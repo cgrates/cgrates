@@ -34,8 +34,9 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -103,15 +104,16 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -137,15 +139,16 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -204,7 +207,8 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err == nil ||
@@ -212,15 +216,16 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -314,7 +319,8 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveActionProfile(context.Background(),
@@ -325,7 +331,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
@@ -348,7 +354,8 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -364,7 +371,7 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
@@ -376,7 +383,8 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -391,7 +399,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
@@ -413,7 +421,8 @@ func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -438,7 +447,8 @@ func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -458,9 +468,10 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.ActionProfileWithAPIOpts{
 		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
@@ -588,9 +599,10 @@ func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.ActionProfileWithAPIOpts{
 		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
@@ -649,7 +661,8 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -665,7 +678,7 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
@@ -691,7 +704,8 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -710,7 +724,7 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
@@ -736,7 +750,8 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -757,5 +772,5 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

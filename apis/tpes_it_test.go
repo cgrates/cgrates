@@ -47,7 +47,6 @@ var (
 	sTestTpes = []func(t *testing.T){
 		testTPeSInitCfg,
 		testTPeSInitDataDb,
-		testTpeSResetStorDb,
 		testTPeSStartEngine,
 		testTPeSRPCConn,
 		testTPeSPing,
@@ -65,7 +64,6 @@ var (
 		testTPeSExportTariffPlanAllTariffPlan,
 		// export again after we will flush the database
 		testTPeSInitDataDb,
-		testTpeSResetStorDb,
 		testTPeSKillEngine,
 		testTPeSInitCfg,
 		testTPeSStartEngine,
@@ -103,13 +101,7 @@ func testTPeSInitCfg(t *testing.T) {
 }
 
 func testTPeSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(tpesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testTpeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(tpesCfg); err != nil {
+	if err := engine.InitDB(tpesCfg); err != nil {
 		t.Fatal(err)
 	}
 }

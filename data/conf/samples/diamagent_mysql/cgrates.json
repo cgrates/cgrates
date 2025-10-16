@@ -12,20 +12,33 @@
     "level": 7
 },
 
-"stor_db": {
-    "db_password": "CGRateS.org"
-},
-
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",					// RPC GOB listening address
 	"http": ":2080",					// HTTP listening address
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "redis",
+			"db_host": "127.0.0.1",
+			"db_port": 6379,
+			"db_name": "10",
+			"db_user": "cgrates"
+		},
+		"StorDB": {
+			"db_type": "mysql",
+			"db_host": "127.0.0.1",
+			"db_port": 3306,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 "rates": {

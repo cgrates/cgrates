@@ -97,10 +97,7 @@ func testRPCMethodsLoadConfig(t *testing.T) {
 }
 
 func testRPCMethodsFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(rpcCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(rpcCfg); err != nil {
+	if err := engine.InitDB(rpcCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -117,7 +114,7 @@ func testRPCMethodsRpcConn(t *testing.T) {
 
 func testRPCMethodsFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if rpcCfg.DataDbCfg().Type == utils.MetaInternal {
+	if rpcCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

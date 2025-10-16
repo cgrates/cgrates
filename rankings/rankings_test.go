@@ -130,7 +130,8 @@ func TestNewRankingService(t *testing.T) {
 func TestStoreRanking(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB([]string{}, []string{}, &ltcache.TransCacheOpts{}, map[string]*config.ItemOpts{})
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	rkg := NewRankingS(dm, nil, nil, cfg)
 	ranking := &utils.Ranking{}
 	ranking.SetConfig(&utils.RankingProfile{

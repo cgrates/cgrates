@@ -79,10 +79,7 @@ func testV1RsLoadConfig(t *testing.T) {
 }
 
 func testV1RsFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(rlsV1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(rlsV1Cfg); err != nil {
+	if err := engine.InitDB(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

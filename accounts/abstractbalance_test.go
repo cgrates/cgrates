@@ -834,7 +834,8 @@ func TestABCost(t *testing.T) {
 func TestABCostWithFiltersNotMatch(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// we expect to receive an error because it will try calculate the cost from rates
 	aB := &abstractBalance{
@@ -879,7 +880,8 @@ func TestABCostWithFilters(t *testing.T) {
 	// debit 10 seconds with cost of 0.1 per second
 	cfg := config.NewDefaultCGRConfig()
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -1224,7 +1226,8 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 func TestAMCostWithUnitFactor(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	aB := &abstractBalance{

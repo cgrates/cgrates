@@ -93,10 +93,7 @@ func testV1SplSLoadConfig(t *testing.T) {
 }
 
 func testV1SplSFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(splSv1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(splSv1Cfg); err != nil {
+	if err := engine.InitDB(splSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +110,7 @@ func testV1SplSRpcConn(t *testing.T) {
 
 func testV1SplSLoadTarrifPlans(t *testing.T) {
 	caching := utils.MetaReload
-	if splSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
+	if splSv1Cfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

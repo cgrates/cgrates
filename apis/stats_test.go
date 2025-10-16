@@ -36,8 +36,9 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -104,15 +105,16 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -138,15 +140,16 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -205,7 +208,8 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err == nil ||
@@ -213,15 +217,16 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -318,7 +323,8 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveStatQueueProfile(context.Background(),
@@ -329,7 +335,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
@@ -352,7 +358,8 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -368,7 +375,7 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
@@ -380,7 +387,8 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -395,7 +403,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
@@ -421,7 +429,8 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -440,7 +449,7 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
@@ -466,7 +475,8 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -487,7 +497,7 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
@@ -509,7 +519,8 @@ func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -534,7 +545,8 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -553,8 +565,9 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 func TestStatsNewStatsv1(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	sS := engine.NewStatService(dm, cfg, nil, nil)
 
 	exp := &StatSv1{
@@ -585,7 +598,7 @@ func TestStatsAPIs(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	expThEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -622,7 +635,8 @@ func TestStatsAPIs(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
-	dm := engine.NewDataManager(data, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	adms := &AdminSv1{
@@ -854,9 +868,10 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:       "cgrates.org",
@@ -1007,9 +1022,10 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:       "cgrates.org",
@@ -1072,7 +1088,8 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1088,5 +1105,5 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

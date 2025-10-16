@@ -20,17 +20,22 @@
 },
 
 
-"data_db": {
-	"db_type": "mongo",
-	"db_name": "10",
-	"db_port": 27017,
-},
-
-"stor_db": {
-	"db_type": "mongo",
-	"db_name": "cgrates",
-	"db_port": 27017,
-	"db_password": "",
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "mongo",
+			"db_name": "10",
+			"db_port": 27017,
+		},
+		"StorDB": {						 // The id of the DB connection
+			"db_type": "*mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"db_name": "cgrates", 		 // db database name to connect to
+			"db_port": 27017, 			 // db port to reach the database
+		},
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 "cdrs": {

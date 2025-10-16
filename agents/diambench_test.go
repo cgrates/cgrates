@@ -47,6 +47,7 @@ func BenchmarkDiameterCaps(b *testing.B) {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -56,6 +57,17 @@ func BenchmarkDiameterCaps(b *testing.B) {
 	}
 	// CoreS config is dynamic for this benchmark.
 	jsonCfg := fmt.Sprintf(`{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "cores": {
 	"caps": %d,
 	"caps_strategy": "%s",

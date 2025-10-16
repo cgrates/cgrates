@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -72,24 +71,25 @@ func TestOnStorIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+		idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
-		onStor = NewDataManager(idb, cfg, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+		onStor = NewDataManager(dbCM, cfg, nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
 		var err error
-		rdsITdb, err = NewRedisStorage(
-			fmt.Sprintf("%s:%s", cfg.DataDbCfg().Host, cfg.DataDbCfg().Port),
-			4, cfg.DataDbCfg().User, cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-			cfg.DataDbCfg().Opts.RedisMaxConns, cfg.DataDbCfg().Opts.RedisConnectAttempts, "", false,
+		rdsITdb, err = NewRedisStorage("127.0.0.1:6379",
+			4, utils.CGRateSLwr, cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.DbCfg().Opts.RedisMaxConns, cfg.DbCfg().Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
-		onStorCfg = cfg.DataDbCfg().Name
-		onStor = NewDataManager(rdsITdb, cfg, nil)
+		onStorCfg = cfg.DbCfg().DBConns[utils.MetaDefault].Name
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: rdsITdb}, cfg.DbCfg())
+		onStor = NewDataManager(dbCM, cfg, nil)
 	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
@@ -102,14 +102,14 @@ func TestOnStorIT(t *testing.T) {
 }
 
 func testOnStorITFlush(t *testing.T) {
-	if err := onStor.DataDB().Flush(""); err != nil {
+	if err := onStor.DataDB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)
 }
 
 func testOnStorITIsDBEmpty(t *testing.T) {
-	test, err := onStor.DataDB().IsDBEmpty()
+	test, err := onStor.DataDB()[utils.MetaDefault].IsDBEmpty()
 	if err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -145,7 +145,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST2"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -203,7 +203,7 @@ func testOnStorITResource(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"res_cgrates.org:RL1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ResourcesPrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ResourcesPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -240,10 +240,10 @@ func testOnStorITCRUDHistory(t *testing.T) {
 		AccountingLoadID: "Account",
 		LoadTime:         time,
 	}
-	if err := onStor.DataDB().AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
+	if err := onStor.DataDB()[utils.MetaDefault].AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetLoadHistory(1, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetLoadHistory(1, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ist, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(ist), utils.ToJSON(rcv[0]))
@@ -251,7 +251,7 @@ func testOnStorITCRUDHistory(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-	if _, err := onStor.DataDB().GetVersions(utils.AccountsStr); err != utils.ErrNotFound {
+	if _, err := onStor.DataDB()[utils.MetaDefault].GetVersions(utils.AccountsStr); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	vrs := Versions{
@@ -259,55 +259,55 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		utils.Actions:     2,
 		utils.CostDetails: 1,
 	}
-	if err := onStor.DataDB().SetVersions(vrs, false); err != nil {
+	if err := onStor.DataDB()[utils.MetaDefault].SetVersions(vrs, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
 	delete(vrs, utils.Actions)
-	if err := onStor.DataDB().SetVersions(vrs, true); err != nil { // overwrite
+	if err := onStor.DataDB()[utils.MetaDefault].SetVersions(vrs, true); err != nil { // overwrite
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
 	eAcnts := Versions{utils.AccountsStr: vrs[utils.AccountsStr]}
-	if rcv, err := onStor.DataDB().GetVersions(utils.AccountsStr); err != nil { //query one element
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetVersions(utils.AccountsStr); err != nil { //query one element
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAcnts, rcv) {
 		t.Errorf("Expecting: %v, received: %v", eAcnts, rcv)
 	}
-	if _, err := onStor.DataDB().GetVersions(utils.NotAvailable); err != utils.ErrNotFound { //query non-existent
+	if _, err := onStor.DataDB()[utils.MetaDefault].GetVersions(utils.NotAvailable); err != utils.ErrNotFound { //query non-existent
 		t.Error(err)
 	}
 	eAcnts[utils.AccountsStr] = 2
 	vrs[utils.AccountsStr] = eAcnts[utils.AccountsStr]
-	if err := onStor.DataDB().SetVersions(eAcnts, false); err != nil { // change one element
+	if err := onStor.DataDB()[utils.MetaDefault].SetVersions(eAcnts, false); err != nil { // change one element
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
-	if err := onStor.DataDB().RemoveVersions(eAcnts); err != nil { // remove one element
+	if err := onStor.DataDB()[utils.MetaDefault].RemoveVersions(eAcnts); err != nil { // remove one element
 		t.Error(err)
 	}
 	delete(vrs, utils.AccountsStr)
-	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
-	if err := onStor.DataDB().RemoveVersions(nil); err != nil { // remove one element
+	if err := onStor.DataDB()[utils.MetaDefault].RemoveVersions(nil); err != nil { // remove one element
 		t.Error(err)
 	}
-	if _, err := onStor.DataDB().GetVersions(""); err != utils.ErrNotFound { //query non-existent
+	if _, err := onStor.DataDB()[utils.MetaDefault].GetVersions(""); err != utils.ErrNotFound { //query non-existent
 		t.Error(err)
 	}
 }
@@ -337,7 +337,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"sqp_cgrates.org:test"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -405,7 +405,7 @@ func testOnStorITStatQueue(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"stq_cgrates.org:Test_StatQueue"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -489,7 +489,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"thp_cgrates.org:test"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -540,7 +540,7 @@ func testOnStorITThreshold(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"thd_cgrates.org:TH1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdPrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ThresholdPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -605,7 +605,7 @@ func testOnStorITFilter(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	expectedT := []string{"ftr_cgrates.org:Filter1", "ftr_cgrates.org:TestFilter2"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.FilterPrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.FilterPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedT), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedT), len(itm))
@@ -702,7 +702,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	expectedT := []string{"rpp_cgrates.org:SPRF_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -803,7 +803,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	expectedT := []string{"alp_cgrates.org:AttrPrf1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -936,7 +936,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	expectedT := []string{"cpp_cgrates.org:CPP_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1017,7 +1017,7 @@ func testOnStorITRateProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", rPrf, rcv)
 	}
 	expectedT := []string{"rtp_cgrates.org:RP1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.RateProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.RateProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1103,7 +1103,7 @@ func testOnStorITActionProfile(t *testing.T) {
 
 	//craft akeysFromPrefix
 	expectedKey := []string{"acp_cgrates.org:TEST_ID1"}
-	if rcv, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.ActionProfilePrefix); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.ActionProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedKey, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expectedKey, rcv)
@@ -1177,7 +1177,7 @@ func testOnStorITAccount(t *testing.T) {
 
 	//craft akeysFromPrefix
 	expectedKey := []string{"acn_cgrates.org:RP1"}
-	if rcv, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.AccountPrefix); err != nil {
+	if rcv, err := onStor.DataDB()[utils.MetaDefault].GetKeysForPrefix(context.TODO(), utils.AccountPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedKey, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expectedKey, rcv)

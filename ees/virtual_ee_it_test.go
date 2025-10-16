@@ -73,10 +73,7 @@ func testVirtLoadConfig(t *testing.T) {
 }
 
 func testVirtResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(virtCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(virtCfg); err != nil {
+	if err := engine.InitDB(virtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

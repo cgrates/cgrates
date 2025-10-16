@@ -38,7 +38,7 @@ func TestConfigDBOptsInvalid(t *testing.T) {
 func TestConfigDBCfgloadFromJSONCfg(t *testing.T) {
 	str := "test"
 	dbcfg := &ConfigDBCfg{}
-	jsnDbCfg := &DbJsonCfg{
+	jsnDbCfg := &ConfigDbJsonCfg{
 		Db_type: &str,
 	}
 

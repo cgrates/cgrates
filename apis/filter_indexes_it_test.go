@@ -44,7 +44,6 @@ var (
 	sTestsFilterIndexesSV1 = []func(t *testing.T){
 		testV1FIdxLoadConfig,
 		testV1FIdxInitDataDb,
-		testV1FIdxResetStorDb,
 
 		testV1FIdxStartEngine,
 		testV1FIdxRpcConn,
@@ -145,7 +144,6 @@ var (
 		testV1IndexClearCache,
 
 		testV1FIdxInitDataDb,
-		testV1FIdxResetStorDb,
 		testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx,
 		testV1FidxSetAndChangeFiltersOnProfiles,
 
@@ -256,13 +254,7 @@ func testV1FIdxLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(tFltrIdxCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testV1FIdxResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(tFltrIdxCfg); err != nil {
+	if err := engine.InitDB(tFltrIdxCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -46,7 +46,6 @@ var (
 	sTestsTr = []func(t *testing.T){
 		testTrendSInitCfg,
 		testTrendSInitDataDB,
-		testTrendSResetStorDB,
 		testTrendsStartEngine,
 		testTrendsRPCConn,
 
@@ -98,13 +97,7 @@ func testTrendSInitCfg(t *testing.T) {
 }
 
 func testTrendSInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(trCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testTrendSResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(trCfg); err != nil {
+	if err := engine.InitDB(trCfg); err != nil {
 		t.Fatal(err)
 	}
 }

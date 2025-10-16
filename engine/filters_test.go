@@ -35,8 +35,9 @@ import (
 
 func TestRatesCostFiltering(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -424,8 +425,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -675,8 +677,9 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -783,8 +786,9 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 
 func TestPassFilterMaxCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -835,8 +839,9 @@ func TestPassFilterMaxCost(t *testing.T) {
 
 func TestPassFilterMissingField(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -933,8 +938,9 @@ func TestVerifyPrefixes(t *testing.T) {
 
 func TestPassPartial(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -1013,8 +1019,9 @@ func TestVerifyInlineFilterS(t *testing.T) {
 
 func TestActivationIntervalPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -1198,8 +1205,9 @@ func TestAPIBan(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -1266,11 +1274,12 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	flts := NewFilterS(cfg, nil, dm)
 	if passes, err := flts.Pass(context.Background(), "cgrate.org", []string{"*rsr:~*req.23:dan|1001"}, ev); err != nil {
 		t.Error(err)
@@ -1292,11 +1301,12 @@ func TestFilterPassCronExpOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1315,11 +1325,12 @@ func TestFilterPassCronExpNotActive(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1336,11 +1347,12 @@ func TestFilterPassCronExpParseErrWrongPath(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 	experr := utils.ErrWrongPath
 
@@ -1356,11 +1368,12 @@ func TestFilterPassCronExpErrNotFound(t *testing.T) {
 	ev := utils.MapStorage{}
 
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1379,11 +1392,12 @@ func TestFilterPassCronExpConvertTimeErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := NewDataManager(idb, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 	experr := "Unsupported time format"
 
@@ -2134,8 +2148,9 @@ func TestFiltersFilterRuleIsValid(t *testing.T) {
 
 func TestPassPartialErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmFilterPass := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmFilterPass := NewDataManager(dbCM, cfg, nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -2727,8 +2742,9 @@ func TestFilterRanking(t *testing.T) {
 
 func TestGetFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 
 	fltID := "fltTest"
 	tenant := "cgrates.org"

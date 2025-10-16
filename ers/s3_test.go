@@ -139,8 +139,9 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 
 func TestS3ERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rdr := &S3ER{

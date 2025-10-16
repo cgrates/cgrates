@@ -29,8 +29,9 @@ import (
 
 func TestRemoveFilterIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -234,8 +235,9 @@ func TestRemoveFilterIndexes(t *testing.T) {
 
 // func TestGetFilterIndexes(t *testing.T) {
 // cfg := config.NewDefaultCGRConfig()
-// data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-// dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+// data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+// dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // connMgr := engine.NewConnManager(cfg)
 // cfg.AdminSCfg().CachesConns = []string{"*internal"}
 // adms := &AdminSv1{
@@ -264,8 +266,9 @@ func TestRemoveFilterIndexes(t *testing.T) {
 
 func TestComputeFilterIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -401,8 +404,9 @@ func TestComputeFilterIndexes(t *testing.T) {
 
 func TestComputeFilterIndexIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -535,8 +539,9 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 
 func TestGetFilterIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -695,8 +700,9 @@ func TestGetFilterIndexes(t *testing.T) {
 
 func TestGetReverseFilterHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -722,8 +728,9 @@ func TestGetReverseFilterHealth(t *testing.T) {
 
 func TestGetThresholdsIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -749,8 +756,9 @@ func TestGetThresholdsIndexesHealth(t *testing.T) {
 
 func TestGetResourcesIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -776,8 +784,9 @@ func TestGetResourcesIndexesHealth(t *testing.T) {
 
 func TestGetStatsIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -803,8 +812,9 @@ func TestGetStatsIndexesHealth(t *testing.T) {
 
 func TestGetRoutesIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -830,8 +840,9 @@ func TestGetRoutesIndexesHealth(t *testing.T) {
 
 func TestGetAttributesIndexHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -857,8 +868,9 @@ func TestGetAttributesIndexHealth(t *testing.T) {
 
 func TestGetChargersIndexHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -884,8 +896,9 @@ func TestGetChargersIndexHealth(t *testing.T) {
 
 func TestGetRateProfilesIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -911,8 +924,9 @@ func TestGetRateProfilesIndexesHealth(t *testing.T) {
 
 func TestGetActionsIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -938,8 +952,9 @@ func TestGetActionsIndexesHealth(t *testing.T) {
 
 func TestGetAccountsIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{
@@ -965,8 +980,9 @@ func TestGetAccountsIndexesHealth(t *testing.T) {
 
 func TestGetRateRatesIndexesHealth(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	adms := &AdminSv1{

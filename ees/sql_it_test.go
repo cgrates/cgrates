@@ -123,10 +123,7 @@ func testSqlEeLoadConfig(t *testing.T) {
 }
 
 func testSqlEeResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(sqlEeCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(sqlEeCfg); err != nil {
+	if err := engine.InitDB(sqlEeCfg); err != nil {
 		t.Fatal(err)
 	}
 }

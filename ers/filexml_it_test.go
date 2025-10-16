@@ -111,11 +111,7 @@ func testXMLITInitConfig(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testXMLITResetDBs(t *testing.T) {
-	err := engine.InitDataDB(xmlCfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = engine.InitStorDB(xmlCfg)
+	err := engine.InitDB(xmlCfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,8 +482,9 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 func TestFileXMLProcessEVentError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	filePath := "/tmp/TestFileXMLProcessEvent/"
 	fname := "file1.xml"

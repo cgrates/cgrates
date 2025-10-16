@@ -84,10 +84,7 @@ func testSes2ItLoadConfig(t *testing.T) {
 }
 
 func testSes2ItFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(ses2Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(ses2Cfg); err != nil {
+	if err := engine.InitDB(ses2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

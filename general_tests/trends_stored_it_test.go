@@ -35,20 +35,9 @@ func TestTrendStore(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaMySQL:
+		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo:
-		dbConfig = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer("mongo"),
-				Port: utils.IntPointer(27017),
-				Name: utils.StringPointer("10"),
-			},
-			StorDB: &engine.DBParams{
-				Type:     utils.StringPointer("mongo"),
-				Name:     utils.StringPointer("cgrates"),
-				Port:     utils.IntPointer(27017),
-				Password: utils.StringPointer(""),
-			},
-		}
+		dbConfig = engine.MongoDBCfg
 	case utils.MetaInternal, utils.MetaPostgres:
 		t.SkipNow()
 	default:

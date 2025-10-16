@@ -35,6 +35,7 @@ func TestSessionBasics(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -47,6 +48,17 @@ func TestSessionBasics(t *testing.T) {
 		ConfigJSON: `{
 "logger": {
 	"type": "*stdout"
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 "sessions": {
     "enabled": true,
@@ -528,6 +540,7 @@ func TestSessionLifecycle(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -538,6 +551,17 @@ func TestSessionLifecycle(t *testing.T) {
 
 	ng := engine.TestEngine{
 		ConfigJSON: `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "sessions": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],

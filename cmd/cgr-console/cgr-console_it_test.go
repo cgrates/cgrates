@@ -117,7 +117,7 @@ func testConsoleItLoadConfig(t *testing.T) {
 }
 
 func testConsoleItInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(cnslItCfg); err != nil {
+	if err := engine.InitDB(cnslItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

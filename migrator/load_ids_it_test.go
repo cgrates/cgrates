@@ -76,27 +76,19 @@ func testLoadIdsStart(testName string, t *testing.T) {
 }
 
 func testLoadIdsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(loadCfgIn.DataDbCfg().Type,
-		loadCfgIn.DataDbCfg().Host, loadCfgIn.DataDbCfg().Port,
-		loadCfgIn.DataDbCfg().Name, loadCfgIn.DataDbCfg().User,
-		loadCfgIn.DataDbCfg().Password, loadCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), loadCfgIn.DataDbCfg().Opts, loadCfgIn.DataDbCfg().Items)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(loadCfgOut.DataDbCfg().Type,
-		loadCfgOut.DataDbCfg().Host, loadCfgOut.DataDbCfg().Port,
-		loadCfgOut.DataDbCfg().Name, loadCfgOut.DataDbCfg().User,
-		loadCfgOut.DataDbCfg().Password, loadCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), loadCfgOut.DataDbCfg().Opts, loadCfgOut.DataDbCfg().Items)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgOut.GeneralCfg().DBDataEncoding, loadCfgOut)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if inPath == outPath {
-		loadMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		loadMigrator, err = NewMigrator(loadCfgOut.DbCfg(), dataDBIn, dataDBOut,
 			false, true)
 	} else {
-		loadMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		loadMigrator, err = NewMigrator(loadCfgOut.DbCfg(), dataDBIn, dataDBOut,
 			false, false)
 	}
 	if err != nil {
@@ -105,29 +97,29 @@ func testLoadIdsITConnect(t *testing.T) {
 }
 
 func testLoadIdsITFlush(t *testing.T) {
-	loadMigrator.dmOut.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(loadMigrator.dmOut.DataManager().DataDB()); err != nil {
+	loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	loadMigrator.dmIN.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(loadMigrator.dmIN.DataManager().DataDB()); err != nil {
+	loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
 
 func testLoadIdsITMigrateAndMove(t *testing.T) {
 
-	err := loadMigrator.dmIN.DataManager().DataDB().SetLoadIDsDrv(context.TODO(), map[string]int64{"account": 1}) // this will be deleated
+	err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetLoadIDsDrv(context.TODO(), map[string]int64{"account": 1}) // this will be deleated
 	if err != nil {
 		t.Error("Error when setting new loadID ", err.Error())
 	}
 	currentVersion := engine.Versions{utils.LoadIDsVrs: 0}
-	err = loadMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	err = loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for LoadIDs ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := loadMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.LoadIDsVrs] != 0 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
@@ -138,18 +130,18 @@ func testLoadIdsITMigrateAndMove(t *testing.T) {
 		t.Error("Error when migrating LoadIDs ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := loadMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.LoadIDsVrs] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
 	}
 	//check if user was migrate correctly
-	_, err = loadMigrator.dmOut.DataManager().DataDB().GetItemLoadIDsDrv(context.TODO(), "")
+	_, err = loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetItemLoadIDsDrv(context.TODO(), "")
 	if err != utils.ErrNotFound {
 		t.Error("Error should be not found : ", err)
 	}
-	// no need to modify the LoadIDs from dmIN
-	// if _, err = loadMigrator.dmIN.DataManager().DataDB().GetItemLoadIDsDrv(context.TODO(),""); err != utils.ErrNotFound {
+	// no need to modify the LoadIDs from dmFrom
+	// if _, err = loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetItemLoadIDsDrv(context.TODO(),""); err != utils.ErrNotFound {
 	// 	t.Error("Error should be not found : ", err)
 	// }
 }

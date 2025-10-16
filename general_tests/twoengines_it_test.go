@@ -77,10 +77,7 @@ func testTwoEnginesInitConfig(t *testing.T) {
 
 }
 func testTwoEnginesFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(engineOneCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(engineOneCfg); err != nil {
+	if err := engine.InitDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
 }

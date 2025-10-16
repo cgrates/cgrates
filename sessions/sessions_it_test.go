@@ -84,10 +84,7 @@ func testSessionsItInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionsItFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(sItCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(sItCfg); err != nil {
+	if err := engine.InitDB(sItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

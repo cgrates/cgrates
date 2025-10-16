@@ -46,36 +46,6 @@ func TestFlags(t *testing.T) {
 	} else if !*version {
 		t.Errorf("Expected true received:%v ", *version)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_type", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBType != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBType)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_host", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBHost != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBHost)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_port", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBPort != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBPort)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_name", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBName != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBName)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_user", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBUser != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBUser)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-datadb_passwd", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inDataDBPass != "true" {
-		t.Errorf("Expected true received:%v ", *inDataDBPass)
-	}
 	if err := cgrMigratorFlags.Parse([]string{"-dbdata_encoding", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *inDBDataEncoding != "true" {
@@ -125,41 +95,6 @@ func TestFlags(t *testing.T) {
 		t.Fatal(err)
 	} else if *dbRedisCACertificate != "true" {
 		t.Errorf("Expected true received:%v ", *dbRedisCACertificate)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_type", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBType != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBType)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_host", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBHost != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBHost)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_port", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBPort != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBPort)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_name", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBName != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBName)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_user", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBUser != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBUser)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_password", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDataDBPass != "true" {
-		t.Errorf("Expected true received:%v ", *outDataDBPass)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_datadb_encoding", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outDBDataEncoding != "true" {
-		t.Errorf("Expected true received:%v ", *outDBDataEncoding)
 	}
 	if err := cgrMigratorFlags.Parse([]string{"-out_redis_sentinel", "true"}); err != nil {
 		t.Fatal(err)

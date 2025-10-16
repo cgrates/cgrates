@@ -4,13 +4,17 @@
 	"level": 7                                                 
 },
 
-"data_db": {
-	"db_type": "*internal",
-},
-
-"stor_db": {
-	"db_type": "*internal",
-	"string_indexed_fields": ["RunID"]
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal",
+			"string_indexed_fields": ["RunID"],
+		},
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 "rates": {

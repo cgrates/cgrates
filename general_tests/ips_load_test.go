@@ -41,15 +41,9 @@ func BenchmarkStressIPsAllocateIP(b *testing.B) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbConfig = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-			StorDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-		}
+		dbConfig = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo, utils.MetaPostgres:
 		b.SkipNow()
 	default:
@@ -60,6 +54,17 @@ func BenchmarkStressIPsAllocateIP(b *testing.B) {
   "admins": {
     "enabled": true
   },
+	"db": {
+		"db_conns": {
+			"*default": {
+				"db_type": "*internal"
+			}
+		},
+		"opts":{
+			"internalDBRewriteInterval": "0s",
+			"internalDBDumpInterval": "0s"
+		}
+	},
   "ips": {
     "enabled": true,
     "indexed_selects": false
@@ -129,15 +134,9 @@ func TestStressIPsAuthorize(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbConfig = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-			StorDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-		}
+		dbConfig = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -148,8 +147,31 @@ func TestStressIPsAuthorize(t *testing.T) {
 		"general": {
 			"log_level": 7
 		},
-		"stor_db": {
-			"db_password": "CGRateS.org"
+		"db": {
+			"db_conns": {
+				"*default": {
+					"db_type": "redis",
+					"db_host": "127.0.0.1",
+					"db_port": 6379,
+					"db_name": "10",
+					"db_user": "cgrates"
+				},
+				"StorDB": {
+					"db_type": "mysql",
+					"db_host": "127.0.0.1",
+					"db_port": 3306,
+					"db_name": "cgrates",
+					"db_user": "cgrates",
+					"db_password": "CGRateS.org"
+				}
+			},
+			"items": {
+				"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+			},
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
 		},
 		
         "admins": {

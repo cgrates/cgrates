@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -96,28 +95,29 @@ func TestFilterIndexerIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+		idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
-		dataManager = NewDataManager(idb, cfg, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+		dataManager = NewDataManager(dbCM, cfg, nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
-		redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s",
-			cfg.DataDbCfg().Host, cfg.DataDbCfg().Port), 4,
-			cfg.DataDbCfg().User, cfg.DataDbCfg().Password,
+		redisDB, err := NewRedisStorage("127.0.0.1:6379", 4,
+			utils.CGRateSLwr, cfg.DbCfg().DBConns[utils.MetaDefault].Password,
 			cfg.GeneralCfg().DBDataEncoding,
-			cfg.DataDbCfg().Opts.RedisMaxConns,
-			cfg.DataDbCfg().Opts.RedisConnectAttempts, "", false,
+			cfg.DbCfg().Opts.RedisMaxConns,
+			cfg.DbCfg().Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false,
 			utils.EmptyString, utils.EmptyString,
 			utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
-		cfgDBName = cfg.DataDbCfg().Name
+		cfgDBName = cfg.DbCfg().DBConns[utils.MetaDefault].Name
 		defer redisDB.Close()
-		dataManager = NewDataManager(redisDB, cfg, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: redisDB}, cfg.DbCfg())
+		dataManager = NewDataManager(dbCM, cfg, nil)
 	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
@@ -129,14 +129,14 @@ func TestFilterIndexerIT(t *testing.T) {
 }
 
 func testITFlush(t *testing.T) {
-	if err := dataManager.DataDB().Flush(""); err != nil {
+	if err := dataManager.DataDB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)
 }
 
 func testITIsDBEmpty(t *testing.T) {
-	test, err := dataManager.DataDB().IsDBEmpty()
+	test, err := dataManager.DataDB()[utils.MetaDefault].IsDBEmpty()
 	if err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -1679,7 +1679,7 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		t.Error(err)
 	}
 	//verify if old key was deleted
-	if _, err := dataManager.DataDB().GetIndexesDrv(context.Background(),
+	if _, err := dataManager.DataDB()[utils.MetaDefault].GetIndexesDrv(context.Background(),
 		"tmp_"+utils.CacheResourceFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", transID), utils.EmptyString, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)

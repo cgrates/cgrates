@@ -104,7 +104,7 @@ func testDNSitInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testDNSitResetDB(t *testing.T) {
-	if err := engine.InitDataDB(dnsCfg); err != nil {
+	if err := engine.InitDB(dnsCfg); err != nil {
 		t.Fatal(err)
 	}
 
@@ -125,7 +125,7 @@ func testDNSitApierRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testDNSitTPFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if dnsCfg.DataDbCfg().Type == utils.MetaInternal {
+	if dnsCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

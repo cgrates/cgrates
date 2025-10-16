@@ -86,10 +86,7 @@ func testV1RtStatsLoadConfig(t *testing.T) {
 }
 
 func testV1RtStatsFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(RtStatsSv1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(RtStatsSv1Cfg); err != nil {
+	if err := engine.InitDB(RtStatsSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -106,7 +103,7 @@ func testV1RtStatsRpcConn(t *testing.T) {
 
 func testV1RtStatsFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if RtStatsSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
+	if RtStatsSv1Cfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

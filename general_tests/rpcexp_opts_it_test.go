@@ -42,6 +42,17 @@ func TestRPCExpIT(t *testing.T) {
 
 	ng1 := engine.TestEngine{
 		ConfigJSON: `{
+"db": {
+  "db_conns": {
+    "*default": {
+      "db_type": "*internal"
+      }
+  },
+  "opts":{
+    "internalDBRewriteInterval": "0s",
+    "internalDBDumpInterval": "0s"
+  }
+},
 "ees": {
 	"enabled": true,
 	"exporters": [
@@ -102,6 +113,17 @@ func TestRPCExpIT(t *testing.T) {
 
 	ng2 := engine.TestEngine{
 		ConfigJSON: `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "listen": {
 	"rpc_json": ":22012",
 	"rpc_gob": ":22013",

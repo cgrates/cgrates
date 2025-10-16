@@ -90,10 +90,7 @@ func testTpInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testTpFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(tpCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(tpCfg); err != nil {
+	if err := engine.InitDB(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +110,7 @@ func testTpRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if tpCfg.DataDbCfg().Type == utils.MetaInternal {
+	if tpCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

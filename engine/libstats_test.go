@@ -1200,14 +1200,16 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	sq.lock(utils.EmptyString)
 
 	tnt, evID := "cgrates.org", "eventID"
-	idb, err := NewInternalDB(nil, nil, nil, config.CgrConfig().DataDbCfg().Items)
+	idb, err := NewInternalDB(nil, nil, nil, config.CgrConfig().DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: idb,
+			dbConns: &DBConnManager{dataDBs: map[string]DataDB{
+				utils.MetaDefault: idb,
+			}},
 		},
 		connMgr: &ConnManager{},
 	}
@@ -1971,9 +1973,10 @@ func TestStatQueueCompressTTLTrue(t *testing.T) {
 func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 
@@ -2014,9 +2017,10 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 
@@ -2062,9 +2066,10 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 

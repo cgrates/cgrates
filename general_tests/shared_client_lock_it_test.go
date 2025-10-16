@@ -45,7 +45,6 @@ var (
 	sTestsClntLock = []func(t *testing.T){
 		testSharedClientLockLoadConfig,
 		testSharedClientLockInitDataDb,
-		testSharedClientLockResetStorDb,
 		testSharedClientLockStartEngine,
 		testSharedClientLockRpcConn,
 
@@ -80,12 +79,18 @@ func testSharedClientLockLoadConfig(t *testing.T) {
 "logger": {
 	"level": 7
 },
-"data_db": {
-	"db_type": "*internal"
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
-"stor_db": {
-	"db_type": "*internal"
-},
+
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*localhost"],
@@ -122,13 +127,7 @@ func testSharedClientLockLoadConfig(t *testing.T) {
 }
 
 func testSharedClientLockInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(clntLockCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testSharedClientLockResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(clntLockCfg); err != nil {
+	if err := engine.InitDB(clntLockCfg); err != nil {
 		t.Fatal(err)
 	}
 }

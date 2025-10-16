@@ -119,7 +119,8 @@ func TestIPsIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
-	case utils.MetaMySQL: // redis is already the default
+	case utils.MetaMySQL:
+		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -181,6 +182,17 @@ func TestIPsIT(t *testing.T) {
 		// 	}
 		// ]
     }
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 "admins": {
 	"enabled": true
@@ -623,8 +635,9 @@ func findProfileByID(profiles []*utils.IPProfile, id string) *utils.IPProfile {
 
 func BenchmarkIPsAuthorize(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	ipService := NewIPService(dm, cfg, fltrs, cm)
@@ -674,8 +687,9 @@ func BenchmarkIPsAuthorize(b *testing.B) {
 
 func BenchmarkIPsAllocate(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	ipService := NewIPService(dm, cfg, fltrs, cm)
@@ -723,8 +737,9 @@ func BenchmarkIPsAllocate(b *testing.B) {
 }
 func BenchmarkIPsRelease(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	ipService := NewIPService(dm, cfg, fltrs, cm)

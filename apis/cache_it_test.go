@@ -44,7 +44,6 @@ var (
 	sTestsCacheSV1 = []func(t *testing.T){
 		testCacheSLoadConfig,
 		testCacheSInitDataDb,
-		testCacheSInitStorDb,
 
 		testCacheSStartEngine,
 		testCacheSRpcConn,
@@ -90,13 +89,7 @@ func testCacheSLoadConfig(t *testing.T) {
 }
 
 func testCacheSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(chcCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCacheSInitStorDb(t *testing.T) {
-	if err := engine.InitStorDB(chcCfg); err != nil {
+	if err := engine.InitDB(chcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

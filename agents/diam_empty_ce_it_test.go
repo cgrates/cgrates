@@ -38,7 +38,6 @@ var (
 	sTestsDiamND = []func(t *testing.T){
 		testDiamEmptyCEItInitCfg,
 		testDiamEmptyCEItDataDb,
-		testDiamEmptyCEItResetStorDb,
 		testDiamEmptyCEItStartEngine,
 		testDiamEmptyCEItConnectDiameterClient,
 		testDiamEmptyCEItKillEngine,
@@ -73,14 +72,7 @@ func testDiamEmptyCEItInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testDiamEmptyCEItDataDb(t *testing.T) {
-	if err := engine.InitDataDB(daCfgND); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testDiamEmptyCEItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(daCfgND); err != nil {
+	if err := engine.InitDB(daCfgND); err != nil {
 		t.Fatal(err)
 	}
 }

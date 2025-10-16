@@ -28,30 +28,40 @@
     }
   },
 
-  "data_db": {
-    "db_type": "*redis",
-    "db_port": 6379,
-    "db_name": "11",
-    "replication_conns": ["rplConn"],
-    "items":{
-      "*accounts":{"replicate":true},
-      "*resource_profiles":{"replicate":false},
-      "*resources":{"replicate":false},
-      "*statqueue_profiles": {"replicate":false},
-      "*statqueues": {"replicate":false},
-      "*threshold_profiles": {"replicate":false},
-      "*thresholds": {"replicate":false},
-      "*filters": {"replicate":false},
-      "*route_profiles":{"replicate":false},
-      "*attribute_profiles":{"replicate":false},
-      "*charger_profiles": {"replicate":false},
-      "*load_ids":{"replicate":false},
-      "*indexes":{"replicate":false}
+  "db": {
+    "db_conns": {
+      "*default": {
+        "db_type": "*redis",
+        "db_host": "127.0.0.1",
+        "db_port": 6379,
+        "db_name": "11",
+        "db_user": "cgrates",
+        "replication_conns": ["rplConn"]
+      },
+      "StorDB": {
+        "db_type": "mysql",
+        "db_host": "127.0.0.1",
+        "db_port": 3306,
+        "db_name": "cgrates",
+        "db_user": "cgrates",
+        "db_password": "CGRateS.org"
+      }
+    },
+    "items": {
+      "*accounts":{"replicate":true, "dbConn": "*default"},
+      "*resource_profiles":{"replicate":false, "dbConn": "*default"},
+      "*resources":{"replicate":false, "dbConn": "*default"},
+      "*statqueue_profiles": {"replicate":false, "dbConn": "*default"},
+      "*statqueues": {"replicate":false, "dbConn": "*default"},
+      "*threshold_profiles": {"replicate":false, "dbConn": "*default"},
+      "*thresholds": {"replicate":false, "dbConn": "*default"},
+      "*filters": {"replicate":false, "dbConn": "*default"},
+      "*route_profiles":{"replicate":false, "dbConn": "*default"},
+      "*attribute_profiles":{"replicate":false, "dbConn": "*default"},
+      "*charger_profiles": {"replicate":false, "dbConn": "*default"},
+      "*load_ids":{"replicate":false, "dbConn": "*default"},
+      "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
     }
-  },
-
-  "stor_db": {
-    "db_password": "CGRateS.org"
   },
 
   "rates": {

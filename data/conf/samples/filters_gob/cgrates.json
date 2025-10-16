@@ -21,14 +21,27 @@
 	"http": ":2080"
 },
 
-"data_db": {								
-	"db_type": "redis",						
-	"db_port": 6379, 						
-	"db_name": "10"					
-},
-
-"stor_db": {
-	"db_password": "CGRateS.org"
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "redis",
+			"db_host": "127.0.0.1",
+			"db_port": 6379,
+			"db_name": "10",
+			"db_user": "cgrates"
+		},
+		"StorDB": {
+			"db_type": "mysql",
+			"db_host": "127.0.0.1",
+			"db_port": 3306,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 "filters": {								

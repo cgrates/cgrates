@@ -736,8 +736,9 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -789,8 +790,9 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -842,8 +844,9 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -934,8 +937,9 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1016,8 +1020,9 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1104,8 +1109,9 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1184,8 +1190,9 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1264,8 +1271,9 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 	value.rdrCfg.CacheDumpFields[0].ComputePath()
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1341,8 +1349,9 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	value.rdrCfg.CacheDumpFields[0].ComputePath()
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1427,8 +1436,9 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1497,8 +1507,9 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1529,6 +1540,17 @@ func TestERsLineNr(t *testing.T) {
 	}
 	csvFd, fwvFd, xmlFd, procFd := t.TempDir(), t.TempDir(), t.TempDir(), t.TempDir()
 	content := fmt.Sprintf(`{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "ers": {
 	"enabled": true,
 	"sessions_conns": [],

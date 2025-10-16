@@ -51,19 +51,32 @@ func TestLoadConfig(t *testing.T) {
 	*dataDBUser = "cgrates2"
 	*dataDBPasswd = "toor"
 	*dbRedisSentinel = "sentinel1"
-	expDBcfg := &config.DataDbCfg{
-		Type:     utils.MetaRedis,
-		Host:     "localhost",
-		Port:     "2012",
-		Name:     "100",
-		User:     "cgrates2",
-		Password: "toor",
-		Opts: &config.DataDBOpts{
-			InternalDBDumpPath:        "/var/lib/cgrates/internal_db/datadb",
-			InternalDBBackupPath:      "/var/lib/cgrates/internal_db/backup/datadb",
+	expDBcfg := &config.DbCfg{
+		DBConns: config.DBConns{
+			utils.StorDB: &config.DBConn{
+				Type:     utils.MetaMySQL,
+				Host:     "127.0.0.1",
+				Port:     "3306",
+				Name:     utils.CGRateSLwr,
+				User:     utils.CGRateSLwr,
+				Password: "CGRateS.org",
+			},
+			utils.MetaDefault: &config.DBConn{
+				Type:     utils.MetaRedis,
+				Host:     "localhost",
+				Port:     "2012",
+				Name:     "100",
+				User:     "cgrates2",
+				Password: "toor",
+			},
+		},
+
+		Opts: &config.DBOpts{
+			InternalDBDumpPath:        "/var/lib/cgrates/internal_db/db",
+			InternalDBBackupPath:      "/var/lib/cgrates/internal_db/backup/db",
 			InternalDBStartTimeout:    300000000000,
-			InternalDBDumpInterval:    0,
-			InternalDBRewriteInterval: 0,
+			InternalDBDumpInterval:    time.Minute,
+			InternalDBRewriteInterval: time.Hour,
 			InternalDBFileSizeLimit:   1073741824,
 			RedisMaxConns:             10,
 			RedisConnectAttempts:      20,
@@ -75,9 +88,14 @@ func TestLoadConfig(t *testing.T) {
 			RedisCluster:              false,
 			RedisPoolPipelineWindow:   150 * time.Microsecond,
 			RedisTLS:                  false,
+			SQLMaxOpenConns:           100,
+			SQLMaxIdleConns:           10,
+			SQLLogLevel:               3,
+			SQLConnMaxLifetime:        0,
+			SQLDSNParams:              map[string]string{},
+			PgSSLMode:                 "disable",
+			MySQLLocation:             "Local",
 		},
-		RmtConns: []string{},
-		RplConns: []string{},
 	}
 	// Loader
 	*tpid = "1"
@@ -92,9 +110,9 @@ func TestLoadConfig(t *testing.T) {
 	*dbDataEncoding = utils.MetaJSON
 	*timezone = utils.Local
 	ldrCfg := loadConfig()
-	ldrCfg.DataDbCfg().Items = nil
-	if !reflect.DeepEqual(ldrCfg.DataDbCfg(), expDBcfg) {
-		t.Errorf("Expected %s received %s", utils.ToJSON(expDBcfg), utils.ToJSON(ldrCfg.DataDbCfg()))
+	ldrCfg.DbCfg().Items = nil
+	if !reflect.DeepEqual(ldrCfg.DbCfg(), expDBcfg) {
+		t.Errorf("Expected %s received %s", utils.ToJSON(expDBcfg), utils.ToJSON(ldrCfg.DbCfg()))
 	}
 	if ldrCfg.GeneralCfg().DBDataEncoding != utils.MetaJSON {
 		t.Errorf("Expected %s received %s", utils.MetaJSON, ldrCfg.GeneralCfg().DBDataEncoding)
@@ -238,7 +256,7 @@ func testLoadItLoadConfig(t *testing.T) {
 }
 
 func testLoadItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDB(ldrItCfg); err != nil {
+	if err := engine.InitDB(ldrItCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -259,11 +277,12 @@ func testLoadItStartLoader(t *testing.T) {
 
 func testLoadItConnectToDB(t *testing.T) {
 	var err error
-	if db, err = engine.NewDataDBConn(ldrItCfg.DataDbCfg().Type,
-		ldrItCfg.DataDbCfg().Host, ldrItCfg.DataDbCfg().Port,
-		ldrItCfg.DataDbCfg().Name, ldrItCfg.DataDbCfg().User,
-		ldrItCfg.DataDbCfg().Password, ldrItCfg.GeneralCfg().DBDataEncoding,
-		ldrItCfg.DataDbCfg().Opts, ldrItCfg.DataDbCfg().Items); err != nil {
+	if db, err = engine.NewDataDBConn(ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Host, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Port,
+		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Name, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].User,
+		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Password, ldrItCfg.GeneralCfg().DBDataEncoding, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields,
+		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
+		ldrItCfg.DbCfg().Opts, ldrItCfg.DbCfg().Items); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -399,7 +418,7 @@ func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithDelayWFlag(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID", "-caching_delay=5s")
+	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*utils.DataDir, "conf", "samples", "tutinternal"), "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID", "-caching_delay=5s")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

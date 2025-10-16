@@ -45,8 +45,9 @@ func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args
 func TestActionsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	aS := NewActionS(cfg, fltrs, dm, nil)
 	if err := dm.SetActionProfile(context.Background(),
@@ -93,8 +94,9 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -171,7 +173,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 		t.Errorf("ResetThreshold hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsResetSQ(t *testing.T) {
@@ -179,8 +181,9 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -257,7 +260,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 		t.Errorf("ResetStatQueue hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
@@ -265,8 +268,9 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -341,15 +345,16 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 		t.Errorf("SetBalance hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -424,7 +429,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 		t.Errorf("AddBalance hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsLog(t *testing.T) {
@@ -438,8 +443,9 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	aS := NewActionS(cfg, fltrs, dm, nil)
@@ -486,7 +492,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsLogCDRs(t *testing.T) {
@@ -494,8 +500,9 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// expArgs := &utils.CGREvent{
@@ -569,7 +576,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 		t.Errorf("CDRLog hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsRemBalance(t *testing.T) {
@@ -577,8 +584,9 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActRemoveBalances{
@@ -653,5 +661,5 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 		t.Errorf("RemoveBalance hasn't been executed")
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

@@ -98,7 +98,7 @@ func testCgrLdrInitCfg(t *testing.T) {
 }
 
 func testCgrLdrInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(cgrLdrCfg); err != nil {
+	if err := engine.InitDB(cgrLdrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

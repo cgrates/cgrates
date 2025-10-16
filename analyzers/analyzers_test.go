@@ -190,11 +190,12 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	anz, err := NewAnalyzerS(cfg)
 
 	if err != nil {

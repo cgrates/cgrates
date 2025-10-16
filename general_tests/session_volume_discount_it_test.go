@@ -90,10 +90,7 @@ func testSessVolDiscInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessVolDiscFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(tSessVolDiscCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(tSessVolDiscCfg); err != nil {
+	if err := engine.InitDB(tSessVolDiscCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +109,7 @@ func testSessVolDiscApierRpcConn(t *testing.T) {
 
 func testSessVolDiscLoadersLoad(t *testing.T) {
 	caching := utils.MetaReload
-	if tSessVolDiscCfg.DataDbCfg().Type == utils.MetaInternal {
+	if tSessVolDiscCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

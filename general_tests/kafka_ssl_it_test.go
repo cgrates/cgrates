@@ -54,6 +54,17 @@ func TestKafkaSSL(t *testing.T) {
 	processedTopic := "processed"
 
 	content := fmt.Sprintf(`{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "ees": {
 	"enabled": true,
 	// "cache": {

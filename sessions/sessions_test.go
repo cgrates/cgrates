@@ -65,8 +65,9 @@ var attrs = &attributes.AttrSProcessEventReply{
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	//connect BiJSON
@@ -95,8 +96,9 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	client := &birpc.Service{}
@@ -1282,8 +1284,9 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
+	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
+	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1304,7 +1307,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1317,7 +1320,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1891,8 +1894,9 @@ func (mk *mockConnWarnDisconnect2) Call(method string, args any, rply any) error
 func TestWarnSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -1990,8 +1994,9 @@ func TestSessionSAsBiRPC(t *testing.T) {
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 	sessions.biJClnts = map[birpc.ClientConnector]string{
 		client: "First_connector",

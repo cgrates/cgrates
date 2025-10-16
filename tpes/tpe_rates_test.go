@@ -33,7 +33,7 @@ func TestTPEnewTPRates(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetRateProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.RateProfile, error) {
 			rt := &utils.RateProfile{
 				Tenant:    utils.CGRateSorg,
@@ -64,7 +64,8 @@ func TestTPEnewTPRates(t *testing.T) {
 			}
 			return rt, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPRates{
 		dm: dm,
 	}
@@ -77,8 +78,9 @@ func TestTPEnewTPRates(t *testing.T) {
 func TestTPEExportItemsRates(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpRt := TPRates{
 		dm: dm,
 	}
@@ -159,8 +161,9 @@ func TestTPEExportItemsRatesNoDbConn(t *testing.T) {
 func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpRt := TPRates{
 		dm: dm,
 	}

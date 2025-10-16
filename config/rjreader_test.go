@@ -38,14 +38,17 @@ var (
 	//
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
-	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_type": "redis",						// data_db type: <*redis|*mongo|*internal>
-		"db_host": "127.0.0.1",					/* data_db host address*/
-		"db_port": 6379, 						// data_db port to reach the database
-		"db_name": "10",/*/*asd*/ 				// data_db database name to connect to
-		"db_user": "*env:TESTVAR", 				// username to use when connecting to data_db
-		"db_password": ",/**/", 				// password to use when connecting to data_db
-		"redisSentinel":"",					// redisSentinel is the name of sentinel
+	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_conns": {
+			"*default": {	
+				"db_type": "redis",						// data_db type: <*redis|*mongo|*internal>
+				"db_host": "127.0.0.1",					/* data_db host address*/
+				"db_port": 6379, 						// data_db port to reach the database
+				"db_name": "10",/*/*asd*/ 				// data_db database name to connect to
+				"db_user": "*env:TESTVAR", 				// username to use when connecting to data_db
+				"db_password": ",/**/", 				// password to use when connecting to data_db
+			},
+		},
 	},/*Multiline coment 
 	Line1
 	Line2
@@ -56,7 +59,7 @@ var (
 
 func TestEnvRawJsonReadByte(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redisSentinel":""}}`)
+	expected := []byte(`{"db":{"db_conns":{"*default":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/"}}}}`)
 	reply := []byte{}
 	bit, err := raw.ReadByte()
 	for ; err == nil; bit, err = raw.ReadByte() {
@@ -212,7 +215,7 @@ func TestEnvReaderRead(t *testing.T) {
 		t.Error(err)
 	}
 	envR := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redisSentinel":""}}`)
+	expected := []byte(`{"db":{"db_conns":{"*default":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/"}}}}`)
 	reply := []byte{}
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
@@ -418,14 +421,17 @@ func TestGetErrorLine(t *testing.T) {
 	//
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
-	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_type": "redis",	1					// data_db type: <*redis|*mongo|*internal>
-		"db_host": "127.0.0.1",					/* data_db host address*/
-		"db_port": 6379, 						// data_db port to reach the database
-		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
-		"db_user": "user", 					// username to use when connecting to data_db
-		"db_password": ",/**/", 						// password to use when connecting to data_db
-		"redisSentinel":"",					// redisSentinel is the name of sentinel
+	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_conns": {
+			"*default": {	
+				"db_type": "redis",	1					// data_db type: <*redis|*mongo|*internal>
+				"db_host": "127.0.0.1",					/* data_db host address*/
+				"db_port": 6379, 						// data_db port to reach the database
+				"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
+				"db_user": "user", 					// username to use when connecting to data_db
+				"db_password": ",/**/", 						// password to use when connecting to data_db
+			},
+		},
 	},/*Multiline coment 
 	Line1
 	Line2
@@ -433,8 +439,8 @@ func TestGetErrorLine(t *testing.T) {
 	*/
 /**/		}//`
 	r := NewRjReaderFromBytes([]byte(jsonstr))
-	var offset int64 = 31
-	var expLine, expChar int64 = 10, 23
+	var offset int64 = 50
+	var expLine, expChar int64 = 12, 25
 	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
@@ -451,14 +457,17 @@ func TestGetErrorLine2(t *testing.T) {
 	//
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
-	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_type": "redis",	/*some comment before*/1					// data_db type: <*redis|*mongo|*internal>
-		"db_host": "127.0.0.1",					/* data_db host address*/
-		"db_port": 6379, 						// data_db port to reach the database
-		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
-		"db_user": "user", 					// username to use when connecting to data_db
-		"db_password": ",/**/", 						// password to use when connecting to data_db
-		"redisSentinel":"",					// redisSentinel is the name of sentinel
+	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_conns": {
+			"*default": {
+				"db_type": "redis",	/*some comment before*/1					// data_db type: <*redis|*mongo|*internal>
+				"db_host": "127.0.0.1",					/* data_db host address*/
+				"db_port": 6379, 						// data_db port to reach the database
+				"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
+				"db_user": "user", 					// username to use when connecting to data_db
+				"db_password": ",/**/", 						// password to use when connecting to data_db
+			},
+		},
 	},/*Multiline coment 
 	Line1
 	Line2
@@ -466,8 +475,8 @@ func TestGetErrorLine2(t *testing.T) {
 	*/
 /**/		}//`
 	r := NewRjReaderFromBytes([]byte(jsonStr))
-	var offset int64 = 31
-	var expLine, expChar int64 = 10, 46
+	var offset int64 = 50
+	var expLine, expChar int64 = 12, 48
 	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {

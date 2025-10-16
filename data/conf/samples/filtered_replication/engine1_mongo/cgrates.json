@@ -20,37 +20,42 @@
 	}
 },
 
-"data_db": {
-	"db_type": "mongo",
-	"db_name": "10",
-	"db_port": 27017,
-	"remote_conns": ["conn1"],
-	"remote_conn_id": "engine1",
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "mongo",
+			"db_host": "127.0.0.1",	
+			"db_port": 27017,
+			"db_name": "10",
+			"db_user": "cgrates",
+			"remote_conns": ["conn1"],
+			"remote_conn_id": "engine1",
+		},
+		"StorDB": {
+			"db_type": "mongo",
+			"db_host": "127.0.0.1",	
+			"db_port": 27017,
+			"db_name": "cgrates",
+			"db_user": "cgrates"
+		}
+	},
 	"items":{
-		"*accounts":{"remote":true,"replicate":false},
-		"*resource_profiles":{"remote":true,"replicate":false},
-		"*resources":{"remote":true,"replicate":false},
-		"*statqueue_profiles": {"remote":true,"replicate":false},
-		"*statqueues": {"remote":true,"replicate":false},
-		"*threshold_profiles": {"remote":true,"replicate":false},
-		"*thresholds": {"remote":true,"replicate":false},
-		"*filters": {"remote":true,"replicate":false},
-		"*route_profiles":{"remote":true,"replicate":false},
-		"*attribute_profiles":{"remote":true,"replicate":false},
-		"*charger_profiles": {"remote":true,"replicate":false},
-		"*rate_profiles":{"remote":true,"replicate":false},
-		"*load_ids":{"remote":true,"replicate":false},
-		"*indexes":{"remote":true, "replicate":false}, 
-		"*action_profiles":{"remote":true,"replicate":false},
-		"*account_profiles":{"remote":true,"replicate":false}
+		"*accounts":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*resource_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*resources":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*statqueue_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*statqueues": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*threshold_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*thresholds": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*filters": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*route_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*attribute_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*charger_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*rate_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*load_ids":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*action_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
-},
-
-"stor_db": {
-	"db_type": "mongo",
-	"db_name": "cgrates",
-	"db_port": 27017,
-	"db_password": ""
 },
 
 "admins": {

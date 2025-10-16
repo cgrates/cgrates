@@ -50,7 +50,6 @@ var (
 	sTestsSq = []func(t *testing.T){
 		testStatsInitCfg,
 		testStatsInitDataDB,
-		testStatsResetStorDB,
 		testStatsStartEngine,
 		testStatsRPCConn,
 		testStatsGetStatQueueBeforeSet,
@@ -111,13 +110,7 @@ func testStatsInitCfg(t *testing.T) {
 }
 
 func testStatsInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(sqCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testStatsResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(sqCfg); err != nil {
+	if err := engine.InitDB(sqCfg); err != nil {
 		t.Fatal(err)
 	}
 }

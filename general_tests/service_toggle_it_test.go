@@ -48,6 +48,17 @@ func TestServiceToggle(t *testing.T) {
 "logger": {
 	"type": "*stdout"
 },
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "accounts": {
 	"enabled": %[1]v
 },
@@ -174,7 +185,7 @@ func checkServiceStates(t *testing.T, client *birpc.Client, want string) {
 		utils.ConfigS,
 		utils.ConnManager,
 		utils.CoreS,
-		utils.DataDB,
+		utils.DB,
 		utils.FilterS,
 		utils.GlobalVarS,
 		utils.GuardianS,
@@ -200,7 +211,6 @@ func checkServiceStates(t *testing.T, client *birpc.Client, want string) {
 		utils.StatS,
 		utils.TPeS,
 		utils.ThresholdS,
-		utils.StorDB,
 		// utils.RegistrarC,
 		// utils.LoaderS,
 		// utils.TrendS,

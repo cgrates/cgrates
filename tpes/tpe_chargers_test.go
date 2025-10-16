@@ -33,7 +33,7 @@ func TestTPEnewTPChargers(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			chgr := &utils.ChargerProfile{
 				Tenant:       "cgrates.org",
@@ -48,7 +48,8 @@ func TestTPEnewTPChargers(t *testing.T) {
 			}
 			return chgr, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPChargers{
 		dm: dm,
 	}
@@ -61,8 +62,9 @@ func TestTPEnewTPChargers(t *testing.T) {
 func TestTPEExportItemsChargers(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpChgr := TPChargers{
 		dm: dm,
 	}
@@ -111,8 +113,9 @@ func TestTPEExportItemsChargersNoDbConn(t *testing.T) {
 func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpChgr := TPChargers{
 		dm: dm,
 	}

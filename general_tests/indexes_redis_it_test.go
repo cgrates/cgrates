@@ -34,9 +34,9 @@ import (
 
 func TestIndexesRedis(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db, err := engine.NewRedisStorage(cfg.DataDbCfg().Host+":"+cfg.DataDbCfg().Port, 10, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, cfg.DataDbCfg().Opts.RedisMaxConns,
-		cfg.DataDbCfg().Opts.RedisConnectAttempts, utils.EmptyString, false, 0, 0, 0, 0, 0,
+	db, err := engine.NewRedisStorage("127.0.0.1:6379", 10, utils.CGRateSLwr,
+		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, cfg.DbCfg().Opts.RedisMaxConns,
+		cfg.DbCfg().Opts.RedisConnectAttempts, utils.EmptyString, false, 0, 0, 0, 0, 0,
 		150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Fatal(err)
@@ -44,7 +44,7 @@ func TestIndexesRedis(t *testing.T) {
 	defer db.Close()
 	limit := engine.RedisLimit + 1
 	indx := make(map[string]utils.StringSet)
-	for i := 0; i < limit; i++ {
+	for i := range limit {
 		indx["*string:*req.Destination:"+strconv.Itoa(i)] = utils.StringSet{"ATTR_New": {}}
 	}
 	if err = db.SetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org:*any", indx,

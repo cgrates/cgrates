@@ -31,22 +31,34 @@
   },
 
 
-  "data_db": {
-    "db_type": "*internal",
-    "remote_conns": ["rmtConn"],
+  "db": {
+    "db_conns": {
+		  "*default": {
+        "db_type": "*internal",
+        "remote_conns": ["rmtConn"],
+	    },
+      "StorDB": {						
+			  "db_type": "mysql",			 
+			  "db_host": "127.0.0.1",		
+			  "db_port": 3306, 			
+			  "db_name": "cgrates", 	
+			  "db_user": "cgrates", 		
+			  "db_password": "CGRateS.org" 
+		  },
+	  },
     "items":{
-      "*accounts":{"remote":true},
-      "*filters": {"remote":true},
-      "*route_profiles":{"remote":true},
-      "*attribute_profiles":{"remote":true},
-      "*charger_profiles": {"remote":true},
-      "*load_ids":{"remote":true},
-      "*indexes":{"remote":true}
-    }
-  },
-
-  "stor_db": {
-    "db_password": "CGRateS.org"
+      "*accounts":{"remote":true, "dbConn": "*default"},
+      "*filters": {"remote":true, "dbConn": "*default"},
+      "*route_profiles":{"remote":true, "dbConn": "*default"},
+      "*attribute_profiles":{"remote":true, "dbConn": "*default"},
+      "*charger_profiles": {"remote":true, "dbConn": "*default"},
+      "*load_ids":{"remote":true, "dbConn": "*default"},
+      "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+    },
+   	"opts":{
+		  "internalDBRewriteInterval": "0s",
+		  "internalDBDumpInterval": "0s"
+	  }
   },
 
   "rates": {

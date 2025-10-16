@@ -33,7 +33,7 @@ func TestTPEnewTPResources(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ResourceProfile, error) {
 			rsc := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
@@ -49,7 +49,8 @@ func TestTPEnewTPResources(t *testing.T) {
 			}
 			return rsc, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPResources{
 		dm: dm,
 	}
@@ -62,8 +63,9 @@ func TestTPEnewTPResources(t *testing.T) {
 func TestTPEExportItemsResources(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -114,8 +116,9 @@ func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
 func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}

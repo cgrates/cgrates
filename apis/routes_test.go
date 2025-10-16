@@ -34,8 +34,9 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -108,15 +109,16 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -141,15 +143,16 @@ func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -222,7 +225,8 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetRouteProfile(context.Background(), rtPrf, &reply); err == nil ||
@@ -230,15 +234,16 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -332,7 +337,8 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	}
 	engine.Cache.Clear(nil)
 
-	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveRouteProfile(context.Background(),
@@ -343,7 +349,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
@@ -366,7 +372,8 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -382,7 +389,7 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
@@ -394,7 +401,8 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -409,7 +417,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfilesCountErrMock(t *testing.T) {
@@ -431,7 +439,8 @@ func TestRoutesGetRouteProfilesCountErrMock(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -456,7 +465,8 @@ func TestRoutesGetRouteProfilesCountErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -476,9 +486,10 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.RouteProfileWithAPIOpts{
 		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
@@ -611,9 +622,10 @@ func TestRoutesGetRouteProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.RouteProfileWithAPIOpts{
 		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
@@ -673,7 +685,8 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -689,7 +702,7 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
@@ -715,7 +728,8 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -734,7 +748,7 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
@@ -760,7 +774,8 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -781,5 +796,5 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

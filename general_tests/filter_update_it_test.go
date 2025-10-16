@@ -110,10 +110,7 @@ func testFilterUpdateInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testFilterUpdateFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(fltrUpdateCfg1); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(fltrUpdateCfg1); err != nil {
+	if err := engine.InitDB(fltrUpdateCfg1); err != nil {
 		t.Fatal(err)
 	}
 }

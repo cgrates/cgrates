@@ -108,27 +108,19 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbCfg().Type,
-		stsCfgIn.DataDbCfg().Host, stsCfgIn.DataDbCfg().Port,
-		stsCfgIn.DataDbCfg().Name, stsCfgIn.DataDbCfg().User,
-		stsCfgIn.DataDbCfg().Password, stsCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), stsCfgIn.DataDbCfg().Opts, stsCfgIn.DataDbCfg().Items)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgIn.GeneralCfg().DBDataEncoding, stsCfgIn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbCfg().Type,
-		stsCfgOut.DataDbCfg().Host, stsCfgOut.DataDbCfg().Port,
-		stsCfgOut.DataDbCfg().Name, stsCfgOut.DataDbCfg().User,
-		stsCfgOut.DataDbCfg().Password, stsCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), stsCfgOut.DataDbCfg().Opts, stsCfgOut.DataDbCfg().Items)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgOut.GeneralCfg().DBDataEncoding, stsCfgOut)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if stsPathIn == stsPathOut {
-		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		stsMigrator, err = NewMigrator(stsCfgIn.DbCfg(), dataDBIn, dataDBOut,
 			false, true)
 	} else {
-		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		stsMigrator, err = NewMigrator(stsCfgIn.DbCfg(), dataDBIn, dataDBOut,
 			false, false)
 	}
 	if err != nil {
@@ -137,8 +129,8 @@ func testStsITConnect(t *testing.T) {
 }
 
 func testStsITFlush(t *testing.T) {
-	stsMigrator.dmOut.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(stsMigrator.dmOut.DataManager().DataDB()); err != nil {
+	stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -243,7 +235,7 @@ func testStsITFlush(t *testing.T) {
 // 	}
 // 	switch stsAction {
 // 	case utils.Migrate:
-// 		err := stsMigrator.dmIN.setV1Stats(v1Sts)
+// 		err := stsMigrator.dmFrom[utils.MetaDefault].setV1Stats(v1Sts)
 // 		if err != nil {
 // 			t.Error("Error when setting v1Stat ", err.Error())
 // 		}
@@ -253,7 +245,7 @@ func testStsITFlush(t *testing.T) {
 // 			utils.Accounts:   2,
 // 			utils.Actions:    2,
 // 		}
-// 		err = stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+// 		err = stsMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 // 		if err != nil {
 // 			t.Error("Error when setting version for stats ", err.Error())
 // 		}
@@ -262,7 +254,7 @@ func testStsITFlush(t *testing.T) {
 // 			t.Error("Error when migrating Stats ", err.Error())
 // 		}
 
-// 		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv("cgrates.org", v1Sts.Id)
+// 		result, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetStatQueueProfileDrv("cgrates.org", v1Sts.Id)
 // 		if err != nil {
 // 			t.Error("Error when getting Stats ", err.Error())
 // 		}
@@ -270,7 +262,7 @@ func testStsITFlush(t *testing.T) {
 // 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 // 		}
 
-// 		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
+// 		result1, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
 // 		if err != nil {
 // 			t.Error("Error when getting Stats ", err.Error())
 // 		}
@@ -280,7 +272,7 @@ func testStsITFlush(t *testing.T) {
 // 			t.Errorf("Expecting: %+v, received: %+v", len(filter.Rules), len(result1.Rules))
 // 		}
 
-// 		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, false, false, utils.NonTransactional)
+// 		result2, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().GetStatQueue("cgrates.org", sq.ID, false, false, utils.NonTransactional)
 // 		if err != nil {
 // 			t.Error("Error when getting Stats ", err.Error())
 // 		}
@@ -289,17 +281,17 @@ func testStsITFlush(t *testing.T) {
 // 		}
 
 // case utils.Move:
-// 	if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
+// 	if err := stsMigrator.dmFrom.DataManager().SetStatQueueProfile(sqp, false); err != nil {
 // 		t.Error("Error when setting Stats ", err.Error())
 // 	}
-// 	if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
+// 	if err := stsMigrator.dmFrom.DataManager().SetStatQueue(sq); err != nil {
 // 		t.Error("Error when setting Stats ", err.Error())
 // 	}
-// 	if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
+// 	if err := stsMigrator.dmTo[utils.MetaDefault].DataManager().SetFilter(filter, true); err != nil {
 // 		t.Error("Error when setting Filter ", err.Error())
 // 	}
 // 	currentVersion := engine.CurrentDataDBVersions()
-// 	err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+// 	err := stsMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 // 	if err != nil {
 // 		t.Error("Error when setting version for stats ", err.Error())
 // 	}
@@ -307,11 +299,11 @@ func testStsITFlush(t *testing.T) {
 // 	if err != nil {
 // 		t.Error("Error when migrating Stats ", err.Error())
 // 	}
-// 	result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
+// 	result, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
 // 	if err != nil {
 // 		t.Error("Error when getting Stats ", err.Error())
 // 	}
-// 	result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
+// 	result1, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
 // 	if err != nil {
 // 		t.Error("Error when getting Stats ", err.Error())
 // 	}
@@ -371,12 +363,12 @@ func testStsITMigrateFromv1(t *testing.T) {
 		// },
 	}
 
-	err := stsMigrator.dmIN.setV1Stats(v1Sts)
+	err := stsMigrator.dmFrom[utils.MetaDefault].setV1Stats(v1Sts)
 	if err != nil {
 		t.Error("Error when setting v1Stat ", err.Error())
 	}
 
-	if err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Stats: 1}, true); err != nil {
+	if err := stsMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(engine.Versions{utils.Stats: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	}
 
@@ -384,7 +376,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error(err)
 	}
 
-	if vrs, err := stsMigrator.dmOut.DataManager().DataDB().GetVersions(utils.Stats); err != nil {
+	if vrs, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(utils.Stats); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	} else if vrs[utils.Stats] != 4 {
 		t.Errorf("Expecting: 4, received: %+v", vrs[utils.Stats])
@@ -392,7 +384,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 
 	//from V1 to V2
 	var filter *engine.Filter
-	if filter, err = stsMigrator.dmOut.DataManager().GetFilter(context.Background(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if filter, err = stsMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter(context.Background(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(config.CgrConfig().GeneralCfg().DefaultTenant, filter.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", config.CgrConfig().GeneralCfg().DefaultTenant, filter.Tenant)
@@ -431,7 +423,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 			MetricID: "*acc",
 		},
 	}
-	if statQueueProfile, err := stsMigrator.dmOut.DataManager().GetStatQueueProfile(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if statQueueProfile, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().GetStatQueueProfile(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if statQueueProfile.ThresholdIDs[0] != "Test" {
 		t.Errorf("Expecting: 'Test', received: %+v", statQueueProfile.ThresholdIDs[0])
@@ -461,7 +453,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 
 	//from V2 to V3
 	var statQueue *engine.StatQueue
-	if statQueue, err = stsMigrator.dmOut.DataManager().GetStatQueue(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if statQueue, err = stsMigrator.dmTo[utils.MetaDefault].DataManager().GetStatQueue(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if statQueue.ID != "test" {
 		t.Errorf("Expecting: 'test', received: %+v", statQueue.ID)

@@ -25,8 +25,24 @@
 	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
 },
 
-"stor_db": {
-	"db_type": "*internal"			
+"db": {							
+	"db_conns": {
+		"*default": {			
+			"db_type": "redis",
+			"db_port": 6379, 
+			"db_name": "10" 	
+		},
+		"StorDB": {						
+			"db_type": "internal"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 "rates": {

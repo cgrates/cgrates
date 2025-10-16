@@ -48,6 +48,17 @@ func TestAnzDocIT(t *testing.T) {
 "admins": {
 	"enabled": true
 },
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "attributes": {
 	"enabled": true,
 	"prefix_indexed_fields": ["*req.Destination", "*req.Account"],

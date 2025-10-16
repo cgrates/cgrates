@@ -20,22 +20,17 @@
     }
 },
 
-"data_db": {
-    "db_type": "*internal",
-    "remote_conns": ["engine"],
-    "replication_conns": ["engine"],
+"db": {
+    "db_conns": {
+		"*default": {
+            "db_type": "*internal",
+            "remote_conns": ["engine"],
+            "replication_conns": ["engine"],
+	    },
+	},
     "items":{
         "*accounts": {"remote":true, "replicate":true},
-        "*reverse_destinations": {"remote":true, "replicate":true},
-        "*destinations": {"remote":true, "replicate":true},
-        "*rating_plans": {"remote":true, "replicate":true},
-        "*rating_profiles": {"remote":true, "replicate":true},
         "*actions": {"remote":true, "replicate":true},
-        "*action_plans": {"remote":true, "replicate":true},
-        "*account_action_plans": {"remote":true, "replicate":true},
-        "*action_triggers": {"remote":true, "replicate":true},
-        "*shared_groups": {"remote":true, "replicate":true},
-        "*timings": {"remote":true, "replicate":true},
         "*resource_profiles": {"remote":true, "replicate":true},
         "*resources": {"remote":true, "replicate":true},
         "*statqueue_profiles": {"remote":true, "replicate":true},
@@ -62,7 +57,11 @@
 		"*rate_filter_indexes" : {"replicate": true},
 		"*action_profile_filter_indexes" : {"replicate": true},
 		"*account_filter_indexes" : {"replicate": true}
-    }
+    },
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 

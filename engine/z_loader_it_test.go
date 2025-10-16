@@ -86,15 +86,16 @@ func testLoaderITInitConfig(t *testing.T) {
 
 func testLoaderITInitDataDB(t *testing.T) {
 	var err error
-	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().Type,
-		lCfg.DataDbCfg().Host, lCfg.DataDbCfg().Port, lCfg.DataDbCfg().Name,
-		lCfg.DataDbCfg().User, lCfg.DataDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.DataDbCfg().Opts, lCfg.DataDbCfg().Items)
+	dbConn, err := NewDataDBConn(lCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+		lCfg.DbCfg().DBConns[utils.MetaDefault].Host, lCfg.DbCfg().DBConns[utils.MetaDefault].Port, lCfg.DbCfg().DBConns[utils.MetaDefault].Name,
+		lCfg.DbCfg().DBConns[utils.MetaDefault].User, lCfg.DbCfg().DBConns[utils.MetaDefault].Password, lCfg.GeneralCfg().DBDataEncoding, lCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields, lCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
+		lCfg.DbCfg().Opts, lCfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbCsv = NewDataManager(dbConn, lCfg, nil)
-	if lCfg.DataDbCfg().Type == utils.MetaInternal {
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dbConn}, lCfg.DbCfg())
+	dataDbCsv = NewDataManager(dbCM, lCfg, nil)
+	if lCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		chIDs := []string{}
 		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB
 			chIDs = append(chIDs, dbKey)
@@ -126,7 +127,8 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	loader, err = NewTpReader(dataDbCsv.DataDB(), csvStorage, "", "",
+	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
+	loader, err = NewTpReader(dbCM, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
@@ -172,7 +174,8 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	loader, err = NewTpReader(dataDbCsv.DataDB(), csvStorage, "", "",
+	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
+	loader, err = NewTpReader(dbCM, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)

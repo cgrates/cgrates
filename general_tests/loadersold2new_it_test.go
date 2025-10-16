@@ -99,10 +99,7 @@ func testLdro2nRtLoadConfig(t *testing.T) {
 }
 
 func testLdro2nRtFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(testLdro2nRtCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(testLdro2nRtCfg); err != nil {
+	if err := engine.InitDB(testLdro2nRtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

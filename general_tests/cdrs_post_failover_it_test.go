@@ -89,10 +89,7 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 }
 
 func testCDRsPostFailoverFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(cdrsPostFailCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(cdrsPostFailCfg); err != nil {
+	if err := engine.InitDB(cdrsPostFailCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -110,7 +107,7 @@ func testCDRsPostFailoverRpcConn(t *testing.T) {
 
 func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if cdrsPostFailCfg.DataDbCfg().Type == utils.MetaInternal {
+	if cdrsPostFailCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

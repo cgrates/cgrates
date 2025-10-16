@@ -45,7 +45,6 @@ var (
 	sTestsRan = []func(t *testing.T){
 		testRankingSInitCfg,
 		testRankingSInitDataDB,
-		testRankingSResetStorDB,
 		testRankingsStartEngine,
 		testRankingsRPCConn,
 
@@ -97,13 +96,7 @@ func testRankingSInitCfg(t *testing.T) {
 }
 
 func testRankingSInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(raCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRankingSResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(raCfg); err != nil {
+	if err := engine.InitDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }

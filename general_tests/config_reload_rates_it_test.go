@@ -75,10 +75,7 @@ func testRateLoadConfig(t *testing.T) {
 }
 
 func testRateFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(testRateCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(testRateCfg); err != nil {
+	if err := engine.InitDB(testRateCfg); err != nil {
 		t.Fatal(err)
 	}
 }

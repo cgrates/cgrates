@@ -101,10 +101,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 }
 
 func testAnalyzerSResetDbs(t *testing.T) {
-	if err := engine.InitDataDB(anzCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(anzCfg); err != nil {
+	if err := engine.InitDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }

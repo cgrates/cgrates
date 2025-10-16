@@ -33,7 +33,7 @@ func TestTPEnewTPTrends(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetTrendProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.TrendProfile, error) {
 			trd := &utils.TrendProfile{
 				Tenant: "cgrates.org",
@@ -41,7 +41,8 @@ func TestTPEnewTPTrends(t *testing.T) {
 			}
 			return trd, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPThresholds{
 		dm: dm,
 	}
@@ -54,8 +55,9 @@ func TestTPEnewTPTrends(t *testing.T) {
 func TestTPEExportTrends(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpTrd := TPTrends{
 		dm: dm,
 	}
@@ -90,8 +92,9 @@ func TestTPEExportItemsTrendsNoDbConn(t *testing.T) {
 func TestTPEExportItemsTrendsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpTrd := TPTrends{
 		dm: dm,
 	}

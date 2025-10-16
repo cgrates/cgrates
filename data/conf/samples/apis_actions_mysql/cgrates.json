@@ -4,14 +4,25 @@
     "level": 7
 },
 
-"data_db": {								
-    "db_type": "redis",						
-    "db_port": 6379, 						
-    "db_name": "10"					
-},
-
-"stor_db": {
-    "db_password": "CGRateS.org"
+"db": {								
+    "db_conns": {
+		"*default": {
+            "db_type": "redis",						
+            "db_port": 6379, 						
+            "db_name": "10"					
+	    },
+		"StorDB": {						 // The id of the DB connection
+			"db_type": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"db_host": "127.0.0.1",		 // the host to connect to
+			"db_port": 3306, 			 // db port to reach the database
+			"db_name": "cgrates", 		 // db database name to connect to
+			"db_user": "cgrates", 		 // username to use when connecting to the database
+			"db_password": "CGRateS.org" // password to use when connecting to the database
+		},
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 "actions": {

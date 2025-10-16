@@ -6,19 +6,15 @@
 		"type": "*stdout",
 		"level": 7
 	},
-    "data_db": {
-        "db_type": "*internal",
+    "db": {
+		"db_conns": {
+			"*default": {
+				"db_type": "*internal"
+			}
+		},
         "items":{
             "*charger_profiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
         },
-        "opts":{
-            "internalDBStartTimeout": "1m",
-            "internalDBDumpInterval": "-1",
-            "internalDBFileSizeLimit": "4KB"
-        }
-    },
-    "stor_db": {
-        "db_type": "*internal",
         "opts":{
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "-1",

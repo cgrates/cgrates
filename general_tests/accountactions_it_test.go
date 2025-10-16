@@ -86,10 +86,7 @@ func testAccActionsInitCfg(t *testing.T) {
 }
 
 func testAccActionsResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(accPrfCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(accPrfCfg); err != nil {
+	if err := engine.InitDB(accPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -101,10 +101,7 @@ func testCDRsInitConfig(t *testing.T) {
 }
 
 func testCDRsFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(cdrsCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(cdrsCfg); err != nil {
+	if err := engine.InitDB(cdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
