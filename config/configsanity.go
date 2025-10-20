@@ -1029,7 +1029,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {
 			if hasOneInternalDB {
-				return fmt.Errorf("<%s> There can only be 1 internal DataDB", utils.DB)
+				return fmt.Errorf("<%s> There can only be 1 internal DB", utils.DB)
 			}
 			if (cfg.dbCfg.Opts.InternalDBDumpInterval != 0 ||
 				cfg.dbCfg.Opts.InternalDBRewriteInterval != 0) &&

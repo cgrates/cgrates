@@ -17,14 +17,16 @@
         },
         "opts":{
             "internalDBStartTimeout": "1m",
-            "internalDBDumpInterval": "500ms"
+            "internalDBDumpInterval": "500ms",
+			"internalDBRewriteInterval": "0s"
         }
     },
 	"config_db": {
         "db_type": "*internal",
 		"opts": {
 			"internalDBStartTimeout": "1m",
-			"internalDBDumpInterval": "500ms"
+			"internalDBDumpInterval": "500ms",
+			"internalDBRewriteInterval": "0s"
 		}
 	},
 	"cdrs": {

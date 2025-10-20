@@ -18,7 +18,8 @@
         "opts":{
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
-            "internalDBFileSizeLimit": "4KB"	
+            "internalDBFileSizeLimit": "4KB",
+			"internalDBRewriteInterval": "0s"
         }
     },
 	"config_db": {
@@ -26,7 +27,8 @@
 		"opts": {
 			"internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
-            "internalDBFileSizeLimit": "4KB"	
+            "internalDBFileSizeLimit": "4KB",
+			"internalDBRewriteInterval": "0s"
 		}
 	},
 	"cdrs": {
