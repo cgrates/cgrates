@@ -125,6 +125,35 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return engine, nil
 }
 
+// Starts the engine from a string JSON config
+func StartEngineFromString(cfgJSON string, waitEngine int, t testing.TB) (*exec.Cmd, error) {
+	cfgPath := t.TempDir()
+	// A JSON configuration string has been passed to the object.
+	// It can be standalone or used to overwrite sections from an
+	// existing configuration file. In case it's the latter, ensure
+	// the file is processed towards the end.
+	filePath := filepath.Join(cfgPath, "zzz_dynamic_cgrates.json")
+	if err := os.WriteFile(filePath, []byte(cfgJSON), 0644); err != nil {
+		return nil, err
+	}
+	var err error
+	cfg, err := config.NewCGRConfigFromPath(context.TODO(), cfgPath)
+	if err != nil {
+		return nil, fmt.Errorf("could not init config from path %s: %v", cfgPath, err)
+	}
+	binPath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		return nil, err
+	}
+	flags := []string{"-config_path", cfg.ConfigPath}
+	engine := exec.Command(binPath, flags...)
+	if err := engine.Start(); err != nil {
+		return nil, fmt.Errorf("cgr-engine command failed: %v", err)
+	}
+	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
+	return engine, nil
+}
+
 // StartEngineWithContext return reference towards the command started so we can stop it if necessary
 func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int) (engine *exec.Cmd, err error) {
 	engine = exec.CommandContext(ctx, "cgr-engine", "-config_path", cfgPath)

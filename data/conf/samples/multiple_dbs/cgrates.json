@@ -40,9 +40,13 @@
 		}
 	},
 	"items":{
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "redis2"},
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "redis2"},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "intrnl"},
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	},
+	"opts": {
+		"internalDBDumpPath": "/tmp/internal_db/db",
+		"internalDBRewriteInterval": "0s"
 	}
 },
 
@@ -54,9 +58,9 @@
 
 "attributes": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"]
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"accounts_conns": ["*internal"]
 },
 
 "chargers": {
@@ -124,7 +128,7 @@
 
 "actions": {
 	"enabled": true,
-	"accounts_conns": ["*localhost"]
+	"accounts_conns": ["*internal"]
 },
 
 
@@ -141,6 +145,16 @@
 
 "tpes": {
 	"enabled": true
-}
+},
+
+"loaders": [
+	{
+		"enabled":true,
+		"id": "*default",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": "",
+		"lockfile_path": ".cgr.lck"
+	}
+]
 
 }

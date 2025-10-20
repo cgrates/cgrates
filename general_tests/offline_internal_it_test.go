@@ -62,9 +62,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		if err := os.MkdirAll(dfltCfg.DbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
-		// if err := os.MkdirAll(dfltCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
-		// 	t.Fatal(err)
-		// }
 		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
