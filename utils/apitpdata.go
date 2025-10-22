@@ -2593,6 +2593,7 @@ type ArgExportToFolder struct {
 type DPRArgs struct {
 	OriginHost      string
 	OriginRealm     string
+	RemoteAddr      string
 	DisconnectCause int
 }
 

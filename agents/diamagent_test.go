@@ -598,6 +598,14 @@ func TestV1DisconnectPeer(t *testing.T) {
 		t.Errorf("Expected WRONG_DISCONNECT_CAUSE error, got: %v", err)
 	}
 	args.DisconnectCause = 1
+
+	// No RemoteAddr. Falls back to OriginHost+OriginRealm lookup.
+	err = agent.V1DisconnectPeer(nil, args, nil)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected ErrNotFound for no matching connection, got: %v", err)
+	}
+
+	args.RemoteAddr = "192.168.1.1:12345"
 	err = agent.V1DisconnectPeer(nil, args, nil)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected ErrNotFound, got: %v", err)

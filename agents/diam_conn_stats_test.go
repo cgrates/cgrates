@@ -86,6 +86,7 @@ func TestDiamConnStats(t *testing.T) {
 	// 	fmt.Println(ng.LogBuffer)
 	// })
 	client, cfg := ng.Run(t)
+	time.Sleep(100 * time.Millisecond) // wait for diameter server to be up
 
 	setSQProfile := func(id, originHost, originRealm string, ttl time.Duration) {
 		t.Helper()
