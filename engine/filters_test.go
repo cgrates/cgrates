@@ -3325,6 +3325,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			expected: []string{"JSON_VALUE(data, '$.name') LIKE 'prefix%'"},
 		},
 		{
+			name: "Prefix LIKE with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.data.*name",
+				Values:  []string{"prefix"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"') LIKE 'prefix%')`},
+		},
+		{
 			name: "Suffix NOT LIKE with empty beforeSep",
 			fltrRule: FilterRule{
 				Type:    utils.MetaNotSuffix,
@@ -3341,6 +3350,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Values:  []string{"suffix"},
 			},
 			expected: []string{"JSON_VALUE(data, '$.name') LIKE '%suffix'"},
+		},
+		{
+			name: "Suffix LIKE with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaSuffix,
+				Element: "~*req.data.*name",
+				Values:  []string{"suffix"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"') LIKE '%suffix')`},
 		},
 		{
 			name: "Regex NOT REGEXP with empty beforeSep",
@@ -3360,7 +3378,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			},
 			expected: []string{"JSON_VALUE(data, '$.pattern') REGEXP '[0-9]+'"},
 		},
-
+		{
+			name: "Regex REGEXP with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaRegex,
+				Element: "~*req.data.*pattern",
+				Values:  []string{"[0-9]+"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*pattern"') REGEXP '[0-9]+')`},
+		},
 		{
 			name: "Not equal with empty beforeSep",
 			fltrRule: FilterRule{
@@ -3380,6 +3406,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			expected: []string{"JSON_VALUE(data, '$.status') = 'active'"},
 		},
 		{
+			name: "Equal condition with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.data.*status",
+				Values:  []string{"active"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*status"') = 'active')`},
+		},
+		{
 			name: "Greater than condition with JSON_VALUE",
 			fltrRule: FilterRule{
 				Type:    utils.MetaGreaterThan,
@@ -3387,6 +3422,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Values:  []string{"50"},
 			},
 			expected: []string{"JSON_VALUE(data, '$.score') > '50'"},
+		},
+		{
+			name: "Greater than condition with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaGreaterThan,
+				Element: "~*req.data.*score",
+				Values:  []string{"50"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') > '50')`},
 		},
 		{
 			name: "Less than or equal condition with JSON_VALUE",
@@ -3398,6 +3442,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			expected: []string{"JSON_VALUE(data, '$.score') <= '30'"},
 		},
 		{
+			name: "Less than or equal condition with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessOrEqual,
+				Element: "~*req.data.*score",
+				Values:  []string{"30"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') <= '30')`},
+		},
+		{
 			name: "Less than condition with JSON_VALUE",
 			fltrRule: FilterRule{
 				Type:    utils.MetaLessThan,
@@ -3406,7 +3459,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			},
 			expected: []string{"JSON_VALUE(data, '$.score') < '20'"},
 		},
-
+		{
+			name: "Less than condition with * column with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessThan,
+				Element: "~*req.data.*score",
+				Values:  []string{"20"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') < '20')`},
+		},
 		{
 			name: "MetaExists with no values",
 			fltrRule: FilterRule{
@@ -3426,6 +3487,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 			expected: []string{"JSON_VALUE(json_field, '$.key') IS NULL"},
 		},
 		{
+			name: "MetaNotExists with *column with no values",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.json_field.*key",
+				Values:  nil,
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(json_field, '$."*key"') IS NULL)`},
+		},
+		{
 			name: "MetaString with values",
 			fltrRule: FilterRule{
 				Type:    utils.MetaString,
@@ -3442,6 +3512,15 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Values:  []string{"prefix1"},
 			},
 			expected: []string{"JSON_VALUE(json_field, '$.key') NOT LIKE 'prefix1%'"},
+		},
+		{
+			name: "MetaPrefix with *column name NOT condition",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotPrefix,
+				Element: "~*req.json_field.*key",
+				Values:  []string{"prefix1"},
+			},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(json_field, '$."*key"') NOT LIKE 'prefix1%')`},
 		},
 		{
 			name: "MetaRegex with multiple values",
