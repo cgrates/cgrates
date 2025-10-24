@@ -269,6 +269,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
+	InitFailedPostCache(cfg.EEsCfg().FailedPosts.TTL, cfg.EEsCfg().FailedPosts.StaticTTL)
 	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
