@@ -1463,9 +1463,6 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent, isMsg, for
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
 	for i, sr := range s.SRuns {
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
-		if reqType == utils.META_NONE {
-			continue
-		}
 		var rplyMaxUsage time.Duration
 		if reqType != utils.META_PREPAID || s.debitStop != nil {
 			rplyMaxUsage = reqMaxUsage
