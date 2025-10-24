@@ -2338,8 +2338,6 @@ const (
 	DBDataEncodingCfg       = "dbdata_encoding"
 	TpExportPathCfg         = "tpexport_dir"
 	PosterAttemptsCfg       = "poster_attempts"
-	FailedPostsDirCfg       = "failed_posts_dir"
-	FailedPostsTTLCfg       = "failed_posts_ttl"
 	DefaultReqTypeCfg       = "default_request_type"
 	DefaultCategoryCfg      = "default_category"
 	DefaultTenantCfg        = "default_tenant"
@@ -2662,7 +2660,9 @@ const (
 	PrecacheCfg   = "precache"
 
 	// EEsCfg
+	FailedPostsCfg          = "failed_posts"
 	ExportPathCfg           = "export_path"
+	FailedPostsDirCfg       = "failed_posts_dir"
 	AttributeSContextCfg    = "attributes_context"
 	SynchronousCfg          = "synchronous"
 	AttemptsCfg             = "attempts"
@@ -2670,6 +2670,9 @@ const (
 	AttributeIDsCfg         = "attribute_ids"
 	ConcurrentRequestsCfg   = "concurrent_requests"
 	MetricsResetScheduleCfg = "metrics_reset_schedule"
+
+	// FailedPostsCfg
+	DirCfg = "dir"
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"

@@ -30,7 +30,7 @@ import (
 
 func TestSetFldPostCacheTTL(t *testing.T) {
 	var1 := failedPostCache
-	SetFailedPostCacheTTL(50 * time.Millisecond)
+	SetFailedPostCacheTTL(50*time.Millisecond, false)
 	var2 := failedPostCache
 	if reflect.DeepEqual(var1, var2) {
 		t.Error("Expecting to be different")
@@ -38,7 +38,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 }
 
 func TestAddFldPost(t *testing.T) {
-	SetFailedPostCacheTTL(5 * time.Second)
+	SetFailedPostCacheTTL(5*time.Second, false)
 	AddFailedPost("", "path1", "format1", "1", &config.EventExporterOpts{
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},

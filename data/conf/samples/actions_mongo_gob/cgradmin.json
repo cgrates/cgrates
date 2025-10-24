@@ -6,8 +6,7 @@
 
 "general": {
     "log_level": 7,
-	"poster_attempts": 1,
-	"failed_posts_ttl": "1",
+    "poster_attempts": 1
 },
 
 "rpc_conns": {
@@ -66,6 +65,9 @@
 
 "ees": {
 	"enabled": true,
+	"failed_posts": {
+	    "ttl": "1"
+	},
 	"exporters": [
 		{
 			"id": "sqs_fail",

@@ -400,6 +400,11 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	exp := map[string]any{
 		"enabled":          true,
 		"attributes_conns": []any{},
+		utils.FailedPostsCfg: map[string]any{
+			utils.DirCfg:       "/var/spool/cgrates/failed_posts",
+			utils.TTLCfg:       "5s",
+			utils.StaticTTLCfg: true,
+		},
 		"cache": map[string]any{
 			"*file_csv":        map[string]any{"limit": -1., "ttl": "5s", "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 			"*amqp_json_map":   map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},

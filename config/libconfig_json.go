@@ -34,8 +34,6 @@ type GeneralJsonCfg struct {
 	Dbdata_encoding        *string
 	Tpexport_dir           *string
 	Poster_attempts        *int
-	Failed_posts_dir       *string
-	Failed_posts_ttl       *string
 	Default_request_type   *string
 	Default_category       *string
 	Default_tenant         *string
@@ -308,12 +306,19 @@ type EventReaderJsonCfg struct {
 	Cache_dump_fields      *[]*FcTemplateJsonCfg
 }
 
+type FailedPostsJsonCfg struct {
+	Dir       *string `json:"dir"`
+	TTL       *string `json:"ttl"`
+	StaticTTL *bool   `json:"static_ttl"`
+}
+
 // EEsJsonCfg contains the configuration of EventExporterService
 type EEsJsonCfg struct {
-	Enabled          *bool
-	Attributes_conns *[]string
-	Cache            *map[string]*CacheParamJsonCfg
-	Exporters        *[]*EventExporterJsonCfg
+	Enabled         *bool                          `json:"enabled"`
+	AttributeSConns *[]string                      `json:"attributes_conns"`
+	Cache           *map[string]*CacheParamJsonCfg `json:"cache"`
+	FailedPosts     *FailedPostsJsonCfg            `json:"failed_posts"`
+	Exporters       *[]*EventExporterJsonCfg       `json:"exporters"`
 }
 
 type EventExporterOptsJson struct {

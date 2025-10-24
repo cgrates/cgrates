@@ -6,7 +6,6 @@
 "general": {
 	"log_level": 7,
 	"poster_attempts": 1,
-	"failed_posts_ttl": "1s"
 },
 
 "data_db": {
@@ -49,6 +48,9 @@
 
 "ees": {
 	"enabled": true,
+	"failed_posts": {
+	    "ttl": "1s"
+	},
 	"exporters": [
 		{
 			"id": "http_localhost",
