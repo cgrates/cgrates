@@ -66,7 +66,7 @@ type TestContent struct {
 }
 
 func TestHttpJsonPoster(t *testing.T) {
-	SetFailedPostCacheTTL(time.Millisecond, false)
+	InitFailedPostCache(time.Millisecond, false)
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
 	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
@@ -123,7 +123,7 @@ func TestHttpJsonPoster(t *testing.T) {
 }
 
 func TestHttpBytesPoster(t *testing.T) {
-	SetFailedPostCacheTTL(time.Millisecond, false)
+	InitFailedPostCache(time.Millisecond, false)
 	content := []byte(`Test
 		Test2
 		`)
