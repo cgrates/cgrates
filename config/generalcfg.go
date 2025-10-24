@@ -27,19 +27,17 @@ import (
 
 // GeneralCfg is the general config section
 type GeneralCfg struct {
-	NodeID               string        // Identifier for this engine instance
-	Logger               string        // dictates the way logs are displayed/stored
-	LogLevel             int           // system wide log level, nothing higher than this will be logged
-	RoundingDecimals     int           // Number of decimals to round end prices at
-	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath         string        // Path towards export folder for offline Tariff Plans
-	PosterAttempts       int           // Time to wait before writing the failed posts in a single file
-	FailedPostsDir       string        // Directory path where we store failed http requests
-	FailedPostsTTL       time.Duration // Directory path where we store failed http requests
-	DefaultReqType       string        // Use this request type if not defined on top
-	DefaultCategory      string        // set default type of record
-	DefaultTenant        string        // set default tenant
-	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	NodeID               string // Identifier for this engine instance
+	Logger               string // dictates the way logs are displayed/stored
+	LogLevel             int    // system wide log level, nothing higher than this will be logged
+	RoundingDecimals     int    // Number of decimals to round end prices at
+	DBDataEncoding       string // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath         string // Path towards export folder for offline Tariff Plans
+	PosterAttempts       int    // Time to wait before writing the failed posts in a single file
+	DefaultReqType       string // Use this request type if not defined on top
+	DefaultCategory      string // set default type of record
+	DefaultTenant        string // set default tenant
+	DefaultTimezone      string // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	DefaultCaching       string
 	CachingDelay         time.Duration // use to add delay before cache reload
 	ConnectAttempts      int           // number of initial connection attempts before giving up
@@ -111,14 +109,6 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Poster_attempts != nil {
 		gencfg.PosterAttempts = *jsnGeneralCfg.Poster_attempts
 	}
-	if jsnGeneralCfg.Failed_posts_dir != nil {
-		gencfg.FailedPostsDir = *jsnGeneralCfg.Failed_posts_dir
-	}
-	if jsnGeneralCfg.Failed_posts_ttl != nil {
-		if gencfg.FailedPostsTTL, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Failed_posts_ttl); err != nil {
-			return err
-		}
-	}
 	if jsnGeneralCfg.Default_timezone != nil {
 		gencfg.DefaultTimezone = *jsnGeneralCfg.Default_timezone
 	}
@@ -161,7 +151,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.DBDataEncodingCfg:       utils.Meta + gencfg.DBDataEncoding,
 		utils.TpExportPathCfg:         gencfg.TpExportPath,
 		utils.PosterAttemptsCfg:       gencfg.PosterAttempts,
-		utils.FailedPostsDirCfg:       gencfg.FailedPostsDir,
 		utils.DefaultReqTypeCfg:       gencfg.DefaultReqType,
 		utils.DefaultCategoryCfg:      gencfg.DefaultCategory,
 		utils.DefaultTenantCfg:        gencfg.DefaultTenant,
@@ -176,7 +165,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.RSRSepCfg:               gencfg.RSRSep,
 		utils.MaxParallelConnsCfg:     gencfg.MaxParallelConns,
 		utils.LockingTimeoutCfg:       "0",
-		utils.FailedPostsTTLCfg:       "0",
 		utils.ConnectTimeoutCfg:       "0",
 		utils.ReplyTimeoutCfg:         "0",
 	}
@@ -187,10 +175,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 
 	if gencfg.LockingTimeout != 0 {
 		initialMP[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
-	}
-
-	if gencfg.FailedPostsTTL != 0 {
-		initialMP[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
 	}
 
 	if gencfg.ConnectTimeout != 0 {
@@ -217,8 +201,6 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		DBDataEncoding:       gencfg.DBDataEncoding,
 		TpExportPath:         gencfg.TpExportPath,
 		PosterAttempts:       gencfg.PosterAttempts,
-		FailedPostsDir:       gencfg.FailedPostsDir,
-		FailedPostsTTL:       gencfg.FailedPostsTTL,
 		DefaultReqType:       gencfg.DefaultReqType,
 		DefaultCategory:      gencfg.DefaultCategory,
 		DefaultTenant:        gencfg.DefaultTenant,

@@ -29,14 +29,15 @@ type EEsCfg struct {
 	Enabled         bool
 	AttributeSConns []string
 	Cache           map[string]*CacheParamCfg
+	FailedPosts     *FailedPostsCfg
 	Exporters       []*EventExporterCfg
 }
 
 // ExporterCfg iterates over the Exporters slice and returns the exporter
 // configuration associated with the specified "id". If none were found, the
 // method will return nil.
-func (eeS *EEsCfg) ExporterCfg(id string) *EventExporterCfg {
-	for _, eeCfg := range eeS.Exporters {
+func (c *EEsCfg) ExporterCfg(id string) *EventExporterCfg {
+	for _, eeCfg := range c.Exporters {
 		if eeCfg.ID == id {
 			return eeCfg
 		}
@@ -44,43 +45,46 @@ func (eeS *EEsCfg) ExporterCfg(id string) *EventExporterCfg {
 	return nil
 }
 
-func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
-	if jsnCfg == nil {
-		return
+func (c *EEsCfg) loadFromJSONCfg(jc *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) error {
+	if jc == nil {
+		return nil
 	}
-	if jsnCfg.Enabled != nil {
-		eeS.Enabled = *jsnCfg.Enabled
+	if jc.Enabled != nil {
+		c.Enabled = *jc.Enabled
 	}
-	if jsnCfg.Cache != nil {
-		for kJsn, vJsn := range *jsnCfg.Cache {
+	if jc.Cache != nil {
+		for kJsn, vJsn := range *jc.Cache {
 			val := new(CacheParamCfg)
 			if err := val.loadFromJSONCfg(vJsn); err != nil {
 				return err
 			}
-			eeS.Cache[kJsn] = val
+			c.Cache[kJsn] = val
 		}
 	}
-	if jsnCfg.Attributes_conns != nil {
-		eeS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for i, fID := range *jsnCfg.Attributes_conns {
+	if jc.AttributeSConns != nil {
+		c.AttributeSConns = make([]string, len(*jc.AttributeSConns))
+		for i, fID := range *jc.AttributeSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			eeS.AttributeSConns[i] = fID
+			c.AttributeSConns[i] = fID
 			if fID == utils.MetaInternal {
-				eeS.AttributeSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+				c.AttributeSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
 			}
 		}
 	}
-	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep, dfltExpCfg)
+	if err := c.FailedPosts.loadFromJSONCfg(jc.FailedPosts); err != nil {
+		return err
+	}
+	return c.appendEEsExporters(jc.Exporters, msgTemplates, sep, dfltExpCfg)
 }
 
-func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string, dfltExpCfg *EventExporterCfg) (err error) {
+func (c *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string, dfltExpCfg *EventExporterCfg) (err error) {
 	if exporters == nil {
 		return
 	}
 	for _, jsnExp := range *exporters {
 		var exp *EventExporterCfg
 		if jsnExp.Id != nil {
-			for _, exporter := range eeS.Exporters {
+			for _, exporter := range c.Exporters {
 				if exporter.ID == *jsnExp.Id {
 					exp = exporter
 					break
@@ -94,7 +98,7 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 				exp = new(EventExporterCfg)
 				exp.Opts = &EventExporterOpts{}
 			}
-			eeS.Exporters = append(eeS.Exporters, exp)
+			c.Exporters = append(c.Exporters, exp)
 		}
 		if err = exp.loadFromJSONCfg(jsnExp, msgTemplates, separator); err != nil {
 			return
@@ -104,32 +108,34 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 }
 
 // Clone returns a deep copy of EEsCfg
-func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
+func (c *EEsCfg) Clone() (cln *EEsCfg) {
 	cln = &EEsCfg{
-		Enabled:         eeS.Enabled,
-		AttributeSConns: make([]string, len(eeS.AttributeSConns)),
+		Enabled:         c.Enabled,
+		AttributeSConns: make([]string, len(c.AttributeSConns)),
 		Cache:           make(map[string]*CacheParamCfg),
-		Exporters:       make([]*EventExporterCfg, len(eeS.Exporters)),
+		FailedPosts:     c.FailedPosts.Clone(),
+		Exporters:       make([]*EventExporterCfg, len(c.Exporters)),
 	}
 
-	copy(cln.AttributeSConns, eeS.AttributeSConns)
-	for key, value := range eeS.Cache {
+	copy(cln.AttributeSConns, c.AttributeSConns)
+	for key, value := range c.Cache {
 		cln.Cache[key] = value.Clone()
 	}
-	for idx, exp := range eeS.Exporters {
+	for idx, exp := range c.Exporters {
 		cln.Exporters[idx] = exp.Clone()
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+func (c *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg: eeS.Enabled,
+		utils.EnabledCfg:     c.Enabled,
+		utils.FailedPostsCfg: c.FailedPosts.AsMapInterface(),
 	}
-	if eeS.AttributeSConns != nil {
-		attributeSConns := make([]string, len(eeS.AttributeSConns))
-		for i, item := range eeS.AttributeSConns {
+	if c.AttributeSConns != nil {
+		attributeSConns := make([]string, len(c.AttributeSConns))
+		for i, item := range c.AttributeSConns {
 			attributeSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
 				attributeSConns[i] = utils.MetaInternal
@@ -137,16 +143,19 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 		}
 		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
-	if eeS.Cache != nil {
-		cache := make(map[string]any, len(eeS.Cache))
-		for key, value := range eeS.Cache {
+	if c.Cache != nil {
+		cache := make(map[string]any, len(c.Cache))
+		for key, value := range c.Cache {
 			cache[key] = value.AsMapInterface()
 		}
 		initialMP[utils.CacheCfg] = cache
 	}
-	if eeS.Exporters != nil {
-		exporters := make([]map[string]any, len(eeS.Exporters))
-		for i, item := range eeS.Exporters {
+	if c.FailedPosts != nil {
+
+	}
+	if c.Exporters != nil {
+		exporters := make([]map[string]any, len(c.Exporters))
+		for i, item := range c.Exporters {
 			exporters[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.ExportersCfg] = exporters
@@ -154,9 +163,9 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	return
 }
 
-func (eeS *EEsCfg) exporterIDs() []string {
-	ids := make([]string, 0, len(eeS.Exporters))
-	for _, exporter := range eeS.Exporters {
+func (c *EEsCfg) exporterIDs() []string {
+	ids := make([]string, 0, len(c.Exporters))
+	for _, exporter := range c.Exporters {
 		ids = append(ids, exporter.ID)
 	}
 	return ids
@@ -1319,4 +1328,48 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		initialMP[utils.FieldsCfg] = fields
 	}
 	return
+}
+
+type FailedPostsCfg struct {
+	Dir       string
+	TTL       time.Duration
+	StaticTTL bool
+}
+
+func (c *FailedPostsCfg) loadFromJSONCfg(jc *FailedPostsJsonCfg) error {
+	if jc == nil {
+		return nil
+	}
+	if jc.Dir != nil {
+		c.Dir = *jc.Dir
+	}
+	if jc.TTL != nil {
+		var err error
+		if c.TTL, err = utils.ParseDurationWithNanosecs(*jc.TTL); err != nil {
+			return err
+		}
+	}
+	if jc.StaticTTL != nil {
+		c.StaticTTL = *jc.StaticTTL
+	}
+	return nil
+}
+
+func (c *FailedPostsCfg) Clone() *FailedPostsCfg {
+	if c == nil {
+		return nil
+	}
+	return &FailedPostsCfg{
+		Dir:       c.Dir,
+		TTL:       c.TTL,
+		StaticTTL: c.StaticTTL,
+	}
+}
+
+func (c *FailedPostsCfg) AsMapInterface() map[string]any {
+	return map[string]any{
+		utils.DirCfg:       c.Dir,
+		utils.TTLCfg:       c.TTL.String(),
+		utils.StaticTTLCfg: c.StaticTTL,
+	}
 }

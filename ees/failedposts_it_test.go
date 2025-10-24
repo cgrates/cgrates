@@ -46,7 +46,7 @@ func TestWriteFldPosts(t *testing.T) {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		t.Fatal("Error creating folder: ", dir, err)
 	}
-	config.CgrConfig().GeneralCfg().FailedPostsDir = dir
+	config.CgrConfig().EEsCfg().FailedPosts.Dir = dir
 	writeFailedPosts("itmID", exportEvent)
 
 	if filename, err := filepath.Glob(filepath.Join(dir, "EEs|*.gob")); err != nil {

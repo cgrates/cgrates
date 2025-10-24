@@ -103,10 +103,10 @@ func testPosterITInitCdrDb(t *testing.T) {
 func testPosterITStartEngine(t *testing.T) {
 	// before starting the engine, create the directories needed for failed posts or
 	// clear their contents if they exist already
-	if err := os.RemoveAll(pstrCfg.GeneralCfg().FailedPostsDir); err != nil {
-		t.Fatal("Error removing folder: ", pstrCfg.GeneralCfg().FailedPostsDir, err)
+	if err := os.RemoveAll(pstrCfg.EEsCfg().FailedPosts.Dir); err != nil {
+		t.Fatal("Error removing folder: ", pstrCfg.EEsCfg().FailedPosts.Dir, err)
 	}
-	if err := os.MkdirAll(pstrCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+	if err := os.MkdirAll(pstrCfg.EEsCfg().FailedPosts.Dir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := engine.StopStartEngine(pstrCfgPath, *utils.WaitRater); err != nil {
@@ -119,14 +119,14 @@ func testPosterITRpcConn(t *testing.T) {
 }
 
 func testPosterReadFolder(format string) (expEv *ees.ExportEvents, err error) {
-	filesInDir, _ := os.ReadDir(pstrCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(pstrCfg.EEsCfg().FailedPosts.Dir)
 	if len(filesInDir) == 0 {
-		err = fmt.Errorf("No files in directory: %s", pstrCfg.GeneralCfg().FailedPostsDir)
+		err = fmt.Errorf("No files in directory: %s", pstrCfg.EEsCfg().FailedPosts.Dir)
 		return
 	}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()
-		filePath := path.Join(pstrCfg.GeneralCfg().FailedPostsDir, fileName)
+		filePath := path.Join(pstrCfg.EEsCfg().FailedPosts.Dir, fileName)
 
 		expEv, err = ees.NewExportEventsFromFile(filePath)
 		if err != nil {

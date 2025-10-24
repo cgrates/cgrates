@@ -107,10 +107,10 @@ func testV1CDRsInitCdrDb(t *testing.T) {
 func testV1CDRsStartEngine(t *testing.T) {
 	// before starting the engine, create the directories needed for failed posts or
 	// clear their contents if they exist already
-	if err := os.RemoveAll(pecdrsCfg.GeneralCfg().FailedPostsDir); err != nil {
-		t.Fatal("Error removing folder: ", pecdrsCfg.GeneralCfg().FailedPostsDir, err)
+	if err := os.RemoveAll(pecdrsCfg.EEsCfg().FailedPosts.Dir); err != nil {
+		t.Fatal("Error removing folder: ", pecdrsCfg.EEsCfg().FailedPosts.Dir, err)
 	}
-	if err := os.MkdirAll(pecdrsCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+	if err := os.MkdirAll(pecdrsCfg.EEsCfg().FailedPosts.Dir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *utils.WaitRater); err != nil {
@@ -575,9 +575,9 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 }
 func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	failoverContent := []byte(fmt.Sprintf(`{"CGRID":"%s"}`, utils.Sha1("test7_processEvent", "OriginHost7")))
-	filesInDir, _ := os.ReadDir(pecdrsCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(pecdrsCfg.EEsCfg().FailedPosts.Dir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", pecdrsCfg.GeneralCfg().FailedPostsDir)
+		t.Fatalf("No files in directory: %s", pecdrsCfg.EEsCfg().FailedPosts.Dir)
 	}
 	var foundFile bool
 	var fileName string
@@ -585,7 +585,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 		fileName = file.Name()
 		if strings.HasPrefix(fileName, "EEs|") {
 			foundFile = true
-			filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
+			filePath := path.Join(pecdrsCfg.EEsCfg().FailedPosts.Dir, fileName)
 			ev, err := ees.NewExportEventsFromFile(filePath)
 			if err != nil {
 				t.Fatal(err)

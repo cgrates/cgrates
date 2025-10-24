@@ -113,11 +113,11 @@ func testCDRsOnExpInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.RemoveAll(cdrsMasterCfg.GeneralCfg().FailedPostsDir); err != nil {
-		t.Fatal("Error removing folder: ", cdrsMasterCfg.GeneralCfg().FailedPostsDir, err)
+	if err := os.RemoveAll(cdrsMasterCfg.EEsCfg().FailedPosts.Dir); err != nil {
+		t.Fatal("Error removing folder: ", cdrsMasterCfg.EEsCfg().FailedPosts.Dir, err)
 	}
 
-	if err := os.MkdirAll(cdrsMasterCfg.GeneralCfg().FailedPostsDir, 0700); err != nil {
+	if err := os.MkdirAll(cdrsMasterCfg.EEsCfg().FailedPosts.Dir, 0700); err != nil {
 		t.Error(err)
 	}
 
@@ -245,9 +245,9 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
-	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsMasterCfg.EEsCfg().FailedPosts.Dir)
 	if len(filesInDir) != 0 {
-		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.EEsCfg().FailedPosts.Dir)
 	}
 }
 
@@ -458,13 +458,13 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	v2.Set("OriginID", "amqpreconnect")
 	httpContent := []any{&ees.HTTPPosterRequest{Body: v1, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}},
 		&ees.HTTPPosterRequest{Body: v2, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}}}
-	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsMasterCfg.EEsCfg().FailedPosts.Dir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.EEsCfg().FailedPosts.Dir)
 	}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()
-		filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
+		filePath := path.Join(cdrsMasterCfg.EEsCfg().FailedPosts.Dir, fileName)
 
 		ev, err := ees.NewExportEventsFromFile(filePath)
 		if err != nil {
