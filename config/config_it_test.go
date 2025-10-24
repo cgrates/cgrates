@@ -111,8 +111,8 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 
 func testNewCGRConfigFromPath(t *testing.T) {
 	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "ROUND_DEC": "5",
-		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
-		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
+		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "DF_TENANT": "cgrates.org",
+		"TIMEZONE": "Local"} {
 		os.Setenv(key, val)
 	}
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/b/b.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/c.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/d.json"

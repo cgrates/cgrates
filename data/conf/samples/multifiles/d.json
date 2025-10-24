@@ -11,7 +11,6 @@
 	"dbdata_encoding": "*env:DB_ENCODING",					// encoding used to store object data in strings: <*msgpack|*json>
 	"tpexport_dir": "*env:TP_EXPORT_DIR",					// path towards export folder for offline Tariff Plans
 	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *http_post, CDR replication)
-	"failed_posts_dir": "*env:FAILED_POSTS_DIR",			// directory path where we store failed requests
 	"default_tenant": "*env:DF_TENANT",						// default tenant to consider when missing from requests
 	"default_timezone": "*env:TIMEZONE",					// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"connect_attempts": 3,									// initial server connect attempts

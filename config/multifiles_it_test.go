@@ -33,8 +33,8 @@ var mfCgrCfg *CGRConfig
 
 func TestMfInitConfig(t *testing.T) {
 	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "ROUND_DEC": "5",
-		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
-		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
+		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "DF_TENANT": "cgrates.org",
+		"TIMEZONE": "Local"} {
 		os.Setenv(key, val)
 	}
 	var err error
@@ -61,7 +61,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
 		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaPseudoPrepaid,
 		DefaultCategory:  "call",
 		DefaultTenant:    "cgrates.org",
@@ -76,7 +75,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DigestEqual:      ":",
 		RSRSep:           ";",
 		MaxParallelConns: 100,
-		FailedPostsTTL:   5 * time.Second,
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
 		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))

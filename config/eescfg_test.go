@@ -179,6 +179,11 @@ func TestEESClone(t *testing.T) {
 				Replicate: false,
 			},
 		},
+		FailedPosts: &FailedPostsCfg{
+			Dir:       "/var/spool/cgrates/failed_posts",
+			TTL:       5 * time.Second,
+			StaticTTL: true,
+		},
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
@@ -589,6 +594,11 @@ func TestEventExporterSameID(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
+		FailedPosts: &FailedPostsCfg{
+			Dir:       "/tmp/test",
+			TTL:       3 * time.Second,
+			StaticTTL: false,
+		},
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
@@ -658,6 +668,11 @@ func TestEventExporterSameID(t *testing.T) {
 "ees": {
 	"enabled": true,
 	"attributes_conns":["conn1"],
+	"failed_posts": {
+		"dir": "/tmp/test",
+		"ttl": "3s",
+		"static_ttl": false
+	},
 	"exporters": [
 		{
 			"id": "file_exporter1",
@@ -685,8 +700,8 @@ func TestEventExporterSameID(t *testing.T) {
 
 func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Attributes_conns: &[]string{"*conn1", "*conn2"},
+		Enabled:         utils.BoolPointer(true),
+		AttributeSConns: &[]string{"*conn1", "*conn2"},
 		Cache: &map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
@@ -758,6 +773,11 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Limit:     -1,
 				StaticTTL: false,
 			},
+		},
+		FailedPosts: &FailedPostsCfg{
+			Dir:       "/var/spool/cgrates/failed_posts",
+			TTL:       5 * time.Second,
+			StaticTTL: true,
 		},
 		Exporters: []*EventExporterCfg{
 			{
@@ -841,8 +861,8 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Attributes_conns: &[]string{"*conn1", "*conn2"},
+		Enabled:         utils.BoolPointer(true),
+		AttributeSConns: &[]string{"*conn1", "*conn2"},
 		Cache: &map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
@@ -919,6 +939,11 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Limit:     -1,
 				StaticTTL: false,
 			},
+		},
+		FailedPosts: &FailedPostsCfg{
+			Dir:       "/var/spool/cgrates/failed_posts",
+			TTL:       5 * time.Second,
+			StaticTTL: true,
 		},
 		Exporters: []*EventExporterCfg{
 			{
@@ -1195,6 +1220,11 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.RemoteCfg:    false,
 				utils.StaticTTLCfg: false,
 			},
+		},
+		utils.FailedPostsCfg: map[string]any{
+			utils.DirCfg:       "/var/spool/cgrates/failed_posts",
+			utils.TTLCfg:       "5s",
+			utils.StaticTTLCfg: true,
 		},
 		utils.ExportersCfg: []map[string]any{
 			{

@@ -43,7 +43,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
-		Failed_posts_ttl:     utils.StringPointer("2"),
 	}
 
 	expected := &GeneralCfg{
@@ -54,7 +53,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
 		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -68,7 +66,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
-		FailedPostsTTL:   2,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -103,18 +100,10 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 
 	cfgJSON2 := &GeneralJsonCfg{
-		Failed_posts_ttl: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %v", expected, err)
-	}
-
-	cfgJSON3 := &GeneralJsonCfg{
 		Locking_timeout: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
-	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
+	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -130,8 +119,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"dbdata_encoding": "*msgpack",							
 			"tpexport_dir": "/var/spool/cgrates/tpe",				
 			"poster_attempts": 3,									
-			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	
-			"failed_posts_ttl": "5s",								
 			"default_request_type": "*rated",						
 			"default_category": "call",								
 			"default_tenant": "cgrates.org",						
@@ -158,8 +145,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
 		utils.PosterAttemptsCfg:       3,
-		utils.FailedPostsDirCfg:       "/var/spool/cgrates/failed_posts",
-		utils.FailedPostsTTLCfg:       "5s",
 		utils.DefaultReqTypeCfg:       "*rated",
 		utils.DefaultCategoryCfg:      "call",
 		utils.DefaultTenantCfg:        "cgrates.org",
@@ -189,7 +174,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
       "general": {
             "node_id": "ENGINE1",
             "locking_timeout": "0",
-            "failed_posts_ttl": "0s",
             "connect_timeout": "0s",
             "reply_timeout": "0s",
             "max_call_duration": "0"
@@ -203,8 +187,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
 		utils.PosterAttemptsCfg:       3,
-		utils.FailedPostsDirCfg:       "/var/spool/cgrates/failed_posts",
-		utils.FailedPostsTTLCfg:       "0",
 		utils.DefaultReqTypeCfg:       "*rated",
 		utils.DefaultCategoryCfg:      "call",
 		utils.DefaultTenantCfg:        "cgrates.org",
@@ -238,7 +220,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
 		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -252,7 +233,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
-		FailedPostsTTL:   2,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

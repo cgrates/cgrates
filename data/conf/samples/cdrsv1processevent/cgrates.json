@@ -5,8 +5,7 @@
 
 "general": {
 	"log_level": 7,
-    "poster_attempts": 1,
-	"failed_posts_ttl": "1",
+    "poster_attempts": 1
 },
 
 "data_db":{
@@ -31,11 +30,16 @@
 "ees": {
 	"enabled": true,
 	"attributes_conns": ["*internal"],
+	"failed_posts": {
+	    "dir": "/tmp/failed_posts",
+	    "ttl": "1"
+	},
 	"exporters": [
 		{
 			"id": "amqp_test_file",
 			"type": "*amqp_json_map",
 			"export_path": "amqps://guest:guest@localhost:256733/",
+			"failed_posts_dir": "/tmp/failed_posts",
 			"attempts": 1,
 			"synchronous": true,
 			"fields":[

@@ -349,7 +349,6 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 
 "general": {
 	"log_level": 7,
-	"failed_posts_ttl": "1ms",
 	"poster_attempts": 1
 },
 
@@ -369,6 +368,9 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 	"enabled": true,
 	"cache": {
 		"*nats_json_map": {"limit": 0, "ttl": "", "static_ttl": false}
+	},
+	"failed_posts": {
+	    "ttl": "1ms"
 	},
 	"exporters": [
 		{

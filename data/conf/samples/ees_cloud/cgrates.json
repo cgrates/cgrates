@@ -2,8 +2,7 @@
 
 "general": {
     "log_level": 7,
-    "poster_attempts": 2,
-    "failed_posts_ttl": "1s"
+    "poster_attempts": 2
 },
 
 "data_db": {
@@ -17,6 +16,9 @@
 
 "ees": {
     "enabled": true,
+	"failed_posts": {
+	    "ttl": "1s"
+	},
     "exporters": [
         {
             "id": "sqs_test_file",

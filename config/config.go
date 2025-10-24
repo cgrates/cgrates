@@ -174,8 +174,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
-	cfg.eesCfg = new(EEsCfg)
-	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
+	cfg.eesCfg = &EEsCfg{
+		Cache:       make(map[string]*CacheParamCfg),
+		FailedPosts: &FailedPostsCfg{},
+	}
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.janusAgentCfg = new(JanusAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)

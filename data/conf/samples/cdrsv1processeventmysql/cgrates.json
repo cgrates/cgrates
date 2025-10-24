@@ -6,7 +6,6 @@
 "general": {
 	"log_level": 7,
     "poster_attempts": 1,
-	"failed_posts_ttl": "1",
 },
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
@@ -31,6 +30,9 @@
 "ees": {
 	"enabled": true,
 	"attributes_conns": ["*internal"],
+	"failed_posts": {
+	    "ttl": "1"
+	},
 	"exporters": [
 		{
 			"id": "amqp_test_file",

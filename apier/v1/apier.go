@@ -1357,7 +1357,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args ReplayFai
 
 	// Set default directories if not provided.
 	if args.SourcePath == "" {
-		args.SourcePath = apierSv1.Config.GeneralCfg().FailedPostsDir
+		args.SourcePath = apierSv1.Config.EEsCfg().FailedPosts.Dir
 	}
 	if args.FailedPath == "" {
 		args.FailedPath = args.SourcePath
