@@ -36,8 +36,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Dbdata_encoding:        utils.StringPointer("*msgpack"),
 		Tpexport_dir:           utils.StringPointer("/var/spool/cgrates/tpe"),
 		Poster_attempts:        utils.IntPointer(3),
-		Failed_posts_dir:       utils.StringPointer("/var/spool/cgrates/failed_posts"),
-		Failed_posts_ttl:       utils.StringPointer("5s"),
 		Default_request_type:   utils.StringPointer(utils.MetaRated),
 		Default_category:       utils.StringPointer("call"),
 		Default_tenant:         utils.StringPointer("cgrates.org"),
@@ -2269,8 +2267,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 
 func TestDfEventExporterCfg(t *testing.T) {
 	eCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Attributes_conns: &[]string{},
+		Enabled:         utils.BoolPointer(false),
+		AttributeSConns: &[]string{},
 		Cache: &map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
@@ -2317,6 +2315,11 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(""),
 				Static_ttl: utils.BoolPointer(false),
 			},
+		},
+		FailedPosts: &FailedPostsJsonCfg{
+			Dir:       utils.StringPointer("/var/spool/cgrates/failed_posts"),
+			TTL:       utils.StringPointer("5s"),
+			StaticTTL: utils.BoolPointer(true),
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{

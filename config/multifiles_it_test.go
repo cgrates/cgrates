@@ -61,7 +61,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
 		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaPseudoPrepaid,
 		DefaultCategory:  "call",
 		DefaultTenant:    "cgrates.org",
@@ -76,7 +75,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DigestEqual:      ":",
 		RSRSep:           ";",
 		MaxParallelConns: 100,
-		FailedPostsTTL:   5 * time.Second,
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
 		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))

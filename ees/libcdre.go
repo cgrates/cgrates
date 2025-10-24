@@ -40,8 +40,8 @@ func init() {
 }
 
 // SetFailedPostCacheTTL recreates the failed cache
-func SetFailedPostCacheTTL(ttl time.Duration) {
-	failedPostCache = ltcache.NewCache(-1, ttl, false, false, []func(itmID string, value any){writeFailedPosts})
+func SetFailedPostCacheTTL(ttl time.Duration, static bool) {
+	failedPostCache = ltcache.NewCache(-1, ttl, static, false, []func(itmID string, value any){writeFailedPosts})
 }
 
 func writeFailedPosts(_ string, value any) {
