@@ -1906,6 +1906,7 @@ const (
 	TBLTPAttributes      = "tp_attributes"
 	TBLTPChargers        = "tp_chargers"
 	TBLVersions          = "versions"
+	TBLAccounts          = "accounts"
 	OldSMCosts           = "sm_costs"
 	TBLTPDispatchers     = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts = "tp_dispatcher_hosts"

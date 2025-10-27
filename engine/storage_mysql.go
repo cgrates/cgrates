@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -89,6 +90,21 @@ func (msqlS *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error)
 	}
 	tx.Commit()
 	return
+}
+
+// DataDB method not implemented yet
+func (msqlS *MySQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (msqlS *MySQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (msqlS *MySQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
 }
 
 func (msqlS *MySQLStorage) extraFieldsExistsQry(field string) string {

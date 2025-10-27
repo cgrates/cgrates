@@ -382,3 +382,13 @@ type AccountMdl struct {
 func (AccountMdl) TableName() string {
 	return utils.TBLTPAccounts
 }
+
+type AccountBytesMdl struct {
+	PK      uint   `gorm:"primary_key"`
+	ID      string `index:"0" re:".*"`
+	Account []byte `gorm:"type:bytea" index:"1" re:".*"`
+}
+
+func (AccountBytesMdl) TableName() string {
+	return utils.TBLAccounts
+}

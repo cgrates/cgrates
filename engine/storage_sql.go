@@ -44,6 +44,7 @@ type SQLImpl interface {
 type SQLStorage struct {
 	DB *sql.DB
 	db *gorm.DB
+	ms utils.Marshaler
 	DataDB
 	SQLImpl
 }
@@ -73,8 +74,32 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error) {
-	return nil, utils.ErrNotImplemented
+// returns all keys in table matching the prefix
+func (sqls *SQLStorage) getAllIndexKeys(_ *context.Context, table, prefix string) (ids []string, err error) {
+	err = sqls.db.Table(table).Select("id").Where("id LIKE ?", prefix+"%").
+		Pluck("id", &ids).Error
+	return
+}
+
+// GetKeysForPrefix will look for keys matching the prefix given
+func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
+	keyLen := len(utils.AccountPrefix)
+	if len(prefix) < keyLen {
+		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
+	}
+	category := prefix[:keyLen]
+	tntID := prefix[keyLen:]
+
+	switch category {
+	case utils.AccountPrefix:
+		keys, err = sqls.getAllIndexKeys(ctx, utils.TBLAccounts, tntID)
+	default:
+		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
+	}
+	for i := range keys { // bring the prefix back to match redis style keys to satisfy functions using it
+		keys[i] = category + keys[i]
+	}
+	return keys, err
 }
 
 func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
@@ -699,21 +724,6 @@ func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 

@@ -45,21 +45,24 @@ func NewDataDBConn(dbType, host, port, name, user,
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
-			opts.RedisMaxConns, opts.RedisConnectAttempts,
-			opts.RedisSentinel,
+			opts.RedisMaxConns, opts.RedisConnectAttempts, opts.RedisSentinel,
 			opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout,
 			opts.RedisPoolPipelineWindow, opts.RedisPoolPipelineLimit,
-			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
+			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey,
+			opts.RedisCACertificate)
 	case utils.MetaMongo:
-		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, stringIndexedFields, opts.MongoQueryTimeout)
+		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass,
+			marshaler, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
-		d, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
-			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode, opts.PgSSLRootCert,
-			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime)
+		d, err = NewPostgresStorage(host, port, name, user, pass, marshaler,
+			opts.PgSSLMode, opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword,
+			opts.PgSSLCertMode, opts.PgSSLRootCert, opts.SQLMaxOpenConns,
+			opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
-			opts.SQLLogLevel, opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
+		d, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns,
+			opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime,
+			opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
 		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields, opts.ToTransCacheOpts(), itmsCfg)
 	default:

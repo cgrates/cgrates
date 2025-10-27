@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -33,9 +34,14 @@ type PostgresStorage struct {
 }
 
 // NewPostgresStorage returns the posgres DB
-func NewPostgresStorage(host, port, name, user, password,
+func NewPostgresStorage(host, port, name, user, password, mrshlerStr string,
 	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
 	maxConn, maxIdleConn, sqlLogLevel int, connMaxLifetime time.Duration) (*SQLStorage, error) {
+	var ms utils.Marshaler
+	var err error
+	if ms, err = utils.NewMarshaler(mrshlerStr); err != nil {
+		return nil, err
+	}
 	connStr := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 		host, port, name, user, password, sslmode)
@@ -68,11 +74,13 @@ func NewPostgresStorage(host, port, name, user, password,
 	pgStor.DB.SetMaxIdleConns(maxIdleConn)
 	pgStor.DB.SetMaxOpenConns(maxConn)
 	pgStor.DB.SetConnMaxLifetime(connMaxLifetime)
+	pgStor.ms = ms
 	//db.LogMode(true)
 	pgStor.db = db
 	return &SQLStorage{
 		DB:      pgStor.DB,
 		db:      pgStor.db,
+		ms:      ms,
 		DataDB:  pgStor,
 		SQLImpl: pgStor,
 	}, nil
@@ -96,6 +104,55 @@ func (poS *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error
 			tx.Rollback()
 			return
 		}
+	}
+	tx.Commit()
+	return
+}
+
+func (poS *PostgresStorage) GetAccountDrv(_ *context.Context, tenant, id string) (ap *utils.Account, err error) {
+	var result []*AccountBytesMdl
+	if err = poS.db.Model(&AccountBytesMdl{}).Where(&AccountBytesMdl{ID: utils.ConcatenatedKey(tenant, id)}).Find(&result).Error; err != nil {
+		return
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ap = &utils.Account{}
+	if err = poS.ms.Unmarshal(result[0].Account, ap); err != nil {
+		return
+	}
+	return
+}
+
+func (poS *PostgresStorage) SetAccountDrv(_ *context.Context, ap *utils.Account) (err error) {
+	var acc []byte
+	if acc, err = poS.ms.Marshal(ap); err != nil {
+		return
+	}
+	tx := poS.db.Begin()
+	mdl := &AccountBytesMdl{
+		ID:      utils.ConcatenatedKey(ap.Tenant, ap.ID),
+		Account: acc,
+	}
+	if err = tx.Model(&AccountBytesMdl{}).Where(
+		AccountBytesMdl{ID: mdl.ID}).Delete(
+		AccountBytesMdl{Account: mdl.Account}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (poS *PostgresStorage) RemoveAccountDrv(_ *context.Context, tenant, id string) (err error) {
+	tx := poS.db.Begin()
+	if err = tx.Model(&AccountBytesMdl{}).Where(&AccountBytesMdl{ID: utils.ConcatenatedKey(tenant, id)}).Delete(&AccountBytesMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
 	}
 	tx.Commit()
 	return
