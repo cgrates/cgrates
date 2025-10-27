@@ -144,7 +144,6 @@ func SubstractDecimal(x, y *Decimal) *Decimal {
 // NewDecimalFromFloat64 is a constructor for Decimal out of float64
 // passing through string is necessary due to differences between decimal and binary representation of float64
 func NewDecimalFromFloat64(f float64) *Decimal {
-
 	// Might want to use SetFloat here.
 	d, _ := decimal.WithContext(DecimalContext).SetString(strconv.FormatFloat(f, 'f', -1, 64))
 	return &Decimal{d}

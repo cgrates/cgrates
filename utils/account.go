@@ -371,6 +371,265 @@ func (acc *Account) CacheClone() any {
 	return acc.Clone()
 }
 
+func (acc *Account) AsMapStringInterface() map[string]any {
+	if acc == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:       acc.Tenant,
+		ID:           acc.ID,
+		FilterIDs:    acc.FilterIDs,
+		Weights:      acc.Weights,
+		Blockers:     acc.Blockers,
+		Opts:         acc.Opts,
+		Balances:     acc.Balances,
+		ThresholdIDs: acc.ThresholdIDs,
+	}
+}
+
+// MapStringInterfaceToAccount converts map[string]any to Account struct
+func MapStringInterfaceToAccount(m map[string]any) (*Account, error) {
+	acc := &Account{}
+
+	if v, ok := m[Tenant].(string); ok {
+		acc.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		acc.ID = v
+	}
+	acc.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	acc.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	acc.Weights = InterfaceToDynamicWeights(m[Weights])
+	acc.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[Opts].(map[string]any); ok {
+		acc.Opts = v
+	}
+	if balances, err := InterfaceToBalances(m[Balances]); err != nil {
+		return nil, err
+	} else {
+		acc.Balances = balances
+	}
+	return acc, nil
+}
+
+// InterfaceToStringSlice converts any to []string
+func InterfaceToStringSlice(v any) []string {
+	if v == nil {
+		return nil
+	}
+
+	switch val := v.(type) {
+	case []string:
+		return val
+	case []any:
+		result := make([]string, 0, len(val))
+		for _, item := range val {
+			if s, ok := item.(string); ok {
+				result = append(result, s)
+			}
+		}
+		return result
+	}
+	return nil
+}
+
+// InterfaceToDynamicWeights converts any to DynamicWeights
+func InterfaceToDynamicWeights(v any) DynamicWeights {
+	if v == nil {
+		return nil
+	}
+
+	switch val := v.(type) {
+	case DynamicWeights:
+		return val
+	case []*DynamicWeight:
+		return DynamicWeights(val)
+	case []any:
+		result := make(DynamicWeights, 0, len(val))
+		for _, item := range val {
+			if dwMap, ok := item.(map[string]any); ok {
+				dw := &DynamicWeight{
+					FilterIDs: InterfaceToStringSlice(dwMap[FilterIDs]),
+				}
+				if weight, ok := dwMap[Weight].(float64); ok {
+					dw.Weight = weight
+				}
+				result = append(result, dw)
+			}
+		}
+		return result
+	}
+	return nil
+}
+
+// InterfaceToDynamicBlockers converts any to DynamicBlockers
+func InterfaceToDynamicBlockers(v any) DynamicBlockers {
+	if v == nil {
+		return nil
+	}
+
+	switch val := v.(type) {
+	case DynamicBlockers:
+		return val
+	case []*DynamicBlocker:
+		return DynamicBlockers(val)
+	case []any:
+		result := make(DynamicBlockers, 0, len(val))
+		for _, item := range val {
+			if dbMap, ok := item.(map[string]any); ok {
+				db := &DynamicBlocker{
+					FilterIDs: InterfaceToStringSlice(dbMap[FilterIDs]),
+				}
+				if blocker, ok := dbMap[Blocker].(bool); ok {
+					db.Blocker = blocker
+				}
+				result = append(result, db)
+			}
+		}
+		return result
+	}
+	return nil
+}
+
+// NewDecimalFromInterface converts any to *Decimal
+func NewDecimalFromInterface(v any) (*Decimal, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	switch val := v.(type) {
+	case *Decimal:
+		return val, nil
+	case string:
+		return NewDecimalFromString(val)
+	case float64:
+		return NewDecimalFromFloat64(val), nil
+	}
+	return nil, nil
+}
+
+// InterfaceToUnitFactors converts any to []*UnitFactor
+func InterfaceToUnitFactors(v any) ([]*UnitFactor, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	switch val := v.(type) {
+	case []*UnitFactor:
+		return val, nil
+	case []any:
+		result := make([]*UnitFactor, 0, len(val))
+		for _, item := range val {
+			if ufMap, ok := item.(map[string]any); ok {
+				uf := &UnitFactor{
+					FilterIDs: InterfaceToStringSlice(ufMap[FilterIDs]),
+				}
+				factor, err := NewDecimalFromInterface(ufMap[Factor])
+				if err != nil {
+					return nil, err
+				}
+				uf.Factor = factor
+				result = append(result, uf)
+			}
+		}
+		return result, nil
+	}
+	return nil, nil
+}
+
+// InterfaceToCostIncrements converts any to []*CostIncrement
+func InterfaceToCostIncrements(v any) ([]*CostIncrement, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	switch val := v.(type) {
+	case []*CostIncrement:
+		return val, nil
+	case []any:
+		result := make([]*CostIncrement, 0, len(val))
+		for _, item := range val {
+			if ciMap, ok := item.(map[string]any); ok {
+				ci := &CostIncrement{
+					FilterIDs: InterfaceToStringSlice(ciMap[FilterIDs]),
+				}
+
+				var err error
+				if ci.Increment, err = NewDecimalFromInterface(ciMap[Increment]); err != nil {
+					return nil, err
+				}
+				if ci.FixedFee, err = NewDecimalFromInterface(ciMap[FixedFee]); err != nil {
+					return nil, err
+				}
+				if ci.RecurrentFee, err = NewDecimalFromInterface(ciMap[RecurrentFee]); err != nil {
+					return nil, err
+				}
+
+				result = append(result, ci)
+			}
+		}
+		return result, nil
+	}
+	return nil, nil
+}
+
+// InterfaceToBalances converts any to map[string]*Balance
+func InterfaceToBalances(v any) (map[string]*Balance, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	switch val := v.(type) {
+	case map[string]*Balance:
+		return val, nil
+	case map[string]any:
+		result := make(map[string]*Balance)
+		for k, v := range val {
+			if balMap, ok := v.(map[string]any); ok {
+				bal, err := MapStringInterfaceToBalance(balMap)
+				if err != nil {
+					return nil, err
+				}
+				result[k] = bal
+			} else if bal, ok := v.(*Balance); ok {
+				result[k] = bal
+			}
+		}
+		return result, nil
+	}
+	return nil, nil
+}
+
+// MapStringInterfaceToBalance converts map[string]any to *Balance
+func MapStringInterfaceToBalance(m map[string]any) (*Balance, error) {
+	bal := &Balance{}
+	if v, ok := m[ID].(string); ok {
+		bal.ID = v
+	}
+	if v, ok := m[Type].(string); ok {
+		bal.Type = v
+	}
+	bal.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	bal.AttributeIDs = InterfaceToStringSlice(m[AttributeIDs])
+	bal.RateProfileIDs = InterfaceToStringSlice(m[RateProfileIDs])
+	bal.Weights = InterfaceToDynamicWeights(m[Weights])
+	bal.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[Opts].(map[string]any); ok {
+		bal.Opts = v
+	}
+	var err error
+	if bal.Units, err = NewDecimalFromInterface(m[Units]); err != nil {
+		return nil, err
+	}
+	if bal.UnitFactors, err = InterfaceToUnitFactors(m[UnitFactors]); err != nil {
+		return nil, err
+	}
+	if bal.CostIncrements, err = InterfaceToCostIncrements(m[CostIncrements]); err != nil {
+		return nil, err
+	}
+	return bal, nil
+}
+
 // Clone returns a clone of the ActivationInterval
 func (aI *ActivationInterval) Clone() *ActivationInterval {
 	if aI == nil {

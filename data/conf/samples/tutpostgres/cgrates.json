@@ -5,6 +5,10 @@
 // Starts rater, scheduler
 
 
+"logger": {
+	"level": 7
+},
+
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",					// RPC GOB listening address
@@ -31,7 +35,8 @@
 		},
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 

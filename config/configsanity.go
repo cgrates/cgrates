@@ -1060,15 +1060,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		dataDBTypes := []string{utils.MetaInternal, utils.MetaRedis, utils.MetaMongo,
 			utils.Internal, utils.Redis, utils.Mongo}
 
-		// if *cdrs item db type is not supported, return error
-		if item == utils.MetaCDRs {
-			if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
-					storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
-			}
-		} else {
-			if !slices.Contains(dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+		if item != utils.MetaAccounts {
+			if item == utils.MetaCDRs {
+				if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
+					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
+						storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+				}
+			} else {
+				if !slices.Contains(dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
+					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+				}
 			}
 		}
 		found1RmtConns := false

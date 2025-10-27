@@ -398,11 +398,16 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	if ng.TpPath == "" {
 		ng.TpPath = cfg.LoaderCfg()[0].TpInDir
 	}
-	if cfg.LoaderCfg().Enabled() {
+	// cfg gets edited in files but not in variable, get the cfg variable from files
+	newCfg, err := config.NewCGRConfigFromPath(context.Background(), cfg.ConfigPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if newCfg.LoaderCfg().Enabled() {
 		WaitForServiceStart(t, client, utils.LoaderS, 200*time.Millisecond)
 	}
 	loadCSVs(t, ng.TpPath, ng.TpFiles)
-	return client, cfg
+	return client, newCfg
 }
 
 // DBConn contains database connection parameters.

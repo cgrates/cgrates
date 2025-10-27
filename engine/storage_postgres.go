@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -33,8 +34,8 @@ type PostgresStorage struct {
 }
 
 // NewPostgresStorage returns the posgres DB
-func NewPostgresStorage(host, port, name, user, password,
-	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
+func NewPostgresStorage(host, port, name, user, password, sslmode, sslcert,
+	sslkey, sslpassword, sslcertmode, sslrootcert string,
 	maxConn, maxIdleConn, sqlLogLevel int, connMaxLifetime time.Duration) (*SQLStorage, error) {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
@@ -96,6 +97,50 @@ func (poS *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error
 			tx.Rollback()
 			return
 		}
+	}
+	tx.Commit()
+	return
+}
+
+func (poS *PostgresStorage) GetAccountDrv(_ *context.Context, tenant, id string) (ap *utils.Account, err error) {
+	var result []*AccountJSONMdl
+	if err = poS.db.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToAccount(result[0].Account)
+}
+
+func (poS *PostgresStorage) SetAccountDrv(_ *context.Context, ap *utils.Account) (err error) {
+	tx := poS.db.Begin()
+	mdl := &AccountJSONMdl{
+		Tenant:  ap.Tenant,
+		ID:      ap.ID,
+		Account: ap.AsMapStringInterface(),
+	}
+	if err = tx.Model(&AccountJSONMdl{}).Where(
+		AccountJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		AccountJSONMdl{Account: mdl.Account}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (poS *PostgresStorage) RemoveAccountDrv(_ *context.Context, tenant, id string) (err error) {
+	tx := poS.db.Begin()
+	if err = tx.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&AccountJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
 	}
 	tx.Commit()
 	return
