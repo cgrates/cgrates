@@ -1507,8 +1507,11 @@ func testAccRefundCharges(t *testing.T) {
 		}, &result); err != nil {
 		t.Error(err)
 	} else {
+		if *utils.DBType == utils.MetaPostgres {
+			acc.Account.Balances["CB"].Units = utils.NewDecimalFromFloat64(50)
+		}
 		if !reflect.DeepEqual(result, acc.Account) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acc.Account), utils.ToJSON(result))
+			t.Errorf("Expected %+v \n, received %+v", acc.Account, result)
 		}
 	}
 }

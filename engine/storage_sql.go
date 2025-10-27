@@ -58,7 +58,8 @@ func (sqls *SQLStorage) ExportGormDB() *gorm.DB {
 }
 
 func (sqls *SQLStorage) Flush(scriptsPath string) (err error) {
-	for _, scriptName := range []string{utils.CreateCDRsTablesSQL, utils.CreateTariffPlanTablesSQL} {
+	for _, scriptName := range []string{utils.CreateAccountsTablesSQL,
+		utils.CreateCDRsTablesSQL, utils.CreateTariffPlanTablesSQL} {
 		if err := sqls.CreateTablesFromScript(path.Join(scriptsPath, scriptName)); err != nil {
 			return err
 		}
@@ -73,8 +74,44 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error) {
-	return nil, utils.ErrNotImplemented
+// returns all keys in table matching the prefix
+func (sqls *SQLStorage) getAllIndexKeys(_ *context.Context, table, prefix string) (ids []string, err error) {
+	err = sqls.db.Table(table).Select("id").Where("id LIKE ?", prefix+"%").
+		Pluck("id", &ids).Error
+	return
+}
+
+// returns all keys in table matching the Tenant and ID
+func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID) (ids []string, err error) {
+	matchingTntID := []utils.TenantID{}
+	err = sqls.db.Table(table).Select("tenant, id").Where("tenant = ? AND id LIKE ?", tntID.Tenant, tntID.ID+"%").
+		Find(&matchingTntID).Error
+	ids = make([]string, len(matchingTntID))
+	for i, result := range matchingTntID {
+		ids[i] = utils.ConcatenatedKey(result.Tenant, result.ID)
+	}
+	return
+}
+
+// GetKeysForPrefix will look for keys matching the prefix given
+func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
+	keyLen := len(utils.AccountPrefix)
+	if len(prefix) < keyLen {
+		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
+	}
+	category := prefix[:keyLen]
+	tntID := utils.NewTenantID(prefix[keyLen:])
+
+	switch category {
+	case utils.AccountPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAccounts, tntID)
+	default:
+		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
+	}
+	for i := range keys { // bring the prefix back to match redis style keys to satisfy functions using it
+		keys[i] = category + keys[i]
+	}
+	return keys, err
 }
 
 func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
@@ -699,21 +736,6 @@ func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
