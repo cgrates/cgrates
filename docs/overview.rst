@@ -197,4 +197,4 @@ Links
 License
 -------
 
-`CGRateS`_ is released under the terms of the `[GNU GENERAL PUBLIC LICENSE Version 3] <http://www.gnu.org/licenses/gpl-3.0.en.html>`_.
+`CGRateS`_ is released under the terms of the `[GNU AFFERO GENERAL PUBLIC LICENSE Version 3] <https://www.gnu.org/licenses/agpl-3.0.html>`_.
