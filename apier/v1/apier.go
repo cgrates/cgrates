@@ -1391,7 +1391,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args ReplayFai
 			failoverPath = filepath.Join(args.FailedPath, d.Name())
 		}
 
-		failedPosts, err := expEv.ReplayFailedPosts(apierSv1.Config.GeneralCfg().PosterAttempts)
+		failedPosts, err := expEv.ReplayFailedPosts()
 		if err != nil && failoverPath != utils.MetaNone {
 			// Write the events that failed to be replayed to the failover directory
 			if err = failedPosts.WriteToFile(failoverPath); err != nil {

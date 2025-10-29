@@ -88,7 +88,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, jsn, &config.EventExporterOpts{
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, 1, jsn, &config.EventExporterOpts{
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},
 		AWS:   &config.AWSOpts{},
@@ -146,7 +146,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, content, &config.EventExporterOpts{
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, 1, content, &config.EventExporterOpts{
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},
 		AWS:   &config.AWSOpts{},
