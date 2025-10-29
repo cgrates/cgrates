@@ -52,7 +52,8 @@ func writeFailedPosts(_ string, value any) {
 	}
 }
 
-func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.EventExporterOpts) {
+func AddFailedPost(failedPostsDir, expPath, format string, attempts int, ev any,
+	opts *config.EventExporterOpts) {
 	key := utils.ConcatenatedKey(failedPostsDir, expPath, format)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
 	var amqpQueueID string
@@ -93,6 +94,7 @@ func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.
 		failedPost = &ExportEvents{
 			Path:           expPath,
 			Type:           format,
+			Attempts:       attempts,
 			Opts:           opts,
 			failedPostsDir: failedPostsDir,
 		}
@@ -126,6 +128,7 @@ type ExportEvents struct {
 	Path           string
 	Opts           *config.EventExporterOpts
 	Type           string
+	Attempts       int
 	Events         []any
 	failedPostsDir string
 }
@@ -157,9 +160,9 @@ func (expEv *ExportEvents) AddEvent(ev any) {
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *ExportEvents, err error) {
+func (expEv *ExportEvents) ReplayFailedPosts() (failedEvents *ExportEvents, err error) {
 	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Type, expEv.Path, utils.MetaNone,
-		attempts, expEv.Opts)
+		expEv.Attempts, expEv.Opts)
 	var ee EventExporter
 	if ee, err = NewEventExporter(eeCfg, config.CgrConfig(), nil, nil); err != nil {
 		return
@@ -169,9 +172,10 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 		keyFunc = utils.UUIDSha1Prefix
 	}
 	failedEvents = &ExportEvents{
-		Path: expEv.Path,
-		Opts: expEv.Opts,
-		Type: expEv.Type,
+		Path:     expEv.Path,
+		Opts:     expEv.Opts,
+		Type:     expEv.Type,
+		Attempts: expEv.Attempts,
 	}
 	for _, ev := range expEv.Events {
 		if err = ExportWithAttempts(ee, ev, keyFunc()); err != nil {

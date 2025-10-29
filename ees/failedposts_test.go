@@ -39,7 +39,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	InitFailedPostCache(5*time.Second, false)
-	AddFailedPost("", "path1", "format1", "1", &config.EventExporterOpts{
+	AddFailedPost("", "path1", "format1", 1, "1", &config.EventExporterOpts{
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},
 		AWS:   &config.AWSOpts{},
@@ -61,9 +61,10 @@ func TestAddFldPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut := &ExportEvents{
-		Path:   "path1",
-		Type:   "format1",
-		Events: []any{"1"},
+		Path:     "path1",
+		Type:     "format1",
+		Attempts: 1,
+		Events:   []any{"1"},
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
 			Els:   &config.ElsOpts{},
@@ -77,7 +78,7 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("", "path1", "format1", "2", &config.EventExporterOpts{
+	AddFailedPost("", "path1", "format1", 1, "2", &config.EventExporterOpts{
 		AMQP:  &config.AMQPOpts{},
 		Els:   &config.ElsOpts{},
 		AWS:   &config.AWSOpts{},
@@ -86,7 +87,7 @@ func TestAddFldPost(t *testing.T) {
 		RPC:   &config.RPCOpts{},
 		SQL:   &config.SQLOpts{},
 	})
-	AddFailedPost("", "path2", "format2", "3", &config.EventExporterOpts{
+	AddFailedPost("", "path2", "format2", 1, "3", &config.EventExporterOpts{
 		AWS: &config.AWSOpts{
 			SQSQueueID: utils.StringPointer("qID"),
 		},
@@ -109,9 +110,10 @@ func TestAddFldPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut = &ExportEvents{
-		Path:   "path1",
-		Type:   "format1",
-		Events: []any{"1", "2"},
+		Path:     "path1",
+		Type:     "format1",
+		Attempts: 1,
+		Events:   []any{"1", "2"},
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
 			Els:   &config.ElsOpts{},
@@ -137,9 +139,10 @@ func TestAddFldPost(t *testing.T) {
 		t.Error("Error when casting")
 	}
 	eOut = &ExportEvents{
-		Path:   "path2",
-		Type:   "format2",
-		Events: []any{"3"},
+		Path:     "path2",
+		Type:     "format2",
+		Attempts: 1,
+		Events:   []any{"3"},
 		Opts: &config.EventExporterOpts{
 			Els:   &config.ElsOpts{},
 			NATS:  &config.NATSOpts{},
