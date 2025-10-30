@@ -74,13 +74,6 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-// returns all keys in table matching the prefix
-func (sqls *SQLStorage) getAllIndexKeys(_ *context.Context, table, prefix string) (ids []string, err error) {
-	err = sqls.db.Table(table).Select("id").Where("id LIKE ?", prefix+"%").
-		Pluck("id", &ids).Error
-	return
-}
-
 // returns all keys in table matching the Tenant and ID
 func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID) (ids []string, err error) {
 	matchingTntID := []utils.TenantID{}
@@ -384,6 +377,55 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 		q.Rollback()
 		return err
 	}
+	return
+}
+
+// GetAccountDrv will get the account from the DB matching the tenant and id provided.
+// Decimal fields ending in `.0` will be read as whole numbers but still in decimal type.
+// (50.0 -> 50)
+func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+	var result []*AccountJSONMdl
+	if err = sqls.db.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToAccount(result[0].Account)
+}
+
+// SetAccountDrv will set in DB the provided Account
+func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &AccountJSONMdl{
+		Tenant:  ap.Tenant,
+		ID:      ap.ID,
+		Account: ap.AsMapStringInterface(),
+	}
+	if err = tx.Model(&AccountJSONMdl{}).Where(
+		AccountJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		AccountJSONMdl{Account: mdl.Account}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+// RemoveAccountDrv will remove from DB the account matching the tenamt and id provided
+func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&AccountJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
 	return
 }
 

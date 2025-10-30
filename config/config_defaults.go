@@ -125,8 +125,10 @@ const CGRATES_CFG_JSON = `
 		},
 	},
 	"items":{
-		// compatible db types: <*internal|*redis|*mongo>
+		// compatible with all db types
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"}, 
+
+		// compatible db types: <*internal|*redis|*mongo>
 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},

@@ -16,12 +16,14 @@ DIR="$(dirname "$(readlink -f "$0")")"
 
 mysql -u $1 -p$2 -h $host < "$DIR"/create_db_with_users.sql
 cu=$?
+mysql -u $1 -p$2 -h $host -D cgrates < "$DIR"/create_accounts_tables.sql
+acct=$?
 mysql -u $1 -p$2 -h $host -D cgrates < "$DIR"/create_cdrs_tables.sql
 cdrt=$?
 mysql -u $1 -p$2 -h $host -D cgrates < "$DIR"/create_tariffplan_tables.sql
 tpt=$?
 
-if [ $cu = 0 ] && [ $cdrt = 0 ] && [ $tpt = 0 ]; then
+if [ $cu = 0 ] && [ $acct = 0 ] && [ $cdrt = 0 ] && [ $tpt = 0 ]; then
 	echo "\n\t+++ CGR-DB successfully set-up! +++\n"
 	exit 0
 fi
