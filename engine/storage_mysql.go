@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -33,8 +32,9 @@ type MySQLStorage struct {
 	SQLStorage
 }
 
-func NewMySQLStorage(host, port, name, user, password string,
-	maxConn, maxIdleConn, logLevel int, connMaxLifetime time.Duration, location string, dsnParams map[string]string) (*SQLStorage, error) {
+func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn,
+	logLevel int, connMaxLifetime time.Duration, location string,
+	dsnParams map[string]string) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=%s&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		user, password, host, port, name, location)
 	db, err := gorm.Open(mysql.Open(connectString+AppendToMysqlDSNOpts(dsnParams)), &gorm.Config{AllowGlobalUpdate: true, Logger: logger.Default.LogMode(logger.LogLevel(logLevel))})
@@ -90,21 +90,6 @@ func (msqlS *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error)
 	}
 	tx.Commit()
 	return
-}
-
-// DataDB method not implemented yet
-func (msqlS *MySQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (msqlS *MySQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (msqlS *MySQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
 }
 
 func (msqlS *MySQLStorage) extraFieldsExistsQry(field string) string {

@@ -85,6 +85,10 @@ func TestAccSIT(t *testing.T) {
 	case utils.MetaMongo:
 		accPrfConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
+		accPrfConfigDIR = "mysql_acc"
+		for _, stest := range sTestsAccPrf {
+			t.Run(accPrfConfigDIR, stest)
+		}
 		accPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		accPrfConfigDIR = "tutpostgres"
@@ -1507,7 +1511,7 @@ func testAccRefundCharges(t *testing.T) {
 		}, &result); err != nil {
 		t.Error(err)
 	} else {
-		if *utils.DBType == utils.MetaPostgres {
+		if *utils.DBType == utils.MetaPostgres || accPrfConfigDIR == "mysql_acc" {
 			acc.Account.Balances["CB"].Units = utils.NewDecimalFromFloat64(50)
 		}
 		if !reflect.DeepEqual(result, acc.Account) {
