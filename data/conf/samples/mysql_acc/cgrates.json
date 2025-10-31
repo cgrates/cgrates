@@ -1,0 +1,141 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"reply_timeout": "50s",
+},
+
+"logger": {
+	"level": 7
+},
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_conns": {
+		"*default": {			// The id of the DB connection
+			"db_type": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
+			"db_host": "127.0.0.1",
+			"db_port": 6379, 	// db port to reach the database
+			"db_name": "10", 	// db database name to connect to
+			"db_user": "cgrates", 
+		},
+		"StorDB": {						 // The id of the DB connection
+			"db_type": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"db_host": "127.0.0.1",		 // the host to connect to
+			"db_port": 3306, 			 // db port to reach the database
+			"db_name": "cgrates", 		 // db database name to connect to
+			"db_user": "cgrates", 		 // username to use when connecting to the database
+			"db_password": "CGRateS.org" // password to use when connecting to the database
+		},
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
+},
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"accounts_conns": ["*localhost"]
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"routes": {
+	"enabled": true,
+	"prefix_indexed_fields":["*req.Destination"],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"rates_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"routes_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rates_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"migrator":{
+
+	"users_filters":["Account"],
+},
+
+
+"admins": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+"rates": {
+	"enabled": true
+},
+
+
+"actions": {
+	"enabled": true,
+	"accounts_conns": ["*localhost"]
+},
+
+
+"accounts": {
+	"enabled": true
+},
+
+
+"filters": {
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"accounts_conns": ["*internal"],
+},
+
+"tpes": {
+	"enabled": true
+},
+
+}

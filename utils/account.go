@@ -371,6 +371,7 @@ func (acc *Account) CacheClone() any {
 	return acc.Clone()
 }
 
+// AsMapStringInterface converts Account struct to map[string]any
 func (acc *Account) AsMapStringInterface() map[string]any {
 	if acc == nil {
 		return nil

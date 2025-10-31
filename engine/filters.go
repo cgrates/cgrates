@@ -1060,23 +1060,24 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 	if len(fltr.Values) == 0 {
 		switch fltr.Type {
 		case utils.MetaExists, utils.MetaNotExists:
-			if not {
+			if not { // not existing means Column IS NULL
 				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
+					conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
 					return
 				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems)
+				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems)
 				if strings.HasPrefix(restOfItems, `"*`) {
 					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
 				}
 				conditions = append(conditions, queryPart)
 				return
 			}
+			// existing means Column IS NOT NULL
 			if firstItem == utils.EmptyString {
-				conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
+				conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
 				return
 			}
-			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems)
+			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems)
 			if strings.HasPrefix(restOfItems, `"*`) {
 				queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
 			}

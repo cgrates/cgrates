@@ -629,6 +629,87 @@ func (a *IPAllocations) Config() *IPProfile {
 	return a.prfl
 }
 
+// AsMapStringInterface converts IPProfile struct to map[string]any
+func (p *IPProfile) AsMapStringInterface() map[string]any {
+	if p == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:    p.Tenant,
+		ID:        p.ID,
+		FilterIDs: p.FilterIDs,
+		Weights:   p.Weights,
+		TTL:       p.TTL,
+		Stored:    p.Stored,
+		Pools:     p.Pools,
+	}
+}
+
+// MapStringInterfaceToIPProfile converts map[string]any to IPProfile struct
+func MapStringInterfaceToIPProfile(m map[string]any) (*IPProfile, error) {
+	ipp := &IPProfile{}
+
+	if v, ok := m[Tenant].(string); ok {
+		ipp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		ipp.ID = v
+	}
+	ipp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	ipp.Weights = InterfaceToDynamicWeights(m[Weights])
+	if v, ok := m[TTL].(string); ok {
+		if dur, err := time.ParseDuration(v); err == nil {
+			ipp.TTL = dur
+		}
+	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
+		ipp.TTL = time.Duration(v)
+	}
+	if v, ok := m[Stored].(bool); ok {
+		ipp.Stored = v
+	}
+	ipp.Pools = InterfaceToPools(m[Pools])
+	return ipp, nil
+}
+
+// InterfaceToPools converts any to []*IPPool
+func InterfaceToPools(v any) []*IPPool {
+	if v == nil {
+		return nil
+	}
+	if pools, ok := v.([]any); ok {
+		ipPools := make([]*IPPool, 0, len(pools))
+		for _, p := range pools {
+			pm, ok := p.(map[string]any)
+			if !ok {
+				break
+			}
+			pool := &IPPool{}
+			if v, ok := pm[ID].(string); ok {
+				pool.ID = v
+			}
+
+			pool.FilterIDs = InterfaceToStringSlice(pm[FilterIDs])
+			if v, ok := pm[Type].(string); ok {
+				pool.Type = v
+			}
+			if v, ok := pm[Range].(string); ok {
+				pool.Range = v
+			}
+			if v, ok := pm[Strategy].(string); ok {
+				pool.Strategy = v
+			}
+			if v, ok := pm[Message].(string); ok {
+				pool.Message = v
+			}
+			pool.Weights = InterfaceToDynamicWeights(pm[Weights])
+			pool.Blockers = InterfaceToDynamicBlockers(pm[Blockers])
+			ipPools = append(ipPools, pool)
+		}
+		return ipPools
+	}
+	return nil
+}
+
 // TenantID returns the unique ID in a multi-tenant environment
 func (a *IPAllocations) TenantID() string {
 	return ConcatenatedKey(a.Tenant, a.ID)
@@ -669,4 +750,65 @@ func (a *IPAllocations) Clone() *IPAllocations {
 // IPAllocationsLockKey builds the guardian key for locking IP allocations.
 func IPAllocationsLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheIPAllocations, tnt, id)
+}
+
+// AsMapStringInterface converts IPProfile struct to map[string]any
+func (p *IPAllocations) AsMapStringInterface() map[string]any {
+	if p == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:      p.Tenant,
+		ID:          p.ID,
+		Allocations: p.Allocations,
+		TTLIndex:    p.TTLIndex,
+	}
+}
+
+// MapStringInterfaceToIPAllocations converts map[string]any to IPAllocations struct
+func MapStringInterfaceToIPAllocations(m map[string]any) (*IPAllocations, error) {
+	ipa := &IPAllocations{}
+
+	if v, ok := m[Tenant].(string); ok {
+		ipa.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		ipa.ID = v
+	}
+	ipa.Allocations = InterfaceToAllocations(m[Allocations])
+	ipa.TTLIndex = InterfaceToStringSlice(m[TTLIndex])
+	return ipa, nil
+}
+
+// InterfaceToAllocations converts any to map[string]*PoolAllocation
+func InterfaceToAllocations(v any) map[string]*PoolAllocation {
+	if v == nil {
+		return nil
+	}
+	if allocs, ok := v.(map[string]any); ok {
+		ipAllocs := make(map[string]*PoolAllocation)
+		for allocID, val := range allocs {
+			allocMap, ok := val.(map[string]any)
+			if !ok {
+				break
+			}
+			allocation := &PoolAllocation{}
+			if v, ok := allocMap[PoolID].(string); ok {
+				allocation.PoolID = v
+			}
+			if v, ok := allocMap[Address].(string); ok {
+				if addr, err := netip.ParseAddr(v); err == nil {
+					allocation.Address = addr
+				}
+			}
+			if v, ok := allocMap[Time].(string); ok {
+				if t, err := time.Parse(time.RFC3339, v); err == nil {
+					allocation.Time = t
+				}
+			}
+			ipAllocs[allocID] = allocation
+		}
+		return ipAllocs
+	}
+	return nil
 }

@@ -393,3 +393,25 @@ type AccountJSONMdl struct {
 func (AccountJSONMdl) TableName() string {
 	return utils.TBLAccounts
 }
+
+type IPProfileMdl struct {
+	PK        uint        `gorm:"primary_key"`
+	Tenant    string      `index:"0" re:".*"`
+	ID        string      `index:"1" re:".*"`
+	IPProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (IPProfileMdl) TableName() string {
+	return utils.TBLIPProfiles
+}
+
+type IPAllocationMdl struct {
+	PK           uint        `gorm:"primary_key"`
+	Tenant       string      `index:"0" re:".*"`
+	ID           string      `index:"1" re:".*"`
+	IPAllocation utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (IPAllocationMdl) TableName() string {
+	return utils.TBLIPAllocations
+}

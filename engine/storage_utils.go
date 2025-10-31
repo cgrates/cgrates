@@ -64,7 +64,8 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime,
 			opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
-		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields, opts.ToTransCacheOpts(), itmsCfg)
+		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields,
+			opts.ToTransCacheOpts(), itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}

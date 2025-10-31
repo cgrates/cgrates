@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ips
 
 import (
+	"fmt"
 	"net/netip"
 	"reflect"
 	"testing"
@@ -115,22 +116,35 @@ var (
 // TODO: move anything sessions related to sessions once ips implementation
 // is complete.
 func TestIPsIT(t *testing.T) {
+	var items string
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
+		items = `"items": {
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	},`
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
-		t.SkipNow()
+		dbCfg = engine.PostgresDBCfg
+		items = `"items": {
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	},`
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
 
 	ng := engine.TestEngine{
-		ConfigJSON: `{
+		ConfigJSON: fmt.Sprintf(`{
+"logger": {
+	"level": 7
+},
+
 "sessions": {
 	"enabled": true,
 	"ips_conns": ["*localhost"],
@@ -187,8 +201,9 @@ func TestIPsIT(t *testing.T) {
 	"db_conns": {
 		"*default": {
 			"db_type": "*internal"
-    	}
+    	},
 	},
+	%s
 	"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -197,7 +212,7 @@ func TestIPsIT(t *testing.T) {
 "admins": {
 	"enabled": true
 }
-}`,
+}`, items),
 		TpFiles: map[string]string{
 			utils.IPsCsv: `
 #Tenant[0],ID[1],FilterIDs[2],Weights[3],TTL[4],Stored[5],PoolID[6],PoolFilterIDs[7],PoolType[8],PoolRange[9],PoolStrategy[10],PoolMessage[11],PoolWeights[12],PoolBlockers[13]
@@ -209,11 +224,12 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		},
 		DBCfg:    dbCfg,
 		Encoding: *utils.Encoding,
-		// LogBuffer:        new(bytes.Buffer),
+		// LogBuffer: new(bytes.Buffer),
 		// GracefulShutdown: true,
 	}
 	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond) // wait for all services
 
 	t.Run("admins apis", func(t *testing.T) {
 		var reply string

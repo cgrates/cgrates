@@ -66,6 +66,10 @@ func TestAccIT(t *testing.T) {
 	case utils.MetaInternal:
 		accConfDIR = "acc_generaltest_internal"
 	case utils.MetaMySQL:
+		accConfDIR = "acc_generaltest_mysql_acc"
+		for _, stest := range sTestsAcc {
+			t.Run(accConfDIR, stest)
+		}
 		accConfDIR = "acc_generaltest_mysql"
 	case utils.MetaMongo:
 		accConfDIR = "acc_generaltest_mongo"
