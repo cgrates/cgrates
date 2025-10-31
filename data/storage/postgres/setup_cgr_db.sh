@@ -17,7 +17,7 @@ DIR="$(dirname "$(readlink -f "$0")")"
 
 export PGPASSWORD="CGRateS.org"
 
-psql -U $user -h $host -d cgrates -f "$DIR"/create_accounts_tables.sql
+psql -U $user -h $host -d cgrates -f "$DIR"/create_db_tables.sql
 acct=$?
 psql -U $user -h $host -d cgrates -f "$DIR"/create_cdrs_tables.sql
 cdrt=$?
