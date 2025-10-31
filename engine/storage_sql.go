@@ -77,8 +77,10 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 // returns all keys in table matching the Tenant and ID
 func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID) (ids []string, err error) {
 	matchingTntID := []utils.TenantID{}
-	err = sqls.db.Table(table).Select("tenant, id").Where("tenant = ? AND id LIKE ?", tntID.Tenant, tntID.ID+"%").
-		Find(&matchingTntID).Error
+	if err = sqls.db.Table(table).Select("tenant, id").Where("tenant = ? AND id LIKE ?", tntID.Tenant, tntID.ID+"%").
+		Find(&matchingTntID).Error; err != nil {
+		return nil, err
+	}
 	ids = make([]string, len(matchingTntID))
 	for i, result := range matchingTntID {
 		ids[i] = utils.ConcatenatedKey(result.Tenant, result.ID)
@@ -98,6 +100,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 	switch category {
 	case utils.AccountPrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAccounts, tntID)
+	case utils.IPProfilesPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPProfiles, tntID)
+	case utils.IPAllocationsPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -429,6 +435,94 @@ func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	return
 }
 
+func (sqls *SQLStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
+	var result []*IPProfileMdl
+	if err := sqls.db.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToIPProfile(result[0].IPProfile)
+}
+
+func (sqls *SQLStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+	tx := sqls.db.Begin()
+	mdl := &IPProfileMdl{
+		Tenant:    ipp.Tenant,
+		ID:        ipp.ID,
+		IPProfile: ipp.AsMapStringInterface(),
+	}
+	if err := tx.Model(&IPProfileMdl{}).Where(
+		IPProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		IPProfileMdl{IPProfile: mdl.IPProfile}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
+	tx := sqls.db.Begin()
+	if err := tx.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&IPProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+	var result []*IPAllocationMdl
+	if err := sqls.db.Model(&IPAllocationMdl{}).Where(&IPAllocationMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToIPAllocations(result[0].IPAllocation)
+}
+
+func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
+	tx := sqls.db.Begin()
+	mdl := &IPAllocationMdl{
+		Tenant:       ip.Tenant,
+		ID:           ip.ID,
+		IPAllocation: ip.AsMapStringInterface(),
+	}
+	if err := tx.Model(&IPAllocationMdl{}).Where(
+		IPAllocationMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		IPAllocationMdl{IPAllocation: mdl.IPAllocation}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
+	tx := sqls.db.Begin()
+	if err := tx.Model(&IPAllocationMdl{}).Where(&IPAllocationMdl{Tenant: tenant, ID: id}).
+		Delete(&IPAllocationMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
 // AddLoadHistory DataDB method not implemented yet
 func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
@@ -498,36 +592,6 @@ func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) 
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
 	return utils.ErrNotImplemented
 }
 
