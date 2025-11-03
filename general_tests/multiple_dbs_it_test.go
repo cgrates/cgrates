@@ -332,7 +332,7 @@ func TestMultipleDBs(t *testing.T) {
 
 	t.Run("CountDBFiles", func(t *testing.T) {
 		var dirs, files int
-		if err := filepath.WalkDir(cfg.DbCfg().Opts.InternalDBDumpPath, func(root string, info fs.DirEntry, err error) error {
+		if err := filepath.WalkDir(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, func(root string, info fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -651,7 +651,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 
 	t.Run("CountDBFiles", func(t *testing.T) {
 		var dirs, files int
-		if err := filepath.WalkDir(cfg.DbCfg().Opts.InternalDBDumpPath, func(root string, info fs.DirEntry, err error) error {
+		if err := filepath.WalkDir(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, func(root string, info fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}

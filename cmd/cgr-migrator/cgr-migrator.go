@@ -50,35 +50,35 @@ var (
 
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
-	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DbCfg().Opts.RedisMaxConns,
+	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns,
 		"The connection pool size")
-	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DbCfg().Opts.RedisConnectAttempts,
+	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts,
 		"The maximum amount of dial attempts")
-	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DbCfg().Opts.RedisSentinel,
+	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisSentinel,
 		"the name of redis sentinel")
 	dbRedisCluster = cgrMigratorFlags.Bool(utils.RedisClusterCfg, false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrMigratorFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DbCfg().Opts.RedisClusterSync,
+	dbRedisClusterSync = cgrMigratorFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterSync,
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DbCfg().Opts.RedisClusterOndownDelay,
+	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbRedisConnectTimeout = cgrMigratorFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DbCfg().Opts.RedisConnectTimeout,
+	dbRedisConnectTimeout = cgrMigratorFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
-	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DbCfg().Opts.RedisReadTimeout,
+	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
-	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DbCfg().Opts.RedisWriteTimeout,
+	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	dbRedisPoolPipelineWindow = cgrMigratorFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow,
+	dbRedisPoolPipelineWindow = cgrMigratorFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineWindow,
 		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
-	dbRedisPoolPipelineLimit = cgrMigratorFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit,
+	dbRedisPoolPipelineLimit = cgrMigratorFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineLimit,
 		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrMigratorFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
-	dbQueryTimeout           = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DbCfg().Opts.MongoQueryTimeout,
+	dbQueryTimeout           = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoQueryTimeout,
 		"The timeout for queries")
-	dbMongoConnScheme = cgrMigratorFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DbCfg().Opts.MongoConnScheme,
+	dbMongoConnScheme = cgrMigratorFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoConnScheme,
 		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 
 	outDataDBRedisSentinel = cgrMigratorFlags.String(utils.OutDBRedisSentinel, utils.MetaDataDB,
@@ -127,61 +127,61 @@ func main() {
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
-	if *dbRedisMaxConns != dfltCfg.DbCfg().Opts.RedisMaxConns {
-		mgrCfg.DbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
+	if *dbRedisMaxConns != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns = *dbRedisMaxConns
 	}
-	if *dbRedisConnectAttempts != dfltCfg.DbCfg().Opts.RedisConnectAttempts {
-		mgrCfg.DbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
+	if *dbRedisConnectAttempts != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts = *dbRedisConnectAttempts
 	}
-	if *inDataDBRedisSentinel != dfltCfg.DbCfg().Opts.RedisSentinel {
-		mgrCfg.DbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel
+	if *inDataDBRedisSentinel != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisSentinel {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisSentinel = *inDataDBRedisSentinel
 	}
-	if *dbRedisCluster != dfltCfg.DbCfg().Opts.RedisCluster {
-		mgrCfg.DbCfg().Opts.RedisCluster = *dbRedisCluster
+	if *dbRedisCluster != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisCluster {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisCluster = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != dfltCfg.DbCfg().Opts.RedisClusterSync {
-		mgrCfg.DbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
+	if *dbRedisClusterSync != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterSync {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterSync = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != dfltCfg.DbCfg().Opts.RedisClusterOndownDelay {
-		mgrCfg.DbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterOndownDelay {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbRedisConnectTimeout != dfltCfg.DbCfg().Opts.RedisConnectTimeout {
-		mgrCfg.DbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
+	if *dbRedisConnectTimeout != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectTimeout {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
-	if *dbRedisReadTimeout != dfltCfg.DbCfg().Opts.RedisReadTimeout {
-		mgrCfg.DbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
+	if *dbRedisReadTimeout != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisReadTimeout {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisReadTimeout = *dbRedisReadTimeout
 	}
-	if *dbRedisWriteTimeout != dfltCfg.DbCfg().Opts.RedisWriteTimeout {
-		mgrCfg.DbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	if *dbRedisWriteTimeout != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisWriteTimeout {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
-	if *dbRedisPoolPipelineWindow != dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow {
-		mgrCfg.DbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
+	if *dbRedisPoolPipelineWindow != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineWindow {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
-	if *dbRedisPoolPipelineLimit != dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit {
-		mgrCfg.DbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
+	if *dbRedisPoolPipelineLimit != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineLimit {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
-	if *dbRedisTls != dfltCfg.DbCfg().Opts.RedisTLS {
-		mgrCfg.DbCfg().Opts.RedisTLS = *dbRedisTls
+	if *dbRedisTls != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisTLS {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisTLS = *dbRedisTls
 	}
-	if *dbRedisClientCertificate != dfltCfg.DbCfg().Opts.RedisClientCertificate {
-		mgrCfg.DbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
+	if *dbRedisClientCertificate != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClientCertificate {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClientCertificate = *dbRedisClientCertificate
 	}
-	if *dbRedisClientKey != dfltCfg.DbCfg().Opts.RedisClientKey {
-		mgrCfg.DbCfg().Opts.RedisClientKey = *dbRedisClientKey
+	if *dbRedisClientKey != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClientKey {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisClientKey = *dbRedisClientKey
 	}
-	if *dbRedisCACertificate != dfltCfg.DbCfg().Opts.RedisCACertificate {
-		mgrCfg.DbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
+	if *dbRedisCACertificate != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisCACertificate {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisCACertificate = *dbRedisCACertificate
 	}
-	if *dbQueryTimeout != dfltCfg.DbCfg().Opts.MongoQueryTimeout {
-		mgrCfg.DbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	if *dbQueryTimeout != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoQueryTimeout {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
-	if *dbMongoConnScheme != dfltCfg.DbCfg().Opts.MongoConnScheme {
-		mgrCfg.DbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
+	if *dbMongoConnScheme != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoConnScheme {
+		mgrCfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoConnScheme = *dbMongoConnScheme
 	}
 
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel == mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel {
-			mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel = dfltCfg.DbCfg().Opts.RedisSentinel
+			mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel = dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisSentinel
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel = *outDataDBRedisSentinel

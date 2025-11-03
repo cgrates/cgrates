@@ -1031,22 +1031,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if hasOneInternalDB {
 				return fmt.Errorf("<%s> There can only be 1 internal DB", utils.DB)
 			}
-			if (cfg.dbCfg.Opts.InternalDBDumpInterval != 0 ||
-				cfg.dbCfg.Opts.InternalDBRewriteInterval != 0) &&
-				cfg.dbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+			if (dbcfg.Opts.InternalDBDumpInterval != 0 ||
+				dbcfg.Opts.InternalDBRewriteInterval != 0) &&
+				dbcfg.Opts.InternalDBFileSizeLimit <= 0 {
 				return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DB,
-					cfg.dbCfg.Opts.InternalDBFileSizeLimit)
+					dbcfg.Opts.InternalDBFileSizeLimit)
 			}
 			hasOneInternalDB = true
 		}
 		if dbcfg.Type == utils.MetaPostgres {
 			if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
 				utils.PgSSLModePrefer, utils.PgSSLModeRequire, utils.PgSSLModeVerifyCA,
-				utils.PgSSLModeVerifyFull}, cfg.dbCfg.Opts.PgSSLMode) {
+				utils.PgSSLModeVerifyFull}, dbcfg.Opts.PgSSLMode) {
 				return fmt.Errorf("<%s> unsupported pgSSLMode (sslmode) in DB configuration", utils.DB)
 			}
 			if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow, utils.PgSSLModeRequire,
-				utils.EmptyString}, cfg.dbCfg.Opts.PgSSLCertMode) {
+				utils.EmptyString}, dbcfg.Opts.PgSSLCertMode) {
 				return fmt.Errorf("<%s> unsupported pgSSLCertMode (sslcertmode) in DB configuration", utils.DB)
 			}
 		}

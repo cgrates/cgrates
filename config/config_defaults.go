@@ -122,6 +122,43 @@ const CGRATES_CFG_JSON = `
 			"replication_conns": [],		// the conns the items are replicated
 			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
 			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+			"opts":{
+	        	"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
+	        	"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.Backupdb when "BackupFolderPath" is not provided
+	        	"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
+	        	"internalDBDumpInterval": "1m",		// dump db regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+	        	"internalDBRewriteInterval": "1h",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+	        	"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
+	        	"redisMaxConns": 10,			// the connection pool size
+	        	"redisConnectAttempts": 20,		// the maximum amount of dial attempts
+	        	"redisSentinel": "",			// the name of sentinel when used
+	        	"redisCluster": false,			// if enabled the db will try to connect to the redis cluster
+	        	"redisClusterSync": "5s",		// the sync interval for the redis cluster
+	        	"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+	        	"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
+	        	"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
+	        	"redisWriteTimeout": "0",		// the amount of wait time until timeout for writing operations
+	        	"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
+	        	"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
+	        	"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+	        	"redisClientCertificate": "",		// path to client certificate
+	        	"redisClientKey": "",			// path to client key
+	        	"redisCACertificate": "",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+	        	"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
+	        	"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+	        	"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
+	        	"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+	        	"mysqlDSNParams":{},		// DSN params for opening db
+	        	"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
+	        	//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+	        	//"pgSSLKey": "",		// location for the secret key used for the client certificate
+	        	//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
+	        	//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
+	        	//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
+	        	"mysqlLocation": "Local",	// the location the time from mysql is retrived
+	        	"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
+	        	"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
+	        }		
 		},
 	},
 	"items":{
@@ -164,43 +201,6 @@ const CGRATES_CFG_JSON = `
 		// compatible db types: <*internal|*mysql|*mongo|*postgres>
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"} // Compatible only for Internal, MySQL, Mongo and PostgresSQL databases
 	},
-	"opts":{
-		"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
-		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.Backupdb when "BackupFolderPath" is not provided
-		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
-		"internalDBDumpInterval": "1m",		// dump db regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
-		"internalDBRewriteInterval": "1h",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
-		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
-		"redisMaxConns": 10,			// the connection pool size
-		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
-		"redisSentinel": "",			// the name of sentinel when used
-		"redisCluster": false,			// if enabled the db will try to connect to the redis cluster
-		"redisClusterSync": "5s",		// the sync interval for the redis cluster
-		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",		// the amount of wait time until timeout for writing operations
-		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
-		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
-		"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate": "",		// path to client certificate
-		"redisClientKey": "",			// path to client key
-		"redisCACertificate": "",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
-		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
-		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
-		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
-		"mysqlDSNParams":{},		// DSN params for opening db
-		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
-		//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
-		//"pgSSLKey": "",		// location for the secret key used for the client certificate
-		//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
-		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
-		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
-		"mysqlLocation": "Local",	// the location the time from mysql is retrived
-		"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
-	}
 },
 
 "listen": {
