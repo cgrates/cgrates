@@ -80,6 +80,8 @@ func TestExport(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		expCfgDir = "export_it_test_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		expCfgDir = "export_it_test_mysql"
 	case utils.MetaMongo:

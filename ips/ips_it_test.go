@@ -121,6 +121,8 @@ func TestIPsIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
 		items = `"items": {

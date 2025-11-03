@@ -33,6 +33,8 @@ import (
 
 func TestThresholdEES(t *testing.T) {
 	switch *utils.DBType {
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 	case utils.MetaPostgres, utils.MetaInternal, utils.MetaMongo:
 		t.SkipNow()

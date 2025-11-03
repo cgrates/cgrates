@@ -60,7 +60,9 @@ package general_tests
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		brodcastInternalCfgDIR = "tutinternal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		brodcastInternalCfgDIR = "tutmysql"
 // 	case utils.MetaMongo:
 // 		brodcastInternalCfgDIR = "tutmongo"

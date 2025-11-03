@@ -49,7 +49,7 @@ func TestDiamEmptyCEItTcp(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIRND = "diamagent_internal_empty_apps"
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")

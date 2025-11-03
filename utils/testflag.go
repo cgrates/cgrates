@@ -28,5 +28,5 @@ var (
 	DataDir   = flag.String("data_dir", "/usr/share/cgrates", "Path to the CGR data directory.")
 	WaitRater = flag.Int("wait_rater", 100, "Time (in ms) to wait for rater initialization.")
 	Encoding  = flag.String("rpc", MetaJSON, "Encoding type for RPC communication (e.g., JSON).")
-	DBType    = flag.String("dbtype", MetaInternal, "Type of database (Internal/Mongo/MySQL/Postgres).")
+	DBType    = flag.String("dbtype", MetaInternal, "Type of database (Internal/Redis/Mongo/MySQL/Postgres).")
 )

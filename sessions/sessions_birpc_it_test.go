@@ -56,7 +56,9 @@ package sessions
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		sessionsBiRPCCfgDIR = "smg_automatic_debits_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		sessionsBiRPCCfgDIR = "smg_automatic_debits_mysql"
 // 	case utils.MetaMongo:
 // 		sessionsBiRPCCfgDIR = "smg_automatic_debits_mongo"

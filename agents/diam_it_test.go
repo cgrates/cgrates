@@ -67,7 +67,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		diamConfigDIR = "diamagent_mysql"
 // 	case utils.MetaMongo:
 // 		diamConfigDIR = "diamagent_mongo"
@@ -85,7 +87,7 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal_supp_apps"
-// 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+// 	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 // 		t.SkipNow()
 // 	default:
 // 		t.Fatal("Unknown Database type")
@@ -115,7 +117,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamsctpagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		diamConfigDIR = "diamsctpagent_mysql"
 // 	case utils.MetaMongo:
 // 		diamConfigDIR = "diamsctpagent_mongo"
@@ -133,7 +137,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal_%sbirpc"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		diamConfigDIR = "diamagent_mysql_%sbirpc"
 // 	case utils.MetaMongo:
 // 		diamConfigDIR = "diamagent_mongo_%sbirpc"
@@ -152,7 +158,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		diamConfigDIR = "diamagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		diamConfigDIR = "diamagent_mysql"
 // 	case utils.MetaMongo:
 // 		diamConfigDIR = "diamagent_mongo"

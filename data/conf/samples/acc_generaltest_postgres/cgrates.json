@@ -25,11 +25,11 @@
 			"db_name": "10", 						// data_db database name to connect to
 		},
 		"StorDB": {						 // The id of the DB connection
-			"db_type": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
-			"db_host": "127.0.0.1",		 // the host to connect to
-			"db_port": 3306, 			 // db port to reach the database
-			"db_name": "cgrates", 		 // db database name to connect to
-			"db_user": "cgrates", 		 // username to use when connecting to the database
+			"db_type": "postgres",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"db_host": "127.0.0.1",	
+			"db_port": 5432, 			 // db port to reach the database
+			"db_name": "cgrates",		 // the host to connect to
+			"db_user": "cgrates",
 			"db_password": "CGRateS.org" // password to use when connecting to the database
 		},
 	},

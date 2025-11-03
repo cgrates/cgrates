@@ -85,6 +85,8 @@ func TestChargersIT(t *testing.T) {
 		chargersConfigDIR = "apis_chargers_internal"
 	case utils.MetaMongo:
 		chargersConfigDIR = "apis_chargers_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		chargersConfigDIR = "apis_chargers_mysql"
 	case utils.MetaPostgres:

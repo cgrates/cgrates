@@ -83,6 +83,8 @@ func TestRoutesIT(t *testing.T) {
 		roConfigDIR = "routes_internal"
 	case utils.MetaMongo:
 		roConfigDIR = "routes_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		roConfigDIR = "routes_mysql"
 	case utils.MetaPostgres:

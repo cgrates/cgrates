@@ -75,6 +75,8 @@ func TestTrendsIT(t *testing.T) {
 		trConfigDIR = "tutinternal"
 	case utils.MetaMongo:
 		trConfigDIR = "tutmongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		trConfigDIR = "tutmysql"
 	case utils.MetaPostgres:

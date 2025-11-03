@@ -108,6 +108,8 @@ func TestAttributesIT(t *testing.T) {
 		attrConfigDIR = "attributes_internal"
 	case utils.MetaMongo:
 		attrConfigDIR = "attributes_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		attrConfigDIR = "attributes_mysql"
 	case utils.MetaPostgres:
@@ -2234,7 +2236,7 @@ func TestAttributesArith(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")

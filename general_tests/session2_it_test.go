@@ -61,6 +61,8 @@ func TestSes2It(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		ses2CfgDir = "tut_session_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		ses2CfgDir = "tut_session_mysql"
 	case utils.MetaMongo:

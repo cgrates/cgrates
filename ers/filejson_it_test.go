@@ -67,11 +67,15 @@ var (
 
 )
 
-	func TestJSONReadFile(t *testing.T) {
-		switch *utils.DBType {
-		case utils.MetaInternal:
-			jsonCfgDIR = "ers_internal"
-		case utils.MetaMySQL:
+		func TestJSONReadFile(t *testing.T) {
+			switch *utils.DBType {
+			case utils.MetaInternal:
+				jsonCfgDIR = "ers_internal"
+			case utils.MetaRedis:
+	    t.SkipNow()
+
+case utils.MetaMySQL:
+
 			jsonCfgDIR = "ers_mysql"
 		case utils.MetaMongo:
 			jsonCfgDIR = "ers_mongo"

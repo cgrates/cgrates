@@ -70,7 +70,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		haCfgDIR = "httpagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		haCfgDIR = "httpagent_mysql"
 // 	case utils.MetaMongo:
 // 		haCfgDIR = "httpagent_mongo"
@@ -94,7 +96,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		haCfgDIR = "httpagenttls_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		haCfgDIR = "httpagenttls_mysql"
 // 	case utils.MetaMongo:
 // 		haCfgDIR = "httpagenttls_mongo"

@@ -52,7 +52,9 @@ func TestActionsit(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		actionsConfigDIR = "actions_internal"
-	case utils.MetaMySQL:
+	case utils.MetaRedis:
+    t.SkipNow()
+case utils.MetaMySQL:
 		actionsConfigDIR = "actions_mysql"
 	case utils.MetaMongo:
 		actionsConfigDIR = "actions_mongo"

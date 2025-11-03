@@ -60,7 +60,9 @@ package general_tests
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		sesRoutesCfgDir = "tutinternal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		sesRoutesCfgDir = "tutmysql"
 // 	case utils.MetaMongo:
 // 		sesRoutesCfgDir = "tutmongo"

@@ -55,6 +55,8 @@ func TestERsReload(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		ersReloadConfigDIR = "disabled_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		ersReloadConfigDIR = "disabled_mysql"
 	case utils.MetaMongo:

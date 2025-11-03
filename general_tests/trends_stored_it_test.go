@@ -34,6 +34,8 @@ import (
 func TestTrendStore(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo:

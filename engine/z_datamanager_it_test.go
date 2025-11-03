@@ -48,6 +48,8 @@ func TestDMitinitDB(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dataDB, err = NewRedisStorage("127.0.0.1:6379", 4, utils.CGRateSLwr,
 			cfg.DbCfg().DBConns[utils.MetaDefault].Password,

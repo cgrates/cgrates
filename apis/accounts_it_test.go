@@ -84,12 +84,10 @@ func TestAccSIT(t *testing.T) {
 		accPrfConfigDIR = "tutinternal"
 	case utils.MetaMongo:
 		accPrfConfigDIR = "tutmongo"
+	case utils.MetaRedis:
+		accPrfConfigDIR = "tutmysql"
 	case utils.MetaMySQL:
 		accPrfConfigDIR = "mysql_acc"
-		for _, stest := range sTestsAccPrf {
-			t.Run(accPrfConfigDIR, stest)
-		}
-		accPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		accPrfConfigDIR = "tutpostgres"
 	default:

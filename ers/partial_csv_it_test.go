@@ -73,7 +73,9 @@ package ers
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		partCfgDIR = "ers_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		partCfgDIR = "ers_mysql"
 // 	case utils.MetaMongo:
 // 		partCfgDIR = "ers_mongo"

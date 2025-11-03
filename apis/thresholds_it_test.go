@@ -77,6 +77,8 @@ func TestThresholdsIT(t *testing.T) {
 		thConfigDIR = "thresholds_internal"
 	case utils.MetaMongo:
 		thConfigDIR = "thresholds_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		thConfigDIR = "thresholds_mysql"
 	case utils.MetaPostgres:

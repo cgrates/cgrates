@@ -65,16 +65,14 @@ func TestAccIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		accConfDIR = "acc_generaltest_internal"
+	case utils.MetaRedis:
+		accConfDIR = "acc_generaltest_redis"
 	case utils.MetaMySQL:
-		accConfDIR = "acc_generaltest_mysql_acc"
-		for _, stest := range sTestsAcc {
-			t.Run(accConfDIR, stest)
-		}
 		accConfDIR = "acc_generaltest_mysql"
 	case utils.MetaMongo:
 		accConfDIR = "acc_generaltest_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		accConfDIR = "acc_generaltest_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

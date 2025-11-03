@@ -37,7 +37,7 @@ func TestServiceToggle(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")

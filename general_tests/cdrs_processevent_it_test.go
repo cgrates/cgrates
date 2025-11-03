@@ -69,7 +69,9 @@ package general_tests
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		pecdrsConfDIR = "cdrsv1processevent"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		pecdrsConfDIR = "cdrsv1processeventmysql"
 // 	case utils.MetaMongo:
 // 		pecdrsConfDIR = "cdrsv1processeventmongo"

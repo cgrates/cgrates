@@ -51,6 +51,8 @@ func TestRldCfg(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testCfgDir = "tutinternal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		testCfgDir = "tutmysql"
 	case utils.MetaMongo:

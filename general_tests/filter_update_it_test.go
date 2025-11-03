@@ -78,6 +78,8 @@ func TestFilterUpdateIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		fltrUpdateCfgDIR1 = "fltr_update_e1_mysql"
 		fltrUpdateCfgDIR2 = "tutmysql"

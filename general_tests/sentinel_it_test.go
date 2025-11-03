@@ -75,7 +75,9 @@ package general_tests
 // 		return
 // 	}
 // 	switch *utils.DBType {
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 	case utils.MetaInternal,
 // 		utils.MetaMongo,
 // 		utils.MetaPostgres:

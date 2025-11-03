@@ -78,6 +78,8 @@ func TestDNSitSimple(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dnsCfgDIR = "dnsagent_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dnsCfgDIR = "dnsagent_mysql"
 	case utils.MetaMongo:

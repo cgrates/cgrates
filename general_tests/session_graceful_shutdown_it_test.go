@@ -64,6 +64,8 @@ func TestSessionSRplcGracefulShutdown(t *testing.T) {
 	case utils.MetaInternal:
 		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_internal"
 		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_mysql"
 		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_mysql"

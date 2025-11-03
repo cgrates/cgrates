@@ -67,6 +67,8 @@ func TestDataConverterIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dcConfDIR = "dataconverter_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dcConfDIR = "dataconverter_mysql"
 	case utils.MetaMongo:

@@ -59,6 +59,8 @@ func TestServManagerIT(t *testing.T) {
 		srvMngConfigDIR = "apis_srvmng_internal"
 	case utils.MetaMongo:
 		srvMngConfigDIR = "apis_srvmng_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		srvMngConfigDIR = "apis_srvmng_mysql"
 	case utils.MetaPostgres:

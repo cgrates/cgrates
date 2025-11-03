@@ -88,6 +88,8 @@ func TestStatsIT(t *testing.T) {
 		sqConfigDIR = "stats_internal"
 	case utils.MetaMongo:
 		sqConfigDIR = "stats_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		sqConfigDIR = "stats_mysql"
 	case utils.MetaPostgres:

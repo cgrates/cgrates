@@ -70,6 +70,8 @@ func TestRouteSV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "routes_generaltests_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		splSv1ConfDIR = "routes_generaltests_mysql"
 	case utils.MetaMongo:

@@ -102,6 +102,8 @@ func TestLoaderIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		loaderCfgDIR = "tutinternal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		loaderCfgDIR = "tutmysql"
 	case utils.MetaMongo:

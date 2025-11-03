@@ -94,6 +94,8 @@ func TestEfS(t *testing.T) {
 		efsConfigDir = "efs_internal"
 	case utils.MetaMongo:
 		efsConfigDir = "efs_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		efsConfigDir = "efs_mysql"
 	case utils.MetaPostgres:
@@ -189,7 +191,7 @@ func testEfsSKillEngine(t *testing.T) {
 func TestEFsReplayEvents(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")

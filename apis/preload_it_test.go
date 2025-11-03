@@ -61,7 +61,7 @@ func TestPreloadIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		preloadCfgDir = "preload_internal"
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatalf("Unsuported dbtype: %q", *utils.DBType)

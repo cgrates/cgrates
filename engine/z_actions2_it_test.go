@@ -47,7 +47,9 @@ func TestActionsITRemoveSMCost(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
-	case utils.MetaMySQL:
+	case utils.MetaRedis:
+    t.SkipNow()
+case utils.MetaMySQL:
 		actsCfgDir = "actions_mysql"
 	case utils.MetaMongo:
 		actsCfgDir = "cdrsv2mongo"
