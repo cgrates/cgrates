@@ -59,6 +59,8 @@ func TestLoadersIDBIdxIt(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		loadersIDBIdxCfgDir = "tutinternal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		loadersIDBIdxCfgDir = "tutmysql"
 	case utils.MetaMongo:

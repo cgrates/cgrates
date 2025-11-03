@@ -66,6 +66,8 @@ func TestFltrSepIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		fltrSepConfDIR = "fltr_sep_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		fltrSepConfDIR = "fltr_sep_mysql"
 	case utils.MetaMongo:

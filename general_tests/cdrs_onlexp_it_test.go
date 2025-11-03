@@ -73,7 +73,9 @@ package general_tests
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal, utils.MetaPostgres:
 // 		t.SkipNow()
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		cdrsMasterCfgDIR = "cdrsonexpmaster_mysql"
 // 		cdrsSlaveCfgDIR = "cdrsonexpslave_mysql"
 // 	case utils.MetaMongo:

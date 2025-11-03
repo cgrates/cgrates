@@ -61,6 +61,8 @@ func TestLdro2nRtChange(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testLdro2nRtCfgDir = "loaders_old2new_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		testLdro2nRtCfgDir = "loaders_old2new_mysql"
 	case utils.MetaMongo:

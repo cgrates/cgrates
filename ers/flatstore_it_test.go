@@ -104,7 +104,9 @@ package ers
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		flatstoreCfgDIR = "ers_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		flatstoreCfgDIR = "ers_mysql"
 // 	case utils.MetaMongo:
 // 		flatstoreCfgDIR = "ers_mongo"

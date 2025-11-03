@@ -78,7 +78,9 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		rpcITCfgDIR1 = "multiral1_internal"
 // 		rpcITCfgDIR2 = "multiral2_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		rpcITCfgDIR1 = "multiral1_mysql"
 // 		rpcITCfgDIR2 = "multiral2_mysql"
 // 	case utils.MetaMongo:

@@ -93,6 +93,8 @@ func TestRateSIT(t *testing.T) {
 		ratePrfConfigDIR = "rates_internal"
 	case utils.MetaMongo:
 		ratePrfConfigDIR = "rates_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		ratePrfConfigDIR = "rates_mysql"
 	case utils.MetaPostgres:

@@ -62,6 +62,8 @@ func TestSessionsData(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dataCfgDIR = "sessions_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dataCfgDIR = "sessions_mysql"
 	case utils.MetaMongo:

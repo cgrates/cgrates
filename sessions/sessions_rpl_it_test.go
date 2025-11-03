@@ -58,7 +58,9 @@ package sessions
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		t.SkipNow()
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		smgRplcMasterCfgDIR = "smgreplcmaster_mysql"
 // 		smgRplcSlaveCfgDIR = "smgreplcslave_mysql"
 // 	case utils.MetaMongo:

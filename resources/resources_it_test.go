@@ -96,6 +96,8 @@ func TestResourceSIT(t *testing.T) {
 		t.SkipNow()
 	case utils.MetaMongo:
 		rsConfigDIR = "resources_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		rsConfigDIR = "resources_mysql"
 	case utils.MetaPostgres:

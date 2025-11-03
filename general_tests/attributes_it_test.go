@@ -66,6 +66,8 @@ func TestAttributeSIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "attr_test_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		alsPrfConfigDIR = "attr_test_mysql"
 	case utils.MetaMongo:

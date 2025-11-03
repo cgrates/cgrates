@@ -86,6 +86,8 @@ func TestSectChange(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testSectCfgDir = "tutinternal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		testSectCfgDir = "tutmysql"
 	case utils.MetaMongo:

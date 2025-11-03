@@ -37,7 +37,9 @@ package registrarc
 // 		},
 // 	}
 // 	switch *utils.DBType {
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 //      dbCfg.DataDB = engine.MySQLDBCfg
 // 	case utils.MetaMongo:
 // 		dbCfg.DataDB = engine.MongoDBCfg.DataDB

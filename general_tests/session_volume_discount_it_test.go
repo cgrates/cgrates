@@ -64,6 +64,8 @@ func TestSessVolDiscount(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		tSessVolDiscCfgDIR = "session_volume_discount_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		tSessVolDiscCfgDIR = "session_volume_discount_mysql"
 	case utils.MetaMongo:

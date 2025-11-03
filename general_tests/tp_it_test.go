@@ -65,6 +65,8 @@ func TestTp(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		tpCfgDIR = "tp_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		tpCfgDIR = "tp_mysql"
 	case utils.MetaMongo:

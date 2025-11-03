@@ -74,7 +74,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		raonfigDIR = "radagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		raonfigDIR = "radagent_mysql"
 // 	case utils.MetaMongo:
 // 		raonfigDIR = "radagent_mongo"

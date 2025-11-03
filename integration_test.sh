@@ -9,7 +9,7 @@
 # ./integration_test.sh -dbtype=*mysql -rpc=*gob
 
 packages=("agents" "apis" "attributes" "chargers" "cmd/cgr-console" "cmd/cgr-loader" "efs" "engine" "ers" "general_tests" "ips" "loaders" "rankings" "registrarc" "resources" "routes" "sessions" "trends")
-dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
+dbtypes=("*internal" "*redis" "*mysql" "*mongo" "*postgres")
 
 # Tests that are independent of the dbtype flag and run only once
 single_run_packages=("analyzers" "cdrs" "config" "cores" "ees" "utils")

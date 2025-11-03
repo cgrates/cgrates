@@ -63,6 +63,8 @@ func TestRtStatsCaseV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		RtStatsSv1ConfDIR = "routes_cases_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		RtStatsSv1ConfDIR = "routes_cases_mysql"
 	case utils.MetaMongo:

@@ -67,6 +67,8 @@ var (
 
 func TestRPCHosts(t *testing.T) {
 	switch *utils.DBType {
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		rpcDir = "registrarc_rpc_mysql"
 		rpcsDir = "registrars_rpc_mysql"

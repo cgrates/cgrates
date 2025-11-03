@@ -77,6 +77,8 @@ func TestCfgSIT(t *testing.T) {
 		cfgDIR = "apis_config_internal"
 	case utils.MetaMongo:
 		cfgDIR = "apis_config_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		cfgDIR = "apis_config_mysql"
 	case utils.MetaPostgres:

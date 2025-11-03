@@ -92,6 +92,8 @@ func TestLoadersIT(t *testing.T) {
 		ldrConfigDIR = "apis_loaders_internal"
 	case utils.MetaMongo:
 		ldrConfigDIR = "apis_loaders_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		ldrConfigDIR = "apis_loaders_mysql"
 	case utils.MetaPostgres:

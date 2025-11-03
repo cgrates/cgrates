@@ -67,6 +67,8 @@ func TestTrendAuQEmptyScheduleIDs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal, utils.MetaPostgres:
 		t.SkipNow()
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		trendAuQConfDIR = "trends_mysql"
 	case utils.MetaMongo:
@@ -82,6 +84,8 @@ func TestTrendAuQEmptyScheduleIDs(t *testing.T) {
 func TestTrendAuQScheduleIDs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal, utils.MetaPostgres:
+		t.SkipNow()
+	case utils.MetaRedis:
 		t.SkipNow()
 	case utils.MetaMySQL:
 		trendAuQConfDIR = "trends_schedIDs_mysql"

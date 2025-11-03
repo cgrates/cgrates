@@ -74,6 +74,8 @@ func TestRankingsIT(t *testing.T) {
 		t.SkipNow()
 	case utils.MetaMongo:
 		raConfigDIR = "rankings_mongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		raConfigDIR = "rankings_mysql"
 	case utils.MetaPostgres:

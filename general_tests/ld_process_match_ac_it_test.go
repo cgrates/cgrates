@@ -85,6 +85,8 @@ func TestLdPrMatchAcChange(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testLdPrMatchAcCfgDir = "ld_process_match_rt_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		testLdPrMatchAcCfgDir = "ld_process_match_rt_mysql"
 	case utils.MetaMongo:

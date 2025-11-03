@@ -42,7 +42,7 @@ import (
 func TestNatsConcurrentReaders(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
@@ -174,7 +174,7 @@ var natsCfg string = `{
 func TestNatsNormalTT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
@@ -314,7 +314,7 @@ resolver_preload: {
 func TestNatsJetStreamTT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")

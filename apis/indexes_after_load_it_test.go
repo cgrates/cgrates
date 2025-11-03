@@ -56,6 +56,8 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		idxLoadConfigDIR = "session_volume_discount_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		idxLoadConfigDIR = "session_volume_discount_mysql"
 	case utils.MetaMongo:

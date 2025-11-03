@@ -57,6 +57,8 @@ func TestEEsBlocker(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		eesBlockerConfDIR = "ees_blocker_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		eesBlockerConfDIR = "ees_blocker_mysql"
 	case utils.MetaMongo:

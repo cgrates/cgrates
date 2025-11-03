@@ -34,6 +34,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		t.SkipNow()
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		cfgDir = "apis_config_mysql"
 	case utils.MetaMongo:

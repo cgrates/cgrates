@@ -78,6 +78,8 @@ func TestFiltersIT(t *testing.T) {
 		fltrConfigDIR = "tutinternal"
 	case utils.MetaMongo:
 		fltrConfigDIR = "tutmongo"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		fltrConfigDIR = "tutmysql"
 	case utils.MetaPostgres:

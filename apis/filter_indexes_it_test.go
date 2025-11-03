@@ -231,6 +231,8 @@ func TestFltrIdxV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		tFltrIdxConfDIR = "filter_indexes_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		tFltrIdxConfDIR = "filter_indexes_mysql"
 	case utils.MetaMongo:

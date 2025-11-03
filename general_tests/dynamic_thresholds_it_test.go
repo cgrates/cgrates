@@ -39,6 +39,8 @@ func TestDynThdIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMongo:

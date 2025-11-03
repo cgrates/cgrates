@@ -52,6 +52,8 @@ func TestRateChange(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testRateCfgDir = "cfg_rld_rates_internal"
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		testRateCfgDir = "cfg_rld_rates_mysql"
 	case utils.MetaMongo:

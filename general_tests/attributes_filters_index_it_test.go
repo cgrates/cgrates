@@ -59,6 +59,8 @@ var (
 
 func TestAttributeFilterSIT(t *testing.T) {
 	switch *utils.DBType {
+	case utils.MetaRedis:
+		t.SkipNow()
 	case utils.MetaMySQL:
 		alsPrfFltrConfigDIR = "attributesindexes_mysql"
 	case utils.MetaMongo:

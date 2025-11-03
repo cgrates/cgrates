@@ -63,7 +63,9 @@ package agents
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
 // 		saonfigDIR = "sipagent_internal"
-// 	case utils.MetaMySQL:
+// 	case utils.MetaRedis:
+//     t.SkipNow()
+// case utils.MetaMySQL:
 // 		saonfigDIR = "sipagent_mysql"
 // 	case utils.MetaMongo:
 // 		saonfigDIR = "sipagent_mongo"
