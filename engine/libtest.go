@@ -52,7 +52,7 @@ func InitDB(cfg *config.CGRConfig) error {
 			dbConn.Name, dbConn.User,
 			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
 			dbConn.StringIndexedFields, dbConn.PrefixIndexedFields,
-			cfg.DbCfg().Opts, cfg.DbCfg().Items)
+			dbConn.Opts, cfg.DbCfg().Items)
 		if err != nil {
 			return err
 		}

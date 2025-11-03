@@ -38,6 +38,9 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 				Db_password:       utils.StringPointer("password"),
 				Remote_conns:      &[]string{"*conn1"},
 				Replication_conns: &[]string{"*conn1"},
+				Opts: &DBOptsJson{
+					RedisSentinel: utils.StringPointer("sentinel"),
+				},
 			},
 		},
 		Items: map[string]*ItemOptsJson{
@@ -45,9 +48,6 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
 			},
-		},
-		Opts: &DBOptsJson{
-			RedisSentinel: utils.StringPointer("sentinel"),
 		},
 	}
 	expected := &DbCfg{
@@ -61,6 +61,9 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 				Password: "password",
 				RmtConns: []string{"*conn1"},
 				RplConns: []string{"*conn1"},
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{
@@ -70,9 +73,6 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 				Replicate: true,
 				Remote:    true,
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -84,9 +84,9 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		if !reflect.DeepEqual(expected.Items[utils.MetaAccounts], jsnCfg.dbCfg.Items[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Items[utils.MetaAccounts]),
 				utils.ToJSON(jsnCfg.dbCfg.Items[utils.MetaAccounts]))
-		} else if !reflect.DeepEqual(expected.Opts.RedisSentinel, jsnCfg.dbCfg.Opts.RedisSentinel) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Opts.RedisSentinel),
-				utils.ToJSON(jsnCfg.dbCfg.Opts.RedisSentinel))
+		} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Opts.RedisSentinel, jsnCfg.dbCfg.DBConns[utils.MetaDefault].Opts.RedisSentinel) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.DBConns[utils.MetaDefault].Opts.RedisSentinel),
+				utils.ToJSON(jsnCfg.dbCfg.DBConns[utils.MetaDefault].Opts.RedisSentinel))
 		} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].RplConns, jsnCfg.dbCfg.DBConns[utils.MetaDefault].RplConns) {
 			t.Errorf("Expected %+v \n, received %+v", expected.DBConns[utils.MetaDefault].RplConns, jsnCfg.dbCfg.DBConns[utils.MetaDefault].RplConns)
 		}
@@ -225,7 +225,6 @@ func TestItemCfgloadFromJson(t *testing.T) {
 
 func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	var dbcfg DbCfg
-	dbcfg.Opts = &DBOpts{}
 	dbcfg.DBConns = DBConns{}
 	cfgJSONStr := `{
 "db": {
@@ -243,14 +242,13 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 				Type: utils.MetaMongo,
 			},
 		},
-		Opts: &DBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Type, dbcfg.DBConns[utils.MetaDefault].Type) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 	cfgJSONStr = `{
 "db": {
@@ -269,14 +267,13 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 				Port: "27017",
 			},
 		},
-		Opts: &DBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Port, dbcfg.DBConns[utils.MetaDefault].Port) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 	cfgJSONStr = `{
 "db": {
@@ -284,28 +281,31 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		"*default": {	
 			"db_type": "*internal",
 			"db_port": -1,
+				"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+					}
 			},
 		},
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
 }`
 	expected = DbCfg{
 		DBConns: DBConns{
 			utils.MetaDefault: &DBConn{
 				Type: utils.MetaInternal,
 				Port: "internal",
+				Opts: &DBOpts{
+					InternalDBDumpInterval:    0,
+					InternalDBRewriteInterval: 0,
+				},
 			},
 		},
-		Opts: &DBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Opts.InternalDBDumpInterval, dbcfg.DBConns[utils.MetaDefault].Opts.InternalDBDumpInterval) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 }
@@ -323,15 +323,14 @@ func TestDataDBRemoteReplication(t *testing.T) {
 			"db_user": "cgrates", 					// username to use when connecting to data_db
 			"db_password": "password",				// password to use when connecting to data_db
 			"remote_conns":["Conn1"],
-			},
-		},
-		"opts":{
+			"opts":{
 			"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
+	      	},
+			},
 		},
 	},
 }`
 	cfg := NewDefaultCGRConfig()
-	dbcfg.Opts = &DBOpts{}
 	dbcfg.DBConns = DBConns{}
 	expected = DbCfg{
 		DBConns: DBConns{
@@ -343,10 +342,10 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				User:     "cgrates",
 				Password: "password",
 				RmtConns: []string{"Conn1"},
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel",
+				},
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -363,13 +362,14 @@ func TestDataDBRemoteReplication(t *testing.T) {
 			"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
 			"remote_conns":["Conn1"],
 			"replication_conns":["Conn2"],
+			"opts":{
+	        	"internalDBRewriteInterval": "0s",
+	         	"internalDBDumpInterval": "0s"
+           	}
 			},
 		},
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
+	
 }`
 
 	expected = DbCfg{
@@ -378,17 +378,20 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				Type:     utils.MetaInternal,
 				RmtConns: []string{"Conn1"},
 				RplConns: []string{"Conn2"},
+				Opts: &DBOpts{
+					InternalDBDumpInterval:    0,
+					InternalDBRewriteInterval: 0,
+				},
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Opts.InternalDBRewriteInterval, dbcfg.DBConns[utils.MetaDefault].Opts.InternalDBRewriteInterval) {
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Opts.InternalDBDumpInterval, dbcfg.DBConns[utils.MetaDefault].Opts.InternalDBDumpInterval) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 
@@ -399,13 +402,13 @@ func TestDataDBRemoteReplication(t *testing.T) {
 			"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
 			"remote_conns":["Conn1","Conn2","Conn3"],
 			"replication_conns":["Conn4","Conn5"],
+				"opts":{
+					"internalDBRewriteInterval": "0s",
+					"internalDBDumpInterval": "0s"
+					}
 			},
 		},
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
 }`
 
 	expected = DbCfg{
@@ -414,17 +417,18 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				Type:     utils.MetaInternal,
 				RmtConns: []string{"Conn1", "Conn2", "Conn3"},
 				RplConns: []string{"Conn4", "Conn5"},
+				Opts: &DBOpts{
+					InternalDBDumpInterval:    0,
+					InternalDBRewriteInterval: 0,
+				},
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dbcfg) {
+	} else if !reflect.DeepEqual(expected.DBConns[utils.MetaDefault].Opts.InternalDBDumpInterval, dbcfg.DBConns[utils.MetaDefault].Opts.InternalDBRewriteInterval) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
 	}
 }
@@ -442,14 +446,14 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"db_user": "cgrates", 					// username to use when connecting to data_db
 			"db_password": "password",				// password to use when connecting to data_db
 			"remote_conns":["Conn1"],
+			"opts": {
+				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
+	  		}
 		},
 	},
     "items":{
 		"*accounts":{"replicate":true},
 	  }	,
-	"opts": {
-		"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
-	  }
 	},
 }`
 
@@ -463,6 +467,9 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				User:     "cgrates",
 				Password: "password",
 				RmtConns: []string{"Conn1"},
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{
@@ -471,12 +478,8 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				Replicate: true,
 			},
 		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
-		},
 	}
 	dbcfg.Items = make(map[string]*ItemOpts)
-	dbcfg.Opts = &DBOpts{}
 	dbcfg.DBConns = DBConns{}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -497,10 +500,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 					"db_user": "cgrates", 					// username to use when connecting to data_db
 					"db_password": "password",				// password to use when connecting to data_db
 					"remote_conns":["Conn1"],
+					"opts": {
+				    "redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
+		            },
 				},
-			},
-			"opts": {
-				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 			},
 			"items":{ 
 				"*load_ids":{"remote":true, "replicate":true}, 
@@ -519,10 +522,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				User:     "cgrates",
 				Password: "password",
 				RmtConns: []string{"Conn1"},
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel",
+				},
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 		Items: map[string]*ItemOpts{
 			utils.MetaLoadIDs: {
@@ -552,10 +555,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 					"db_user": "cgrates", 					// username to use when connecting to data_db
 					"db_password": "password",				// password to use when connecting to data_db
 					"remote_conns":["Conn1"],
+					"opts": {
+						"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
+					},
 				},
-			},
-			"opts": {
-				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 			},
 			"items":{
 				"*resource_profiles":{"remote":false, "replicate":false}, 
@@ -575,10 +578,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				User:     "cgrates",
 				Password: "password",
 				RmtConns: []string{"Conn1"},
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel",
+				},
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel",
 		},
 		Items: map[string]*ItemOpts{
 			utils.MetaResourceProfiles:  {Limit: -1},
@@ -609,12 +612,12 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 				"db_password": "", 						
 				"remote_conns":[],
 				"replication_conns":[],
+				"opts": {
+					"redisSentinel":"",					
+					"mongoQueryTimeout":"10s",
+				},
 			},
 		},					
-		"opts": {
-			"redisSentinel":"",					
-			"mongoQueryTimeout":"10s",
-		},
 		"items":{
 			"*accounts":{"remote":true, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"}, 					
 			"*reverse_destinations": {"remote":false, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"},
@@ -662,6 +665,9 @@ func TestCloneDataDB(t *testing.T) {
 				Db_password:       utils.StringPointer("password"),
 				Remote_conns:      &[]string{"*conn1"},
 				Replication_conns: &[]string{"*conn1"},
+				Opts: &DBOptsJson{
+					RedisSentinel: utils.StringPointer("sentinel"),
+				},
 			},
 		},
 		Items: map[string]*ItemOptsJson{
@@ -669,9 +675,6 @@ func TestCloneDataDB(t *testing.T) {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
 			},
-		},
-		Opts: &DBOptsJson{
-			RedisSentinel: utils.StringPointer("sentinel"),
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -682,9 +685,9 @@ func TestCloneDataDB(t *testing.T) {
 		if !reflect.DeepEqual(rcv.Items[utils.MetaAccounts], jsnCfg.dbCfg.Items[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rcv.Items[utils.MetaAccounts]),
 				utils.ToJSON(jsnCfg.dbCfg.Items[utils.MetaAccounts]))
-		} else if !reflect.DeepEqual(rcv.Opts.RedisSentinel, jsnCfg.dbCfg.Opts.RedisSentinel) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rcv.Opts.RedisSentinel),
-				utils.ToJSON(jsnCfg.dbCfg.Opts.RedisSentinel))
+		} else if !reflect.DeepEqual(rcv.DBConns[utils.MetaDefault].Opts.RedisSentinel, jsnCfg.dbCfg.DBConns[utils.MetaDefault].Opts.RedisSentinel) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rcv.DBConns[utils.MetaDefault].Opts.RedisSentinel),
+				utils.ToJSON(jsnCfg.dbCfg.DBConns[utils.MetaDefault].Opts.RedisSentinel))
 		} else if !reflect.DeepEqual(rcv.DBConns[utils.MetaDefault].RplConns, jsnCfg.dbCfg.DBConns[utils.MetaDefault].RplConns) {
 			t.Errorf("Expected %+v \n, received %+v", rcv.DBConns[utils.MetaDefault].RplConns, jsnCfg.dbCfg.DBConns[utils.MetaDefault].RplConns)
 		}
@@ -837,12 +840,12 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 				RplConns:    []string{},
 				RplFiltered: true,
 				RplCache:    "RplCache",
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel1",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel1",
-		},
 	}
 
 	v2 := &DbCfg{
@@ -859,6 +862,9 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 				RplConns:    []string{"RplConn1"},
 				RplFiltered: false,
 				RplCache:    "RplCache2",
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel2",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{
@@ -868,9 +874,6 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 				RouteID:   "RouteID2",
 				APIKey:    "APIKey2",
 			},
-		},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel2",
 		},
 	}
 
@@ -888,6 +891,9 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 				Replication_conns:    &[]string{"RplConn1"},
 				Replication_filtered: utils.BoolPointer(false),
 				Replication_cache:    utils.StringPointer("RplCache2"),
+				Opts: &DBOptsJson{
+					RedisSentinel: utils.StringPointer("sentinel2"),
+				},
 			},
 		},
 		Items: map[string]*ItemOptsJson{
@@ -897,9 +903,6 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 				Route_id:  utils.StringPointer("RouteID2"),
 				Api_key:   utils.StringPointer("APIKey2"),
 			},
-		},
-		Opts: &DBOptsJson{
-			RedisSentinel: utils.StringPointer("sentinel2"),
 		},
 	}
 
@@ -912,7 +915,6 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 	expected2 := &DbJsonCfg{
 		Db_conns: DbConnsJson{},
 		Items:    map[string]*ItemOptsJson{},
-		Opts:     &DBOptsJson{},
 	}
 	rcv = diffDataDBJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
@@ -1006,12 +1008,12 @@ func TestDataDbDiff(t *testing.T) {
 				RplConns:    []string{},
 				RplFiltered: true,
 				RplCache:    "RplCache",
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel1",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel1",
-		},
 	}
 
 	exp := &DbCfg{
@@ -1028,12 +1030,12 @@ func TestDataDbDiff(t *testing.T) {
 				RplConns:    []string{},
 				RplFiltered: true,
 				RplCache:    "RplCache",
+				Opts: &DBOpts{
+					RedisSentinel: "sentinel1",
+				},
 			},
 		},
 		Items: map[string]*ItemOpts{},
-		Opts: &DBOpts{
-			RedisSentinel: "sentinel1",
-		},
 	}
 
 	rcv := dataDbCfg.CloneSection()

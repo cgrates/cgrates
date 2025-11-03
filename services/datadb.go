@@ -61,7 +61,7 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 		dbConn, err := engine.NewDataDBConn(dbconn.Type,
 			dbconn.Host, dbconn.Port, dbconn.Name, dbconn.User,
 			dbconn.Password, db.cfg.GeneralCfg().DBDataEncoding, dbconn.StringIndexedFields,
-			dbconn.PrefixIndexedFields, db.cfg.DbCfg().Opts, db.cfg.DbCfg().Items)
+			dbconn.PrefixIndexedFields, dbconn.Opts, db.cfg.DbCfg().Items)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return err
@@ -111,16 +111,16 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 				return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
 					dbConn.Type)
 			}
-			mgo.SetTTL(db.cfg.DbCfg().Opts.MongoQueryTimeout)
+			mgo.SetTTL(dbConn.Opts.MongoQueryTimeout)
 		case utils.MetaPostgres, utils.MetaMySQL:
 			msql, canCast := db.dm.DataDB()[dbKey].(*engine.SQLStorage)
 			if !canCast {
 				return fmt.Errorf("can't convert DB of type %s to SQLStorage",
 					dbConn.Type)
 			}
-			msql.DB.SetMaxOpenConns(db.cfg.DbCfg().Opts.SQLMaxOpenConns)
-			msql.DB.SetMaxIdleConns(db.cfg.DbCfg().Opts.SQLMaxIdleConns)
-			msql.DB.SetConnMaxLifetime(db.cfg.DbCfg().Opts.SQLConnMaxLifetime)
+			msql.DB.SetMaxOpenConns(dbConn.Opts.SQLMaxOpenConns)
+			msql.DB.SetMaxIdleConns(dbConn.Opts.SQLMaxIdleConns)
+			msql.DB.SetConnMaxLifetime(dbConn.Opts.SQLConnMaxLifetime)
 		case utils.MetaInternal:
 			idb, canCast := db.dm.DataDB()[dbKey].(*engine.InternalDB)
 			if !canCast {
@@ -204,26 +204,26 @@ func (db *DataDBService) needsConnectionReload() bool {
 			}
 		}
 		if db.oldDBCfg.DBConns[dbConnKey].Type == utils.MetaRedis &&
-			(db.oldDBCfg.Opts.RedisMaxConns != db.cfg.DbCfg().Opts.RedisMaxConns ||
-				db.oldDBCfg.Opts.RedisConnectAttempts != db.cfg.DbCfg().Opts.RedisConnectAttempts ||
-				db.oldDBCfg.Opts.RedisSentinel != db.cfg.DbCfg().Opts.RedisSentinel ||
-				db.oldDBCfg.Opts.RedisCluster != db.cfg.DbCfg().Opts.RedisCluster ||
-				db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DbCfg().Opts.RedisClusterSync ||
-				db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DbCfg().Opts.RedisClusterOndownDelay ||
-				db.oldDBCfg.Opts.RedisConnectTimeout != db.cfg.DbCfg().Opts.RedisConnectTimeout ||
-				db.oldDBCfg.Opts.RedisReadTimeout != db.cfg.DbCfg().Opts.RedisReadTimeout ||
-				db.oldDBCfg.Opts.RedisWriteTimeout != db.cfg.DbCfg().Opts.RedisWriteTimeout ||
-				db.oldDBCfg.Opts.RedisPoolPipelineWindow != db.cfg.DbCfg().Opts.RedisPoolPipelineWindow ||
-				db.oldDBCfg.Opts.RedisPoolPipelineLimit != db.cfg.DbCfg().Opts.RedisPoolPipelineLimit) {
+			(dbConn.Opts.RedisMaxConns != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisMaxConns ||
+				dbConn.Opts.RedisConnectAttempts != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisConnectAttempts ||
+				dbConn.Opts.RedisSentinel != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisSentinel ||
+				dbConn.Opts.RedisCluster != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisCluster ||
+				dbConn.Opts.RedisClusterSync != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisClusterSync ||
+				dbConn.Opts.RedisClusterOndownDelay != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisClusterOndownDelay ||
+				dbConn.Opts.RedisConnectTimeout != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisConnectTimeout ||
+				dbConn.Opts.RedisReadTimeout != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisReadTimeout ||
+				dbConn.Opts.RedisWriteTimeout != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisWriteTimeout ||
+				dbConn.Opts.RedisPoolPipelineWindow != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisPoolPipelineWindow ||
+				dbConn.Opts.RedisPoolPipelineLimit != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisPoolPipelineLimit) {
 			return true
 		}
 		if db.cfg.DbCfg().DBConns[dbConnKey].Type == utils.MetaPostgres &&
-			(db.oldDBCfg.Opts.PgSSLMode != db.cfg.DbCfg().Opts.PgSSLMode ||
-				db.oldDBCfg.Opts.PgSSLCert != db.cfg.DbCfg().Opts.PgSSLCert ||
-				db.oldDBCfg.Opts.PgSSLKey != db.cfg.DbCfg().Opts.PgSSLKey ||
-				db.oldDBCfg.Opts.PgSSLPassword != db.cfg.DbCfg().Opts.PgSSLPassword ||
-				db.oldDBCfg.Opts.PgSSLCertMode != db.cfg.DbCfg().Opts.PgSSLCertMode ||
-				db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.DbCfg().Opts.PgSSLRootCert) {
+			(dbConn.Opts.PgSSLMode != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLMode ||
+				dbConn.Opts.PgSSLCert != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLCert ||
+				dbConn.Opts.PgSSLKey != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLKey ||
+				dbConn.Opts.PgSSLPassword != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLPassword ||
+				dbConn.Opts.PgSSLCertMode != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLCertMode ||
+				dbConn.Opts.PgSSLRootCert != db.cfg.DbCfg().DBConns[dbConnKey].Opts.PgSSLRootCert) {
 			return true
 		}
 	}

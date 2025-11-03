@@ -3161,7 +3161,7 @@ func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 			dbConnCfg.Host, dbConnCfg.Port, dbConnCfg.Name, dbConnCfg.User,
 			dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
 			dbConnCfg.StringIndexedFields, dbConnCfg.PrefixIndexedFields,
-			cfg.DbCfg().Opts, cfg.DbCfg().Items)
+			dbConnCfg.Opts, cfg.DbCfg().Items)
 		if err != nil {
 			return
 		}

@@ -91,7 +91,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 	dbConn, err := NewDataDBConn(lCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		lCfg.DbCfg().DBConns[utils.MetaDefault].Host, lCfg.DbCfg().DBConns[utils.MetaDefault].Port, lCfg.DbCfg().DBConns[utils.MetaDefault].Name,
 		lCfg.DbCfg().DBConns[utils.MetaDefault].User, lCfg.DbCfg().DBConns[utils.MetaDefault].Password, lCfg.GeneralCfg().DBDataEncoding, lCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields, lCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
-		lCfg.DbCfg().Opts, lCfg.DbCfg().Items)
+		lCfg.DbCfg().DBConns[utils.MetaDefault].Opts, lCfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}

@@ -84,7 +84,7 @@ func TestOnStorIT(t *testing.T) {
 		var err error
 		rdsITdb, err = NewRedisStorage("127.0.0.1:6379",
 			4, utils.CGRateSLwr, cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding,
-			cfg.DbCfg().Opts.RedisMaxConns, cfg.DbCfg().Opts.RedisConnectAttempts, "", false,
+			cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())

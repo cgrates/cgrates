@@ -35,8 +35,8 @@ import (
 func TestIndexesRedis(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db, err := engine.NewRedisStorage("127.0.0.1:6379", 10, utils.CGRateSLwr,
-		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, cfg.DbCfg().Opts.RedisMaxConns,
-		cfg.DbCfg().Opts.RedisConnectAttempts, utils.EmptyString, false, 0, 0, 0, 0, 0,
+		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns,
+		cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts, utils.EmptyString, false, 0, 0, 0, 0, 0,
 		150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Fatal(err)

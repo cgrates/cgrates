@@ -102,6 +102,7 @@ type DBConn struct {
 	RplConns            []string // Replication connIDs
 	RplFiltered         bool
 	RplCache            string
+	Opts                *DBOpts
 }
 
 // loadFromJSONCfg load the DBConn section of the DataDBCfg
@@ -168,6 +169,9 @@ func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
 	if jsnDbConnCfg.Replication_cache != nil {
 		dbC.RplCache = *jsnDbConnCfg.Replication_cache
 	}
+	if jsnDbConnCfg.Opts != nil {
+		err = dbC.Opts.loadFromJSONCfg(jsnDbConnCfg.Opts)
+	}
 	return
 }
 
@@ -178,7 +182,6 @@ type DBConns map[string]*DBConn
 type DbCfg struct {
 	DBConns DBConns
 	Items   map[string]*ItemOpts
-	Opts    *DBOpts
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
@@ -351,11 +354,18 @@ func (dbcfg *DbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Db_conns != nil {
 		// hardcoded *default connection to internal, can be overwritten
-		dbcfg.DBConns[utils.MetaDefault] = &DBConn{
-			Type: utils.MetaInternal,
+		if _, exists := dbcfg.DBConns[utils.MetaDefault]; !exists {
+			dbcfg.DBConns[utils.MetaDefault] = &DBConn{
+				Type: utils.MetaInternal,
+				Opts: &DBOpts{},
+			}
 		}
 		for kJsn, vJsn := range jsnDbCfg.Db_conns {
-			dbcfg.DBConns[kJsn] = new(DBConn)
+			if _, exists := dbcfg.DBConns[kJsn]; !exists {
+				dbcfg.DBConns[kJsn] = &DBConn{
+					Opts: &DBOpts{},
+				}
+			}
 			if err = dbcfg.DBConns[kJsn].loadFromJSONCfg(vJsn); err != nil {
 				return err
 			}
@@ -374,9 +384,6 @@ func (dbcfg *DbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 
-	if jsnDbCfg.Opts != nil {
-		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
-	}
 	return
 }
 
@@ -384,6 +391,9 @@ func (DbCfg) SName() string               { return DBJSON }
 func (dbcfg DbCfg) CloneSection() Section { return dbcfg.Clone() }
 
 func (dbOpts *DBOpts) Clone() *DBOpts {
+	if dbOpts == nil {
+		dbOpts = &DBOpts{}
+	}
 	return &DBOpts{
 		InternalDBDumpPath:        dbOpts.InternalDBDumpPath,
 		InternalDBBackupPath:      dbOpts.InternalDBBackupPath,
@@ -428,7 +438,6 @@ func (dbcfg DbCfg) Clone() (cln *DbCfg) {
 	cln = &DbCfg{
 		DBConns: make(DBConns),
 		Items:   make(map[string]*ItemOpts),
-		Opts:    dbcfg.Opts.Clone(),
 	}
 	for k, v := range dbcfg.DBConns {
 		cln.DBConns[k] = v.Clone()
@@ -451,6 +460,7 @@ func (dbC *DBConn) Clone() (cln *DBConn) {
 		RplFiltered: dbC.RplFiltered,
 		RplCache:    dbC.RplCache,
 		RmtConnID:   dbC.RmtConnID,
+		Opts:        dbC.Opts.Clone(),
 	}
 	if dbC.StringIndexedFields != nil {
 		cln.StringIndexedFields = slices.Clone(dbC.StringIndexedFields)
@@ -469,55 +479,56 @@ func (dbC *DBConn) Clone() (cln *DBConn) {
 
 // AsMapInterface returns the config as a map[string]any
 func (dbcfg DbCfg) AsMapInterface() any {
-	opts := map[string]any{
-		utils.InternalDBDumpPathCfg:        dbcfg.Opts.InternalDBDumpPath,
-		utils.InternalDBBackupPathCfg:      dbcfg.Opts.InternalDBBackupPath,
-		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout.String(),
-		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval.String(),
-		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval.String(),
-		utils.InternalDBFileSizeLimitCfg:   dbcfg.Opts.InternalDBFileSizeLimit,
-		utils.RedisMaxConnsCfg:             dbcfg.Opts.RedisMaxConns,
-		utils.RedisConnectAttemptsCfg:      dbcfg.Opts.RedisConnectAttempts,
-		utils.RedisSentinelNameCfg:         dbcfg.Opts.RedisSentinel,
-		utils.RedisClusterCfg:              dbcfg.Opts.RedisCluster,
-		utils.RedisClusterSyncCfg:          dbcfg.Opts.RedisClusterSync.String(),
-		utils.RedisClusterOnDownDelayCfg:   dbcfg.Opts.RedisClusterOndownDelay.String(),
-		utils.RedisConnectTimeoutCfg:       dbcfg.Opts.RedisConnectTimeout.String(),
-		utils.RedisReadTimeoutCfg:          dbcfg.Opts.RedisReadTimeout.String(),
-		utils.RedisWriteTimeoutCfg:         dbcfg.Opts.RedisWriteTimeout.String(),
-		utils.RedisPoolPipelineWindowCfg:   dbcfg.Opts.RedisPoolPipelineWindow.String(),
-		utils.RedisPoolPipelineLimitCfg:    dbcfg.Opts.RedisPoolPipelineLimit,
-		utils.RedisTLSCfg:                  dbcfg.Opts.RedisTLS,
-		utils.RedisClientCertificateCfg:    dbcfg.Opts.RedisClientCertificate,
-		utils.RedisClientKeyCfg:            dbcfg.Opts.RedisClientKey,
-		utils.RedisCACertificateCfg:        dbcfg.Opts.RedisCACertificate,
-		utils.MongoQueryTimeoutCfg:         dbcfg.Opts.MongoQueryTimeout.String(),
-		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
-		utils.SQLMaxOpenConnsCfg:           dbcfg.Opts.SQLMaxOpenConns,
-		utils.SQLMaxIdleConnsCfg:           dbcfg.Opts.SQLMaxIdleConns,
-		utils.SQLLogLevelCfg:               dbcfg.Opts.SQLLogLevel,
-		utils.SQLConnMaxLifetime:           dbcfg.Opts.SQLConnMaxLifetime.String(),
-		utils.MYSQLDSNParams:               dbcfg.Opts.SQLDSNParams,
-		utils.PgSSLModeCfg:                 dbcfg.Opts.PgSSLMode,
-		utils.MysqlLocation:                dbcfg.Opts.MySQLLocation,
-	}
-	if dbcfg.Opts.PgSSLCert != "" {
-		opts[utils.PgSSLCertCfg] = dbcfg.Opts.PgSSLCert
-	}
-	if dbcfg.Opts.PgSSLKey != "" {
-		opts[utils.PgSSLKeyCfg] = dbcfg.Opts.PgSSLKey
-	}
-	if dbcfg.Opts.PgSSLPassword != "" {
-		opts[utils.PgSSLPasswordCfg] = dbcfg.Opts.PgSSLPassword
-	}
-	if dbcfg.Opts.PgSSLCertMode != "" {
-		opts[utils.PgSSLCertModeCfg] = dbcfg.Opts.PgSSLCertMode
-	}
-	if dbcfg.Opts.PgSSLRootCert != "" {
-		opts[utils.PgSSLRootCertCfg] = dbcfg.Opts.PgSSLRootCert
-	}
+
 	dbConns := make(map[string]map[string]any)
 	for k, dbc := range dbcfg.DBConns {
+		opts := map[string]any{
+			utils.InternalDBDumpPathCfg:        dbc.Opts.InternalDBDumpPath,
+			utils.InternalDBBackupPathCfg:      dbc.Opts.InternalDBBackupPath,
+			utils.InternalDBStartTimeoutCfg:    dbc.Opts.InternalDBStartTimeout.String(),
+			utils.InternalDBDumpIntervalCfg:    dbc.Opts.InternalDBDumpInterval.String(),
+			utils.InternalDBRewriteIntervalCfg: dbc.Opts.InternalDBRewriteInterval.String(),
+			utils.InternalDBFileSizeLimitCfg:   dbc.Opts.InternalDBFileSizeLimit,
+			utils.RedisMaxConnsCfg:             dbc.Opts.RedisMaxConns,
+			utils.RedisConnectAttemptsCfg:      dbc.Opts.RedisConnectAttempts,
+			utils.RedisSentinelNameCfg:         dbc.Opts.RedisSentinel,
+			utils.RedisClusterCfg:              dbc.Opts.RedisCluster,
+			utils.RedisClusterSyncCfg:          dbc.Opts.RedisClusterSync.String(),
+			utils.RedisClusterOnDownDelayCfg:   dbc.Opts.RedisClusterOndownDelay.String(),
+			utils.RedisConnectTimeoutCfg:       dbc.Opts.RedisConnectTimeout.String(),
+			utils.RedisReadTimeoutCfg:          dbc.Opts.RedisReadTimeout.String(),
+			utils.RedisWriteTimeoutCfg:         dbc.Opts.RedisWriteTimeout.String(),
+			utils.RedisPoolPipelineWindowCfg:   dbc.Opts.RedisPoolPipelineWindow.String(),
+			utils.RedisPoolPipelineLimitCfg:    dbc.Opts.RedisPoolPipelineLimit,
+			utils.RedisTLSCfg:                  dbc.Opts.RedisTLS,
+			utils.RedisClientCertificateCfg:    dbc.Opts.RedisClientCertificate,
+			utils.RedisClientKeyCfg:            dbc.Opts.RedisClientKey,
+			utils.RedisCACertificateCfg:        dbc.Opts.RedisCACertificate,
+			utils.MongoQueryTimeoutCfg:         dbc.Opts.MongoQueryTimeout.String(),
+			utils.MongoConnSchemeCfg:           dbc.Opts.MongoConnScheme,
+			utils.SQLMaxOpenConnsCfg:           dbc.Opts.SQLMaxOpenConns,
+			utils.SQLMaxIdleConnsCfg:           dbc.Opts.SQLMaxIdleConns,
+			utils.SQLLogLevelCfg:               dbc.Opts.SQLLogLevel,
+			utils.SQLConnMaxLifetime:           dbc.Opts.SQLConnMaxLifetime.String(),
+			utils.MYSQLDSNParams:               dbc.Opts.SQLDSNParams,
+			utils.PgSSLModeCfg:                 dbc.Opts.PgSSLMode,
+			utils.MysqlLocation:                dbc.Opts.MySQLLocation,
+		}
+		if dbc.Opts.PgSSLCert != "" {
+			opts[utils.PgSSLCertCfg] = dbc.Opts.PgSSLCert
+		}
+		if dbc.Opts.PgSSLKey != "" {
+			opts[utils.PgSSLKeyCfg] = dbc.Opts.PgSSLKey
+		}
+		if dbc.Opts.PgSSLPassword != "" {
+			opts[utils.PgSSLPasswordCfg] = dbc.Opts.PgSSLPassword
+		}
+		if dbc.Opts.PgSSLCertMode != "" {
+			opts[utils.PgSSLCertModeCfg] = dbc.Opts.PgSSLCertMode
+		}
+		if dbc.Opts.PgSSLRootCert != "" {
+			opts[utils.PgSSLRootCertCfg] = dbc.Opts.PgSSLRootCert
+		}
 		dbConns[k] = map[string]any{
 			utils.DataDbTypeCfg:          dbc.Type,
 			utils.DataDbHostCfg:          dbc.Host,
@@ -531,6 +542,7 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			utils.ReplicationConnsCfg:    dbc.RplConns,
 			utils.ReplicationFilteredCfg: dbc.RplFiltered,
 			utils.ReplicationCache:       dbc.RplCache,
+			utils.OptsCfg:                opts,
 		}
 		if dbc.Port != "" {
 			dbConns[k][utils.DataDbPortCfg], _ = strconv.Atoi(dbc.Port)
@@ -538,7 +550,6 @@ func (dbcfg DbCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.DataDbConnsCfg: dbConns,
-		utils.OptsCfg:        opts,
 	}
 	if dbcfg.Items != nil {
 		items := make(map[string]any)
@@ -752,6 +763,7 @@ type DbConnJson struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
+	Opts                  *DBOptsJson
 }
 
 type DbConnsJson map[string]*DbConnJson
@@ -760,7 +772,6 @@ type DbConnsJson map[string]*DbConnJson
 type DbJsonCfg struct {
 	Db_conns DbConnsJson
 	Items    map[string]*ItemOptsJson
-	Opts     *DBOptsJson
 }
 
 func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
@@ -919,6 +930,7 @@ func diffDataDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	if v1.RplCache != v2.RplCache {
 		d.Replication_cache = utils.StringPointer(v2.RplCache)
 	}
+	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
 
@@ -976,7 +988,6 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DbCfg) *DbJsonCfg {
 	}
 	d.Db_conns = diffDataDBConnsJsonCfg(d.Db_conns, v1.DBConns, v2.DBConns)
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
-	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
 

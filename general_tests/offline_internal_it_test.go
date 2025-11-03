@@ -59,7 +59,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 	}
 	for i, pth := range paths {
 		dfltCfg := config.NewDefaultCGRConfig()
-		if err := os.MkdirAll(dfltCfg.DbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+		if err := os.MkdirAll(dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
 		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
@@ -305,7 +305,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 
 			t.Run("CountDataDBFiles", func(t *testing.T) {
 				var dirs, files int
-				if err := filepath.Walk(cfg.DbCfg().Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
+				if err := filepath.Walk(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
 					if err != nil {
 						return err
 					}
