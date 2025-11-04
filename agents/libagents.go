@@ -189,16 +189,20 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		return true, nil
 	}
 
-	// Clone is needed to prevent data races if requests are sent
-	// asynchronously.
-	ev := cgrEv.Clone()
-
-	ev.Event[utils.ReplyState] = replyState
-	ev.Event[utils.StartTime] = startTime
-	ev.Event[utils.EndTime] = endTime
-	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
-	ev.Event[utils.Source] = agentName
-	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
+	ev := &utils.CGREvent{
+		Tenant: cgrEv.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]any{
+			utils.ReplyState:     replyState,
+			utils.StartTime:      startTime,
+			utils.EndTime:        endTime,
+			utils.ProcessingTime: endTime.Sub(startTime),
+			utils.Source:         agentName,
+		},
+		APIOpts: map[string]any{
+			utils.MetaEventType: utils.ProcessTime,
+		},
+	}
 
 	if rawStatIDs != "" {
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
