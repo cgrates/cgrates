@@ -938,6 +938,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.EEs, connID)
 			}
 		}
+
+		// Check cache TTL for file exporters which require positive TTL as
+		// content is flushed only upon cache expiration.
+		for eeType, cacheCfg := range cfg.eesCfg.Cache {
+			if slices.Contains([]string{utils.MetaFileCSV, utils.MetaFileFWV}, eeType) {
+				if cacheCfg.TTL <= 0 {
+					return fmt.Errorf("<%s> exporter type %q requires positive cache TTL, got %v",
+						utils.EEs, eeType, cacheCfg.TTL)
+				}
+			}
+		}
+
 		for _, exp := range cfg.eesCfg.Exporters {
 			if !possibleExporterTypes.Has(exp.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for exporter with ID: %s", utils.EEs, exp.Type, exp.ID)
