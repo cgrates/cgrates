@@ -438,6 +438,7 @@ type Item struct {
 type DBParams struct {
 	DBConns map[string]DBConn `json:"db_conns,omitempty"`
 	Items   map[string]Item   `json:"items,omitempty"`
+	Opts    map[string]any    `json:"opts"`
 }
 
 // DBCfg holds the configurations for data_db and/or stor_db.
@@ -738,6 +739,10 @@ var (
 				utils.MetaDefault: {
 					Type: utils.StringPointer(utils.MetaInternal),
 				},
+			},
+			Opts: map[string]any{
+				utils.InternalDBDumpIntervalCfg:    "0s",
+				utils.InternalDBRewriteIntervalCfg: "0s",
 			},
 		},
 	}
