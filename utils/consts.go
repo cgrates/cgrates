@@ -1846,6 +1846,7 @@ const (
 	EeSv1Ping                 = "EeSv1.Ping"
 	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
 	EeSv1ArchiveEventsInReply = "EeSv1.ArchiveEventsInReply"
+	EeSv1ResetExporterMetrics = "EeSv1.ResetExporterMetrics"
 )
 
 // ActionProfile APIs

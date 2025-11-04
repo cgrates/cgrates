@@ -332,3 +332,24 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	*reply = buff.Bytes()
 	return
 }
+
+// V1ResetExporterMetricsParams contains required parameters for resetting exporter metrics.
+type V1ResetExporterMetricsParams struct {
+	Tenant     string
+	ID         string // unique identifier of the request
+	ExporterID string
+	APIOpts    map[string]any
+}
+
+// V1ResetExporterMetrics resets the metrics for a specific exporter identified by ExporterID.
+// Returns utils.ErrNotFound if the exporter is not found in the cache.
+func (eeS *EeS) V1ResetExporterMetrics(ctx *context.Context, params V1ResetExporterMetricsParams, reply *string) error {
+	eeCfg := eeS.cfg.EEsCfg().ExporterCfg(params.ExporterID)
+	ee, ok := eeS.exporterCache[eeCfg.Type].Get(eeCfg.ID)
+	if !ok {
+		return utils.ErrNotFound
+	}
+	ee.(EventExporter).GetMetrics().Reset()
+	*reply = utils.OK
+	return nil
+}
