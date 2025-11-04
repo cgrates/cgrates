@@ -33,12 +33,12 @@ import (
 )
 
 func TestSqlGetMetrics(t *testing.T) {
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 	sqlEe := &SQLEe{
-		dc: dc,
+		em: em,
 	}
-	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.dc) {
-		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.dc))
+	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.em) {
+		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.em))
 	}
 }
 

@@ -32,14 +32,14 @@ import (
 
 func TestNewLogEE(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 
 	expected := &LogEE{
 		cfg: cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
-		dc:  dc,
+		em:  em,
 	}
 
-	rcv := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	rcv := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
 	}
@@ -47,8 +47,8 @@ func TestNewLogEE(t *testing.T) {
 
 func TestLogEEExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := utils.NewExporterMetrics("", time.Local)
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := map[string]any{
 		"field1": 2,
 		"field2": "value",
@@ -71,7 +71,7 @@ func TestLogEE_GetMetrics(t *testing.T) {
 	mockMetrics := &utils.ExporterMetrics{}
 
 	vEe := &LogEE{
-		dc: mockMetrics,
+		em: mockMetrics,
 	}
 
 	result := vEe.GetMetrics()
@@ -83,8 +83,8 @@ func TestLogEE_GetMetrics(t *testing.T) {
 
 func TestLogEEPrepareMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := utils.NewExporterMetrics("", time.Local)
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := &utils.CGREvent{
 		Event: map[string]any{
 			"field1": 2,
@@ -99,8 +99,8 @@ func TestLogEEPrepareMap(t *testing.T) {
 
 func TestLogEEPrepareOrderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := utils.NewExporterMetrics("", time.Local)
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"*path1"},

@@ -34,10 +34,10 @@ import (
 )
 
 func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	dc *utils.ExporterMetrics) (pstrJSON *HTTPjsonMapEE, err error) {
+	em *utils.ExporterMetrics) (pstrJSON *HTTPjsonMapEE, err error) {
 	pstrJSON = &HTTPjsonMapEE{
 		cfg:    cfg,
-		dc:     dc,
+		em:     em,
 		client: &http.Client{Transport: engine.HTTPPstrTransport(), Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
 		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
@@ -48,7 +48,7 @@ func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 // HTTPjsonMapEE implements EventExporter interface for .csv files
 type HTTPjsonMapEE struct {
 	cfg    *config.EventExporterCfg
-	dc     *utils.ExporterMetrics
+	em     *utils.ExporterMetrics
 	client *http.Client
 	reqs   *concReq
 
@@ -62,7 +62,7 @@ func (httpEE *HTTPjsonMapEE) composeHeader(cgrCfg *config.CGRConfig, filterS *en
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpEE.Cfg().HeaderFields(), httpEE.dc, cgrCfg, filterS); err != nil {
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpEE.Cfg().HeaderFields(), httpEE.em, cgrCfg, filterS); err != nil {
 		return
 	}
 	for el := exp.GetFirstElement(); el != nil; el = el.Next() {
@@ -92,7 +92,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content, _ any) (
 
 func (httpEE *HTTPjsonMapEE) Close() (_ error) { return }
 
-func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.ExporterMetrics { return httpEE.dc }
+func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.ExporterMetrics { return httpEE.em }
 
 func (httpEE *HTTPjsonMapEE) ExtraData(ev *utils.CGREvent) any { return nil }
 
