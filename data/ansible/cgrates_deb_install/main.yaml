@@ -1,0 +1,107 @@
+---
+- name: Install CGRates from deb package and configure from private repository
+  hosts: all
+  become: true
+  vars:
+    # Configuration repository settings
+    cgrates_config_repo: "git@github.com:{{ vault_github_repo_owner }}/{{ vault_github_repo_name }}.git"
+    cgrates_config_source_path: "{{ vault_cgrates_config_source_path }}"
+    cgrates_repo_dir: "/opt/{{ vault_github_repo_name }}"
+
+  tasks:
+    - name: Install CGRates from deb package
+      ansible.builtin.import_role:
+        name: ../roles/cgrates
+      vars:
+        cgrates_install_method: "package"
+        cgrates_debian_codename: "bookworm"
+
+    - name: Set up GitHub SSH access
+      ansible.builtin.import_role:
+        name: ../roles/github_ssh
+      vars:
+        github_ssh_token: "{{ vault_github_token }}"
+        github_ssh_repo_owner: "{{ vault_github_repo_owner }}"
+        github_ssh_repo_name: "{{ vault_github_repo_name }}"
+      when:
+        - vault_github_token is defined
+        - vault_github_repo_owner is defined
+        - vault_github_repo_name is defined
+
+    - name: Configuration deployment
+      block:
+        - name: Create repository directory
+          ansible.builtin.file:
+            path: "{{ cgrates_repo_dir }}"
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: '0755'
+
+        - name: Clone configuration repository
+          ansible.builtin.git:
+            repo: "{{ cgrates_config_repo }}"
+            dest: "{{ cgrates_repo_dir }}"
+            force: true
+            update: true
+          become_user: "{{ ansible_user }}"
+          notify: restart cgrates
+
+        - name: Check if source path exists in repository
+          ansible.builtin.stat:
+            path: "{{ cgrates_repo_dir }}/{{ cgrates_config_source_path }}"
+          register: config_source_stat
+
+        - name: Deploy configuration via symlink
+          when: config_source_stat.stat.exists
+          block:
+            - name: Check if /etc/cgrates is already a symlink
+              ansible.builtin.stat:
+                path: "/etc/cgrates"
+              register: cgrates_dest_stat
+
+            - name: Remove existing /etc/cgrates directory if not a symlink
+              ansible.builtin.file:
+                path: "/etc/cgrates"
+                state: absent
+              when: cgrates_dest_stat.stat.exists and not cgrates_dest_stat.stat.islnk
+
+            - name: Create symlink to configuration
+              ansible.builtin.file:
+                src: "{{ cgrates_repo_dir }}/{{ cgrates_config_source_path }}"
+                dest: "/etc/cgrates"
+                state: link
+                force: true
+              notify: restart cgrates
+
+            - name: Display configuration source
+              ansible.builtin.debug:
+                msg: "Configuration linked from {{ cgrates_repo_dir }}/{{ cgrates_config_source_path }} to /etc/cgrates"
+
+        - name: Skip configuration when source path doesn't exist
+          ansible.builtin.debug:
+            msg: "Source path '{{ cgrates_config_source_path }}' not found in repository, skipping configuration"
+          when: not config_source_stat.stat.exists
+
+    - name: Setup TP directory permissions needed for cgrates to create lock files when loading TP data
+      block:
+        - name: Add cgrates user to ansible user's group for shared access
+          ansible.builtin.user:
+            name: cgrates
+            groups: "{{ ansible_user }}"
+            append: true
+
+        - name: Set group write permission on TP directory for cgrates lock file creation
+          ansible.builtin.file:
+            path: "{{ cgrates_repo_dir }}/{{ vault_cgrates_tp_path }}"
+            mode: '0775'
+          when:
+            - config_source_stat.stat.exists
+            - vault_cgrates_tp_path is defined
+
+  handlers:
+    - name: restart cgrates
+      ansible.builtin.systemd:
+        name: cgrates
+        state: restarted
+        daemon_reload: true
