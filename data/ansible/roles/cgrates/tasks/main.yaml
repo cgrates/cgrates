@@ -1,71 +1,111 @@
 ---
-- name: Install CGRateS dependencies
-  become: true
-  ansible.builtin.package:
-    name: "{{ cgrates_dependencies }}"
-    state: present
-    update_cache: true
+# Package installation tasks
+- name: Install CGRateS from package
+  when: cgrates_install_method == "package"
+  block:
+    - name: Install CGRateS package dependencies
+      become: true
+      ansible.builtin.apt:
+        name: "{{ cgrates_package_dependencies }}"
+        state: present
+        update_cache: true
 
-- name: Create cgrates directory
-  ansible.builtin.file:
-    state: directory
-    mode: u=rwx,go=rx
-    owner: "{{ ansible_user }}"
-    dest: "{{ cgrates_dir }}"
-  when: cgrates_clone_repo | bool
+    - name: Download the GPG Key
+      ansible.builtin.get_url:
+        url: https://apt.cgrates.org/apt.cgrates.org.gpg.key
+        dest: /tmp/apt.cgrates.org.asc
 
-- name: Git clone cgrates
-  ansible.builtin.git:
-    repo: https://github.com/cgrates/cgrates.git
-    dest: "{{ cgrates_dir }}"
-    update: true
-    force: true
-    version: "{{ cgrates_branch }}"
-  when: cgrates_clone_repo | bool
+    - name: Move the GPG Key to the trusted area
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/apt.cgrates.org.asc
+        dest: /etc/apt/trusted.gpg.d/apt.cgrates.org.asc
+        remote_src: true
 
-- name: Install cgrates binaries
-  ansible.builtin.command:
-    cmd: bash -c './build.sh'
-    chdir: "{{ cgrates_dir }}"
-  environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+    - name: Add the CGRateS repository to the sources list
+      become: true
+      ansible.builtin.copy:
+        content: "deb http://apt.cgrates.org/debian/ {{ cgrates_package_version }}-{{ cgrates_debian_codename }} main\n"
+        dest: /etc/apt/sources.list.d/cgrates.list
 
-- name: Create cgrates data folder symlink
-  ansible.builtin.file:
-    src: "{{ cgrates_dir }}/data"
-    dest: "{{ cgrates_data_path }}"
-    state: link
-  become: true
-  when: cgrates_data_path | length > 0
+    - name: Install CGRateS package
+      become: true
+      ansible.builtin.apt:
+        name: cgrates
+        state: latest
+        update_cache: true
 
-- name: Create cgrates binary symlinks
-  ansible.builtin.file:
-    src: "{{ golang_gopath }}/bin/{{ item }}"
-    dest: "{{ cgrates_bin_path }}/{{ item }}"
-    state: link
-  become: true
-  when: cgrates_bin_path | length > 0
-  loop:
-    - cgr-engine
-    - cgr-loader
-    - cgr-migrator
-    - cgr-console
-    - cgr-tester
+# Source installation tasks
+- name: Install CGRateS from source
+  when: cgrates_install_method == "source"
+  block:
+    - name: Install CGRateS dependencies
+      become: true
+      ansible.builtin.package:
+        name: "{{ cgrates_dependencies }}"
+        state: present
+        update_cache: true
 
-- name: Run post install scripts
-  become: true
-  ansible.builtin.command:
-    cmd: "{{ item.cmd }}"
-    chdir: "{{ cgrates_dir }}/data/storage/{{ item.db }}"
-  when: item.db in cgrates_dbs
-  loop:
-    - db: mysql
-      cmd: sh setup_ers_db.sh root CGRateS.org localhost
-    - db: mysql
-      cmd: sh setup_cgr_db.sh root CGRateS.org localhost
-    - db: postgres
-      cmd: sh create_db_with_users.sh
-    - db: postgres
-      cmd: sh create_ers_db.sh
-    - db: mongo
-      cmd: sh setup_cgr_db.sh
+    - name: Create cgrates directory
+      ansible.builtin.file:
+        state: directory
+        mode: u=rwx,go=rx
+        owner: "{{ ansible_user }}"
+        dest: "{{ cgrates_dir }}"
+      when: cgrates_clone_repo | bool
+
+    - name: Git clone cgrates
+      ansible.builtin.git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: "{{ cgrates_dir }}"
+        update: true
+        force: true
+        version: "{{ cgrates_branch }}"
+      when: cgrates_clone_repo | bool
+
+    - name: Install cgrates binaries
+      ansible.builtin.command:
+        cmd: bash -c './build.sh'
+        chdir: "{{ cgrates_dir }}"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+
+    - name: Create cgrates data folder symlink
+      ansible.builtin.file:
+        src: "{{ cgrates_dir }}/data"
+        dest: "{{ cgrates_data_path }}"
+        state: link
+      become: true
+      when: cgrates_data_path | length > 0
+
+    - name: Create cgrates binary symlinks
+      ansible.builtin.file:
+        src: "{{ golang_gopath }}/bin/{{ item }}"
+        dest: "{{ cgrates_bin_path }}/{{ item }}"
+        state: link
+      become: true
+      when: cgrates_bin_path | length > 0
+      loop:
+        - cgr-engine
+        - cgr-loader
+        - cgr-migrator
+        - cgr-console
+        - cgr-tester
+
+    - name: Run post install scripts
+      become: true
+      ansible.builtin.command:
+        cmd: "{{ item.cmd }}"
+        chdir: "{{ cgrates_dir }}/data/storage/{{ item.db }}"
+      when: item.db in cgrates_dbs
+      loop:
+        - db: mysql
+          cmd: sh setup_ers_db.sh root CGRateS.org localhost
+        - db: mysql
+          cmd: sh setup_cgr_db.sh root CGRateS.org localhost
+        - db: postgres
+          cmd: sh create_db_with_users.sh
+        - db: postgres
+          cmd: sh create_ers_db.sh
+        - db: mongo
+          cmd: sh setup_cgr_db.sh
