@@ -50,9 +50,6 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	rdr.dialURL = rdr.Config().SourcePath
 	if err := rdr.setOpts(rdr.Config().Opts); err != nil {
@@ -154,7 +151,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 	}
 	for {
 		if rdr.Config().ConcurrentReqs != -1 {
-			<-rdr.cap // do not try to read if the limit is reached
+			rdr.cap <- struct{}{}
 		}
 		msg, err := r.ReadMessage(context.Background())
 		if err != nil {
@@ -174,7 +171,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 						utils.ERs, string(msg.Key), err.Error()))
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
-				rdr.cap <- struct{}{}
+				<-rdr.cap
 			}
 		}(msg)
 	}
