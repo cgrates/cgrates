@@ -24,6 +24,7 @@ import (
 	"io"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -32,13 +33,7 @@ import (
 )
 
 func TestFileCsvGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	fCsv := &FileCSVee{dc: dc}
 
 	if rcv := fCsv.GetMetrics(); !reflect.DeepEqual(rcv, fCsv.dc) {
@@ -66,7 +61,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		dc:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -130,7 +125,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		dc:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -188,13 +183,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	fCsv := &FileCSVee{
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
@@ -228,7 +217,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloserWrite{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		dc:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -263,7 +252,7 @@ func TestFileCsvOnEvictedClose(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloserError{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		dc:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{

@@ -35,7 +35,7 @@ type EventExporter interface {
 	Connect() error                                                     // called before exporting an event to make sure it is connected
 	ExportEvent(ctx *context.Context, content any, extraData any) error // called on each event to be exported
 	Close() error                                                       // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage                                  // called to get metrics
+	GetMetrics() *utils.ExporterMetrics                                 // called to get metrics
 	PrepareMap(*utils.CGREvent) (any, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (any, error)
 	ExtraData(*utils.CGREvent) any
@@ -44,12 +44,13 @@ type EventExporter interface {
 // NewEventExporter produces exporters
 func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 	filterS *engine.FilterS, connMngr *engine.ConnManager) (ee EventExporter, err error) {
-	var dc *utils.SafeMapStorage
-	if dc, err = newEEMetrics(utils.FirstNonEmpty(
-		cfg.Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
-		return
+	timezone := utils.FirstNonEmpty(cfg.Timezone, cgrCfg.GeneralCfg().DefaultTimezone)
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nil, err
 	}
+	dc := utils.NewExporterMetrics(cfg.MetricsResetSchedule, loc)
+
 	switch cfg.Type {
 	case utils.MetaFileCSV:
 		return NewFileCSVee(cfg, cgrCfg, filterS, dc, nil)
@@ -125,20 +126,7 @@ func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FC
 	return
 }
 
-func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
-	loc, err := time.LoadLocation(location)
-	if err != nil {
-		return nil, err
-	}
-	return &utils.SafeMapStorage{MapStorage: utils.MapStorage{
-		utils.NumberOfEvents:  int64(0),
-		utils.PositiveExports: utils.StringSet{},
-		utils.NegativeExports: utils.StringSet{},
-		utils.TimeNow:         time.Now().In(loc),
-	}}, nil
-}
-
-func updateEEMetrics(dc *utils.SafeMapStorage, originID string, ev engine.MapEvent, hasError bool, timezone string) {
+func updateEEMetrics(dc *utils.ExporterMetrics, originID string, ev engine.MapEvent, hasError bool, timezone string) {
 	dc.Lock()
 	defer dc.Unlock()
 	if hasError {

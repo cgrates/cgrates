@@ -30,7 +30,7 @@ import (
 )
 
 func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	dc *utils.SafeMapStorage) (httpPost *HTTPPostEE, err error) {
+	dc *utils.ExporterMetrics) (httpPost *HTTPPostEE, err error) {
 	httpPost = &HTTPPostEE{
 		cfg:    cfg,
 		dc:     dc,
@@ -44,7 +44,7 @@ func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filte
 // FileCSVee implements EventExporter interface for .csv files
 type HTTPPostEE struct {
 	cfg    *config.EventExporterCfg
-	dc     *utils.SafeMapStorage
+	dc     *utils.ExporterMetrics
 	client *http.Client
 	reqs   *concReq
 
@@ -92,7 +92,7 @@ func (httpPost *HTTPPostEE) ExportEvent(ctx *context.Context, content, _ any) (e
 
 func (httpPost *HTTPPostEE) Close() (_ error) { return }
 
-func (httpPost *HTTPPostEE) GetMetrics() *utils.SafeMapStorage { return httpPost.dc }
+func (httpPost *HTTPPostEE) GetMetrics() *utils.ExporterMetrics { return httpPost.dc }
 
 func (httpPost *HTTPPostEE) ExtraData(ev *utils.CGREvent) any { return nil }
 

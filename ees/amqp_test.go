@@ -28,12 +28,13 @@ import (
 
 func TestNewAMQPee(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := &utils.SafeMapStorage{
+	dc := &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			utils.NumberOfEvents:  int64(0),
 			utils.PositiveExports: utils.StringSet{},
 			utils.NegativeExports: 5,
-		}}
+		},
+	}
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests = 2
 	rcv := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	exp := &AMQPee{

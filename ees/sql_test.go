@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -32,10 +33,7 @@ import (
 )
 
 func TestSqlGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	sqlEe := &SQLEe{
 		dc: dc,
 	}

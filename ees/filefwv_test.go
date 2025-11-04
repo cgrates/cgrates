@@ -24,6 +24,7 @@ import (
 	"io"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -32,10 +33,7 @@ import (
 )
 
 func TestFileFwvGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	fFwv := &FileFWVee{dc: dc}
 
 	if rcv := fFwv.GetMetrics(); !reflect.DeepEqual(rcv, fFwv.dc) {
@@ -56,7 +54,7 @@ func TestFileFwvComposeHeader(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloser{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -119,7 +117,7 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloser{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -177,10 +175,7 @@ func TestFileFwvExportEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	fFwv := &FileFWVee{
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
@@ -214,10 +209,7 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	fFwv := &FileFWVee{
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
@@ -242,7 +234,7 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloserWrite{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -275,7 +267,7 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloserWrite{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -307,7 +299,7 @@ func TestFileFwvOnEvictedTrailer(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloserWrite{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -346,7 +338,7 @@ func TestFileFwvOnEvictedClose(t *testing.T) {
 		cgrCfg:  cfg,
 		filterS: filterS,
 		writer:  nopCloserError{byteBuff},
-		dc:      &utils.SafeMapStorage{},
+		dc:      &utils.ExporterMetrics{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
