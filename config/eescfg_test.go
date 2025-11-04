@@ -364,16 +364,16 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Id:               utils.StringPointer("CSVExporter"),
-				Type:             utils.StringPointer("*fileCSV"),
-				Filters:          &[]string{},
-				Attribute_ids:    &[]string{},
-				Flags:            &[]string{"*dryRun"},
-				Export_path:      utils.StringPointer("/tmp/testCSV"),
-				Timezone:         utils.StringPointer("UTC"),
-				Synchronous:      utils.BoolPointer(true),
-				Attempts:         utils.IntPointer(1),
-				Failed_posts_dir: utils.StringPointer("/var/spool/cgrates/failed_posts"),
+				ID:             utils.StringPointer("CSVExporter"),
+				Type:           utils.StringPointer("*fileCSV"),
+				Filters:        &[]string{},
+				AttributeIDs:   &[]string{},
+				Flags:          &[]string{"*dryRun"},
+				ExportPath:     utils.StringPointer("/tmp/testCSV"),
+				Timezone:       utils.StringPointer("UTC"),
+				Synchronous:    utils.BoolPointer(true),
+				Attempts:       utils.IntPointer(1),
+				FailedPostsDir: utils.StringPointer("/var/spool/cgrates/failed_posts"),
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:   utils.StringPointer(utils.MetaOriginID),
@@ -474,15 +474,15 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Id:            utils.StringPointer("CSVExporter"),
-				Type:          utils.StringPointer("*fileCSV"),
-				Filters:       &[]string{},
-				Attribute_ids: &[]string{},
-				Flags:         &[]string{"*dryRun"},
-				Export_path:   utils.StringPointer("/tmp/testCSV"),
-				Timezone:      utils.StringPointer("UTC"),
-				Synchronous:   utils.BoolPointer(true),
-				Attempts:      utils.IntPointer(1),
+				ID:           utils.StringPointer("CSVExporter"),
+				Type:         utils.StringPointer("*fileCSV"),
+				Filters:      &[]string{},
+				AttributeIDs: &[]string{},
+				Flags:        &[]string{"*dryRun"},
+				ExportPath:   utils.StringPointer("/tmp/testCSV"),
+				Timezone:     utils.StringPointer("UTC"),
+				Synchronous:  utils.BoolPointer(true),
+				Attempts:     utils.IntPointer(1),
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:    utils.StringPointer(utils.AnswerTime),
@@ -629,6 +629,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "synchronous": false,								
 			      "attempts": 1,										
 			      "field_separator": ",",								
+				  "metrics_reset_schedule": "@every 1s",
 			      "fields":[
                       {"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
                   ]
@@ -660,15 +661,16 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 						"allowNativePasswords": "true",
 					},
 				},
-				utils.TimezoneCfg:           "UTC",
-				utils.FiltersCfg:            []string{},
-				utils.FlagsCfg:              []string{"randomFlag"},
-				utils.AttributeIDsCfg:       []string{},
-				utils.AttributeContextCfg:   utils.EmptyString,
-				utils.SynchronousCfg:        false,
-				utils.AttemptsCfg:           1,
-				utils.ConcurrentRequestsCfg: 0,
-				utils.BlockerCfg:            false,
+				utils.TimezoneCfg:             "UTC",
+				utils.FiltersCfg:              []string{},
+				utils.FlagsCfg:                []string{"randomFlag"},
+				utils.AttributeIDsCfg:         []string{},
+				utils.AttributeContextCfg:     utils.EmptyString,
+				utils.SynchronousCfg:          false,
+				utils.AttemptsCfg:             1,
+				utils.ConcurrentRequestsCfg:   0,
+				utils.BlockerCfg:              false,
+				utils.MetricsResetScheduleCfg: "@every 1s",
 				utils.FieldsCfg: []map[string]any{
 					{
 						utils.TagCfg:   utils.MetaOriginID,
@@ -723,12 +725,13 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				"PARAM_1": []string{"param1"},
 			},
 		},
-		AttributeSIDs:      []string{"ATTR_PRF"},
-		AttributeSCtx:      "*sessions",
-		Synchronous:        false,
-		Attempts:           2,
-		ConcurrentRequests: 3,
-		FailedPostsDir:     "/tmp/failedPosts",
+		AttributeSIDs:        []string{"ATTR_PRF"},
+		AttributeSCtx:        "*sessions",
+		Synchronous:          false,
+		Attempts:             2,
+		ConcurrentRequests:   3,
+		MetricsResetSchedule: "@every 5s",
+		FailedPostsDir:       "/tmp/failedPosts",
 		Fields: []*FCTemplate{
 			{
 				Type: "*string",
@@ -768,12 +771,13 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				"PARAM_2": []string{"param2"},
 			},
 		},
-		AttributeSIDs:      []string{"ATTR_PRF_2"},
-		AttributeSCtx:      "*actions",
-		Synchronous:        true,
-		Attempts:           3,
-		ConcurrentRequests: 4,
-		FailedPostsDir:     "/tmp/failed",
+		AttributeSIDs:        []string{"ATTR_PRF_2"},
+		AttributeSCtx:        "*actions",
+		Synchronous:          true,
+		Attempts:             3,
+		ConcurrentRequests:   4,
+		MetricsResetSchedule: "@every 3s",
+		FailedPostsDir:       "/tmp/failed",
 		Fields: []*FCTemplate{
 			{
 				Type: "*prefix",
@@ -799,29 +803,30 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 	}
 
 	expected := &EventExporterJsonCfg{
-		Id:          utils.StringPointer("EES_ID2"),
-		Type:        utils.StringPointer("http"),
-		Export_path: utils.StringPointer("/var/tmp/ees"),
+		ID:         utils.StringPointer("EES_ID2"),
+		Type:       utils.StringPointer("http"),
+		ExportPath: utils.StringPointer("/var/tmp/ees"),
 		Opts: &EventExporterOptsJson{
 			CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 		},
-		Timezone:            utils.StringPointer("EEST"),
-		Filters:             &[]string{"Filter2"},
-		Flags:               &[]string{"FLAG_2:PARAM_2:param2"},
-		Attribute_ids:       &[]string{"ATTR_PRF_2"},
-		Attribute_context:   utils.StringPointer("*actions"),
-		Synchronous:         utils.BoolPointer(true),
-		Attempts:            utils.IntPointer(3),
-		Concurrent_requests: utils.IntPointer(4),
-		Failed_posts_dir:    utils.StringPointer("/tmp/failed"),
+		Timezone:             utils.StringPointer("EEST"),
+		Filters:              &[]string{"Filter2"},
+		Flags:                &[]string{"FLAG_2:PARAM_2:param2"},
+		AttributeIDs:         &[]string{"ATTR_PRF_2"},
+		AttributeContext:     utils.StringPointer("*actions"),
+		Synchronous:          utils.BoolPointer(true),
+		Attempts:             utils.IntPointer(3),
+		ConcurrentRequests:   utils.IntPointer(4),
+		MetricsResetSchedule: utils.StringPointer("@every 3s"),
+		FailedPostsDir:       utils.StringPointer("/tmp/failed"),
 		Fields: &[]*FcTemplateJsonCfg{
 			{
 				Type:   utils.StringPointer("*prefix"),
 				Layout: utils.StringPointer(""),
 			},
 		},
-		Blocker:   utils.BoolPointer(false),
-		Efs_conns: utils.SliceStringPointer([]string{"efs test"}),
+		Blocker:  utils.BoolPointer(false),
+		EFsConns: utils.SliceStringPointer([]string{"efs test"}),
 	}
 
 	rcv := diffEventExporterJsonCfg(d, v1, v2)
@@ -864,12 +869,12 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 func TestGetEventExporterJsonCfg(t *testing.T) {
 	d := []*EventExporterJsonCfg{
 		{
-			Id: utils.StringPointer("EES_ID"),
+			ID: utils.StringPointer("EES_ID"),
 		},
 	}
 
 	expected := &EventExporterJsonCfg{
-		Id: utils.StringPointer("EES_ID"),
+		ID: utils.StringPointer("EES_ID"),
 	}
 
 	rcv, idx := getEventExporterJsonCfg(d, "EES_ID")
@@ -881,7 +886,7 @@ func TestGetEventExporterJsonCfg(t *testing.T) {
 
 	d = []*EventExporterJsonCfg{
 		{
-			Id: nil,
+			ID: nil,
 		},
 	}
 	rcv, idx = getEventExporterJsonCfg(d, "EES_ID")
@@ -1015,19 +1020,19 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 
 	expected := &[]*EventExporterJsonCfg{
 		{
-			Id:          utils.StringPointer("EES_ID2"),
-			Type:        utils.StringPointer("http"),
-			Export_path: utils.StringPointer("/var/tmp/ees"),
+			ID:         utils.StringPointer("EES_ID2"),
+			Type:       utils.StringPointer("http"),
+			ExportPath: utils.StringPointer("/var/tmp/ees"),
 			Opts: &EventExporterOptsJson{
 				CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 			},
-			Timezone:          utils.StringPointer("EEST"),
-			Filters:           &[]string{"Filter2"},
-			Flags:             &[]string{"FLAG_2:PARAM_2:param2"},
-			Attribute_ids:     &[]string{"ATTR_PRF_2"},
-			Attribute_context: utils.StringPointer("*actions"),
-			Synchronous:       utils.BoolPointer(true),
-			Attempts:          utils.IntPointer(3),
+			Timezone:         utils.StringPointer("EEST"),
+			Filters:          &[]string{"Filter2"},
+			Flags:            &[]string{"FLAG_2:PARAM_2:param2"},
+			AttributeIDs:     &[]string{"ATTR_PRF_2"},
+			AttributeContext: utils.StringPointer("*actions"),
+			Synchronous:      utils.BoolPointer(true),
+			Attempts:         utils.IntPointer(3),
 			Fields: &[]*FcTemplateJsonCfg{
 				{
 					Type:   utils.StringPointer("*prefix"),
@@ -1055,14 +1060,14 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 
 	d = &[]*EventExporterJsonCfg{
 		{
-			Id: utils.StringPointer("EES_ID2"),
+			ID: utils.StringPointer("EES_ID2"),
 		},
 	}
 
 	expected = &[]*EventExporterJsonCfg{
 		{
 			Opts: &EventExporterOptsJson{},
-			Id:   utils.StringPointer("EES_ID2"),
+			ID:   utils.StringPointer("EES_ID2"),
 		},
 	}
 
@@ -1117,7 +1122,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Id:   utils.StringPointer("EES_ID"),
+				ID:   utils.StringPointer("EES_ID"),
 				Opts: &EventExporterOptsJson{},
 			},
 		},
