@@ -126,7 +126,6 @@ func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FC
 }
 
 func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
-	tNow := time.Now()
 	loc, err := time.LoadLocation(location)
 	if err != nil {
 		return nil, err
@@ -135,8 +134,7 @@ func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
 		utils.NumberOfEvents:  int64(0),
 		utils.PositiveExports: utils.StringSet{},
 		utils.NegativeExports: utils.StringSet{},
-		utils.TimeNow: time.Date(tNow.Year(), tNow.Month(), tNow.Day(),
-			tNow.Hour(), tNow.Minute(), tNow.Second(), tNow.Nanosecond(), loc),
+		utils.TimeNow:         time.Now().In(loc),
 	}}, nil
 }
 
