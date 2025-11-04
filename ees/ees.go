@@ -33,7 +33,9 @@ import (
 
 // onCacheEvicted is called by ltcache when evicting an item
 func onCacheEvicted(_ string, value any) {
-	value.(EventExporter).Close()
+	ee := value.(EventExporter)
+	ee.GetMetrics().StopCron()
+	ee.Close()
 }
 
 // NewEventExporterS initializes a new EventExporterS.

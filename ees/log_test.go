@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -31,10 +32,7 @@ import (
 
 func TestNewLogEE(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 
 	expected := &LogEE{
 		cfg: cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
@@ -49,10 +47,7 @@ func TestNewLogEE(t *testing.T) {
 
 func TestLogEEExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := map[string]any{
 		"field1": 2,
@@ -72,33 +67,23 @@ func TestLogEEExportEvent(t *testing.T) {
 	}
 }
 
-func TestLogEEGetMetrics(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
+func TestLogEE_GetMetrics(t *testing.T) {
+	mockMetrics := &utils.ExporterMetrics{}
+
+	vEe := &LogEE{
+		dc: mockMetrics,
 	}
-	dc.MapStorage = utils.MapStorage{
-		"metric1": "value",
-	}
-	expected := &utils.SafeMapStorage{
-		MapStorage: utils.MapStorage{
-			"metric1": "value",
-		},
-	}
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
-	rcv := logEE.GetMetrics()
-	if !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expected %T \n but received \n %T", expected, rcv)
+
+	result := vEe.GetMetrics()
+
+	if result != mockMetrics {
+		t.Errorf("expected %v, got %v", mockMetrics, result)
 	}
 }
 
 func TestLogEEPrepareMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := &utils.CGREvent{
 		Event: map[string]any{
@@ -114,10 +99,7 @@ func TestLogEEPrepareMap(t *testing.T) {
 
 func TestLogEEPrepareOrderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
