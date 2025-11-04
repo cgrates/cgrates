@@ -25,7 +25,7 @@
     - name: Add the CGRateS repository to the sources list
       become: true
       ansible.builtin.copy:
-        content: "deb http://apt.cgrates.org/debian/ {{ cgrates_package_version }}-{{ cgrates_debian_codename }} main\n"
+        content: "deb http://apt.cgrates.org/debian/ {{ cgrates_branch }}-{{ cgrates_debian_codename }} main\n"
         dest: /etc/apt/sources.list.d/cgrates.list
 
     - name: Install CGRateS package
