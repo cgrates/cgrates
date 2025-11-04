@@ -284,7 +284,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.StatSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 			if isInternal && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DiameterAgent)
 			}
@@ -293,7 +293,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.ThresholdSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 			if isInternal && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DiameterAgent)
 			}
