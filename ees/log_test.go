@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -32,7 +31,10 @@ import (
 
 func TestNewLogEE(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	expected := &LogEE{
 		cfg: cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
@@ -47,7 +49,10 @@ func TestNewLogEE(t *testing.T) {
 
 func TestLogEEExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := map[string]any{
 		"field1": 2,
@@ -83,7 +88,10 @@ func TestLogEE_GetMetrics(t *testing.T) {
 
 func TestLogEEPrepareMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := &utils.CGREvent{
 		Event: map[string]any{
@@ -99,7 +107,10 @@ func TestLogEEPrepareMap(t *testing.T) {
 
 func TestLogEEPrepareOrderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
