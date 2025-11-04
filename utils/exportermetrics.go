@@ -48,7 +48,7 @@ func NewExporterMetrics(schedule, timezone string) (*ExporterMetrics, error) {
 	m.Reset() // init MapStorage with default values
 
 	if schedule != "" {
-		m.cron = cron.New()
+		m.cron = cron.New(cron.WithLocation(loc))
 		if _, err := m.cron.AddFunc(schedule, func() {
 			m.Reset()
 		}); err != nil {
