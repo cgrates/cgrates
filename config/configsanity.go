@@ -1061,7 +1061,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			utils.Internal, utils.Redis, utils.Mongo}
 
 		if item != utils.MetaAccounts && item != utils.MetaIPProfiles &&
-			item != utils.MetaIPAllocations && item != utils.MetaActionProfiles {
+			item != utils.MetaIPAllocations && item != utils.MetaActionProfiles &&
+			item != utils.MetaChargerProfiles {
 			if item == utils.MetaCDRs {
 				if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
 					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,

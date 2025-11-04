@@ -173,3 +173,38 @@ type ChargerProfileWithAPIOpts struct {
 	*ChargerProfile
 	APIOpts map[string]any
 }
+
+// AsMapStringInterface converts ChargerProfile struct to map[string]any
+func (cp *ChargerProfile) AsMapStringInterface() map[string]any {
+	if cp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:       cp.Tenant,
+		ID:           cp.ID,
+		FilterIDs:    cp.FilterIDs,
+		Weights:      cp.Weights,
+		Blockers:     cp.Blockers,
+		RunID:        cp.RunID,
+		AttributeIDs: cp.AttributeIDs,
+	}
+}
+
+// MapStringInterfaceToChargerProfile converts map[string]any to ChargerProfile struct
+func MapStringInterfaceToChargerProfile(m map[string]any) (cp *ChargerProfile, err error) {
+	cp = &ChargerProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		cp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		cp.ID = v
+	}
+	cp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	cp.Weights = InterfaceToDynamicWeights(m[Weights])
+	cp.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[RunID].(string); ok {
+		cp.RunID = v
+	}
+	cp.AttributeIDs = InterfaceToStringSlice(m[AttributeIDs])
+	return cp, nil
+}

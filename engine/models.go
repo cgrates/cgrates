@@ -426,3 +426,14 @@ type ActionProfileJSONMdl struct {
 func (ActionProfileJSONMdl) TableName() string {
 	return utils.TBLActionProfilesJSON
 }
+
+type ChargerProfileMdl struct {
+	PK             uint        `gorm:"primary_key"`
+	Tenant         string      `index:"0" re:".*"`
+	ID             string      `index:"1" re:".*"`
+	ChargerProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ChargerProfileMdl) TableName() string {
+	return utils.TBLChargerProfilesJSON
+}

@@ -106,6 +106,8 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID)
 	case utils.ActionProfilePrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfilesJSON, tntID)
+	case utils.ChargerProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfilesJSON, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -534,8 +536,7 @@ func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id str
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	ap, err = utils.MapStringInterfaceToActionProfile(result[0].ActionProfile)
-	return
+	return utils.MapStringInterfaceToActionProfile(result[0].ActionProfile)
 }
 
 func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
@@ -563,6 +564,51 @@ func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 	tx := sqls.db.Begin()
 	if err := tx.Model(&ActionProfileJSONMdl{}).Where(&ActionProfileJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&ActionProfileJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) GetChargerProfileDrv(_ *context.Context, tenant, id string) (cp *utils.ChargerProfile, err error) {
+	var result []*ChargerProfileMdl
+	if err := sqls.db.Model(&ChargerProfileMdl{}).Where(&ChargerProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+
+	return utils.MapStringInterfaceToChargerProfile(result[0].ChargerProfile)
+}
+
+func (sqls *SQLStorage) SetChargerProfileDrv(_ *context.Context, cp *utils.ChargerProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ChargerProfileMdl{
+		Tenant:         cp.Tenant,
+		ID:             cp.ID,
+		ChargerProfile: cp.AsMapStringInterface(),
+	}
+	if err := tx.Model(&ChargerProfileMdl{}).Where(
+		ChargerProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ChargerProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err := tx.Model(&ChargerProfileMdl{}).Where(&ChargerProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&ChargerProfileMdl{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -804,21 +850,6 @@ func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.At
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetChargerProfileDrv(_ *context.Context, tenant, id string) (r *utils.ChargerProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetChargerProfileDrv(_ *context.Context, r *utils.ChargerProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 

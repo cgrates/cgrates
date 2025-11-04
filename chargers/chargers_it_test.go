@@ -86,11 +86,11 @@ func TestChargersIT(t *testing.T) {
 	case utils.MetaMongo:
 		chargersConfigDIR = "apis_chargers_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		chargersConfigDIR = "apis_chargers_redis"
 	case utils.MetaMySQL:
 		chargersConfigDIR = "apis_chargers_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		chargersConfigDIR = "apis_chargers_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

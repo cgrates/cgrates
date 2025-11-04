@@ -43,3 +43,14 @@ CREATE TABLE action_profiles (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX action_profiles_idx ON action_profiles ("id");
+
+
+DROP TABLE IF EXISTS charger_profiles;
+CREATE TABLE charger_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  charger_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX charger_profiles_idx ON charger_profiles ("id");
