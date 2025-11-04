@@ -191,6 +191,54 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	rdrCfg *config.EventReaderCfg) (err error) {
 	startTime := time.Now()
+	replyState := utils.OK
+
+	// Defer stats and thresholds processing to ensure it happens even with early returns.
+	defer func() {
+		endTime := time.Now()
+		if rdrCfg.Flags.Has(utils.MetaDryRun) {
+			return
+		}
+		rawStatIDs := rdrCfg.Flags.ParamValue(utils.MetaERsStats)
+		rawThIDs := rdrCfg.Flags.ParamValue(utils.MetaERsThresholds)
+
+		// Early return if nothing to process.
+		if rawStatIDs == "" && rawThIDs == "" {
+			return
+		}
+
+		// Clone is needed to prevent data races if requests are sent
+		// asynchronously.
+		ev := cgrEv.Clone()
+
+		ev.Event[utils.ReplyState] = replyState
+		ev.Event[utils.StartTime] = startTime
+		ev.Event[utils.EndTime] = endTime
+		ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
+		ev.Event[utils.Source] = utils.ERs
+		ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
+
+		if rawStatIDs != "" {
+			statIDs := strings.Split(rawStatIDs, utils.ANDSep)
+			ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
+			var reply []string
+			if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().StatSConns,
+				utils.StatSv1ProcessEvent, ev, &reply); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to process event in %s: %v",
+					utils.ERs, utils.StatS, err))
+			}
+		}
+		if rawThIDs != "" {
+			thIDs := strings.Split(rawThIDs, utils.ANDSep)
+			ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+			var reply []string
+			if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().ThresholdSConns,
+				utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to process event in %s: %v",
+					utils.ERs, utils.ThresholdS, err))
+			}
+		}
+	}()
 	// log the event created if requested by flags
 	if rdrCfg.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
@@ -223,21 +271,33 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateAuthorize
+		}
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateInitiate
+		}
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateUpdate
+		}
 	case utils.MetaTerminate:
 		rply := utils.StringPointer("")
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateTerminate
+		}
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
@@ -246,12 +306,18 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
 		if utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage) {
+			if err != nil {
+				replyState = utils.ErrReplyStateMessage
+			}
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateEvent
+		}
 	case utils.MetaCDRs: // allow CDR processing
 	case utils.MetaExport: // allow event exporting
 	}
@@ -265,6 +331,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 				EeIDs:    rdrCfg.EEsIDs,
 				CGREvent: cgrEv,
 			}, &reply); err != nil {
+			replyState = utils.ErrReplyStateExport
 			return err
 		}
 	}
@@ -277,6 +344,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		var replyCDRs string
 		if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &replyCDRs); err != nil {
+			replyState = utils.ErrReplyStateCDRs
 			return err
 		}
 	}
