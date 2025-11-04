@@ -66,9 +66,7 @@ func (fCsv *FileCSVee) init(wrtr io.WriteCloser) (err error) {
 	// create the file
 	filePath := path.Join(fCsv.Cfg().ExportPath,
 		fCsv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
-	fCsv.dc.Lock()
-	fCsv.dc.MapStorage[utils.ExportPath] = filePath
-	fCsv.dc.Unlock()
+	fCsv.dc.Set([]string{utils.ExportPath}, filePath)
 	if fCsv.cfg.ExportPath == utils.MetaBuffer {
 		fCsv.wrtr = wrtr
 	} else if fCsv.wrtr, err = os.Create(filePath); err != nil {
