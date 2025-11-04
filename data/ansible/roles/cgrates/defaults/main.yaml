@@ -1,8 +1,6 @@
 ---
-golang_gopath: "/home/{{ ansible_user }}/go"
-golang_install_dir: /usr/local/go
 cgrates_clone_repo: true
-cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+cgrates_dir: "/home/{{ ansible_user }}/go/src/github.com/cgrates/cgrates"
 cgrates_branch: master
 
 # Installation method: "source" or "package"
