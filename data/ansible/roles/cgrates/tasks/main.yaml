@@ -80,7 +80,7 @@
 
     - name: Create cgrates binary symlinks
       ansible.builtin.file:
-        src: "{{ golang_gopath }}/bin/{{ item }}"
+        src: "/home/{{ ansible_user }}/go/bin/{{ item }}"
         dest: "{{ cgrates_bin_path }}/{{ item }}"
         state: link
       become: true
