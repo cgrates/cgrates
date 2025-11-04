@@ -36,10 +36,10 @@ import (
 )
 
 func NewSQLEe(cfg *config.EventExporterCfg,
-	dc *utils.ExporterMetrics) (sqlEe *SQLEe, err error) {
+	em *utils.ExporterMetrics) (sqlEe *SQLEe, err error) {
 	sqlEe = &SQLEe{
 		cfg:  cfg,
-		dc:   dc,
+		em:   em,
 		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
 	err = sqlEe.initDialector()
@@ -49,7 +49,7 @@ func NewSQLEe(cfg *config.EventExporterCfg,
 // SQLEe implements EventExporter interface for SQL
 type SQLEe struct {
 	cfg   *config.EventExporterCfg
-	dc    *utils.ExporterMetrics
+	em    *utils.ExporterMetrics
 	db    *gorm.DB
 	sqldb *sql.DB
 	reqs  *concReq
@@ -157,7 +157,7 @@ func (sqlEe *SQLEe) Close() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) GetMetrics() *utils.ExporterMetrics { return sqlEe.dc }
+func (sqlEe *SQLEe) GetMetrics() *utils.ExporterMetrics { return sqlEe.em }
 
 func (sqlEe *SQLEe) ExtraData(ev *utils.CGREvent) any { return nil }
 

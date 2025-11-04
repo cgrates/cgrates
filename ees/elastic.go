@@ -39,17 +39,17 @@ import (
 type ElasticEE struct {
 	mu   sync.RWMutex
 	cfg  *config.EventExporterCfg
-	dc   *utils.ExporterMetrics
+	em   *utils.ExporterMetrics
 	reqs *concReq
 
 	client    *elasticsearch.TypedClient
 	clientCfg elasticsearch.Config
 }
 
-func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) (*ElasticEE, error) {
+func NewElasticEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*ElasticEE, error) {
 	el := &ElasticEE{
 		cfg:  cfg,
-		dc:   dc,
+		em:   em,
 		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
 	if err := el.parseClientOpts(); err != nil {
@@ -221,7 +221,7 @@ func (e *ElasticEE) Close() error {
 	return nil
 }
 
-func (e *ElasticEE) GetMetrics() *utils.ExporterMetrics { return e.dc }
+func (e *ElasticEE) GetMetrics() *utils.ExporterMetrics { return e.em }
 
 func (eEE *ElasticEE) ExtraData(ev *utils.CGREvent) any {
 	return utils.ConcatenatedKey(
