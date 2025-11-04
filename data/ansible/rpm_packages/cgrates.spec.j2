@@ -85,11 +85,11 @@ cp -rpf {{ cgrates_dir }}/data/storage/mongo $RPM_BUILD_ROOT%{_datarootdir}/%{na
 cp -rpf {{ cgrates_dir }}/data/storage/mysql $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 cp -rpf {{ cgrates_dir }}/data/storage/postgres $RPM_BUILD_ROOT%{_datarootdir}/%{name}/storage
 install -D -m 0644 -p {{ cgrates_dir }}/data/conf/%{name}/%{name}.json $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.json
-install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
-install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
-install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
-install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
-install -D -m 0755 -p {{ golang_gopath }}/bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
+install -D -m 0755 -p /home/{{ user }}/go/bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
+install -D -m 0755 -p /home/{{ user }}/go/bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
+install -D -m 0755 -p /home/{{ user }}/go/bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
+install -D -m 0755 -p /home/{{ user }}/go/bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
+install -D -m 0755 -p /home/{{ user }}/go/bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
