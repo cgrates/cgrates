@@ -104,7 +104,7 @@ func TestActionsIT(t *testing.T) {
 	case utils.MetaMongo:
 		actConfigDIR = "apis_actions_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		actConfigDIR = "apis_actions_redis"
 	case utils.MetaMySQL:
 		actConfigDIR = "apis_actions_mysql"
 	case utils.MetaPostgres:

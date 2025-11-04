@@ -658,7 +658,9 @@ func MapStringInterfaceToIPProfile(m map[string]any) (*IPProfile, error) {
 	ipp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
 	ipp.Weights = InterfaceToDynamicWeights(m[Weights])
 	if v, ok := m[TTL].(string); ok {
-		if dur, err := time.ParseDuration(v); err == nil {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
 			ipp.TTL = dur
 		}
 	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
@@ -752,7 +754,7 @@ func IPAllocationsLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheIPAllocations, tnt, id)
 }
 
-// AsMapStringInterface converts IPProfile struct to map[string]any
+// AsMapStringInterface converts IPAllocations struct to map[string]any
 func (p *IPAllocations) AsMapStringInterface() map[string]any {
 	if p == nil {
 		return nil
@@ -766,7 +768,7 @@ func (p *IPAllocations) AsMapStringInterface() map[string]any {
 }
 
 // MapStringInterfaceToIPAllocations converts map[string]any to IPAllocations struct
-func MapStringInterfaceToIPAllocations(m map[string]any) (*IPAllocations, error) {
+func MapStringInterfaceToIPAllocations(m map[string]any) *IPAllocations {
 	ipa := &IPAllocations{}
 
 	if v, ok := m[Tenant].(string); ok {
@@ -777,7 +779,7 @@ func MapStringInterfaceToIPAllocations(m map[string]any) (*IPAllocations, error)
 	}
 	ipa.Allocations = InterfaceToAllocations(m[Allocations])
 	ipa.TTLIndex = InterfaceToStringSlice(m[TTLIndex])
-	return ipa, nil
+	return ipa
 }
 
 // InterfaceToAllocations converts any to map[string]*PoolAllocation

@@ -291,6 +291,120 @@ func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	}
 }
 
+// AsMapStringInterface converts ActionProfile struct to map[string]any
+func (ap *ActionProfile) AsMapStringInterface() map[string]any {
+	if ap == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:    ap.Tenant,
+		ID:        ap.ID,
+		FilterIDs: ap.FilterIDs,
+		Weights:   ap.Weights,
+		Blockers:  ap.Blockers,
+		Schedule:  ap.Schedule,
+		Targets:   ap.Targets,
+		Actions:   ap.Actions,
+	}
+}
+
+// MapStringInterfaceToActionProfile converts map[string]any to ActionProfile struct
+func MapStringInterfaceToActionProfile(m map[string]any) (ap *ActionProfile, err error) {
+	ap = &ActionProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		ap.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		ap.ID = v
+	}
+	ap.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	ap.Weights = InterfaceToDynamicWeights(m[Weights])
+	ap.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[Schedule].(string); ok {
+		ap.Schedule = v
+	}
+	ap.Targets = InterfaceToMapStringStringSet(m[Targets])
+	if ap.Actions, err = InterfaceToAPActions(m[Actions]); err != nil {
+		return nil, err
+	}
+	return ap, nil
+}
+
+// InterfaceToAPActions converts any to []*APAction
+func InterfaceToAPActions(m any) ([]*APAction, error) {
+	v, ok := m.([]any)
+	if !ok {
+		return nil, nil
+	}
+
+	actions := make([]*APAction, 0, len(v))
+	for _, actionAny := range v {
+		if actionMap, ok := actionAny.(map[string]any); ok {
+			action, err := MapToAPAction(actionMap)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, action)
+		}
+	}
+	return actions, nil
+}
+
+// MapToAPAction converts map[string]any to APAction struct
+func MapToAPAction(m map[string]any) (*APAction, error) {
+	action := &APAction{}
+	if v, ok := m[ID].(string); ok {
+		action.ID = v
+	}
+	action.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	if v, ok := m[TTL].(string); ok {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
+			action.TTL = dur
+		}
+	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
+		action.TTL = time.Duration(v)
+	}
+	if v, ok := m[Type].(string); ok {
+		action.Type = v
+	}
+	if v, ok := m[Opts].(map[string]any); ok {
+		action.Opts = v
+	}
+	action.Weights = InterfaceToDynamicWeights(m[Weights])
+	action.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[Diktats].([]any); ok {
+		action.Diktats = make([]*APDiktat, 0, len(v))
+		for _, diktatAny := range v {
+			if diktatMap, ok := diktatAny.(map[string]any); ok {
+				diktat, err := MapToAPDiktat(diktatMap)
+				if err != nil {
+					return nil, err
+				}
+				action.Diktats = append(action.Diktats, diktat)
+			}
+		}
+	}
+	return action, nil
+}
+
+// MapToAPDiktat converts map[string]any to APDiktat struct
+func MapToAPDiktat(m map[string]any) (*APDiktat, error) {
+	diktat := &APDiktat{}
+	if v, ok := m[ID].(string); ok {
+		diktat.ID = v
+	}
+	diktat.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+
+	if v, ok := m[Opts].(map[string]any); ok {
+		diktat.Opts = v
+	}
+	diktat.Weights = InterfaceToDynamicWeights(m[Weights])
+	diktat.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	return diktat, nil
+}
+
 // APAction defines action related information used within an ActionProfile.
 type APAction struct {
 	ID        string         // Action ID

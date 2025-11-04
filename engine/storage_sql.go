@@ -104,6 +104,8 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPProfiles, tntID)
 	case utils.IPAllocationsPrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID)
+	case utils.ActionProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfilesJSON, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -488,7 +490,7 @@ func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id str
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return utils.MapStringInterfaceToIPAllocations(result[0].IPAllocation)
+	return utils.MapStringInterfaceToIPAllocations(result[0].IPAllocation), nil
 }
 
 func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
@@ -516,6 +518,51 @@ func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id 
 	tx := sqls.db.Begin()
 	if err := tx.Model(&IPAllocationMdl{}).Where(&IPAllocationMdl{Tenant: tenant, ID: id}).
 		Delete(&IPAllocationMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
+	var result []*ActionProfileJSONMdl
+	if err := sqls.db.Model(&ActionProfileJSONMdl{}).Where(&ActionProfileJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ap, err = utils.MapStringInterfaceToActionProfile(result[0].ActionProfile)
+	return
+}
+
+func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ActionProfileJSONMdl{
+		Tenant:        ap.Tenant,
+		ID:            ap.ID,
+		ActionProfile: ap.AsMapStringInterface(),
+	}
+	if err := tx.Model(&ActionProfileJSONMdl{}).Where(
+		ActionProfileJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ActionProfileJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err := tx.Model(&ActionProfileJSONMdl{}).Where(&ActionProfileJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&ActionProfileJSONMdl{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -812,20 +859,6 @@ func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profil
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 

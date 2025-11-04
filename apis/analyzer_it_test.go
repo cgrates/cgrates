@@ -62,7 +62,7 @@ var (
 
 func TestAnalyzerSIT(t *testing.T) {
 	switch *utils.DBType {
-	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
+	case utils.MetaInternal, utils.MetaRedis, utils.MetaMySQL, utils.MetaPostgres:
 		t.SkipNow()
 	case utils.MetaMongo:
 		anzCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers")
