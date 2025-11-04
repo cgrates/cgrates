@@ -1,0 +1,22 @@
+---
+# GitHub SSH configuration
+github_ssh_key_path: "/home/{{ ansible_user }}/.ssh/id_rsa"
+github_ssh_key_name: "cgrates-ssh-key"
+
+# GitHub API settings
+# Token scopes needed:
+# - For deploy keys: 'repo' scope
+# - For user keys: 'admin:public_key' scope
+github_ssh_token: ""
+github_ssh_repo_owner: ""
+github_ssh_repo_name: ""
+
+# SSH key method selection
+# User keys: Account-wide access, inherit user permissions, work for all repos
+# Deploy keys: Repository-specific, can be read-only
+github_ssh_use_deploy_keys: false  # false = user keys (default), true = deploy keys
+github_ssh_deploy_key_read_only: false  # only used when github_ssh_use_deploy_keys: true
+
+# SSH client configuration
+github_ssh_known_hosts_file: "/home/{{ ansible_user }}/.ssh/known_hosts"
+github_ssh_config_file: "/home/{{ ansible_user }}/.ssh/config"
