@@ -34,7 +34,10 @@ import (
 )
 
 func TestHttpPostGetMetrics(t *testing.T) {
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	httpPost := &HTTPPostEE{
 		em: em,
 	}

@@ -240,11 +240,10 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		return fmt.Errorf("exporter with ID: %s has an invalid ExportPath for archiving", expID)
 	}
 	timezone := utils.FirstNonEmpty(eeCfg.Timezone, eeS.cfg.GeneralCfg().DefaultTimezone)
-	loc, err := time.LoadLocation(timezone)
+	em, err := utils.NewExporterMetrics(eeCfg.MetricsResetSchedule, timezone)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to initialize exporter metrics: %v", err)
 	}
-	em := utils.NewExporterMetrics(eeCfg.MetricsResetSchedule, loc)
 
 	var ee EventExporter
 
