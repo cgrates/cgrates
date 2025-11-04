@@ -195,7 +195,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 		expNM := utils.NewOrderedNavigableMap()
 		err = NewExportRequest(map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
-			utils.MetaDC:   exp.GetMetrics(),
+			utils.MetaEM:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
@@ -244,7 +244,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	if err != nil {
 		return err
 	}
-	dc := utils.NewExporterMetrics(eeCfg.MetricsResetSchedule, loc)
+	em := utils.NewExporterMetrics(eeCfg.MetricsResetSchedule, loc)
 
 	var ee EventExporter
 
@@ -261,9 +261,9 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	switch eeCfg.Type {
 	case utils.MetaFileCSV:
-		ee, err = NewFileCSVee(eeCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
+		ee, err = NewFileCSVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
 	case utils.MetaFileFWV:
-		ee, err = NewFileFWVee(eeCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
+		ee, err = NewFileFWVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
 	default:
 		err = fmt.Errorf("unsupported exporter type: %s>", eeCfg.Type)
 	}

@@ -34,10 +34,10 @@ import (
 )
 
 // NewNatsEE creates a kafka poster
-func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Duration, dc *utils.ExporterMetrics) (natsPstr *NatsEE, err error) {
+func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Duration, em *utils.ExporterMetrics) (natsPstr *NatsEE, err error) {
 	natsPstr = &NatsEE{
 		cfg:     cfg,
-		dc:      dc,
+		em:      em,
 		subject: utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
@@ -55,7 +55,7 @@ type NatsEE struct {
 	posterJS jetstream.JetStream
 
 	cfg          *config.EventExporterCfg
-	dc           *utils.ExporterMetrics
+	em           *utils.ExporterMetrics
 	reqs         *concReq
 	sync.RWMutex // protect writer
 	bytePreparing
@@ -127,7 +127,7 @@ func (pstr *NatsEE) Close() error {
 	return err
 }
 
-func (pstr *NatsEE) GetMetrics() *utils.ExporterMetrics { return pstr.dc }
+func (pstr *NatsEE) GetMetrics() *utils.ExporterMetrics { return pstr.em }
 
 func (pstr *NatsEE) ExtraData(ev *utils.CGREvent) any { return nil }
 
