@@ -513,7 +513,6 @@ func TestSQSERReadLoop(t *testing.T) {
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
 	}
-	rdr.cap <- struct{}{}
 	rdr.Config().ConcurrentReqs = 1
 	counter := 0
 	receiveMessage := func(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error) {
@@ -558,7 +557,6 @@ func TestSQSERReadLoop2(t *testing.T) {
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
 	}
-	rdr.cap <- struct{}{}
 	rdr.Config().ConcurrentReqs = 1
 	counter := 0
 	receiveMessage := func(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error) {

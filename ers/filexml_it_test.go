@@ -364,16 +364,9 @@ func TestNewXMLFileER(t *testing.T) {
 		rdrEvents: nil,
 		rdrError:  nil,
 		rdrExit:   nil,
-		conReqs:   make(chan struct{}, 1),
+		conReqs:   nil,
 	}
-	var value struct{}
-	expEr.conReqs <- value
 	eR, err := NewXMLFileER(cfg, 0, nil, nil, nil, fltrs, nil)
-	expConReq := make(chan struct{}, 1)
-	expConReq <- struct{}{}
-	if <-expConReq != <-eR.(*XMLFileER).conReqs {
-		t.Errorf("Expected %v but received %v", <-expConReq, <-eR.(*XMLFileER).conReqs)
-	}
 	expEr.conReqs = nil
 	eR.(*XMLFileER).conReqs = nil
 	if err != nil {
@@ -433,7 +426,6 @@ func TestFileXMLProcessEvent(t *testing.T) {
 
 	eR.Config().Fields[0].ComputePath()
 
-	eR.conReqs <- struct{}{}
 	fileName := "file1.xml"
 	if err := eR.processFile(fileName); err != nil {
 		t.Error(err)
@@ -474,7 +466,6 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	errExpect := "open /tmp/TestFileXMLProcessEvent/file1.xml: no such file or directory"
 	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -521,7 +512,6 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().Tenant = utils.RSRParsers{
 		{
 			Rules: "test",
@@ -584,7 +574,6 @@ func TestFileXMLProcessEVentError3(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	eR.Config().Fields = []*config.FCTemplate{
 		{
@@ -638,7 +627,6 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 
 	fileName := "file1.xml"
 	errExpect := "XML syntax error on line 2: unexpected EOF"
@@ -663,7 +651,6 @@ func TestFileXML(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
@@ -716,7 +703,6 @@ func TestFileXMLError(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
@@ -759,7 +745,6 @@ func TestFileXMLExit(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
