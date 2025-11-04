@@ -21,6 +21,7 @@ package ees
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -29,10 +30,7 @@ import (
 
 func TestNewRpcEE(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 
 	rcv, err := NewRpcEE(eeSCfg, dc, connMgr)
@@ -102,10 +100,7 @@ func TestRPCCfg(t *testing.T) {
 
 func TestRPCConnect(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
@@ -147,10 +142,7 @@ func TestRPCConnect(t *testing.T) {
 
 func TestRPCClose(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {
@@ -166,7 +158,7 @@ func TestRPCClose(t *testing.T) {
 
 func TestRPCGetMetrics(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc := &utils.SafeMapStorage{
+	dc := &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			"time":         "now",
 			"just_a_field": "just_a_value",
@@ -185,10 +177,7 @@ func TestRPCGetMetrics(t *testing.T) {
 
 func TestRPCPrepareMap(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
 	if err != nil {

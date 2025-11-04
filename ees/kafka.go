@@ -32,7 +32,7 @@ import (
 )
 
 // NewKafkaEE creates a kafka poster
-func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*KafkaEE, error) {
+func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) (*KafkaEE, error) {
 	pstr := &KafkaEE{
 		cfg:  cfg,
 		dc:   dc,
@@ -100,7 +100,7 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*KafkaE
 type KafkaEE struct {
 	writer *kafka.Writer
 	cfg    *config.EventExporterCfg
-	dc     *utils.SafeMapStorage
+	dc     *utils.ExporterMetrics
 	reqs   *concReq
 	bytePreparing
 }
@@ -131,7 +131,7 @@ func (k *KafkaEE) Close() error {
 	return k.writer.Close()
 }
 
-func (k *KafkaEE) GetMetrics() *utils.SafeMapStorage { return k.dc }
+func (k *KafkaEE) GetMetrics() *utils.ExporterMetrics { return k.dc }
 func (k *KafkaEE) ExtraData(ev *utils.CGREvent) any {
 	return utils.ConcatenatedKey(
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
