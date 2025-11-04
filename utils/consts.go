@@ -2378,13 +2378,14 @@ const (
 	PartitionsCfg = "partitions"
 	PrecacheCfg   = "precache"
 
-	// CdrsCfg
-	ExportPathCfg         = "export_path"
-	SynchronousCfg        = "synchronous"
-	AttemptsCfg           = "attempts"
-	AttributeContextCfg   = "attribute_context"
-	AttributeIDsCfg       = "attribute_ids"
-	ConcurrentRequestsCfg = "concurrent_requests"
+	// EEsCfg
+	ExportPathCfg           = "export_path"
+	SynchronousCfg          = "synchronous"
+	AttemptsCfg             = "attempts"
+	AttributeContextCfg     = "attribute_context"
+	AttributeIDsCfg         = "attribute_ids"
+	ConcurrentRequestsCfg   = "concurrent_requests"
+	MetricsResetScheduleCfg = "metrics_reset_schedule"
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"

@@ -545,6 +545,7 @@ const CGRATES_CFG_JSON = `
 			"synchronous": false,					// block processing until export has a result
 			"blocker": false,					// stops the processing of the following exporters
 			"attempts": 1,						// export attempts
+			"metrics_reset_schedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
 			"opts": {						// extra options for exporter
 
 				// CSV
