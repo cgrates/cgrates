@@ -9,7 +9,7 @@ VERBOSE=false
 DRYRUN=false
 
 # Parse command line options
-OPTS=$(getopt -o f:t:d:p:r:P:vDh --long from:,to:,dur:,port:,registrar:,passwd:,verbose,dryrun,help -n "$(basename "$0")" -- "$@")
+OPTS=$(getopt -o f:t:d:H:p:r:P:vDh --long from:,to:,dur:,host:,port:,registrar:,passwd:,verbose,dryrun,help -n "$(basename "$0")" -- "$@")
 if [ $? -ne 0 ]; then
     echo "Failed to parse options." >&2
     exit 1
