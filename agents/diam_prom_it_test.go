@@ -214,6 +214,15 @@ func TestDiamPrometheus(t *testing.T) {
 					{
 						MetricID: "*sum#~*req.ProcessingTime",
 					},
+					{
+						MetricID: "*highest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*lowest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*distinct#~*req.ProcessingTime",
+					},
 				},
 				Stored:   true,
 				MinItems: 1,
@@ -236,6 +245,15 @@ func TestDiamPrometheus(t *testing.T) {
 					},
 					{
 						MetricID: "*sum#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*highest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*lowest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*distinct#~*req.ProcessingTime",
 					},
 				},
 				Stored:   true,

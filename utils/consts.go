@@ -1073,6 +1073,8 @@ const (
 	MetaSum      = "*sum"
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
+	MetaHighest  = "*highest"
+	MetaLowest   = "*lowest"
 )
 
 // Diameter/Radius request types

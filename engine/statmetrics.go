@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -45,6 +47,8 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm Sta
 		utils.MetaSum:      NewStatSum,
 		utils.MetaAverage:  NewStatAverage,
 		utils.MetaDistinct: NewStatDistinct,
+		utils.MetaHighest:  NewStatHighest,
+		utils.MetaLowest:   NewStatLowest,
 	}
 	// split the metricID
 	// in case of *sum we have *sum#~*req.FieldName
@@ -1028,4 +1032,286 @@ func (dst *StatDistinct) Clone() StatMetric {
 		cln.FieldValues[k] = v.Clone()
 	}
 	return cln
+}
+
+// NewStatHighest creates a StatHighest metric for tracking maximum field values.
+func NewStatHighest(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatHighest{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		FieldName: fieldName,
+		Highest:   utils.NewDecimal(0, 0),
+		Events:    make(map[string]*utils.Decimal),
+	}
+}
+
+// StatHighest tracks the maximum value for a specific field across events.
+type StatHighest struct {
+	FilterIDs []string // event filters to apply before processing
+	FieldName string   // field path to extract from events
+	MinItems  uint64   // minimum events required for valid results
+
+	Highest *utils.Decimal            // current maximum value tracked
+	Count   uint64                    // number of events currently tracked
+	Events  map[string]*utils.Decimal // event values indexed by ID for deletion
+}
+
+// Clone creates a deep copy of StatHighest.
+func (s *StatHighest) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatHighest{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		Highest:   s.Highest,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatHighest) GetStringValue(decimals int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := s.Highest.Round(decimals).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatHighest) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return s.Highest
+}
+
+// AddEvent processes a new event, updating highest value if necessary
+func (s *StatHighest) AddEvent(evID string, ev utils.DataProvider) error {
+	val, err := fieldValue(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Highest) == 1 {
+		s.Highest = val
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Count++
+	}
+
+	s.Events[evID] = val
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatHighest) AddOneEvent(ev utils.DataProvider) error {
+	val, err := fieldValue(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Highest) == 1 {
+		s.Highest = val
+	}
+	s.Count++
+	return nil
+}
+
+func (s *StatHighest) RemEvent(evID string) error {
+	v, exists := s.Events[evID]
+	if !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	if v.Compare(s.Highest) == 0 {
+		s.Highest = utils.NewDecimal(0, 0) // reset highest
+
+		// Find new highest among remaining events.
+		for _, val := range s.Events {
+			if val.Compare(s.Highest) == 1 {
+				s.Highest = val
+			}
+		}
+	}
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatHighest) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatHighest) GetMinItems() uint64 { return s.MinItems }
+
+// Compress is part of StatMetric interface.
+func (s *StatHighest) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatHighest) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatLowest creates a StatLowest metric for tracking minimum field values.
+func NewStatLowest(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatLowest{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		FieldName: fieldName,
+		Lowest:    utils.NewDecimalFromFloat64(math.MaxFloat64),
+		Events:    make(map[string]*utils.Decimal),
+	}
+}
+
+// StatLowest tracks the minimum value for a specific field across events.
+type StatLowest struct {
+	FilterIDs []string // event filters to apply before processing
+	FieldName string   // field path to extract from events
+	MinItems  uint64   // minimum events required for valid results
+
+	Lowest *utils.Decimal            // current minimum value tracked
+	Count  uint64                    // number of events currently tracked
+	Events map[string]*utils.Decimal // event values indexed by ID for deletion
+}
+
+// Clone creates a deep copy of StatLowest.
+func (s *StatLowest) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatLowest{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		Lowest:    s.Lowest,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatLowest) GetStringValue(decimals int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := s.Lowest.Round(decimals).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatLowest) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return s.Lowest
+}
+
+// AddEvent processes a new event, updating lowest value if necessary.
+func (s *StatLowest) AddEvent(evID string, ev utils.DataProvider) error {
+	val, err := fieldValue(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Lowest) == -1 {
+		s.Lowest = val
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Count++
+	}
+
+	s.Events[evID] = val
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatLowest) AddOneEvent(ev utils.DataProvider) error {
+	val, err := fieldValue(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Lowest) == -1 {
+		s.Lowest = val
+	}
+	s.Count++
+	return nil
+}
+
+func (s *StatLowest) RemEvent(evID string) error {
+	v, exists := s.Events[evID]
+	if !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	if v.Compare(s.Lowest) == 0 {
+		s.Lowest = utils.NewDecimalFromFloat64(math.MaxFloat64) // reset lowest
+
+		// Find new lowest among remaining events.
+		for _, val := range s.Events {
+			if val.Compare(s.Lowest) == -1 {
+				s.Lowest = val
+			}
+		}
+	}
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatLowest) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatLowest) GetMinItems() uint64 { return s.MinItems }
+
+// Compress is part of StatMetric interface.
+func (s *StatLowest) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatLowest) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// fieldValue gets the numeric value from the DataProvider.
+func fieldValue(fldName string, dp utils.DataProvider) (*utils.Decimal, error) {
+	ival, err := utils.DPDynamicInterface(fldName, dp)
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return nil, utils.ErrPrefix(err, fldName)
+			// NOTE: return below might be clearer
+			// return nil, fmt.Errorf("field %s: %v", field, err)
+		}
+		return nil, err
+	}
+	v, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return nil, err
+	}
+	return &utils.Decimal{Big: v}, nil
 }
