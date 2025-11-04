@@ -610,51 +610,51 @@ type Metric struct {
 	FilterIDs []string
 }
 
-func (sum *Metric) GetFilterIDs() []string { return sum.FilterIDs }
+func (m *Metric) GetFilterIDs() []string { return m.FilterIDs }
 
-func (sum *Metric) getTotalValue() *utils.Decimal {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getTotalValue() *utils.Decimal {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.DecimalNaN
 	}
-	return sum.Value
+	return m.Value
 }
 
-func (sum *Metric) getAvgValue() *utils.Decimal {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getAvgValue() *utils.Decimal {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.DecimalNaN
 	}
-	return utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0))
+	return utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0))
 }
 
-func (sum *Metric) getAvgStringValue(rounding int) string {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getAvgStringValue(rounding int) string {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.NotAvailable
 	}
-	v, _ := utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0)).Round(rounding).Float64()
+	v, _ := utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0)).Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (sum *Metric) GetStringValue(rounding int) string {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) GetStringValue(rounding int) string {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.NotAvailable
 	}
-	v, _ := sum.Value.Round(rounding).Float64()
+	v, _ := m.Value.Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (sum *Metric) GetValue() (v *utils.Decimal) {
-	return sum.getTotalValue()
+func (m *Metric) GetValue() (v *utils.Decimal) {
+	return m.getTotalValue()
 }
 
-func (sum *Metric) addEvent(evID string, ival any) (err error) {
+func (m *Metric) addEvent(evID string, ival any) (err error) {
 	var val *decimal.Big
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
 	}
 	dVal := &utils.Decimal{Big: val}
-	sum.Value = utils.SumDecimal(sum.Value, dVal)
-	if v, has := sum.Events[evID]; !has {
-		sum.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
+	m.Value = utils.SumDecimal(m.Value, dVal)
+	if v, has := m.Events[evID]; !has {
+		m.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
 	} else {
 		v.Stat = utils.DivideDecimal(
 			utils.SumDecimal(
@@ -663,34 +663,34 @@ func (sum *Metric) addEvent(evID string, ival any) (err error) {
 			utils.NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
-	sum.Count++
+	m.Count++
 	return
 }
 
 // Adding aggregated metrics without events
-func (sum *Metric) addOneEvent(ival any) (err error) {
+func (m *Metric) addOneEvent(ival any) (err error) {
 	var val *decimal.Big
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
 	}
 	dVal := &utils.Decimal{Big: val}
-	sum.Value = utils.SumDecimal(sum.Value, dVal)
-	sum.Count++
+	m.Value = utils.SumDecimal(m.Value, dVal)
+	m.Count++
 	return
 }
 
 // Deleting a specific event and updating metrics
-func (sum *Metric) RemEvent(evID string) (err error) {
-	val, has := sum.Events[evID]
+func (m *Metric) RemEvent(evID string) (err error) {
+	val, has := m.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
 	if val.Stat.Compare(utils.NewDecimal(0, 0)) != 0 {
-		sum.Value = utils.SubstractDecimal(sum.Value, val.Stat)
+		m.Value = utils.SubstractDecimal(m.Value, val.Stat)
 	}
-	sum.Count--
+	m.Count--
 	if val.CompressFactor <= 1 {
-		delete(sum.Events, evID)
+		delete(m.Events, evID)
 	} else {
 		val.CompressFactor = val.CompressFactor - 1
 	}
@@ -698,27 +698,27 @@ func (sum *Metric) RemEvent(evID string) (err error) {
 }
 
 // GetMinItems returns the minim items for the metric
-func (sum *Metric) GetMinItems() uint64 { return sum.MinItems }
+func (m *Metric) GetMinItems() uint64 { return m.MinItems }
 
 // Compress is part of StatMetric interface
-func (sum *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
-	if sum.Count < queueLen {
-		eventIDs = make([]string, 0, len(sum.Events))
-		for id := range sum.Events {
+func (m *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
+	if m.Count < queueLen {
+		eventIDs = make([]string, 0, len(m.Events))
+		for id := range m.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
 	}
-	sum.Events = map[string]*DecimalWithCompress{defaultID: {
-		Stat:           utils.DivideDecimal(sum.Value, utils.NewDecimalFromFloat64(float64(sum.Count))),
-		CompressFactor: sum.Count,
+	m.Events = map[string]*DecimalWithCompress{defaultID: {
+		Stat:           utils.DivideDecimal(m.Value, utils.NewDecimalFromFloat64(float64(m.Count))),
+		CompressFactor: m.Count,
 	}}
 	return []string{defaultID}
 }
 
 // Compress is part of StatMetric interface
-func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64 {
-	for id, val := range sum.Events {
+func (m *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id, val := range m.Events {
 		if _, has := events[id]; !has {
 			events[id] = val.CompressFactor
 		}
@@ -729,36 +729,36 @@ func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64
 	return events
 }
 
-func (sum *Metric) Clone() (cln *Metric) {
-	if sum == nil {
+func (m *Metric) Clone() (cln *Metric) {
+	if m == nil {
 		return nil
 	}
 	cln = &Metric{
-		Count:    sum.Count,
-		MinItems: sum.MinItems,
+		Count:    m.Count,
+		MinItems: m.MinItems,
 	}
-	if sum.Value != nil {
-		cln.Value = sum.Value.Clone()
+	if m.Value != nil {
+		cln.Value = m.Value.Clone()
 	}
-	if sum.Events != nil {
-		cln.Events = make(map[string]*DecimalWithCompress, len(sum.Events))
-		maps.Copy(cln.Events, sum.Events)
+	if m.Events != nil {
+		cln.Events = make(map[string]*DecimalWithCompress, len(m.Events))
+		maps.Copy(cln.Events, m.Events)
 	}
-	if sum.FilterIDs != nil {
-		cln.FilterIDs = make([]string, len(sum.FilterIDs))
-		cln.FilterIDs = slices.Clone(sum.FilterIDs)
+	if m.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(m.FilterIDs))
+		cln.FilterIDs = slices.Clone(m.FilterIDs)
 	}
 	return
 }
 
-func (sum *Metric) Equal(v *Metric) bool {
-	if sum.MinItems != v.MinItems ||
-		sum.Count != v.Count ||
-		sum.Value.Compare(v.Value) != 0 ||
-		len(sum.Events) != len(v.Events) {
+func (m *Metric) Equal(v *Metric) bool {
+	if m.MinItems != v.MinItems ||
+		m.Count != v.Count ||
+		m.Value.Compare(v.Value) != 0 ||
+		len(m.Events) != len(v.Events) {
 		return false
 	}
-	for k, c1 := range sum.Events {
+	for k, c1 := range m.Events {
 		c2, has := v.Events[k]
 		if !has ||
 			c1.CompressFactor != c2.CompressFactor ||
