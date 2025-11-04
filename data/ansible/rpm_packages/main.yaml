@@ -1,25 +1,54 @@
 ---
+# Before running this script you need the following:
+# - 2 RockyLinux 9 minimal install servers with static ips defined
+#     in order to configure a static ip:
+#       1. type nmtui in console
+#       2. Edit a connection
+#       3. Choose the interface (enp0s8 in my case) and select Edit...
+#       4. Go to IPv4 CONFIGURATION and set from Automatic to Manual then select Show
+#       5. Type the desired address alongside Addresses field then click OK then click Back
+#       6. Go to Activate a connection
+#       7. Deactivate the enp0s8 connection and activate it again to apply the changes
+# - after the user creation below, to set up a passwordless ssh connection from the yum host created user to the pkg host created user(otherwise a yes/no prompt will be encountered
+#   and disrupt the script)
+
+- hosts: pkg, yum
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Make sure we have a 'admin' group
+      group:
+        name: admin
+        state: present
+
+    - name: Allow 'admin' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%admin'
+        line: '%admin ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Add sudoers users to admin group
+      user:
+        name={{ user }}
+        groups=admin
+        append=yes
+        state=present
+        createhome=yes
+
+    - name: get the username running the deploy
+      become: false
+      local_action: command whoami
+      register: host_username
+
+    - name: Set up authorized keys for the {{ user }} user
+      authorized_key: user={{ user }} key="{{ item }}"
+      with_file:
+        - '/home/{{ host_username.stdout }}/.ssh/id_rsa.pub'
+
 - hosts: yum
   vars:
-    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.24'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
-
-    ###############################################################
     # CGRateS location
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
     cgrates_branch: "1.0"
@@ -38,9 +67,9 @@
 
     rootUser : root
 
-    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+    customPath: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-  remote_user: '{{ user }}'
+    ansible_user: '{{ user }}'
   tasks:
     - name: set cgrates cgrates_distribution
       set_fact:
@@ -109,6 +138,7 @@
       when: nginxConfig.stdout_lines|length < 1
 
     - name: Enable and start nginx
+      become: true
       systemd:
         name: nginx
         state: started
@@ -131,18 +161,10 @@
 
 ###########################################################################################################################
 ###########################################################################################################################
-# Install Golang
-    - name: install unarchive dependencies (zypper)
-      become: yes
-      zypper:
-        name:
-          - gzip
-          - tar
-        state: present
-      when: ansible_pkg_mgr == 'zypper'
-
-    - name: Install golang
-      include: go.yaml
+# Install Go
+- name: Install Go
+    import_role:
+      name: ../roles/go
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -171,26 +193,26 @@
       become: yes
       shell: "go clean --cache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: clean go modcache
       become: yes
       shell: "go clean --modcache"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: sync the go mod with vendor
       become: yes
       shell: "go mod vendor"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
         chdir: '{{ cgrates_dir }}'
 
     - name:  build cgrates
       shell: "sh {{ cgrates_dir }}/build.sh"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
         chdir: '{{ cgrates_dir }}'
         
@@ -257,7 +279,7 @@
       become: yes
       shell: 'rpmbuild -bb --define "_topdir /home/{{ user }}/cgr_build" cgr_build/SPECS/cgrates.spec'
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
         
     - name: Take the name of the .rpm package
       become: yes
@@ -317,7 +339,7 @@
 - hosts: pkg
   vars:
     ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-  remote_user: '{{ user }}'
+    ansible_user: '{{ user }}'
   tasks:
     - name: set cgrates cgrates_distribution
       set_fact:
