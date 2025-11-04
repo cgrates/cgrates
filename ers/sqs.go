@@ -49,9 +49,6 @@ func NewSQSER(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	rdr.parseOpts(rdr.Config().Opts)
 	return rdr, nil
@@ -197,7 +194,7 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 	// scv := sqs.New(rdr.session)
 	for !rdr.isClosed() {
 		if rdr.Config().ConcurrentReqs != -1 {
-			<-rdr.cap // do not try to read if the limit is reached
+			rdr.cap <- struct{}{}
 		}
 		var msgs *sqs.ReceiveMessageOutput
 		if msgs, err = scv.ReceiveMessage(&sqs.ReceiveMessageInput{
@@ -210,7 +207,7 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 		if len(msgs.Messages) != 0 {
 			go rdr.readMsg(scv, msgs.Messages[0])
 		} else if rdr.Config().ConcurrentReqs != -1 {
-			rdr.cap <- struct{}{}
+			<-rdr.cap
 		}
 
 	}
@@ -229,7 +226,7 @@ func (rdr *SQSER) isClosed() bool {
 
 func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	if rdr.Config().ConcurrentReqs != -1 {
-		defer func() { rdr.cap <- struct{}{} }()
+		defer func() { <-rdr.cap }()
 	}
 	body := []byte(*msg.Body)
 	key := *msg.MessageId
