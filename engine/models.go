@@ -415,3 +415,14 @@ type IPAllocationMdl struct {
 func (IPAllocationMdl) TableName() string {
 	return utils.TBLIPAllocations
 }
+
+type ActionProfileJSONMdl struct {
+	PK            uint        `gorm:"primary_key"`
+	Tenant        string      `index:"0" re:".*"`
+	ID            string      `index:"1" re:".*"`
+	ActionProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ActionProfileJSONMdl) TableName() string {
+	return utils.TBLActionProfilesJSON
+}

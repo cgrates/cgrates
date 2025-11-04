@@ -40,13 +40,47 @@ func TestDynThdIT(t *testing.T) {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
+	case utils.MetaMySQL:
+		dbCfg = engine.DBCfg{DB: &engine.DBParams{
+			DBConns: map[string]engine.DBConn{
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaMySQL),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(3306),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer("CGRateS.org"),
+				},
+			},
+			Items: map[string]engine.Item{
+				utils.MetaActionProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
+		}}
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
-		dbCfg = engine.PostgresDBCfg
+		dbCfg = engine.DBCfg{DB: &engine.DBParams{
+			DBConns: map[string]engine.DBConn{
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaPostgres),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(5432),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer("CGRateS.org"),
+				},
+			},
+			Items: map[string]engine.Item{
+				utils.MetaActionProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
+		}}
 	default:
 		t.Fatal("Unknown Database type")
 	}
