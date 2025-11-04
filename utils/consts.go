@@ -1093,6 +1093,8 @@ const (
 	MetaPDD      = "*pdd"
 	MetaDDC      = "*ddc"
 	MetaSum      = "*sum"
+	MetaREPSC    = "*repsc"
+	MetaREPFC    = "*repfc"
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
 	MetaHighest  = "*highest"
