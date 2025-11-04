@@ -21,7 +21,6 @@ package ees
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,7 +29,10 @@ import (
 
 func TestNewRpcEE(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 
 	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
@@ -100,7 +102,10 @@ func TestRPCCfg(t *testing.T) {
 
 func TestRPCConnect(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -139,7 +144,10 @@ func TestRPCConnect(t *testing.T) {
 
 func TestRPCClose(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -174,7 +182,10 @@ func TestRPCGetMetrics(t *testing.T) {
 
 func TestRPCPrepareMap(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {

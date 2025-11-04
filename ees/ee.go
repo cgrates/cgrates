@@ -45,11 +45,10 @@ type EventExporter interface {
 func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 	filterS *engine.FilterS, connMngr *engine.ConnManager) (ee EventExporter, err error) {
 	timezone := utils.FirstNonEmpty(cfg.Timezone, cgrCfg.GeneralCfg().DefaultTimezone)
-	loc, err := time.LoadLocation(timezone)
+	em, err := utils.NewExporterMetrics(cfg.MetricsResetSchedule, timezone)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize exporter metrics: %v", err)
 	}
-	em := utils.NewExporterMetrics(cfg.MetricsResetSchedule, loc)
 
 	switch cfg.Type {
 	case utils.MetaFileCSV:

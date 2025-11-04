@@ -21,14 +21,16 @@ package ees
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestVirtualEeGetMetrics(t *testing.T) {
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	vEe := &VirtualEE{
 		em: em,
 	}
