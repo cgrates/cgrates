@@ -771,29 +771,31 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 // Used to update the index map when a filter is modified.
 func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmType, tnt string,
 	removeIndexKeys []string, itemIDs utils.StringSet) error {
+	if len(removeIndexKeys) == 0 {
+		return nil // no indexes to remove
+	}
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 
-	// Retrieve current filter indexes.
-	fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt, utils.EmptyString,
-		utils.NonTransactional, true, false)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			return err
-		}
-		return nil
-	}
-
-	// Remove itemIDs from the specified index keys.
 	for _, idxKey := range removeIndexKeys {
+		fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,
+			idxKey, utils.NonTransactional, true, false)
+		if err != nil {
+			if err != utils.ErrNotFound {
+				return err
+			}
+			continue
+		}
 		for itemID := range itemIDs {
 			fltrIdx[idxKey].Remove(itemID)
 		}
+		if err := dm.SetIndexes(ctx, idxItmType, tnt, fltrIdx, true,
+			utils.NonTransactional); err != nil {
+			return err
+		}
 	}
-
-	// Store the updated indexes.
-	return dm.SetIndexes(ctx, idxItmType, tnt, fltrIdx, true, utils.NonTransactional)
+	return nil
 }
 
 // IsDynamicDPPath check dynamic path with ~*stats, ~*resources, ~*accounts, ~*libphonenumber, ~*asm to not be indexed
