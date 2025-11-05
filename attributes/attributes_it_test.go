@@ -109,11 +109,11 @@ func TestAttributesIT(t *testing.T) {
 	case utils.MetaMongo:
 		attrConfigDIR = "attributes_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		attrConfigDIR = "attributes_redis"
 	case utils.MetaMySQL:
 		attrConfigDIR = "attributes_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		attrConfigDIR = "attributes_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

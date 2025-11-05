@@ -105,9 +105,11 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 	case utils.IPAllocationsPrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID)
 	case utils.ActionProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfilesJSON, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfiles, tntID)
 	case utils.ChargerProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfilesJSON, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfiles, tntID)
+	case utils.AttributeProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAttributeProfiles, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -616,6 +618,51 @@ func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id s
 	return nil
 }
 
+func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.AttributeProfile, err error) {
+	var result []*AttributeProfileMdl
+	if err := sqls.db.Model(&AttributeProfileMdl{}).Where(&AttributeProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+
+	return utils.MapStringInterfaceToAttributeProfile(result[0].AttributeProfile)
+}
+
+func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, ap *utils.AttributeProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &AttributeProfileMdl{
+		Tenant:           ap.Tenant,
+		ID:               ap.ID,
+		AttributeProfile: ap.AsMapStringInterface(),
+	}
+	if err = tx.Model(&AttributeProfileMdl{}).Where(
+		AttributeProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		AttributeProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&AttributeProfileMdl{}).Where(&AttributeProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&AttributeProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // AddLoadHistory DataDB method not implemented yet
 func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
@@ -835,21 +882,6 @@ func (sqls *SQLStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteP
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (r *utils.AttributeProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.AttributeProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
