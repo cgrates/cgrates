@@ -67,13 +67,13 @@ func TestAttributeSIT(t *testing.T) {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "attr_test_internal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		alsPrfConfigDIR = "attr_test_redis"
 	case utils.MetaMySQL:
 		alsPrfConfigDIR = "attr_test_mysql"
 	case utils.MetaMongo:
 		alsPrfConfigDIR = "attr_test_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		alsPrfConfigDIR = "attr_test_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

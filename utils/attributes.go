@@ -415,3 +415,66 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.Weights = ext.Weights
 	return
 }
+
+// AsMapStringInterface converts AttributeProfile struct to map[string]any
+func (ap *AttributeProfile) AsMapStringInterface() map[string]any {
+	if ap == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:     ap.Tenant,
+		ID:         ap.ID,
+		FilterIDs:  ap.FilterIDs,
+		Weights:    ap.Weights,
+		Blockers:   ap.Blockers,
+		Attributes: ap.Attributes,
+	}
+}
+
+// MapStringInterfaceToAttributeProfile converts map[string]any to AttributeProfile struct
+func MapStringInterfaceToAttributeProfile(m map[string]any) (ap *AttributeProfile, err error) {
+	ap = &AttributeProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		ap.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		ap.ID = v
+	}
+	ap.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	ap.Weights = InterfaceToDynamicWeights(m[Weights])
+	ap.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	ap.Attributes = InterfaceToAttributes(m[Attributes])
+	return
+}
+
+// InterfaceToAttributes converts interface{} to []*Attribute
+func InterfaceToAttributes(v any) []*Attribute {
+	if v == nil {
+		return nil
+	}
+	attrs, ok := v.([]any)
+	if !ok {
+		return nil
+	}
+	attributes := make([]*Attribute, 0, len(attrs))
+	for _, attrIface := range attrs {
+		attrMap, ok := attrIface.(map[string]any)
+		if !ok {
+			continue
+		}
+		attr := &Attribute{}
+		attr.FilterIDs = InterfaceToStringSlice(attrMap[FilterIDs])
+		attr.Blockers = InterfaceToDynamicBlockers(attrMap[Blockers])
+		if path, ok := attrMap[Path].(string); ok {
+			attr.Path = path
+		}
+		if typ, ok := attrMap[Type].(string); ok {
+			attr.Type = typ
+		}
+		if valueIface, ok := attrMap[Value]; ok {
+			attr.Value = InterfaceToRSRParsers(valueIface)
+		}
+		attributes = append(attributes, attr)
+	}
+	return attributes
+}

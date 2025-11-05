@@ -54,3 +54,14 @@ CREATE TABLE charger_profiles (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX charger_profiles_idx ON charger_profiles ("id");
+
+
+DROP TABLE IF EXISTS attribute_profiles;
+CREATE TABLE attribute_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  attribute_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX attribute_profiles_idx ON attribute_profiles ("id");

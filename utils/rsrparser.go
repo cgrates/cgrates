@@ -214,6 +214,31 @@ func (prsrs RSRParsers) AsStringSlice() (v []string) {
 	return
 }
 
+// InterfaceToRSRParsers converts interface to RSRParsers (unexported fields not included)
+func InterfaceToRSRParsers(v any) RSRParsers {
+	if v == nil {
+		return nil
+	}
+	parsers := make(RSRParsers, 0)
+	switch val := v.(type) {
+	case []any:
+		for _, item := range val {
+			if parserMap, ok := item.(map[string]any); ok {
+				parser := &RSRParser{}
+				if rules, ok := parserMap[Rules].(string); ok {
+					parser.Rules = rules
+				}
+				if path, ok := parserMap[Path].(string); ok {
+					parser.Path = path
+				}
+				parsers = append(parsers, parser)
+			}
+		}
+	}
+
+	return parsers
+}
+
 // NewRSRParser builds one RSRParser
 func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
