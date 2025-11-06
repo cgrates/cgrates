@@ -112,7 +112,7 @@ type Resource struct {
 	Tenant string
 	ID     string
 	Usages map[string]*ResourceUsage
-	TTLIdx []string // holds ordered list of ResourceIDs based on their TTL, empty if feature is disableda
+	TTLIdx []string // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
 }
 
 // Clone clones *Resource (lkID excluded)
@@ -161,6 +161,75 @@ func (r *Resource) TotalUsage() float64 {
 		tu += ru.Units
 	}
 	return tu
+}
+
+// AsMapStringInterface converts Resource struct to map[string]any
+func (rp *Resource) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant: rp.Tenant,
+		ID:     rp.ID,
+		Usages: rp.Usages,
+		TTLIdx: rp.TTLIdx,
+	}
+}
+
+// MapStringInterfaceToResource converts map[string]any to Resource struct
+func MapStringInterfaceToResource(m map[string]any) *Resource {
+	rp := &Resource{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.Usages = InterfaceToMapStringResourceUsage(m[Usages])
+	rp.TTLIdx = InterfaceToStringSlice(m[TTLIdx])
+	return rp
+}
+
+// InterfaceToMapStringResourceUsage converts any to map[string]*ResourceUsage
+func InterfaceToMapStringResourceUsage(v any) map[string]*ResourceUsage {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case map[string]*ResourceUsage:
+		return val
+	case map[string]any:
+		result := make(map[string]*ResourceUsage)
+		for k, v := range val {
+			if balMap, ok := v.(map[string]any); ok {
+				result[k] = MapStringInterfaceToResourceUsage(balMap)
+			} else if bal, ok := v.(*ResourceUsage); ok {
+				result[k] = bal
+			}
+		}
+		return result
+	}
+	return nil
+}
+
+// MapStringInterfaceToResourceUsage converts map[string]any to *ResourceUsage
+func MapStringInterfaceToResourceUsage(m map[string]any) *ResourceUsage {
+	resUsage := &ResourceUsage{}
+	if v, ok := m[Tenant].(string); ok {
+		resUsage.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		resUsage.ID = v
+	}
+	if v, ok := m[ExpiryTime].(string); ok {
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			resUsage.ExpiryTime = t
+		}
+	}
+	if v, ok := m[Units].(float64); ok {
+		resUsage.Units = v
+	}
+	return resUsage
 }
 
 // Available returns the available number of units
@@ -300,4 +369,59 @@ func ResourceProfileLockKey(tnt, id string) string {
 // ResourceLockKey returns the ID used to lock a resource with guardian
 func ResourceLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheResources, tnt, id)
+}
+
+// AsMapStringInterface converts ResourceProfile struct to map[string]any
+func (rp *ResourceProfile) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		FilterIDs:         rp.FilterIDs,
+		UsageTTL:          rp.FilterIDs,
+		Limit:             rp.Limit,
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+		Weights:           rp.Weights,
+		ThresholdIDs:      rp.ThresholdIDs,
+	}
+}
+
+// MapStringInterfaceToResourceProfile converts map[string]any to ResourceProfile struct
+func MapStringInterfaceToResourceProfile(m map[string]any) (rp *ResourceProfile, err error) {
+	rp = &ResourceProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	if v, ok := m[UsageTTL].(string); ok {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
+			rp.UsageTTL = dur
+		}
+	} else if v, ok := m[UsageTTL].(float64); ok { // for -1 cases
+		rp.UsageTTL = time.Duration(v)
+	}
+	if v, ok := m[Limit].(float64); ok {
+		rp.Limit = v
+	}
+	if v, ok := m[AllocationMessage].(string); ok {
+		rp.AllocationMessage = v
+	}
+	if v, ok := m[Blocker].(bool); ok {
+		rp.Blocker = v
+	}
+	if v, ok := m[Stored].(bool); ok {
+		rp.Stored = v
+	}
+	rp.Weights = InterfaceToDynamicWeights(m[Weights])
+	rp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	return
 }

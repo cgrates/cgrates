@@ -65,3 +65,25 @@ CREATE TABLE attribute_profiles (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX attribute_profiles_idx ON attribute_profiles ("id");
+
+
+DROP TABLE IF EXISTS resource_profiles;
+CREATE TABLE resource_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  resource_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX resource_profiles_idx ON resource_profiles ("id");
+
+
+DROP TABLE IF EXISTS resources;
+CREATE TABLE resources (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  resource JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX resources_idx ON resources ("id");

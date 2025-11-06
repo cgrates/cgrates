@@ -67,3 +67,25 @@ CREATE TABLE attribute_profiles (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX attribute_profiles_idx ON attribute_profiles (`id`);
+
+DROP TABLE IF EXISTS resource_profiles;
+CREATE TABLE resource_profiles (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `resource_profile` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX resource_profiles_idx ON resource_profiles (`id`);
+
+DROP TABLE IF EXISTS resources;
+CREATE TABLE resources (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `resource` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX resources_idx ON resources (`id`);

@@ -110,6 +110,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfiles, tntID)
 	case utils.AttributeProfilePrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAttributeProfiles, tntID)
+	case utils.ResourceProfilesPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResourceProfiles, tntID)
+	case utils.ResourcesPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResources, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -627,7 +631,6 @@ func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id 
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-
 	return utils.MapStringInterfaceToAttributeProfile(result[0].AttributeProfile)
 }
 
@@ -656,6 +659,94 @@ func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, 
 	tx := sqls.db.Begin()
 	if err = tx.Model(&AttributeProfileMdl{}).Where(&AttributeProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&AttributeProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
+	var result []*ResourceProfileMdl
+	if err = sqls.db.Model(&ResourceProfileMdl{}).Where(&ResourceProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToResourceProfile(result[0].ResourceProfile)
+}
+
+func (sqls *SQLStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ResourceProfileMdl{
+		Tenant:          rsp.Tenant,
+		ID:              rsp.ID,
+		ResourceProfile: rsp.AsMapStringInterface(),
+	}
+	if err = tx.Model(&ResourceProfileMdl{}).Where(
+		ResourceProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ResourceProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&ResourceProfileMdl{}).Where(&ResourceProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&ResourceProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
+	var result []*ResourceJSONMdl
+	if err = sqls.db.Model(&ResourceJSONMdl{}).Where(&ResourceJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToResource(result[0].Resource), nil
+}
+
+func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ResourceJSONMdl{
+		Tenant:   r.Tenant,
+		ID:       r.ID,
+		Resource: r.AsMapStringInterface(),
+	}
+	if err = tx.Model(&ResourceJSONMdl{}).Where(
+		ResourceJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ResourceJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&ResourceJSONMdl{}).Where(&ResourceJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&ResourceJSONMdl{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -703,36 +794,6 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
 	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
 }
 
 // GetStatQueueProfileDrv DataDB method not implemented yet

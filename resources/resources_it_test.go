@@ -25,6 +25,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path"
 	"reflect"
 	"sort"
@@ -92,16 +93,23 @@ var (
 func TestResourceSIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		// rsConfigDIR = "resources_internal"
-		t.SkipNow()
+		rsConfigDIR = "resources_internal"
+		if err := os.MkdirAll("/tmp/internal_db/db", 0755); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+				t.Error(err)
+			}
+		})
 	case utils.MetaMongo:
 		rsConfigDIR = "resources_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		rsConfigDIR = "resources_redis"
 	case utils.MetaMySQL:
 		rsConfigDIR = "resources_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		rsConfigDIR = "resources_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
