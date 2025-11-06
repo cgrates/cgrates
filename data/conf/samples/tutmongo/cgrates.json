@@ -24,14 +24,14 @@
 			"db_host": "127.0.0.1",	
 			"db_port": 27017,
 			"db_name": "10",
-			"db_user": "cgrates",
+			"db_user": "cgrates"
 		},
 		"StorDB": {						 // The id of the DB connection
 			"db_type": "mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
 			"db_host": "127.0.0.1",	
 			"db_port": 27017,			 // db port to reach the database
 			"db_name": "cgrates",		 // the host to connect to
-			"db_user": "cgrates",
+			"db_user": "cgrates"
 		},
 	},
 	"items": {

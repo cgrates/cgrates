@@ -41,13 +41,14 @@ func Benchmark10IPsAllocated(b *testing.B) {
 		"db": {
 			"db_conns": {
 				"*default": {
-					"db_type": "*internal"
-				}
-			},
-			"opts":{
+					"db_type": "*internal",
+							"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
 			}
+				}
+			},
+
 		},
         "admins": {
 	       "enabled": true,

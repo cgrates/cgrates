@@ -45,13 +45,13 @@ func TestRPCExpIT(t *testing.T) {
 "db": {
   "db_conns": {
     "*default": {
-      "db_type": "*internal"
-      }
-  },
-  "opts":{
+      "db_type": "*internal",
+	    "opts":{
     "internalDBRewriteInterval": "0s",
     "internalDBDumpInterval": "0s"
   }
+      }
+  },
 },
 "ees": {
 	"enabled": true,
@@ -116,13 +116,13 @@ func TestRPCExpIT(t *testing.T) {
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
-    	}
-	},
-	"opts":{
+			"db_type": "*internal",
+			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
 	}
+    	}
+	},
 },
 "listen": {
 	"rpc_json": ":22012",

@@ -9,11 +9,11 @@
 		"*default": {
 			"db_type": "*internal",
 			"string_indexed_fields": ["RunID"],
-		},
-	},
-	"opts":{
+			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
+	}
+		},
 	}
 },
 

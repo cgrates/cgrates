@@ -54,20 +54,52 @@ func TestLoadConfig(t *testing.T) {
 	expDBcfg := &config.DbCfg{
 		DBConns: config.DBConns{
 			utils.StorDB: &config.DBConn{
-				Type:     utils.MetaMySQL,
-				Host:     "127.0.0.1",
-				Port:     "3306",
-				Name:     utils.CGRateSLwr,
-				User:     utils.CGRateSLwr,
-				Password: "CGRateS.org",
+				Type:                utils.MetaMySQL,
+				Host:                "127.0.0.1",
+				Port:                "3306",
+				Name:                utils.CGRateSLwr,
+				User:                utils.CGRateSLwr,
+				Password:            "CGRateS.org",
+				StringIndexedFields: []string{},
+				PrefixIndexedFields: []string{},
+				RmtConns:            []string{},
+				RplConns:            []string{},
+				Opts: &config.DBOpts{
+					InternalDBDumpPath:        "/var/lib/cgrates/internal_db/db",
+					InternalDBBackupPath:      "/var/lib/cgrates/internal_db/backup/db",
+					InternalDBStartTimeout:    300000000000,
+					InternalDBDumpInterval:    time.Minute,
+					InternalDBRewriteInterval: time.Hour,
+					InternalDBFileSizeLimit:   1073741824,
+					RedisMaxConns:             10,
+					RedisConnectAttempts:      20,
+					MongoQueryTimeout:         10 * time.Second,
+					MongoConnScheme:           "mongodb",
+					RedisClusterSync:          5 * time.Second,
+					RedisClusterOndownDelay:   0,
+					RedisCluster:              false,
+					RedisPoolPipelineWindow:   150 * time.Microsecond,
+					RedisTLS:                  false,
+					SQLMaxOpenConns:           100,
+					SQLMaxIdleConns:           10,
+					SQLLogLevel:               3,
+					SQLConnMaxLifetime:        0,
+					SQLDSNParams:              map[string]string{},
+					PgSSLMode:                 "disable",
+					MySQLLocation:             "Local",
+				},
 			},
 			utils.MetaDefault: &config.DBConn{
-				Type:     utils.MetaRedis,
-				Host:     "localhost",
-				Port:     "2012",
-				Name:     "100",
-				User:     "cgrates2",
-				Password: "toor",
+				Type:                utils.MetaRedis,
+				Host:                "localhost",
+				Port:                "2012",
+				Name:                "100",
+				User:                "cgrates2",
+				StringIndexedFields: []string{},
+				PrefixIndexedFields: []string{},
+				RmtConns:            []string{},
+				RplConns:            []string{},
+				Password:            "toor",
 				Opts: &config.DBOpts{
 					InternalDBDumpPath:        "/var/lib/cgrates/internal_db/db",
 					InternalDBBackupPath:      "/var/lib/cgrates/internal_db/backup/db",
@@ -111,7 +143,7 @@ func TestLoadConfig(t *testing.T) {
 	ldrCfg := loadConfig()
 	ldrCfg.DbCfg().Items = nil
 	if !reflect.DeepEqual(ldrCfg.DbCfg(), expDBcfg) {
-		t.Errorf("Expected %s received %s", utils.ToJSON(expDBcfg), utils.ToJSON(ldrCfg.DbCfg()))
+		t.Errorf("Expected %s \nreceived %s", utils.ToJSON(expDBcfg), utils.ToJSON(ldrCfg.DbCfg()))
 	}
 	if ldrCfg.GeneralCfg().DBDataEncoding != utils.MetaJSON {
 		t.Errorf("Expected %s received %s", utils.MetaJSON, ldrCfg.GeneralCfg().DBDataEncoding)

@@ -46,8 +46,9 @@ var (
 	}
 	getDftRemHstCfg = func() *RemoteHost { return new(RemoteHost) }
 
-	getDftEvExpCfg = func() *EventExporterCfg { return &EventExporterCfg{Opts: &EventExporterOpts{}} }
-	getDftEvRdrCfg = func() *EventReaderCfg { return &EventReaderCfg{Opts: &EventReaderOpts{}} }
+	getDftEvExpCfg  = func() *EventExporterCfg { return &EventExporterCfg{Opts: &EventExporterOpts{}} }
+	getDftEvRdrCfg  = func() *EventReaderCfg { return &EventReaderCfg{Opts: &EventReaderOpts{}} }
+	getDftDBConnCfg = func() *DBConn { return &DBConn{} }
 )
 
 func init() {
@@ -64,6 +65,13 @@ func init() {
 	for _, exp := range cgrCfg.eesCfg.Exporters {
 		if exp.ID == utils.MetaDefault {
 			getDftEvExpCfg = exp.Clone
+			break
+		}
+	}
+
+	for id, dbconnCfg := range cgrCfg.dbCfg.DBConns {
+		if id == utils.MetaDefault {
+			getDftDBConnCfg = dbconnCfg.Clone
 			break
 		}
 	}

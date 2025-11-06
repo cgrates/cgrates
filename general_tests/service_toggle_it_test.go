@@ -51,13 +51,13 @@ func TestServiceToggle(t *testing.T) {
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
-    	}
-	},
-	"opts":{
+			"db_type": "*internal",
+			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
 	}
+    	}
+	},
 },
 "accounts": {
 	"enabled": %[1]v

@@ -22,15 +22,15 @@
 			"db_name": "10" 	
 		},
 		"StorDB": {						
-			"db_type": "internal"
+			"db_type": "internal",
+				"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 		}
 	},
 	"items": {
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
-	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
 	}
 },
 

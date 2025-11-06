@@ -72,13 +72,13 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
-    	}
-	},
-	"opts":{
+			"db_type": "*internal",
+				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
 	}
+    	}
+	},
 },
 "radius_agent": {
 	"client_dictionaries": {

@@ -362,9 +362,7 @@ func (dbcfg *DbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 		for kJsn, vJsn := range jsnDbCfg.Db_conns {
 			if _, exists := dbcfg.DBConns[kJsn]; !exists {
-				dbcfg.DBConns[kJsn] = &DBConn{
-					Opts: &DBOpts{},
-				}
+				dbcfg.DBConns[kJsn] = getDftDBConnCfg()
 			}
 			if err = dbcfg.DBConns[kJsn].loadFromJSONCfg(vJsn); err != nil {
 				return err

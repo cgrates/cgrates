@@ -57,7 +57,11 @@ func TestDiameterAgentCapsIT(t *testing.T) {
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
+			"db_type": "*internal",
+			"opts":{
+			"internalDBDumpInterval": "0",	
+			"internalDBRewriteInterval": "0"
+	}
     	}
 	},
 },
