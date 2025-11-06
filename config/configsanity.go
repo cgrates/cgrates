@@ -1033,6 +1033,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		utils.MetaActionProfiles,
 		utils.MetaChargerProfiles,
 		utils.MetaAttributeProfiles,
+		utils.MetaResourceProfiles,
+		utils.MetaResources,
 	}
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {

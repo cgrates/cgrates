@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"os"
 	"path"
 	"testing"
 
@@ -55,15 +56,23 @@ var (
 func TestRsV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		rlsV1ConfDIR = "tutinternal"
+		rlsV1ConfDIR = "resources_internal"
+		if err := os.MkdirAll("/tmp/internal_db/db", 0755); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+				t.Error(err)
+			}
+		})
 	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
 		rlsV1ConfDIR = "tutmysql"
+	case utils.MetaMySQL:
+		rlsV1ConfDIR = "resources_mysql"
 	case utils.MetaMongo:
 		rlsV1ConfDIR = "tutmongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		rlsV1ConfDIR = "resources_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

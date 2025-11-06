@@ -448,3 +448,25 @@ type AttributeProfileMdl struct {
 func (AttributeProfileMdl) TableName() string {
 	return utils.TBLAttributeProfiles
 }
+
+type ResourceProfileMdl struct {
+	PK              uint        `gorm:"primary_key"`
+	Tenant          string      `index:"0" re:".*"`
+	ID              string      `index:"1" re:".*"`
+	ResourceProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ResourceProfileMdl) TableName() string {
+	return utils.TBLResourceProfiles
+}
+
+type ResourceJSONMdl struct {
+	PK       uint        `gorm:"primary_key"`
+	Tenant   string      `index:"0" re:".*"`
+	ID       string      `index:"1" re:".*"`
+	Resource utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ResourceJSONMdl) TableName() string {
+	return utils.TBLResources
+}

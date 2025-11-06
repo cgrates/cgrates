@@ -9,9 +9,9 @@
 		"*default": {
 			"db_type": "*internal",
 			"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
+				"internalDBDumpPath": "/tmp/internal_db/db",
+				"internalDBDumpInterval": "-1"
+			}
     	}
 	}
 },
