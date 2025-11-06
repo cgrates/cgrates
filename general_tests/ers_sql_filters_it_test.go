@@ -1572,13 +1572,13 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql`,
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
-    	}
-	},
-	"opts":{
+			"db_type": "*internal",
+			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
 	}
+    	}
+	},
 },
 
 "admins": {

@@ -21,13 +21,13 @@
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
-		},
-	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
+			"db_type": "*internal",
+			"opts":{
+				"internalDBRewriteInterval": "0",
+				"internalDBDumpInterval": "0"
 	}
+		}
+	},
 },
 
 "cdrs": {

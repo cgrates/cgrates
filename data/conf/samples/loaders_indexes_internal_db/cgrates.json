@@ -26,6 +26,10 @@
             "db_type": "*internal",
             "remote_conns": ["engine"],
             "replication_conns": ["engine"],
+            "opts":{
+	        	"internalDBRewriteInterval": "0s",
+		        "internalDBDumpInterval": "0s"
+	        }
 	    },
 	},
     "items":{
@@ -57,11 +61,7 @@
 		"*rate_filter_indexes" : {"replicate": true},
 		"*action_profile_filter_indexes" : {"replicate": true},
 		"*account_filter_indexes" : {"replicate": true}
-    },
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
+    }
 },
 
 

@@ -73,13 +73,13 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	"db_conns": {
 		"*default": {	
 			"db_type": "*internal",
-			"string_indexed_fields": ["RunID"]
+			"string_indexed_fields": ["RunID"],
+				"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
 		},
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
 },
 
 "rates": {

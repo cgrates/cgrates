@@ -30,6 +30,10 @@
 			"db_type": "*internal",
 			"replication_conns": ["conn2"],
 			"replication_filtered": true,
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+		}
 		},
 	},
 	"items":{
@@ -48,10 +52,6 @@
 		"*load_ids":{"remote":false,"replicate":true},
 		"*action_profiles":{"remote":false,"replicate":true},
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
 },
 
 

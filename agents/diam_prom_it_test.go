@@ -55,12 +55,12 @@ func TestDiamPrometheus(t *testing.T) {
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal"
+			"db_type": "*internal",
+				"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
     	}
-	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
 	}
 },
 "sessions": {

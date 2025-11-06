@@ -57,13 +57,13 @@ func BenchmarkStressIPsAllocateIP(b *testing.B) {
 	"db": {
 		"db_conns": {
 			"*default": {
-				"db_type": "*internal"
-			}
-		},
-		"opts":{
+				"db_type": "*internal",
+						"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"
 		}
+			}
+		},
 	},
   "ips": {
     "enabled": true,
@@ -154,7 +154,7 @@ func TestStressIPsAuthorize(t *testing.T) {
 					"db_host": "127.0.0.1",
 					"db_port": 6379,
 					"db_name": "10",
-					"db_user": "cgrates"
+					"db_user": "cgrates",
 				},
 				"StorDB": {
 					"db_type": "mysql",
@@ -162,16 +162,17 @@ func TestStressIPsAuthorize(t *testing.T) {
 					"db_port": 3306,
 					"db_name": "cgrates",
 					"db_user": "cgrates",
-					"db_password": "CGRateS.org"
+					"db_password": "CGRateS.org",
+				"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
 				}
 			},
 			"items": {
 				"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 			},
-			"opts":{
-				"internalDBRewriteInterval": "0s",
-				"internalDBDumpInterval": "0s"
-			}
+
 		},
 		
         "admins": {

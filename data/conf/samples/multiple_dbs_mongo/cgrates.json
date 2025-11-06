@@ -23,7 +23,11 @@
 			"db_name": "10"
 		},
 		"internalDBConn": {
-			"db_type": "*internal"
+			"db_type": "*internal",
+	     	"opts": {
+		      "internalDBDumpPath": "/tmp/internal_db/db",
+		    	"internalDBRewriteInterval": "0s"
+	}
 		},
 		"mongoDBConn": {
 			"db_type": "mongo",
@@ -37,10 +41,6 @@
 		"*charger_profiles": {"dbConn": "mongoDBConn"},
 		"*charger_filter_indexes" : {"dbConn": "internalDBConn"},
 		"*cdrs": {"dbConn": "mongoDBConn"}
-	},
-	"opts": {
-		"internalDBDumpPath": "/tmp/internal_db/db",
-		"internalDBRewriteInterval": "0s"
 	}
 },
 

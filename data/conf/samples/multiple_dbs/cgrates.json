@@ -20,10 +20,14 @@
 		"*default": {
 			"db_type": "*redis",		
 			"db_port": 6379, 	
-			"db_name": "10"
+			"db_name": "10",
 		},
 		"intrnl": {
-			"db_type": "*internal"
+			"db_type": "*internal",
+			"opts": {
+				"internalDBDumpPath": "/tmp/internal_db/db",
+				"internalDBRewriteInterval": "0s"
+			}
 		},
 		"redis2": {
 			"db_type": "*redis",		
@@ -43,10 +47,6 @@
 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "redis2"},
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "intrnl"},
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
-	},
-	"opts": {
-		"internalDBDumpPath": "/tmp/internal_db/db",
-		"internalDBRewriteInterval": "0s"
 	}
 },
 

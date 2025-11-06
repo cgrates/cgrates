@@ -9,16 +9,16 @@
     "db": {
 		"db_conns": {
 			"*default": {
-				"db_type": "*internal"
+				"db_type": "*internal",
+				  "opts":{
+           	 "internalDBDumpInterval": "500ms",
+            	"internalDBRewriteInterval": "500ms",
+        	    "internalDBFileSizeLimit": "4k"	
+        }
 			}
 		},
         "items":{
             "*charger_profiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
-        },
-        "opts":{
-            "internalDBDumpInterval": "500ms",
-            "internalDBRewriteInterval": "500ms",
-            "internalDBFileSizeLimit": "4k"	
         }
     },
 	"config_db": {

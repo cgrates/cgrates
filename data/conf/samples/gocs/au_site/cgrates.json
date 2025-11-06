@@ -36,6 +36,10 @@
 		  "*default": {
         "db_type": "*internal",
         "remote_conns": ["rmtConn"],
+        "opts":{
+		      "internalDBRewriteInterval": "0s",
+		       "internalDBDumpInterval": "0s"
+	    }
 	    },
       "StorDB": {						
 			  "db_type": "mysql",			 
@@ -54,11 +58,7 @@
       "*charger_profiles": {"remote":true, "dbConn": "*default"},
       "*load_ids":{"remote":true, "dbConn": "*default"},
       "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
-    },
-   	"opts":{
-		  "internalDBRewriteInterval": "0s",
-		  "internalDBDumpInterval": "0s"
-	  }
+    }
   },
 
   "rates": {

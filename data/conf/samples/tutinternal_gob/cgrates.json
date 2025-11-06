@@ -29,11 +29,11 @@
 	"db_conns": {
 		"*default": {
 			"db_type": "*internal",	
-    	}
-	},
-	"opts":{
+			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
+	}
+    	}
 	}
 },
 
