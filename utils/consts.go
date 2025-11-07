@@ -505,6 +505,7 @@ const (
 	CDRKey                = "CDR"
 	CDRs                  = "CDRs"
 	ExpiryTime            = "ExpiryTime"
+	EventID               = "EventID"
 	AllowNegative         = "AllowNegative"
 	Disabled              = "Disabled"
 	Action                = "Action"
@@ -1919,6 +1920,8 @@ const (
 	TBLAttributeProfiles = "attribute_profiles"
 	TBLResourceProfiles  = "resource_profiles"
 	TBLResources         = "resources"
+	TBLStatQueueProfiles = "stat_queue_profiles"
+	TBLStatQueues        = "stat_queues"
 	OldSMCosts           = "sm_costs"
 	TBLTPDispatchers     = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts = "tp_dispatcher_hosts"
@@ -2699,6 +2702,9 @@ const (
 	// Stats
 	OptsStatsProfileIDs  = "*statsProfileIDs"
 	OptsRoundingDecimals = "*roundingDecimals"
+	SQItems              = "SQItems"
+	SQMetrics            = "SQMetrics"
+	Compressed           = "Compressed"
 
 	// Thresholds
 	ThresholdHit = "ThresholdHit"

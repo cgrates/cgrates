@@ -470,3 +470,25 @@ type ResourceJSONMdl struct {
 func (ResourceJSONMdl) TableName() string {
 	return utils.TBLResources
 }
+
+type StatQueueProfileMdl struct {
+	PK               uint        `gorm:"primary_key"`
+	Tenant           string      `index:"0" re:".*"`
+	ID               string      `index:"1" re:".*"`
+	StatQueueProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (StatQueueProfileMdl) TableName() string {
+	return utils.TBLStatQueueProfiles
+}
+
+type StatQueueMdl struct {
+	PK        uint        `gorm:"primary_key"`
+	Tenant    string      `index:"0" re:".*"`
+	ID        string      `index:"1" re:".*"`
+	StatQueue utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (StatQueueMdl) TableName() string {
+	return utils.TBLStatQueues
+}

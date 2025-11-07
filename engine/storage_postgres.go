@@ -33,9 +33,13 @@ type PostgresStorage struct {
 }
 
 // NewPostgresStorage returns the posgres DB
-func NewPostgresStorage(host, port, name, user, password, sslmode, sslcert,
+func NewPostgresStorage(host, port, name, user, password, mrshlerStr, sslmode, sslcert,
 	sslkey, sslpassword, sslcertmode, sslrootcert string,
 	maxConn, maxIdleConn, sqlLogLevel int, connMaxLifetime time.Duration) (*SQLStorage, error) {
+	ms, err := utils.NewMarshaler(mrshlerStr)
+	if err != nil {
+		return nil, err
+	}
 	connStr := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 		host, port, name, user, password, sslmode)
@@ -73,6 +77,7 @@ func NewPostgresStorage(host, port, name, user, password, sslmode, sslcert,
 	return &SQLStorage{
 		DB:      pgStor.DB,
 		db:      pgStor.db,
+		ms:      ms,
 		DataDB:  pgStor,
 		SQLImpl: pgStor,
 	}, nil

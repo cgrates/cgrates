@@ -87,3 +87,24 @@ CREATE TABLE resources (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX resources_idx ON resources ("id");
+
+DROP TABLE IF EXISTS stat_queue_profiles;
+CREATE TABLE stat_queue_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  stat_queue_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX stat_queue_profiles_idx ON stat_queue_profiles ("id");
+
+
+DROP TABLE IF EXISTS stat_queues;
+CREATE TABLE stat_queues (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  stat_queue JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX stat_queues_idx ON stat_queues ("id");
