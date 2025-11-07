@@ -102,6 +102,8 @@ type DBConn struct {
 	RplConns            []string // Replication connIDs
 	RplFiltered         bool
 	RplCache            string
+	RplFailedDir        string
+	RplInterval         time.Duration
 	Opts                *DBOpts
 }
 
@@ -168,6 +170,15 @@ func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
 	}
 	if jsnDbConnCfg.Replication_cache != nil {
 		dbC.RplCache = *jsnDbConnCfg.Replication_cache
+	}
+	if jsnDbConnCfg.RplFailedDir != nil {
+		dbC.RplFailedDir = *jsnDbConnCfg.RplFailedDir
+	}
+	if jsnDbConnCfg.RplInterval != nil {
+		dbC.RplInterval, err = utils.ParseDurationWithNanosecs(*jsnDbConnCfg.RplInterval)
+		if err != nil {
+			return
+		}
 	}
 	if jsnDbConnCfg.Opts != nil {
 		err = dbC.Opts.loadFromJSONCfg(jsnDbConnCfg.Opts)
@@ -449,16 +460,18 @@ func (dbcfg DbCfg) Clone() (cln *DbCfg) {
 // Clone returns the cloned object
 func (dbC *DBConn) Clone() (cln *DBConn) {
 	cln = &DBConn{
-		Type:        dbC.Type,
-		Host:        dbC.Host,
-		Port:        dbC.Port,
-		Name:        dbC.Name,
-		User:        dbC.User,
-		Password:    dbC.Password,
-		RplFiltered: dbC.RplFiltered,
-		RplCache:    dbC.RplCache,
-		RmtConnID:   dbC.RmtConnID,
-		Opts:        dbC.Opts.Clone(),
+		Type:         dbC.Type,
+		Host:         dbC.Host,
+		Port:         dbC.Port,
+		Name:         dbC.Name,
+		User:         dbC.User,
+		Password:     dbC.Password,
+		RplFiltered:  dbC.RplFiltered,
+		RplCache:     dbC.RplCache,
+		RmtConnID:    dbC.RmtConnID,
+		RplFailedDir: dbC.RplFailedDir,
+		RplInterval:  dbC.RplInterval,
+		Opts:         dbC.Opts.Clone(),
 	}
 	if dbC.StringIndexedFields != nil {
 		cln.StringIndexedFields = slices.Clone(dbC.StringIndexedFields)
@@ -528,19 +541,21 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			opts[utils.PgSSLRootCertCfg] = dbc.Opts.PgSSLRootCert
 		}
 		dbConns[k] = map[string]any{
-			utils.DataDbTypeCfg:          dbc.Type,
-			utils.DataDbHostCfg:          dbc.Host,
-			utils.DataDbNameCfg:          dbc.Name,
-			utils.DataDbUserCfg:          dbc.User,
-			utils.DataDbPassCfg:          dbc.Password,
-			utils.StringIndexedFieldsCfg: dbc.StringIndexedFields,
-			utils.PrefixIndexedFieldsCfg: dbc.PrefixIndexedFields,
-			utils.RemoteConnsCfg:         dbc.RmtConns,
-			utils.RemoteConnIDCfg:        dbc.RmtConnID,
-			utils.ReplicationConnsCfg:    dbc.RplConns,
-			utils.ReplicationFilteredCfg: dbc.RplFiltered,
-			utils.ReplicationCache:       dbc.RplCache,
-			utils.OptsCfg:                opts,
+			utils.DataDbTypeCfg:           dbc.Type,
+			utils.DataDbHostCfg:           dbc.Host,
+			utils.DataDbNameCfg:           dbc.Name,
+			utils.DataDbUserCfg:           dbc.User,
+			utils.DataDbPassCfg:           dbc.Password,
+			utils.StringIndexedFieldsCfg:  dbc.StringIndexedFields,
+			utils.PrefixIndexedFieldsCfg:  dbc.PrefixIndexedFields,
+			utils.RemoteConnsCfg:          dbc.RmtConns,
+			utils.RemoteConnIDCfg:         dbc.RmtConnID,
+			utils.ReplicationConnsCfg:     dbc.RplConns,
+			utils.ReplicationFilteredCfg:  dbc.RplFiltered,
+			utils.ReplicationCache:        dbc.RplCache,
+			utils.ReplicationFailedDirCfg: dbc.RplFailedDir,
+			utils.ReplicationIntervalCfg:  dbc.RplInterval.String(),
+			utils.OptsCfg:                 opts,
 		}
 		if dbc.Port != "" {
 			dbConns[k][utils.DataDbPortCfg], _ = strconv.Atoi(dbc.Port)
@@ -761,6 +776,8 @@ type DbConnJson struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
+	RplFailedDir          *string `json:"replication_failed_dir"`
+	RplInterval           *string `json:"replication_interval"`
 	Opts                  *DBOptsJson
 }
 
@@ -927,6 +944,12 @@ func diffDataDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	}
 	if v1.RplCache != v2.RplCache {
 		d.Replication_cache = utils.StringPointer(v2.RplCache)
+	}
+	if v1.RplFailedDir != v2.RplFailedDir {
+		d.RplFailedDir = utils.StringPointer(v2.RplFailedDir)
+	}
+	if v1.RplInterval != v2.RplInterval {
+		d.RplInterval = utils.StringPointer(v2.RplInterval.String())
 	}
 	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
