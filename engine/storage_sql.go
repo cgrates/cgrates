@@ -44,6 +44,7 @@ type SQLImpl interface {
 type SQLStorage struct {
 	DB *sql.DB
 	db *gorm.DB
+	ms utils.Marshaler
 	DataDB
 	SQLImpl
 }
@@ -114,6 +115,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResourceProfiles, tntID)
 	case utils.ResourcesPrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResources, tntID)
+	case utils.StatQueueProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueueProfiles, tntID)
+	case utils.StatQueuePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueues, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -754,6 +759,103 @@ func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id strin
 	return
 }
 
+func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
+	var result []*StatQueueProfileMdl
+	if err = sqls.db.Model(&StatQueueProfileMdl{}).Where(&StatQueueProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return MapStringInterfaceToStatQueueProfile(result[0].StatQueueProfile)
+}
+
+func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &StatQueueProfileMdl{
+		Tenant:           sq.Tenant,
+		ID:               sq.ID,
+		StatQueueProfile: sq.AsMapStringInterface(),
+	}
+	if err = tx.Model(&StatQueueProfileMdl{}).Where(
+		StatQueueProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		StatQueueProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&StatQueueProfileMdl{}).Where(&StatQueueProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&StatQueueProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+	var result []*StatQueueMdl
+	if err = sqls.db.Model(&StatQueueMdl{}).Where(&StatQueueMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	ssq, err := MapStringInterfaceToStoredStatQueue(result[0].StatQueue)
+	if err != nil {
+		return nil, err
+	}
+	return ssq.AsStatQueue(sqls.ms)
+}
+
+func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+	if ssq == nil {
+		if ssq, err = NewStoredStatQueue(sq, sqls.ms); err != nil {
+			return
+		}
+	}
+	tx := sqls.db.Begin()
+	mdl := &StatQueueMdl{
+		Tenant:    ssq.Tenant,
+		ID:        ssq.ID,
+		StatQueue: ssq.AsMapStringInterface(),
+	}
+	if err = tx.Model(&StatQueueMdl{}).Where(
+		StatQueueMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		StatQueueMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&StatQueueMdl{}).Where(&StatQueueMdl{Tenant: tenant, ID: id}).
+		Delete(&StatQueueMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // AddLoadHistory DataDB method not implemented yet
 func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
@@ -794,36 +896,6 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
 	return nil, utils.ErrNotImplemented
-}
-
-// GetStatQueueProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// SetStatQueueProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// RemStatQueueProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// GetStatQueueDrv DataDB method not implemented yet
-func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// SetStatQueueDrv DataDB method not implemented yet
-func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// RemStatQueueDrv DataDB method not implemented yet
-func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
 }
 
 // DataDB method not implemented yet

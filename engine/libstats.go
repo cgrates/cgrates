@@ -20,6 +20,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
@@ -614,6 +615,65 @@ func (sq *StatQueue) CacheClone() any {
 	return sq.Clone()
 }
 
+// AsMapStringInterface converts StoredStatQueue struct to map[string]any
+func (ssq *StoredStatQueue) AsMapStringInterface() map[string]any {
+	if ssq == nil {
+		return nil
+	}
+	return map[string]any{
+		utils.Tenant:     ssq.Tenant,
+		utils.ID:         ssq.ID,
+		utils.SQItems:    ssq.SQItems,
+		utils.SQMetrics:  ssq.SQMetrics,
+		utils.Compressed: ssq.Compressed,
+	}
+}
+
+// MapStringInterfaceToStoredStatQueue converts map[string]any to StoredStatQueue struct
+func MapStringInterfaceToStoredStatQueue(m map[string]any) (*StoredStatQueue, error) {
+	ssq := &StoredStatQueue{}
+	if v, ok := m[utils.Tenant].(string); ok {
+		ssq.Tenant = v
+	}
+	if v, ok := m[utils.ID].(string); ok {
+		ssq.ID = v
+	}
+	if items, ok := m[utils.SQItems].([]any); ok {
+		for _, item := range items {
+			if itemMap, ok := item.(map[string]any); ok {
+				sqItem := SQItem{}
+				if eventID, ok := itemMap[utils.EventID].(string); ok {
+					sqItem.EventID = eventID
+				}
+				if expiryTime, ok := itemMap[utils.ExpiryTime].(*time.Time); ok {
+					sqItem.ExpiryTime = expiryTime
+				} else if expiryStr, ok := itemMap[utils.ExpiryTime].(string); ok {
+					if parsedTime, err := time.Parse(time.RFC3339, expiryStr); err == nil {
+						sqItem.ExpiryTime = &parsedTime
+					}
+				}
+				ssq.SQItems = append(ssq.SQItems, sqItem)
+			}
+		}
+	}
+	if metrics, ok := m[utils.SQMetrics].(map[string]any); ok {
+		ssq.SQMetrics = make(map[string][]byte)
+		for key, value := range metrics {
+			if metricBytes, ok := value.(string); ok {
+				decodedBytes, err := base64.StdEncoding.DecodeString(metricBytes)
+				if err != nil {
+					return nil, fmt.Errorf("failed to decode base64 string: %v", err)
+				}
+				ssq.SQMetrics[key] = decodedBytes
+			}
+		}
+	}
+	if v, ok := m[utils.Compressed].(bool); ok {
+		ssq.Compressed = v
+	}
+	return ssq, nil
+}
+
 // unlockStatQueues unlocks all locked StatQueues in the given slice.
 func unlockStatQueues(sqs []*StatQueue) {
 	for _, sq := range sqs {
@@ -866,4 +926,82 @@ func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ any, err erro
 	case utils.Blockers:
 		return mf.Blockers, nil
 	}
+}
+
+// AsMapStringInterface converts StatQueueProfile struct to map[string]any
+func (sqp *StatQueueProfile) AsMapStringInterface() map[string]any {
+	if sqp == nil {
+		return nil
+	}
+	return map[string]any{
+		utils.Tenant:       sqp.Tenant,
+		utils.ID:           sqp.ID,
+		utils.FilterIDs:    sqp.FilterIDs,
+		utils.Weights:      sqp.Weights,
+		utils.Blockers:     sqp.Blockers,
+		utils.QueueLength:  sqp.QueueLength,
+		utils.TTL:          sqp.TTL,
+		utils.MinItems:     sqp.MinItems,
+		utils.Stored:       sqp.Stored,
+		utils.ThresholdIDs: sqp.ThresholdIDs,
+		utils.Metrics:      sqp.Metrics,
+	}
+}
+
+// MapStringInterfaceToStatQueueProfile converts map[string]any to StatQueueProfile struct
+func MapStringInterfaceToStatQueueProfile(m map[string]any) (*StatQueueProfile, error) {
+	sqp := &StatQueueProfile{}
+	if v, ok := m[utils.Tenant].(string); ok {
+		sqp.Tenant = v
+	}
+	if v, ok := m[utils.ID].(string); ok {
+		sqp.ID = v
+	}
+	sqp.FilterIDs = utils.InterfaceToStringSlice(m[utils.FilterIDs])
+	sqp.Weights = utils.InterfaceToDynamicWeights(m[utils.Weights])
+	sqp.Blockers = utils.InterfaceToDynamicBlockers(m[utils.Blockers])
+	if v, ok := m[utils.QueueLength].(float64); ok {
+		sqp.QueueLength = int(v)
+	}
+	if v, ok := m[utils.TTL].(string); ok {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
+			sqp.TTL = dur
+		}
+	} else if v, ok := m[utils.TTL].(float64); ok { // for -1 cases
+		sqp.TTL = time.Duration(v)
+	}
+	if v, ok := m[utils.MinItems].(float64); ok {
+		sqp.MinItems = int(v)
+	}
+	if v, ok := m[utils.Stored].(bool); ok {
+		sqp.Stored = v
+	}
+	sqp.ThresholdIDs = utils.InterfaceToStringSlice(m[utils.ThresholdIDs])
+	sqp.Metrics = InterfaceToMetrics(m[utils.Metrics])
+	return sqp, nil
+}
+
+func InterfaceToMetrics(v any) []*MetricWithFilters {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case []any:
+		result := make([]*MetricWithFilters, 0, len(val))
+		for _, item := range val {
+			if itemMap, ok := item.(map[string]any); ok {
+				metric := &MetricWithFilters{}
+				if metricID, ok := itemMap[utils.MetricID].(string); ok {
+					metric.MetricID = metricID
+				}
+				metric.FilterIDs = utils.InterfaceToStringSlice(itemMap[utils.FilterIDs])
+				metric.Blockers = utils.InterfaceToDynamicBlockers(itemMap[utils.Blockers])
+				result = append(result, metric)
+			}
+		}
+		return result
+	}
+	return nil
 }

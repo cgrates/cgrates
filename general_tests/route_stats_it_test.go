@@ -64,13 +64,13 @@ func TestRtStatsCaseV1IT(t *testing.T) {
 	case utils.MetaInternal:
 		RtStatsSv1ConfDIR = "routes_cases_internal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		RtStatsSv1ConfDIR = "routes_cases_redis"
 	case utils.MetaMySQL:
 		RtStatsSv1ConfDIR = "routes_cases_mysql"
 	case utils.MetaMongo:
 		RtStatsSv1ConfDIR = "routes_cases_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		RtStatsSv1ConfDIR = "routes_cases_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

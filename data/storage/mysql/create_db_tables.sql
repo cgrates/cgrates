@@ -89,3 +89,25 @@ CREATE TABLE resources (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX resources_idx ON resources (`id`);
+
+DROP TABLE IF EXISTS stat_queue_profiles;
+CREATE TABLE stat_queue_profiles (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `stat_queue_profile` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX stat_queue_profiles_idx ON stat_queue_profiles (`id`);
+
+DROP TABLE IF EXISTS stat_queues;
+CREATE TABLE stat_queues (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `stat_queue` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX stat_queues_idx ON stat_queues (`id`);

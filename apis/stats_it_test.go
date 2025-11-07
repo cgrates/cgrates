@@ -89,11 +89,11 @@ func TestStatsIT(t *testing.T) {
 	case utils.MetaMongo:
 		sqConfigDIR = "stats_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		sqConfigDIR = "stats_redis"
 	case utils.MetaMySQL:
 		sqConfigDIR = "stats_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		sqConfigDIR = "stats_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

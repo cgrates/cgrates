@@ -55,12 +55,12 @@ func NewDataDBConn(dbType, host, port, name, user,
 		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass,
 			marshaler, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
-		d, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
+		d, err = NewPostgresStorage(host, port, name, user, pass, marshaler, opts.PgSSLMode,
 			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode,
 			opts.PgSSLRootCert, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
 			opts.SQLLogLevel, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns,
+		d, err = NewMySQLStorage(host, port, name, user, pass, marshaler, opts.SQLMaxOpenConns,
 			opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime,
 			opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
