@@ -156,9 +156,7 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-	for dataDBKey := range db.dm.DataDB() {
-		db.dm.DataDB()[dataDBKey].Close()
-	}
+	db.dm.Close()
 	return nil
 }
 

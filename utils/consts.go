@@ -2124,6 +2124,8 @@ const (
 	ReplicationFilteredCfg       = "replication_filtered"
 	ReplicationCache             = "replication_cache"
 	RemoteConnIDCfg              = "remote_conn_id"
+	ReplicationFailedDirCfg      = "replication_failed_dir"
+	ReplicationIntervalCfg       = "replication_interval"
 )
 
 // ItemOpt

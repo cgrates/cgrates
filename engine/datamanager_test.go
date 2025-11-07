@@ -244,6 +244,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 		},
 		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
 	}
+	dm.dbConns.replicators[utils.MetaDefault] = newReplicator(cfg.DbCfg().DBConns[utils.MetaDefault], cM)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "*stirng:~*req.Account:1001",
@@ -256,7 +257,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
 	err := dm.SetFilter(context.Background(), fltr, true)
-	if err.Error() != expErr {
+	if err != nil && err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 }

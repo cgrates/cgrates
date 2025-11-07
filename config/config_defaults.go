@@ -122,6 +122,8 @@ const CGRATES_CFG_JSON = `
 			"replication_conns": [],		// the conns the items are replicated
 			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
 			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+			"replication_failed_dir": "", 		// directory for failed batch replications (used when interval > 0)
+			"replication_interval": "", 		// interval between batched replications (0 for immediate)
 			"opts":{
 	        	"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
 	        	"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.Backupdb when "BackupFolderPath" is not provided

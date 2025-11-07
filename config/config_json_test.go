@@ -290,6 +290,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replication_filtered:  utils.BoolPointer(false),
 				Remote_conn_id:        utils.StringPointer(utils.EmptyString),
 				Replication_cache:     utils.StringPointer(utils.EmptyString),
+				RplFailedDir:          utils.StringPointer(utils.EmptyString),
+				RplInterval:           utils.StringPointer(utils.EmptyString),
 				Opts: &DBOptsJson{
 					InternalDBDumpPath:        utils.StringPointer("/var/lib/cgrates/internal_db/db"),
 					InternalDBBackupPath:      utils.StringPointer("/var/lib/cgrates/internal_db/backup/db"),
