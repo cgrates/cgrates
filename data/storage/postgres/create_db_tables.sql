@@ -108,3 +108,25 @@ CREATE TABLE stat_queues (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX stat_queues_idx ON stat_queues ("id");
+
+
+DROP TABLE IF EXISTS threshold_profiles;
+CREATE TABLE threshold_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  threshold_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX threshold_profiles_idx ON threshold_profiles ("id");
+
+
+DROP TABLE IF EXISTS thresholds;
+CREATE TABLE thresholds (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  threshold JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX thresholds_idx ON thresholds ("id");

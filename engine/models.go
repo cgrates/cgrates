@@ -492,3 +492,25 @@ type StatQueueMdl struct {
 func (StatQueueMdl) TableName() string {
 	return utils.TBLStatQueues
 }
+
+type ThresholdProfileMdl struct {
+	PK               uint        `gorm:"primary_key"`
+	Tenant           string      `index:"0" re:".*"`
+	ID               string      `index:"1" re:".*"`
+	ThresholdProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ThresholdProfileMdl) TableName() string {
+	return utils.TBLThresholdProfiles
+}
+
+type ThresholdJSONMdl struct {
+	PK        uint        `gorm:"primary_key"`
+	Tenant    string      `index:"0" re:".*"`
+	ID        string      `index:"1" re:".*"`
+	Threshold utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (ThresholdJSONMdl) TableName() string {
+	return utils.TBLThresholds
+}
