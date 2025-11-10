@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-export DH_VERBOSE=1
+#export DH_VERBOSE=1
 
 # Enable hardening build flags
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
@@ -26,7 +26,7 @@ execute_after_dh_auto_configure:
 	(mkdir -p _build/pkg && cd _build/pkg && ln -s ../../dependencies/pkg/* .)
 
 override_dh_auto_build:
-	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_build -- \
+	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" DH_VERBOSE=1 dh_auto_build -- \
 	-ldflags "-X 'github.com/cgrates/cgrates/utils.GitCommitDate=$$GIT_COMMIT_DATE' \
 	          -X 'github.com/cgrates/cgrates/utils.GitCommitHash=$$GIT_COMMIT_HASH'"
 
