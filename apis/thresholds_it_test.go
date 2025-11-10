@@ -78,11 +78,11 @@ func TestThresholdsIT(t *testing.T) {
 	case utils.MetaMongo:
 		thConfigDIR = "thresholds_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		thConfigDIR = "thresholds_redis"
 	case utils.MetaMySQL:
 		thConfigDIR = "thresholds_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		thConfigDIR = "thresholds_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

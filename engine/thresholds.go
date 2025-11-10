@@ -220,6 +220,40 @@ func (t *Threshold) isLocked() bool {
 	return t.lkID != utils.EmptyString
 }
 
+// AsMapStringInterface converts Threshold struct to map[string]any
+func (t *Threshold) AsMapStringInterface() map[string]any {
+	if t == nil {
+		return nil
+	}
+	return map[string]any{
+		utils.Tenant: t.Tenant,
+		utils.ID:     t.ID,
+		utils.Hits:   t.Hits,
+		utils.Snooze: t.Snooze,
+	}
+}
+
+// MapStringInterfaceToThreshold converts map[string]any to Threshold struct
+func MapStringInterfaceToThreshold(m map[string]any) (*Threshold, error) {
+	th := &Threshold{}
+
+	if v, ok := m[utils.Tenant].(string); ok {
+		th.Tenant = v
+	}
+	if v, ok := m[utils.ID].(string); ok {
+		th.ID = v
+	}
+	if v, ok := m[utils.Hits].(float64); ok {
+		th.Hits = int(v)
+	}
+	if v, ok := m[utils.Snooze].(string); ok {
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			th.Snooze = t
+		}
+	}
+	return th, nil
+}
+
 // unlockThresholds unlocks all locked Thresholds in the given slice.
 func unlockThresholds(ts []*Threshold) {
 	for _, t := range ts {
@@ -840,4 +874,62 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ any, err error
 	case utils.EeIDs:
 		return tp.EeIDs, nil
 	}
+}
+
+// AsMapStringInterface converts ThresholdProfile struct to map[string]any
+func (tp *ThresholdProfile) AsMapStringInterface() map[string]any {
+	if tp == nil {
+		return nil
+	}
+	return map[string]any{
+		utils.Tenant:           tp.Tenant,
+		utils.ID:               tp.ID,
+		utils.FilterIDs:        tp.FilterIDs,
+		utils.MaxHits:          tp.MaxHits,
+		utils.MinHits:          tp.MinHits,
+		utils.MinSleep:         tp.MinSleep,
+		utils.Blocker:          tp.Blocker,
+		utils.Weights:          tp.Weights,
+		utils.ActionProfileIDs: tp.ActionProfileIDs,
+		utils.Async:            tp.Async,
+		utils.EeIDs:            tp.EeIDs,
+	}
+}
+
+// MapStringInterfaceToThresholdProfile converts map[string]any to ThresholdProfile struct
+func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, error) {
+	tp := &ThresholdProfile{}
+
+	if v, ok := m[utils.Tenant].(string); ok {
+		tp.Tenant = v
+	}
+	if v, ok := m[utils.ID].(string); ok {
+		tp.ID = v
+	}
+	tp.FilterIDs = utils.InterfaceToStringSlice(m[utils.FilterIDs])
+	if v, ok := m[utils.MaxHits].(float64); ok {
+		tp.MaxHits = int(v)
+	}
+	if v, ok := m[utils.MinHits].(float64); ok {
+		tp.MinHits = int(v)
+	}
+	if v, ok := m[utils.MinSleep].(string); ok {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
+			tp.MinSleep = dur
+		}
+	} else if v, ok := m[utils.MinSleep].(float64); ok { // for -1 cases
+		tp.MinSleep = time.Duration(v)
+	}
+	if v, ok := m[utils.Blocker].(bool); ok {
+		tp.Blocker = v
+	}
+	tp.Weights = utils.InterfaceToDynamicWeights(m[utils.Weights])
+	tp.ActionProfileIDs = utils.InterfaceToStringSlice(m[utils.ActionProfileIDs])
+	if v, ok := m[utils.Async].(bool); ok {
+		tp.Async = v
+	}
+	tp.EeIDs = utils.InterfaceToStringSlice(m[utils.EeIDs])
+	return tp, nil
 }

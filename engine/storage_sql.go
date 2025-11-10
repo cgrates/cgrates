@@ -119,6 +119,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueueProfiles, tntID)
 	case utils.StatQueuePrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueues, tntID)
+	case utils.ThresholdProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholdProfiles, tntID)
+	case utils.ThresholdPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholds, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -856,6 +860,94 @@ func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
+func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+	var result []*ThresholdProfileMdl
+	if err = sqls.db.Model(&ThresholdProfileMdl{}).Where(&ThresholdProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return MapStringInterfaceToThresholdProfile(result[0].ThresholdProfile)
+}
+
+func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ThresholdProfileMdl{
+		Tenant:           tp.Tenant,
+		ID:               tp.ID,
+		ThresholdProfile: tp.AsMapStringInterface(),
+	}
+	if err = tx.Model(&ThresholdProfileMdl{}).Where(
+		ThresholdProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ThresholdProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&ThresholdProfileMdl{}).Where(&ThresholdProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&ThresholdProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (tp *Threshold, err error) {
+	var result []*ThresholdJSONMdl
+	if err = sqls.db.Model(&ThresholdJSONMdl{}).Where(&ThresholdJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return MapStringInterfaceToThreshold(result[0].Threshold)
+}
+
+func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, t *Threshold) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &ThresholdJSONMdl{
+		Tenant:    t.Tenant,
+		ID:        t.ID,
+		Threshold: t.AsMapStringInterface(),
+	}
+	if err = tx.Model(&ThresholdJSONMdl{}).Where(
+		ThresholdJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		ThresholdJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&ThresholdJSONMdl{}).Where(&ThresholdJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&ThresholdJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // AddLoadHistory DataDB method not implemented yet
 func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
@@ -955,36 +1047,6 @@ func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (er
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// GetThresholdProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// SetThresholdProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// RemThresholdProfileDrv DataDB method not implemented yet
-func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *Threshold, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, r *Threshold) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 

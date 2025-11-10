@@ -58,6 +58,14 @@ func TestDynThdIT(t *testing.T) {
 					Limit:  utils.IntPointer(-1),
 					DbConn: utils.StringPointer(utils.StorDB),
 				},
+				utils.MetaThresholdProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaThresholds: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
 			},
 		}}
 	case utils.MetaMongo:
@@ -76,6 +84,14 @@ func TestDynThdIT(t *testing.T) {
 			},
 			Items: map[string]engine.Item{
 				utils.MetaActionProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaThresholdProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaThresholds: {
 					Limit:  utils.IntPointer(-1),
 					DbConn: utils.StringPointer(utils.StorDB),
 				},

@@ -111,3 +111,25 @@ CREATE TABLE stat_queues (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX stat_queues_idx ON stat_queues (`id`);
+
+DROP TABLE IF EXISTS threshold_profiles;
+CREATE TABLE threshold_profiles (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `threshold_profile` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX threshold_profiles_idx ON threshold_profiles (`id`);
+
+DROP TABLE IF EXISTS thresholds;
+CREATE TABLE thresholds (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `threshold` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX thresholds_idx ON thresholds (`id`);

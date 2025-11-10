@@ -1922,6 +1922,8 @@ const (
 	TBLResources         = "resources"
 	TBLStatQueueProfiles = "stat_queue_profiles"
 	TBLStatQueues        = "stat_queues"
+	TBLThresholdProfiles = "threshold_profiles"
+	TBLThresholds        = "thresholds"
 	OldSMCosts           = "sm_costs"
 	TBLTPDispatchers     = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts = "tp_dispatcher_hosts"
