@@ -2101,7 +2101,10 @@ func TestDDCGetCompressFactor(t *testing.T) {
 }
 
 func TestStatSumGetFloat64Value(t *testing.T) {
-	statSum := NewStatSum(2, "~*opts.*cost", nil)
+	statSum, err := NewStatSum(2, "~*opts.*cost", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ev := &utils.CGREvent{ID: "EVENT_1",
 		APIOpts: map[string]any{
 			utils.MetaDestination: "1002",
@@ -2165,7 +2168,10 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 }
 
 func TestStatSumGetStringValue(t *testing.T) {
-	statSum := NewStatSum(2, "~*opts.*cost", nil)
+	statSum, err := NewStatSum(2, "~*opts.*cost", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ev := &utils.CGREvent{ID: "EVENT_1",
 		APIOpts: map[string]any{
 			utils.MetaDestination: "1002",
@@ -2210,7 +2216,10 @@ func TestStatSumGetStringValue(t *testing.T) {
 }
 
 func TestStatSumGetStringValue2(t *testing.T) {
-	statSum := NewStatSum(2, "~*opts.*cost", nil)
+	statSum, err := NewStatSum(2, "~*opts.*cost", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ev1 := &utils.CGREvent{ID: "EVENT_1",
 		APIOpts: map[string]any{utils.MetaCost: 12.3}}
 	if err := statSum.AddEvent(ev1.ID, utils.MapStorage{utils.MetaOpts: ev1.APIOpts}); err != nil {
@@ -2383,7 +2392,10 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	sum := NewStatSum(2, "~*opts.*cost", nil)
+	sum, err := NewStatSum(2, "~*opts.*cost", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ev := &utils.CGREvent{ID: "EVENT_1",
 		APIOpts: map[string]any{utils.MetaCost: 18.2}}
 	ev2 := &utils.CGREvent{ID: "EVENT_2",
@@ -3034,7 +3046,10 @@ func TestDCCMarshal(t *testing.T) {
 }
 
 func TestStatSumMarshal(t *testing.T) {
-	statSum := NewStatSum(2, "~*opts.*cost", nil)
+	statSum, err := NewStatSum(2, "~*opts.*cost", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ev := &utils.CGREvent{ID: "EVENT_1",
 		APIOpts: map[string]any{
 			utils.MetaDestination: "1002",
