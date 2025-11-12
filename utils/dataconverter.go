@@ -842,7 +842,7 @@ func (GigawordsConverter) Convert(in any) (any, error) {
 }
 
 // ConnStatusConverter converts connection status strings to numeric values.
-// Returns 1 for UP, -1 for DOWN, and 0 for DUPLICATE.
+// Returns 1 for UP and -1 for DOWN.
 type ConnStatusConverter struct{}
 
 // Convert implements DataConverter interface
@@ -853,8 +853,6 @@ func (c ConnStatusConverter) Convert(in any) (any, error) {
 		return 1, nil
 	case ConnStatusDown:
 		return -1, nil
-	case ConnStatusDuplicate:
-		return 0, nil
 	}
 	return 0, fmt.Errorf("unsupported connection status: %q", status)
 }
