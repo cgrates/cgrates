@@ -575,12 +575,6 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 		return errors.New("WRONG_DISCONNECT_CAUSE")
 	}
 
-	m := diam.NewRequest(diam.DisconnectPeer,
-		diam.CHARGING_CONTROL_APP_ID, dict.Default)
-	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(args.OriginHost))
-	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(args.OriginRealm))
-	m.NewAVP(avp.DisconnectCause, avp.Mbit, 0, datatype.Enumerated(args.DisconnectCause))
-
 	var conn diam.Conn
 	var key string
 
@@ -607,6 +601,15 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 	if conn == nil {
 		return utils.ErrNotFound
 	}
+
+	// RFC 6733 Section 5.4.1: DPR contains sender's Origin-Host/Realm
+	m := diam.NewRequest(diam.DisconnectPeer,
+		diam.CHARGING_CONTROL_APP_ID, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0,
+		datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0,
+		datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginRealm))
+	m.NewAVP(avp.DisconnectCause, avp.Mbit, 0, datatype.Enumerated(args.DisconnectCause))
 
 	dpaCh := make(chan *diam.Message, 1)
 	da.dpaLck.Lock()
