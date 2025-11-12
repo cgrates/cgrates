@@ -216,11 +216,23 @@ func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // updateStatsMetrics fetches and updates all StatQueue metrics by calling each
 // configured StatS connection.
 func (pa *PrometheusAgent) updateStatsMetrics() {
-	if len(pa.cfg.PrometheusAgentCfg().StatQueueIDs) == 0 {
-		return
-	}
-	for _, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
-		for _, sqID := range pa.cfg.PrometheusAgentCfg().StatQueueIDs {
+	for connIdx, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
+		sqIDs := pa.cfg.PrometheusAgentCfg().StatQueueIDs
+
+		// When no StatQueueIDs set, fetch all available ones.
+		if len(sqIDs) == 0 {
+			adminsConnID := pa.cfg.PrometheusAgentCfg().AdminSConns[connIdx]
+			if err := pa.cm.Call(context.Background(), []string{adminsConnID},
+				utils.AdminSv1GetStatQueueProfileIDs,
+				&utils.ArgsItemIDs{}, &sqIDs); err != nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<%s> failed to retrieve all StatQueue IDs (connID=%q): %v",
+					utils.PrometheusAgent, adminsConnID, err))
+				continue
+			}
+		}
+
+		for _, sqID := range sqIDs {
 
 			tenantID := utils.NewTenantID(sqID)
 			if tenantID.Tenant == "" {
