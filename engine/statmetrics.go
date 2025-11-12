@@ -33,24 +33,34 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+type metricConstructor func(uint64, string, []string) StatMetric
+type metricConstructorErr func(uint64, string, []string) (StatMetric, error)
+
+// withErrReturn wraps a constructor to return an error (always nil).
+func withErrReturn(fn metricConstructor) metricConstructorErr {
+	return func(minItems uint64, extraParams string, filterIDs []string) (StatMetric, error) {
+		return fn(minItems, extraParams, filterIDs), nil
+	}
+}
+
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
 func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm StatMetric, err error) {
-	metrics := map[string]func(uint64, string, []string) StatMetric{
-		utils.MetaASR:      NewASR,
-		utils.MetaACD:      NewACD,
-		utils.MetaTCD:      NewTCD,
-		utils.MetaACC:      NewACC,
-		utils.MetaTCC:      NewTCC,
-		utils.MetaPDD:      NewPDD,
-		utils.MetaDDC:      NewDDC,
-		utils.MetaSum:      NewStatSum,
-		utils.MetaAverage:  NewStatAverage,
-		utils.MetaDistinct: NewStatDistinct,
-		utils.MetaHighest:  NewStatHighest,
-		utils.MetaLowest:   NewStatLowest,
-		utils.MetaREPSC:    NewStatREPSC,
-		utils.MetaREPFC:    NewStatREPFC,
+	metrics := map[string]metricConstructorErr{
+		utils.MetaASR:      withErrReturn(NewASR),
+		utils.MetaACD:      withErrReturn(NewACD),
+		utils.MetaTCD:      withErrReturn(NewTCD),
+		utils.MetaACC:      withErrReturn(NewACC),
+		utils.MetaTCC:      withErrReturn(NewTCC),
+		utils.MetaPDD:      withErrReturn(NewPDD),
+		utils.MetaDDC:      withErrReturn(NewDDC),
+		utils.MetaSum:      NewStatSum, // Already returns (StatMetric, error)
+		utils.MetaAverage:  withErrReturn(NewStatAverage),
+		utils.MetaDistinct: withErrReturn(NewStatDistinct),
+		utils.MetaHighest:  withErrReturn(NewStatHighest),
+		utils.MetaLowest:   withErrReturn(NewStatLowest),
+		utils.MetaREPSC:    withErrReturn(NewStatREPSC),
+		utils.MetaREPFC:    withErrReturn(NewStatREPFC),
 	}
 	// split the metricID
 	// in case of *sum we have *sum#~*req.FieldName
@@ -62,7 +72,7 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm Sta
 	if len(metricSplit[1:]) > 0 {
 		extraParams = metricSplit[1]
 	}
-	return metrics[metricSplit[0]](minItems, extraParams, filterIDs), nil
+	return metrics[metricSplit[0]](minItems, extraParams, filterIDs)
 }
 
 // StatMetric is the interface which a metric should implement
@@ -771,12 +781,15 @@ func (m *Metric) Equal(v *Metric) bool {
 	return true
 }
 
-func NewStatSum(minItems uint64, fieldName string, filterIDs []string) StatMetric {
-	flds, _ := utils.NewRSRParsers(fieldName, utils.InfieldSep)
+func NewStatSum(minItems uint64, fieldName string, filterIDs []string) (StatMetric, error) {
+	flds, err := utils.NewRSRParsers(fieldName, utils.InfieldSep)
+	if err != nil {
+		return nil, err
+	}
 	return &StatSum{
 		Metric: NewMetric(minItems, filterIDs),
 		Fields: flds,
-	}
+	}, nil
 }
 
 type StatSum struct {
