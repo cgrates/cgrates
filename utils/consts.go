@@ -2359,6 +2359,8 @@ const (
 	ASRTemplateCfg             = "asr_template"
 	RARTemplateCfg             = "rar_template"
 	ForcedDisconnectCfg        = "forced_disconnect"
+	ConnStatusStatQueueIDsCfg  = "conn_status_stat_queue_ids"
+	ConnStatusThresholdIDsCfg  = "conn_status_threshold_ids"
 	ConnHealthCheckIntervalCfg = "conn_health_check_interval"
 	TemplatesCfg               = "templates"
 	RequestProcessorsCfg       = "request_processors"
