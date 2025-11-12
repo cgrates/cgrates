@@ -2081,6 +2081,7 @@ const (
 	PosterAttemptsCfg       = "poster_attempts"
 	FailedPostsDirCfg       = "failed_posts_dir"
 	FailedPostsTTLCfg       = "failed_posts_ttl"
+	FailedPostsStaticTTLCfg = "failed_posts_static_ttl"
 	DefaultReqTypeCfg       = "default_request_type"
 	DefaultCategoryCfg      = "default_category"
 	DefaultTenantCfg        = "default_tenant"

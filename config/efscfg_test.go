@@ -48,7 +48,7 @@ func TestEFsCfgLoadFromJSONCfg(t *testing.T) {
 func TestEFsCfgLoadFromJSONCfgFailedPostsTTL(t *testing.T) {
 	efsCfg := &EFsCfg{}
 	jsonEFsCfg := &EfsJsonCfg{
-		Failed_posts_ttl: utils.StringPointer("failedPost"),
+		FailedPostsTTL: utils.StringPointer("failedPost"),
 	}
 	expErr := `time: invalid duration "failedPost"`
 	if err := efsCfg.loadFromJSONCfg(jsonEFsCfg); err.Error() != expErr {
@@ -99,10 +99,10 @@ func TestDiffEFsJsonCfg(t *testing.T) {
 	}
 
 	expected := &EfsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Poster_attempts:  utils.IntPointer(3),
-		Failed_posts_dir: utils.StringPointer("3"),
-		Failed_posts_ttl: utils.StringPointer("3ns"),
+		Enabled:        utils.BoolPointer(true),
+		PosterAttempts: utils.IntPointer(3),
+		FailedPostsDir: utils.StringPointer("3"),
+		FailedPostsTTL: utils.StringPointer("3ns"),
 	}
 
 	rcv := diffEFsJsonCfg(d, v1, v2)
@@ -112,10 +112,10 @@ func TestDiffEFsJsonCfg(t *testing.T) {
 
 	v2_2 := v1
 	expected2 := &EfsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Poster_attempts:  utils.IntPointer(3),
-		Failed_posts_dir: utils.StringPointer("3"),
-		Failed_posts_ttl: utils.StringPointer("3ns"),
+		Enabled:        utils.BoolPointer(true),
+		PosterAttempts: utils.IntPointer(3),
+		FailedPostsDir: utils.StringPointer("3"),
+		FailedPostsTTL: utils.StringPointer("3ns"),
 	}
 
 	rcv = diffEFsJsonCfg(d, v1, v2_2)
