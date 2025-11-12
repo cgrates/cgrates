@@ -116,3 +116,9 @@ func (dc *DiameterClient) ReceivedMessage(rplyTimeout time.Duration) *diam.Messa
 		return nil
 	}
 }
+
+// Close disconnects the DiameterClient. Implements io.Closer.
+func (dc *DiameterClient) Close() error {
+	dc.conn.Close()
+	return nil
+}
