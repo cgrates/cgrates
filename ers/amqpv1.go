@@ -46,9 +46,6 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
-		for i := 0; i < concReq; i++ {
-			rdr.cap <- struct{}{}
-		}
 	}
 	if rdr.Config().Opts.AMQPQueueID != nil {
 		rdr.queueID = "/" + *rdr.Config().Opts.AMQPQueueID
@@ -125,7 +122,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 	}
 	for {
 		if rdr.Config().ConcurrentReqs != -1 {
-			<-rdr.cap // do not try to read if the limit is reached
+			rdr.cap <- struct{}{}
 		}
 		ctx := context.Background()
 		var msg *amqpv1.Message
@@ -152,7 +149,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 						utils.ERs, err.Error()))
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
-				rdr.cap <- struct{}{}
+				<-rdr.cap
 			}
 		}(msg)
 	}

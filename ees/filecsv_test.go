@@ -32,17 +32,14 @@ import (
 )
 
 func TestFileCsvGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	fCsv := &FileCSVee{dc: dc}
+	fCsv := &FileCSVee{em: em}
 
-	if rcv := fCsv.GetMetrics(); !reflect.DeepEqual(rcv, fCsv.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(fCsv.dc))
+	if rcv := fCsv.GetMetrics(); !reflect.DeepEqual(rcv, fCsv.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(fCsv.em))
 	}
 }
 
@@ -66,7 +63,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		em:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -130,7 +127,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		em:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -188,12 +185,9 @@ func TestFileCsvExportEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	fCsv := &FileCSVee{
 		cfg:       cfg.EEsCfg().Exporters[0],
@@ -201,7 +195,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        dc,
+		em:        em,
 	}
 
 	if err := fCsv.ExportEvent(context.Background(), []string{"value", "3"}, ""); err != nil {
@@ -228,7 +222,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloserWrite{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		em:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
@@ -263,7 +257,7 @@ func TestFileCsvOnEvictedClose(t *testing.T) {
 		filterS:   filterS,
 		wrtr:      nopCloserError{byteBuff},
 		csvWriter: csvNW,
-		dc:        &utils.SafeMapStorage{},
+		em:        &utils.ExporterMetrics{},
 	}
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{

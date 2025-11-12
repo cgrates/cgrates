@@ -27,16 +27,16 @@ import (
 )
 
 func TestVirtualEeGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	vEe := &VirtualEE{
-		dc: dc,
+		em: em,
 	}
 
-	if rcv := vEe.GetMetrics(); !reflect.DeepEqual(rcv, vEe.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(vEe.dc))
+	if rcv := vEe.GetMetrics(); !reflect.DeepEqual(rcv, vEe.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(vEe.em))
 	}
 }
 func TestVirtualEeExportEvent(t *testing.T) {

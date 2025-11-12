@@ -19,9 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -33,6 +31,7 @@ type PrometheusAgentJsonCfg struct {
 	Path                  *string   `json:"path"`
 	CollectGoMetrics      *bool     `json:"collect_go_metrics"`
 	CollectProcessMetrics *bool     `json:"collect_process_metrics"`
+	AdminSConns           *[]string `json:"admins_conns"`
 	CacheSConns           *[]string `json:"caches_conns"`
 	CacheIDs              *[]string `json:"cache_ids"`
 	CoreSConns            *[]string `json:"cores_conns"`
@@ -46,6 +45,7 @@ type PrometheusAgentCfg struct {
 	Path                  string
 	CollectGoMetrics      bool
 	CollectProcessMetrics bool
+	AdminSConns           []string
 	CacheSConns           []string
 	CacheIDs              []string
 	CoreSConns            []string
@@ -78,6 +78,9 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	if jc.CollectProcessMetrics != nil {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
+	if jc.AdminSConns != nil {
+		c.AdminSConns = tagInternalConns(*jc.AdminSConns, utils.MetaAdminS)
+	}
 	if jc.CacheSConns != nil {
 		c.CacheSConns = tagInternalConns(*jc.CacheSConns, utils.MetaCaches)
 	}
@@ -103,6 +106,7 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
+		utils.AdminSConnsCfg:           stripInternalConns(c.AdminSConns),
 		utils.CacheSConnsCfg:           stripInternalConns(c.CacheSConns),
 		utils.CacheIDsCfg:              stripInternalConns(c.CacheIDs),
 		utils.CoreSConnsCfg:            stripInternalConns(c.CoreSConns),
@@ -121,43 +125,13 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		Path:                  c.Path,
 		CollectGoMetrics:      c.CollectGoMetrics,
 		CollectProcessMetrics: c.CollectProcessMetrics,
+		AdminSConns:           slices.Clone(c.AdminSConns),
 		CacheSConns:           slices.Clone(c.CacheSConns),
 		CacheIDs:              slices.Clone(c.CacheIDs),
 		CoreSConns:            slices.Clone(c.CoreSConns),
 		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}
-}
-
-func (c PrometheusAgentCfg) validate(cfg *CGRConfig) error {
-	if !c.Enabled {
-		return nil
-	}
-	for _, connID := range cfg.prometheusAgentCfg.CacheSConns {
-		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
-		}
-	}
-	for _, connID := range cfg.prometheusAgentCfg.CoreSConns {
-		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
-		}
-	}
-	for _, connID := range c.StatSConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
-		}
-		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
-		}
-	}
-	if len(c.CoreSConns) > 0 {
-		if c.CollectGoMetrics || c.CollectProcessMetrics {
-			return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
-				utils.PrometheusAgent)
-		}
-	}
-	return nil
 }
 
 func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAgentCfg) *PrometheusAgentJsonCfg {
@@ -176,6 +150,9 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 	// adding some changes
 	if v1.CollectProcessMetrics != v2.CollectProcessMetrics && true {
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
+	}
+	if !slices.Equal(v1.AdminSConns, v2.AdminSConns) {
+		d.AdminSConns = utils.SliceStringPointer(v2.AdminSConns)
 	}
 	if !slices.Equal(v1.CoreSConns, v2.CoreSConns) {
 		d.CoreSConns = utils.SliceStringPointer(v2.CoreSConns)

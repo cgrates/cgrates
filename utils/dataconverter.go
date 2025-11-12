@@ -142,6 +142,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return splitConverter(params[len(MetaSplit)+1:]), nil
 	case strings.HasPrefix(params, MetaStrip):
 		return NewStripConverter(params)
+	case params == MetaConnStatus:
+		return ConnStatusConverter{}, nil
 	case strings.HasPrefix(params, MetaGigawords):
 		return new(GigawordsConverter), nil
 	default:
@@ -837,4 +839,20 @@ func (GigawordsConverter) Convert(in any) (any, error) {
 	}
 	totalOctects := (gigawordsValue * int64(math.Pow(2, 32))) // 2^32
 	return totalOctects, nil
+}
+
+// ConnStatusConverter converts connection status strings to numeric values.
+// Returns 1 for UP and -1 for DOWN.
+type ConnStatusConverter struct{}
+
+// Convert implements DataConverter interface
+func (c ConnStatusConverter) Convert(in any) (any, error) {
+	status := IfaceAsString(in)
+	switch status {
+	case ConnStatusUp:
+		return 1, nil
+	case ConnStatusDown:
+		return -1, nil
+	}
+	return 0, fmt.Errorf("unsupported connection status: %q", status)
 }

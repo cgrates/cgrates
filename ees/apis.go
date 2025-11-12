@@ -186,9 +186,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 	}()
 	var eEv any
 
-	exp.GetMetrics().Lock()
-	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
-	exp.GetMetrics().Unlock()
+	exp.GetMetrics().IncrementEvents()
 	if len(exp.Cfg().ContentFields()) == 0 {
 		if eEv, err = exp.PrepareMap(ev); err != nil {
 			return
@@ -197,7 +195,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 		expNM := utils.NewOrderedNavigableMap()
 		err = NewExportRequest(map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
-			utils.MetaDC:   exp.GetMetrics(),
+			utils.MetaEM:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
@@ -223,30 +221,30 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		return fmt.Errorf("ExporterID is missing from argument's options")
 	}
 	// check if there are any exporters that match our expID
-	var eesCfg *config.EventExporterCfg
+	var eeCfg *config.EventExporterCfg
 	for _, exporter := range eeS.cfg.EEsCfg().Exporters {
 		if exporter.ID == expID {
-			eesCfg = exporter
+			eeCfg = exporter
 			break
 		}
 	}
-	if eesCfg == nil {
+	if eeCfg == nil {
 		return fmt.Errorf("exporter config with ID: %s is missing", expID)
 	}
 	// also mandatory to be synchronous
-	if !eesCfg.Synchronous {
+	if !eeCfg.Synchronous {
 		return fmt.Errorf("exporter with ID: %s is not synchronous", expID)
 	}
 	// also mandatory to be type of *buffer
-	if eesCfg.ExportPath != utils.MetaBuffer {
+	if eeCfg.ExportPath != utils.MetaBuffer {
 		return fmt.Errorf("exporter with ID: %s has an invalid ExportPath for archiving", expID)
 	}
-	var dc *utils.SafeMapStorage
-	if dc, err = newEEMetrics(utils.FirstNonEmpty(
-		eesCfg.Timezone,
-		eeS.cfg.GeneralCfg().DefaultTimezone)); err != nil {
-		return
+	timezone := utils.FirstNonEmpty(eeCfg.Timezone, eeS.cfg.GeneralCfg().DefaultTimezone)
+	em, err := utils.NewExporterMetrics(eeCfg.MetricsResetSchedule, timezone)
+	if err != nil {
+		return fmt.Errorf("failed to initialize exporter metrics: %v", err)
 	}
+
 	var ee EventExporter
 
 	buff := new(bytes.Buffer)
@@ -260,13 +258,13 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}); err != nil {
 		return err
 	}
-	switch eesCfg.Type {
+	switch eeCfg.Type {
 	case utils.MetaFileCSV:
-		ee, err = NewFileCSVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
+		ee, err = NewFileCSVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
 	case utils.MetaFileFWV:
-		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
+		ee, err = NewFileFWVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
 	default:
-		err = fmt.Errorf("unsupported exporter type: %s>", eesCfg.Type)
+		err = fmt.Errorf("unsupported exporter type: %s>", eeCfg.Type)
 	}
 	if err != nil {
 		return err
@@ -286,10 +284,10 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 	var exported bool
 	for _, event := range args.Events {
-		if len(eesCfg.Filters) != 0 && !ignoreFltr {
+		if len(eeCfg.Filters) != 0 && !ignoreFltr {
 			cgrDp[utils.MetaReq] = event.Event
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
-				eesCfg.Filters, cgrDp); errPass != nil {
+				eeCfg.Filters, cgrDp); errPass != nil {
 				return errPass
 			} else if !pass {
 				continue // does not pass the filters, ignore the exporter
@@ -332,4 +330,25 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	*reply = buff.Bytes()
 	return
+}
+
+// V1ResetExporterMetricsParams contains required parameters for resetting exporter metrics.
+type V1ResetExporterMetricsParams struct {
+	Tenant     string
+	ID         string // unique identifier of the request
+	ExporterID string
+	APIOpts    map[string]any
+}
+
+// V1ResetExporterMetrics resets the metrics for a specific exporter identified by ExporterID.
+// Returns utils.ErrNotFound if the exporter is not found in the cache.
+func (eeS *EeS) V1ResetExporterMetrics(ctx *context.Context, params V1ResetExporterMetricsParams, reply *string) error {
+	eeCfg := eeS.cfg.EEsCfg().ExporterCfg(params.ExporterID)
+	ee, ok := eeS.exporterCache[eeCfg.Type].Get(eeCfg.ID)
+	if !ok {
+		return utils.ErrNotFound
+	}
+	ee.(EventExporter).GetMetrics().Reset()
+	*reply = utils.OK
+	return nil
 }

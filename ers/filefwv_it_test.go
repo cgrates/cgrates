@@ -291,7 +291,6 @@ func TestFileFWVProcessEvent(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	fname := "file1.fwv"
 	errExpect := "unsupported field prefix: <> when set fields"
 	eR.Config().Fields = []*config.FCTemplate{
@@ -356,7 +355,6 @@ func TestFileFWV(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/fwvErs/out"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -391,7 +389,6 @@ func TestFileFWVServeDefault(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/fwvErs/out"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -427,7 +424,6 @@ func TestFileFWVExit(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
@@ -459,7 +455,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		},
 		APIOpts: map[string]any{},
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/TestFileFWVProcessTrailer/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
@@ -512,7 +507,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/TestFileFWVProcessTrailer/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
@@ -549,7 +543,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().Tenant = utils.RSRParsers{
 		{
 			Rules: "cgrates.org",
@@ -597,7 +590,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	trailerFields := []*config.FCTemplate{
 		{
 			Tag:   "OriginId",
@@ -629,7 +621,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -678,7 +669,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	trailerFields := []*config.FCTemplate{
 		{},
 	}
@@ -705,7 +695,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	record := "testRecord"
 	trailerFields := []*config.FCTemplate{
 		{

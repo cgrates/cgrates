@@ -33,16 +33,16 @@ import (
 )
 
 func TestHttpJsonMapGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	httpEE := &HTTPjsonMapEE{
-		dc: dc,
+		em: em,
 	}
 
-	if rcv := httpEE.GetMetrics(); !reflect.DeepEqual(rcv, httpEE.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpEE.dc))
+	if rcv := httpEE.GetMetrics(); !reflect.DeepEqual(rcv, httpEE.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpEE.em))
 	}
 }
 

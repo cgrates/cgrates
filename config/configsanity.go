@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cron"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -273,6 +274,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DiameterAgent, utils.SessionS)
 		}
+		if len(cfg.diameterAgentCfg.ConnStatusStatQueueIDs) != 0 && len(cfg.diameterAgentCfg.StatSConns) == 0 {
+			return fmt.Errorf("<%s> stat_queue_ids defined but no %s connections configured",
+				utils.DiameterAgent, utils.StatS)
+		}
+		if len(cfg.diameterAgentCfg.ConnStatusThresholdIDs) != 0 && len(cfg.diameterAgentCfg.ThresholdSConns) == 0 {
+			return fmt.Errorf("<%s> threshold_ids defined but no %s connections configured",
+				utils.DiameterAgent, utils.ThresholdS)
+		}
 		for _, connID := range cfg.diameterAgentCfg.SessionSConns {
 			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
 			if isInternal && !cfg.sessionSCfg.Enabled {
@@ -283,7 +292,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.StatSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 			if isInternal && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DiameterAgent)
 			}
@@ -292,7 +301,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.ThresholdSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 			if isInternal && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DiameterAgent)
 			}
@@ -938,9 +947,31 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.EEs, connID)
 			}
 		}
+
+		// Check cache TTL for file exporters which require positive TTL as
+		// content is flushed only upon cache expiration.
+		for eeType, cacheCfg := range cfg.eesCfg.Cache {
+			if slices.Contains([]string{utils.MetaFileCSV, utils.MetaFileFWV}, eeType) {
+				if cacheCfg.TTL <= 0 {
+					return fmt.Errorf("<%s> exporter type %q requires positive cache TTL, got %v",
+						utils.EEs, eeType, cacheCfg.TTL)
+				}
+			}
+		}
+
 		for _, exp := range cfg.eesCfg.Exporters {
 			if !possibleExporterTypes.Has(exp.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for exporter with ID: %s", utils.EEs, exp.Type, exp.ID)
+			}
+
+			if exp.MetricsResetSchedule != "" {
+				parser := cron.NewParser(
+					cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
+				)
+				if _, err := parser.Parse(exp.MetricsResetSchedule); err != nil {
+					return fmt.Errorf("<%s> invalid cron expression %q in metrics_reset_schedule for exporter %q: %v",
+						utils.EEs, exp.MetricsResetSchedule, exp.ID, err)
+				}
 			}
 
 			switch exp.Type {
@@ -1254,8 +1285,46 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> the CleanupInterval needs to be bigger than 0", utils.AnalyzerS)
 		}
 	}
-	if err := cfg.prometheusAgentCfg.validate(cfg); err != nil {
-		return err
+	if cfg.prometheusAgentCfg.Enabled {
+		if len(cfg.prometheusAgentCfg.StatSConns) > 0 &&
+			len(cfg.prometheusAgentCfg.StatQueueIDs) == 0 &&
+			len(cfg.prometheusAgentCfg.StatSConns) != len(cfg.prometheusAgentCfg.AdminSConns) {
+			return fmt.Errorf(
+				"<%s> when StatQueueIDs is empty, admins_conns must match stats_conns length to fetch StatQueue IDs",
+				utils.PrometheusAgent)
+		}
+		for _, connID := range cfg.prometheusAgentCfg.AdminSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.admS.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AdminS, utils.PrometheusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.prometheusAgentCfg.CacheSConns {
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.prometheusAgentCfg.CoreSConns {
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.prometheusAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		if len(cfg.prometheusAgentCfg.CoreSConns) > 0 {
+			if cfg.prometheusAgentCfg.CollectGoMetrics || cfg.prometheusAgentCfg.CollectProcessMetrics {
+				return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
+					utils.PrometheusAgent)
+			}
+		}
 	}
 
 	return nil

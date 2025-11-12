@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -31,20 +33,34 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+type metricConstructor func(uint64, string, []string) StatMetric
+type metricConstructorErr func(uint64, string, []string) (StatMetric, error)
+
+// withErrReturn wraps a constructor to return an error (always nil).
+func withErrReturn(fn metricConstructor) metricConstructorErr {
+	return func(minItems uint64, extraParams string, filterIDs []string) (StatMetric, error) {
+		return fn(minItems, extraParams, filterIDs), nil
+	}
+}
+
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
 func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm StatMetric, err error) {
-	metrics := map[string]func(uint64, string, []string) StatMetric{
-		utils.MetaASR:      NewASR,
-		utils.MetaACD:      NewACD,
-		utils.MetaTCD:      NewTCD,
-		utils.MetaACC:      NewACC,
-		utils.MetaTCC:      NewTCC,
-		utils.MetaPDD:      NewPDD,
-		utils.MetaDDC:      NewDDC,
-		utils.MetaSum:      NewStatSum,
-		utils.MetaAverage:  NewStatAverage,
-		utils.MetaDistinct: NewStatDistinct,
+	metrics := map[string]metricConstructorErr{
+		utils.MetaASR:      withErrReturn(NewASR),
+		utils.MetaACD:      withErrReturn(NewACD),
+		utils.MetaTCD:      withErrReturn(NewTCD),
+		utils.MetaACC:      withErrReturn(NewACC),
+		utils.MetaTCC:      withErrReturn(NewTCC),
+		utils.MetaPDD:      withErrReturn(NewPDD),
+		utils.MetaDDC:      withErrReturn(NewDDC),
+		utils.MetaSum:      NewStatSum, // Already returns (StatMetric, error)
+		utils.MetaAverage:  withErrReturn(NewStatAverage),
+		utils.MetaDistinct: withErrReturn(NewStatDistinct),
+		utils.MetaHighest:  withErrReturn(NewStatHighest),
+		utils.MetaLowest:   withErrReturn(NewStatLowest),
+		utils.MetaREPSC:    withErrReturn(NewStatREPSC),
+		utils.MetaREPFC:    withErrReturn(NewStatREPFC),
 	}
 	// split the metricID
 	// in case of *sum we have *sum#~*req.FieldName
@@ -56,7 +72,7 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm Sta
 	if len(metricSplit[1:]) > 0 {
 		extraParams = metricSplit[1]
 	}
-	return metrics[metricSplit[0]](minItems, extraParams, filterIDs), nil
+	return metrics[metricSplit[0]](minItems, extraParams, filterIDs)
 }
 
 // StatMetric is the interface which a metric should implement
@@ -606,51 +622,51 @@ type Metric struct {
 	FilterIDs []string
 }
 
-func (sum *Metric) GetFilterIDs() []string { return sum.FilterIDs }
+func (m *Metric) GetFilterIDs() []string { return m.FilterIDs }
 
-func (sum *Metric) getTotalValue() *utils.Decimal {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getTotalValue() *utils.Decimal {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.DecimalNaN
 	}
-	return sum.Value
+	return m.Value
 }
 
-func (sum *Metric) getAvgValue() *utils.Decimal {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getAvgValue() *utils.Decimal {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.DecimalNaN
 	}
-	return utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0))
+	return utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0))
 }
 
-func (sum *Metric) getAvgStringValue(rounding int) string {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) getAvgStringValue(rounding int) string {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.NotAvailable
 	}
-	v, _ := utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0)).Round(rounding).Float64()
+	v, _ := utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0)).Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (sum *Metric) GetStringValue(rounding int) string {
-	if sum.Count == 0 || sum.Count < sum.MinItems {
+func (m *Metric) GetStringValue(rounding int) string {
+	if m.Count == 0 || m.Count < m.MinItems {
 		return utils.NotAvailable
 	}
-	v, _ := sum.Value.Round(rounding).Float64()
+	v, _ := m.Value.Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (sum *Metric) GetValue() (v *utils.Decimal) {
-	return sum.getTotalValue()
+func (m *Metric) GetValue() (v *utils.Decimal) {
+	return m.getTotalValue()
 }
 
-func (sum *Metric) addEvent(evID string, ival any) (err error) {
+func (m *Metric) addEvent(evID string, ival any) (err error) {
 	var val *decimal.Big
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
 	}
 	dVal := &utils.Decimal{Big: val}
-	sum.Value = utils.SumDecimal(sum.Value, dVal)
-	if v, has := sum.Events[evID]; !has {
-		sum.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
+	m.Value = utils.SumDecimal(m.Value, dVal)
+	if v, has := m.Events[evID]; !has {
+		m.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
 	} else {
 		v.Stat = utils.DivideDecimal(
 			utils.SumDecimal(
@@ -659,34 +675,34 @@ func (sum *Metric) addEvent(evID string, ival any) (err error) {
 			utils.NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
-	sum.Count++
+	m.Count++
 	return
 }
 
 // Adding aggregated metrics without events
-func (sum *Metric) addOneEvent(ival any) (err error) {
+func (m *Metric) addOneEvent(ival any) (err error) {
 	var val *decimal.Big
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
 	}
 	dVal := &utils.Decimal{Big: val}
-	sum.Value = utils.SumDecimal(sum.Value, dVal)
-	sum.Count++
+	m.Value = utils.SumDecimal(m.Value, dVal)
+	m.Count++
 	return
 }
 
 // Deleting a specific event and updating metrics
-func (sum *Metric) RemEvent(evID string) (err error) {
-	val, has := sum.Events[evID]
+func (m *Metric) RemEvent(evID string) (err error) {
+	val, has := m.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
 	if val.Stat.Compare(utils.NewDecimal(0, 0)) != 0 {
-		sum.Value = utils.SubstractDecimal(sum.Value, val.Stat)
+		m.Value = utils.SubstractDecimal(m.Value, val.Stat)
 	}
-	sum.Count--
+	m.Count--
 	if val.CompressFactor <= 1 {
-		delete(sum.Events, evID)
+		delete(m.Events, evID)
 	} else {
 		val.CompressFactor = val.CompressFactor - 1
 	}
@@ -694,27 +710,27 @@ func (sum *Metric) RemEvent(evID string) (err error) {
 }
 
 // GetMinItems returns the minim items for the metric
-func (sum *Metric) GetMinItems() uint64 { return sum.MinItems }
+func (m *Metric) GetMinItems() uint64 { return m.MinItems }
 
 // Compress is part of StatMetric interface
-func (sum *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
-	if sum.Count < queueLen {
-		eventIDs = make([]string, 0, len(sum.Events))
-		for id := range sum.Events {
+func (m *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
+	if m.Count < queueLen {
+		eventIDs = make([]string, 0, len(m.Events))
+		for id := range m.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
 	}
-	sum.Events = map[string]*DecimalWithCompress{defaultID: {
-		Stat:           utils.DivideDecimal(sum.Value, utils.NewDecimalFromFloat64(float64(sum.Count))),
-		CompressFactor: sum.Count,
+	m.Events = map[string]*DecimalWithCompress{defaultID: {
+		Stat:           utils.DivideDecimal(m.Value, utils.NewDecimalFromFloat64(float64(m.Count))),
+		CompressFactor: m.Count,
 	}}
 	return []string{defaultID}
 }
 
 // Compress is part of StatMetric interface
-func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64 {
-	for id, val := range sum.Events {
+func (m *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id, val := range m.Events {
 		if _, has := events[id]; !has {
 			events[id] = val.CompressFactor
 		}
@@ -725,36 +741,36 @@ func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64
 	return events
 }
 
-func (sum *Metric) Clone() (cln *Metric) {
-	if sum == nil {
+func (m *Metric) Clone() (cln *Metric) {
+	if m == nil {
 		return nil
 	}
 	cln = &Metric{
-		Count:    sum.Count,
-		MinItems: sum.MinItems,
+		Count:    m.Count,
+		MinItems: m.MinItems,
 	}
-	if sum.Value != nil {
-		cln.Value = sum.Value.Clone()
+	if m.Value != nil {
+		cln.Value = m.Value.Clone()
 	}
-	if sum.Events != nil {
-		cln.Events = make(map[string]*DecimalWithCompress, len(sum.Events))
-		maps.Copy(cln.Events, sum.Events)
+	if m.Events != nil {
+		cln.Events = make(map[string]*DecimalWithCompress, len(m.Events))
+		maps.Copy(cln.Events, m.Events)
 	}
-	if sum.FilterIDs != nil {
-		cln.FilterIDs = make([]string, len(sum.FilterIDs))
-		cln.FilterIDs = slices.Clone(sum.FilterIDs)
+	if m.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(m.FilterIDs))
+		cln.FilterIDs = slices.Clone(m.FilterIDs)
 	}
 	return
 }
 
-func (sum *Metric) Equal(v *Metric) bool {
-	if sum.MinItems != v.MinItems ||
-		sum.Count != v.Count ||
-		sum.Value.Compare(v.Value) != 0 ||
-		len(sum.Events) != len(v.Events) {
+func (m *Metric) Equal(v *Metric) bool {
+	if m.MinItems != v.MinItems ||
+		m.Count != v.Count ||
+		m.Value.Compare(v.Value) != 0 ||
+		len(m.Events) != len(v.Events) {
 		return false
 	}
-	for k, c1 := range sum.Events {
+	for k, c1 := range m.Events {
 		c2, has := v.Events[k]
 		if !has ||
 			c1.CompressFactor != c2.CompressFactor ||
@@ -765,42 +781,41 @@ func (sum *Metric) Equal(v *Metric) bool {
 	return true
 }
 
-func NewStatSum(minItems uint64, fieldName string, filterIDs []string) StatMetric {
-	return &StatSum{Metric: NewMetric(minItems, filterIDs),
-		FieldName: fieldName}
+func NewStatSum(minItems uint64, fieldName string, filterIDs []string) (StatMetric, error) {
+	flds, err := utils.NewRSRParsers(fieldName, utils.InfieldSep)
+	if err != nil {
+		return nil, err
+	}
+	return &StatSum{
+		Metric: NewMetric(minItems, filterIDs),
+		Fields: flds,
+	}, nil
 }
 
 type StatSum struct {
 	*Metric
-	FieldName string
+	Fields utils.RSRParsers
 }
 
 func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
 		return err
 	}
 	return sum.addEvent(evID, ival)
 }
 func (sum *StatSum) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
 		return err
 	}
-
 	return sum.addOneEvent(ival)
 }
 
 func (sum *StatSum) Clone() StatMetric {
 	return &StatSum{
-		Metric:    sum.Metric.Clone(),
-		FieldName: sum.FieldName,
+		Metric: sum.Metric.Clone(),
+		Fields: sum.Fields,
 	}
 }
 
@@ -1028,4 +1043,556 @@ func (dst *StatDistinct) Clone() StatMetric {
 		cln.FieldValues[k] = v.Clone()
 	}
 	return cln
+}
+
+// NewStatHighest creates a StatHighest metric for tracking maximum field values.
+func NewStatHighest(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatHighest{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		FieldName: fieldName,
+		Highest:   utils.NewDecimal(0, 0),
+		Events:    make(map[string]*utils.Decimal),
+	}
+}
+
+// StatHighest tracks the maximum value for a specific field across events.
+type StatHighest struct {
+	FilterIDs []string // event filters to apply before processing
+	FieldName string   // field path to extract from events
+	MinItems  uint64   // minimum events required for valid results
+
+	Highest *utils.Decimal            // current maximum value tracked
+	Count   uint64                    // number of events currently tracked
+	Events  map[string]*utils.Decimal // event values indexed by ID for deletion
+}
+
+// Clone creates a deep copy of StatHighest.
+func (s *StatHighest) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatHighest{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		Highest:   s.Highest,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatHighest) GetStringValue(decimals int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := s.Highest.Round(decimals).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatHighest) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return s.Highest
+}
+
+// AddEvent processes a new event, updating highest value if necessary
+func (s *StatHighest) AddEvent(evID string, ev utils.DataProvider) error {
+	val, err := fieldValueFromDP(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Highest) == 1 {
+		s.Highest = val
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Count++
+	}
+
+	s.Events[evID] = val
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatHighest) AddOneEvent(ev utils.DataProvider) error {
+	val, err := fieldValueFromDP(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Highest) == 1 {
+		s.Highest = val
+	}
+	s.Count++
+	return nil
+}
+
+func (s *StatHighest) RemEvent(evID string) error {
+	v, exists := s.Events[evID]
+	if !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	if v.Compare(s.Highest) == 0 {
+		s.Highest = utils.NewDecimal(0, 0) // reset highest
+
+		// Find new highest among remaining events.
+		for _, val := range s.Events {
+			if val.Compare(s.Highest) == 1 {
+				s.Highest = val
+			}
+		}
+	}
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatHighest) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatHighest) GetMinItems() uint64 { return s.MinItems }
+
+// Compress is part of StatMetric interface.
+func (s *StatHighest) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatHighest) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatLowest creates a StatLowest metric for tracking minimum field values.
+func NewStatLowest(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatLowest{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		FieldName: fieldName,
+		Lowest:    utils.NewDecimalFromFloat64(math.MaxFloat64),
+		Events:    make(map[string]*utils.Decimal),
+	}
+}
+
+// StatLowest tracks the minimum value for a specific field across events.
+type StatLowest struct {
+	FilterIDs []string // event filters to apply before processing
+	FieldName string   // field path to extract from events
+	MinItems  uint64   // minimum events required for valid results
+
+	Lowest *utils.Decimal            // current minimum value tracked
+	Count  uint64                    // number of events currently tracked
+	Events map[string]*utils.Decimal // event values indexed by ID for deletion
+}
+
+// Clone creates a deep copy of StatLowest.
+func (s *StatLowest) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatLowest{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		Lowest:    s.Lowest,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatLowest) GetStringValue(decimals int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := s.Lowest.Round(decimals).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatLowest) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return s.Lowest
+}
+
+// AddEvent processes a new event, updating lowest value if necessary.
+func (s *StatLowest) AddEvent(evID string, ev utils.DataProvider) error {
+	val, err := fieldValueFromDP(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Lowest) == -1 {
+		s.Lowest = val
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Count++
+	}
+
+	s.Events[evID] = val
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatLowest) AddOneEvent(ev utils.DataProvider) error {
+	val, err := fieldValueFromDP(s.FieldName, ev)
+	if err != nil {
+		return err
+	}
+	if val.Compare(s.Lowest) == -1 {
+		s.Lowest = val
+	}
+	s.Count++
+	return nil
+}
+
+func (s *StatLowest) RemEvent(evID string) error {
+	v, exists := s.Events[evID]
+	if !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	if v.Compare(s.Lowest) == 0 {
+		s.Lowest = utils.NewDecimalFromFloat64(math.MaxFloat64) // reset lowest
+
+		// Find new lowest among remaining events.
+		for _, val := range s.Events {
+			if val.Compare(s.Lowest) == -1 {
+				s.Lowest = val
+			}
+		}
+	}
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatLowest) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatLowest) GetMinItems() uint64 { return s.MinItems }
+
+// Compress is part of StatMetric interface.
+func (s *StatLowest) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatLowest) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatREPSC creates a StatREPSC metric for counting successful requests.
+func NewStatREPSC(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatREPSC{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		Events:    make(map[string]struct{}),
+	}
+}
+
+// StatREPSC counts requests where ReplyState equals "OK"
+type StatREPSC struct {
+	FilterIDs []string            // event filters to apply before processing
+	MinItems  uint64              // minimum events required for valid results
+	Count     uint64              // number of successful events tracked
+	Events    map[string]struct{} // event IDs indexed for deletion
+}
+
+// Clone creates a deep copy of StatREPSC.
+func (s *StatREPSC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatREPSC{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		MinItems:  s.MinItems,
+		Count:     s.Count,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatREPSC) GetStringValue(_ int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	return strconv.Itoa(int(s.Count))
+}
+
+func (s *StatREPSC) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return utils.NewDecimal(int64(s.Count), 0)
+}
+
+// AddEvent processes a new event, incrementing count if ReplyState is "OK".
+func (s *StatREPSC) AddEvent(evID string, ev utils.DataProvider) error {
+	replyState, err := replyStateFromDP(ev)
+	if err != nil {
+		return err
+	}
+	if replyState != utils.OK {
+		return nil
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Events[evID] = struct{}{}
+		s.Count++
+	}
+
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatREPSC) AddOneEvent(ev utils.DataProvider) error {
+	replyState, err := replyStateFromDP(ev)
+	if err != nil {
+		return err
+	}
+	if replyState != utils.OK {
+		return nil
+	}
+	s.Count++
+	return nil
+}
+
+func (s *StatREPSC) RemEvent(evID string) error {
+	if _, exists := s.Events[evID]; !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatREPSC) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatREPSC) GetMinItems() uint64 {
+	return s.MinItems
+}
+
+// Compress is part of StatMetric interface.
+func (s *StatREPSC) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatREPSC) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatREPFC creates a StatREPFC metric for counting failed requests.
+func NewStatREPFC(minItems uint64, errorType string, filterIDs []string) StatMetric {
+	return &StatREPFC{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		ErrorType: errorType,
+		Events:    make(map[string]struct{}),
+	}
+}
+
+// StatREPFC counts requests where ReplyState is not "OK".
+type StatREPFC struct {
+	FilterIDs []string            // event filters to apply before processing
+	MinItems  uint64              // minimum events required for valid results
+	ErrorType string              // specific error type to filter for (empty = all errors)
+	Count     uint64              // number of failed events tracked
+	Events    map[string]struct{} // event IDs indexed for deletion
+}
+
+// Clone creates a deep copy of StatREPFC.
+func (s *StatREPFC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatREPFC{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		MinItems:  s.MinItems,
+		ErrorType: s.ErrorType,
+		Count:     s.Count,
+		Events:    maps.Clone(s.Events),
+	}
+	return clone
+}
+
+func (s *StatREPFC) GetStringValue(_ int) string {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.NotAvailable
+	}
+	return strconv.Itoa(int(s.Count))
+}
+
+func (s *StatREPFC) GetValue() *utils.Decimal {
+	if s.Count == 0 || s.Count < s.MinItems {
+		return utils.DecimalNaN
+	}
+	return utils.NewDecimal(int64(s.Count), 0)
+}
+
+// AddEvent processes a new event, incrementing count if ReplyState is not "OK".
+func (s *StatREPFC) AddEvent(evID string, ev utils.DataProvider) error {
+	replyState, err := replyStateFromDP(ev)
+	if err != nil {
+		return err
+	}
+
+	// Skip if success when counting all failures, or if not matching specific
+	// error type.
+	if s.ErrorType == "" && replyState == utils.OK {
+		return nil
+	}
+	// Handle multiple errors separated by ";" (e.g., "ERR_TERMINATE;ERR_CDRS")
+	// Use split + exact match instead of strings.Contains to avoid false positives.
+	if s.ErrorType != "" {
+		errors := strings.Split(replyState, utils.InfieldSep)
+		if !slices.Contains(errors, s.ErrorType) {
+			return nil
+		}
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Events[evID] = struct{}{}
+		s.Count++
+	}
+
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatREPFC) AddOneEvent(ev utils.DataProvider) error {
+	replyState, err := replyStateFromDP(ev)
+	if err != nil {
+		return err
+	}
+
+	// Skip if success when counting all failures, or if not matching specific
+	// error type.
+	if s.ErrorType == "" && replyState == utils.OK {
+		return nil
+	}
+	// Handle multiple errors separated by ";" (e.g., "ERR_TERMINATE;ERR_CDRS")
+	// Use split + exact match instead of strings.Contains to avoid false positives
+	if s.ErrorType != "" {
+		errors := strings.Split(replyState, utils.InfieldSep)
+		if !slices.Contains(errors, s.ErrorType) {
+			return nil
+		}
+	}
+
+	s.Count++
+	return nil
+}
+
+func (s *StatREPFC) RemEvent(evID string) error {
+	if _, exists := s.Events[evID]; !exists {
+		return utils.ErrNotFound
+	}
+	delete(s.Events, evID)
+	s.Count--
+	return nil
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatREPFC) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatREPFC) GetMinItems() uint64 {
+	return s.MinItems
+}
+
+// Compress is part of StatMetric interface.
+func (s *StatREPFC) Compress(_ uint64, _ string) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatREPFC) GetCompressFactor(events map[string]uint64) map[string]uint64 {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// fieldValueFromDP gets the numeric value from the DataProvider.
+func fieldValueFromDP(fldName string, dp utils.DataProvider) (*utils.Decimal, error) {
+	ival, err := utils.DPDynamicInterface(fldName, dp)
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return nil, utils.ErrPrefix(err, fldName)
+			// NOTE: return below might be clearer
+			// return nil, fmt.Errorf("field %s: %v", field, err)
+		}
+		return nil, err
+	}
+	v, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return nil, err
+	}
+	return &utils.Decimal{Big: v}, nil
+}
+
+// replyStateFromDP gets the numeric value from the DataProvider.
+func replyStateFromDP(dp utils.DataProvider) (string, error) {
+	ival, err := dp.FieldAsInterface([]string{utils.MetaReq, utils.ReplyState})
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return "", utils.ErrPrefix(err, utils.ReplyState)
+			// NOTE: return below might be clearer
+			// return 0, fmt.Errorf("field %s: %v", utils.ReplyState, err)
+		}
+		return "", err
+	}
+	return utils.IfaceAsString(ival), nil
 }

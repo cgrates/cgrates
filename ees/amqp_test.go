@@ -28,17 +28,18 @@ import (
 
 func TestNewAMQPee(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc := &utils.SafeMapStorage{
+	em := &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			utils.NumberOfEvents:  int64(0),
 			utils.PositiveExports: utils.StringSet{},
 			utils.NegativeExports: 5,
-		}}
+		},
+	}
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests = 2
-	rcv := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	rcv := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	exp := &AMQPee{
 		cfg:  cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
-		dc:   dc,
+		em:   em,
 		reqs: newConcReq(cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests),
 	}
 	rcv.reqs = nil
@@ -48,24 +49,3 @@ func TestNewAMQPee(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 }
-
-// func TestAMQPExportEvent(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dc := &utils.SafeMapStorage{
-// 		MapStorage: utils.MapStorage{
-// 			utils.NumberOfEvents:  int64(0),
-// 			utils.PositiveExports: utils.StringSet{},
-// 			utils.NegativeExports: 5,
-// 		}}
-// 	// cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests = 2
-// 	// cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Opts = &config.EventExporterOpts{
-
-// 	// }
-// 	pstr := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
-// 	content := "some_content"
-// 	pstr.postChan =
-// 	if err := pstr.ExportEvent(context.Background(), content, ""); err != nil {
-// 		t.Error(err)
-// 	}
-
-// }

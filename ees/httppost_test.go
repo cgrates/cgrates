@@ -34,19 +34,16 @@ import (
 )
 
 func TestHttpPostGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	httpPost := &HTTPPostEE{
-		dc: dc,
+		em: em,
 	}
 
-	if rcv := httpPost.GetMetrics(); !reflect.DeepEqual(rcv, httpPost.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpPost.dc))
+	if rcv := httpPost.GetMetrics(); !reflect.DeepEqual(rcv, httpPost.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpPost.em))
 	}
 }
 

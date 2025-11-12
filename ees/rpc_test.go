@@ -29,20 +29,20 @@ import (
 
 func TestNewRpcEE(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
 
-	rcv, err := NewRpcEE(eeSCfg, dc, connMgr)
+	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
 	}
 
 	exp := &RPCee{
 		cfg:     eeSCfg,
-		dc:      dc,
+		em:      em,
 		connMgr: connMgr,
 	}
 
@@ -102,12 +102,12 @@ func TestRPCCfg(t *testing.T) {
 
 func TestRPCConnect(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -118,12 +118,9 @@ func TestRPCConnect(t *testing.T) {
 
 // func TestRPCExportEvent(t *testing.T) {
 // 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-// 	dc, err := newEEMetrics("Local")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+// 	em := utils.NewExporterMetrics("",time.Local)
 // 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-// 	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+// 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 // 	if err != nil {
 // 		t.Error(err)
 // 	}
@@ -147,12 +144,12 @@ func TestRPCConnect(t *testing.T) {
 
 func TestRPCClose(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -166,31 +163,31 @@ func TestRPCClose(t *testing.T) {
 
 func TestRPCGetMetrics(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc := &utils.SafeMapStorage{
+	em := &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			"time":         "now",
 			"just_a_field": "just_a_value",
 		},
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if rcv := rpcEe.GetMetrics(); !reflect.DeepEqual(rcv, dc) {
-		t.Errorf("Expected %v \n but received \n %v", dc, rcv)
+	if rcv := rpcEe.GetMetrics(); !reflect.DeepEqual(rcv, em) {
+		t.Errorf("Expected %v \n but received \n %v", em, rcv)
 	}
 }
 
 func TestRPCPrepareMap(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
 	}

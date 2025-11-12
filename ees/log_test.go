@@ -31,17 +31,17 @@ import (
 
 func TestNewLogEE(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	expected := &LogEE{
 		cfg: cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
-		dc:  dc,
+		em:  em,
 	}
 
-	rcv := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	rcv := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
 	}
@@ -49,11 +49,11 @@ func TestNewLogEE(t *testing.T) {
 
 func TestLogEEExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := map[string]any{
 		"field1": 2,
 		"field2": "value",
@@ -72,34 +72,27 @@ func TestLogEEExportEvent(t *testing.T) {
 	}
 }
 
-func TestLogEEGetMetrics(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
+func TestLogEE_GetMetrics(t *testing.T) {
+	mockMetrics := &utils.ExporterMetrics{}
+
+	vEe := &LogEE{
+		em: mockMetrics,
 	}
-	dc.MapStorage = utils.MapStorage{
-		"metric1": "value",
-	}
-	expected := &utils.SafeMapStorage{
-		MapStorage: utils.MapStorage{
-			"metric1": "value",
-		},
-	}
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
-	rcv := logEE.GetMetrics()
-	if !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expected %T \n but received \n %T", expected, rcv)
+
+	result := vEe.GetMetrics()
+
+	if result != mockMetrics {
+		t.Errorf("expected %v, got %v", mockMetrics, result)
 	}
 }
 
 func TestLogEEPrepareMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := &utils.CGREvent{
 		Event: map[string]any{
 			"field1": 2,
@@ -114,11 +107,11 @@ func TestLogEEPrepareMap(t *testing.T) {
 
 func TestLogEEPrepareOrderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), em)
 	mp := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"*path1"},

@@ -32,6 +32,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func mustNewStatSum(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	sum, err := NewStatSum(minItems, fieldName, filterIDs)
+	if err != nil {
+		panic(err)
+	}
+	return sum
+}
+
 var (
 	testStatsPrfs = []*StatQueueProfile{
 		{
@@ -104,7 +112,7 @@ var (
 			ID:     "StatQueueProfile1",
 			sqPrfl: testStatsPrfs[0],
 			SQMetrics: map[string]StatMetric{
-				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+				utils.MetaSum: mustNewStatSum(1, "~*req.Usage", nil),
 			},
 		},
 		{
@@ -112,7 +120,7 @@ var (
 			ID:     "StatQueueProfile2",
 			sqPrfl: testStatsPrfs[1],
 			SQMetrics: map[string]StatMetric{
-				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+				utils.MetaSum: mustNewStatSum(1, "~*req.Usage", nil),
 			},
 		},
 		{
@@ -120,7 +128,7 @@ var (
 			ID:     "StatQueueProfilePrefix",
 			sqPrfl: testStatsPrfs[2],
 			SQMetrics: map[string]StatMetric{
-				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+				utils.MetaSum: mustNewStatSum(1, "~*req.Usage", nil),
 			},
 		},
 	}

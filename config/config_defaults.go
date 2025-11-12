@@ -522,8 +522,9 @@ const CGRATES_CFG_JSON = `
 "efs": {
 	"enabled": false,					// starts the EventReader service: <true|false>
 	"poster_attempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
-	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
-	"failed_posts_ttl": "5s"				// time to wait before writing the failed posts in a single file
+	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory where failed export requests are stored
+	"failed_posts_ttl": "5s",				// cache ttl for batching failed posts before writing to disk
+	"failed_posts_static_ttl": true				// if false, ttl resets on every cache access
 },
 
 "ees": {
@@ -548,6 +549,7 @@ const CGRATES_CFG_JSON = `
 			"synchronous": false,					// block processing until export has a result
 			"blocker": false,					// stops the processing of the following exporters
 			"attempts": 1,						// export attempts
+			"metrics_reset_schedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
 			"opts": {						// extra options for exporter
 
 				// CSV
@@ -1030,6 +1032,9 @@ const CGRATES_CFG_JSON = `
 	"asr_template": "",						// enable AbortSession message being sent to client on DisconnectSession
 	"rar_template": "",						// template used to build the Re-Auth-Request
 	"forced_disconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
+	"conn_status_stat_queue_ids": [],				// StatQueue IDs for connection status events
+	"conn_status_threshold_ids": [],				// Threshold IDs for connection status events
+	"conn_health_check_interval": "0",				// peer connection health check interval (0 to disable)
 	"request_processors": []					// list of processors to be applied to diameter messages
 },
 
@@ -1091,6 +1096,7 @@ const CGRATES_CFG_JSON = `
 "prometheus_agent": {
 	"enabled": false,			// enables the prometheus agent: <true|false>
 	"path": "/prometheus",			// endpoint for prometheus metrics
+	"admins_conns": [],			// connections to AdminS, empty to disable: <""|*internal|$rpc_conns_id>
 	"caches_conns": [], 			// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
 	"cache_ids": [],			// cache partition IDs to collect statistics for, empty for all partitions
 	"cores_conns": [],			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>

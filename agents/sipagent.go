@@ -379,6 +379,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
 	startTime := time.Now()
+	replyState := utils.OK
 	if pass, err := sa.filterS.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -417,12 +418,18 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateAuthorize
+		}
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateEvent
+		}
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
@@ -431,6 +438,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		// }
 		agReq.setCGRReply(rply, err)
 	}
+
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
@@ -457,15 +465,21 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return true, nil
 	}
 
-	// Clone is needed to prevent data races if requests are sent
-	// asynchronously.
-	ev := cgrEv.Clone()
-
-	ev.Event[utils.StartTime] = startTime
-	ev.Event[utils.EndTime] = endTime
-	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
-	ev.Event[utils.Source] = utils.SIPAgent
-	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
+	ev := &utils.CGREvent{
+		Tenant: cgrEv.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]any{
+			utils.ReplyState:         replyState,
+			utils.StartTime:          startTime,
+			utils.EndTime:            endTime,
+			utils.ProcessingTime:     endTime.Sub(startTime),
+			utils.Source:             utils.SIPAgent,
+			utils.RequestProcessorID: reqProcessor.ID,
+		},
+		APIOpts: map[string]any{
+			utils.MetaEventType: utils.EventPerformanceReport,
+		},
+	}
 
 	if rawStatIDs != "" {
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)

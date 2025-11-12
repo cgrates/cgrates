@@ -27,17 +27,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewLogEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *LogEE {
+func NewLogEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *LogEE {
 	return &LogEE{
 		cfg: cfg,
-		dc:  dc,
+		em:  em,
 	}
 }
 
 // LogEE implements EventExporter interface for .csv files
 type LogEE struct {
 	cfg *config.EventExporterCfg
-	dc  *utils.SafeMapStorage
+	em  *utils.ExporterMetrics
 }
 
 func (vEe *LogEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
@@ -48,9 +48,9 @@ func (vEe *LogEE) ExportEvent(_ *context.Context, mp, _ any) error {
 			utils.EEs, vEe.Cfg().ID, utils.ToJSON(mp)))
 	return nil
 }
-func (vEe *LogEE) Close() error                      { return nil }
-func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
-func (vEe *LogEE) ExtraData(ev *utils.CGREvent) any  { return nil }
+func (vEe *LogEE) Close() error                       { return nil }
+func (vEe *LogEE) GetMetrics() *utils.ExporterMetrics { return vEe.em }
+func (vEe *LogEE) ExtraData(ev *utils.CGREvent) any   { return nil }
 func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return mp.Event, nil
 }
