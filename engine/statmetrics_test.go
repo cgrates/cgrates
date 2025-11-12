@@ -2114,7 +2114,8 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev2 := &utils.CGREvent{ID: "EVENT_2"}
-	if err := statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts}); err == nil || err.Error() != "NOT_FOUND:~*opts.*cost" {
+	if err := statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts}); err == nil ||
+		err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if v := statSum.GetValue(); v != utils.DecimalNaN {
@@ -2233,26 +2234,41 @@ func TestStatSumGetStringValue2(t *testing.T) {
 }
 
 func TestStatSumGetStringValue3(t *testing.T) {
-	statSum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
+	statSum := &StatSum{
+		Metric: NewMetric(2, nil),
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+	}
 	expected := &StatSum{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
-				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
-				"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
+				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
+				"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.3"), CompressFactor: 1},
 			},
 			MinItems: 2,
 			Count:    3,
-			Value:    utils.NewDecimalFromStringIgnoreError("42.700"),
+			Value:    utils.NewDecimalFromStringIgnoreError("42.7"),
 		},
-		FieldName: "~*opts.*cost",
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
-	ev1 := &utils.CGREvent{ID: "EVENT_1",
-		APIOpts: map[string]any{utils.MetaCost: 18.2}}
-	ev2 := &utils.CGREvent{ID: "EVENT_1",
-		APIOpts: map[string]any{utils.MetaCost: 6.2}}
-	ev3 := &utils.CGREvent{ID: "EVENT_3",
-		APIOpts: map[string]any{utils.MetaCost: 18.3}}
+	ev1 := &utils.CGREvent{
+		ID: "EVENT_1",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(182, 1),
+		},
+	}
+	ev2 := &utils.CGREvent{
+		ID: "EVENT_1",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(62, 1),
+		},
+	}
+	ev3 := &utils.CGREvent{
+		ID: "EVENT_3",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(183, 1),
+		},
+	}
 	if err := statSum.AddEvent(ev1.ID, utils.MapStorage{utils.MetaOpts: ev1.APIOpts}); err != nil {
 		t.Error(err)
 	}
@@ -2278,26 +2294,41 @@ func TestStatSumGetStringValue3(t *testing.T) {
 }
 
 func TestStatSumCompress(t *testing.T) {
-	sum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
+	sum := &StatSum{
+		Metric: NewMetric(2, nil),
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+	}
 	expected := &StatSum{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
-				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
-				"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
+				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.2"), CompressFactor: 1},
+				"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.2"), CompressFactor: 1},
 			},
 			MinItems: 2,
-			Value:    utils.NewDecimalFromStringIgnoreError("24.400"),
+			Value:    utils.NewDecimalFromStringIgnoreError("24.4"),
 			Count:    2,
 		},
-		FieldName: "~*opts.*cost",
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
-	ev := &utils.CGREvent{ID: "EVENT_1",
-		APIOpts: map[string]any{utils.MetaCost: 18.2}}
-	ev2 := &utils.CGREvent{ID: "EVENT_2",
-		APIOpts: map[string]any{utils.MetaCost: 6.2}}
-	ev4 := &utils.CGREvent{ID: "EVENT_1",
-		APIOpts: map[string]any{utils.MetaCost: 18.3}}
+	ev := &utils.CGREvent{
+		ID: "EVENT_1",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(182, 1),
+		},
+	}
+	ev2 := &utils.CGREvent{
+		ID: "EVENT_2",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(62, 1),
+		},
+	}
+	ev4 := &utils.CGREvent{
+		ID: "EVENT_1",
+		APIOpts: map[string]any{
+			utils.MetaCost: utils.NewDecimal(183, 1),
+		},
+	}
 	sum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	sum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	expIDs := []string{"EVENT_1", "EVENT_2"}
@@ -2319,7 +2350,7 @@ func TestStatSumCompress(t *testing.T) {
 			Value:    utils.NewDecimalFromFloat64(24.4),
 			Count:    2,
 		},
-		FieldName: "~*opts.*cost",
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
@@ -3013,7 +3044,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.MetaUsage:       10 * time.Second}}
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nstatSum StatSum
-	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`)
+	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Fields":[{"Rules":"~*opts.*cost","Path":"~*opts.*cost"}]}`)
 	if b, err := jMarshaler.Marshal(statSum); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3704,9 +3735,10 @@ func TestStatPDDClone(t *testing.T) {
 }
 
 func TestStatSumClone(t *testing.T) {
-
-	sum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
-
+	sum := &StatSum{
+		Metric: NewMetric(2, nil),
+		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+	}
 	if rcv := sum.Clone(); !reflect.DeepEqual(rcv, sum) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", sum, rcv)
 	}
