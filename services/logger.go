@@ -59,7 +59,7 @@ func (s *LoggerService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	}
 	cm := cms.(*ConnManagerService).ConnManager()
 	utils.Logger = engine.NewExportLogger(context.TODO(), s.cfg.GeneralCfg().DefaultTenant, cm, s.cfg)
-	efs.SetFailedPostCacheTTL(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)
+	efs.InitFailedPostCache(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)
 	return nil
 }
 
