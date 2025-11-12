@@ -548,15 +548,21 @@ const (
 	EventReaderID      = "EventReaderID"
 
 	// Event types
-	EventType              = "EventType"
-	MetaEventType          = "*eventType"
-	CDRKey                 = "CDR"
-	ThresholdHit           = "ThresholdHit"
-	RankingUpdate          = "RankingUpdate"
-	ResourceUpdate         = "ResourceUpdate"
-	StatUpdate             = "StatUpdate"
-	TrendUpdate            = "TrendUpdate"
-	EventPerformanceReport = "PerformanceReport"
+	EventType                   = "EventType"
+	MetaEventType               = "*eventType"
+	CDRKey                      = "CDR"
+	ThresholdHit                = "ThresholdHit"
+	RankingUpdate               = "RankingUpdate"
+	ResourceUpdate              = "ResourceUpdate"
+	StatUpdate                  = "StatUpdate"
+	TrendUpdate                 = "TrendUpdate"
+	EventPerformanceReport      = "PerformanceReport"
+	EventConnectionStatusReport = "ConnectionStatusReport"
+
+	// Connection status event fields.
+	ConnLocalAddr  = "LocalAddr"
+	ConnRemoteAddr = "RemoteAddr"
+	ConnStatus     = "ConnectionStatus" // -1=down, 0=duplicate, 1=up
 
 	// ReplyState error constants
 	ErrReplyStateAuthorize = "ERR_AUTHORIZE"
