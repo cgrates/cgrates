@@ -985,6 +985,69 @@ func (fltr *Filter) FieldAsInterface(fldPath []string) (_ any, err error) {
 	return fltr.Rules[idx].FieldAsInterface(fldPath[1:])
 }
 
+// AsMapStringInterface converts Filter struct to map[string]any
+func (fltr *Filter) AsMapStringInterface() map[string]any {
+	if fltr == nil {
+		return nil
+	}
+	return map[string]any{
+		utils.Tenant: fltr.Tenant,
+		utils.ID:     fltr.ID,
+		utils.Rules:  fltr.Rules,
+	}
+}
+
+// MapStringInterfaceToFilter converts map[string]any to Filter struct
+func MapStringInterfaceToFilter(m map[string]any) (*Filter, error) {
+	fltr := &Filter{}
+
+	if v, ok := m[utils.Tenant].(string); ok {
+		fltr.Tenant = v
+	}
+	if v, ok := m[utils.ID].(string); ok {
+		fltr.ID = v
+	}
+	fltr.Rules = InterfaceToRules(m[utils.Rules])
+	return fltr, nil
+}
+
+// InterfaceToRules converts interface to []*FilterRule
+func InterfaceToRules(v any) []*FilterRule {
+	if v == nil {
+		return nil
+	}
+	if val, ok := v.([]any); !ok {
+		return nil
+	} else {
+		result := make([]*FilterRule, 0, len(val))
+		for _, item := range val {
+			if filters, ok := item.(map[string]any); ok {
+				result = append(result, MapStringInterfaceToFilterRule(filters))
+			}
+		}
+		return result
+	}
+}
+
+// MapStringInterfaceToFilterRule converts map[string]any to *FilterRule
+func MapStringInterfaceToFilterRule(m map[string]any) *FilterRule {
+	if m == nil {
+		return nil
+	}
+	rule := &FilterRule{}
+
+	if v, ok := m[utils.Type].(string); ok {
+		rule.Type = v
+	}
+
+	if v, ok := m[utils.Element].(string); ok {
+		rule.Element = v
+	}
+
+	rule.Values = utils.InterfaceToStringSlice(m[utils.Values])
+	return rule
+}
+
 func (fltr *FilterRule) String() string { return utils.ToJSON(fltr) }
 func (fltr *FilterRule) FieldAsString(fldPath []string) (_ string, err error) {
 	var val any

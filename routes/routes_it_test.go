@@ -84,11 +84,11 @@ func TestRoutesIT(t *testing.T) {
 	case utils.MetaMongo:
 		roConfigDIR = "routes_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		roConfigDIR = "routes_redis"
 	case utils.MetaMySQL:
 		roConfigDIR = "routes_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		roConfigDIR = "routes_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

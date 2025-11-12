@@ -1039,6 +1039,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		utils.MetaStatQueues,
 		utils.MetaThresholdProfiles,
 		utils.MetaThresholds,
+		utils.MetaFilters,
+		utils.MetaRouteProfiles,
 	}
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {

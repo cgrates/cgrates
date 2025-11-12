@@ -66,6 +66,42 @@ func TestDynThdIT(t *testing.T) {
 					Limit:  utils.IntPointer(-1),
 					DbConn: utils.StringPointer(utils.StorDB),
 				},
+				utils.MetaStatQueueProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaStatQueues: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaAttributeProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaResourceProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaResources: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaFilters: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaRouteProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaIPProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaIPAllocations: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
 			},
 		}}
 	case utils.MetaMongo:
@@ -92,6 +128,42 @@ func TestDynThdIT(t *testing.T) {
 					DbConn: utils.StringPointer(utils.StorDB),
 				},
 				utils.MetaThresholds: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaStatQueueProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaStatQueues: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaAttributeProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaResourceProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaResources: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaFilters: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaRouteProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaIPProfiles: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+				utils.MetaIPAllocations: {
 					Limit:  utils.IntPointer(-1),
 					DbConn: utils.StringPointer(utils.StorDB),
 				},
