@@ -44,6 +44,8 @@ type DiameterAgentCfg struct {
 	ASRTemplate             string
 	RARTemplate             string
 	ForcedDisconnect        string
+	ConnStatusStatQueueIDs  []string
+	ConnStatusThresholdIDs  []string
 	ConnHealthCheckInterval time.Duration // peer connection health check interval (0 to disable)
 	RequestProcessors       []*RequestProcessor
 }
@@ -110,6 +112,12 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 	if jc.ForcedDisconnect != nil {
 		da.ForcedDisconnect = *jc.ForcedDisconnect
 	}
+	if jc.ConnStatusStatQueueIDs != nil {
+		da.ConnStatusStatQueueIDs = *jc.ConnStatusStatQueueIDs
+	}
+	if jc.ConnStatusThresholdIDs != nil {
+		da.ConnStatusThresholdIDs = *jc.ConnStatusThresholdIDs
+	}
 	if jc.ConnHealthCheckInterval != nil {
 		da.ConnHealthCheckInterval, err = utils.ParseDurationWithNanosecs(*jc.ConnHealthCheckInterval)
 		if err != nil {
@@ -134,6 +142,8 @@ func (da DiameterAgentCfg) AsMapInterface() any {
 		utils.SessionSConnsCfg:           stripInternalConns(da.SessionSConns),
 		utils.StatSConnsCfg:              stripInternalConns(da.StatSConns),
 		utils.ThresholdSConnsCfg:         stripInternalConns(da.ThresholdSConns),
+		utils.ConnStatusStatQueueIDsCfg:  da.ConnStatusStatQueueIDs,
+		utils.ConnStatusThresholdIDsCfg:  da.ConnStatusThresholdIDs,
 		utils.OriginHostCfg:              da.OriginHost,
 		utils.OriginRealmCfg:             da.OriginRealm,
 		utils.VendorIDCfg:                da.VendorID,
@@ -175,6 +185,8 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		ASRTemplate:             da.ASRTemplate,
 		RARTemplate:             da.RARTemplate,
 		ForcedDisconnect:        da.ForcedDisconnect,
+		ConnStatusStatQueueIDs:  slices.Clone(da.ConnStatusStatQueueIDs),
+		ConnStatusThresholdIDs:  slices.Clone(da.ConnStatusThresholdIDs),
 		ConnHealthCheckInterval: da.ConnHealthCheckInterval,
 	}
 	if da.CEApplications != nil {
@@ -208,6 +220,8 @@ type DiameterAgentJsonCfg struct {
 	ASRTemplate             *string                `json:"asr_template"`
 	RARTemplate             *string                `json:"rar_template"`
 	ForcedDisconnect        *string                `json:"forced_disconnect"`
+	ConnStatusStatQueueIDs  *[]string              `json:"conn_status_stat_queue_ids"`
+	ConnStatusThresholdIDs  *[]string              `json:"conn_status_threshold_ids"`
 	ConnHealthCheckInterval *string                `json:"conn_health_check_interval"`
 	RequestProcessors       *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
@@ -263,6 +277,12 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	}
 	if v1.ForcedDisconnect != v2.ForcedDisconnect {
 		d.ForcedDisconnect = utils.StringPointer(v2.ForcedDisconnect)
+	}
+	if !slices.Equal(v1.ConnStatusStatQueueIDs, v2.ConnStatusStatQueueIDs) {
+		d.ConnStatusStatQueueIDs = utils.SliceStringPointer(v2.ConnStatusStatQueueIDs)
+	}
+	if !slices.Equal(v1.ConnStatusThresholdIDs, v2.ConnStatusThresholdIDs) {
+		d.ConnStatusThresholdIDs = utils.SliceStringPointer(v2.ConnStatusThresholdIDs)
 	}
 	if v1.ConnHealthCheckInterval != v2.ConnHealthCheckInterval {
 		d.ConnHealthCheckInterval = utils.StringPointer(v2.ConnHealthCheckInterval.String())
