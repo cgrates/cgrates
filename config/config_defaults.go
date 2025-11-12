@@ -1028,6 +1028,7 @@ const CGRATES_CFG_JSON = `
 	"asr_template": "",						// enable AbortSession message being sent to client on DisconnectSession
 	"rar_template": "",						// template used to build the Re-Auth-Request
 	"forced_disconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
+	"conn_health_check_interval": "0",				// peer connection health check interval (0 to disable)
 	"request_processors": []					// list of processors to be applied to diameter messages
 },
 

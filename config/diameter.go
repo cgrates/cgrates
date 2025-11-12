@@ -20,6 +20,7 @@ package config
 
 import (
 	"slices"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -27,23 +28,24 @@ import (
 
 // DiameterAgentCfg the config section that describes the Diameter Agent
 type DiameterAgentCfg struct {
-	Enabled           bool   // enables the diameter agent: <true|false>
-	ListenNet         string // sctp or tcp
-	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesPath  string
-	CEApplications    []string
-	SessionSConns     []string
-	StatSConns        []string
-	ThresholdSConns   []string
-	OriginHost        string
-	OriginRealm       string
-	VendorID          int
-	ProductName       string
-	SyncedConnReqs    bool
-	ASRTemplate       string
-	RARTemplate       string
-	ForcedDisconnect  string
-	RequestProcessors []*RequestProcessor
+	Enabled                 bool   // enables the diameter agent: <true|false>
+	ListenNet               string // sctp or tcp
+	Listen                  string // address where to listen for diameter requests <x.y.z.y:1234>
+	DictionariesPath        string
+	CEApplications          []string
+	SessionSConns           []string
+	StatSConns              []string
+	ThresholdSConns         []string
+	OriginHost              string
+	OriginRealm             string
+	VendorID                int
+	ProductName             string
+	SyncedConnReqs          bool
+	ASRTemplate             string
+	RARTemplate             string
+	ForcedDisconnect        string
+	ConnHealthCheckInterval time.Duration // peer connection health check interval (0 to disable)
+	RequestProcessors       []*RequestProcessor
 }
 
 // loadDiameterAgentCfg loads the DiameterAgent section of the configuration
@@ -55,86 +57,93 @@ func (da *DiameterAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGR
 	return da.loadFromJSONCfg(jsnDACfg)
 }
 
-func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg) (err error) {
-	if jsnCfg == nil {
+func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error) {
+	if jc == nil {
 		return nil
 	}
-	if jsnCfg.Enabled != nil {
-		da.Enabled = *jsnCfg.Enabled
+	if jc.Enabled != nil {
+		da.Enabled = *jc.Enabled
 	}
-	if jsnCfg.Listen != nil {
-		da.Listen = *jsnCfg.Listen
+	if jc.Listen != nil {
+		da.Listen = *jc.Listen
 	}
-	if jsnCfg.ListenNet != nil {
-		da.ListenNet = *jsnCfg.ListenNet
+	if jc.ListenNet != nil {
+		da.ListenNet = *jc.ListenNet
 	}
-	if jsnCfg.DictionariesPath != nil {
-		da.DictionariesPath = *jsnCfg.DictionariesPath
+	if jc.DictionariesPath != nil {
+		da.DictionariesPath = *jc.DictionariesPath
 	}
-	if jsnCfg.CEApplications != nil {
-		da.CEApplications = make([]string, len(*jsnCfg.CEApplications))
-		copy(da.CEApplications, *jsnCfg.CEApplications)
+	if jc.CEApplications != nil {
+		da.CEApplications = make([]string, len(*jc.CEApplications))
+		copy(da.CEApplications, *jc.CEApplications)
 	}
-	if jsnCfg.SessionSConns != nil {
-		da.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+	if jc.SessionSConns != nil {
+		da.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
 	}
-	if jsnCfg.StatSConns != nil {
-		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	if jc.StatSConns != nil {
+		da.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
-	if jsnCfg.ThresholdSConns != nil {
-		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	if jc.ThresholdSConns != nil {
+		da.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
 	}
-	if jsnCfg.OriginHost != nil {
-		da.OriginHost = *jsnCfg.OriginHost
+	if jc.OriginHost != nil {
+		da.OriginHost = *jc.OriginHost
 	}
-	if jsnCfg.OriginRealm != nil {
-		da.OriginRealm = *jsnCfg.OriginRealm
+	if jc.OriginRealm != nil {
+		da.OriginRealm = *jc.OriginRealm
 	}
-	if jsnCfg.VendorID != nil {
-		da.VendorID = *jsnCfg.VendorID
+	if jc.VendorID != nil {
+		da.VendorID = *jc.VendorID
 	}
-	if jsnCfg.ProductName != nil {
-		da.ProductName = *jsnCfg.ProductName
+	if jc.ProductName != nil {
+		da.ProductName = *jc.ProductName
 	}
-	if jsnCfg.SyncedConnRequests != nil {
-		da.SyncedConnReqs = *jsnCfg.SyncedConnRequests
+	if jc.SyncedConnRequests != nil {
+		da.SyncedConnReqs = *jc.SyncedConnRequests
 	}
-	if jsnCfg.ASRTemplate != nil {
-		da.ASRTemplate = *jsnCfg.ASRTemplate
+	if jc.ASRTemplate != nil {
+		da.ASRTemplate = *jc.ASRTemplate
 	}
-	if jsnCfg.RARTemplate != nil {
-		da.RARTemplate = *jsnCfg.RARTemplate
+	if jc.RARTemplate != nil {
+		da.RARTemplate = *jc.RARTemplate
 	}
-	if jsnCfg.ForcedDisconnect != nil {
-		da.ForcedDisconnect = *jsnCfg.ForcedDisconnect
+	if jc.ForcedDisconnect != nil {
+		da.ForcedDisconnect = *jc.ForcedDisconnect
 	}
-	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.RequestProcessors)
+	if jc.ConnHealthCheckInterval != nil {
+		da.ConnHealthCheckInterval, err = utils.ParseDurationWithNanosecs(*jc.ConnHealthCheckInterval)
+		if err != nil {
+			return
+		}
+	}
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jc.RequestProcessors)
 	return
 }
 
-// AsMapInterface returns the config as a map[string]any
+// AsMapInterface returns the config as a map[string]any.
 func (da DiameterAgentCfg) AsMapInterface() any {
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp := map[string]any{
-		utils.EnabledCfg:           da.Enabled,
-		utils.ListenNetCfg:         da.ListenNet,
-		utils.ListenCfg:            da.Listen,
-		utils.DictionariesPathCfg:  da.DictionariesPath,
-		utils.SessionSConnsCfg:     stripInternalConns(da.SessionSConns),
-		utils.StatSConnsCfg:        stripInternalConns(da.StatSConns),
-		utils.ThresholdSConnsCfg:   stripInternalConns(da.ThresholdSConns),
-		utils.OriginHostCfg:        da.OriginHost,
-		utils.OriginRealmCfg:       da.OriginRealm,
-		utils.VendorIDCfg:          da.VendorID,
-		utils.ProductNameCfg:       da.ProductName,
-		utils.SyncedConnReqsCfg:    da.SyncedConnReqs,
-		utils.ASRTemplateCfg:       da.ASRTemplate,
-		utils.RARTemplateCfg:       da.RARTemplate,
-		utils.ForcedDisconnectCfg:  da.ForcedDisconnect,
-		utils.RequestProcessorsCfg: requestProcessors,
+		utils.EnabledCfg:                 da.Enabled,
+		utils.ListenNetCfg:               da.ListenNet,
+		utils.ListenCfg:                  da.Listen,
+		utils.DictionariesPathCfg:        da.DictionariesPath,
+		utils.SessionSConnsCfg:           stripInternalConns(da.SessionSConns),
+		utils.StatSConnsCfg:              stripInternalConns(da.StatSConns),
+		utils.ThresholdSConnsCfg:         stripInternalConns(da.ThresholdSConns),
+		utils.OriginHostCfg:              da.OriginHost,
+		utils.OriginRealmCfg:             da.OriginRealm,
+		utils.VendorIDCfg:                da.VendorID,
+		utils.ProductNameCfg:             da.ProductName,
+		utils.SyncedConnReqsCfg:          da.SyncedConnReqs,
+		utils.ASRTemplateCfg:             da.ASRTemplate,
+		utils.RARTemplateCfg:             da.RARTemplate,
+		utils.ForcedDisconnectCfg:        da.ForcedDisconnect,
+		utils.ConnHealthCheckIntervalCfg: da.ConnHealthCheckInterval.String(),
+		utils.RequestProcessorsCfg:       requestProcessors,
 	}
 	if da.CEApplications != nil {
 		apps := make([]string, len(da.CEApplications))
@@ -150,22 +159,23 @@ func (da DiameterAgentCfg) CloneSection() Section { return da.Clone() }
 // Clone returns a deep copy of DiameterAgentCfg
 func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 	clone := &DiameterAgentCfg{
-		Enabled:          da.Enabled,
-		ListenNet:        da.ListenNet,
-		Listen:           da.Listen,
-		DictionariesPath: da.DictionariesPath,
-		CEApplications:   slices.Clone(da.CEApplications),
-		SessionSConns:    slices.Clone(da.SessionSConns),
-		StatSConns:       slices.Clone(da.StatSConns),
-		ThresholdSConns:  slices.Clone(da.ThresholdSConns),
-		OriginHost:       da.OriginHost,
-		OriginRealm:      da.OriginRealm,
-		VendorID:         da.VendorID,
-		ProductName:      da.ProductName,
-		SyncedConnReqs:   da.SyncedConnReqs,
-		ASRTemplate:      da.ASRTemplate,
-		RARTemplate:      da.RARTemplate,
-		ForcedDisconnect: da.ForcedDisconnect,
+		Enabled:                 da.Enabled,
+		ListenNet:               da.ListenNet,
+		Listen:                  da.Listen,
+		DictionariesPath:        da.DictionariesPath,
+		CEApplications:          slices.Clone(da.CEApplications),
+		SessionSConns:           slices.Clone(da.SessionSConns),
+		StatSConns:              slices.Clone(da.StatSConns),
+		ThresholdSConns:         slices.Clone(da.ThresholdSConns),
+		OriginHost:              da.OriginHost,
+		OriginRealm:             da.OriginRealm,
+		VendorID:                da.VendorID,
+		ProductName:             da.ProductName,
+		SyncedConnReqs:          da.SyncedConnReqs,
+		ASRTemplate:             da.ASRTemplate,
+		RARTemplate:             da.RARTemplate,
+		ForcedDisconnect:        da.ForcedDisconnect,
+		ConnHealthCheckInterval: da.ConnHealthCheckInterval,
 	}
 	if da.CEApplications != nil {
 		clone.CEApplications = make([]string, len(da.CEApplications))
@@ -182,23 +192,24 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool                  `json:"enabled"`
-	Listen             *string                `json:"listen"`
-	ListenNet          *string                `json:"listen_net"`
-	DictionariesPath   *string                `json:"dictionaries_path"`
-	CEApplications     *[]string              `json:"ce_applications"`
-	SessionSConns      *[]string              `json:"sessions_conns"`
-	StatSConns         *[]string              `json:"stats_conns"`
-	ThresholdSConns    *[]string              `json:"thresholds_conns"`
-	OriginHost         *string                `json:"origin_host"`
-	OriginRealm        *string                `json:"origin_realm"`
-	VendorID           *int                   `json:"vendor_id"`
-	ProductName        *string                `json:"product_name"`
-	SyncedConnRequests *bool                  `json:"synced_conn_requests"`
-	ASRTemplate        *string                `json:"asr_template"`
-	RARTemplate        *string                `json:"rar_template"`
-	ForcedDisconnect   *string                `json:"forced_disconnect"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled                 *bool                  `json:"enabled"`
+	Listen                  *string                `json:"listen"`
+	ListenNet               *string                `json:"listen_net"`
+	DictionariesPath        *string                `json:"dictionaries_path"`
+	CEApplications          *[]string              `json:"ce_applications"`
+	SessionSConns           *[]string              `json:"sessions_conns"`
+	StatSConns              *[]string              `json:"stats_conns"`
+	ThresholdSConns         *[]string              `json:"thresholds_conns"`
+	OriginHost              *string                `json:"origin_host"`
+	OriginRealm             *string                `json:"origin_realm"`
+	VendorID                *int                   `json:"vendor_id"`
+	ProductName             *string                `json:"product_name"`
+	SyncedConnRequests      *bool                  `json:"synced_conn_requests"`
+	ASRTemplate             *string                `json:"asr_template"`
+	RARTemplate             *string                `json:"rar_template"`
+	ForcedDisconnect        *string                `json:"forced_disconnect"`
+	ConnHealthCheckInterval *string                `json:"conn_health_check_interval"`
+	RequestProcessors       *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg) *DiameterAgentJsonCfg {
@@ -252,6 +263,9 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	}
 	if v1.ForcedDisconnect != v2.ForcedDisconnect {
 		d.ForcedDisconnect = utils.StringPointer(v2.ForcedDisconnect)
+	}
+	if v1.ConnHealthCheckInterval != v2.ConnHealthCheckInterval {
+		d.ConnHealthCheckInterval = utils.StringPointer(v2.ConnHealthCheckInterval.String())
 	}
 	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
