@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
 	"testing"
 	"time"
@@ -76,7 +75,8 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*stat_filter_indexes",
 		"*rpc_connections"
 	],
-	"stats_conns": ["*localhost", "external"],
+	// "apiers_conns": ["*internal", "external"],
+	"stats_conns": ["*internal", "external"],
 	"stat_queue_ids": ["cgrates.org:SQ_1","SQ_2"]
 }
 }`
@@ -169,8 +169,8 @@ func processStats(t *testing.T, client *birpc.Client) {
 			ID:     utils.GenUUID(),
 			Event:  map[string]any{},
 			APIOpts: map[string]any{
-				utils.MetaUsage:           time.Duration(rand.Intn(3600)+60) * time.Second,
-				utils.MetaCost:            rand.Float64()*20 + 0.1,
+				utils.MetaUsage:           time.Duration(i) * time.Second,
+				utils.MetaCost:            i * 10,
 				utils.OptsStatsProfileIDs: fmt.Sprintf("SQ_%d", i+1),
 			},
 		}, &reply); err != nil {
