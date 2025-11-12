@@ -499,14 +499,7 @@ const (
 	BalanceBlockers       = "BalanceBlockers"
 	BalanceDisabled       = "BalanceDisabled"
 	Units                 = "Units"
-	AccountUpdate         = "AccountUpdate"
-	BalanceUpdate         = "BalanceUpdate"
-	StatUpdate            = "StatUpdate"
-	TrendUpdate           = "TrendUpdate"
-	RankingUpdate         = "RankingUpdate"
-	ResourceUpdate        = "ResourceUpdate"
 	ProcessTime           = "ProcessTime"
-	CDRKey                = "CDR"
 	CDRs                  = "CDRs"
 	ExpiryTime            = "ExpiryTime"
 	EventID               = "EventID"
@@ -553,6 +546,17 @@ const (
 	ReplyState         = "ReplyState"
 	RequestProcessorID = "RequestProcessorID"
 	EventReaderID      = "EventReaderID"
+
+	// Event types
+	EventType              = "EventType"
+	MetaEventType          = "*eventType"
+	CDRKey                 = "CDR"
+	ThresholdHit           = "ThresholdHit"
+	RankingUpdate          = "RankingUpdate"
+	ResourceUpdate         = "ResourceUpdate"
+	StatUpdate             = "StatUpdate"
+	TrendUpdate            = "TrendUpdate"
+	EventPerformanceReport = "PerformanceReport"
 
 	// ReplyState error constants
 	ErrReplyStateAuthorize = "ERR_AUTHORIZE"
@@ -2749,8 +2753,6 @@ const (
 	Compressed           = "Compressed"
 
 	// Thresholds
-	ThresholdHit = "ThresholdHit"
-
 	Hits                     = "Hits"
 	Snooze                   = "Snooze"
 	ThresholdConfig          = "Config"
@@ -2771,8 +2773,6 @@ const (
 	OptsContext              = "*context"
 	MetaSubsys               = "*subsys"
 	MetaMethod               = "*reqMethod"
-	MetaEventType            = "*eventType"
-	EventType                = "EventType"
 	SchedulerInit            = "SchedulerInit"
 	MetaProfileIgnoreFilters = "*profileIgnoreFilters"
 	MetaPosterAttempts       = "*posterAttempts"
