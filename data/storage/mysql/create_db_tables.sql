@@ -133,3 +133,25 @@ CREATE TABLE thresholds (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX thresholds_idx ON thresholds (`id`);
+
+DROP TABLE IF EXISTS filters;
+CREATE TABLE filters (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `filter` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE INDEX filters_idx ON filters (`id`);
+
+DROP TABLE IF EXISTS route_profiles;
+CREATE TABLE route_profiles (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `route_profile` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX route_profiles_idx ON route_profiles (`id`);

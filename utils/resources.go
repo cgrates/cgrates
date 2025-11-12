@@ -380,7 +380,7 @@ func (rp *ResourceProfile) AsMapStringInterface() map[string]any {
 		Tenant:            rp.Tenant,
 		ID:                rp.ID,
 		FilterIDs:         rp.FilterIDs,
-		UsageTTL:          rp.FilterIDs,
+		UsageTTL:          rp.UsageTTL,
 		Limit:             rp.Limit,
 		AllocationMessage: rp.AllocationMessage,
 		Blocker:           rp.Blocker,

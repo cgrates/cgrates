@@ -75,15 +75,15 @@ var (
 func TestFiltersIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		fltrConfigDIR = "tutinternal"
+		fltrConfigDIR = "filters_internal"
 	case utils.MetaMongo:
-		fltrConfigDIR = "tutmongo"
+		fltrConfigDIR = "filters_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		fltrConfigDIR = "filters_redis"
 	case utils.MetaMySQL:
-		fltrConfigDIR = "tutmysql"
+		fltrConfigDIR = "filters_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		fltrConfigDIR = "filters_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

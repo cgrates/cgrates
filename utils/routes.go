@@ -316,6 +316,87 @@ func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	return rp.Routes[*idx].FieldAsInterface(fldPath[1:])
 }
 
+// AsMapStringInterface converts RouteProfile struct to map[string]any
+func (rp *RouteProfile) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		FilterIDs:         rp.FilterIDs,
+		Weights:           rp.Weights,
+		Blockers:          rp.Blockers,
+		Sorting:           rp.Sorting,
+		SortingParameters: rp.SortingParameters,
+		Routes:            rp.Routes,
+	}
+}
+
+// MapStringInterfaceToRouteProfile converts map[string]any to RouteProfile struct
+func MapStringInterfaceToRouteProfile(m map[string]any) *RouteProfile {
+	rp := &RouteProfile{}
+
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	rp.Weights = InterfaceToDynamicWeights(m[Weights])
+	rp.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[Sorting].(string); ok {
+		rp.Sorting = v
+	}
+	rp.SortingParameters = InterfaceToStringSlice(m[SortingParameters])
+	rp.Routes = InterfaceToRoutes(m[Routes])
+	return rp
+}
+
+// InterfaceToRoutes converts interface to []*Route
+func InterfaceToRoutes(v any) []*Route {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case []*Route:
+		return val
+	case []any:
+		var result []*Route
+		for _, item := range val {
+			if m, ok := item.(map[string]any); ok {
+				route := MapStringInterfaceToRoute(m)
+				result = append(result, route)
+			} else if r, ok := item.(*Route); ok {
+				result = append(result, r)
+			}
+		}
+		return result
+	default:
+		return nil
+	}
+}
+
+// MapStringInterfaceToRoute converts map[string]any to Route struct
+func MapStringInterfaceToRoute(m map[string]any) *Route {
+	r := &Route{}
+	if v, ok := m[ID].(string); ok {
+		r.ID = v
+	}
+	r.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	r.AccountIDs = InterfaceToStringSlice(m[AccountIDs])
+	r.RateProfileIDs = InterfaceToStringSlice(m[RateProfileIDs])
+	r.ResourceIDs = InterfaceToStringSlice(m[ResourceIDs])
+	r.StatIDs = InterfaceToStringSlice(m[StatIDs])
+	r.Weights = InterfaceToDynamicWeights(m[Weights])
+	r.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[RouteParameters].(string); ok {
+		r.RouteParameters = v
+	}
+	return r
+}
+
 // Route defines a single route within a RouteProfile.
 type Route struct {
 	ID              string // RouteID

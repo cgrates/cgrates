@@ -514,3 +514,25 @@ type ThresholdJSONMdl struct {
 func (ThresholdJSONMdl) TableName() string {
 	return utils.TBLThresholds
 }
+
+type FilterJSONMdl struct {
+	PK     uint        `gorm:"primary_key"`
+	Tenant string      `index:"0" re:".*"`
+	ID     string      `index:"1" re:".*"`
+	Filter utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (FilterJSONMdl) TableName() string {
+	return utils.TBLFilters
+}
+
+type RouteProfileMdl struct {
+	PK           uint        `gorm:"primary_key"`
+	Tenant       string      `index:"0" re:".*"`
+	ID           string      `index:"1" re:".*"`
+	RouteProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (RouteProfileMdl) TableName() string {
+	return utils.TBLRouteProfiles
+}

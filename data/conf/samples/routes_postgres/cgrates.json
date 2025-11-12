@@ -24,9 +24,9 @@
 			"db_user": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mysql",
-			"db_host": "127.0.0.1",
-			"db_port": 3306,
+			"db_type": "postgres",
+			"db_host": "127.0.0.1",	
+			"db_port": 5432,
 			"db_name": "cgrates",
 			"db_user": "cgrates",
 			"db_password": "CGRateS.org"

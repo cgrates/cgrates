@@ -72,13 +72,13 @@ func TestFltrIT(t *testing.T) {
 	case utils.MetaInternal:
 		fltrConfDIR = "filters_internal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		fltrConfDIR = "filters_redis"
 	case utils.MetaMySQL:
 		fltrConfDIR = "filters_mysql"
 	case utils.MetaMongo:
 		fltrConfDIR = "filters_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		fltrConfDIR = "filters_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -119,8 +119,10 @@ func testV1FltrRpcConn(t *testing.T) {
 func testV1FltrLoadTarrifPlans(t *testing.T) {
 
 	caching := utils.MetaReload
-	if fltrCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
-		caching = utils.MetaNone
+	for _, dbc := range fltrCfg.DbCfg().DBConns {
+		if dbc.Type == utils.MetaInternal {
+			caching = utils.MetaNone
+		}
 	}
 	var reply string
 	if err := fltrRpc.Call(context.Background(), utils.LoaderSv1Run,

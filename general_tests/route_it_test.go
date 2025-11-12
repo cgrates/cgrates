@@ -71,13 +71,13 @@ func TestRouteSV1IT(t *testing.T) {
 	case utils.MetaInternal:
 		splSv1ConfDIR = "routes_generaltests_internal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		splSv1ConfDIR = "routes_generaltests_redis"
 	case utils.MetaMySQL:
 		splSv1ConfDIR = "routes_generaltests_mysql"
 	case utils.MetaMongo:
 		splSv1ConfDIR = "routes_generaltests_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		splSv1ConfDIR = "routes_generaltests_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
