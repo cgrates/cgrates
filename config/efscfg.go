@@ -25,74 +25,82 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type EfsJsonCfg struct {
+	Enabled              *bool   `json:"enabled"`
+	PosterAttempts       *int    `json:"poster_attempts"`
+	FailedPostsDir       *string `json:"failed_posts_dir"`
+	FailedPostsTTL       *string `json:"failed_posts_ttl"`
+	FailedPostsStaticTTL *bool   `json:"failed_posts_static_ttl"`
+}
+
 type EFsCfg struct {
-	Enabled        bool
-	PosterAttempts int           // Time to wait before writing the failed posts in a single file
-	FailedPostsDir string        // Directory path where we store failed http requests
-	FailedPostsTTL time.Duration // Directory path where we store failed http requests
+	Enabled              bool
+	PosterAttempts       int           // number of attempts before considering post request failed
+	FailedPostsDir       string        // directory where failed export requests are stored
+	FailedPostsTTL       time.Duration // cache ttl for batching failed posts before writing to disk
+	FailedPostsStaticTTL bool          // if false, ttl resets on every cache access
 }
 
 func (EFsCfg) SName() string { return EFsJSON }
 
-func (efsCfg *EFsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (c *EFsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsonEFsCfg := new(EfsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, EFsJSON, jsonEFsCfg); err != nil {
 		return
 	}
-	return efsCfg.loadFromJSONCfg(jsonEFsCfg)
+	return c.loadFromJSONCfg(jsonEFsCfg)
 }
 
 // loadFromJSONCfg loads EFs config from JsonCfg
-func (efsCfg *EFsCfg) loadFromJSONCfg(jsonEFsCfg *EfsJsonCfg) (err error) {
-	if jsonEFsCfg == nil {
-		return
+func (c *EFsCfg) loadFromJSONCfg(jc *EfsJsonCfg) error {
+	if jc == nil {
+		return nil
 	}
-	if jsonEFsCfg.Enabled != nil {
-		efsCfg.Enabled = *jsonEFsCfg.Enabled
+	if jc.Enabled != nil {
+		c.Enabled = *jc.Enabled
 	}
-	if jsonEFsCfg.Poster_attempts != nil {
-		efsCfg.PosterAttempts = *jsonEFsCfg.Poster_attempts
+	if jc.PosterAttempts != nil {
+		c.PosterAttempts = *jc.PosterAttempts
 	}
-	if jsonEFsCfg.Failed_posts_dir != nil {
-		efsCfg.FailedPostsDir = *jsonEFsCfg.Failed_posts_dir
+	if jc.FailedPostsDir != nil {
+		c.FailedPostsDir = *jc.FailedPostsDir
 	}
-	if jsonEFsCfg.Failed_posts_ttl != nil {
-		if efsCfg.FailedPostsTTL, err = utils.ParseDurationWithNanosecs(*jsonEFsCfg.Failed_posts_ttl); err != nil {
-			return
+	if jc.FailedPostsTTL != nil {
+		var err error
+		if c.FailedPostsTTL, err = utils.ParseDurationWithNanosecs(*jc.FailedPostsTTL); err != nil {
+			return err
 		}
 	}
-	return
+	if jc.FailedPostsStaticTTL != nil {
+		c.FailedPostsStaticTTL = *jc.FailedPostsStaticTTL
+	}
+	return nil
 }
 
 // AsMapInterface returns the config of EFsCfg as a map[string]any
-func (efsCfg EFsCfg) AsMapInterface() any {
+func (c EFsCfg) AsMapInterface() any {
 	mp := map[string]any{
-		utils.EnabledCfg:        efsCfg.Enabled,
-		utils.FailedPostsDirCfg: efsCfg.FailedPostsDir,
-		utils.PosterAttemptsCfg: efsCfg.PosterAttempts,
+		utils.EnabledCfg:              c.Enabled,
+		utils.FailedPostsDirCfg:       c.FailedPostsDir,
+		utils.FailedPostsStaticTTLCfg: c.FailedPostsStaticTTL,
+		utils.PosterAttemptsCfg:       c.PosterAttempts,
 	}
-	if efsCfg.FailedPostsTTL != 0 {
-		mp[utils.FailedPostsTTLCfg] = efsCfg.FailedPostsTTL.String()
+	if c.FailedPostsTTL != 0 {
+		mp[utils.FailedPostsTTLCfg] = c.FailedPostsTTL.String()
 	}
 	return mp
 }
 
-func (efsCfg EFsCfg) CloneSection() Section { return efsCfg.Clone() }
+func (c EFsCfg) CloneSection() Section { return c.Clone() }
 
-func (efsCfg EFsCfg) Clone() *EFsCfg {
+func (c EFsCfg) Clone() *EFsCfg {
 	return &EFsCfg{
-		Enabled:        efsCfg.Enabled,
-		PosterAttempts: efsCfg.PosterAttempts,
-		FailedPostsDir: efsCfg.FailedPostsDir,
-		FailedPostsTTL: efsCfg.FailedPostsTTL,
+		Enabled:              c.Enabled,
+		PosterAttempts:       c.PosterAttempts,
+		FailedPostsDir:       c.FailedPostsDir,
+		FailedPostsTTL:       c.FailedPostsTTL,
+		FailedPostsStaticTTL: c.FailedPostsStaticTTL,
 	}
-}
-
-type EfsJsonCfg struct {
-	Enabled          *bool
-	Poster_attempts  *int
-	Failed_posts_dir *string
-	Failed_posts_ttl *string
 }
 
 func diffEFsJsonCfg(d *EfsJsonCfg, v1, v2 *EFsCfg) *EfsJsonCfg {
@@ -103,13 +111,16 @@ func diffEFsJsonCfg(d *EfsJsonCfg, v1, v2 *EFsCfg) *EfsJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if v1.PosterAttempts != v2.PosterAttempts {
-		d.Poster_attempts = utils.IntPointer(v2.PosterAttempts)
+		d.PosterAttempts = utils.IntPointer(v2.PosterAttempts)
 	}
 	if v1.FailedPostsDir != v2.FailedPostsDir {
-		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
+		d.FailedPostsDir = utils.StringPointer(v2.FailedPostsDir)
 	}
 	if v1.FailedPostsTTL != v2.FailedPostsTTL {
-		d.Failed_posts_ttl = utils.StringPointer(v2.FailedPostsTTL.String())
+		d.FailedPostsTTL = utils.StringPointer(v2.FailedPostsTTL.String())
+	}
+	if v1.FailedPostsStaticTTL != v2.FailedPostsStaticTTL {
+		d.FailedPostsStaticTTL = utils.BoolPointer(v2.FailedPostsStaticTTL)
 	}
 	return d
 }

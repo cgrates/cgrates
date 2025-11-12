@@ -519,8 +519,9 @@ const CGRATES_CFG_JSON = `
 "efs": {
 	"enabled": false,					// starts the EventReader service: <true|false>
 	"poster_attempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
-	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
-	"failed_posts_ttl": "5s"				// time to wait before writing the failed posts in a single file
+	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory where failed export requests are stored
+	"failed_posts_ttl": "5s",				// cache ttl for batching failed posts before writing to disk
+	"failed_posts_static_ttl": true				// if false, ttl resets on every cache access
 },
 
 "ees": {
