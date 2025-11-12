@@ -21,6 +21,7 @@ Example configuration in the JSON file:
     "prometheus_agent": {
         "enabled": true,
         "path": "/prometheus",
+        "apiers_conns": ["*internal", "external"],
         "caches_conns": ["*internal"],
         "cache_ids": [
             "*attribute_filter_indexes",
@@ -43,6 +44,9 @@ enabled
 path
     HTTP endpoint path where Prometheus metrics will be exposed, e.g., "/prometheus" or "/metrics"
 
+apiers_conns
+    List of connection IDs to ApierS components. Required when stat_queue_ids is empty to fetch all available StatQueue profile IDs. Must match the length of stats_conns when auto-fetching is used. Possible values: <""|*internal|$rpc_conns_id>
+
 caches_conns
     List of connection IDs to CacheS components for collecting cache statistics. Empty list disables cache metrics collection. Possible values: <""|*internal|$rpc_conns_id>
 
@@ -56,7 +60,7 @@ stats_conns
     List of connection IDs to StatS components for collecting StatQueue metrics. Empty list disables StatQueue metrics collection. Possible values: <""|*internal|$rpc_conns_id>
 
 stat_queue_ids
-    List of StatQueue IDs to collect metrics from. Can include tenant in format <[tenant]:ID>. If tenant is not specified, default tenant from general configuration is used.
+    List of StatQueue IDs to collect metrics from. Can include tenant in format <[tenant]:ID>. If tenant is not specified, default tenant from general configuration is used. Leave empty to automatically collect metrics from all available StatQueues (requires apiers_conns).
 
 Available Metrics
 -----------------
@@ -134,6 +138,11 @@ The PrometheusAgent operates differently than other CGRateS components that use 
 - When multiple connections are configured in cores_conns, the agent attempts to collect metrics from **all** connections, labeling them with their respective node_id
 - When multiple connections are configured in caches_conns, the agent collects cache statistics from **all** connections for the specified cache_ids
 - The agent processes metrics requests only when Prometheus sends a scrape request to the configured HTTP endpoint
+
+StatQueue metrics are collected based on the ``stat_queue_ids`` configuration. When specific StatQueue IDs are provided, only those StatQueues are monitored. When ``stat_queue_ids`` is left empty, all available StatQueues are monitored by fetching StatQueue profile IDs from the configured ``apiers_conns``.
+
+.. note::
+    When fetching all StatQueues (empty stat_queue_ids), each ApierS connection in ``apiers_conns`` corresponds to its StatS counterpart at the same index position in ``stats_conns``.
 
 You can view all exported metrics and see what Prometheus would scrape by making a simple curl request to the HTTP endpoint:
 
