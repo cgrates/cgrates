@@ -772,41 +772,37 @@ func (m *Metric) Equal(v *Metric) bool {
 }
 
 func NewStatSum(minItems uint64, fieldName string, filterIDs []string) StatMetric {
-	return &StatSum{Metric: NewMetric(minItems, filterIDs),
-		FieldName: fieldName}
+	flds, _ := utils.NewRSRParsers(fieldName, utils.InfieldSep)
+	return &StatSum{
+		Metric: NewMetric(minItems, filterIDs),
+		Fields: flds,
+	}
 }
 
 type StatSum struct {
 	*Metric
-	FieldName string
+	Fields utils.RSRParsers
 }
 
 func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
 		return err
 	}
 	return sum.addEvent(evID, ival)
 }
 func (sum *StatSum) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
 		return err
 	}
-
 	return sum.addOneEvent(ival)
 }
 
 func (sum *StatSum) Clone() StatMetric {
 	return &StatSum{
-		Metric:    sum.Metric.Clone(),
-		FieldName: sum.FieldName,
+		Metric: sum.Metric.Clone(),
+		Fields: sum.Fields,
 	}
 }
 
