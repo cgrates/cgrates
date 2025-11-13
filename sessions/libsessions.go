@@ -325,8 +325,8 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage           map[string]time.Duration                      `json:",omitempty"`
-	Cost               map[string]float64                            `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
+	AccountSUsage      map[string]time.Duration                      `json:",omitempty"`
+	RateSCost          map[string]float64                            `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
 	ResourceAllocation map[string]string                             `json:",omitempty"`
 	Attributes         map[string]*attributes.AttrSProcessEventReply `json:",omitempty"`
 	RouteProfiles      map[string]routes.SortedRoutesList            `json:",omitempty"`
@@ -338,9 +338,9 @@ type V1ProcessEventReply struct {
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.MaxUsage != nil {
+	if v1Rply.AccountSUsage != nil {
 		usage := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, v := range v1Rply.MaxUsage {
+		for k, v := range v1Rply.AccountSUsage {
 			usage.Map[k] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapMaxUsage] = usage
@@ -397,9 +397,9 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 		}
 		cgrReply[utils.CapStatQueues] = st
 	}
-	if v1Rply.Cost != nil {
+	if v1Rply.RateSCost != nil {
 		costs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, cost := range v1Rply.Cost {
+		for k, cost := range v1Rply.RateSCost {
 			costs.Map[k] = utils.NewLeafNode(cost)
 		}
 	}

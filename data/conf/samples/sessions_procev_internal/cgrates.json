@@ -1,0 +1,105 @@
+{
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
+"general": {
+	"reply_timeout": "10s"
+},
+
+"logger": {
+	"level": 7
+},
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal",
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+		}
+    	}
+	}
+},
+
+"stor_db": {
+	"db_type": "*internal"			
+},
+
+"rates": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"session_cost_retries": 1,
+	"chargers_conns":["*internal"],
+	"rates_conns": ["*internal"],
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"routes": {
+	"enabled": true,
+},
+
+
+"sessions": {
+	"enabled": true,
+	"session_ttl": "50ms",
+	"chargers_conns": ["*internal"],
+	"rates_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"thresholds_conns": ["*internal"],
+	"stats_conns": ["*internal"],
+	"routes_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"alterable_fields": ["Extra1"]
+},
+
+
+"admins": {
+	"enabled": true,
+},
+
+
+}

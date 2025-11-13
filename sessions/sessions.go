@@ -1708,10 +1708,11 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	return
 }
 
+/*
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	args *utils.CGREvent, rply *V1ProcessEventReply) (err error) {
-	/*
+
 		if args == nil {
 			return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 		}
@@ -2151,9 +2152,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if withErrors {
 			err = utils.ErrPartiallyExecuted
 		}
-	*/
+
 	return
 }
+*/
 
 // BiRPCv1SyncSessions will sync sessions on demand
 func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,

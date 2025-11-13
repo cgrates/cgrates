@@ -781,3 +781,43 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 
 	return sS.processCDR(ctx, cgrEv, rply)
 }
+
+// BiRPCv1ProcessEvent processes an CGREvent with various subsystems
+func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
+	args *utils.CGREvent, authReply *V1ProcessEventReply) (err error) {
+	if args == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if args.APIOpts == nil {
+		args.APIOpts = make(map[string]any)
+	}
+	if args.ID == "" {
+		args.ID = utils.GenUUID()
+	}
+	if args.Tenant == "" {
+		args.Tenant = sS.cfg.GeneralCfg().DefaultTenant
+	}
+	// RPC caching
+	if sS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.ID)
+		refID := guardian.Guardian.GuardIDs("",
+			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*authReply = *cachedResp.Result.(*V1ProcessEventReply)
+			}
+			return cachedResp.Error
+		}
+		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: authReply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+	return
+}
