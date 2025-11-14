@@ -1926,6 +1926,8 @@ const (
 	TBLThresholds        = "thresholds"
 	TBLFilters           = "filters"
 	TBLRouteProfiles     = "route_profiles"
+	TBLRateProfiles      = "rate_profiles"
+	TBLRates             = "rates"
 	OldSMCosts           = "sm_costs"
 	TBLTPDispatchers     = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts = "tp_dispatcher_hosts"

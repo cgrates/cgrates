@@ -127,6 +127,8 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLFilters, tntID)
 	case utils.RouteProfilePrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRouteProfiles, tntID)
+	case utils.RateProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRateProfiles, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -1040,6 +1042,172 @@ func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id s
 	return
 }
 
+func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
+	tx := sqls.db.Begin()
+	rpMdl := &RateProfileJSONMdl{
+		Tenant:      rpp.Tenant,
+		ID:          rpp.ID,
+		RateProfile: rpp.AsMapStringInterface(),
+	}
+	if optOverwrite {
+		if err = tx.Model(&RateMdl{}).Where(&RateMdl{Tenant: rpMdl.Tenant, RateProfileID: rpMdl.ID}).
+			Delete(&RateMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		if err = tx.Model(&RateProfileJSONMdl{}).Where(
+			RateProfileJSONMdl{Tenant: rpMdl.Tenant, ID: rpMdl.ID}).Delete(
+			RateProfileJSONMdl{}).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	}
+	var existingRP RateProfileJSONMdl
+	result := tx.Where(RateProfileJSONMdl{Tenant: rpMdl.Tenant, ID: rpMdl.ID}).First(&existingRP)
+	switch result.Error {
+	case nil: // Record exists, update it
+		rpMdl.PK = existingRP.PK
+		if err = tx.Save(rpMdl).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	case gorm.ErrRecordNotFound: // Record doesn't exist, create it
+		if err = tx.Create(rpMdl).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	default:
+		tx.Rollback()
+		return result.Error
+	}
+	for rID, rate := range rpp.Rates {
+		rMdl := &RateMdl{
+			Tenant:        rpp.Tenant,
+			ID:            rID,
+			Rate:          rate.AsMapStringInterface(),
+			RateProfileID: rpp.ID,
+		}
+		if optOverwrite {
+			if err = tx.Model(&RateMdl{}).Where(
+				RateMdl{Tenant: rMdl.Tenant, ID: rMdl.ID}).Delete(
+				RateMdl{}).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		}
+		var existingRT RateMdl
+		result := tx.Where(RateMdl{Tenant: rMdl.Tenant, ID: rMdl.ID, RateProfileID: rpMdl.ID}).First(&existingRT)
+		switch result.Error {
+		case nil: // Record exists, update it
+			rMdl.PK = existingRT.PK
+			if err = tx.Save(rMdl).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		case gorm.ErrRecordNotFound: // Record doesn't exist, create it
+			if err = tx.Create(rMdl).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		default:
+			tx.Rollback()
+			return result.Error
+		}
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+	var rpResult []*RateProfileJSONMdl
+	if err = sqls.db.Model(&RateProfileJSONMdl{}).Where(&RateProfileJSONMdl{Tenant: tenant,
+		ID: id}).Find(&rpResult).Error; err != nil {
+		return nil, err
+	}
+	if len(rpResult) == 0 {
+		return nil, utils.ErrNotFound
+	}
+
+	if rpp, err = utils.MapStringInterfaceToRateProfile(rpResult[0].RateProfile); err != nil {
+		return nil, err
+	}
+
+	var rtResult []*RateMdl
+	if err = sqls.db.Model(&RateMdl{}).Where(&RateMdl{Tenant: tenant,
+		RateProfileID: id}).Find(&rtResult).Error; err != nil { // find all rates for that rating profile
+		return nil, err
+	}
+	if len(rtResult) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	for _, rateMdl := range rtResult {
+		if rt, err := utils.MapStringInterfaceToRate(rateMdl.Rate); err != nil {
+			return nil, err
+		} else {
+			rpp.Rates[rt.ID] = rt
+		}
+	}
+	return
+}
+
+// GetRateProfileRatesDrv will return back all the RateIDs and Rates from a RateProfile
+func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+	tx := sqls.db.Model(&RateMdl{}).Where(&RateMdl{RateProfileID: profileID})
+	if rtPrfx != utils.EmptyString {
+		tx = tx.Where("id LIKE ?", rtPrfx+"%")
+	}
+	var rtResult []*RateMdl
+	if err = tx.Find(&rtResult).Error; err != nil {
+		return nil, nil, err
+	}
+	if len(rtResult) == 0 {
+		return nil, nil, utils.ErrNotFound
+	}
+	for _, ratesMdl := range rtResult {
+		rateIDs = append(rateIDs, ratesMdl.ID)
+	}
+	if needIDs {
+		// Only return IDs
+		return rateIDs, nil, nil
+	}
+	for _, rateMdl := range rtResult {
+		if rt, err := utils.MapStringInterfaceToRate(rateMdl.Rate); err != nil {
+			return nil, nil, err
+		} else {
+			rates = append(rates, rt)
+		}
+	}
+	return
+}
+
+func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+	tx := sqls.db.Begin()
+	if rateIDs != nil {
+		for _, rateID := range *rateIDs {
+			if err = tx.Model(&RateMdl{}).Where(&RateMdl{Tenant: tenant, ID: rateID, RateProfileID: id}).
+				Delete(&RateMdl{}).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		tx.Commit()
+		return
+	}
+
+	if err = tx.Model(&RateMdl{}).Where(&RateMdl{Tenant: tenant, RateProfileID: id}).
+		Delete(&RateMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err = tx.Model(&RateProfileJSONMdl{}).Where(&RateProfileJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&RateProfileJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // Used to check if specific subject is stored using prefix key attached to entity
 func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (has bool, err error) {
 	var categoryModelMap = map[string]any{
@@ -1057,9 +1225,9 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		utils.RouteProfilePrefix:     &RouteProfileMdl{},
 		utils.AttributeProfilePrefix: &AttributeProfileMdl{},
 		utils.ChargerProfilePrefix:   &ChargerProfileMdl{},
+		utils.RateProfilePrefix:      &RateProfileJSONMdl{},
 		// utils.TrendPrefix:            &TrendJSONMdl{},
 		// utils.TrendProfilePrefix:     &TrendProfileMdl{},
-		// utils.RateProfilePrefix:      &RateProfileJSONMdl{},
 	}
 	model, ok := categoryModelMap[category]
 	if !ok {
@@ -1186,26 +1354,6 @@ func (sqls *SQLStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]i
 
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveLoadIDsDrv() (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// GetRateProfileRateIDsDrv DataDB method not implemented yet
-func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
-	return nil, nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
 	return utils.ErrNotImplemented
 }
 

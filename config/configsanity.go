@@ -1027,6 +1027,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// DataDB sanity checks
 	hasOneInternalDB := false // used to reutrn error in case more then 1 internaldb is found
 	allDBsItems := []string{
+		utils.CacheVersions,
 		utils.MetaAccounts,
 		utils.MetaIPProfiles,
 		utils.MetaIPAllocations,
@@ -1041,6 +1042,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		utils.MetaThresholds,
 		utils.MetaFilters,
 		utils.MetaRouteProfiles,
+		utils.MetaRateProfiles,
 	}
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {
@@ -1080,11 +1082,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if item == utils.MetaCDRs {
 				if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
 					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
-						storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+						storDBTypes[4:], cfg.dbCfg.DBConns[val.DBConn].Type)
 				}
 			} else {
 				if !slices.Contains(dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes[3:], cfg.dbCfg.DBConns[val.DBConn].Type)
 				}
 			}
 		}
