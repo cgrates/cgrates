@@ -203,6 +203,50 @@ func (rp *RankingProfile) FieldAsInterface(fldPath []string) (_ any, err error) 
 	}
 }
 
+// AsMapStringInterface converts RankingProfile struct to map[string]any
+func (rp *RankingProfile) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		Schedule:          rp.Schedule,
+		StatIDs:           rp.StatIDs,
+		MetricIDs:         rp.MetricIDs,
+		Sorting:           rp.Sorting,
+		SortingParameters: rp.SortingParameters,
+		Stored:            rp.Stored,
+		ThresholdIDs:      rp.ThresholdIDs,
+	}
+}
+
+// MapStringInterfaceToRankingProfile converts map[string]any to RankingProfile struct
+func MapStringInterfaceToRankingProfile(m map[string]any) *RankingProfile {
+	rp := &RankingProfile{}
+
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	if v, ok := m[Schedule].(string); ok {
+		rp.Schedule = v
+	}
+	rp.StatIDs = InterfaceToStringSlice(m[StatIDs])
+	rp.MetricIDs = InterfaceToStringSlice(m[MetricIDs])
+	if v, ok := m[Sorting].(string); ok {
+		rp.Sorting = v
+	}
+	rp.SortingParameters = InterfaceToStringSlice(m[SortingParameters])
+	if v, ok := m[Stored].(bool); ok {
+		rp.Stored = v
+	}
+	rp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	return rp
+}
+
 // RankingProfileLockKey returns the ID used to lock a RankingProfile with guardian.
 func RankingProfileLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheRankingProfiles, tnt, id)
@@ -350,6 +394,57 @@ func (r *Ranking) RUnlock() {
 // MetricIDs returns the set of metric IDs for this ranking.
 func (r *Ranking) MetricIDs() StringSet {
 	return r.metricIDs
+}
+
+// AsMapStringInterface converts Ranking struct to map[string]any
+func (rp *Ranking) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		LastUpdate:        rp.LastUpdate,
+		Metrics:           rp.Metrics,
+		Sorting:           rp.Sorting,
+		SortingParameters: rp.SortingParameters,
+		SortedStatIDs:     rp.SortedStatIDs,
+	}
+}
+
+// MapStringInterfaceToRanking converts map[string]any to Ranking struct
+func MapStringInterfaceToRanking(m map[string]any) *Ranking {
+	rp := &Ranking{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	if v, ok := m[LastUpdate].(string); ok {
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			rp.LastUpdate = t
+		}
+	}
+	if v, ok := m[Metrics].(map[string]any); ok {
+		rp.Metrics = make(map[string]map[string]float64)
+		for key, val := range v {
+			if innerMap, ok := val.(map[string]any); ok {
+				rp.Metrics[key] = make(map[string]float64)
+				for innerKey, innerVal := range innerMap {
+					if floatVal, ok := innerVal.(float64); ok {
+						rp.Metrics[key][innerKey] = floatVal
+					}
+				}
+			}
+		}
+	}
+	if v, ok := m[Sorting].(string); ok {
+		rp.Sorting = v
+	}
+	rp.SortingParameters = InterfaceToStringSlice(m[SortingParameters])
+	rp.SortedStatIDs = InterfaceToStringSlice(m[SortedStatIDs])
+	return rp
 }
 
 // rankingSorter defines interface for different ranking sorting strategies.

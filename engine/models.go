@@ -560,3 +560,25 @@ type RateMdl struct {
 func (RateMdl) TableName() string {
 	return utils.TBLRates
 }
+
+type RankingProfileMdl struct {
+	PK             uint        `gorm:"primary_key"`
+	Tenant         string      `index:"0" re:".*"`
+	ID             string      `index:"1" re:".*"`
+	RankingProfile utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (RankingProfileMdl) TableName() string {
+	return utils.TBLRankingProfiles
+}
+
+type RankingJSONMdl struct {
+	PK      uint        `gorm:"primary_key"`
+	Tenant  string      `index:"0" re:".*"`
+	ID      string      `index:"1" re:".*"`
+	Ranking utils.JSONB `gorm:"type:jsonb" index:"2" re:".*"`
+}
+
+func (RankingJSONMdl) TableName() string {
+	return utils.TBLRankings
+}

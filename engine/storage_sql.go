@@ -129,6 +129,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRouteProfiles, tntID)
 	case utils.RateProfilePrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRateProfiles, tntID)
+	case utils.RankingProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankingProfiles, tntID)
+	case utils.RankingPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankings, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -1208,6 +1212,94 @@ func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	return
 }
 
+func (sqls *SQLStorage) SetRankingProfileDrv(ctx *context.Context, rp *utils.RankingProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &RankingProfileMdl{
+		Tenant:         rp.Tenant,
+		ID:             rp.ID,
+		RankingProfile: rp.AsMapStringInterface(),
+	}
+	if err = tx.Model(&RankingProfileMdl{}).Where(
+		RankingProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		RankingProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (rp *utils.RankingProfile, err error) {
+	var result []*RankingProfileMdl
+	if err = sqls.db.Model(&RankingProfileMdl{}).Where(&RankingProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToRankingProfile(result[0].RankingProfile), nil
+}
+
+func (sqls *SQLStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&RankingProfileMdl{}).Where(&RankingProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&RankingProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
+	var result []*RankingJSONMdl
+	if err = sqls.db.Model(&RankingJSONMdl{}).Where(&RankingJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToRanking(result[0].Ranking), nil
+}
+
+func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &RankingJSONMdl{
+		Tenant:  rn.Tenant,
+		ID:      rn.ID,
+		Ranking: rn.AsMapStringInterface(),
+	}
+	if err = tx.Model(&RankingJSONMdl{}).Where(
+		RankingJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		RankingJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&RankingJSONMdl{}).Where(&RankingJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&RankingJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // Used to check if specific subject is stored using prefix key attached to entity
 func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (has bool, err error) {
 	var categoryModelMap = map[string]any{
@@ -1226,6 +1318,8 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		utils.AttributeProfilePrefix: &AttributeProfileMdl{},
 		utils.ChargerProfilePrefix:   &ChargerProfileMdl{},
 		utils.RateProfilePrefix:      &RateProfileJSONMdl{},
+		utils.RankingPrefix:          &RankingJSONMdl{},
+		utils.RankingProfilePrefix:   &RankingProfileMdl{},
 		// utils.TrendPrefix:            &TrendJSONMdl{},
 		// utils.TrendProfilePrefix:     &TrendProfileMdl{},
 	}
@@ -1305,41 +1399,6 @@ func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err e
 // DataDB method not implemented yet
 func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetRankingProfileDrv(ctx *context.Context, sg *utils.RankingProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.RankingProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// GetStorageType returns the storage type that is being used
-func (sqls *SQLStorage) GetStorageType() string {
-	return utils.MetaMySQL
 }
 
 // DataDB method not implemented yet
