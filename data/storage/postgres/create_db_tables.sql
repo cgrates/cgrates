@@ -152,3 +152,46 @@ CREATE TABLE route_profiles (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX route_profiles_idx ON route_profiles ("id");
+
+
+DROP TABLE IF EXISTS rates;
+DROP TABLE IF EXISTS rate_profiles;
+CREATE TABLE rate_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  rate_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX rate_profiles_idx ON rate_profiles ("id");
+CREATE TABLE rates (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  rate JSONB NOT NULL,
+  rate_profile_id VARCHAR(64) NOT NULL,
+  UNIQUE (tenant, id, rate_profile_id),
+  FOREIGN KEY (rate_profile_id) REFERENCES rate_profiles (id)
+);
+
+
+DROP TABLE IF EXISTS ranking_profiles;
+CREATE TABLE ranking_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  ranking_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX ranking_profiles_idx ON ranking_profiles ("id");
+
+
+DROP TABLE IF EXISTS rankings;
+CREATE TABLE rankings (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  ranking JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX rankings_idx ON rankings ("id");

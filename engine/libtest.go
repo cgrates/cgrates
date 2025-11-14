@@ -410,6 +410,13 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	return client, newCfg
 }
 
+// Opts contains opts of database
+type Opts struct {
+	InternalDBDumpPath        *string `json:"internalDBDumpPath,omitempty"`
+	InternalDBDumpInterval    *string `json:"internalDBDumpInterval,omitempty"`
+	InternalDBRewriteInterval *string `json:"internalDBRewriteInterval,omitempty"`
+}
+
 // DBConn contains database connection parameters.
 type DBConn struct {
 	Type     *string `json:"db_type,omitempty"`
@@ -418,6 +425,7 @@ type DBConn struct {
 	Name     *string `json:"db_name,omitempty"`
 	User     *string `json:"db_user,omitempty"`
 	Password *string `json:"db_password,omitempty"`
+	Opts     Opts    `json:"opts,omitempty"`
 }
 
 // Item contains db item parameters
@@ -734,6 +742,33 @@ var (
 		},
 	}
 	MySQLDBCfg = DBCfg{
+		DB: &DBParams{
+			DBConns: map[string]DBConn{
+				utils.MetaDefault: {
+					Type: utils.StringPointer(utils.MetaRedis),
+					Host: utils.StringPointer("127.0.0.1"),
+					Port: utils.IntPointer(6379),
+					Name: utils.StringPointer("10"),
+					User: utils.StringPointer(utils.CGRateSLwr),
+				},
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaMySQL),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(3306),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer("CGRateS.org"),
+				},
+			},
+			Items: map[string]Item{
+				utils.MetaCDRs: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
+		},
+	}
+	RedisDBCfg = DBCfg{
 		DB: &DBParams{
 			DBConns: map[string]DBConn{
 				utils.MetaDefault: {

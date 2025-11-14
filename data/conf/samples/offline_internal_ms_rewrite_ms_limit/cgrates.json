@@ -10,11 +10,11 @@
 		"db_conns": {
 			"*default": {
 				"db_type": "*internal",
-				  "opts":{
-           	 "internalDBDumpInterval": "500ms",
-            	"internalDBRewriteInterval": "500ms",
-        	    "internalDBFileSizeLimit": "4k"	
-        }
+					"opts":{
+           	 		"internalDBDumpInterval": "500ms",
+            		"internalDBRewriteInterval": "500ms",
+        	    	"internalDBFileSizeLimit": "4k"	
+        		}
 			}
 		},
         "items":{
