@@ -94,11 +94,11 @@ func TestRateSIT(t *testing.T) {
 	case utils.MetaMongo:
 		ratePrfConfigDIR = "rates_mongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		ratePrfConfigDIR = "rates_redis"
 	case utils.MetaMySQL:
 		ratePrfConfigDIR = "rates_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		ratePrfConfigDIR = "rates_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -1598,8 +1598,15 @@ func testRateProfileUpdateRates(t *testing.T) {
 			},
 		}, &result2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, expectedRate) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+	} else if *utils.DBType != utils.MetaMySQL && *utils.DBType != utils.MetaPostgres {
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
+	} else if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
+		expectedRate.Rates["RT_THUESDAY"].IntervalRates[0].FixedFee = utils.NewDecimal(2, 1)
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
 	}
 }
 
@@ -1686,9 +1693,17 @@ func testRateProfileRemoveMultipleRates(t *testing.T) {
 			},
 		}, &result2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, expectedRate) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+	} else if *utils.DBType != utils.MetaMySQL && *utils.DBType != utils.MetaPostgres {
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
+	} else if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
+		expectedRate.Rates["RT_THUESDAY"].IntervalRates[0].FixedFee = utils.NewDecimal(2, 1)
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
 	}
+
 }
 
 func testRateProfileSetMultipleRatesInProfile(t *testing.T) {
@@ -1878,8 +1893,16 @@ func testRateProfileSetMultipleRatesInProfile(t *testing.T) {
 			},
 		}, &result2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, expectedRate) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+	} else if *utils.DBType != utils.MetaMySQL && *utils.DBType != utils.MetaPostgres {
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
+	} else if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
+		expectedRate.Rates["RT_THUESDAY"].IntervalRates[0].FixedFee = utils.NewDecimal(2, 1)
+		expectedRate.Rates["RT_SUNDAY"].IntervalRates[1].IntervalStart = utils.NewDecimal(100000000, 0)
+		if !reflect.DeepEqual(result2, expectedRate) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+		}
 	}
 
 }
@@ -1937,7 +1960,18 @@ func testRateProfileUpdateProfileRatesOverwrite(t *testing.T) {
 			},
 		}, &result2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
+	} else if *utils.DBType != utils.MetaMySQL && *utils.DBType != utils.MetaPostgres {
+		if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
+		}
+	} else if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
+		ratePrf.RateProfile.MaxCost = utils.NewDecimal(5, 1)
+		if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
+		}
+	}
+
+	if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
 	}
 

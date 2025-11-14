@@ -1026,6 +1026,42 @@ func (rt *Rate) FieldAsInterface(fldPath []string) (_ any, err error) {
 	}
 }
 
+// AsMapStringInterface converts Rate struct to map[string]any
+func (rt *Rate) AsMapStringInterface() map[string]any {
+	if rt == nil {
+		return nil
+	}
+	return map[string]any{
+		ID:              rt.ID,
+		FilterIDs:       rt.FilterIDs,
+		ActivationTimes: rt.ActivationTimes,
+		Weights:         rt.Weights,
+		Blocker:         rt.Blocker,
+		IntervalRates:   rt.IntervalRates,
+	}
+}
+
+// MapStringInterfaceToRate converts map[string]any to Rate struct
+func MapStringInterfaceToRate(m map[string]any) (*Rate, error) {
+	rt := &Rate{}
+	if v, ok := m[ID].(string); ok {
+		rt.ID = v
+	}
+	rt.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	if v, ok := m[ActivationTimes].(string); ok {
+		rt.ActivationTimes = v
+	}
+	rt.Weights = InterfaceToDynamicWeights(m[Weights])
+	if v, ok := m[Blocker].(bool); ok {
+		rt.Blocker = v
+	}
+	var err error
+	if rt.IntervalRates, err = InterfaceToIntervalRates(m[IntervalRates]); err != nil {
+		return nil, err
+	}
+	return rt, nil
+}
+
 func (iR *IntervalRate) String() string { return ToJSON(iR) }
 func (iR *IntervalRate) FieldAsString(fldPath []string) (_ string, err error) {
 	var val any
@@ -1052,6 +1088,42 @@ func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ any, err error) {
 	case Increment:
 		return iR.Increment, nil
 	}
+}
+
+// InterfaceToIntervalRates converts any to []*IntervalRate
+func InterfaceToIntervalRates(v any) (intervalRates []*IntervalRate, err error) {
+	if v == nil {
+		return
+	}
+	switch val := v.(type) {
+	case []*IntervalRate:
+		return val, nil
+	case []any:
+		result := make([]*IntervalRate, 0, len(val))
+		for _, item := range val {
+			if irMap, ok := item.(map[string]any); ok {
+				ir := new(IntervalRate)
+				if ir.IntervalStart, err = NewDecimalFromInterface(irMap[IntervalStart]); err != nil {
+					return nil, err
+				}
+				if ir.FixedFee, err = NewDecimalFromInterface(irMap[FixedFee]); err != nil {
+					return nil, err
+				}
+				if ir.RecurrentFee, err = NewDecimalFromInterface(irMap[RecurrentFee]); err != nil {
+					return nil, err
+				}
+				if ir.Unit, err = NewDecimalFromInterface(irMap[Unit]); err != nil {
+					return nil, err
+				}
+				if ir.Increment, err = NewDecimalFromInterface(irMap[Increment]); err != nil {
+					return nil, err
+				}
+				result = append(result, ir)
+			}
+		}
+		return result, nil
+	}
+	return
 }
 
 // AsDataDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
@@ -1087,6 +1159,51 @@ func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]any, err error) 
 		mp[fldKey] = string(result)
 	}
 	return mp, nil
+}
+
+// AsMapStringInterface converts RateProfile struct to map[string]any
+//
+//	! Rates not included !
+func (rp *RateProfile) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:          rp.Tenant,
+		ID:              rp.ID,
+		FilterIDs:       rp.FilterIDs,
+		Weights:         rp.Weights,
+		MinCost:         rp.MinCost,
+		MaxCost:         rp.MaxCost,
+		MaxCostStrategy: rp.MaxCostStrategy,
+	}
+}
+
+// MapStringInterfaceToRateProfile converts map[string]any to RateProfile struct
+//
+//	! Rates not included !
+func MapStringInterfaceToRateProfile(m map[string]any) (*RateProfile, error) {
+	rp := &RateProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	rp.Weights = InterfaceToDynamicWeights(m[Weights])
+	var err error
+	if rp.MinCost, err = NewDecimalFromInterface(m[MinCost]); err != nil {
+		return nil, err
+	}
+	if rp.MaxCost, err = NewDecimalFromInterface(m[MaxCost]); err != nil {
+		return nil, err
+	}
+	if v, ok := m[MaxCostStrategy].(string); ok {
+		rp.MaxCostStrategy = v
+	}
+	rp.Rates = make(map[string]*Rate)
+	return rp, nil
 }
 
 // NewRateProfileFromMapDataDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
