@@ -1927,6 +1927,8 @@ const (
 	TBLFilters           = "filters"
 	TBLRouteProfiles     = "route_profiles"
 	TBLRateProfiles      = "rate_profiles"
+	TBLRankingProfiles   = "ranking_profiles"
+	TBLRankings          = "rankings"
 	TBLRates             = "rates"
 	OldSMCosts           = "sm_costs"
 	TBLTPDispatchers     = "tp_dispatcher_profiles"
