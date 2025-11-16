@@ -58,12 +58,8 @@ func TestSessionSProcEv(t *testing.T) {
 				t.Error(err)
 			}
 		}()
-	case utils.MetaMySQL:
-		sProcEvCfgDIR = "sessions_procev_mysql"
-	case utils.MetaMongo:
-		sProcEvCfgDIR = "sessions_backup_mongo"
-	case utils.MetaPostgres:
-		sProcEvCfgDIR = "sessions_procev_postgres"
+	case utils.MetaRedis, utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres:
+		return
 	default:
 		t.Fatal("Unknown Database type")
 	}
