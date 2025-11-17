@@ -623,6 +623,7 @@ type AsteriskConnCfg struct {
 	Password             string
 	ConnectAttempts      int
 	Reconnects           int
+	AriWebSocket         bool
 	MaxReconnectInterval time.Duration
 }
 
@@ -648,6 +649,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err er
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.Ari_websocket != nil {
+		aConnCfg.AriWebSocket = *jsnCfg.Ari_websocket
+	}
 	if jsnCfg.Max_reconnect_interval != nil {
 		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return
@@ -665,6 +669,7 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
 		utils.Password:                aConnCfg.Password,
 		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
 		utils.ReconnectsCfg:           aConnCfg.Reconnects,
+		utils.AriWebSocketCfg:         aConnCfg.AriWebSocket,
 		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval.String(),
 	}
 }
@@ -678,6 +683,7 @@ func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 		Password:             aConnCfg.Password,
 		ConnectAttempts:      aConnCfg.ConnectAttempts,
 		Reconnects:           aConnCfg.Reconnects,
+		AriWebSocket:         aConnCfg.AriWebSocket,
 		MaxReconnectInterval: aConnCfg.MaxReconnectInterval,
 	}
 }

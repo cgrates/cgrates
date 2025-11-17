@@ -184,7 +184,7 @@ type PjsuaAccount struct {
 
 // Returns file reference where we can write to control pjsua in terminal
 func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitDur time.Duration) (*os.File, error) {
-	cmdArgs := []string{fmt.Sprintf("--local-port=%d", localPort), "--null-audio", "--auto-answer=200", "--max-calls=32", "--app-log-level=0"}
+	cmdArgs := []string{fmt.Sprintf("--local-port=%d", localPort), "--null-audio", "--auto-answer=200", "--max-calls=4", "--app-log-level=0"}
 	for idx, acnt := range acnts {
 		if idx != 0 {
 			cmdArgs = append(cmdArgs, "--next-account")
