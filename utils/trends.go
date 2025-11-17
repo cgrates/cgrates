@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package utils
 
 import (
+	"encoding/base64"
 	"maps"
 	"math"
 	"slices"
@@ -222,6 +223,72 @@ func (tp *TrendProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	case Stored:
 		return tp.Stored, nil
 	}
+}
+
+// AsMapStringInterface converts TrendProfile struct to map[string]any
+func (tp *TrendProfile) AsMapStringInterface() map[string]any {
+	if tp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:          tp.Tenant,
+		ID:              tp.ID,
+		Schedule:        tp.Schedule,
+		StatID:          tp.StatID,
+		Metrics:         tp.Metrics,
+		TTL:             tp.TTL,
+		QueueLength:     tp.QueueLength,
+		MinItems:        tp.MinItems,
+		CorrelationType: tp.CorrelationType,
+		Tolerance:       tp.Tolerance,
+		Stored:          tp.Stored,
+		ThresholdIDs:    tp.ThresholdIDs,
+	}
+}
+
+// MapStringInterfaceToTrendProfile converts map[string]any to TrendProfile struct
+func MapStringInterfaceToTrendProfile(m map[string]any) (*TrendProfile, error) {
+	tp := &TrendProfile{}
+
+	if v, ok := m[Tenant].(string); ok {
+		tp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		tp.ID = v
+	}
+	if v, ok := m[Schedule].(string); ok {
+		tp.Schedule = v
+	}
+	if v, ok := m[StatID].(string); ok {
+		tp.StatID = v
+	}
+	tp.Metrics = InterfaceToStringSlice(m[Metrics])
+	if v, ok := m[TTL].(string); ok {
+		if dur, err := time.ParseDuration(v); err != nil {
+			return nil, err
+		} else {
+			tp.TTL = dur
+		}
+	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
+		tp.TTL = time.Duration(v)
+	}
+	if v, ok := m[QueueLength].(float64); ok {
+		tp.QueueLength = int(v)
+	}
+	if v, ok := m[MinItems].(float64); ok {
+		tp.MinItems = int(v)
+	}
+	if v, ok := m[CorrelationType].(string); ok {
+		tp.CorrelationType = v
+	}
+	if v, ok := m[Tolerance].(float64); ok {
+		tp.Tolerance = v
+	}
+	if v, ok := m[Stored].(bool); ok {
+		tp.Stored = v
+	}
+	tp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	return tp, nil
 }
 
 // Trend represents a collection of metrics with trend analysis.
@@ -539,4 +606,77 @@ func GetTrendLabel(tGrowth float64, tolerance float64) (lbl string) {
 		lbl = MetaConstant
 	}
 	return
+}
+
+// AsMapStringInterface converts Trend struct to map[string]any
+func (t *Trend) AsMapStringInterface() map[string]any {
+	if t == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            t.Tenant,
+		ID:                t.ID,
+		RunTimes:          t.RunTimes,
+		Metrics:           t.Metrics,
+		CompressedMetrics: t.CompressedMetrics,
+	}
+}
+
+// MapStringInterfaceToTrend converts map[string]any to Trend struct
+func MapStringInterfaceToTrend(m map[string]any) (*Trend, error) {
+	t := &Trend{}
+	if v, ok := m[Tenant].(string); ok {
+		t.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		t.ID = v
+	}
+	if v, ok := m[RunTimes].([]any); ok {
+		for _, rt := range v {
+			if timeStr, ok := rt.(string); ok {
+				parsedTime, err := time.Parse(time.RFC3339, timeStr)
+				if err != nil {
+					return nil, err
+				}
+				t.RunTimes = append(t.RunTimes, parsedTime)
+			}
+		}
+	}
+	if cMetrics, ok := m[CompressedMetrics].(string); ok {
+		var err error
+		if t.CompressedMetrics, err = base64.StdEncoding.DecodeString(cMetrics); err != nil {
+			return nil, err
+		}
+	}
+	if v, ok := m[Metrics].(map[string]any); ok {
+		t.Metrics = make(map[time.Time]map[string]*MetricWithTrend)
+		for timeStr, innerMap := range v {
+			parsedTime, err := time.Parse(time.RFC3339, timeStr)
+			if err != nil {
+				return nil, err
+			}
+			if innerMetrics, ok := innerMap.(map[string]any); ok {
+				t.Metrics[parsedTime] = make(map[string]*MetricWithTrend)
+				for metricKey, metricVal := range innerMetrics {
+					if metricData, ok := metricVal.(map[string]any); ok {
+						mwt := &MetricWithTrend{}
+						if id, ok := metricData[ID].(string); ok {
+							mwt.ID = id
+						}
+						if value, ok := metricData[Value].(float64); ok {
+							mwt.Value = value
+						}
+						if trendGrowth, ok := metricData[TrendGrowth].(float64); ok {
+							mwt.TrendGrowth = trendGrowth
+						}
+						if trendLabel, ok := metricData[TrendLabel].(string); ok {
+							mwt.TrendLabel = trendLabel
+						}
+						t.Metrics[parsedTime][metricKey] = mwt
+					}
+				}
+			}
+		}
+	}
+	return t, nil
 }

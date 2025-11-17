@@ -76,11 +76,11 @@ func TestTrendsIT(t *testing.T) {
 	case utils.MetaMongo:
 		trConfigDIR = "tutmongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		trConfigDIR = "trends_redis"
 	case utils.MetaMySQL:
-		trConfigDIR = "tutmysql"
+		trConfigDIR = "trends_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		trConfigDIR = "trends_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

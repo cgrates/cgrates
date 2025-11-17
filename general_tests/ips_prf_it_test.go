@@ -35,8 +35,8 @@ import (
 func Benchmark10IPsAllocated(b *testing.B) {
 
 	content := `{
-		"general": {
-			"log_level": 7
+		"logger": {
+			"level": 7
 		},
 		"db": {
 			"db_conns": {
