@@ -650,6 +650,8 @@ func MapStringInterfaceToStoredStatQueue(m map[string]any) (*StoredStatQueue, er
 				} else if expiryStr, ok := itemMap[utils.ExpiryTime].(string); ok {
 					if parsedTime, err := time.Parse(time.RFC3339, expiryStr); err == nil {
 						sqItem.ExpiryTime = &parsedTime
+					} else {
+						return nil, err
 					}
 				}
 				ssq.SQItems = append(ssq.SQItems, sqItem)

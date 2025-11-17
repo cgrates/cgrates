@@ -171,8 +171,8 @@ CREATE TABLE rates (
  `pk` int(11) NOT NULL AUTO_INCREMENT,
  `tenant` VARCHAR(40) NOT NULL,
  `id` VARCHAR(64) NOT NULL,
- `rate` JSON NOT NULL,
  `rate_profile_id` VARCHAR(64) NOT NULL,
+ `rate` JSON NOT NULL,
   PRIMARY KEY (`pk`),
   UNIQUE KEY unique_tenant_id_rate_profile_id (`tenant`, `id`, `rate_profile_id`),
   FOREIGN KEY (rate_profile_id) REFERENCES rate_profiles (id)
@@ -199,3 +199,25 @@ CREATE TABLE rankings (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX rankings_idx ON rankings (`id`);
+
+DROP TABLE IF EXISTS trend_profiles;
+CREATE TABLE trend_profiles (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `trend_profile` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX trend_profiles_idx ON trend_profiles (`id`);
+
+DROP TABLE IF EXISTS trends;
+CREATE TABLE trends (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40) NOT NULL,
+ `id` VARCHAR(64) NOT NULL,
+ `trend` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_id (`tenant`, `id`)
+);
+CREATE UNIQUE INDEX trends_idx ON trends (`id`);

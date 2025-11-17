@@ -168,8 +168,8 @@ CREATE TABLE rates (
   pk SERIAL PRIMARY KEY,
   tenant VARCHAR(40) NOT NULL,
   id VARCHAR(64) NOT NULL,
-  rate JSONB NOT NULL,
   rate_profile_id VARCHAR(64) NOT NULL,
+  rate JSONB NOT NULL,
   UNIQUE (tenant, id, rate_profile_id),
   FOREIGN KEY (rate_profile_id) REFERENCES rate_profiles (id)
 );
@@ -195,3 +195,25 @@ CREATE TABLE rankings (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX rankings_idx ON rankings ("id");
+
+
+DROP TABLE IF EXISTS trend_profiles;
+CREATE TABLE trend_profiles (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  trend_profile JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX trend_profiles_idx ON trend_profiles ("id");
+
+
+DROP TABLE IF EXISTS trends;
+CREATE TABLE trends (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40) NOT NULL,
+  id VARCHAR(64) NOT NULL,
+  trend JSONB NOT NULL,
+  UNIQUE (tenant, id)
+);
+CREATE UNIQUE INDEX trends_idx ON trends ("id");

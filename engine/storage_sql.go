@@ -133,6 +133,10 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankingProfiles, tntID)
 	case utils.RankingPrefix:
 		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankings, tntID)
+	case utils.TrendProfilePrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrendProfiles, tntID)
+	case utils.TrendPrefix:
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrends, tntID)
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -1300,6 +1304,95 @@ func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string
 	return
 }
 
+func (sqls *SQLStorage) SetTrendProfileDrv(ctx *context.Context, tp *utils.TrendProfile) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &TrendProfileMdl{
+		Tenant:       tp.Tenant,
+		ID:           tp.ID,
+		TrendProfile: tp.AsMapStringInterface(),
+	}
+	if err = tx.Model(&TrendProfileMdl{}).Where(
+		TrendProfileMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		TrendProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+
+}
+
+func (sqls *SQLStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (tp *utils.TrendProfile, err error) {
+	var result []*TrendProfileMdl
+	if err = sqls.db.Model(&TrendProfileMdl{}).Where(&TrendProfileMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToTrendProfile(result[0].TrendProfile)
+}
+
+func (sqls *SQLStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&TrendProfileMdl{}).Where(&TrendProfileMdl{Tenant: tenant, ID: id}).
+		Delete(&TrendProfileMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (t *utils.Trend, err error) {
+	var result []*TrendJSONMdl
+	if err = sqls.db.Model(&TrendJSONMdl{}).Where(&TrendJSONMdl{Tenant: tenant,
+		ID: id}).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.MapStringInterfaceToTrend(result[0].Trend)
+}
+
+func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, t *utils.Trend) (err error) {
+	tx := sqls.db.Begin()
+	mdl := &TrendJSONMdl{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+		Trend:  t.AsMapStringInterface(),
+	}
+	if err = tx.Model(&TrendJSONMdl{}).Where(
+		TrendJSONMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
+		TrendJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	if err = tx.Save(mdl).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	return
+}
+
+func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&TrendJSONMdl{}).Where(&TrendJSONMdl{Tenant: tenant, ID: id}).
+		Delete(&TrendJSONMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
+}
+
 // Used to check if specific subject is stored using prefix key attached to entity
 func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (has bool, err error) {
 	var categoryModelMap = map[string]any{
@@ -1320,8 +1413,8 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		utils.RateProfilePrefix:      &RateProfileJSONMdl{},
 		utils.RankingPrefix:          &RankingJSONMdl{},
 		utils.RankingProfilePrefix:   &RankingProfileMdl{},
-		// utils.TrendPrefix:            &TrendJSONMdl{},
-		// utils.TrendProfilePrefix:     &TrendProfileMdl{},
+		utils.TrendPrefix:            &TrendJSONMdl{},
+		utils.TrendProfilePrefix:     &TrendProfileMdl{},
 	}
 	model, ok := categoryModelMap[category]
 	if !ok {
@@ -1369,36 +1462,6 @@ func (sqls *SQLStorage) RewriteDataDB() (err error) {
 func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
 	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetTrendProfileDrv(ctx *context.Context, sg *utils.TrendProfile) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.TrendProfile, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *utils.Trend, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNotImplemented
 }
 
 // DataDB method not implemented yet

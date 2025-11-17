@@ -55,7 +55,6 @@
 	{
 		"id": "CustomLoader",								
 		"enabled": true,								
-		"dry_run": false,									
 		"tenant": "cgrates.org",
 		"run_delay": "0",									
 		"lockfile_path": ".cgr.lock",					
@@ -76,7 +75,6 @@
 	{
 		"id": "WithoutMoveToOut",			
 		"enabled": true,
-		"dry_run": false,
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
@@ -98,7 +96,6 @@
 	{
 		"id": "SubpathLoaderWithoutMove",
 		"enabled": true,
-		"dry_run": false,
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
@@ -120,7 +117,6 @@
 	{
 		"id": "SubpathLoaderWithMove",
 		"enabled": true,
-		"dry_run": false,
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
@@ -142,7 +138,6 @@
 	{
 		"id": "LoaderWithTemplate",
 		"enabled": true,
-		"dry_run": false,
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
@@ -163,7 +158,6 @@
 	{
 		"id": "CustomSep",								
 		"enabled": true,									
-		"dry_run": false,									
 		"tenant": "cgrates.org",
 		"run_delay": "-1",										
 		"lockfile_path": ".cgr.lock",						

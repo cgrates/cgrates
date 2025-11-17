@@ -144,8 +144,8 @@ func TestStressIPsAuthorize(t *testing.T) {
 	}
 
 	content := `{
-		"general": {
-			"log_level": 7
+		"logger": {
+			"level": 7
 		},
 		"db": {
 			"db_conns": {

@@ -34,21 +34,119 @@ import (
 func TestTrendStore(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbConfig = engine.DBCfg{
+			DB: &engine.DBParams{
+				DBConns: map[string]engine.DBConn{
+					utils.MetaDefault: {
+						Type: utils.StringPointer(utils.MetaInternal),
+						Opts: engine.Opts{
+							InternalDBDumpInterval:    utils.StringPointer("0s"),
+							InternalDBRewriteInterval: utils.StringPointer("0s"),
+						},
+					},
+				},
+			},
+		}
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbConfig = engine.RedisDBCfg
 	case utils.MetaMySQL:
-		dbConfig = engine.MySQLDBCfg
+		dbConfig = engine.DBCfg{
+			DB: &engine.DBParams{
+				DBConns: map[string]engine.DBConn{
+					utils.MetaDefault: {
+						Type: utils.StringPointer(utils.MetaRedis),
+						Host: utils.StringPointer("127.0.0.1"),
+						Port: utils.IntPointer(6379),
+						Name: utils.StringPointer("10"),
+						User: utils.StringPointer(utils.CGRateSLwr),
+					},
+					utils.StorDB: {
+						Type:     utils.StringPointer(utils.MetaMySQL),
+						Host:     utils.StringPointer("127.0.0.1"),
+						Port:     utils.IntPointer(3306),
+						Name:     utils.StringPointer(utils.CGRateSLwr),
+						User:     utils.StringPointer(utils.CGRateSLwr),
+						Password: utils.StringPointer("CGRateS.org"),
+					},
+				},
+				Items: map[string]engine.Item{
+					utils.MetaCDRs: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaTrendProfiles: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaTrends: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaStatQueueProfiles: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaStatQueues: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+				},
+			},
+		}
 	case utils.MetaMongo:
 		dbConfig = engine.MongoDBCfg
-	case utils.MetaInternal, utils.MetaPostgres:
-		t.SkipNow()
+	case utils.MetaPostgres:
+		dbConfig = engine.DBCfg{
+			DB: &engine.DBParams{
+				DBConns: map[string]engine.DBConn{
+					utils.MetaDefault: {
+						Type: utils.StringPointer(utils.MetaRedis),
+						Host: utils.StringPointer("127.0.0.1"),
+						Port: utils.IntPointer(6379),
+						Name: utils.StringPointer("10"),
+						User: utils.StringPointer(utils.CGRateSLwr),
+					},
+					utils.StorDB: {
+						Type:     utils.StringPointer(utils.MetaPostgres),
+						Host:     utils.StringPointer("127.0.0.1"),
+						Port:     utils.IntPointer(5432),
+						Name:     utils.StringPointer(utils.CGRateSLwr),
+						User:     utils.StringPointer(utils.CGRateSLwr),
+						Password: utils.StringPointer("CGRateS.org"),
+					},
+				},
+				Items: map[string]engine.Item{
+					utils.MetaCDRs: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaTrendProfiles: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaTrends: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaStatQueueProfiles: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+					utils.MetaStatQueues: {
+						Limit:  utils.IntPointer(-1),
+						DbConn: utils.StringPointer(utils.StorDB),
+					},
+				},
+			},
+		}
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
 	content := `{
 
-"general": {
-	"log_level": 7,
+"logger": {
+	"level": 7
 },
 "trends": {
 	"enabled": true,

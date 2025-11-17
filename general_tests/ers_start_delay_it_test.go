@@ -42,8 +42,8 @@ func TestErsStartDelay(t *testing.T) {
 		t.Fatalf("could not write to file %s: %v", filePath, err)
 	}
 	content := fmt.Sprintf(`{
-		"general": {
-			"log_level": 7
+		"logger": {
+			"level": 7
 		},
 		"db": {
 			"db_conns": {
