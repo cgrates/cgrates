@@ -217,3 +217,16 @@ CREATE TABLE trends (
   UNIQUE (tenant, id)
 );
 CREATE UNIQUE INDEX trends_idx ON trends ("id");
+
+
+DROP TABLE IF EXISTS load_history;
+CREATE TABLE load_history (
+  key SERIAL PRIMARY KEY,
+  load_instance JSONB NOT NULL
+);
+
+DROP TABLE IF EXISTS load_ids;
+CREATE TABLE load_ids (
+  pk SERIAL PRIMARY KEY,
+  load_ids JSONB NOT NULL
+);

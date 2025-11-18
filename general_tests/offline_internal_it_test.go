@@ -40,7 +40,7 @@ import (
 
 func TestOfflineInternal(t *testing.T) { // run with sudo
 	switch *utils.DBType {
-	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres:
+	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres, utils.MetaRedis:
 		t.SkipNow()
 	}
 	paths := []string{
@@ -317,8 +317,8 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 37 {
-					t.Errorf("expected <%d> directories, received <%d>", 37, dirs)
+				} else if dirs != 36 {
+					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
 				} else if i > 6 && files != 33 {
 					t.Errorf("expected <%d> files, received <%d>", 33, files)
 				} else if i < 6 && files != 32 {

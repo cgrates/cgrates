@@ -34,7 +34,6 @@
 	},
     "items":{
         "*accounts": {"remote":true, "replicate":true},
-        "*actions": {"remote":true, "replicate":true},
         "*resource_profiles": {"remote":true, "replicate":true},
         "*resources": {"remote":true, "replicate":true},
         "*statqueue_profiles": {"remote":true, "replicate":true},

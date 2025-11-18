@@ -348,8 +348,8 @@ func TestMultipleDBs(t *testing.T) {
 			return nil
 		}); err != nil {
 			t.Error(err)
-		} else if dirs != 37 {
-			t.Errorf("expected <%d> directories, received <%d>", 37, dirs)
+		} else if dirs != 36 {
+			t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
 		} else if files != 2 {
 			t.Errorf("expected <%d> files, received <%d>", 2, files)
 		}
@@ -667,8 +667,8 @@ func TestMultipleDBsMongo(t *testing.T) {
 			return nil
 		}); err != nil {
 			t.Error(err)
-		} else if dirs != 37 {
-			t.Errorf("expected <%d> directories, received <%d>", 37, dirs)
+		} else if dirs != 36 {
+			t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
 		} else if files != 2 {
 			t.Errorf("expected <%d> files, received <%d>", 2, files)
 		}
