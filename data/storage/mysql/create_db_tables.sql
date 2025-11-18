@@ -221,3 +221,17 @@ CREATE TABLE trends (
   UNIQUE KEY unique_tenant_id (`tenant`, `id`)
 );
 CREATE UNIQUE INDEX trends_idx ON trends (`id`);
+
+DROP TABLE IF EXISTS load_history;
+CREATE TABLE load_history (
+ `key` VARCHAR(64) NOT NULL,
+ `load_instance` JSON NOT NULL,
+  PRIMARY KEY (`key`)
+);
+
+DROP TABLE IF EXISTS load_ids;
+CREATE TABLE load_ids (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `load_ids` JSON NOT NULL,
+  PRIMARY KEY (`pk`)
+);

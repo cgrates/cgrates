@@ -20,6 +20,7 @@ package engine
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -27,7 +28,9 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 	"gorm.io/gorm"
 )
 
@@ -176,7 +179,7 @@ func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
 // GetVersions returns slice of all versions or a specific version if tag is specified
 func (sqls *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	q := sqls.db.Model(&TBLVersion{})
-	if itm != utils.TBLVersions && itm != "" {
+	if itm != utils.TBLVersions && itm != utils.EmptyString {
 		q = sqls.db.Where(&TBLVersion{Item: itm})
 	}
 	var verModels []*TBLVersion
@@ -1427,10 +1430,159 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	return count > 0, err
 }
 
-// AddLoadHistory DataDB method not implemented yet
+// AddLoadHistory adds a single load instance to the load history.
 func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
-	return utils.ErrNotImplemented
+	if loadHistSize == 0 { // Load history disabled
+		return nil
+	}
+	// Make sure we do it locked since other instances can modify the history while we read it.
+	err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) error {
+		return sqls.db.Transaction(func(tx *gorm.DB) error {
+			var mdl *LoadInstanceMdl
+			result := tx.Table(utils.LoadInstKey).Where(&LoadInstanceMdl{Key: utils.LoadInstKey}).First(&mdl)
+			if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return result.Error
+			}
+			var existingLoadHistory []*utils.LoadInstance
+			if result.Error == nil && len(mdl.LoadInstance) > 0 {
+				existingLoadHistory = utils.MapStringInterfaceToLoadInstances(mdl.LoadInstance)
+			}
+
+			// Insert at the first position
+			existingLoadHistory = append(existingLoadHistory, nil)
+			copy(existingLoadHistory[1:], existingLoadHistory[0:])
+			existingLoadHistory[0] = ldInst
+
+			histLen := len(existingLoadHistory)
+			if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element
+				existingLoadHistory = existingLoadHistory[:loadHistSize]
+			}
+			newMdl := &LoadInstanceMdl{
+				Key:          utils.LoadInstKey,
+				LoadInstance: utils.LoadInstancesAsMapStringInterface(existingLoadHistory),
+			}
+
+			return tx.Table(utils.LoadInstKey).Save(&newMdl).Error
+		})
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+
+	if err != nil {
+		return err
+	}
+	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, utils.EmptyString,
+		cacheCommit(transactionID), transactionID); errCh != nil {
+		return errCh
+	}
+	return err
+}
+
+// Limit will only retrieve the last n items out of history, newest first
+func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
+	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
+	if limit == 0 {
+		return nil, nil
+	}
+	if !skipCache {
+		x, ok := Cache.Get(utils.LoadInstKey, utils.EmptyString)
+		if ok {
+			if x != nil {
+				items, ok := x.([]*utils.LoadInstance)
+				if !ok {
+					return nil, utils.ErrCastFailed
+				}
+				if len(items) < limit || limit == -1 {
+					return items, nil
+				}
+				return items[:limit], nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	var mdl *LoadInstanceMdl
+	result := sqls.db.Table(utils.LoadInstKey).Where(&LoadInstanceMdl{Key: utils.LoadInstKey}).First(&mdl)
+	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, result.Error
+	} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, utils.ErrNotFound
+	}
+	loadInstances := utils.MapStringInterfaceToLoadInstances(mdl.LoadInstance)
+	cCommit := cacheCommit(transactionID)
+	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, utils.EmptyString, cCommit, transactionID); errCh != nil {
+		return nil, errCh
+	}
+	if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, utils.EmptyString, loadInstances, nil, cCommit, transactionID); errCh != nil {
+		return nil, errCh
+	}
+	if len(loadInstances) < limit || limit == -1 {
+		return loadInstances, nil
+	}
+	return loadInstances[:limit], nil
+}
+
+func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+	var mdl LoadIDMdl
+	tx := sqls.db.Table(utils.TBLLoadIDs)
+	result := tx.First(&mdl)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, utils.ErrNotFound
+		}
+		return nil, result.Error
+	}
+	if len(mdl.LoadIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	loadIDs = make(map[string]int64)
+	// Filter by prefix if specified
+	if itemIDPrefix != utils.EmptyString {
+		for key, value := range mdl.LoadIDs {
+			if strings.HasPrefix(key, itemIDPrefix) {
+				loadIDs[key] = int64(value.(float64))
+			}
+		}
+		if len(loadIDs) == 0 {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		for k, v := range mdl.LoadIDs {
+			loadIDs[k] = int64(v.(float64))
+		}
+	}
+	return loadIDs, nil
+}
+
+func (sqls *SQLStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+	return sqls.db.Transaction(func(tx *gorm.DB) error {
+		var existing LoadIDMdl
+		result := tx.Table(utils.TBLLoadIDs).First(&existing)
+		if result.Error == nil {
+			for k, v := range loadIDs {
+				existing.LoadIDs[k] = v
+			}
+		} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			loadIdsMapAny := make(map[string]any)
+			for k, v := range loadIDs {
+				loadIdsMapAny[k] = v
+			}
+			existing = LoadIDMdl{
+				LoadIDs: loadIdsMapAny,
+			}
+		} else {
+			return result.Error
+		}
+		return tx.Table(utils.TBLLoadIDs).Save(&existing).Error
+	})
+}
+
+func (sqls *SQLStorage) RemoveLoadIDsDrv() (err error) {
+	tx := sqls.db.Begin()
+	if err = tx.Model(&LoadIDMdl{}).Delete(&LoadIDMdl{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return
 }
 
 // Only intended for InternalDB
@@ -1455,27 +1607,6 @@ func (sqls *SQLStorage) DumpDataDB() (err error) {
 
 // Will rewrite every dump file of DataDB,  only for InternalDB
 func (sqls *SQLStorage) RewriteDataDB() (err error) {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
-	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
-	return utils.ErrNotImplemented
-}
-
-// DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
 

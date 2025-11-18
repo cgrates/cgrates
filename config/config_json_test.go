@@ -336,14 +336,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Remote:     utils.BoolPointer(false),
 				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
-			utils.MetaActions: {
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Limit:      utils.IntPointer(-1),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-				DbConn:     utils.StringPointer(utils.MetaDefault),
-			},
 			utils.CacheResourceProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),

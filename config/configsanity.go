@@ -1047,6 +1047,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		utils.MetaRankings,
 		utils.MetaTrendProfiles,
 		utils.MetaTrends,
+		utils.MetaLoadIDs,
 	}
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {

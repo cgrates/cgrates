@@ -604,3 +604,21 @@ type TrendJSONMdl struct {
 func (TrendJSONMdl) TableName() string {
 	return utils.TBLTrends
 }
+
+type LoadInstanceMdl struct {
+	Key          string      `gorm:"primary_key"`
+	LoadInstance utils.JSONB `gorm:"type:jsonb" index:"0" re:".*"`
+}
+
+func (LoadInstanceMdl) TableName() string {
+	return utils.LoadInstKey
+}
+
+type LoadIDMdl struct {
+	PK      uint        `gorm:"primary_key"`
+	LoadIDs utils.JSONB `gorm:"type:jsonb" index:"0" re:".*"`
+}
+
+func (LoadIDMdl) TableName() string {
+	return utils.TBLLoadIDs
+}
