@@ -63,7 +63,7 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		sesPauseCfgDir = "tutinternal"
 // 	case utils.MetaRedis:
-//     t.SkipNow()
+// 		sesPauseCfgDir = "tutredis"
 // case utils.MetaMySQL:
 // 		sesPauseCfgDir = "tutmysql"
 // 	case utils.MetaMongo:

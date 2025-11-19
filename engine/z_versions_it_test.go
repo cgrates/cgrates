@@ -26,6 +26,7 @@ import (
 	"log"
 	"os/exec"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -51,7 +52,7 @@ func TestVersionsIT(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
+		versionsConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		versionsConfigDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -92,9 +93,9 @@ func testInitDataDB(t *testing.T) {
 }
 
 func testVersionsFlush(t *testing.T) {
-	err := dm3.DataDB()[utils.MetaDefault].Flush("")
+	err := dm3.DataDB()[utils.MetaDefault].Flush(path.Join(vrsCfg.DataFolderPath, "storage", strings.Trim(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type, "*")))
 	if err != nil {
-		t.Error("Error when flushing Mongo ", err.Error())
+		t.Error("Error when flushing ", err.Error())
 	}
 
 }
@@ -117,7 +118,7 @@ func testVersion(t *testing.T) {
 		testVersion = allVersions
 		testVersion[utils.AccountsStr] = 1
 		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
-	case utils.MetaMongo, utils.MetaRedis:
+	case utils.MetaMongo, utils.MetaRedis, utils.MetaMySQL, utils.MetaPostgres:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.AccountsStr] = 1
@@ -146,7 +147,7 @@ func testVersion(t *testing.T) {
 	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(testVersion, false); err != nil {
 		t.Error(err)
 	}
-	if err := CheckVersions(dm3.DataDB()[utils.MetaDefault]); err.Error() != test {
+	if err := CheckVersions(dm3.DataDB()[utils.MetaDefault]); err == nil || err.Error() != test {
 		t.Error(err)
 	}
 	if err := dm3.DataDB()[utils.MetaDefault].RemoveVersions(testVersion); err != nil {

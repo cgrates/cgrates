@@ -66,7 +66,7 @@ func TestRsV1IT(t *testing.T) {
 			}
 		})
 	case utils.MetaRedis:
-		rlsV1ConfDIR = "tutmysql"
+		rlsV1ConfDIR = "tutredis"
 	case utils.MetaMySQL:
 		rlsV1ConfDIR = "resources_mysql"
 	case utils.MetaMongo:

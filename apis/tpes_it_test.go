@@ -80,7 +80,7 @@ func TestTPeSIT(t *testing.T) {
 	case utils.MetaMongo:
 		tpeSConfigDIR = "tutmongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		tpeSConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		tpeSConfigDIR = "tutmysql"
 	case utils.MetaPostgres:

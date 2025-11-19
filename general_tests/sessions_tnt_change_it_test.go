@@ -58,7 +58,7 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		sesTntChngCfgDir = "tutinternal"
 // 	case utils.MetaRedis:
-//     t.SkipNow()
+// 		sesTntChngCfgDir = "tutredis"
 // case utils.MetaMySQL:
 // 		sesTntChngCfgDir = "tutmysql"
 // 	case utils.MetaMongo:

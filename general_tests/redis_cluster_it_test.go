@@ -116,11 +116,10 @@ func TestRedisCluster(t *testing.T) {
 		t.SkipNow()
 	}
 	switch *utils.DBType {
-	case utils.MetaRedis:
-		t.SkipNow()
 	case utils.MetaMySQL:
 	case utils.MetaInternal,
 		utils.MetaMongo,
+		utils.MetaRedis,
 		utils.MetaPostgres:
 		t.SkipNow()
 	default:

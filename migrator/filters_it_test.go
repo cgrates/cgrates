@@ -52,8 +52,8 @@ var sTestsFltrIT = []func(t *testing.T){
 }
 
 func TestFiltersMigrateITRedis(t *testing.T) {
-	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
-	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	testFltrStart("TestFiltersMigrateITRedis", utils.Migrate, t)
 }
 
@@ -65,13 +65,13 @@ func TestFiltersMigrateITMongo(t *testing.T) {
 
 func TestFiltersITMove(t *testing.T) {
 	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
-	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	testFltrStart("TestFiltersITMove", utils.Move, t)
 }
 
 func TestFiltersITMigrateMongo2Redis(t *testing.T) {
 	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
-	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	testFltrStart("TestFiltersITMigrateMongo2Redis", utils.Migrate, t)
 }
 
@@ -82,7 +82,7 @@ func TestFiltersITMoveEncoding(t *testing.T) {
 }
 
 func TestFiltersITMoveEncoding2(t *testing.T) {
-	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	inPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	outPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysqljson")
 	testFltrStart("TestFiltersITMoveEncoding2", utils.Move, t)
 }

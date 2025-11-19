@@ -95,7 +95,7 @@ func TestConsoleItTests(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
+		cnslItDirPath = "tutredis"
 	case utils.MetaMySQL:
 		cnslItDirPath = "tutmysql"
 	case utils.MetaMongo:

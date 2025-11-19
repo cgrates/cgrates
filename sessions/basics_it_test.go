@@ -35,7 +35,7 @@ func TestSessionBasics(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -542,7 +542,7 @@ func TestSessionLifecycle(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:

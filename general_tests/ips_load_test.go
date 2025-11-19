@@ -42,6 +42,8 @@ func BenchmarkStressIPsAllocateIP(b *testing.B) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbConfig = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbConfig = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo, utils.MetaPostgres:
@@ -135,6 +137,8 @@ func TestStressIPsAuthorize(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbConfig = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbConfig = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbConfig = engine.MySQLDBCfg
 	case utils.MetaMongo, utils.MetaPostgres:

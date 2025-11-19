@@ -52,12 +52,12 @@ var sTestsStsIT = []func(t *testing.T){
 
 func TestStatsQueueITRedis(t *testing.T) {
 	var err error
-	stsPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	stsPathIn = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	stsCfgIn, err = config.NewCGRConfigFromPath(context.Background(), stsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	stsPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	stsPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	stsCfgOut, err = config.NewCGRConfigFromPath(context.Background(), stsPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -95,7 +95,7 @@ func TestStatsQueueITMove(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stsPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	stsPathOut = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	stsCfgOut, err = config.NewCGRConfigFromPath(context.Background(), stsPathOut)
 	if err != nil {
 		t.Fatal(err)

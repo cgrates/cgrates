@@ -67,7 +67,7 @@ func TestCacheSv1IT(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
+		cacheConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		cacheConfigDIR = "tutmysql"
 	case utils.MetaMongo:

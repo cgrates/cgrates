@@ -46,6 +46,8 @@ func BenchmarkDiameterCaps(b *testing.B) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbCfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMongo:

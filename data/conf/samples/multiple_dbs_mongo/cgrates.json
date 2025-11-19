@@ -46,7 +46,8 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":["*internal"]
+	"chargers_conns":["*internal"],
+	"rates_conns": ["*internal"]
 },
 
 
