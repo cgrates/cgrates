@@ -40,7 +40,7 @@ func TestTrendSchedule(t *testing.T) {
 				DBConns: map[string]engine.DBConn{
 					utils.MetaDefault: {
 						Type: utils.StringPointer(utils.MetaInternal),
-						Opts: engine.Opts{
+						Opts: engine.DBConnOpts{
 							InternalDBDumpInterval:    utils.StringPointer("0s"),
 							InternalDBRewriteInterval: utils.StringPointer("0s"),
 						},

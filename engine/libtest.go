@@ -410,8 +410,8 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	return client, newCfg
 }
 
-// Opts contains opts of database
-type Opts struct {
+// DBConnOpts contains opts of database
+type DBConnOpts struct {
 	InternalDBDumpPath        *string `json:"internalDBDumpPath,omitempty"`
 	InternalDBDumpInterval    *string `json:"internalDBDumpInterval,omitempty"`
 	InternalDBRewriteInterval *string `json:"internalDBRewriteInterval,omitempty"`
@@ -419,13 +419,13 @@ type Opts struct {
 
 // DBConn contains database connection parameters.
 type DBConn struct {
-	Type     *string `json:"db_type,omitempty"`
-	Host     *string `json:"db_host,omitempty"`
-	Port     *int    `json:"db_port,omitempty"`
-	Name     *string `json:"db_name,omitempty"`
-	User     *string `json:"db_user,omitempty"`
-	Password *string `json:"db_password,omitempty"`
-	Opts     Opts    `json:"opts,omitempty"`
+	Type     *string    `json:"db_type,omitempty"`
+	Host     *string    `json:"db_host,omitempty"`
+	Port     *int       `json:"db_port,omitempty"`
+	Name     *string    `json:"db_name,omitempty"`
+	User     *string    `json:"db_user,omitempty"`
+	Password *string    `json:"db_password,omitempty"`
+	Opts     DBConnOpts `json:"opts"`
 }
 
 // Item contains db item parameters
@@ -438,7 +438,6 @@ type Item struct {
 type DBParams struct {
 	DBConns map[string]DBConn `json:"db_conns,omitempty"`
 	Items   map[string]Item   `json:"items,omitempty"`
-	Opts    map[string]any    `json:"opts"`
 }
 
 // DBCfg holds the configurations for data_db and/or stor_db.
@@ -738,11 +737,11 @@ var (
 			DBConns: map[string]DBConn{
 				utils.MetaDefault: {
 					Type: utils.StringPointer(utils.MetaInternal),
+					Opts: DBConnOpts{
+						InternalDBDumpInterval:    utils.StringPointer("0s"),
+						InternalDBRewriteInterval: utils.StringPointer("0s"),
+					},
 				},
-			},
-			Opts: map[string]any{
-				utils.InternalDBDumpIntervalCfg:    "0s",
-				utils.InternalDBRewriteIntervalCfg: "0s",
 			},
 		},
 	}
