@@ -69,6 +69,7 @@ func (s *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager
 	s.srv, _ = engine.NewServiceWithPing(s.efS, utils.EfSv1, utils.V1Prfx)
 	cl.RpcRegister(s.srv)
 	cms.AddInternalConn(utils.EFs, s.srv)
+	efs.InitFailedPostCache(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)
 	return
 }
 
