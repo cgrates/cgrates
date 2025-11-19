@@ -42,7 +42,7 @@ func TestRankingStore(t *testing.T) {
 				DBConns: map[string]engine.DBConn{
 					utils.MetaDefault: {
 						Type: utils.StringPointer(utils.MetaInternal),
-						Opts: engine.Opts{
+						Opts: engine.DBConnOpts{
 							InternalDBDumpPath: utils.StringPointer("/tmp/internal_db"),
 						},
 					},

@@ -86,7 +86,7 @@ func TestFilterIndexUpdates(t *testing.T) {
 		dbConnCfg.Host, dbConnCfg.Port,
 		dbConnCfg.Name, dbConnCfg.User,
 		dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
-		nil, nil, cfg.DbCfg().Opts, cfg.DbCfg().Items)
+		nil, nil, dbConnCfg.Opts, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -392,7 +392,7 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 		dbConnCfg.Host, dbConnCfg.Port,
 		dbConnCfg.Name, dbConnCfg.User,
 		dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
-		nil, nil, cfg.DbCfg().Opts, cfg.DbCfg().Items)
+		nil, nil, dbConnCfg.Opts, cfg.DbCfg().Items)
 	if err != nil {
 		b.Fatal(err)
 	}
