@@ -21,7 +21,6 @@ package services
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -59,7 +58,6 @@ func (s *LoggerService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	}
 	cm := cms.(*ConnManagerService).ConnManager()
 	utils.Logger = engine.NewExportLogger(context.TODO(), s.cfg.GeneralCfg().DefaultTenant, cm, s.cfg)
-	efs.InitFailedPostCache(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)
 	return nil
 }
 
