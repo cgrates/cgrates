@@ -213,7 +213,7 @@ func TestERSSQLFilters(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -401,7 +401,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -599,7 +599,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -795,7 +795,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -1029,7 +1029,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -1231,7 +1231,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -1434,7 +1434,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		t.SkipNow()
+		dbcfg = engine.RedisDBCfg
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:

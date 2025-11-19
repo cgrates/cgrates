@@ -79,10 +79,10 @@ func TestFilterUpdateIT(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
 		fltrUpdateCfgDIR1 = "fltr_update_e1_mysql"
-		fltrUpdateCfgDIR2 = "tutmysql"
+		fltrUpdateCfgDIR2 = "tutredis"
+	case utils.MetaMySQL:
+		t.SkipNow()
 	case utils.MetaMongo:
 		fltrUpdateCfgDIR1 = "fltr_update_e1_mongo"
 		fltrUpdateCfgDIR2 = "tutmongo"

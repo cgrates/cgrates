@@ -49,8 +49,6 @@ func TestDMitinitDB(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
 		dataDB, err = NewRedisStorage("127.0.0.1:6379", 4, utils.CGRateSLwr,
 			cfg.DbCfg().DBConns[utils.MetaDefault].Password,
 			cfg.GeneralCfg().DBDataEncoding,
@@ -62,6 +60,8 @@ func TestDMitinitDB(t *testing.T) {
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
+	case utils.MetaMySQL:
+		t.SkipNow()
 	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:

@@ -60,7 +60,7 @@ func TestLoadersIDBIdxIt(t *testing.T) {
 	case utils.MetaInternal:
 		loadersIDBIdxCfgDir = "tutinternal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		loadersIDBIdxCfgDir = "tutredis"
 	case utils.MetaMySQL:
 		loadersIDBIdxCfgDir = "tutmysql"
 	case utils.MetaMongo:

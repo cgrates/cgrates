@@ -77,7 +77,7 @@ func TestCGRLoaderRemove(t *testing.T) {
 	case utils.MetaMongo:
 		cgrLdrCfgDir = "tutmongo"
 	case utils.MetaRedis:
-		t.SkipNow()
+		cgrLdrCfgDir = "tutredis"
 	case utils.MetaMySQL:
 		cgrLdrCfgDir = "tutmysql"
 	case utils.MetaPostgres:

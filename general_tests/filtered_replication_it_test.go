@@ -77,9 +77,9 @@ var (
 func TestFilteredReplication(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
 		fltrRplDB = "redis"
+	case utils.MetaMySQL:
+		t.SkipNow()
 	case utils.MetaMongo:
 		fltrRplDB = "mongo"
 	case utils.MetaPostgres, utils.MetaInternal:

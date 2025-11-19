@@ -47,7 +47,7 @@ var sTestsVrsIT = []func(t *testing.T){
 
 func TestVersionITRedis(t *testing.T) {
 	var err error
-	vrsPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	vrsPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), vrsPath)
 	if err != nil {
 		t.Fatal(err)

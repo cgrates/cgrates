@@ -61,7 +61,7 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		brodcastInternalCfgDIR = "tutinternal"
 // 	case utils.MetaRedis:
-//     t.SkipNow()
+// 		brodcastInternalCfgDIR = "tutredis"
 // case utils.MetaMySQL:
 // 		brodcastInternalCfgDIR = "tutmysql"
 // 	case utils.MetaMongo:

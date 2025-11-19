@@ -53,8 +53,8 @@ var (
 func TestSeSRplPrepaid(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaRedis:
-    t.SkipNow()
-case utils.MetaMySQL:
+		sesRplPrePaidCfgDIR = "tutredis"
+	case utils.MetaMySQL:
 		sesRplPrePaidCfgDIR = "tutmysql"
 	case utils.MetaMongo:
 		sesRplPrePaidCfgDIR = "tutmongo"

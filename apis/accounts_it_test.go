@@ -85,7 +85,7 @@ func TestAccSIT(t *testing.T) {
 	case utils.MetaMongo:
 		accPrfConfigDIR = "tutmongo"
 	case utils.MetaRedis:
-		accPrfConfigDIR = "tutmysql"
+		accPrfConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		accPrfConfigDIR = "mysql_acc"
 	case utils.MetaPostgres:

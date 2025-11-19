@@ -61,7 +61,7 @@ func TestLoaderIT(t *testing.T) {
 	case utils.MetaInternal:
 		loaderConfigDIR = "tutinternal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		loaderConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		loaderConfigDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -104,8 +104,8 @@ func testLoaderITInitDataDB(t *testing.T) {
 		}
 		Cache.Clear(chIDs)
 	} else {
-		if err = dbConn.Flush(utils.EmptyString); err != nil {
-			t.Fatal("Error when flushing datadb")
+		if err = dbConn.Flush(path.Join(lCfg.DataFolderPath, "storage", strings.Trim(lCfg.DbCfg().DBConns[utils.MetaDefault].Type, "*"))); err != nil {
+			t.Fatal("Error when flushing datadb: ", err)
 		}
 	}
 	cacheChan := make(chan birpc.ClientConnector, 1)

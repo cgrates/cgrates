@@ -64,7 +64,7 @@ func TestAccActionsIT(t *testing.T) {
 	case utils.MetaInternal:
 		accPrfConfigDIR = "tutinternal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		accPrfConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		accPrfConfigDIR = "tutmysql"
 	case utils.MetaMongo:

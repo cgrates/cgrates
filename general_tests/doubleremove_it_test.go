@@ -65,7 +65,7 @@ func TestDoubleRemoveIT(t *testing.T) {
 	case utils.MetaInternal:
 		doubleRemoveDIR = "tutinternal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		doubleRemoveDIR = "tutredis"
 	case utils.MetaMySQL:
 		doubleRemoveDIR = "tutmysql"
 	case utils.MetaMongo:

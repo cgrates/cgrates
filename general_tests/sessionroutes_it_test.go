@@ -61,7 +61,7 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		sesRoutesCfgDir = "tutinternal"
 // 	case utils.MetaRedis:
-//     t.SkipNow()
+// 		sesRoutesCfgDir = "tutredis"
 // case utils.MetaMySQL:
 // 		sesRoutesCfgDir = "tutmysql"
 // 	case utils.MetaMongo:

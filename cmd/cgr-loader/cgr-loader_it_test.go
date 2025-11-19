@@ -42,8 +42,15 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaRedis:
+	case utils.MetaInternal, utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	// DataDb
-	*cfgPath = path.Join(*utils.DataDir, "conf", "samples", "tutmysql")
+	*cfgPath = path.Join(*utils.DataDir, "conf", "samples", "tutredis")
 	*dataDBType = utils.MetaRedis
 	*dataDBHost = "localhost"
 	*dataDBPort = "2012"
@@ -265,7 +272,7 @@ func TestLoadIt(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaRedis:
-		t.SkipNow()
+		ldrItCfgDir = "tutredis"
 	case utils.MetaMySQL:
 		ldrItCfgDir = "tutmysql"
 	case utils.MetaMongo:

@@ -61,7 +61,7 @@ package general_tests
 // 	case utils.MetaInternal:
 // 		a1ConfigDir = "tutinternal"
 // 	case utils.MetaRedis:
-//     t.SkipNow()
+// 		a1ConfigDir = "tutredis"
 // case utils.MetaMySQL:
 // 		a1ConfigDir = "tutmysql"
 // 	case utils.MetaMongo:

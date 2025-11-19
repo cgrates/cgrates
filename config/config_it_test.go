@@ -1125,7 +1125,7 @@ func testHandleConfigSFolderError(t *testing.T) {
 
 func testHttpHandlerConfigSInvalidPath(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/\x00/"
-	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutmysql/cgrates.json", nil)
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutredis/cgrates.json", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
@@ -1135,7 +1135,7 @@ func testHttpHandlerConfigSInvalidPath(t *testing.T) {
 	if resp.Status != "500 Internal Server Error" {
 		t.Errorf("Expected:%+v, received:%+v", "200 OK", resp.Status)
 	}
-	httpBodyMsgError := "stat /usr/share/\x00/conf/samples/tutmysql/cgrates.json: invalid argument"
+	httpBodyMsgError := "stat /usr/share/\x00/conf/samples/tutredis/cgrates.json: invalid argument"
 	if httpBodyMsgError != string(body) {
 		t.Errorf("Received:%q, expected:%q", string(body), httpBodyMsgError)
 	}
@@ -1143,7 +1143,7 @@ func testHttpHandlerConfigSInvalidPath(t *testing.T) {
 
 func testHttpHandlerConfigSForFile(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
-	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutmysql/cgrates.json", nil)
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutredis/cgrates.json", nil)
 	w := httptest.NewRecorder()
 	HandlerConfigS(w, req)
 
@@ -1153,7 +1153,7 @@ func testHttpHandlerConfigSForFile(t *testing.T) {
 	if resp.Status != "200 OK" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
 	}
-	if dat, err := os.ReadFile("/usr/share/cgrates/conf/samples/tutmysql/cgrates.json"); err != nil {
+	if dat, err := os.ReadFile("/usr/share/cgrates/conf/samples/tutredis/cgrates.json"); err != nil {
 		t.Error(err)
 	} else if string(dat) != string(body) {
 		t.Errorf("Expected %s , received: %s ", string(dat), string(body))
