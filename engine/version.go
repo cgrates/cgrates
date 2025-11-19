@@ -103,7 +103,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	switch storType {
 	case utils.MetaMongo:
 		message = dataDBVers
-	case utils.MetaInternal:
+	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
 		message = allVers
 	case utils.MetaRedis:
 		message = dataDBVers
@@ -163,14 +163,10 @@ func CurrentAllDBVersions() Versions {
 // CurrentDBVersions returns versions based on dbType
 func CurrentDBVersions(storType string) Versions {
 	switch storType {
-	case utils.MetaMongo:
-		return CurrentAllDBVersions()
-	case utils.MetaInternal:
+	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL, utils.MetaInternal:
 		return CurrentAllDBVersions()
 	case utils.MetaRedis:
 		return CurrentDataDBVersions()
-	case utils.MetaPostgres, utils.MetaMySQL:
-		return CurrentStorDBVersions()
 	}
 	return nil
 }

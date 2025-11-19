@@ -964,7 +964,7 @@ func (rs *RedisStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 	return rs.Cmd(nil, redisDEL, utils.ActionProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-// GetIndexesDrv retrieves Indexes from dataDB
+// GetIndexesDrv retrieves Indexes from DB
 func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
@@ -997,7 +997,7 @@ func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 	return
 }
 
-// SetIndexesDrv stores Indexes into DataDB
+// SetIndexesDrv stores Indexes into DB
 func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
