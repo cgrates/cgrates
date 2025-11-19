@@ -1026,29 +1026,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 
 	// DataDB sanity checks
 	hasOneInternalDB := false // used to reutrn error in case more then 1 internaldb is found
-	allDBsItems := []string{
-		utils.CacheVersions,
-		utils.MetaAccounts,
-		utils.MetaIPProfiles,
-		utils.MetaIPAllocations,
-		utils.MetaActionProfiles,
-		utils.MetaChargerProfiles,
-		utils.MetaAttributeProfiles,
-		utils.MetaResourceProfiles,
-		utils.MetaResources,
-		utils.MetaStatQueueProfiles,
-		utils.MetaStatQueues,
-		utils.MetaThresholdProfiles,
-		utils.MetaThresholds,
-		utils.MetaFilters,
-		utils.MetaRouteProfiles,
-		utils.MetaRateProfiles,
-		utils.MetaRankingProfiles,
-		utils.MetaRankings,
-		utils.MetaTrendProfiles,
-		utils.MetaTrends,
-		utils.MetaLoadIDs,
-	}
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {
 			if hasOneInternalDB {
@@ -1080,19 +1057,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		storDBTypes := []string{utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo,
 			utils.MetaPostgres, utils.Internal, utils.MySQL, utils.Mongo, utils.Postgres}
-		dataDBTypes := []string{utils.MetaInternal, utils.MetaRedis, utils.MetaMongo,
-			utils.Internal, utils.Redis, utils.Mongo}
 
-		if !slices.Contains(allDBsItems, item) {
-			if item == utils.MetaCDRs {
-				if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
-						storDBTypes[4:], cfg.dbCfg.DBConns[val.DBConn].Type)
-				}
-			} else {
-				if !slices.Contains(dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-					return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes[3:], cfg.dbCfg.DBConns[val.DBConn].Type)
-				}
+		if item == utils.MetaCDRs {
+			if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
+				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
+					storDBTypes[4:], cfg.dbCfg.DBConns[val.DBConn].Type)
 			}
 		}
 		found1RmtConns := false

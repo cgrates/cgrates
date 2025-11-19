@@ -162,6 +162,24 @@ func (s StringSet) FieldAsString(fldPath []string) (_ string, err error) {
 	return "{}", nil // noting in it as is a empty structure
 }
 
+// ToMapStringAny converts StringSet to map[string]any
+func (s StringSet) ToMapStringAny() map[string]any {
+	out := make(map[string]any, len(s))
+	for k, v := range s {
+		out[k] = v
+	}
+	return out
+}
+
+// MapStringAnyToStringSet converts map[string]any to a StringSet.
+func MapStringAnyToStringSet(m map[string]any) StringSet {
+	out := make(StringSet, len(m))
+	for k := range m {
+		out[k] = struct{}{}
+	}
+	return out
+}
+
 // InterfaceToMapStringStringSet converts map[string]any to map[string]StringSet
 func InterfaceToMapStringStringSet(m any) map[string]StringSet {
 	v, ok := m.(map[string]any)

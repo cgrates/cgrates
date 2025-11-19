@@ -537,7 +537,7 @@ func (RouteProfileMdl) TableName() string {
 	return utils.TBLRouteProfiles
 }
 
-// Doesnt include Rates in RateProfile json, Rates taken from Rate using foreign keys
+// Doesnt include Rates in RateProfile json, Rates taken from RateMdl using foreign keys
 type RateProfileJSONMdl struct {
 	PK          uint        `gorm:"primary_key"`
 	Tenant      string      `index:"0" re:".*"`
@@ -621,4 +621,16 @@ type LoadIDMdl struct {
 
 func (LoadIDMdl) TableName() string {
 	return utils.TBLLoadIDs
+}
+
+type IndexMdl struct {
+	PK     uint        `gorm:"primary_key"`
+	Tenant string      `index:"0" re:".*"`
+	Type   string      `index:"1" re:".*"`
+	Key    string      `index:"2" re:".*"`
+	Value  utils.JSONB `gorm:"type:jsonb" index:"3" re:".*"`
+}
+
+func (IndexMdl) TableName() string {
+	return utils.TBLIndexes
 }

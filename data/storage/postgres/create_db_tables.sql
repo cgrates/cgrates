@@ -230,3 +230,16 @@ CREATE TABLE load_ids (
   pk SERIAL PRIMARY KEY,
   load_ids JSONB NOT NULL
 );
+
+DROP TABLE IF EXISTS indexes;
+CREATE TABLE indexes (
+  pk SERIAL PRIMARY KEY,
+  tenant VARCHAR(40),
+  type VARCHAR(40) NOT NULL,
+  key VARCHAR(40),
+  value JSONB NOT NULL,
+  UNIQUE (tenant, type, key)
+);
+CREATE INDEX indexes_key_idx ON indexes ("key");
+CREATE INDEX indexes_type_idx ON indexes ("type");
+CREATE INDEX indexes_type_key_idx ON indexes ("type", "key");

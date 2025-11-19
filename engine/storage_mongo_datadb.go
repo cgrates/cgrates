@@ -1446,7 +1446,7 @@ func (ms *MongoStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 	})
 }
 
-// GetIndexesDrv retrieves Indexes from dataDB
+// GetIndexesDrv retrieves Indexes from DB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 // id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
 func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (map[string]utils.StringSet, error) {
@@ -1503,7 +1503,7 @@ func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 	return indexes, nil
 }
 
-// SetIndexesDrv stores Indexes into DataDB
+// SetIndexesDrv stores Indexes into DB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 func (ms *MongoStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) error {

@@ -745,25 +745,12 @@ var (
 		DB: &DBParams{
 			DBConns: map[string]DBConn{
 				utils.MetaDefault: {
-					Type: utils.StringPointer(utils.MetaRedis),
-					Host: utils.StringPointer("127.0.0.1"),
-					Port: utils.IntPointer(6379),
-					Name: utils.StringPointer("10"),
-					User: utils.StringPointer(utils.CGRateSLwr),
-				},
-				utils.StorDB: {
 					Type:     utils.StringPointer(utils.MetaMySQL),
 					Host:     utils.StringPointer("127.0.0.1"),
 					Port:     utils.IntPointer(3306),
 					Name:     utils.StringPointer(utils.CGRateSLwr),
 					User:     utils.StringPointer(utils.CGRateSLwr),
 					Password: utils.StringPointer("CGRateS.org"),
-				},
-			},
-			Items: map[string]Item{
-				utils.MetaCDRs: {
-					Limit:  utils.IntPointer(-1),
-					DbConn: utils.StringPointer(utils.StorDB),
 				},
 			},
 		},
@@ -826,25 +813,12 @@ var (
 		DB: &DBParams{
 			DBConns: map[string]DBConn{
 				utils.MetaDefault: {
-					Type: utils.StringPointer(utils.MetaRedis),
-					Host: utils.StringPointer("127.0.0.1"),
-					Port: utils.IntPointer(6379),
-					Name: utils.StringPointer("10"),
-					User: utils.StringPointer(utils.CGRateSLwr),
-				},
-				utils.StorDB: {
 					Type:     utils.StringPointer(utils.MetaPostgres),
 					Host:     utils.StringPointer("127.0.0.1"),
 					Port:     utils.IntPointer(5432),
 					Name:     utils.StringPointer(utils.CGRateSLwr),
 					User:     utils.StringPointer(utils.CGRateSLwr),
 					Password: utils.StringPointer("CGRateS.org"),
-				},
-			},
-			Items: map[string]Item{
-				utils.MetaCDRs: {
-					Limit:  utils.IntPointer(-1),
-					DbConn: utils.StringPointer(utils.StorDB),
 				},
 			},
 		},

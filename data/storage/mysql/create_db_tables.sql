@@ -235,3 +235,17 @@ CREATE TABLE load_ids (
  `load_ids` JSON NOT NULL,
   PRIMARY KEY (`pk`)
 );
+
+DROP TABLE IF EXISTS indexes;
+CREATE TABLE indexes (
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tenant` VARCHAR(40),
+ `type` VARCHAR(40) NOT NULL,
+ `key` VARCHAR(64),
+ `value` JSON NOT NULL,
+  PRIMARY KEY (`pk`),
+  UNIQUE KEY unique_tenant_type_key (`tenant`, `type`, `key`)
+);
+CREATE INDEX indexes_key_idx ON indexes (`key`);
+CREATE INDEX indexes_type_idx ON indexes (`type`);
+CREATE INDEX indexes_type_key_idx ON indexes (`type`, `key`);
