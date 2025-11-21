@@ -1638,7 +1638,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 				Balance: &BalanceFilter{
 					Type:           utils.StringPointer(utils.MetaVoice),
 					Value:          &utils.ValueFormula{Static: 30},
-					ExpirationDate: utils.TimePointer(time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC)),
+					ExpirationDate: utils.TimePointer(time.Now().Add(24 * time.Hour)),
 				},
 			},
 		},
@@ -1668,7 +1668,7 @@ func TestActionRemoveBalance(t *testing.T) {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.NewStringMap("NAT", "RET"),
-					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+					ExpirationDate: time.Now().Add(24 * time.Hour),
 				},
 				&Balance{
 					Value:          10,
@@ -1718,7 +1718,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.NewStringMap("NAT", "RET"),
-					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+					ExpirationDate: time.Now().Add(24 * time.Hour),
 				},
 				&Balance{
 					Value:          10,
