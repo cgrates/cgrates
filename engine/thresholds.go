@@ -20,12 +20,12 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
+	"slices"
 	"sort"
 	"sync"
 	"time"
-
-	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -472,13 +472,17 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 			return nil, err
 		}
 	}
-	ts = make(Thresholds, 0, len(tIDs))
-	for tID := range tIDs {
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(tIDs))
+
+	ts = make(Thresholds, 0, len(itemIDs))
+	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			thresholdProfileLockKey(tnt, tID))
+			thresholdProfileLockKey(tnt, id))
 		var tPrfl *ThresholdProfile
-		if tPrfl, err = tS.dm.GetThresholdProfile(tnt, tID, true, true, utils.NonTransactional); err != nil {
+		if tPrfl, err = tS.dm.GetThresholdProfile(tnt, id, true, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
 				err = nil

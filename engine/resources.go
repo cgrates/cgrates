@@ -20,7 +20,9 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
+	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -676,13 +678,17 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 			return
 		}
 	}
-	rs = make(Resources, 0, len(rIDs))
-	for resName := range rIDs {
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(rIDs))
+
+	rs = make(Resources, 0, len(itemIDs))
+	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			resourceProfileLockKey(tnt, resName))
+			resourceProfileLockKey(tnt, id))
 		var rPrf *ResourceProfile
-		if rPrf, err = rS.dm.GetResourceProfile(tnt, resName,
+		if rPrf, err = rS.dm.GetResourceProfile(tnt, id,
 			true, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
