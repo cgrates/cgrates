@@ -367,15 +367,6 @@ func (rs Resources) unlock() {
 	}
 }
 
-// resIDsMp returns a map of resource IDs which is used for caching
-func (rs Resources) resIDsMp() (mp utils.StringSet) {
-	mp = make(utils.StringSet)
-	for _, r := range rs {
-		mp.Add(r.ID)
-	}
-	return mp
-}
-
 // recordUsage will record the usage in all the resource limits, failing back on errors
 func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	var nonReservedIdx int // index of first resource not reserved
@@ -640,16 +631,16 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
-	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
+	var itemIDs []string
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
-		rIDs = x.(utils.StringSet)
+		itemIDs = x.([]string)
 		defer func() { // make sure we uncache if we find errors
 			if err != nil {
 				if errCh := Cache.Remove(utils.CacheEventResources, evUUID,
@@ -660,7 +651,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		}()
 
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = MatchingItemIDsForEvent(evNm,
+		rIDs, err := MatchingItemIDsForEvent(evNm,
 			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
 			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
 			rS.cgrcfg.ResourceSCfg().SuffixIndexedFields,
@@ -675,13 +666,11 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 					return nil, errCh
 				}
 			}
-			return
+			return nil, err
 		}
+		// Lock items in sorted order to prevent AB-BA deadlock.
+		itemIDs = slices.Sorted(maps.Keys(rIDs))
 	}
-
-	// Lock items in sorted order to prevent AB-BA deadlock.
-	itemIDs := slices.Sorted(maps.Keys(rIDs))
-
 	rs = make(Resources, 0, len(itemIDs))
 	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
@@ -749,7 +738,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 			break
 		}
 	}
-	if err = Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); err != nil {
+	if err = Cache.Set(utils.CacheEventResources, evUUID, itemIDs, nil, true, ""); err != nil {
 		rs.unlock()
 	}
 	return
