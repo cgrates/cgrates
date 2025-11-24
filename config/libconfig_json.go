@@ -1006,9 +1006,8 @@ type CoreSJsonCfg struct {
 }
 
 type IPsOptsJson struct {
-	UsageID *string  `json:"*usageID"`
-	TTL     *string  `json:"*ttl"`
-	Units   *float64 `json:"*units"`
+	AllocationID *string `json:"*allocationID"`
+	TTL          *string `json:"*ttl"`
 }
 
 // IPsJsonCfg holds the unparsed ips section configuration as found in the

@@ -126,17 +126,16 @@ func (c IPsCfg) AsMapInterface() any {
 }
 
 type IPsOpts struct {
-	UsageID string
-	TTL     *time.Duration
-	Units   float64
+	AllocationID string
+	TTL          *time.Duration
 }
 
 func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 	if jc == nil {
 		return nil
 	}
-	if jc.UsageID != nil {
-		o.UsageID = *jc.UsageID
+	if jc.AllocationID != nil {
+		o.AllocationID = *jc.AllocationID
 	}
 	if jc.TTL != nil {
 		ttl, err := utils.ParseDurationWithNanosecs(*jc.TTL)
@@ -145,17 +144,13 @@ func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 		}
 		o.TTL = &ttl
 	}
-	if jc.Units != nil {
-		o.Units = *jc.Units
-	}
 	return nil
 }
 
 // Clone returns a deep copy of IPsOpts.
 func (o *IPsOpts) Clone() *IPsOpts {
 	cln := &IPsOpts{
-		UsageID: o.UsageID,
-		Units:   o.Units,
+		AllocationID: o.AllocationID,
 	}
 	if o.TTL != nil {
 		cln.TTL = new(time.Duration)
@@ -167,8 +162,7 @@ func (o *IPsOpts) Clone() *IPsOpts {
 // AsMapInterface returns the config as a map[string]any.
 func (o *IPsOpts) AsMapInterface() map[string]any {
 	m := map[string]any{
-		utils.MetaUsageIDCfg: o.UsageID,
-		utils.MetaUnitsCfg:   o.Units,
+		utils.MetaAllocationIDCfg: o.AllocationID,
 	}
 	if o.TTL != nil {
 		m[utils.MetaTTLCfg] = *o.TTL

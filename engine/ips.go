@@ -603,7 +603,7 @@ func (s *IPService) V1GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.UsageID, utils.OptsIPsUsageID)
+	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.AllocationID, utils.OptsIPsUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -653,7 +653,7 @@ func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, r
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.UsageID, utils.OptsIPsUsageID)
+	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.AllocationID, utils.OptsIPsUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -692,11 +692,6 @@ func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, r
 	}
 	defer ips.unlock()
 
-	if _, err = utils.GetFloat64Opts(args, s.cfg.IPsCfg().Opts.Units,
-		utils.OptsIPsUnits); err != nil {
-		return
-	}
-
 	/*
 		authorize logic
 		...
@@ -714,7 +709,7 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.UsageID, utils.OptsIPsUsageID)
+	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.AllocationID, utils.OptsIPsUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -754,11 +749,6 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 	}
 	defer ips.unlock()
 
-	if _, err = utils.GetFloat64Opts(args, s.cfg.IPsCfg().Opts.Units,
-		utils.OptsIPsUnits); err != nil {
-		return
-	}
-
 	/*
 		allocate logic
 		...
@@ -780,7 +770,7 @@ func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, rep
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.UsageID, utils.OptsIPsUsageID)
+	usageID := utils.GetStringOpts(args, s.cfg.IPsCfg().Opts.AllocationID, utils.OptsIPsUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
