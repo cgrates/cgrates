@@ -1856,81 +1856,6 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	}
 }
 
-func TestResourceResIDsMp(t *testing.T) {
-	resprf := []*ResourceProfile{
-		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
-			UsageTTL:          10 * time.Second,
-			Limit:             10.00,
-			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
-		},
-		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
-			UsageTTL:          10 * time.Second,
-			Limit:             10.00,
-			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
-		},
-		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
-			UsageTTL:          10 * time.Second,
-			Limit:             10.00,
-			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "ResourceProfile1",
-			Usages: map[string]*ResourceUsage{},
-			TTLIdx: []string{},
-			rPrf:   resprf[0],
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "ResourceProfile2",
-			Usages: map[string]*ResourceUsage{},
-			TTLIdx: []string{},
-			rPrf:   resprf[1],
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "ResourceProfile3",
-			Usages: map[string]*ResourceUsage{},
-			TTLIdx: []string{},
-			rPrf:   resprf[2],
-		},
-	}
-	expected := utils.StringSet{
-		"ResourceProfile1": struct{}{},
-		"ResourceProfile2": struct{}{},
-		"ResourceProfile3": struct{}{},
-	}
-	if rcv := resourceTest.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
-	}
-}
-
 func TestResourceMatchWithIndexFalse(t *testing.T) {
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
@@ -2205,9 +2130,11 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	res := &Resource{Tenant: resProf.Tenant,
+	res := &Resource{
+		Tenant: resProf.Tenant,
 		ID:     resProf.ID,
-		Usages: make(map[string]*ResourceUsage)}
+		Usages: make(map[string]*ResourceUsage),
+	}
 
 	if err := Cache.Set(utils.CacheResources, "cgrates.org:ResourceProfileCached",
 		res, nil, cacheCommit(utils.EmptyString), utils.EmptyString); err != nil {
@@ -2215,7 +2142,7 @@ func TestResourceCaching(t *testing.T) {
 	}
 
 	resources := Resources{res}
-	if err := Cache.Set(utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
+	if err := Cache.Set(utils.CacheEventResources, "TestResourceCaching", []string{resProf.ID}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
@@ -2224,7 +2151,8 @@ func TestResourceCaching(t *testing.T) {
 		ID:     utils.UUIDSha1Prefix(),
 		Event: map[string]any{
 			"Account":     "1001",
-			"Destination": "3002"},
+			"Destination": "3002",
+		},
 	}
 
 	mres, err := rS.matchingResourcesForEvent(ev.Tenant, ev,
@@ -5653,7 +5581,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 	rS := NewResourceService(dmRES, cfg,
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
 
-	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringSet{"Res2": {}}, nil, true, utils.NonTransactional)
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", []string{"Res2"}, nil, true, utils.NonTransactional)
 	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
@@ -5675,8 +5603,8 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 		&FilterS{dm: dm, cfg: cfg}, nil)
 	Cache.Clear(nil)
 	prfs := make([]*ResourceProfile, 0)
-	ids := utils.StringSet{}
-	for i := 0; i < 10; i++ {
+	ids := make([]string, 0, 11)
+	for i := range 10 {
 		rPrf := &ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                fmt.Sprintf("RES%d", i),
@@ -5688,7 +5616,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 		}
 		dm.SetResourceProfile(rPrf, true)
 		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	dm.RemoveResource("cgrates.org", "RES1")
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks", ids, nil, true, utils.NonTransactional)
@@ -5727,8 +5655,8 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		&FilterS{dm: dm, cfg: cfg}, nil)
 	Cache.Clear(nil)
 	prfs := make([]*ResourceProfile, 0)
-	ids := utils.StringSet{}
-	for i := 0; i < 10; i++ {
+	ids := make([]string, 0, 11)
+	for i := range 10 {
 		rPrf := &ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                fmt.Sprintf("RES%d", i),
@@ -5740,7 +5668,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		}
 		dm.SetResourceProfile(rPrf, true)
 		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	rPrf := &ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -5757,7 +5685,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		t.Fatal(err)
 	}
 	prfs = append(prfs, rPrf)
-	ids.Add(rPrf.ID)
+	ids = append(ids, rPrf.ID)
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
 	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
@@ -5793,8 +5721,8 @@ func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) 
 	rS := NewResourceService(dm, cfg,
 		&FilterS{dm: dm, cfg: cfg}, nil)
 
-	ids := utils.StringSet{}
-	for i := 0; i < 10; i++ {
+	ids := make([]string, 0, 10)
+	for i := range 10 {
 		rPrf := &ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                fmt.Sprintf("RES%d", i),
@@ -5805,7 +5733,7 @@ func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) 
 			ThresholdIDs:      []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(rPrf, true)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	rPrf := &ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -5820,7 +5748,7 @@ func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) 
 		},
 	}
 	dm.SetResourceProfile(rPrf, true)
-	ids.Add(rPrf.ID)
+	ids = append(ids, rPrf.ID)
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
 	mres, err := rS.matchingResourcesForEvent("cgrates.org", &utils.CGREvent{Time: utils.TimePointer(time.Now())},
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
@@ -5872,9 +5800,9 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	rS := NewResourceService(dm, cfg,
 		&FilterS{dm: dm, cfg: cfg}, nil)
 
-	ids := utils.StringSet{}
-	for i := 0; i < 10; i++ {
-		ids.Add(fmt.Sprintf("RES%d", i))
+	ids := make([]string, 0, 11)
+	for i := range 10 {
+		ids = append(ids, fmt.Sprintf("RES%d", i))
 	}
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks3", ids, nil, true, utils.NonTransactional)
 	_, err := rS.matchingResourcesForEvent("cgrates.org", new(utils.CGREvent),
