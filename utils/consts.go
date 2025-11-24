@@ -2707,7 +2707,8 @@ const (
 	MetaUnitsCfg    = "*units"
 
 	// IPsCfg
-	MetaTTLCfg = "*ttl"
+	MetaAllocationIDCfg = "*allocationID"
+	MetaTTLCfg          = "*ttl"
 
 	// RoutesCfg
 	MetaProfileCountCfg = "*profileCount"
