@@ -20,7 +20,9 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
+	"slices"
 	"sync"
 	"time"
 
@@ -174,13 +176,17 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			return
 		}
 	}
-	sqs = make(StatQueues, 0, len(sqIDs))
-	for sqID := range sqIDs {
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(sqIDs))
+
+	sqs = make(StatQueues, 0, len(itemIDs))
+	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			statQueueProfileLockKey(tnt, sqID))
+			statQueueProfileLockKey(tnt, id))
 		var sqPrfl *StatQueueProfile
-		if sqPrfl, err = sS.dm.GetStatQueueProfile(tnt, sqID, true, true, utils.NonTransactional); err != nil {
+		if sqPrfl, err = sS.dm.GetStatQueueProfile(tnt, id, true, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
 				err = nil
