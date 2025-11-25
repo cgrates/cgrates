@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"time"
 
@@ -108,6 +109,7 @@ type SessionSCfg struct {
 	ListenBigob            string
 	ChargerSConns          []string
 	RALsConns              []string
+	IPsConns               []string
 	ResSConns              []string
 	ThreshSConns           []string
 	StatSConns             []string
@@ -167,6 +169,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 				scfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
 			}
 		}
+	}
+	if jsnCfg.Ips_conns != nil {
+		scfg.IPsConns = tagInternalConns(*jsnCfg.Ips_conns, utils.MetaIPs)
 	}
 	if jsnCfg.Resources_conns != nil {
 		scfg.ResSConns = make([]string, len(*jsnCfg.Resources_conns))
@@ -352,6 +357,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.ListenBijsonCfg:           scfg.ListenBijson,
 		utils.ListenBigobCfg:            scfg.ListenBigob,
 		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
+		utils.IPsConnsCfg:               stripInternalConns(scfg.IPsConns),
 		utils.StoreSCostsCfg:            scfg.StoreSCosts,
 		utils.SessionIndexesCfg:         scfg.SessionIndexes.AsSlice(),
 		utils.ClientProtocolCfg:         scfg.ClientProtocol,
@@ -495,6 +501,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:                scfg.Enabled,
 		ListenBijson:           scfg.ListenBijson,
+		IPsConns:               slices.Clone(scfg.IPsConns),
 		DebitInterval:          scfg.DebitInterval,
 		StoreSCosts:            scfg.StoreSCosts,
 		SessionTTL:             scfg.SessionTTL,

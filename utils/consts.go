@@ -2526,6 +2526,7 @@ const (
 	ListenBijsonCfg           = "listen_bijson"
 	ListenBigobCfg            = "listen_bigob"
 	RALsConnsCfg              = "rals_conns"
+	IPsConnsCfg               = "ips_conns"
 	ResSConnsCfg              = "resources_conns"
 	ThreshSConnsCfg           = "thresholds_conns"
 	RouteSConnsCfg            = "routes_conns"
