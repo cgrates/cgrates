@@ -383,7 +383,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 		}
 	}
 	// release the resources for the session
-	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
+	if len(sS.cgrCfg.SessionSCfg().ResourceSConns) != 0 && s.ResourceID != "" {
 		var reply string
 		cgrEv := &utils.CGREvent{
 			Tenant:  s.Tenant,
@@ -397,7 +397,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 		cgrEv.APIOpts[utils.OptsResourcesUsageID] = s.ResourceID
 		cgrEv.APIOpts[utils.OptsResourcesUnits] = 1
 		cgrEv.SetCloneable(true)
-		if err := sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns,
+		if err := sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns,
 			utils.ResourceSv1ReleaseResources,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Warning(
@@ -2187,7 +2187,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.MaxUsage = &maxUsage
 	}
 	if args.AuthorizeResources {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -2200,7 +2200,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AuthorizeResources,
 			args.CGREvent, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2458,7 +2458,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 	}
 	if args.AllocateResources {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2470,7 +2470,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns,
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns,
 			utils.ResourceSv1AllocateResources, args.CGREvent, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2918,7 +2918,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 	}
 	if args.ReleaseResources {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2930,7 +2930,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID // same ID should be accepted by first group since the previous resource should be expired
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1ReleaseResources,
 			args.CGREvent, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -3200,7 +3200,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		}
 	}
 	if args.AllocateResources {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -3212,7 +3212,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AllocateResources,
 			args.CGREvent, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -3554,7 +3554,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	// check for *resources
 	if argsFlagsWithParams.GetBool(utils.MetaResources) {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		rply.ResourceAllocation = make(map[string]string)
@@ -3575,7 +3575,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				//check for subflags and convert them into utils.FlagsWithParams
 				switch {
 				case resOpt.Has(utils.MetaAuthorize):
-					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
+					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AuthorizeResources,
 						args.CGREvent, &resMessage); err != nil {
 						if blockError {
 							return utils.NewErrResourceS(err)
@@ -3586,7 +3586,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 						withErrors = true
 					}
 				case resOpt.Has(utils.MetaAllocate):
-					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AllocateResources,
 						args.CGREvent, &resMessage); err != nil {
 						if blockError {
 							return utils.NewErrResourceS(err)
@@ -3597,7 +3597,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 						withErrors = true
 					}
 				case resOpt.Has(utils.MetaRelease):
-					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
+					if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1ReleaseResources,
 						args.CGREvent, &resMessage); err != nil {
 						if blockError {
 							return utils.NewErrResourceS(err)
@@ -4062,7 +4062,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *stri
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb bool) (tIDs []string, err error) {
-	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
+	if len(sS.cgrCfg.SessionSCfg().ThresholdSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
 	if cgrEv.APIOpts == nil {
@@ -4074,7 +4074,7 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb
 	}
 	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThreshSConns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
+	err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThresholdSConns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
 	return
 }
 
@@ -4122,7 +4122,7 @@ func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignore
 // processAttributes will receive the event and send it to AttributeS to be processed
 func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 	clnb bool) (rplyEv engine.AttrSProcessEventReply, err error) {
-	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
+	if len(sS.cgrCfg.SessionSCfg().AttributeSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	if cgrEv.APIOpts == nil {
@@ -4135,7 +4135,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 		utils.IfaceAsString(ctx),
 		utils.MetaSessionS)
 	cgrEv.SetCloneable(clnb)
-	err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().AttrSConns, utils.AttributeSv1ProcessEvent,
+	err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv)
 	if err == nil && !has && utils.IfaceAsString(rplyEv.APIOpts[utils.OptsContext]) == utils.MetaSessionS {
 		delete(rplyEv.APIOpts, utils.OptsContext)

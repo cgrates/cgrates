@@ -40,7 +40,7 @@ import (
 func TestDNSAgentStartReloadShut(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners = []config.DnsListener{
 		{
@@ -96,7 +96,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -183,7 +183,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners[0].Network = "test"
 	cfg.DNSAgentCfg().Listeners[0].Address = "test"

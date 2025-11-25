@@ -132,7 +132,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	anzBiRPC, err = utils.NewBiJSONrpcClient(anzCfg.SessionSCfg().ListenBijson, srv)
+	anzBiRPC, err = utils.NewBiJSONrpcClient(anzCfg.SessionSCfg().ListenBiJSON, srv)
 	if err != nil {
 		t.Fatal(err)
 	}

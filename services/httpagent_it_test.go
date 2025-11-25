@@ -39,7 +39,7 @@ import (
 func TestHTTPAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)

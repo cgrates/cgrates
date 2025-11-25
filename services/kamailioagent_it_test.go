@@ -43,7 +43,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -122,7 +122,7 @@ func TestKamailioAgentReload(t *testing.T) {
 func TestKamailioAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -147,7 +147,7 @@ func TestKamailioAgentReload2(t *testing.T) {
 func TestKamailioAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)

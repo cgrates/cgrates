@@ -119,12 +119,12 @@ func testSessionsBiRPCApierRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummyClnt, err := utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBijson,
+	dummyClnt, err := utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBiJSON,
 		srv)
 	if err != nil { // First attempt is to make sure multiple clients are supported
 		t.Fatal(err)
 	}
-	if sessionsBiRPC, err = utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBijson,
+	if sessionsBiRPC, err = utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBiJSON,
 		srv); err != nil {
 		t.Fatal(err)
 	}

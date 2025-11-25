@@ -255,9 +255,9 @@ func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string
 		}
 		extraPath = cfg.HTTPCfg().HTTPJsonRPCURL
 	case rpcclient.BiRPCJSON:
-		address = cfg.SessionSCfg().ListenBijson
+		address = cfg.SessionSCfg().ListenBiJSON
 	case rpcclient.BiRPCGOB:
-		address = cfg.SessionSCfg().ListenBigob
+		address = cfg.SessionSCfg().ListenBiGob
 	}
 	if _, port, err = net.SplitHostPort(address); err != nil {
 		return
