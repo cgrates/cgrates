@@ -174,64 +174,22 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.IPsConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
 	}
 	if jsnCfg.ResourceSConns != nil {
-		scfg.ResourceSConns = make([]string, len(*jsnCfg.ResourceSConns))
-		for idx, connID := range *jsnCfg.ResourceSConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.ResourceSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			}
-		}
+		scfg.ResourceSConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaResources)
 	}
 	if jsnCfg.ThresholdSConns != nil {
-		scfg.ThresholdSConns = make([]string, len(*jsnCfg.ThresholdSConns))
-		for idx, connID := range *jsnCfg.ThresholdSConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.ThresholdSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			}
-		}
+		scfg.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
 	if jsnCfg.StatSConns != nil {
-		scfg.StatSConns = make([]string, len(*jsnCfg.StatSConns))
-		for idx, connID := range *jsnCfg.StatSConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.StatSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
-			}
-		}
+		scfg.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
 	}
 	if jsnCfg.RouteSConns != nil {
-		scfg.RouteSConns = make([]string, len(*jsnCfg.RouteSConns))
-		for idx, connID := range *jsnCfg.RouteSConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.RouteSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.RouteSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
-			}
-		}
+		scfg.RouteSConns = tagInternalConns(*jsnCfg.RouteSConns, utils.MetaRoutes)
 	}
 	if jsnCfg.AttributeSConns != nil {
-		scfg.AttributeSConns = make([]string, len(*jsnCfg.AttributeSConns))
-		for idx, connID := range *jsnCfg.AttributeSConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.AttributeSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		scfg.AttributeSConns = tagInternalConns(*jsnCfg.AttributeSConns, utils.MetaAttributes)
 	}
 	if jsnCfg.CDRsConns != nil {
-		scfg.CDRsConns = make([]string, len(*jsnCfg.CDRsConns))
-		for idx, connID := range *jsnCfg.CDRsConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.CDRsConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
-			}
-		}
+		scfg.CDRsConns = tagInternalConns(*jsnCfg.CDRsConns, utils.MetaCDRs)
 	}
 	if jsnCfg.ReplicationConns != nil {
 		scfg.ReplicationConns = make([]string, len(*jsnCfg.ReplicationConns))
@@ -318,14 +276,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.SchedulerConns != nil {
-		scfg.SchedulerConns = make([]string, len(*jsnCfg.SchedulerConns))
-		for idx, connID := range *jsnCfg.SchedulerConns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.SchedulerConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-			}
-		}
+		scfg.SchedulerConns = tagInternalConns(*jsnCfg.SchedulerConns, utils.MetaScheduler)
 	}
 	if jsnCfg.BackupInterval != nil {
 		if scfg.BackupInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.BackupInterval); err != nil {
@@ -356,8 +307,17 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.EnabledCfg:                scfg.Enabled,
 		utils.ListenBijsonCfg:           scfg.ListenBiJSON,
 		utils.ListenBigobCfg:            scfg.ListenBiGob,
-		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
+		utils.ChargerSConnsCfg:          stripInternalConns(scfg.ChargerSConns),
+		utils.RALsConnsCfg:              stripInternalConns(scfg.RALsConns),
 		utils.IPsConnsCfg:               stripInternalConns(scfg.IPsConns),
+		utils.ResourceSConnsCfg:         stripInternalConns(scfg.ResourceSConns),
+		utils.ThresholdSConnsCfg:        stripInternalConns(scfg.ThresholdSConns),
+		utils.StatSConnsCfg:             stripInternalConns(scfg.StatSConns),
+		utils.RouteSConnsCfg:            stripInternalConns(scfg.RouteSConns),
+		utils.AttributeSConnsCfg:        stripInternalConns(scfg.AttributeSConns),
+		utils.CDRsConnsCfg:              stripInternalConns(scfg.CDRsConns),
+		utils.SchedulerConnsCfg:         stripInternalConns(scfg.SchedulerConns),
+		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
 		utils.StoreSCostsCfg:            scfg.StoreSCosts,
 		utils.SessionIndexesCfg:         scfg.SessionIndexes.AsSlice(),
 		utils.ClientProtocolCfg:         scfg.ClientProtocol,
@@ -398,96 +358,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	if scfg.MinDurLowBalance != 0 {
 		initialMP[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
-	}
-	if scfg.ChargerSConns != nil {
-		chargerSConns := make([]string, len(scfg.ChargerSConns))
-		for i, item := range scfg.ChargerSConns {
-			chargerSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
-				chargerSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ChargerSConnsCfg] = chargerSConns
-	}
-	if scfg.RALsConns != nil {
-		RALsConns := make([]string, len(scfg.RALsConns))
-		for i, item := range scfg.RALsConns {
-			RALsConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				RALsConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.RALsConnsCfg] = RALsConns
-	}
-	if scfg.ResourceSConns != nil {
-		resSConns := make([]string, len(scfg.ResourceSConns))
-		for i, item := range scfg.ResourceSConns {
-			resSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
-				resSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ResourceSConnsCfg] = resSConns
-	}
-	if scfg.ThresholdSConns != nil {
-		threshSConns := make([]string, len(scfg.ThresholdSConns))
-		for i, item := range scfg.ThresholdSConns {
-			threshSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				threshSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ThresholdSConnsCfg] = threshSConns
-	}
-	if scfg.StatSConns != nil {
-		statSConns := make([]string, len(scfg.StatSConns))
-		for i, item := range scfg.StatSConns {
-			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
-				statSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.StatSConnsCfg] = statSConns
-	}
-	if scfg.RouteSConns != nil {
-		routesConns := make([]string, len(scfg.RouteSConns))
-		for i, item := range scfg.RouteSConns {
-			routesConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes) {
-				routesConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.RouteSConnsCfg] = routesConns
-	}
-	if scfg.AttributeSConns != nil {
-		attrSConns := make([]string, len(scfg.AttributeSConns))
-		for i, item := range scfg.AttributeSConns {
-			attrSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attrSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AttributeSConnsCfg] = attrSConns
-	}
-	if scfg.CDRsConns != nil {
-		CDRsConns := make([]string, len(scfg.CDRsConns))
-		for i, item := range scfg.CDRsConns {
-			CDRsConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
-				CDRsConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.CDRsConnsCfg] = CDRsConns
-	}
-	if scfg.SchedulerConns != nil {
-		schedulerConns := make([]string, len(scfg.SchedulerConns))
-		for i, item := range scfg.SchedulerConns {
-			schedulerConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
-				schedulerConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.SchedulerConnsCfg] = schedulerConns
 	}
 
 	if scfg.BackupInterval != 0 {
