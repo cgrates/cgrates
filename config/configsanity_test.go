@@ -299,6 +299,19 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.ResSConns = []string{}
 	cfg.resourceSCfg.Enabled = true
 
+	cfg.sessionSCfg.IPsConns = []string{utils.MetaInternal}
+	expected = "<IPs> not enabled but requested by <SessionS> component"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected %q, received: %q", expected, err)
+	}
+	cfg.sessionSCfg.IPsConns = []string{"test"}
+	expected = "<SessionS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.IPsConns = []string{}
+	cfg.ipsCfg.Enabled = true
+
 	cfg.sessionSCfg.ThreshSConns = []string{utils.MetaInternal}
 	expected = "<ThresholdS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

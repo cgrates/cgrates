@@ -418,6 +418,7 @@ type SessionSJsonCfg struct {
 	Listen_bigob               *string
 	Chargers_conns             *[]string
 	Rals_conns                 *[]string
+	Ips_conns                  *[]string
 	Resources_conns            *[]string
 	Thresholds_conns           *[]string
 	Stats_conns                *[]string
