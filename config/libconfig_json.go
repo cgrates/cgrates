@@ -413,37 +413,37 @@ type EventExporterJsonCfg struct {
 
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
-	Enabled                    *bool
-	Listen_bijson              *string
-	Listen_bigob               *string
-	Chargers_conns             *[]string
-	Rals_conns                 *[]string
-	Ips_conns                  *[]string
-	Resources_conns            *[]string
-	Thresholds_conns           *[]string
-	Stats_conns                *[]string
-	Routes_conns               *[]string
-	Cdrs_conns                 *[]string
-	Replication_conns          *[]string
-	Attributes_conns           *[]string
-	Debit_interval             *string
-	Store_session_costs        *bool
-	Session_ttl                *string
-	Session_ttl_max_delay      *string
-	Session_ttl_last_used      *string
-	Session_ttl_usage          *string
-	Session_ttl_last_usage     *string
-	Session_indexes            *[]string
-	Client_protocol            *float64
-	Channel_sync_interval      *string
-	Stale_chan_max_extra_usage *string
-	Terminate_attempts         *int
-	Alterable_fields           *[]string
-	Min_dur_low_balance        *string
-	Scheduler_conns            *[]string
-	Stir                       *STIRJsonCfg
-	Default_usage              *map[string]string
-	Backup_interval            *string
+	Enabled                *bool              `json:"enabled"`
+	ListenBiJSON           *string            `json:"listen_bijson"`
+	ListenBiGob            *string            `json:"listen_bigob"`
+	ChargerSConns          *[]string          `json:"chargers_conns"`
+	RALsConns              *[]string          `json:"rals_conns"`
+	IPsConns               *[]string          `json:"ips_conns"`
+	ResourceSConns         *[]string          `json:"resources_conns"`
+	ThresholdSConns        *[]string          `json:"thresholds_conns"`
+	StatSConns             *[]string          `json:"stats_conns"`
+	RouteSConns            *[]string          `json:"routes_conns"`
+	CDRsConns              *[]string          `json:"cdrs_conns"`
+	ReplicationConns       *[]string          `json:"replication_conns"`
+	AttributeSConns        *[]string          `json:"attributes_conns"`
+	DebitInterval          *string            `json:"debit_interval"`
+	StoreSCosts            *bool              `json:"store_session_costs"`
+	SessionTTL             *string            `json:"session_ttl"`
+	SessionTTLMaxDelay     *string            `json:"session_ttl_max_delay"`
+	SessionTTLLastUsed     *string            `json:"session_ttl_last_used"`
+	SessionTTLUsage        *string            `json:"session_ttl_usage"`
+	SessionTTLLastUsage    *string            `json:"session_ttl_last_usage"`
+	SessionIndexes         *[]string          `json:"session_indexes"`
+	ClientProtocol         *float64           `json:"client_protocol"`
+	ChannelSyncInterval    *string            `json:"channel_sync_interval"`
+	StaleChanMaxExtraUsage *string            `json:"stale_chan_max_extra_usage"`
+	TerminateAttempts      *int               `json:"terminate_attempts"`
+	AlterableFields        *[]string          `json:"alterable_fields"`
+	MinDurLowBalance       *string            `json:"min_dur_low_balance"`
+	SchedulerConns         *[]string          `json:"scheduler_conns"`
+	Stir                   *STIRJsonCfg       `json:"stir"`
+	DefaultUsage           *map[string]string `json:"default_usage"`
+	BackupInterval         *string            `json:"backup_interval"`
 }
 
 // FreeSWITCHAgent config section

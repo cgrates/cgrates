@@ -113,7 +113,7 @@ func (smg *SessionService) Start() error {
 		smg.server.RpcRegister(legacySrv)
 	}
 	// Register BiRpc handlers
-	if smg.cfg.SessionSCfg().ListenBijson != "" {
+	if smg.cfg.SessionSCfg().ListenBiJSON != "" {
 		smg.birpcEnabled = true
 		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
 		// run this in it's own goroutine
@@ -123,8 +123,8 @@ func (smg *SessionService) Start() error {
 }
 
 func (smg *SessionService) start() (err error) {
-	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
-		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
+	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBiJSON,
+		smg.cfg.SessionSCfg().ListenBiGob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.Lock()
 		smg.birpcEnabled = false

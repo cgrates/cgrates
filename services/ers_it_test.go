@@ -52,7 +52,7 @@ func TestEventReaderSReload(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()

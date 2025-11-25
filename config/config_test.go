@@ -480,16 +480,16 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
+		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		RALsConns:           []string{},
 		CDRsConns:           []string{},
 		IPsConns:            []string{},
-		ResSConns:           []string{},
-		ThreshSConns:        []string{},
+		ResourceSConns:      []string{},
+		ThresholdSConns:     []string{},
 		StatSConns:          []string{},
 		RouteSConns:         []string{},
-		AttrSConns:          []string{},
+		AttributeSConns:     []string{},
 		ReplicationConns:    []string{},
 		DebitInterval:       0,
 		StoreSCosts:         false,
@@ -1225,7 +1225,7 @@ func TestLoadSessionSCfgError(t *testing.T) {
           "session_ttl_usage": 1,
     },
 }`
-	expected := "json: cannot unmarshal number into Go struct field SessionSJsonCfg.Session_ttl_usage of type string"
+	expected := "json: cannot unmarshal number into Go struct field SessionSJsonCfg.session_ttl_usage of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1984,15 +1984,15 @@ func TestRouteSConfig(t *testing.T) {
 func TestSessionSConfig(t *testing.T) {
 	expected := &SessionSCfg{
 		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
+		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		RALsConns:           []string{},
 		IPsConns:            []string{},
-		ResSConns:           []string{},
-		ThreshSConns:        []string{},
+		ResourceSConns:      []string{},
+		ThresholdSConns:     []string{},
 		StatSConns:          []string{},
 		RouteSConns:         []string{},
-		AttrSConns:          []string{},
+		AttributeSConns:     []string{},
 		CDRsConns:           []string{},
 		ReplicationConns:    []string{},
 		DebitInterval:       0,

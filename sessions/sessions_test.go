@@ -2744,7 +2744,7 @@ func TestBiJClntID(t *testing.T) {
 func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -2817,7 +2817,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -2888,7 +2888,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -2959,7 +2959,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -3027,7 +3027,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -3149,7 +3149,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
@@ -3220,7 +3220,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {

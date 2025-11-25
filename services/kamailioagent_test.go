@@ -35,7 +35,7 @@ func TestKamailioAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()

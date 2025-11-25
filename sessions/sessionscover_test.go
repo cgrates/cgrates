@@ -346,7 +346,7 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 func TestForceSTerminatorReleaseSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -981,7 +981,7 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
@@ -1042,7 +1042,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnID"
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
@@ -1808,7 +1808,7 @@ func TestSyncSessions(t *testing.T) {
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	//cfg.GeneralCfg().ReplyTimeout = 1
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
 		Replicate: true,
@@ -2599,7 +2599,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	}
 
 	expected = "NOT_CONNECTED: RouteS"
-	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	sessions.cgrCfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -2702,7 +2702,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
@@ -2804,11 +2804,11 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
-	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.SessionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
@@ -2919,8 +2919,8 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
@@ -2985,12 +2985,12 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 
 	args.AllocateResources = true
 	args.AttributeIDs = []string{}
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{}
 	expected = "NOT_CONNECTED: ResourceS"
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
 	args = NewV1InitSessionArgs(true, []string{},
 		false, []string{}, false, []string{}, true, false,
@@ -3065,8 +3065,8 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -3204,11 +3204,11 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
-	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.SessionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
@@ -3281,7 +3281,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -3591,7 +3591,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -3627,11 +3627,11 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 
 	args = NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
 	expected = "NOT_CONNECTED: ResourceS"
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{}
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
 	cgrEvent.Tenant = "CHANGED_ID"
 	args = NewV1TerminateSessionArgs(false, true, true, nil, true, nil, cgrEvent, true)
@@ -3701,7 +3701,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -3808,7 +3808,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -3989,7 +3989,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	args.CGREvent.ID = "TEST_ID"
 	args.Flags = append(args.Flags, utils.MetaAttributes)
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	sessions.cgrCfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -4005,14 +4005,14 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 
 	args.Flags = []string{utils.MetaRoutes, "*routes:*event_cost:2", utils.MetaThresholds}
 	args.CGREvent.ID = "SECOND_ID"
-	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	sessions.cgrCfg.SessionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	expected = "PARTIALLY_EXECUTED"
 	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = []string{utils.MetaThresholds, utils.MetaBlockerError}
-	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	sessions.cgrCfg.SessionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	expected = "THRESHOLDS_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -4157,7 +4157,7 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 	if err := sessions.BiRPCv1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	args.Flags = append(args.Flags, utils.MetaResources)
 
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
@@ -4665,7 +4665,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	sessions.cgrCfg.SessionSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
 	expected = "MANDATORY_IE_MISSING: [connIDs]"
 	if err := sessions.BiRPCv1GetCost(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -4713,7 +4713,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	tmp := engine.Cache
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
 		Replicate: true,

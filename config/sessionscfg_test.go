@@ -67,28 +67,28 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Listen_bijson:         utils.StringPointer("127.0.0.1:2018"),
-		Chargers_conns:        &[]string{utils.MetaInternal, "*conn1"},
-		Rals_conns:            &[]string{utils.MetaInternal, "*conn1"},
-		Ips_conns:             &[]string{utils.MetaInternal, "*conn1"},
-		Resources_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		Thresholds_conns:      &[]string{utils.MetaInternal, "*conn1"},
-		Stats_conns:           &[]string{utils.MetaInternal, "*conn1"},
-		Routes_conns:          &[]string{utils.MetaInternal, "*conn1"},
-		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
-		Cdrs_conns:            &[]string{utils.MetaInternal, "*conn1"},
-		Replication_conns:     &[]string{"*conn1"},
-		Debit_interval:        utils.StringPointer("2"),
-		Store_session_costs:   utils.BoolPointer(true),
-		Session_ttl:           utils.StringPointer("0"),
-		Session_indexes:       &[]string{},
-		Client_protocol:       utils.Float64Pointer(2.5),
-		Channel_sync_interval: utils.StringPointer("10"),
-		Terminate_attempts:    utils.IntPointer(6),
-		Alterable_fields:      &[]string{},
-		Min_dur_low_balance:   utils.StringPointer("1"),
-		Scheduler_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Enabled:             utils.BoolPointer(true),
+		ListenBiJSON:        utils.StringPointer("127.0.0.1:2018"),
+		ChargerSConns:       &[]string{utils.MetaInternal, "*conn1"},
+		RALsConns:           &[]string{utils.MetaInternal, "*conn1"},
+		IPsConns:            &[]string{utils.MetaInternal, "*conn1"},
+		ResourceSConns:      &[]string{utils.MetaInternal, "*conn1"},
+		ThresholdSConns:     &[]string{utils.MetaInternal, "*conn1"},
+		StatSConns:          &[]string{utils.MetaInternal, "*conn1"},
+		RouteSConns:         &[]string{utils.MetaInternal, "*conn1"},
+		AttributeSConns:     &[]string{utils.MetaInternal, "*conn1"},
+		CDRsConns:           &[]string{utils.MetaInternal, "*conn1"},
+		ReplicationConns:    &[]string{"*conn1"},
+		DebitInterval:       utils.StringPointer("2"),
+		StoreSCosts:         utils.BoolPointer(true),
+		SessionTTL:          utils.StringPointer("0"),
+		SessionIndexes:      &[]string{},
+		ClientProtocol:      utils.Float64Pointer(2.5),
+		ChannelSyncInterval: utils.StringPointer("10"),
+		TerminateAttempts:   utils.IntPointer(6),
+		AlterableFields:     &[]string{},
+		MinDurLowBalance:    utils.StringPointer("1"),
+		SchedulerConns:      &[]string{utils.MetaInternal, "*conn1"},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
@@ -99,15 +99,15 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	expected := &SessionSCfg{
 		Enabled:             true,
-		ListenBijson:        "127.0.0.1:2018",
+		ListenBiJSON:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
-		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
 		DebitInterval:       2,
@@ -144,7 +144,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Replication_conns: &[]string{utils.MetaInternal},
+		ReplicationConns: &[]string{utils.MetaInternal},
 	}
 	expected := "Replication connection ID needs to be different than *internal"
 	jsonCfg := NewDefaultCGRConfig()
@@ -155,7 +155,7 @@ func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Debit_interval: utils.StringPointer("1ss"),
+		DebitInterval: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -166,7 +166,7 @@ func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Session_ttl: utils.StringPointer("1ss"),
+		SessionTTL: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -177,7 +177,7 @@ func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Channel_sync_interval: utils.StringPointer("1ss"),
+		ChannelSyncInterval: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -188,7 +188,7 @@ func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Min_dur_low_balance: utils.StringPointer("1ss"),
+		MinDurLowBalance: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -199,7 +199,7 @@ func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Session_ttl_last_usage: utils.StringPointer("1ss"),
+		SessionTTLLastUsage: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -207,21 +207,21 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON1 := &SessionSJsonCfg{
-		Session_ttl_last_used: utils.StringPointer("1ss"),
+		SessionTTLLastUsed: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
 	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON2 := &SessionSJsonCfg{
-		Session_ttl_max_delay: utils.StringPointer("1ss"),
+		SessionTTLMaxDelay: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
 	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON3 := &SessionSJsonCfg{
-		Session_ttl_usage: utils.StringPointer("1ss"),
+		SessionTTLUsage: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
 	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
@@ -231,22 +231,22 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Session_ttl_last_usage: utils.StringPointer("1"),
-		Session_ttl_last_used:  utils.StringPointer("10"),
-		Session_ttl_max_delay:  utils.StringPointer("100"),
-		Session_ttl_usage:      utils.StringPointer("1"),
+		SessionTTLLastUsage: utils.StringPointer("1"),
+		SessionTTLLastUsed:  utils.StringPointer("10"),
+		SessionTTLMaxDelay:  utils.StringPointer("100"),
+		SessionTTLUsage:     utils.StringPointer("1"),
 	}
 	expected := &SessionSCfg{
 		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
+		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		RALsConns:           []string{},
 		IPsConns:            []string{},
-		ResSConns:           []string{},
-		ThreshSConns:        []string{},
+		ResourceSConns:      []string{},
+		ThresholdSConns:     []string{},
 		StatSConns:          []string{},
 		RouteSConns:         []string{},
-		AttrSConns:          []string{},
+		AttributeSConns:     []string{},
 		CDRsConns:           []string{},
 		ReplicationConns:    []string{},
 		DebitInterval:       0,
@@ -300,7 +300,7 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase12(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Default_usage: &map[string]string{
+		DefaultUsage: &map[string]string{
 			utils.MetaAny:   "1ss",
 			utils.MetaVoice: "1ss",
 			utils.MetaData:  "1ss",
@@ -950,15 +950,15 @@ func TestFsAgentCfgClone(t *testing.T) {
 func TestSessionSCfgClone(t *testing.T) {
 	ban := &SessionSCfg{
 		Enabled:             true,
-		ListenBijson:        "127.0.0.1:2018",
+		ListenBiJSON:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
-		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
 		DebitInterval:       2,
@@ -1003,10 +1003,10 @@ func TestSessionSCfgClone(t *testing.T) {
 	if rcv.IPsConns[1] = ""; ban.IPsConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ResSConns[1] = ""; ban.ResSConns[1] != "*conn1" {
+	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ThreshSConns[1] = ""; ban.ThreshSConns[1] != "*conn1" {
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
@@ -1015,7 +1015,7 @@ func TestSessionSCfgClone(t *testing.T) {
 	if rcv.RouteSConns[1] = ""; ban.RouteSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.AttrSConns[1] = ""; ban.AttrSConns[1] != "*conn1" {
+	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {

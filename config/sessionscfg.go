@@ -105,16 +105,16 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled                bool
-	ListenBijson           string
-	ListenBigob            string
+	ListenBiJSON           string
+	ListenBiGob            string
 	ChargerSConns          []string
 	RALsConns              []string
 	IPsConns               []string
-	ResSConns              []string
-	ThreshSConns           []string
+	ResourceSConns         []string
+	ThresholdSConns        []string
 	StatSConns             []string
 	RouteSConns            []string
-	AttrSConns             []string
+	AttributeSConns        []string
 	CDRsConns              []string
 	ReplicationConns       []string
 	DebitInterval          time.Duration
@@ -144,15 +144,15 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		scfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_bijson != nil {
-		scfg.ListenBijson = *jsnCfg.Listen_bijson
+	if jsnCfg.ListenBiJSON != nil {
+		scfg.ListenBiJSON = *jsnCfg.ListenBiJSON
 	}
-	if jsnCfg.Listen_bigob != nil {
-		scfg.ListenBigob = *jsnCfg.Listen_bigob
+	if jsnCfg.ListenBiGob != nil {
+		scfg.ListenBiGob = *jsnCfg.ListenBiGob
 	}
-	if jsnCfg.Chargers_conns != nil {
-		scfg.ChargerSConns = make([]string, len(*jsnCfg.Chargers_conns))
-		for idx, connID := range *jsnCfg.Chargers_conns {
+	if jsnCfg.ChargerSConns != nil {
+		scfg.ChargerSConns = make([]string, len(*jsnCfg.ChargerSConns))
+		for idx, connID := range *jsnCfg.ChargerSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.ChargerSConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -160,9 +160,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Rals_conns != nil {
-		scfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
-		for idx, connID := range *jsnCfg.Rals_conns {
+	if jsnCfg.RALsConns != nil {
+		scfg.RALsConns = make([]string, len(*jsnCfg.RALsConns))
+		for idx, connID := range *jsnCfg.RALsConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.RALsConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -170,32 +170,32 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Ips_conns != nil {
-		scfg.IPsConns = tagInternalConns(*jsnCfg.Ips_conns, utils.MetaIPs)
+	if jsnCfg.IPsConns != nil {
+		scfg.IPsConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
 	}
-	if jsnCfg.Resources_conns != nil {
-		scfg.ResSConns = make([]string, len(*jsnCfg.Resources_conns))
-		for idx, connID := range *jsnCfg.Resources_conns {
+	if jsnCfg.ResourceSConns != nil {
+		scfg.ResourceSConns = make([]string, len(*jsnCfg.ResourceSConns))
+		for idx, connID := range *jsnCfg.ResourceSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.ResSConns[idx] = connID
+			scfg.ResourceSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.ResSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+				scfg.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
 			}
 		}
 	}
-	if jsnCfg.Thresholds_conns != nil {
-		scfg.ThreshSConns = make([]string, len(*jsnCfg.Thresholds_conns))
-		for idx, connID := range *jsnCfg.Thresholds_conns {
+	if jsnCfg.ThresholdSConns != nil {
+		scfg.ThresholdSConns = make([]string, len(*jsnCfg.ThresholdSConns))
+		for idx, connID := range *jsnCfg.ThresholdSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.ThreshSConns[idx] = connID
+			scfg.ThresholdSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.ThreshSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+				scfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
 			}
 		}
 	}
-	if jsnCfg.Stats_conns != nil {
-		scfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
-		for idx, connID := range *jsnCfg.Stats_conns {
+	if jsnCfg.StatSConns != nil {
+		scfg.StatSConns = make([]string, len(*jsnCfg.StatSConns))
+		for idx, connID := range *jsnCfg.StatSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -203,9 +203,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Routes_conns != nil {
-		scfg.RouteSConns = make([]string, len(*jsnCfg.Routes_conns))
-		for idx, connID := range *jsnCfg.Routes_conns {
+	if jsnCfg.RouteSConns != nil {
+		scfg.RouteSConns = make([]string, len(*jsnCfg.RouteSConns))
+		for idx, connID := range *jsnCfg.RouteSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.RouteSConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -213,19 +213,19 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Attributes_conns != nil {
-		scfg.AttrSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for idx, connID := range *jsnCfg.Attributes_conns {
+	if jsnCfg.AttributeSConns != nil {
+		scfg.AttributeSConns = make([]string, len(*jsnCfg.AttributeSConns))
+		for idx, connID := range *jsnCfg.AttributeSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.AttrSConns[idx] = connID
+			scfg.AttributeSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.AttrSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+				scfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
 			}
 		}
 	}
-	if jsnCfg.Cdrs_conns != nil {
-		scfg.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
-		for idx, connID := range *jsnCfg.Cdrs_conns {
+	if jsnCfg.CDRsConns != nil {
+		scfg.CDRsConns = make([]string, len(*jsnCfg.CDRsConns))
+		for idx, connID := range *jsnCfg.CDRsConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.CDRsConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -233,93 +233,93 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Replication_conns != nil {
-		scfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
-		for idx, connID := range *jsnCfg.Replication_conns {
+	if jsnCfg.ReplicationConns != nil {
+		scfg.ReplicationConns = make([]string, len(*jsnCfg.ReplicationConns))
+		for idx, connID := range *jsnCfg.ReplicationConns {
 			if connID == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal")
 			}
 			scfg.ReplicationConns[idx] = connID
 		}
 	}
-	if jsnCfg.Debit_interval != nil {
-		if scfg.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
+	if jsnCfg.DebitInterval != nil {
+		if scfg.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.DebitInterval); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Store_session_costs != nil {
-		scfg.StoreSCosts = *jsnCfg.Store_session_costs
+	if jsnCfg.StoreSCosts != nil {
+		scfg.StoreSCosts = *jsnCfg.StoreSCosts
 	}
-	if jsnCfg.Session_ttl != nil {
-		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
+	if jsnCfg.SessionTTL != nil {
+		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.SessionTTL); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Session_ttl_max_delay != nil {
+	if jsnCfg.SessionTTLMaxDelay != nil {
 		var maxTTLDelay time.Duration
-		if maxTTLDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
+		if maxTTLDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.SessionTTLMaxDelay); err != nil {
 			return err
 		}
 		scfg.SessionTTLMaxDelay = &maxTTLDelay
 	}
-	if jsnCfg.Session_ttl_last_used != nil {
+	if jsnCfg.SessionTTLLastUsed != nil {
 		var sessionTTLLastUsed time.Duration
-		if sessionTTLLastUsed, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
+		if sessionTTLLastUsed, err = utils.ParseDurationWithNanosecs(*jsnCfg.SessionTTLLastUsed); err != nil {
 			return err
 		}
 		scfg.SessionTTLLastUsed = &sessionTTLLastUsed
 	}
-	if jsnCfg.Session_ttl_usage != nil {
+	if jsnCfg.SessionTTLUsage != nil {
 		var sessionTTLUsage time.Duration
-		if sessionTTLUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_usage); err != nil {
+		if sessionTTLUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.SessionTTLUsage); err != nil {
 			return err
 		}
 		scfg.SessionTTLUsage = &sessionTTLUsage
 	}
-	if jsnCfg.Session_ttl_last_usage != nil {
+	if jsnCfg.SessionTTLLastUsage != nil {
 		var sessionTTLLastUsage time.Duration
-		if sessionTTLLastUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_usage); err != nil {
+		if sessionTTLLastUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.SessionTTLLastUsage); err != nil {
 			return err
 		}
 		scfg.SessionTTLLastUsage = &sessionTTLLastUsage
 	}
-	if jsnCfg.Session_indexes != nil {
-		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.Session_indexes)
+	if jsnCfg.SessionIndexes != nil {
+		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.SessionIndexes)
 	}
-	if jsnCfg.Client_protocol != nil {
-		scfg.ClientProtocol = *jsnCfg.Client_protocol
+	if jsnCfg.ClientProtocol != nil {
+		scfg.ClientProtocol = *jsnCfg.ClientProtocol
 	}
-	if jsnCfg.Channel_sync_interval != nil {
-		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
+	if jsnCfg.ChannelSyncInterval != nil {
+		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.ChannelSyncInterval); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Stale_chan_max_extra_usage != nil {
-		if scfg.StaleChanMaxExtraUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Stale_chan_max_extra_usage); err != nil {
+	if jsnCfg.StaleChanMaxExtraUsage != nil {
+		if scfg.StaleChanMaxExtraUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.StaleChanMaxExtraUsage); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Terminate_attempts != nil {
-		scfg.TerminateAttempts = *jsnCfg.Terminate_attempts
+	if jsnCfg.TerminateAttempts != nil {
+		scfg.TerminateAttempts = *jsnCfg.TerminateAttempts
 	}
-	if jsnCfg.Alterable_fields != nil {
-		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
+	if jsnCfg.AlterableFields != nil {
+		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.AlterableFields)
 	}
-	if jsnCfg.Min_dur_low_balance != nil {
-		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
+	if jsnCfg.MinDurLowBalance != nil {
+		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.MinDurLowBalance); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Default_usage != nil {
-		for k, v := range *jsnCfg.Default_usage {
+	if jsnCfg.DefaultUsage != nil {
+		for k, v := range *jsnCfg.DefaultUsage {
 			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
 			}
 		}
 	}
-	if jsnCfg.Scheduler_conns != nil {
-		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
-		for idx, connID := range *jsnCfg.Scheduler_conns {
+	if jsnCfg.SchedulerConns != nil {
+		scfg.SchedulerConns = make([]string, len(*jsnCfg.SchedulerConns))
+		for idx, connID := range *jsnCfg.SchedulerConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.SchedulerConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -327,8 +327,8 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Backup_interval != nil {
-		if scfg.BackupInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Backup_interval); err != nil {
+	if jsnCfg.BackupInterval != nil {
+		if scfg.BackupInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.BackupInterval); err != nil {
 			return err
 		}
 	}
@@ -354,8 +354,8 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	initialMP = map[string]any{
 		utils.EnabledCfg:                scfg.Enabled,
-		utils.ListenBijsonCfg:           scfg.ListenBijson,
-		utils.ListenBigobCfg:            scfg.ListenBigob,
+		utils.ListenBijsonCfg:           scfg.ListenBiJSON,
+		utils.ListenBigobCfg:            scfg.ListenBiGob,
 		utils.ReplicationConnsCfg:       scfg.ReplicationConns,
 		utils.IPsConnsCfg:               stripInternalConns(scfg.IPsConns),
 		utils.StoreSCostsCfg:            scfg.StoreSCosts,
@@ -419,9 +419,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.RALsConnsCfg] = RALsConns
 	}
-	if scfg.ResSConns != nil {
-		resSConns := make([]string, len(scfg.ResSConns))
-		for i, item := range scfg.ResSConns {
+	if scfg.ResourceSConns != nil {
+		resSConns := make([]string, len(scfg.ResourceSConns))
+		for i, item := range scfg.ResourceSConns {
 			resSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
 				resSConns[i] = utils.MetaInternal
@@ -429,9 +429,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.ResourceSConnsCfg] = resSConns
 	}
-	if scfg.ThreshSConns != nil {
-		threshSConns := make([]string, len(scfg.ThreshSConns))
-		for i, item := range scfg.ThreshSConns {
+	if scfg.ThresholdSConns != nil {
+		threshSConns := make([]string, len(scfg.ThresholdSConns))
+		for i, item := range scfg.ThresholdSConns {
 			threshSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
 				threshSConns[i] = utils.MetaInternal
@@ -459,9 +459,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.RouteSConnsCfg] = routesConns
 	}
-	if scfg.AttrSConns != nil {
-		attrSConns := make([]string, len(scfg.AttrSConns))
-		for i, item := range scfg.AttrSConns {
+	if scfg.AttributeSConns != nil {
+		attrSConns := make([]string, len(scfg.AttributeSConns))
+		for i, item := range scfg.AttributeSConns {
 			attrSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
 				attrSConns[i] = utils.MetaInternal
@@ -500,7 +500,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:                scfg.Enabled,
-		ListenBijson:           scfg.ListenBijson,
+		ListenBiJSON:           scfg.ListenBiJSON,
 		IPsConns:               slices.Clone(scfg.IPsConns),
 		DebitInterval:          scfg.DebitInterval,
 		StoreSCosts:            scfg.StoreSCosts,
@@ -546,13 +546,13 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		cln.RALsConns = make([]string, len(scfg.RALsConns))
 		copy(cln.RALsConns, scfg.RALsConns)
 	}
-	if scfg.ResSConns != nil {
-		cln.ResSConns = make([]string, len(scfg.ResSConns))
-		copy(cln.ResSConns, scfg.ResSConns)
+	if scfg.ResourceSConns != nil {
+		cln.ResourceSConns = make([]string, len(scfg.ResourceSConns))
+		copy(cln.ResourceSConns, scfg.ResourceSConns)
 	}
-	if scfg.ThreshSConns != nil {
-		cln.ThreshSConns = make([]string, len(scfg.ThreshSConns))
-		copy(cln.ThreshSConns, scfg.ThreshSConns)
+	if scfg.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(scfg.ThresholdSConns))
+		copy(cln.ThresholdSConns, scfg.ThresholdSConns)
 	}
 	if scfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(scfg.StatSConns))
@@ -562,9 +562,9 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		cln.RouteSConns = make([]string, len(scfg.RouteSConns))
 		copy(cln.RouteSConns, scfg.RouteSConns)
 	}
-	if scfg.AttrSConns != nil {
-		cln.AttrSConns = make([]string, len(scfg.AttrSConns))
-		copy(cln.AttrSConns, scfg.AttrSConns)
+	if scfg.AttributeSConns != nil {
+		cln.AttributeSConns = make([]string, len(scfg.AttributeSConns))
+		copy(cln.AttributeSConns, scfg.AttributeSConns)
 	}
 	if scfg.CDRsConns != nil {
 		cln.CDRsConns = make([]string, len(scfg.CDRsConns))

@@ -681,7 +681,7 @@ func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	db := NewDataDBService(cfg, cM, false, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	err := db.Start()
 	if err != nil {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
@@ -695,7 +695,7 @@ func TestDataDBStartRalsSCfgErr(t *testing.T) {
 	db := NewDataDBService(cfg, cM, false, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
 	db.cfg.RalsCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.SessionSCfg().ListenBiJSON = ""
 	err := db.Start()
 	if err == nil || err.Error() != "unsupported db_type <badtype>" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "unsupported db_type <badtype>", err)
