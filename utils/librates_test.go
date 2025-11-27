@@ -2586,3 +2586,45 @@ func TestRateSIncrementFieldAsInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestRateProfileSetFilterIDs(t *testing.T) {
+	rp := &RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		Rates: map[string]*Rate{
+			"RT_MIN": {
+				ID:              "RT_MIN",
+				Weights:         DynamicWeights{{Weight: 0}},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*IntervalRate{
+					{
+						IntervalStart: NewDecimal(0, 0),
+						RecurrentFee:  NewDecimal(1, 2),
+					},
+				},
+			},
+		},
+	}
+
+	path := []string{FilterIDs}
+
+	err := rp.Set(path, []string{"*string:~*req.CustomerID:1001"}, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	err = rp.Set(path, []string{"*string:~*req.CustomerID:1001"}, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// even thought they are identical filters, they are both appended
+
+	if len(rp.FilterIDs) != 2 {
+		t.Fatalf("expected 2 duplicated FilterIDs, got %d", len(rp.FilterIDs))
+	}
+
+	if rp.FilterIDs[0] != rp.FilterIDs[1] {
+		t.Fatalf("expected duplicates to be identical, got %#v", rp.FilterIDs)
+	}
+}
