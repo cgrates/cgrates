@@ -35,7 +35,19 @@ func TestSessionBasics(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaRedis:
-		dbcfg = engine.RedisDBCfg
+		dbcfg = engine.DBCfg{
+			DB: &engine.DBParams{
+				DBConns: map[string]engine.DBConn{
+					utils.MetaDefault: {
+						Type: utils.StringPointer(utils.MetaRedis),
+						Host: utils.StringPointer("127.0.0.1"),
+						Port: utils.IntPointer(6379),
+						Name: utils.StringPointer("10"),
+						User: utils.StringPointer(utils.CGRateSLwr),
+					},
+				},
+			},
+		}
 	case utils.MetaMySQL:
 		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
@@ -270,6 +282,46 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 		}
 	}
 
+	checkCDRRedis := func(t *testing.T, cdr *utils.CDR, wantCosts map[string]string) {
+		t.Helper()
+		var got string
+		for costKey, want := range wantCosts {
+			switch costKey {
+			case utils.Abstracts, utils.Concretes:
+				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				var canCast bool
+				got, canCast = cd[costKey].(string)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to string")
+				}
+			case utils.Cost:
+				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				var canCast bool
+				got, canCast = cd[costKey].(string)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to string")
+				}
+			case utils.MetaCost:
+				var canCast bool
+				got, canCast = cdr.Opts[utils.MetaCost].(string)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to string")
+				}
+			default:
+				t.Fatalf("invalid cdr cost key: %q", costKey)
+			}
+			if got != want {
+				t.Errorf("cdr %s = %v, want %v", costKey, got, want)
+			}
+		}
+	}
+
 	// session helpers
 	authEvent := func(t *testing.T, wantUsage, wantErr string) {
 		t.Helper()
@@ -375,14 +427,22 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 
 		// accounting via CostIncrements
 		cdr := processCDR(t, "1001", "1002", "1m30s", utils.MetaAccounts)
-		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+		switch *utils.DBType {
+		case utils.MetaMongo: // field names are lowercase on mongo
 			checkCDRMongo(t, cdr,
 				map[string]float64{
 					"abstracts":    90000000000.0,
 					"concretes":    0.9,
 					utils.MetaCost: 0.9,
 				})
-		} else {
+		case utils.MetaRedis:
+			checkCDRRedis(t, cdr,
+				map[string]string{
+					utils.Abstracts: "90000000000",
+					utils.Concretes: "0.9",
+					utils.MetaCost:  "0.9",
+				})
+		default:
 			checkCDR(t, cdr,
 				map[string]float64{
 					utils.Abstracts: 90000000000.0,
@@ -406,14 +466,22 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts)
-		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+		switch *utils.DBType {
+		case utils.MetaMongo: // field names are lowercase on mongo
 			checkCDRMongo(t, cdr,
 				map[string]float64{
 					"abstracts":    float64(150 * time.Second),
 					"concretes":    2.9,
 					utils.MetaCost: 2.9,
 				})
-		} else {
+		case utils.MetaRedis:
+			checkCDRRedis(t, cdr,
+				map[string]string{
+					utils.Abstracts: "150000000000",
+					utils.Concretes: "2.90",
+					utils.MetaCost:  "2.90",
+				})
+		default:
 			checkCDR(t, cdr,
 				map[string]float64{
 					utils.Abstracts: float64(150 * time.Second),
@@ -436,13 +504,20 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaRates)
-		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+		switch *utils.DBType {
+		case utils.MetaMongo: // field names are lowercase on mongo
 			checkCDRMongo(t, cdr,
 				map[string]float64{
 					"cost":         2.9,
 					utils.MetaCost: 2.9,
 				})
-		} else {
+		case utils.MetaRedis:
+			checkCDRRedis(t, cdr,
+				map[string]string{
+					utils.Cost:     "2.90",
+					utils.MetaCost: "2.90",
+				})
+		default:
 			checkCDR(t, cdr,
 				map[string]float64{
 					utils.Cost:     2.9,
@@ -497,7 +572,8 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts, utils.MetaRates)
-		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+		switch *utils.DBType {
+		case utils.MetaMongo: // field names are lowercase on mongo
 			checkCDRMongo(t, cdr,
 				map[string]float64{
 					"abstracts":    float64(150 * time.Second),
@@ -505,7 +581,15 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 					utils.MetaCost: 1.5,
 					"cost":         2.9,
 				})
-		} else {
+		case utils.MetaRedis:
+			checkCDRRedis(t, cdr,
+				map[string]string{
+					utils.Abstracts: "150000000000",
+					utils.Concretes: "1.5",
+					utils.MetaCost:  "1.5",
+					utils.Cost:      "2.90",
+				})
+		default:
 			checkCDR(t, cdr,
 				map[string]float64{
 					utils.Abstracts: float64(150 * time.Second),

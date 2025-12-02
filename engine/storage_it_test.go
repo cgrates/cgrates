@@ -35,7 +35,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db, err := NewRedisStorage("127.0.0.1:6379", 10, utils.CGRateSLwr,
 		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts,
-		utils.EmptyString, false, 0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
+		utils.EmptyString, false, 0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

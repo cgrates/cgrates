@@ -75,7 +75,7 @@ func TestCDRsIT(t *testing.T) {
 	case utils.MetaInternal:
 		cdrsConfDIR = "cdrsv2internal"
 	case utils.MetaRedis:
-		t.SkipNow()
+		cdrsConfDIR = "cdrsv2redis"
 	case utils.MetaMySQL:
 		cdrsConfDIR = "cdrsv2mysql"
 	case utils.MetaMongo:
