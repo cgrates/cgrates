@@ -139,11 +139,11 @@ func TestDiamConnStats(t *testing.T) {
 
 	initDiamConn := func(originHost, originRealm string) io.Closer {
 		t.Helper()
-		client, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen,
+		client, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address,
 			originHost, originRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 			cfg.DiameterAgentCfg().DictionariesPath,
-			cfg.DiameterAgentCfg().ListenNet)
+			cfg.DiameterAgentCfg().Listeners[0].Network)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -557,11 +557,15 @@ type OsipsConnJsonCfg struct {
 	Reconnects *int
 }
 
+type DiamListenerJsnCfg struct {
+	Address *string `json:"address"`
+	Network *string `json:"network"`
+}
+
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
 	Enabled                 *bool                  `json:"enabled"`
-	Listen                  *string                `json:"listen"`
-	ListenNet               *string                `json:"listen_net"`
+	Listeners               *[]*DiamListenerJsnCfg `json:"listeners"`
 	DictionariesPath        *string                `json:"dictionaries_path"`
 	CeApplications          *[]string              `json:"ce_applications"`
 	SessionSConns           *[]string              `json:"sessions_conns"`

@@ -70,10 +70,10 @@ cgrates.org,DEFAULT,,,*default,*none,0`,
 	client, cfg := ng.Run(b)
 
 	time.Sleep(10 * time.Millisecond) // wait for DiameterAgent service to start
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -210,10 +210,10 @@ cgrates.org,Raw,,,*raw,*constant:*req.RequestType:*none,0`,
 	client, cfg := ng.Run(b)
 
 	time.Sleep(50 * time.Millisecond) // wait for DiameterAgent service to start
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
 	if err != nil {
 		b.Fatal(err)
 	}

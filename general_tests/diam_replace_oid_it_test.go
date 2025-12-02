@@ -97,10 +97,10 @@ cgrates.org,DEFAULT,,,*default,*none,0`,
 	}
 	client, cfg := ng.Run(t)
 
-	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
 	if err != nil {
 		t.Fatal(err)
 	}
