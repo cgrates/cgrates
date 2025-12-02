@@ -97,11 +97,11 @@ func testDiamEmptyCEItStartEngine(t *testing.T) {
 }
 
 func testDiamEmptyCEItConnectDiameterClient(t *testing.T) {
-	diamClntND, err = NewDiameterClient(daCfgND.DiameterAgentCfg().Listen,
+	diamClntND, err = NewDiameterClient(daCfgND.DiameterAgentCfg().Listeners[0].Address,
 		"INTEGRATION_TESTS",
 		daCfgND.DiameterAgentCfg().OriginRealm, daCfgND.DiameterAgentCfg().VendorID,
 		daCfgND.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		daCfgND.DiameterAgentCfg().DictionariesPath, daCfgND.DiameterAgentCfg().ListenNet)
+		daCfgND.DiameterAgentCfg().DictionariesPath, daCfgND.DiameterAgentCfg().Listeners[0].Network)
 	if err.Error() != "missing application" {
 		t.Fatal(err)
 	}

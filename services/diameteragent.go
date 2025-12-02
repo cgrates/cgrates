@@ -55,9 +55,6 @@ type DiameterAgent struct {
 	connMgr *engine.ConnManager
 	caps    *engine.Caps
 
-	lnet  string
-	laddr string
-
 	srvDep map[string]*sync.WaitGroup
 }
 
@@ -83,8 +80,6 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps) error
 			utils.DiameterAgent, err))
 		return err
 	}
-	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
-	da.laddr = da.cfg.DiameterAgentCfg().Listen
 	da.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
 		lnsErr := d.ListenAndServe(da.stopChan)
@@ -99,16 +94,8 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps) error
 
 // Reload handles the change of config
 func (da *DiameterAgent) Reload() (err error) {
-	da.Lock()
-	defer da.Unlock()
-	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
-		da.laddr == da.cfg.DiameterAgentCfg().Listen {
-		return
-	}
-	close(da.stopChan)
-	filterS := <-da.filterSChan
-	da.filterSChan <- filterS
-	return da.start(filterS, da.caps)
+	da.Shutdown()
+	return da.Start()
 }
 
 // Shutdown stops the service

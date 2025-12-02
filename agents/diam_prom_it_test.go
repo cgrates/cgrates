@@ -328,10 +328,10 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 	}
 
 	time.Sleep(500 * time.Millisecond)
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
 	if err != nil {
 		t.Fatal(err)
 	}

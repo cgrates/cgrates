@@ -94,7 +94,6 @@ func TestDiameterAgentReload1(t *testing.T) {
 
 	cfg.DiameterAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
-	diamSrv.(*DiameterAgent).lnet = "bad_lnet_test"
 	err2 := diamSrv.Reload()
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
@@ -156,7 +155,7 @@ func TestDiameterAgentReload3(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, caps, srvDep)
 
-	cfg.DiameterAgentCfg().ListenNet = "bad"
+	cfg.DiameterAgentCfg().Listeners[0].Network = "bad"
 	cfg.DiameterAgentCfg().DictionariesPath = ""
 
 	da := srv.(*DiameterAgent)
