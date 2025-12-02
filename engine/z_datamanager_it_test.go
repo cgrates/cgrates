@@ -56,7 +56,7 @@ func TestDMitinitDB(t *testing.T) {
 			cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false,
 			utils.EmptyString, utils.EmptyString,
-			utils.EmptyString)
+			utils.EmptyString, nil, nil)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
