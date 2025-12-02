@@ -1,0 +1,67 @@
+{
+	"logger": {
+		"level": 7
+	},
+
+
+	"rpc_conns": {
+		"conn1": {
+			"strategy": "*first",
+			"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
+		}
+	},
+
+	"rates": {
+		"enabled": true
+	},
+
+	"cdrs": {
+		"enabled": true,
+		"attributes_conns":["*internal"],
+		"chargers_conns":["conn1"],
+		"rates_conns": ["conn1"],
+		"stats_conns": ["conn1"],
+		"thresholds_conns": ["conn1"],
+	},
+
+	"attributes": {
+		"enabled": true
+	},
+
+	"stats": {
+		"enabled": true,
+		"store_interval": "1s",
+		"thresholds_conns": ["*internal"]
+	},
+
+	"thresholds": {
+		"enabled": true,
+		"actions_conns": ["*localhost"],
+		"store_interval": "1s"
+	},
+
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"]
+	},
+
+	"admins": {
+		"enabled": true,
+	},
+
+	"actions": {
+		"enabled": true
+	},
+
+	"loaders": [
+		{
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+			"tp_out_dir": ""
+		}
+	]
+
+}
