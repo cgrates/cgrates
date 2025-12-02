@@ -7,12 +7,11 @@
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal",
-			"string_indexed_fields": ["*opts.*accounts"],
-			"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
-	}
+			"db_type": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
+			"db_host": "127.0.0.1",
+			"db_port": 6379, 	// db port to reach the database
+			"db_name": "10", 	// db database name to connect to
+			"string_indexed_fields": ["*opts.*accounts"]
 		},
 	}
 },

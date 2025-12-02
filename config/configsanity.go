@@ -1086,15 +1086,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if _, has := cfg.dbCfg.DBConns[val.DBConn]; !has {
 			return fmt.Errorf("item's <%s> dbConn <%v>, does not match any db_conns ID", item, val.DBConn)
 		}
-		storDBTypes := []string{utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo,
-			utils.MetaPostgres, utils.Internal, utils.MySQL, utils.Mongo, utils.Postgres}
-
-		if item == utils.MetaCDRs {
-			if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
-				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
-					storDBTypes[4:], cfg.dbCfg.DBConns[val.DBConn].Type)
-			}
-		}
 		found1RmtConns := false
 		found1RplConns := false
 		for _, dbcfg := range cfg.dbCfg.DBConns {
