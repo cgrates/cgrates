@@ -50,6 +50,7 @@ var (
 	ErrResourceUnauthorized             = errors.New("RESOURCE_UNAUTHORIZED")
 	ErrIPUnavailable                    = errors.New("IP_UNAVAILABLE")
 	ErrIPUnauthorized                   = errors.New("IP_UNAUTHORIZED")
+	ErrIPAlreadyAllocated               = errors.New("IP_ALREADY_ALLOCATED")
 	ErrNoActiveSession                  = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted                = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded                 = errors.New("MAX_USAGE_EXCEEDED")
@@ -109,6 +110,7 @@ var (
 		ErrResourceUnauthorized.Error():             ErrResourceUnauthorized,
 		ErrIPUnavailable.Error():                    ErrIPUnavailable,
 		ErrIPUnauthorized.Error():                   ErrIPUnauthorized,
+		ErrIPAlreadyAllocated.Error():               ErrIPAlreadyAllocated,
 		ErrNoActiveSession.Error():                  ErrNoActiveSession,
 		ErrPartiallyExecuted.Error():                ErrPartiallyExecuted,
 		ErrMaxUsageExceeded.Error():                 ErrMaxUsageExceeded,

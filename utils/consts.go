@@ -53,7 +53,7 @@ var (
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
 		CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups,
 		CacheTimings, CacheResourceProfiles, CacheResources, CacheEventResources,
-		CacheIPProfiles, CacheIPs, CacheEventIPs, CacheStatQueueProfiles,
+		CacheIPProfiles, CacheIPAllocations, CacheEventIPs, CacheStatQueueProfiles,
 		CacheRankingProfiles, CacheRankings, CacheStatQueues, CacheThresholdProfiles,
 		CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheTrendProfiles, CacheTrends, CacheResourceFilterIndexes, CacheIPFilterIndexes,
@@ -90,7 +90,7 @@ var (
 		CacheResourceProfiles:        ResourceProfilesPrefix,
 		CacheResources:               ResourcesPrefix,
 		CacheIPProfiles:              IPProfilesPrefix,
-		CacheIPs:                     IPsPrefix,
+		CacheIPAllocations:           IPAllocationsPrefix,
 		CacheTimings:                 TimingsPrefix,
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
@@ -325,7 +325,7 @@ const (
 	UsersPrefix               = "usr_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
-	IPsPrefix                 = "ips_"
+	IPAllocationsPrefix       = "ips_"
 	IPProfilesPrefix          = "ipp_"
 	ThresholdPrefix           = "thd_"
 	TrendPrefix               = "trd_"
@@ -601,6 +601,7 @@ const (
 	Weight               = "Weight"
 	Limit                = "Limit"
 	UsageTTL             = "UsageTTL"
+	Message              = "Message"
 	AllocationMessage    = "AllocationMessage"
 	Stored               = "Stored"
 	AddressPool          = "AddressPool"
@@ -850,6 +851,7 @@ const (
 	InitS                   = "InitS"
 	TLSNoCaps               = "tls"
 	UsageID                 = "UsageID"
+	AllocationID            = "AllocationID"
 	Replacement             = "Replacement"
 	Regexp                  = "Regexp"
 	Order                   = "Order"
@@ -926,6 +928,14 @@ const (
 	MetaFD                  = "*fd"
 	SortingData             = "SortingData"
 	ProfileID               = "ProfileID"
+	PoolID                  = "PoolID"
+	PoolFilterIDs           = "PoolFilterIDs"
+	PoolType                = "PoolType"
+	PoolRange               = "PoolRange"
+	PoolStrategy            = "PoolStrategy"
+	PoolMessage             = "PoolMessage"
+	PoolWeight              = "PoolWeight"
+	PoolBlocker             = "PoolBlocker"
 	SortedRoutes            = "SortedRoutes"
 	MetaMonthly             = "*monthly"
 	MetaYearly              = "*yearly"
@@ -1134,6 +1144,7 @@ const (
 	MetaActionTriggers      = "*action_triggers"
 	MetaActions             = "*actions"
 	MetaResourceProfile     = "*resource_profiles"
+	MetaIPAllocations       = "*ip_allocations"
 	MetaIPProfiles          = "*ip_profiles"
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
@@ -1148,8 +1159,8 @@ const (
 	MetaThresholds          = "*thresholds"
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
-	MetaResources           = "*resources"
 	MetaIPs                 = "*ips"
+	MetaResources           = "*resources"
 	MetaSessionsBackup      = "*sessions_backup"
 	MetaLoadIDs             = "*load_ids"
 	MetaNodeID              = "*node_id"
@@ -1464,7 +1475,7 @@ const (
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
-	ReplicatorSv1GetIP                   = "ReplicatorSv1.GetIP"
+	ReplicatorSv1GetIPAllocations        = "ReplicatorSv1.GetIPAllocations"
 	ReplicatorSv1GetIPProfile            = "ReplicatorSv1.GetIPProfile"
 	ReplicatorSv1GetActionTriggers       = "ReplicatorSv1.GetActionTriggers"
 	ReplicatorSv1GetSharedGroup          = "ReplicatorSv1.GetSharedGroup"
@@ -1495,7 +1506,7 @@ const (
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
-	ReplicatorSv1SetIP                   = "ReplicatorSv1.SetIP"
+	ReplicatorSv1SetIPAllocations        = "ReplicatorSv1.SetIPAllocations"
 	ReplicatorSv1SetIPProfile            = "ReplicatorSv1.SetIPProfile"
 	ReplicatorSv1SetActionTriggers       = "ReplicatorSv1.SetActionTriggers"
 	ReplicatorSv1SetSharedGroup          = "ReplicatorSv1.SetSharedGroup"
@@ -1526,7 +1537,7 @@ const (
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
-	ReplicatorSv1RemoveIP                = "ReplicatorSv1.RemoveIP"
+	ReplicatorSv1RemoveIPAllocations     = "ReplicatorSv1.RemoveIPAllocations"
 	ReplicatorSv1RemoveIPProfile         = "ReplicatorSv1.RemoveIPProfile"
 	ReplicatorSv1RemoveActionTriggers    = "ReplicatorSv1.RemoveActionTriggers"
 	ReplicatorSv1RemoveSharedGroup       = "ReplicatorSv1.RemoveSharedGroup"
@@ -1936,16 +1947,17 @@ const (
 
 // IPs APIs
 const (
-	IPsV1Ping               = "IPsV1.Ping"
-	IPsV1GetIP              = "IPsV1.GetIP"
-	IPsV1GetIPsForEvent     = "IPsV1.GetIPsForEvent"
-	IPsV1AuthorizeIPs       = "IPsV1.AuthorizeIPs"
-	IPsV1AllocateIPs        = "IPsV1.AllocateIPs"
-	IPsV1ReleaseIPs         = "IPsV1.ReleaseIPs"
-	APIerSv1SetIPProfile    = "APIerSv1.SetIPProfile"
-	APIerSv1RemoveIPProfile = "APIerSv1.RemoveIPProfile"
-	APIerSv1GetIPProfile    = "APIerSv1.GetIPProfile"
-	APIerSv1GetIPProfileIDs = "APIerSv1.GetIPProfileIDs"
+	IPsV1Ping                    = "IPsV1.Ping"
+	IPsV1GetIPAllocations        = "IPsV1.GetIPAllocations"
+	IPsV1GetIPAllocationForEvent = "IPsV1.GetIPAllocationForEvent"
+	IPsV1AuthorizeIP             = "IPsV1.AuthorizeIP"
+	IPsV1AllocateIP              = "IPsV1.AllocateIP"
+	IPsV1ReleaseIP               = "IPsV1.ReleaseIP"
+	IPsV1ClearIPAllocations      = "IPsV1.ClearIPAllocations"
+	APIerSv1SetIPProfile         = "APIerSv1.SetIPProfile"
+	APIerSv1RemoveIPProfile      = "APIerSv1.RemoveIPProfile"
+	APIerSv1GetIPProfile         = "APIerSv1.GetIPProfile"
+	APIerSv1GetIPProfileIDs      = "APIerSv1.GetIPProfileIDs"
 )
 
 // SessionS APIs
@@ -2205,7 +2217,7 @@ const (
 	CacheSharedGroups            = "*shared_groups"
 	CacheResources               = "*resources"
 	CacheResourceProfiles        = "*resource_profiles"
-	CacheIPs                     = "*ips"
+	CacheIPAllocations           = "*ip_allocations"
 	CacheIPProfiles              = "*ip_profiles"
 	CacheTimings                 = "*timings"
 	CacheEventResources          = "*event_resources"
@@ -2914,7 +2926,7 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsRoutesProfileCount, OptsDispatchersProfilesCount, OptsAttributesProfileRuns,
 	OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs, OptsStatsProfileIgnoreFilters,
 	OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters, OptsResourcesUsageID, OptsResourcesUsageTTL,
-	OptsResourcesUnits, OptsIPsUsageID, OptsIPsTTL, OptsIPsUnits, OptsAttributeS, OptsThresholdS, OptsChargerS,
+	OptsResourcesUnits, OptsIPsAllocationID, OptsIPsTTL, OptsAttributeS, OptsThresholdS, OptsChargerS,
 	OptsStatS, OptsRALs, OptsRerate, OptsRefund, MetaAccountID})
 
 // EventExporter metrics
@@ -2960,14 +2972,17 @@ const (
 	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
+
 	// Resources
 	OptsResourcesUsageID  = "*rsUsageID"
 	OptsResourcesUsageTTL = "*rsUsageTTL"
 	OptsResourcesUnits    = "*rsUnits"
+
 	// IPs
-	OptsIPsUsageID = "*ipUsageID"
-	OptsIPsTTL     = "*ipTTL"
-	OptsIPsUnits   = "*ipUnits"
+	OptsIPsAllocationID = "*ipAllocationID"
+	OptsIPsTTL          = "*ipTTL"
+	MetaAllocationID    = "*allocationID"
+
 	// Routes
 	OptsRoutesProfileCount = "*rouProfileCount"
 	OptsRoutesLimit        = "*rouLimit"

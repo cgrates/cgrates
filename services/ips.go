@@ -75,7 +75,7 @@ func (s *IPService) Start() error {
 	}
 	s.srvDep[utils.DataDB].Add(1)
 	<-s.cache.GetPrecacheChannel(utils.CacheIPProfiles)
-	<-s.cache.GetPrecacheChannel(utils.CacheIPs)
+	<-s.cache.GetPrecacheChannel(utils.CacheIPAllocations)
 	<-s.cache.GetPrecacheChannel(utils.CacheIPFilterIndexes)
 
 	fltrs := <-s.fsChan

@@ -38,7 +38,7 @@ type DataDBMock struct {
 	GetIPProfileDrvF          func(tnt, id string) (*IPProfile, error)
 	SetIPProfileDrvF          func(ipp *IPProfile) error
 	RemoveIPProfileDrvF       func(tnt, id string) error
-	SetIPDrvF                 func(ip *IP) error
+	SetIPAllocationsDrvF      func(ip *IPAllocations) error
 	GetStatQueueProfileDrvF   func(tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF   func(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF   func(tenant, id string) (err error)
@@ -304,18 +304,18 @@ func (dbM *DataDBMock) RemoveIPProfileDrv(tnt, id string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIPDrv(string, string) (*IP, error) {
+func (dbM *DataDBMock) GetIPAllocationsDrv(string, string) (*IPAllocations, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetIPDrv(ip *IP) error {
-	if dbM.SetIPDrvF != nil {
-		return dbM.SetIPDrvF(ip)
+func (dbM *DataDBMock) SetIPAllocationsDrv(ip *IPAllocations) error {
+	if dbM.SetIPAllocationsDrvF != nil {
+		return dbM.SetIPAllocationsDrvF(ip)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIPDrv(string, string) error {
+func (dbM *DataDBMock) RemoveIPAllocationsDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 

@@ -127,7 +127,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheIPProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheIPs: {Limit: utils.IntPointer(-1),
+			utils.CacheIPAllocations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheEventIPs: {Limit: utils.IntPointer(-1),
@@ -436,7 +436,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 			},
-			utils.MetaIPs: {
+			utils.MetaIPAllocations: {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),

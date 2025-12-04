@@ -321,7 +321,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (exists boo
 		utils.ActionPrefix, utils.ActionPlanPrefix, utils.AccountPrefix:
 		err = rs.Cmd(&i, redis_EXISTS, category+subject)
 		return i == 1, err
-	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.IPsPrefix,
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.IPAllocationsPrefix,
 		utils.IPProfilesPrefix, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
 		utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix,
 		utils.RouteProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix,
@@ -859,31 +859,31 @@ func (rs *RedisStorage) RemoveIPProfileDrv(tenant, id string) error {
 	return rs.Cmd(nil, redis_DEL, utils.IPProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetIPDrv(tenant, id string) (*IP, error) {
+func (rs *RedisStorage) GetIPAllocationsDrv(tenant, id string) (*IPAllocations, error) {
 	var values []byte
-	if err := rs.Cmd(&values, redis_GET, utils.IPsPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+	if err := rs.Cmd(&values, redis_GET, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return nil, err
 	}
 	if len(values) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	var ip *IP
+	var ip *IPAllocations
 	if err := rs.ms.Unmarshal(values, &ip); err != nil {
 		return nil, err
 	}
 	return ip, nil
 }
 
-func (rs *RedisStorage) SetIPDrv(ip *IP) error {
+func (rs *RedisStorage) SetIPAllocationsDrv(ip *IPAllocations) error {
 	result, err := rs.ms.Marshal(ip)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd(nil, redis_SET, utils.IPsPrefix+ip.TenantID(), string(result))
+	return rs.Cmd(nil, redis_SET, utils.IPAllocationsPrefix+ip.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveIPDrv(tenant, id string) error {
-	return rs.Cmd(nil, redis_DEL, utils.IPsPrefix+utils.ConcatenatedKey(tenant, id))
+func (rs *RedisStorage) RemoveIPAllocationsDrv(tenant, id string) error {
+	return rs.Cmd(nil, redis_DEL, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {

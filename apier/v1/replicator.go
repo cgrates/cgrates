@@ -218,10 +218,10 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *uti
 	return nil
 }
 
-// GetIP is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
-	engine.UpdateReplicationFilters(utils.IPsPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetIPDrv(tntID.Tenant, tntID.ID)
+// GetIPAllocations is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetIPAllocations(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) error {
+	engine.UpdateReplicationFilters(utils.IPAllocationsPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetIPAllocationsDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -632,13 +632,13 @@ func (rplSv1 *ReplicatorSv1) SetIPProfile(ctx *context.Context, ipp *engine.IPPr
 	return
 }
 
-// SetIP is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetIP(ctx *context.Context, ip *engine.IPWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetIPDrv(ip.IP); err != nil {
+// SetIPAllocations is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetIPAllocations(ctx *context.Context, ip *engine.IPAllocationsWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetIPAllocationsDrv(ip.IPAllocations); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ip.APIOpts[utils.CacheOpt]),
-		ip.Tenant, utils.CacheIPs, ip.TenantID(), utils.EmptyString, nil, nil, ip.APIOpts); err != nil {
+		ip.Tenant, utils.CacheIPAllocations, ip.TenantID(), utils.EmptyString, nil, nil, ip.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1073,13 +1073,13 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *u
 	return
 }
 
-// RemoveIP is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveIPDrv(args.Tenant, args.ID); err != nil {
+// RemoveIPAllocations is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveIPAllocationsDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheIPs, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheIPAllocations, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

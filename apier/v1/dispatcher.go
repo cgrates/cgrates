@@ -429,29 +429,34 @@ func (dRs *DispatcherIPsV1) Ping(ctx *context.Context, args *utils.CGREvent, rep
 	return dRs.dRs.IPsV1Ping(ctx, args, reply)
 }
 
-// GetIPsForEvent implements IPsV1GetIPsForEvent
-func (dRs *DispatcherIPsV1) GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
-	reply *engine.IPs) error {
-	return dRs.dRs.IPsV1GetIPsForEvent(ctx, args, reply)
+// GetIPAllocationForEvent implements IPsV1GetIPAllocationForEvent
+func (dRs *DispatcherIPsV1) GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.IPAllocations) error {
+	return dRs.dRs.IPsV1GetIPAllocationForEvent(ctx, args, reply)
 }
 
-func (dRs *DispatcherIPsV1) GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
-	return dRs.dRs.IPsV1GetIP(ctx, args, reply)
+func (dRs *DispatcherIPsV1) GetIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) error {
+	return dRs.dRs.IPsV1GetIPAllocations(ctx, args, reply)
 }
 
-func (dRs *DispatcherIPsV1) AuthorizeIPs(ctx *context.Context, args *utils.CGREvent,
+func (dRs *DispatcherIPsV1) AuthorizeIP(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.AllocatedIP) error {
+	return dRs.dRs.IPsV1AuthorizeIP(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) AllocateIP(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.AllocatedIP) error {
+	return dRs.dRs.IPsV1AllocateIP(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) ReleaseIP(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.IPsV1AuthorizeIPs(ctx, args, reply)
+	return dRs.dRs.IPsV1ReleaseIP(ctx, args, reply)
 }
 
-func (dRs *DispatcherIPsV1) AllocateIPs(ctx *context.Context, args *utils.CGREvent,
+func (dRs *DispatcherIPsV1) ClearIPAllocations(ctx *context.Context, args *engine.ClearIPAllocationsArgs,
 	reply *string) error {
-	return dRs.dRs.IPsV1AllocateIPs(ctx, args, reply)
-}
-
-func (dRs *DispatcherIPsV1) ReleaseIPs(ctx *context.Context, args *utils.CGREvent,
-	reply *string) error {
-	return dRs.dRs.IPsV1ReleaseIPs(ctx, args, reply)
+	return dRs.dRs.IPsV1ClearIPAllocations(ctx, args, reply)
 }
 
 func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {
@@ -1171,9 +1176,9 @@ func (dS *DispatcherReplicatorSv1) GetResourceProfile(ctx *context.Context, tntI
 	return dS.dS.ReplicatorSv1GetResourceProfile(ctx, tntID, reply)
 }
 
-// GetIP
-func (dS *DispatcherReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
-	return dS.dS.ReplicatorSv1GetIP(ctx, tntID, reply)
+// GetIPAllocations
+func (dS *DispatcherReplicatorSv1) GetIPAllocations(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) error {
+	return dS.dS.ReplicatorSv1GetIPAllocations(ctx, tntID, reply)
 }
 
 // GetIPProfile
@@ -1308,9 +1313,9 @@ func (dS *DispatcherReplicatorSv1) SetResourceProfile(ctx *context.Context, args
 	return dS.dS.ReplicatorSv1SetResourceProfile(ctx, args, reply)
 }
 
-// SetIP
-func (dS *DispatcherReplicatorSv1) SetIP(ctx *context.Context, args *engine.IPWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetIP(ctx, args, reply)
+// SetIPAllocations
+func (dS *DispatcherReplicatorSv1) SetIPAllocations(ctx *context.Context, args *engine.IPAllocationsWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetIPAllocations(ctx, args, reply)
 }
 
 // SetIPProfile
@@ -1433,9 +1438,9 @@ func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(ctx *context.Context, a
 	return dS.dS.ReplicatorSv1RemoveResourceProfile(ctx, args, reply)
 }
 
-// RemoveIP
-func (dS *DispatcherReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveIP(ctx, args, reply)
+// RemoveIPAllocations
+func (dS *DispatcherReplicatorSv1) RemoveIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveIPAllocations(ctx, args, reply)
 }
 
 // RemoveIPProfile

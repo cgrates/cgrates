@@ -268,11 +268,16 @@ type IPMdl struct {
 	FilterIDs          string  `index:"2" re:".*"`
 	ActivationInterval string  `index:"3" re:".*"`
 	TTL                string  `index:"4" re:".*"`
-	Type               string  `index:"5" re:".*"`
-	AddressPool        string  `index:"6" re:".*"`
-	Allocation         string  `index:"7" re:".*"`
-	Stored             bool    `index:"8" re:".*"`
-	Weight             float64 `index:"9" re:".*"`
+	Stored             bool    `index:"5" re:".*"`
+	Weight             float64 `index:"6" re:".*"`
+	PoolID             string  `index:"7" re:".*"`
+	PoolFilterIDs      string  `index:"8" re:".*"`
+	PoolType           string  `index:"9" re:".*"`
+	PoolRange          string  `index:"10" re:".*"`
+	PoolStrategy       string  `index:"11" re:".*"`
+	PoolMessage        string  `index:"12" re:".*"`
+	PoolWeight         float64 `index:"13" re:".*"`
+	PoolBlocker        bool    `index:"14" re:".*"`
 	CreatedAt          time.Time
 }
 

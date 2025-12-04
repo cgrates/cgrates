@@ -377,7 +377,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				cacheArgs[utils.CacheIPProfiles] = ids
-				cacheArgs[utils.CacheIPs] = ids
+				cacheArgs[utils.CacheIPAllocations] = ids
 			}
 		}
 	case utils.MetaFilters:

@@ -89,9 +89,9 @@ type DataDB interface {
 	GetIPProfileDrv(string, string) (*IPProfile, error)
 	SetIPProfileDrv(*IPProfile) error
 	RemoveIPProfileDrv(string, string) error
-	GetIPDrv(string, string) (*IP, error)
-	SetIPDrv(*IP) error
-	RemoveIPDrv(string, string) error
+	GetIPAllocationsDrv(string, string) (*IPAllocations, error)
+	SetIPAllocationsDrv(*IPAllocations) error
+	RemoveIPAllocationsDrv(string, string) error
 	GetTimingDrv(string) (*utils.TPTiming, error)
 	SetTimingDrv(*utils.TPTiming) error
 	RemoveTimingDrv(string) error
