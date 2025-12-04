@@ -370,8 +370,12 @@ type EventExporterOptsJson struct {
 	AWSSecret                   *string           `json:"awsSecret"`
 	AWSToken                    *string           `json:"awsToken"`
 	SQSQueueID                  *string           `json:"sqsQueueID"`
+	SQSForcePathStyle           *bool             `json:"sqsForcePathStyle"`
+	SQSSkipTlsVerify            *bool             `json:"sqsSkipTlsVerify"`
 	S3BucketID                  *string           `json:"s3BucketID"`
 	S3FolderPath                *string           `json:"s3FolderPath"`
+	S3ForcePathStyle            *bool             `json:"s3ForcePathStyle"`
+	S3SkipTlsVerify             *bool             `json:"s3SkipTlsVerify"`
 	NATSJetStream               *bool             `json:"natsJetStream"`
 	NATSSubject                 *string           `json:"natsSubject"`
 	NATSJWTFile                 *string           `json:"natsJWTFile"`

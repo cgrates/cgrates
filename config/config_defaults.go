@@ -627,10 +627,14 @@ const CGRATES_CFG_JSON = `
 
 				//SQS
 				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS exporters from were the events are exported
+				// "sqsForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
+				// "sqsSkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// S3
 				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from where the events that are  exported
 				// "s3FolderPath": "",			// S3FolderPath 
+				// "s3ForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
+				// "s3SkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// Nats
 				// "natsJetStream": false,		// controls if the nats poster uses the JetStream

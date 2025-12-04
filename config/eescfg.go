@@ -221,13 +221,17 @@ type AMQPOpts struct {
 }
 
 type AWSOpts struct {
-	Region       *string
-	Key          *string
-	Secret       *string
-	Token        *string
-	SQSQueueID   *string
-	S3BucketID   *string
-	S3FolderPath *string
+	Region            *string
+	Key               *string
+	Secret            *string
+	Token             *string
+	SQSQueueID        *string
+	SQSForcePathStyle *bool
+	SQSSkipTlsVerify  *bool
+	S3BucketID        *string
+	S3FolderPath      *string
+	S3ForcePathStyle  *bool
+	S3SkipTlsVerify   *bool
 }
 
 type NATSOpts struct {
@@ -484,11 +488,23 @@ func (awsOpts *AWSOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	if jsnCfg.SQSQueueID != nil {
 		awsOpts.SQSQueueID = jsnCfg.SQSQueueID
 	}
+	if jsnCfg.SQSForcePathStyle != nil {
+		awsOpts.SQSForcePathStyle = jsnCfg.SQSForcePathStyle
+	}
+	if jsnCfg.SQSSkipTlsVerify != nil {
+		awsOpts.SQSSkipTlsVerify = jsnCfg.SQSSkipTlsVerify
+	}
 	if jsnCfg.S3BucketID != nil {
 		awsOpts.S3BucketID = jsnCfg.S3BucketID
 	}
 	if jsnCfg.S3FolderPath != nil {
 		awsOpts.S3FolderPath = jsnCfg.S3FolderPath
+	}
+	if jsnCfg.S3ForcePathStyle != nil {
+		awsOpts.S3ForcePathStyle = jsnCfg.S3ForcePathStyle
+	}
+	if jsnCfg.S3SkipTlsVerify != nil {
+		awsOpts.S3SkipTlsVerify = jsnCfg.S3SkipTlsVerify
 	}
 	return
 }
@@ -907,6 +923,14 @@ func (awsOpts *AWSOpts) Clone() *AWSOpts {
 		cln.SQSQueueID = new(string)
 		*cln.SQSQueueID = *awsOpts.SQSQueueID
 	}
+	if awsOpts.SQSForcePathStyle != nil {
+		cln.SQSForcePathStyle = new(bool)
+		*cln.SQSForcePathStyle = *awsOpts.SQSForcePathStyle
+	}
+	if awsOpts.SQSSkipTlsVerify != nil {
+		cln.SQSSkipTlsVerify = new(bool)
+		*cln.SQSSkipTlsVerify = *awsOpts.SQSSkipTlsVerify
+	}
 	if awsOpts.S3BucketID != nil {
 		cln.S3BucketID = new(string)
 		*cln.S3BucketID = *awsOpts.S3BucketID
@@ -914,6 +938,14 @@ func (awsOpts *AWSOpts) Clone() *AWSOpts {
 	if awsOpts.S3FolderPath != nil {
 		cln.S3FolderPath = new(string)
 		*cln.S3FolderPath = *awsOpts.S3FolderPath
+	}
+	if awsOpts.S3ForcePathStyle != nil {
+		cln.S3ForcePathStyle = new(bool)
+		*cln.S3ForcePathStyle = *awsOpts.S3ForcePathStyle
+	}
+	if awsOpts.S3SkipTlsVerify != nil {
+		cln.S3SkipTlsVerify = new(bool)
+		*cln.S3SkipTlsVerify = *awsOpts.S3SkipTlsVerify
 	}
 	return cln
 }
@@ -1233,11 +1265,23 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		if awsOpts.SQSQueueID != nil {
 			opts[utils.SQSQueueID] = *awsOpts.SQSQueueID
 		}
+		if awsOpts.SQSForcePathStyle != nil {
+			opts[utils.SQSForcePathStyle] = *awsOpts.SQSForcePathStyle
+		}
+		if awsOpts.SQSSkipTlsVerify != nil {
+			opts[utils.SQSSkipTlsVerify] = *awsOpts.SQSSkipTlsVerify
+		}
 		if awsOpts.S3BucketID != nil {
 			opts[utils.S3Bucket] = *awsOpts.S3BucketID
 		}
 		if awsOpts.S3FolderPath != nil {
 			opts[utils.S3FolderPath] = *awsOpts.S3FolderPath
+		}
+		if awsOpts.S3ForcePathStyle != nil {
+			opts[utils.S3ForcePathStyle] = *awsOpts.S3ForcePathStyle
+		}
+		if awsOpts.S3SkipTlsVerify != nil {
+			opts[utils.S3SkipTlsVerify] = *awsOpts.S3SkipTlsVerify
 		}
 	}
 	if natOpts := eeC.Opts.NATS; natOpts != nil {

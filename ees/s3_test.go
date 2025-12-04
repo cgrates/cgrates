@@ -66,25 +66,31 @@ func TestParseOptsAllFieldsSet(t *testing.T) {
 	key := "id"
 	secret := "key"
 	token := "token"
+	fps := true
+	stv := true
 
 	opts := &config.EventExporterOpts{
 		AWS: &config.AWSOpts{
-			S3BucketID:   &bucketID,
-			S3FolderPath: &folderPath,
-			Region:       &region,
-			Key:          &key,
-			Secret:       &secret,
-			Token:        &token,
+			S3BucketID:       &bucketID,
+			S3FolderPath:     &folderPath,
+			Region:           &region,
+			Key:              &key,
+			Secret:           &secret,
+			Token:            &token,
+			S3ForcePathStyle: &fps,
+			S3SkipTlsVerify:  &stv,
 		},
 	}
 
 	expected := S3EE{
-		bucket:     bucketID,
-		folderPath: folderPath,
-		awsRegion:  region,
-		awsID:      key,
-		awsKey:     secret,
-		awsToken:   token,
+		bucket:         bucketID,
+		folderPath:     folderPath,
+		awsRegion:      region,
+		awsID:          key,
+		awsKey:         secret,
+		awsToken:       token,
+		forcePathStyle: true,
+		skipTlsVerify:  true,
 	}
 
 	s3ee := &S3EE{}
@@ -106,5 +112,11 @@ func TestParseOptsAllFieldsSet(t *testing.T) {
 	}
 	if s3ee.awsToken != expected.awsToken {
 		t.Errorf("Expected awsToken %s, got %s", expected.awsToken, s3ee.awsToken)
+	}
+	if s3ee.forcePathStyle != expected.forcePathStyle {
+		t.Errorf("Expected forcePathStyle %v, got %v", expected.forcePathStyle, s3ee.forcePathStyle)
+	}
+	if s3ee.skipTlsVerify != expected.skipTlsVerify {
+		t.Errorf("Expected skipTLSVerify %v, got %v", expected.skipTlsVerify, s3ee.skipTlsVerify)
 	}
 }
