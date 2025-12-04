@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"net/http"
 	"path"
 	"testing"
 	"time"
@@ -181,6 +183,115 @@ func testS3VerifyExport(t *testing.T) {
 	}
 
 	expected := `{"Account":"1001","CGRID":"ea1f1968cc207859672c332364fc7614c86b04c5","Category":"call","Destination":"1002","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","Subject":"1001","Tenant":"AnotherTenant","ToR":"*data"}`
+	if rply := string(file.Bytes()); rply != expected {
+		t.Errorf("Expected: %q, received: %q", expected, rply)
+	}
+}
+
+var (
+	runS3NuantixTest = flag.Bool("nuantix", false, "Run the integration test for the S3 exporter from Nuantix")
+
+	sTestsS3Nuantix = []func(t *testing.T){
+		testS3LoadConfig,
+		testS3ResetDataDB,
+		testS3ResetStorDb,
+		testS3StartEngine,
+		testS3RPCConn,
+		testS3NuantixExportEvent,
+		testS3NuantixVerifyExport,
+		testStopCgrEngine,
+	}
+)
+
+func TestS3ExportNuantix(t *testing.T) {
+	if !*runS3NuantixTest {
+		t.SkipNow()
+	}
+	s3ConfDir = "ees_cloud"
+	for _, stest := range sTestsS3Nuantix {
+		t.Run(s3ConfDir, stest)
+	}
+}
+
+func testS3NuantixExportEvent(t *testing.T) {
+	cgrID = utils.Sha1("abcdefg", time.Unix(1383813745, 0).UTC().String())
+	t.Log(cgrID)
+	ev := &engine.CGREventWithEeIDs{
+		EeIDs: []string{"s3_nuantix_test_file"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "dataEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]any{
+				utils.CGRID:        cgrID,
+				utils.ToR:          utils.MetaData,
+				utils.OriginID:     "abcdefg",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "AnotherTenant",
+				utils.Category:     "call", //for data CDR use different Tenant
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        10 * time.Nanosecond,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         0.012,
+			},
+		},
+	}
+
+	var reply map[string]utils.MapStorage
+	if err := s3RPC.Call(context.Background(), utils.EeSv1ProcessEvent, ev, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(2 * time.Second)
+}
+
+func testS3NuantixVerifyExport(t *testing.T) {
+	endpoint := "s3.eu-central-1.amazonaws.com"
+	region := "eu-central-1"
+	qname := "cgrates-cdrs"
+
+	key := fmt.Sprintf("%s/%s:%s.json", "", cgrID, utils.MetaDefault)
+
+	var sess *session.Session
+	cfg := aws.Config{Endpoint: aws.String(endpoint)}
+	cfg.Region = aws.String(region)
+
+	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	var err error
+	cfg.S3ForcePathStyle = aws.Bool(true)
+	cfg.HTTPClient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	sess, err = session.NewSessionWithOptions(
+		session.Options{
+			Config: cfg,
+		},
+	)
+	if err != nil {
+		t.Error(err)
+	}
+	s3Clnt := s3.New(sess)
+	s3Clnt.DeleteObject(&s3.DeleteObjectInput{})
+	file := aws.NewWriteAtBuffer([]byte{})
+	svc := s3manager.NewDownloader(sess)
+
+	if _, err = svc.Download(file,
+		&s3.GetObjectInput{
+			Bucket: aws.String(qname),
+			Key:    aws.String(key),
+		}); err != nil {
+		t.Fatalf("Unable to download item %v", err)
+	}
+
+	expected := `{"Account":"1001","CGRID":"5a5ff7c40039976e1c2bd303dee45983267f6ed2","Category":"call","Destination":"1002","OriginID":"abcdefg","RequestType":"*rated","RunID":"*default","Subject":"1001","Tenant":"AnotherTenant","ToR":"*data"}`
 	if rply := string(file.Bytes()); rply != expected {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}
