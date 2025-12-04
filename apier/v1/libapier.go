@@ -81,7 +81,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID, group
 		case utils.CacheResourceProfiles:
 			cacheIDs = append(cacheIDs, utils.CacheResources)
 		case utils.CacheIPProfiles:
-			cacheIDs = append(cacheIDs, utils.CacheIPs)
+			cacheIDs = append(cacheIDs, utils.CacheIPAllocations)
 		case utils.CacheStatQueueProfiles:
 			cacheIDs = append(cacheIDs, utils.CacheStatQueues)
 		}
@@ -107,7 +107,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	case utils.CacheResourceProfiles:
 		argCache[utils.CacheResources] = []string{itemID}
 	case utils.CacheIPProfiles:
-		argCache[utils.CacheIPs] = []string{itemID}
+		argCache[utils.CacheIPAllocations] = []string{itemID}
 	case utils.CacheStatQueueProfiles:
 		argCache[utils.CacheStatQueues] = []string{itemID}
 	}

@@ -126,7 +126,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaIPProfiles:          {Limit: -1},
 			utils.MetaStatQueues:          {Limit: -1},
 			utils.MetaResources:           {Limit: -1},
-			utils.MetaIPs:                 {Limit: -1},
+			utils.MetaIPAllocations:       {Limit: -1},
 			utils.MetaStatQueueProfiles:   {Limit: -1},
 			utils.MetaRankings:            {Limit: -1},
 			utils.MetaRankingProfiles:     {Limit: -1},

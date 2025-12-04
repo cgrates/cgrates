@@ -58,7 +58,7 @@ func TestGetDefaultEmptyCacheStats(t *testing.T) {
 		utils.CacheResources,
 		utils.CacheIPFilterIndexes,
 		utils.CacheIPProfiles,
-		utils.CacheIPs,
+		utils.CacheIPAllocations,
 		utils.CacheReverseDestinations,
 		utils.CacheRPCResponses,
 		utils.CacheSharedGroups,

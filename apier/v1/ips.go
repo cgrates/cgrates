@@ -27,37 +27,45 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewIPsV1(rls *engine.IPService) *IPsV1 {
-	return &IPsV1{rls: rls}
+// NewIPsV1 initializes the IPSv1 object.
+func NewIPsV1(ipS *engine.IPService) *IPsV1 {
+	return &IPsV1{ips: ipS}
 }
 
+// IPsV1 represents the RPC object to register for ips v1 APIs.
 type IPsV1 struct {
-	rls *engine.IPService
+	ips *engine.IPService
 }
 
-// GetIPsForEvent returns IPs matching a specific event.
-func (ip *IPsV1) GetIPsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.IPs) error {
-	return ip.rls.V1GetIPsForEvent(ctx, args, reply)
+// GetIPAllocationForEvent returns the IPAllocations object matching the event.
+func (s *IPsV1) GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.IPAllocations) error {
+	return s.ips.V1GetIPAllocationForEvent(ctx, args, reply)
 }
 
-// AuthorizeIPs checks if there are limits imposed for event.
-func (ip *IPsV1) AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return ip.rls.V1AuthorizeIPs(ctx, args, reply)
+// AuthorizeIP checks if it's able to allocate an IP address for the given event.
+func (s *IPsV1) AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *engine.AllocatedIP) error {
+	return s.ips.V1AuthorizeIP(ctx, args, reply)
 }
 
-// AllocateIPs records usage for an event.
-func (ip *IPsV1) AllocateIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return ip.rls.V1AllocateIPs(ctx, args, reply)
+// AllocateIP allocates an IP address for the given event.
+func (s *IPsV1) AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *engine.AllocatedIP) error {
+	return s.ips.V1AllocateIP(ctx, args, reply)
 }
 
-// V1TerminateIPUsage releases usage for an event
-func (ip *IPsV1) ReleaseIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return ip.rls.V1ReleaseIPs(ctx, args, reply)
+// ReleaseIP releases an allocated IP address for the given event.
+func (s *IPsV1) ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return s.ips.V1ReleaseIP(ctx, args, reply)
 }
 
-// GetIP retrieves the specified IP from data_db.
-func (ip *IPsV1) GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
-	return ip.rls.V1GetIP(ctx, args, reply)
+// GetIPAllocations returns all IP allocations for a tenantID.
+func (s *IPsV1) GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) error {
+	return s.ips.V1GetIPAllocations(ctx, arg, reply)
+}
+
+// ClearIPAllocations clears IP allocations from an IPAllocations object.
+// If args.AllocationIDs is empty or nil, all allocations will be cleared.
+func (s *IPsV1) ClearIPAllocations(ctx *context.Context, arg *engine.ClearIPAllocationsArgs, reply *string) error {
+	return s.ips.V1ClearIPAllocations(ctx, arg, reply)
 }
 
 // GetIPProfile retrieves the specificed IPProfile from data_db.
@@ -115,7 +123,7 @@ func (a *APIerSv1) SetIPProfile(ctx *context.Context, arg *engine.IPProfileWithA
 	loadID := time.Now().UnixNano()
 	if err = a.DataManager.SetLoadIDs(
 		map[string]int64{utils.CacheIPProfiles: loadID,
-			utils.CacheIPs: loadID}); err != nil {
+			utils.CacheIPAllocations: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	// delay if needed before cache call
@@ -157,7 +165,7 @@ func (a *APIerSv1) RemoveIPProfile(ctx *context.Context, arg *utils.TenantIDWith
 	//generate a loadID for CacheIPProfiles and CacheIPs and store it in database
 	//make 1 insert for both IPProfile and IPs instead of 2
 	loadID := time.Now().UnixNano()
-	if err := a.DataManager.SetLoadIDs(map[string]int64{utils.CacheIPProfiles: loadID, utils.CacheIPs: loadID}); err != nil {
+	if err := a.DataManager.SetLoadIDs(map[string]int64{utils.CacheIPProfiles: loadID, utils.CacheIPAllocations: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

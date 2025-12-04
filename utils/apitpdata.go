@@ -1422,6 +1422,35 @@ func (trp *TPResourceProfile) CacheClone() any {
 	return trp.Clone()
 }
 
+// TPIPPool is used in TPIPProfile
+type TPIPPool struct {
+	ID        string
+	FilterIDs []string
+	Type      string
+	Range     string
+	Strategy  string
+	Message   string
+	Weight    float64
+	Blocker   bool
+}
+
+// Clone method for TPIPPool
+func (p *TPIPPool) Clone() *TPIPPool {
+	if p == nil {
+		return nil
+	}
+	return &TPIPPool{
+		ID:        p.ID,
+		FilterIDs: slices.Clone(p.FilterIDs),
+		Type:      p.Type,
+		Range:     p.Range,
+		Strategy:  p.Strategy,
+		Message:   p.Message,
+		Weight:    p.Weight,
+		Blocker:   p.Blocker,
+	}
+}
+
 // TPIPProfile is used in APIs to manage remotely offline IPProfile
 type TPIPProfile struct {
 	TPid               string
@@ -1430,17 +1459,19 @@ type TPIPProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
 	TTL                string
-	Type               string
-	AddressPool        string
-	Allocation         string
 	Stored             bool
 	Weight             float64
+	Pools              []*TPIPPool
 }
 
 // Clone method for TPIPProfile
 func (tp *TPIPProfile) Clone() *TPIPProfile {
 	if tp == nil {
 		return nil
+	}
+	pools := make([]*TPIPPool, len(tp.Pools))
+	for i, pool := range tp.Pools {
+		pools[i] = pool.Clone()
 	}
 	return &TPIPProfile{
 		TPid:               tp.TPid,
@@ -1451,6 +1482,7 @@ func (tp *TPIPProfile) Clone() *TPIPProfile {
 		TTL:                tp.TTL,
 		Stored:             tp.Stored,
 		Weight:             tp.Weight,
+		Pools:              pools,
 	}
 }
 
@@ -2396,7 +2428,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		ResourceProfileIDs:       arg[CacheResourceProfiles],
 		ResourceIDs:              arg[CacheResources],
 		IPProfileIDs:             arg[CacheIPProfiles],
-		IPIDs:                    arg[CacheIPs],
+		IPIDs:                    arg[CacheIPAllocations],
 		StatsQueueIDs:            arg[CacheStatQueues],
 		StatsQueueProfileIDs:     arg[CacheStatQueueProfiles],
 		RankingIDs:               arg[CacheRankings],
@@ -2482,7 +2514,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheResourceProfiles:        a.ResourceProfileIDs,
 		CacheResources:               a.ResourceIDs,
 		CacheIPProfiles:              a.IPProfileIDs,
-		CacheIPs:                     a.IPIDs,
+		CacheIPAllocations:           a.IPIDs,
 		CacheStatQueues:              a.StatsQueueIDs,
 		CacheStatQueueProfiles:       a.StatsQueueProfileIDs,
 		CacheThresholds:              a.ThresholdIDs,

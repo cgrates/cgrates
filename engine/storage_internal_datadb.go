@@ -216,7 +216,7 @@ func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error
 	case utils.DestinationPrefix, utils.RatingPlanPrefix, utils.RatingProfilePrefix,
 		utils.ActionPrefix, utils.ActionPlanPrefix, utils.AccountPrefix:
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], subject), nil
-	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.IPsPrefix,
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.IPAllocationsPrefix,
 		utils.IPProfilesPrefix, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
 		utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix,
 		utils.RouteProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix,
@@ -553,21 +553,21 @@ func (iDB *InternalDB) RemoveIPProfileDrv(tenant, id string) error {
 	return nil
 }
 
-func (iDB *InternalDB) GetIPDrv(tenant, id string) (*IP, error) {
-	if x, ok := iDB.db.Get(utils.CacheIPs, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
-		return x.(*IP), nil
+func (iDB *InternalDB) GetIPAllocationsDrv(tenant, id string) (*IPAllocations, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*IPAllocations), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetIPDrv(ip *IP) error {
-	iDB.db.Set(utils.CacheIPs, ip.TenantID(), ip, nil,
+func (iDB *InternalDB) SetIPAllocationsDrv(ip *IPAllocations) error {
+	iDB.db.Set(utils.CacheIPAllocations, ip.TenantID(), ip, nil,
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemoveIPDrv(tenant, id string) error {
-	iDB.db.Remove(utils.CacheIPs, utils.ConcatenatedKey(tenant, id),
+func (iDB *InternalDB) RemoveIPAllocationsDrv(tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return nil
 }

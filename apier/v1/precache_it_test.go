@@ -195,7 +195,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheResourceProfiles:    {Items: 3},
 		utils.CacheResources:           {Items: 3},
 		utils.CacheIPProfiles:          {},
-		utils.CacheIPs:                 {},
+		utils.CacheIPAllocations:       {},
 		utils.CacheReverseDestinations: {Items: 7},
 		utils.CacheRPCResponses:        {},
 		utils.MetaSentryPeer:           {},

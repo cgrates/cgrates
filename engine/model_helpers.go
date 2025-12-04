@@ -1238,63 +1238,98 @@ func (tps IPMdls) CSVHeader() []string {
 		utils.FilterIDs,
 		utils.ActivationIntervalString,
 		utils.TTL,
-		utils.Limit,
-		utils.AllocationMessage,
-		utils.Type,
-		utils.AddressPool,
-		utils.Allocation,
-		utils.Blocker,
 		utils.Stored,
 		utils.Weight,
+		utils.PoolID,
+		utils.PoolFilterIDs,
+		utils.PoolType,
+		utils.PoolRange,
+		utils.PoolStrategy,
+		utils.PoolMessage,
+		utils.PoolWeight,
+		utils.PoolBlocker,
 	}
 }
 
 func (tps IPMdls) AsTPIPs() []*utils.TPIPProfile {
-	mrl := make(map[string]*utils.TPIPProfile)
 	filterMap := make(map[string]utils.StringSet)
-	for _, tp := range tps {
-		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
-		rl, found := mrl[tenID]
+	mst := make(map[string]*utils.TPIPProfile)
+	poolMap := make(map[string]map[string]*utils.TPIPPool)
+	for _, mdl := range tps {
+		tenID := (&utils.TenantID{Tenant: mdl.Tenant, ID: mdl.ID}).TenantID()
+		tpip, found := mst[tenID]
 		if !found {
-			rl = &utils.TPIPProfile{
-				TPid:        tp.Tpid,
-				Tenant:      tp.Tenant,
-				ID:          tp.ID,
-				Stored:      tp.Stored,
-				Type:        tp.Type,
-				AddressPool: tp.AddressPool,
-				Allocation:  tp.Allocation,
+			tpip = &utils.TPIPProfile{
+				TPid:   mdl.Tpid,
+				Tenant: mdl.Tenant,
+				ID:     mdl.ID,
+				Stored: mdl.Stored,
 			}
 		}
-		if tp.TTL != utils.EmptyString {
-			rl.TTL = tp.TTL
+		// Handle Pool
+		if mdl.PoolID != utils.EmptyString {
+			if _, has := poolMap[tenID]; !has {
+				poolMap[tenID] = make(map[string]*utils.TPIPPool)
+			}
+			poolID := mdl.PoolID
+			if mdl.PoolFilterIDs != utils.EmptyString {
+				poolID = utils.ConcatenatedKey(poolID,
+					utils.NewStringSet(strings.Split(mdl.PoolFilterIDs, utils.InfieldSep)).Sha1())
+			}
+			pool, found := poolMap[tenID][poolID]
+			if !found {
+				pool = &utils.TPIPPool{
+					ID:       mdl.PoolID,
+					Type:     mdl.PoolType,
+					Range:    mdl.PoolRange,
+					Strategy: mdl.PoolStrategy,
+					Message:  mdl.PoolMessage,
+					Weight:   mdl.PoolWeight,
+					Blocker:  mdl.PoolBlocker,
+				}
+			}
+			if mdl.PoolFilterIDs != utils.EmptyString {
+				poolFilterSplit := strings.Split(mdl.PoolFilterIDs, utils.InfieldSep)
+				pool.FilterIDs = append(pool.FilterIDs, poolFilterSplit...)
+			}
+			poolMap[tenID][poolID] = pool
 		}
-		if tp.Weight != 0 {
-			rl.Weight = tp.Weight
+		// Profile-level fields
+		if mdl.TTL != utils.EmptyString {
+			tpip.TTL = mdl.TTL
 		}
-		rl.Stored = tp.Stored
-		if len(tp.ActivationInterval) != 0 {
-			rl.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
+		if mdl.Weight != 0 {
+			tpip.Weight = mdl.Weight
+		}
+		if mdl.Stored {
+			tpip.Stored = mdl.Stored
+		}
+		if len(mdl.ActivationInterval) != 0 {
+			tpip.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(mdl.ActivationInterval, utils.InfieldSep)
 			if len(aiSplt) == 2 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
-				rl.ActivationInterval.ExpiryTime = aiSplt[1]
+				tpip.ActivationInterval.ActivationTime = aiSplt[0]
+				tpip.ActivationInterval.ExpiryTime = aiSplt[1]
 			} else if len(aiSplt) == 1 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
+				tpip.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.FilterIDs != utils.EmptyString {
+		if mdl.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
 				filterMap[tenID] = make(utils.StringSet)
 			}
-			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
+			filterMap[tenID].AddSlice(strings.Split(mdl.FilterIDs, utils.InfieldSep))
 		}
-		mrl[tenID] = rl
+		mst[tenID] = tpip
 	}
-	result := make([]*utils.TPIPProfile, len(mrl))
+	// Build result with Pools
+	result := make([]*utils.TPIPProfile, len(mst))
 	i := 0
-	for tntID, rl := range mrl {
-		result[i] = rl
+	for tntID, tpip := range mst {
+		result[i] = tpip
+		for _, poolData := range poolMap[tntID] {
+			result[i].Pools = append(result[i].Pools, poolData)
+		}
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		i++
 	}
@@ -1306,18 +1341,15 @@ func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
 		return nil
 	}
 	var mdls IPMdls
-	// In case that TPIPProfile don't have filter
-	if len(tp.FilterIDs) == 0 {
+	// Handle case with no pools
+	if len(tp.Pools) == 0 {
 		mdl := &IPMdl{
-			Tpid:        tp.TPid,
-			Tenant:      tp.Tenant,
-			ID:          tp.ID,
-			Type:        tp.Type,
-			AddressPool: tp.AddressPool,
-			Allocation:  tp.Allocation,
-			Stored:      tp.Stored,
-			TTL:         tp.TTL,
-			Weight:      tp.Weight,
+			Tpid:   tp.TPid,
+			Tenant: tp.Tenant,
+			ID:     tp.ID,
+			TTL:    tp.TTL,
+			Stored: tp.Stored,
+			Weight: tp.Weight,
 		}
 		if tp.ActivationInterval != nil {
 			if tp.ActivationInterval.ActivationTime != utils.EmptyString {
@@ -1327,9 +1359,16 @@ func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
 				mdl.ActivationInterval += utils.InfieldSep + tp.ActivationInterval.ExpiryTime
 			}
 		}
+		for i, val := range tp.FilterIDs {
+			if i != 0 {
+				mdl.FilterIDs += utils.InfieldSep
+			}
+			mdl.FilterIDs += val
+		}
 		mdls = append(mdls, mdl)
+		return mdls
 	}
-	for i, fltr := range tp.FilterIDs {
+	for i, pool := range tp.Pools {
 		mdl := &IPMdl{
 			Tpid:   tp.TPid,
 			Tenant: tp.Tenant,
@@ -1337,11 +1376,15 @@ func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
 			Stored: tp.Stored,
 		}
 		if i == 0 {
-			mdl.Type = tp.Type
-			mdl.AddressPool = tp.AddressPool
-			mdl.Allocation = tp.Allocation
+			// Profile-level fields only on first row
 			mdl.TTL = tp.TTL
 			mdl.Weight = tp.Weight
+			for j, val := range tp.FilterIDs {
+				if j != 0 {
+					mdl.FilterIDs += utils.InfieldSep
+				}
+				mdl.FilterIDs += val
+			}
 			if tp.ActivationInterval != nil {
 				if tp.ActivationInterval.ActivationTime != utils.EmptyString {
 					mdl.ActivationInterval = tp.ActivationInterval.ActivationTime
@@ -1351,7 +1394,20 @@ func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
 				}
 			}
 		}
-		mdl.FilterIDs = fltr
+		// Pool fields on every row
+		mdl.PoolID = pool.ID
+		mdl.PoolType = pool.Type
+		mdl.PoolRange = pool.Range
+		mdl.PoolStrategy = pool.Strategy
+		mdl.PoolMessage = pool.Message
+		mdl.PoolWeight = pool.Weight
+		mdl.PoolBlocker = pool.Blocker
+		for j, val := range pool.FilterIDs {
+			if j != 0 {
+				mdl.PoolFilterIDs += utils.InfieldSep
+			}
+			mdl.PoolFilterIDs += val
+		}
 		mdls = append(mdls, mdl)
 	}
 	return mdls
@@ -1359,14 +1415,12 @@ func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
 
 func APItoIP(tp *utils.TPIPProfile, timezone string) (*IPProfile, error) {
 	ipp := &IPProfile{
-		Tenant:      tp.Tenant,
-		ID:          tp.ID,
-		Type:        tp.Type,
-		AddressPool: tp.AddressPool,
-		Allocation:  tp.Allocation,
-		Weight:      tp.Weight,
-		Stored:      tp.Stored,
-		FilterIDs:   make([]string, len(tp.FilterIDs)),
+		Tenant:    tp.Tenant,
+		ID:        tp.ID,
+		Weight:    tp.Weight,
+		Stored:    tp.Stored,
+		FilterIDs: make([]string, len(tp.FilterIDs)),
+		Pools:     make([]*IPPool, len(tp.Pools)),
 	}
 	if tp.TTL != utils.EmptyString {
 		var err error
@@ -1383,6 +1437,19 @@ func APItoIP(tp *utils.TPIPProfile, timezone string) (*IPProfile, error) {
 			return nil, err
 		}
 	}
+
+	for i, pool := range tp.Pools {
+		ipp.Pools[i] = &IPPool{
+			ID:        pool.ID,
+			FilterIDs: pool.FilterIDs,
+			Type:      pool.Type,
+			Range:     pool.Range,
+			Strategy:  pool.Strategy,
+			Message:   pool.Message,
+			Weight:    pool.Weight,
+			Blocker:   pool.Blocker,
+		}
+	}
 	return ipp, nil
 }
 
@@ -1392,17 +1459,28 @@ func IPProfileToAPI(ipp *IPProfile) *utils.TPIPProfile {
 		ID:                 ipp.ID,
 		FilterIDs:          make([]string, len(ipp.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
-		Type:               ipp.Type,
-		AddressPool:        ipp.AddressPool,
-		Allocation:         ipp.Allocation,
 		Stored:             ipp.Stored,
 		Weight:             ipp.Weight,
+		Pools:              make([]*utils.TPIPPool, len(ipp.Pools)),
 	}
 	if ipp.TTL != time.Duration(0) {
 		tp.TTL = ipp.TTL.String()
 	}
 
 	copy(tp.FilterIDs, ipp.FilterIDs)
+
+	for i, pool := range ipp.Pools {
+		tp.Pools[i] = &utils.TPIPPool{
+			ID:        pool.ID,
+			FilterIDs: pool.FilterIDs,
+			Type:      pool.Type,
+			Range:     pool.Range,
+			Strategy:  pool.Strategy,
+			Message:   pool.Message,
+			Weight:    pool.Weight,
+			Blocker:   pool.Blocker,
+		}
+	}
 
 	if ipp.ActivationInterval != nil {
 		if !ipp.ActivationInterval.ActivationTime.IsZero() {

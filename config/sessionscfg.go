@@ -174,7 +174,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.IPsConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
 	}
 	if jsnCfg.ResourceSConns != nil {
-		scfg.ResourceSConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaResources)
+		scfg.ResourceSConns = tagInternalConns(*jsnCfg.ResourceSConns, utils.MetaResources)
 	}
 	if jsnCfg.ThresholdSConns != nil {
 		scfg.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)

@@ -57,7 +57,7 @@ var (
 		utils.IPProfilesPrefix:         {},
 		utils.TimingsPrefix:            {},
 		utils.ResourcesPrefix:          {},
-		utils.IPsPrefix:                {},
+		utils.IPAllocationsPrefix:      {},
 		utils.StatQueuePrefix:          {},
 		utils.StatQueueProfilePrefix:   {},
 		utils.ThresholdPrefix:          {},
@@ -197,10 +197,10 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, ipProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetIPProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
-		case utils.IPsPrefix:
+		case utils.IPAllocationsPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, ipLockKey(tntID.Tenant, tntID.ID))
-			_, err = dm.GetIP(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, ipAllocationsLockKey(tntID.Tenant, tntID.ID))
+			_, err = dm.GetIPAllocations(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional, nil)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
@@ -865,7 +865,7 @@ func (dm *DataManager) RemoveThreshold(tenant, id string) (err error) {
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]
 	_ = dm.replicator.replicate(
-		utils.ThresholdPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+		utils.ThresholdPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveThreshold,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2095,49 +2095,55 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id string, withIndex bool) 
 	return dm.RemoveResource(tenant, id)
 }
 
-func (dm *DataManager) GetIP(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (rs *IP, err error) {
+func (dm *DataManager) GetIPAllocations(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string, prfl *IPProfile) (ip *IPAllocations, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheIPs, tntID); ok {
+		if x, ok := Cache.Get(utils.CacheIPAllocations, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*IP), nil
+			ip = x.(*IPAllocations)
+			if err = ip.computeUnexported(prfl); err != nil {
+				return nil, err
+			}
+			return ip, nil
 		}
 	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	rs, err = dm.dataDB.GetIPDrv(tenant, id)
+	ip, err = dm.dataDB.GetIPAllocationsDrv(tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPs]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPAllocations]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
-				utils.ReplicatorSv1GetIP,
+				utils.ReplicatorSv1GetIPAllocations,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &rs); err == nil {
-				err = dm.dataDB.SetIPDrv(rs)
+				}, &ip); err == nil {
+				err = dm.dataDB.SetIPAllocationsDrv(ip)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(utils.CacheIPs, tntID, nil, nil,
+				if errCh := Cache.Set(utils.CacheIPAllocations, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
-
 			}
 			return nil, err
 		}
 	}
+	if err = ip.computeUnexported(prfl); err != nil {
+		return nil, err
+	}
 	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheIPs, tntID, rs, nil,
+		if errCh := Cache.Set(utils.CacheIPAllocations, tntID, ip, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2145,40 +2151,38 @@ func (dm *DataManager) GetIP(tenant, id string, cacheRead, cacheWrite bool,
 	return
 }
 
-func (dm *DataManager) SetIP(rs *IP) (err error) {
+func (dm *DataManager) SetIPAllocations(ip *IPAllocations) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().SetIPDrv(rs); err != nil {
+	if err = dm.dataDB.SetIPAllocationsDrv(ip); err != nil {
 		return
 	}
-	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPs]
+	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPAllocations]
 	return dm.replicator.replicate(
-		utils.IPsPrefix, rs.TenantID(), // these are used to get the host IDs from cache
-		utils.ReplicatorSv1SetIP,
-		&IPWithAPIOpts{
-			IP: rs,
+		utils.IPAllocationsPrefix, ip.TenantID(), // these are used to get the host IDs from cache
+		utils.ReplicatorSv1SetIPAllocations,
+		&IPAllocationsWithAPIOpts{
+			IPAllocations: ip,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm)
+				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}, itm)
 }
 
-func (dm *DataManager) RemoveIP(tenant, id string) (err error) {
+func (dm *DataManager) RemoveIPAllocations(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveIPDrv(tenant, id); err != nil {
+	if err = dm.dataDB.RemoveIPAllocationsDrv(tenant, id); err != nil {
 		return
 	}
-	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPs]
+	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPAllocations]
 	_ = dm.replicator.replicate(
-		utils.IPsPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
-		utils.ReplicatorSv1RemoveIP,
+		utils.IPAllocationsPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
+		utils.ReplicatorSv1RemoveIPAllocations,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm)
+				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}, itm)
 	return
 }
 
@@ -2236,23 +2240,23 @@ func (dm *DataManager) SetIPProfile(ipp *IPProfile, withIndex bool) (err error) 
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if err = dm.checkFilters(ipp.Tenant, ipp.FilterIDs); err != nil {
+		if err := dm.checkFilters(ipp.Tenant, ipp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("%+s for item with ID: %+v",
 				err, ipp.TenantID())
 		}
 	}
-	oldIP, err := dm.GetIPProfile(ipp.Tenant, ipp.ID, true, false, utils.NonTransactional)
+	oldIPP, err := dm.GetIPProfile(ipp.Tenant, ipp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetIPProfileDrv(ipp); err != nil {
+	if err = dm.dataDB.SetIPProfileDrv(ipp); err != nil {
 		return err
 	}
 	if withIndex {
 		var oldFiltersIDs *[]string
-		if oldIP != nil {
-			oldFiltersIDs = &oldIP.FilterIDs
+		if oldIPP != nil {
+			oldFiltersIDs = &oldIPP.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheIPFilterIndexes, ipp.Tenant,
 			utils.EmptyString, ipp.ID, oldFiltersIDs, ipp.FilterIDs, false); err != nil {
@@ -2271,20 +2275,20 @@ func (dm *DataManager) SetIPProfile(ipp *IPProfile, withIndex bool) (err error) 
 		}, itm); err != nil {
 		return
 	}
-	if oldIP == nil || // create the IP if it didn't exist before
-		oldIP.TTL != ipp.TTL ||
-		(oldIP.Stored != ipp.Stored && oldIP.Stored) { // reset the IP the profile changed these fields
-		err = dm.SetIP(&IP{
-			Tenant: ipp.Tenant,
-			ID:     ipp.ID,
-			Usages: make(map[string]*IPUsage),
+	if oldIPP == nil || // create the resource if it didn't exist before
+		oldIPP.TTL != ipp.TTL ||
+		oldIPP.Stored != ipp.Stored && oldIPP.Stored { // reset the resource if the profile changed this fields
+		err = dm.SetIPAllocations(&IPAllocations{
+			Tenant:      ipp.Tenant,
+			ID:          ipp.ID,
+			Allocations: make(map[string]*PoolAllocation),
 		})
-	} else if _, errGet := dm.GetIP(ipp.Tenant, ipp.ID, // do not try to get the IP if the configuration changed
-		true, false, utils.NonTransactional); errGet == utils.ErrNotFound { // the IP does not exist
-		err = dm.SetIP(&IP{
-			Tenant: ipp.Tenant,
-			ID:     ipp.ID,
-			Usages: make(map[string]*IPUsage),
+	} else if _, errGet := dm.GetIPAllocations(ipp.Tenant, ipp.ID, // do not try to get the resource if the configuration changed
+		true, false, utils.NonTransactional, nil); errGet == utils.ErrNotFound { // the resource does not exist
+		err = dm.SetIPAllocations(&IPAllocations{
+			Tenant:      ipp.Tenant,
+			ID:          ipp.ID,
+			Allocations: make(map[string]*PoolAllocation),
 		})
 	}
 	return
@@ -2294,22 +2298,22 @@ func (dm *DataManager) RemoveIPProfile(tenant, id string, withIndex bool) (err e
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRes, err := dm.GetIPProfile(tenant, id, true, false, utils.NonTransactional)
+	oldIPP, err := dm.GetIPProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveIPProfileDrv(tenant, id); err != nil {
+	if err = dm.dataDB.RemoveIPProfileDrv(tenant, id); err != nil {
 		return
 	}
-	if oldRes == nil {
+	if oldIPP == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(dm, utils.CacheIPFilterIndexes, tenant, id, oldRes.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(dm, utils.CacheIPFilterIndexes, tenant, id, oldIPP.FilterIDs); err != nil {
 			return
 		}
 		if err = removeItemFromFilterIndex(dm, utils.CacheIPFilterIndexes,
-			tenant, utils.EmptyString, id, oldRes.FilterIDs); err != nil {
+			tenant, utils.EmptyString, id, oldIPP.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -2322,7 +2326,7 @@ func (dm *DataManager) RemoveIPProfile(tenant, id string, withIndex bool) (err e
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
-	return dm.RemoveIP(tenant, id)
+	return dm.RemoveIPAllocations(tenant, id)
 }
 
 func (dm *DataManager) GetActionTriggers(id string, skipCache bool,

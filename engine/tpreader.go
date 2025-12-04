@@ -1636,7 +1636,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	}
 	if len(tpr.ipProfiles) != 0 {
 		loadIDs[utils.CacheIPProfiles] = loadID
-		loadIDs[utils.CacheIPs] = loadID
+		loadIDs[utils.CacheIPAllocations] = loadID
 	}
 	if verbose {
 		log.Print("StatQueueProfiles:")
@@ -2352,7 +2352,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	if len(tpr.ipProfiles) != 0 {
 		loadIDs[utils.CacheIPProfiles] = loadID
-		loadIDs[utils.CacheIPs] = loadID
+		loadIDs[utils.CacheIPAllocations] = loadID
 	}
 	if len(tpr.sqProfiles) != 0 {
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
@@ -2428,7 +2428,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 		utils.CacheResourceProfiles:    rspIDs,
 		utils.CacheResources:           rspIDs,
 		utils.CacheIPProfiles:          ippIDs,
-		utils.CacheIPs:                 ippIDs,
+		utils.CacheIPAllocations:       ippIDs,
 		utils.CacheActionTriggers:      aatIDs,
 		utils.CacheStatQueues:          stqpIDs,
 		utils.CacheStatQueueProfiles:   stqpIDs,

@@ -234,13 +234,13 @@ func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(ctx *context.Contex
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetResourceProfile, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) (err error) {
+func (dS *DispatcherService) ReplicatorSv1GetIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1GetIP, tnt,
+		if err = dS.authorize(utils.ReplicatorSv1GetIPAllocations, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -249,7 +249,7 @@ func (dS *DispatcherService) ReplicatorSv1GetIP(ctx *context.Context, args *util
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1GetIP, args, reply)
+	}, utils.MetaReplicator, utils.ReplicatorSv1GetIPAllocations, args, reply)
 }
 
 func (dS *DispatcherService) ReplicatorSv1GetIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IPProfile) (err error) {
@@ -716,15 +716,15 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(ctx *context.Contex
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetResourceProfile, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetIP(ctx *context.Context, args *engine.IPWithAPIOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetIPAllocations(ctx *context.Context, args *engine.IPAllocationsWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.IPWithAPIOpts{
-			IP: &engine.IP{},
+		args = &engine.IPAllocationsWithAPIOpts{
+			IPAllocations: &engine.IPAllocations{},
 		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1SetIP, args.Tenant,
+		if err = dS.authorize(utils.ReplicatorSv1SetIPAllocations, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -732,7 +732,7 @@ func (dS *DispatcherService) ReplicatorSv1SetIP(ctx *context.Context, args *engi
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1SetIP, args, rpl)
+	}, utils.MetaReplicator, utils.ReplicatorSv1SetIPAllocations, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1SetIPProfile(ctx *context.Context, args *engine.IPProfileWithAPIOpts, rpl *string) (err error) {
@@ -1169,7 +1169,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(ctx *context.Con
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveResourceProfile, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1RemoveIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
 		args = &utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{},
@@ -1177,7 +1177,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIP(ctx *context.Context, args *u
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1RemoveIP, args.Tenant,
+		if err = dS.authorize(utils.ReplicatorSv1RemoveIPAllocations, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -1185,7 +1185,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIP(ctx *context.Context, args *u
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIP, args, rpl)
+	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIPAllocations, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1RemoveIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {

@@ -40,73 +40,74 @@ func (dS *DispatcherService) IPsV1Ping(ctx *context.Context, args *utils.CGREven
 	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) IPsV1GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
-	reply *engine.IPs) (err error) {
+func (dS *DispatcherService) IPsV1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.IPAllocations) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.IPsV1GetIPsForEvent, tnt,
+		if err = dS.authorize(utils.IPsV1GetIPAllocationForEvent, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1GetIPsForEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1GetIPAllocationForEvent, args, reply)
 }
 
-func (dS *DispatcherService) IPsV1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) IPsV1AuthorizeIP(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.AllocatedIP) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.IPsV1AuthorizeIP, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1AuthorizeIP, args, reply)
+}
+
+func (dS *DispatcherService) IPsV1AllocateIP(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.AllocatedIP) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.IPsV1AllocateIP, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1AllocateIP, args, reply)
+}
+
+func (dS *DispatcherService) IPsV1ReleaseIP(ctx *context.Context, args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.IPsV1AuthorizeIPs, tnt,
+		if err = dS.authorize(utils.IPsV1ReleaseIP, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1AuthorizeIPs, args, reply)
+	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1ReleaseIP, args, reply)
 }
 
-func (dS *DispatcherService) IPsV1AllocateIPs(ctx *context.Context, args *utils.CGREvent,
+func (dS *DispatcherService) IPsV1ClearIPAllocations(ctx *context.Context, args *engine.ClearIPAllocationsArgs,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.IPsV1AllocateIPs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1AllocateIPs, args, reply)
-}
-
-func (dS *DispatcherService) IPsV1ReleaseIPs(ctx *context.Context, args *utils.CGREvent,
-	reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && args.Tenant != utils.EmptyString {
-		tnt = args.Tenant
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.IPsV1ReleaseIPs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(args, utils.MetaIPs, utils.IPsV1ReleaseIPs, args, reply)
-}
-
-func (dS *DispatcherService) IPsV1GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
-		tnt = args.TenantID.Tenant
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.IPsV1GetIP, tnt,
+		if err = dS.authorize(utils.IPsV1ClearIPAllocations, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -115,5 +116,23 @@ func (dS *DispatcherService) IPsV1GetIP(ctx *context.Context, args *utils.Tenant
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
-	}, utils.MetaIPs, utils.IPsV1GetIP, args, reply)
+	}, utils.MetaIPs, utils.IPsV1ClearIPAllocations, args, reply)
+}
+
+func (dS *DispatcherService) IPsV1GetIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IPAllocations) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.IPsV1GetIPAllocations, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
+	}, utils.MetaIPs, utils.IPsV1GetIPAllocations, args, reply)
 }
