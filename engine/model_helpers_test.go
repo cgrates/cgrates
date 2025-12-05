@@ -6285,3 +6285,63 @@ func TestTrendProfileToAPIs(t *testing.T) {
 	}
 
 }
+
+func TestAsTPAttributesFilterIDsDuplicate(t *testing.T) {
+	tests := []struct {
+		name       string
+		input      string
+		wantFilter []string
+	}{
+		{
+			name:       "SingleDuplicate",
+			input:      "*string:~*req.Subject:1001" + utils.InfieldSep + "*string:~*req.Subject:1001",
+			wantFilter: []string{"*string:~*req.Subject:1001"},
+		},
+		{
+			name: "MultipleDuplicates",
+			input: "*string:~*req.Subject:1001" + utils.InfieldSep + "*string:~*req.Subject:1001" + utils.InfieldSep + "*string:~*req.Subject:1002" +
+				utils.InfieldSep + "*string:~*req.Subject:1002" + utils.InfieldSep + "*string:~*req.Subject:1003",
+			wantFilter: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*string:~*req.Subject:1003"},
+		},
+		{
+			name:       "NoDuplicates",
+			input:      "*string:~*req.Subject:2001" + utils.InfieldSep + "*string:~*req.Subject:2002" + utils.InfieldSep + "*string:~*req.Subject:2003",
+			wantFilter: []string{"*string:~*req.Subject:2001", "*string:~*req.Subject:2002", "*string:~*req.Subject:2003"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mdls := AttributeMdls{
+				&AttributeMdl{
+					Tenant:    "cgrates.org",
+					ID:        "ATTR1",
+					FilterIDs: tt.input,
+				},
+			}
+
+			result := mdls.AsTPAttributes()
+			if len(result) != 1 {
+				t.Errorf("Expected 1 TPAttributeProfile, got %d", len(result))
+				return
+			}
+
+			tp := result[0]
+
+			gotFilters := make(map[string]struct{})
+			for _, f := range tp.FilterIDs {
+				gotFilters[f] = struct{}{}
+			}
+
+			for _, expected := range tt.wantFilter {
+				if _, found := gotFilters[expected]; !found {
+					t.Errorf("Expected filter %s not found in result %v", expected, tp.FilterIDs)
+				}
+			}
+
+			if len(tp.FilterIDs) != len(tt.wantFilter) {
+				t.Errorf("Expected %d unique filters, got %d: %v", len(tt.wantFilter), len(tp.FilterIDs), tp.FilterIDs)
+			}
+		})
+	}
+}
