@@ -72,12 +72,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 "db": {
 	"db_conns": {
 		"*default": {	
-			"db_type": "*internal",
-			"string_indexed_fields": ["RunID"],
-				"opts":{
-				"internalDBRewriteInterval": "0s",
-				"internalDBDumpInterval": "0s"
-			}
+%s
 		},
 	},
 },
@@ -119,10 +114,23 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 
 }
 `
+	var dbcfg string
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		dbcfg = `			"db_type": "*internal",
+			"string_indexed_fields": ["*opts.*originID"],
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}`
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
+	case utils.MetaRedis:
+		dbcfg = `			"db_type": "*redis",
+			"db_host": "127.0.0.1",
+			"db_port": 6379,
+			"db_name": "10",
+			"string_indexed_fields": ["*opts.*originID"],`
 	default:
 		t.Fatal("unknown dbtype")
 	}
@@ -130,7 +138,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cfg, cfgPath, clean, err := initCfg(ctx, fmt.Sprintf(cfgContent, tpPath))
+	cfg, cfgPath, clean, err := initCfg(ctx, fmt.Sprintf(cfgContent, dbcfg, tpPath))
 	if err != nil {
 		t.Fatalf("parsing configuration file failed: %v", err)
 	}
@@ -282,20 +290,66 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 			&cdrs); err != nil {
 			t.Error(err)
 		}
-		sort.Slice(cdrs, func(i, j int) bool {
-			return cdrs[i].Opts[utils.MetaCost].(float64) < cdrs[j].Opts[utils.MetaCost].(float64)
-		})
-		if cdrs[0].Opts[utils.MetaCost] != 2. ||
-			cdrs[0].Opts[utils.MetaOriginID] != "processCDR1" {
-			t.Errorf("expected first cdr to have originID %s and cost %.2f, received %s and %.1f",
-				"processCDR1", 2.,
-				cdrs[0].Opts[utils.MetaOriginID], cdrs[0].Opts[utils.MetaCost])
+		if *utils.DBType == utils.MetaRedis {
+			sort.Slice(cdrs, func(i, j int) bool {
+				return cdrs[i].Opts[utils.MetaCost].(string) < cdrs[j].Opts[utils.MetaCost].(string)
+			})
+			if cdrs[0].Opts[utils.MetaCost] != "2.0" ||
+				cdrs[0].Opts[utils.MetaOriginID] != "processCDR1" {
+				t.Errorf("expected first cdr to have originID %s and cost 2, received %s and %#v",
+					"processCDR1",
+					cdrs[0].Opts[utils.MetaOriginID], cdrs[0].Opts[utils.MetaCost])
+			}
+			if cdrs[1].Opts[utils.MetaCost] != "7.0" ||
+				cdrs[1].Opts[utils.MetaOriginID] != "processCDR2" {
+				t.Errorf("expected first cdr to have originID %s and cost 7, received %s and %#v",
+					"processCDR1",
+					cdrs[1].Opts[utils.MetaOriginID], cdrs[1].Opts[utils.MetaCost])
+			}
+		} else {
+			sort.Slice(cdrs, func(i, j int) bool {
+				return cdrs[i].Opts[utils.MetaCost].(float64) < cdrs[j].Opts[utils.MetaCost].(float64)
+			})
+			if cdrs[0].Opts[utils.MetaCost] != 2. ||
+				cdrs[0].Opts[utils.MetaOriginID] != "processCDR1" {
+				t.Errorf("expected first cdr to have originID %s and cost %.2f, received %s and %.1f",
+					"processCDR1", 2.,
+					cdrs[0].Opts[utils.MetaOriginID], cdrs[0].Opts[utils.MetaCost])
+			}
+			if cdrs[1].Opts[utils.MetaCost] != 7. ||
+				cdrs[1].Opts[utils.MetaOriginID] != "processCDR2" {
+				t.Errorf("expected first cdr to have originID %s and cost %.2f, received %s and %.1f",
+					"processCDR1", 7.,
+					cdrs[1].Opts[utils.MetaOriginID], cdrs[1].Opts[utils.MetaCost])
+			}
 		}
-		if cdrs[1].Opts[utils.MetaCost] != 7. ||
-			cdrs[1].Opts[utils.MetaOriginID] != "processCDR2" {
-			t.Errorf("expected first cdr to have originID %s and cost %.2f, received %s and %.1f",
-				"processCDR1", 7.,
-				cdrs[1].Opts[utils.MetaOriginID], cdrs[1].Opts[utils.MetaCost])
+	})
+
+	t.Run("RemoveCDRs", func(t *testing.T) {
+		args := &utils.CDRFilters{
+			Tenant: "cgrates.org",
+			ID:     "RemoveCDRs1",
 		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1RemoveCDRs, args,
+			&reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("expected reply <%v>, received <%v>", utils.OK, reply)
+		}
+
+		args = &utils.CDRFilters{
+			Tenant: "cgrates.org",
+			ID:     "GetCDRs1",
+		}
+
+		experr := "retrieving CDRs failed: NOT_FOUND"
+		var cdrs []*utils.CDR
+		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, args,
+			&cdrs); err == nil || err.Error() != experr {
+			t.Errorf("expected err <%v>, received <%v>", experr, err)
+		}
+
 	})
 }
