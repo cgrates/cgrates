@@ -2212,6 +2212,7 @@ type mongoStoredSession struct {
 	NodeID        string
 	CGRID         string
 	Tenant        string
+	IPAllocID     string
 	ResourceID    string
 	ClientConnID  string
 	EventStart    MapEvent
@@ -2238,6 +2239,7 @@ func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions 
 					NodeID:        nodeID,
 					CGRID:         sess.CGRID,
 					Tenant:        sess.Tenant,
+					IPAllocID:     sess.IPAllocID,
 					ResourceID:    sess.ResourceID,
 					ClientConnID:  sess.ClientConnID,
 					EventStart:    sess.EventStart,
@@ -2286,6 +2288,7 @@ func (ms *MongoStorage) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSessi
 			oneStSession := &StoredSession{
 				CGRID:         result.CGRID,
 				Tenant:        result.Tenant,
+				IPAllocID:     result.IPAllocID,
 				ResourceID:    result.ResourceID,
 				ClientConnID:  result.ClientConnID,
 				EventStart:    result.EventStart,

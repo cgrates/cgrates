@@ -133,7 +133,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
@@ -177,7 +177,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
 	rply = sessions.V1AuthorizeReply{}
@@ -217,7 +217,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		}}
 	// now we will set the maxCOst to be 1 in order to match route3 and route1
 	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
 	rply = sessions.V1AuthorizeReply{}
@@ -231,7 +231,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 	}
 
 	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
 	rply = sessions.V1AuthorizeReply{}
@@ -266,7 +266,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		},
 	}
 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1ProcessMessageReply
@@ -312,7 +312,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 	}
 
 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
 	rply = sessions.V1ProcessMessageReply{}
@@ -352,7 +352,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		}}
 	// now we will set the maxCOst to be 1 in order to match route3 and route1
 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
 	rply = sessions.V1ProcessMessageReply{}
@@ -366,7 +366,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 	}
 
 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
 	rply = sessions.V1ProcessMessageReply{}

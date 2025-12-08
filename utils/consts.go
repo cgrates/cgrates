@@ -1336,6 +1336,7 @@ const (
 	MetaGigawords           = "*gigawords"
 	CapAttributes           = "Attributes"
 	CapResourceAllocation   = "ResourceAllocation"
+	CapAllocatedIP          = "AllocatedIP"
 	CapMaxUsage             = "MaxUsage"
 	CapRoutes               = "Routes"
 	CapRouteProfiles        = "RouteProfiles"

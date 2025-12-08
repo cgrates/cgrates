@@ -274,7 +274,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
@@ -324,7 +324,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
@@ -374,7 +374,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	var rply sessions.V1AuthorizeReply
@@ -425,7 +425,7 @@ func testFraudFinalAuthorize(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		false, false, false, cgrEv, utils.Paginator{}, false, "")
 
 	expErr := `RALS_ERROR:ACCOUNT_DISABLED`

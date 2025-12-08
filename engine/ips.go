@@ -183,6 +183,16 @@ func (ip *AllocatedIP) AsNavigableMap() map[string]*utils.DataNode {
 	}
 }
 
+// Digest returns a string representation of the allocated IP for digest replies.
+func (ip *AllocatedIP) Digest() string {
+	return utils.ConcatenatedKey(
+		ip.ProfileID,
+		ip.PoolID,
+		ip.Message,
+		ip.Address.String(),
+	)
+}
+
 // IPAllocations represents IP allocations with usage tracking and TTL management.
 type IPAllocations struct {
 	Tenant      string

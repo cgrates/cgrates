@@ -357,6 +357,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
@@ -382,6 +383,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
@@ -414,6 +416,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.GetBool(utils.MetaThresholds),
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
@@ -435,6 +438,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
+			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),

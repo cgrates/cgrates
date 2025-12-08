@@ -194,6 +194,10 @@ func NewErrResourceS(err error) error {
 	return fmt.Errorf("RESOURCES_ERROR:%s", err)
 }
 
+func NewErrIPs(err error) error {
+	return fmt.Errorf("IPS_ERROR:%s", err)
+}
+
 func NewErrRouteS(err error) error {
 	return fmt.Errorf("ROUTES_ERROR:%s", err)
 }
