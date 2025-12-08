@@ -73,6 +73,7 @@ type Session struct {
 
 	CGRID         string
 	Tenant        string
+	IPAllocID     string
 	ResourceID    string
 	ClientConnID  string          // connection ID towards the client so we can recover from passive
 	EventStart    engine.MapEvent // Event which started the session
@@ -119,6 +120,7 @@ func (s *Session) Clone() (cln *Session) {
 	cln = &Session{
 		CGRID:         s.CGRID,
 		Tenant:        s.Tenant,
+		IPAllocID:     s.IPAllocID,
 		ResourceID:    s.ResourceID,
 		ClientConnID:  s.ClientConnID,
 		EventStart:    s.EventStart.Clone(),
@@ -152,6 +154,7 @@ func (s *Session) asStoredSession() *engine.StoredSession {
 	return &engine.StoredSession{
 		CGRID:         s.CGRID,
 		Tenant:        s.Tenant,
+		IPAllocID:     s.IPAllocID,
 		ResourceID:    s.ResourceID,
 		ClientConnID:  s.ClientConnID,
 		EventStart:    s.EventStart,
@@ -181,6 +184,7 @@ func newSessionFromStoredSession(s *engine.StoredSession) *Session {
 	return &Session{
 		CGRID:         s.CGRID,
 		Tenant:        s.Tenant,
+		IPAllocID:     s.IPAllocID,
 		ResourceID:    s.ResourceID,
 		ClientConnID:  s.ClientConnID,
 		EventStart:    s.EventStart,

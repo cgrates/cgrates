@@ -38,6 +38,7 @@ type StoredSRun struct {
 type StoredSession struct {
 	CGRID         string
 	Tenant        string
+	IPAllocID     string
 	ResourceID    string
 	ClientConnID  string        // connection ID towards the client so we can recover from passive
 	EventStart    MapEvent      // Event which started the session

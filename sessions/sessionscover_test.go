@@ -1478,7 +1478,7 @@ func TestNewSession(t *testing.T) {
 	}
 
 	expectedErr := "ChargerS is disabled"
-	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+	if _, err := sessions.newSession(cgrEv, "originID", "clientConnID",
 		time.Second, false, false); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -1488,7 +1488,8 @@ func TestNewSession(t *testing.T) {
 	expectedSess := &Session{
 		CGRID:        "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 		Tenant:       "cgrates.org",
-		ResourceID:   "resourceID",
+		ResourceID:   "originID",
+		IPAllocID:    "originID",
 		ClientConnID: "clientConnID",
 		EventStart: map[string]any{
 			utils.CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -1511,7 +1512,7 @@ func TestNewSession(t *testing.T) {
 		},
 		Chargeable: true,
 	}
-	if rcv, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+	if rcv, err := sessions.newSession(cgrEv, "originID", "clientConnID",
 		time.Second, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expectedSess) {
@@ -1520,7 +1521,7 @@ func TestNewSession(t *testing.T) {
 
 	//error in mocking the call from connMgr
 	cgrEv.ID = utils.EmptyString
-	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+	if _, err := sessions.newSession(cgrEv, "originID", "clientConnID",
 		time.Second, false, false); err == nil || err.Error() != utils.NewErrChargerS(utils.ErrNotImplemented).Error() {
 		t.Errorf("Expected %+v, received %+v", utils.NewErrChargerS(utils.ErrNotImplemented), err)
 	}
@@ -1529,7 +1530,7 @@ func TestNewSession(t *testing.T) {
 		"da39a3ee5e6b4b0d3255bfef95601890afd80709": {},
 	}
 	//sessions already exists
-	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+	if _, err := sessions.newSession(cgrEv, "originID", "clientConnID",
 		time.Second, false, false); err == nil || err.Error() != utils.ErrExists.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrExists, err)
 	}
@@ -2547,7 +2548,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 		},
 	}
 	args := NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		false, false, false, nil, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
@@ -2588,7 +2589,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	//Get Attributes
 	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	args = NewV1AuthorizeArgs(true, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	args.CGREvent.ID = "TestID"
 	args.CGREvent.Tenant = "cgrates.org"
@@ -2671,7 +2672,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
@@ -2695,7 +2696,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	//AuthorizeResources
 	args = NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, false, true, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "")
 	expected = "NOT_CONNECTED: ResourceS"
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -2715,7 +2716,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	//GetRoutes
 	args = NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	expected = "NOT_CONNECTED: RouteS"
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -2729,7 +2730,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	//ProcessThresholds
 	args = NewV1AuthorizeArgs(false, []string{},
-		true, []string{"TestID"}, false, []string{}, false, false,
+		true, []string{"TestID"}, false, []string{}, false, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -2737,7 +2738,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	//ProcessStats
 	args = NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, true, []string{"TestID"}, false, false,
+		false, []string{}, true, []string{"TestID"}, false, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	if err := sessions.BiRPCv1AuthorizeEvent(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -2834,7 +2835,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := NewV1AuthorizeArgs(true, []string{},
-		true, []string{}, true, []string{}, true, true,
+		true, []string{}, true, []string{}, false, true, true,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 
 	authReply := new(V1AuthorizeReplyWithDigest)
@@ -2942,7 +2943,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	args := NewV1InitSessionArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		nil, true)
 
 	rply := &V1InitSessionReply{}
@@ -2959,7 +2960,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	//get from cache error
 	cgrEvent.ID = "INITIATE_SESSION_ACTIVE"
 	args = NewV1InitSessionArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		cgrEvent, true)
 	caches := engine.NewCacheS(cfg, dm, nil)
 	//value's error will be nil, so the error of the initiate sessions will be the same
@@ -2993,7 +2994,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
 	args = NewV1InitSessionArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		cgrEvent, true)
 	delete(args.CGREvent.Event, utils.OriginID)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
@@ -3010,7 +3011,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 		},
 	}
 	args = NewV1InitSessionArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		cgrEvent, true)
 	expected = "RESOURCES_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -3019,7 +3020,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 
 	//missing subsystems
 	args = NewV1InitSessionArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -3091,7 +3092,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	}
 
 	args := NewV1InitSessionArgs(false, []string{},
-		false, []string{}, false, []string{}, false, true,
+		false, []string{}, false, []string{}, false, false, true,
 		cgrEvent, true)
 
 	rply := &V1InitSessionReply{}
@@ -3120,7 +3121,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 
 	//here we process the thresholds
 	args = NewV1InitSessionArgs(false, []string{},
-		true, []string{}, true, []string{}, false, true,
+		true, []string{}, true, []string{}, false, false, true,
 		cgrEvent, true)
 	sessions = NewSessionS(cfg, dm, connMgr)
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
@@ -3139,7 +3140,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	}
 	sessions = NewSessionS(cfg, dm, connMgr)
 	args = NewV1InitSessionArgs(false, []string{},
-		true, []string{}, true, []string{}, false, true,
+		true, []string{}, true, []string{}, false, false, true,
 		cgrEvent, true)
 	expected = "EXISTS"
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err != utils.ErrPartiallyExecuted {
@@ -3236,7 +3237,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	}
 
 	args := NewV1InitSessionArgs(true, []string{},
-		true, []string{}, true, []string{}, true, true,
+		true, []string{}, true, []string{}, true, false, true,
 		cgrEvent, true)
 
 	authReply := new(V1InitReplyWithDigest)
@@ -3473,7 +3474,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 		},
 	}
 
-	args := NewV1TerminateSessionArgs(true, false, false, nil, false, nil, nil, true)
+	args := NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, nil, true)
 	var reply string
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3481,7 +3482,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	}
 
 	cgrEvent.ID = utils.EmptyString
-	args = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(false, false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -3502,7 +3503,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	engine.Cache = tmp
 
 	cgrEvent.Event[utils.OriginID] = utils.EmptyString
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -3511,7 +3512,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	cgrEvent.APIOpts = make(map[string]any)
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "invalid_time_format"
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:time: invalid duration \"invalid_time_format\""
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -3523,13 +3524,13 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	sessions.aSessions = map[string]*Session{
 		"CGR_ID": {},
 	}
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 	cgrEvent.Event[utils.CGRID] = "CHANGED_CGRID"
 
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "RALS_ERROR:ChargerS is disabled"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3539,7 +3540,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	//update session error
 	cgrEvent.Event[utils.Usage] = "invalid_dur_time"
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "time: invalid duration \"invalid_dur_time\""
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -3567,7 +3568,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	sessions = NewSessionS(cfg, dm, connMgr)
 	caches = engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = caches
-	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(true, false, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -3610,7 +3611,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	args := NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
+	args := NewV1TerminateSessionArgs(false, true, false, false, nil, false, nil, cgrEvent, true)
 	var reply string
 	expected := "RESOURCES_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3618,14 +3619,14 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	}
 
 	cgrEvent.Event[utils.OriginID] = utils.EmptyString
-	args = NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(false, true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [OriginID]"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
 
-	args = NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(false, true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "NOT_CONNECTED: ResourceS"
 	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{}
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3634,7 +3635,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
 	cgrEvent.Tenant = "CHANGED_ID"
-	args = NewV1TerminateSessionArgs(false, true, true, nil, true, nil, cgrEvent, true)
+	args = NewV1TerminateSessionArgs(false, true, false, true, nil, true, nil, cgrEvent, true)
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Exepected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
@@ -3721,7 +3722,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	}
 
 	args := NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
+		false, []string{}, false, []string{}, false, false, false,
 		true, false, false, nil, utils.Paginator{}, false, "1")
 	reply := V1ProcessMessageReply{}
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
@@ -3731,7 +3732,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 
 	cgrEvent.ID = utils.EmptyString
 	args = NewV1ProcessMessageArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3740,7 +3741,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 
 	cgrEvent.ID = "test_id"
 	args = NewV1ProcessMessageArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "NOT_CONNECTED: ResourceS"
 	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3756,7 +3757,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	}
 	engine.Cache = caches
 	args = NewV1ProcessMessageArgs(true, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessMessage, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
@@ -3830,7 +3831,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	}
 
 	args := NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	reply := V1ProcessMessageReply{}
 	expected := "MANDATORY_IE_MISSING: [OriginID]"
@@ -3840,7 +3841,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	cgrEvent.Event[utils.OriginID] = "ID"
 
 	args = NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, true, false,
+		false, []string{}, false, []string{}, true, false, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	reply = V1ProcessMessageReply{}
 	expected = "RESOURCES_ERROR:NOT_IMPLEMENTED"
@@ -3850,7 +3851,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
 	args = NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, true, true,
+		false, []string{}, false, []string{}, true, false, true,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	expected = "NOT_CONNECTED: RouteS"
 	if err := sessions.BiRPCv1ProcessMessage(context.Background(), args, &reply); err == nil || err.Error() != expected {
@@ -3864,7 +3865,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	}
 
 	args = NewV1ProcessMessageArgs(false, []string{},
-		true, []string{}, true, []string{}, true, true,
+		true, []string{}, true, []string{}, true, false, true,
 		true, false, false, cgrEvent, utils.Paginator{}, false, "1")
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 
