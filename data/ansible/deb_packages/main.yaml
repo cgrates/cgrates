@@ -187,14 +187,27 @@
             file_type: file
           register: package_files
 
-        - name: Move package files to incoming directory
+        - name: Copy package files to incoming directory
           become: true
-          ansible.builtin.command: mv {{ item.path }} {{ reprepro_basedir }}/incoming/
-          args:
-            creates: "{{ reprepro_basedir }}/incoming/{{ item.path | basename }}"
-            removes: "{{ item.path }}"
+          ansible.builtin.copy:
+            src: "{{ item.path }}"
+            dest: "{{ reprepro_basedir }}/incoming/"
+            remote_src: true
           with_items: "{{ package_files.files }}"
           when: package_files.matched > 0
+
+        - name: Check if packages already in reprepro
+          become: true
+          ansible.builtin.shell: |
+            reprepro -b {{ reprepro_basedir }} list {{ cgrates_branch }}-{{ item.codename }} 2>/dev/null | grep -q cgrates
+          register: reprepro_check
+          changed_when: false
+          failed_when: false
+          with_items: "{{ distributions }}"
+
+        - name: Set skip_reprepro fact
+          ansible.builtin.set_fact:
+            skip_reprepro: "{{ reprepro_check.results | selectattr('rc', 'equalto', 0) | list | length == distributions | length }}"
 
         - name: Find Debian package changes files (.changes) for each distribution
           ansible.builtin.find:
@@ -203,23 +216,34 @@
             file_type: file
           register: changes_files
           with_items: "{{ distributions }}"
+          when: not (skip_reprepro | default(false))
 
         - name: Validate that each distribution has exactly one .changes file for proper reprepro inclusion
           ansible.builtin.fail:
             msg: "Debian packaging error: Expected exactly 1 .changes file for {{ item.item.codename }}, found {{ item.matched }}. Each distribution should have a single .changes file for proper repository inclusion."
-          when: item.matched != 1
-          with_items: "{{ changes_files.results }}"
+          when:
+            - not (skip_reprepro | default(false))
+            - item.matched != 1
+          with_items: "{{ changes_files.results | default([]) }}"
 
         - name: Include the packages with reprepro
           become: true
           ansible.builtin.shell:
             cmd: reprepro -Vb . --ignore=wrongdistribution include {{ cgrates_branch }}-{{ item.item.codename }} {{ item.files[0].path }}
             chdir: "{{ reprepro_basedir }}"
-          with_items: "{{ changes_files.results }}"
-          when: cgrates_branch == 'master' or git_tag_result.stdout_lines | length > 0
+          with_items: "{{ changes_files.results | default([]) }}"
+          when:
+            - not (skip_reprepro | default(false))
+            - cgrates_branch == 'master' or git_tag_result.stdout_lines | length > 0
 
         - name: Copy the file to PKG server
-          ansible.builtin.command: "scp {{ reprepro_basedir }}/incoming/{{ item.path | basename }} {{ pkgAddr }}:/tmp/"
+          ansible.builtin.command: "scp {{ item.path }} {{ pkgAddr }}:/tmp/"
+          with_items: "{{ package_files.files }}"
+
+        - name: Remove package files after successful sync
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: absent
           with_items: "{{ package_files.files }}"
 
       rescue:
@@ -282,14 +306,6 @@
           ansible.builtin.file:
             path: "{{ reprepro_basedir }}/incoming"
             state: absent
-
-        - name: Remove leftover package files
-          ansible.builtin.file:
-            path: "{{ item }}"
-            state: absent
-          with_fileglob:
-            - "/home/{{ user }}/go/src/github.com/cgrates/cgrates_*"
-            - "/home/{{ user }}/go/src/github.com/cgrates/cgrates-dbgsym_*"
 
 - hosts: pkg
   vars:
