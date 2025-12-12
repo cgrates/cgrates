@@ -1413,3 +1413,66 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	}
 
 }
+
+func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+
+	rp := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		FilterIDs: []string{
+			"*string:~*req.Account:1001", "*string:~*req.Account:1001",
+			"*string:~*req.Subject:1002", "*string:~*req.Subject:1002", "*string:~*req.Subject:1002",
+			"*string:~*req.Destination:1001",
+		},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						Unit:          utils.NewDecimal(60, 0),
+						Increment:     utils.NewDecimal(60, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if len(rp.FilterIDs) != 6 {
+		t.Fatalf("Expected 6 FilterIDs before setToDB, got %d", len(rp.FilterIDs))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, rp, true, false); err != nil {
+		t.Fatal(err)
+	}
+
+	expectedFilterIDs := []string{
+		"*string:~*req.Account:1001", "*string:~*req.Account:1001",
+		"*string:~*req.Subject:1002", "*string:~*req.Subject:1002", "*string:~*req.Subject:1002",
+		"*string:~*req.Destination:1001",
+	}
+
+	if !reflect.DeepEqual(rp.FilterIDs, expectedFilterIDs) {
+		t.Errorf("Expected FilterIDs after setToDB: %v, received: %v", expectedFilterIDs, rp.FilterIDs)
+	}
+
+	if len(rp.FilterIDs) != 6 {
+		t.Errorf("Expected 6 FilterIDs after compacting, got %d", len(rp.FilterIDs))
+	}
+
+	retrieved, err := dm.GetRateProfile(context.Background(), "cgrates.org", "RP1", true, true, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(retrieved.FilterIDs, expectedFilterIDs) {
+		t.Errorf("Expected FilterIDs in DB: %v, received: %v", expectedFilterIDs, retrieved.FilterIDs)
+	}
+}
