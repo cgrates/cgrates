@@ -230,8 +230,8 @@ cgrates.org,ResGroup21,*string:~*req.Account:1001,2014-07-29T15:00:00Z,1s,2,call
 cgrates.org,ResGroup22,*string:~*req.Account:dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	IPsCSVContent = `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8],Weight[9]
-cgrates.org,IPs1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,ipv4,127.0.0.1/24,*ascending,true,10
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Stored[5],Weight[6],PoolID[7],PoolFilterIDs[8],PoolType[9],PoolRange[10],PoolStrategy[11],PoolMessage[12],PoolWeight[13],PoolBlocker[14]
+cgrates.org,IPs1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,true,10,Pool1,,ipv4,127.0.0.1/24,*ascending,,10,false
 `
 	StatsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]

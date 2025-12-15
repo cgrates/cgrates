@@ -53,14 +53,9 @@ func TestCmdMaxUsage(t *testing.T) {
 	}
 	// for coverage purpose
 	formatedResult := command.GetFormatedResult(command.RpcResult())
-	expected := GetFormatedResult(command.RpcResult(), utils.StringSet{
-		utils.Usage:              {},
-		utils.GroupIntervalStart: {},
-		utils.RateIncrement:      {},
-		utils.RateUnit:           {},
-	})
-	if !reflect.DeepEqual(formatedResult, expected) {
-		t.Errorf("Expected <%+v>, Received <%+v>", expected, formatedResult)
+
+	if formatedResult != `"0s"` {
+		t.Errorf("Expected 0s, Received %s", formatedResult)
 	}
 	expected2 := []string{utils.ToR, utils.RequestType, utils.Tenant,
 		utils.Category, utils.AccountField, utils.Subject, utils.Destination,

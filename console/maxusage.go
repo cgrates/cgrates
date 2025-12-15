@@ -19,6 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
+	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -54,7 +58,10 @@ func (self *CmdGetMaxUsage) RpcMethod() string {
 
 func (self *CmdGetMaxUsage) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.UsageRecordWithAPIOpts)
+		self.rpcParams = &engine.UsageRecordWithAPIOpts{
+			UsageRecord: new(engine.UsageRecord),
+			APIOpts:     make(map[string]any),
+		}
 	}
 	return self.rpcParams
 }
@@ -64,10 +71,18 @@ func (self *CmdGetMaxUsage) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetMaxUsage) RpcResult() any {
-	var f int64
-	return &f
+	var d time.Duration
+	return &d
 }
 
 func (self *CmdGetMaxUsage) ClientArgs() []string {
 	return self.clientArgs
+}
+
+func (self *CmdGetMaxUsage) GetFormatedResult(result any) string {
+	if tv, canCast := result.(*time.Duration); canCast {
+		return fmt.Sprintf(`"%s"`, tv.String())
+	}
+	out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
+	return string(out)
 }
