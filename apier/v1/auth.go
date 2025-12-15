@@ -28,7 +28,7 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (apierSv1 *APIerSv1) GetMaxUsage(ctx *context.Context, usageRecord *engine.UsageRecordWithAPIOpts, maxUsage *int64) error {
+func (apierSv1 *APIerSv1) GetMaxUsage(ctx *context.Context, usageRecord *engine.UsageRecordWithAPIOpts, maxUsage *time.Duration) error {
 	if apierSv1.Responder == nil {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
@@ -70,6 +70,6 @@ func (apierSv1 *APIerSv1) GetMaxUsage(ctx *context.Context, usageRecord *engine.
 		*maxUsage = -1
 		return nil
 	}
-	*maxUsage = maxDur.Nanoseconds()
+	*maxUsage = maxDur
 	return nil
 }
