@@ -254,6 +254,8 @@ cgrates.org,RP1,,,,,,RT_WEEKEND,,,,true,,0.067,0.03,,
 cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
 cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
 cgrates.org,RP1,,,,,,RT_CHRISTMAS,,,,true,,,,,
+cgrates.org,RP2,*string:~*req.Account:1001;*string:~*req.Account:1001;*string:~*req.Account:1002;*string:~*req.Account:1001;*string:~*req.Account:1003,,,,,,,,,,,,,,
+cgrates.org,RP2,*string:~*req.Account:1003;*string:~*req.Account:1004,,,,,,,,,,,,,,
 cgrates.org,RP2,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
 cgrates.org,RP2,*string:~*req.Subject:1002,;10,0.2,0.4,*free,RT_WEEK,,"* * * * 1-5",fltr1;20,false,0s,0,0.24,2m,30s
 `); err != nil {
@@ -898,9 +900,10 @@ func testLoadersGetRateProfiles(t *testing.T) {
 			},
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "RP2",
-			FilterIDs: []string{"*string:~*req.Subject:1002"},
+			Tenant: "cgrates.org",
+			ID:     "RP2",
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002", "*string:~*req.Account:1001",
+				"*string:~*req.Account:1003", "*string:~*req.Account:1004", "*string:~*req.Subject:1002"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,

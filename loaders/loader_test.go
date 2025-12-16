@@ -1454,8 +1454,8 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	}
 
 	expectedFilterIDs := []string{
-		"*string:~*req.Account:1001", "*string:~*req.Account:1001",
-		"*string:~*req.Subject:1002", "*string:~*req.Subject:1002", "*string:~*req.Subject:1002",
+		"*string:~*req.Account:1001",
+		"*string:~*req.Subject:1002",
 		"*string:~*req.Destination:1001",
 	}
 
@@ -1463,8 +1463,8 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 		t.Errorf("Expected FilterIDs after setToDB: %v, received: %v", expectedFilterIDs, rp.FilterIDs)
 	}
 
-	if len(rp.FilterIDs) != 6 {
-		t.Errorf("Expected 6 FilterIDs after compacting, got %d", len(rp.FilterIDs))
+	if len(rp.FilterIDs) != 3 {
+		t.Errorf("Expected 3 FilterIDs after compacting, got %d", len(rp.FilterIDs))
 	}
 
 	retrieved, err := dm.GetRateProfile(context.Background(), "cgrates.org", "RP1", true, true, utils.NonTransactional)

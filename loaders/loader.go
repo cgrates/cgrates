@@ -24,6 +24,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -104,6 +105,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		return dm.SetChargerProfile(ctx, data.(*utils.ChargerProfile), withIndex)
 	case utils.MetaRateProfiles:
 		rpl := data.(*utils.RateProfile)
+		rpl.FilterIDs = slices.Compact(rpl.FilterIDs)
 		if ratesPartial {
 			err = dm.SetRateProfile(ctx, rpl, false, true)
 		} else {
