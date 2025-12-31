@@ -1,0 +1,40 @@
+{
+    "sessions": {
+        "enabled": true,
+        "ips_conns": [
+            "*localhost"
+        ],
+        "cdrs_conns": [
+            "*localhost"
+        ],
+        "chargers_conns": [
+            "*localhost"
+        ],
+    },
+    "ips": {
+        "enabled": true,
+        "store_interval": "-1"
+    },
+    "cdrs": {
+        "enabled": true,
+    },
+    "chargers": {
+        "enabled": true
+    },
+    "radius_agent": {
+        "enabled": true,
+        "sessions_conns": [
+            "*bijson_localhost"
+        ],
+        "listeners": [
+            {
+                "network": "udp",
+                "auth_address": "127.0.0.1:1812",
+                "acct_address": "127.0.0.1:1813"
+            }
+        ]
+    },
+    "apiers": {
+        "enabled": true
+    }
+}
