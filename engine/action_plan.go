@@ -308,6 +308,9 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 	err = nil
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, act := range acts {
+			if accountActions[act.ActionType] {
+				continue
+			}
 			if expDate, parseErr := utils.ParseTimeDetectLayout(act.ExpirationString,
 				config.CgrConfig().GeneralCfg().DefaultTimezone); (act.Balance == nil || act.Balance.EmptyExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
