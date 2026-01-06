@@ -156,6 +156,30 @@ type actionTypeFunc func(*Account, *Action, Actions, *FilterS, any, SharedAction
 
 var actionFuncMap = make(map[string]actionTypeFunc)
 
+var accountActions = map[string]bool{
+	utils.MetaTopUp:                   true,
+	utils.MetaDebit:                   true,
+	utils.MetaResetTriggers:           true,
+	utils.MetaSetRecurrent:            true,
+	utils.MetaUnsetRecurrent:          true,
+	utils.MetaAllowNegative:           true,
+	utils.MetaDenyNegative:            true,
+	utils.MetaResetAccount:            true,
+	utils.MetaTopUpReset:              true,
+	utils.MetaDebitReset:              true,
+	utils.MetaTransferBalance:         true,
+	utils.MetaResetCounters:           true,
+	utils.MetaEnableAccount:           true,
+	utils.MetaDisableAccount:          true,
+	utils.MetaTransferMonetaryDefault: true,
+	utils.MetaPublishAccount:          true,
+	utils.MetaCDRAccount:              true,
+	utils.SetExpiry:                   true,
+	utils.TopUpZeroNegative:           true,
+	utils.MetaSetBalance:              true,
+	utils.MetaRemoveBalance:           true,
+}
+
 func init() {
 	actionFuncMap[utils.MetaLog] = logAction
 	actionFuncMap[utils.MetaResetTriggers] = resetTriggersAction

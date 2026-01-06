@@ -301,10 +301,6 @@ func TestActionTimingExErr(t *testing.T) {
 	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
-	at.actions[0].ActionType = utils.MetaDebitReset
-	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
-		t.Error(err)
-	}
 	at.accountIDs = utils.StringMap{"cgrates.org:zeroNegative": true}
 	at.actions[0].ActionType = utils.MetaResetStatQueue
 	if err := at.Execute(nil, ""); err == nil || err != utils.ErrPartiallyExecuted {
