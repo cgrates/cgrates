@@ -104,6 +104,21 @@ func StringMapFromSlice(s []string) StringMap {
 	return result
 }
 
+func (sm StringMap) AsPrefixedString() string {
+	if len(sm) == 0 {
+		return ""
+	}
+	res := make([]string, 0, len(sm))
+	for key, enabled := range sm {
+		if !enabled {
+			res = append(res, NegativePrefix+key)
+		} else {
+			res = append(res, key)
+		}
+	}
+	return strings.Join(res, InfieldSep)
+}
+
 func (sm StringMap) Copy(o StringMap) {
 	for k, v := range o {
 		sm[k] = v

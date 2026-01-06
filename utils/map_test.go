@@ -19,7 +19,9 @@ package utils
 
 import (
 	"reflect"
+	"slices"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -517,6 +519,58 @@ func TestStringMapFromSlice(t *testing.T) {
 		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
 	}
 
+}
+
+func TestStringMapAsPrefixedString(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  StringMap
+		expStr string
+	}{
+		{
+			name: "NormalDest",
+			input: StringMap{
+				"DEST_1001": true,
+				"DEST_1002": true,
+			},
+			expStr: "DEST_1001;DEST_1002",
+		},
+		{
+			name: "ExcludedDest",
+			input: StringMap{
+				"DEST_1003": false,
+				"DEST_1004": false,
+			},
+			expStr: "!DEST_1003;!DEST_1004",
+		},
+		{
+			name: "MixedDest",
+			input: StringMap{
+				"DEST_1001": true,
+				"DEST_1004": false,
+			},
+			expStr: "DEST_1001;!DEST_1004",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.input.AsPrefixedString()
+
+			gotDest := strings.Split(got, InfieldSep)
+			expDest := strings.Split(tt.expStr, InfieldSep)
+
+			slices.Sort(gotDest)
+			slices.Sort(expDest)
+
+			for i := range gotDest {
+				if gotDest[i] != expDest[i] {
+					t.Errorf("Mismatch at index %d! Expected: %s, Received: %s", i, expDest[i], gotDest[i])
+				}
+			}
+
+		})
+	}
 }
 
 func TestStringMapNewStringMap(t *testing.T) {
