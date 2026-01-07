@@ -22,7 +22,7 @@ require (
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201129173550-63ea3d835706
 	github.com/cgrates/fsock v0.0.0-20241217115946-62b079e0b9bc
-	github.com/cgrates/go-diameter v0.0.0-20251006100929-4b565c81dba6
+	github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
 	github.com/cgrates/ltcache v0.0.0-20250409175814-a90b4db74697
