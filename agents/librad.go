@@ -120,8 +120,12 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(chapAVPs) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(CHAPPasswordAVP)
 		}
-		return radigo.AuthenticateCHAP([]byte(pass),
-			req.Authenticator[:], chapAVPs[0].RawValue), nil
+		// RFC 2865: Use CHAP-Challenge AVP if present, otherwise Request Authenticator.
+		challenge := req.Authenticator[:]
+		if chapChallengeAVPs := req.AttributesWithName(CHAPChallengeAVP, utils.EmptyString); len(chapChallengeAVPs) > 0 {
+			challenge = chapChallengeAVPs[0].RawValue
+		}
+		return radigo.AuthenticateCHAP([]byte(pass), challenge, chapAVPs[0].RawValue), nil
 	case flags.Has(utils.MetaMSCHAPV2):
 		msChallenge := req.AttributesWithName(MSCHAPChallengeAVP, MicrosoftVendor)
 		if len(msChallenge) == 0 {
