@@ -45,7 +45,7 @@ const (
 	UserPasswordAVP    = "User-Password"
 	CHAPPasswordAVP    = "CHAP-Password"
 	MSCHAPChallengeAVP = "MS-CHAP-Challenge"
-	MSCHAPResponseAVP  = "MS-CHAP-Response"
+	MSCHAP2ResponseAVP = "MS-CHAP2-Response"
 	MicrosoftVendor    = "Microsoft"
 	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )

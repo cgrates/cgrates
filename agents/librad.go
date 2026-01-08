@@ -127,9 +127,9 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(msChallenge) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(MSCHAPChallengeAVP)
 		}
-		msResponse := req.AttributesWithName(MSCHAPResponseAVP, MicrosoftVendor)
+		msResponse := req.AttributesWithName(MSCHAP2ResponseAVP, MicrosoftVendor)
 		if len(msResponse) == 0 {
-			return false, utils.NewErrMandatoryIeMissing(MSCHAPResponseAVP)
+			return false, utils.NewErrMandatoryIeMissing(MSCHAP2ResponseAVP)
 		}
 		vsaMSResponde := msResponse[0].Value.(*radigo.VSA).RawValue
 		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA).RawValue
