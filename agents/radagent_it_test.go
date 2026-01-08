@@ -704,7 +704,7 @@ func testRAitAuthMSCHAPV2Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+	if err := authReq.AddAVPWithName("MS-CHAP2-Response", string(respVal), "Microsoft"); err != nil {
 		t.Error(err)
 	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
@@ -768,7 +768,7 @@ func testRAitAuthMSCHAPV2SuccessTCP(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+	if err := authReq.AddAVPWithName("MS-CHAP2-Response", string(respVal), "Microsoft"); err != nil {
 		t.Error(err)
 	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
@@ -831,7 +831,7 @@ func testRAitAuthMSCHAPV2Fail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+	if err := authReq.AddAVPWithName("MS-CHAP2-Response", string(respVal), "Microsoft"); err != nil {
 		t.Error(err)
 	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
@@ -886,7 +886,7 @@ func testRAitAuthMSCHAPV2FailTCP(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("MS-CHAP-Response", string(respVal), "Microsoft"); err != nil {
+	if err := authReq.AddAVPWithName("MS-CHAP2-Response", string(respVal), "Microsoft"); err != nil {
 		t.Error(err)
 	}
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
