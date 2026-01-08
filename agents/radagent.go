@@ -44,6 +44,7 @@ const (
 	MetaRadReplyCode   = "*radReplyCode"
 	UserPasswordAVP    = "User-Password"
 	CHAPPasswordAVP    = "CHAP-Password"
+	CHAPChallengeAVP   = "CHAP-Challenge"
 	MSCHAPChallengeAVP = "MS-CHAP-Challenge"
 	MSCHAP2ResponseAVP = "MS-CHAP2-Response"
 	MicrosoftVendor    = "Microsoft"

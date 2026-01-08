@@ -64,6 +64,8 @@ var (
 		testRAitAuthCHAPSuccessTCP,
 		testRAitAuthCHAPFail,
 		testRAitAuthCHAPFailTCP,
+		testRAitAuthCHAPWithChallengeAVP,
+		testRAitAuthCHAPWithChallengeAVPTCP,
 		testRAitAuthMSCHAPV2Success,
 		testRAitAuthMSCHAPV2SuccessTCP,
 		testRAitAuthMSCHAPV2Fail,
@@ -679,6 +681,104 @@ func testRAitAuthCHAPFailTCP(t *testing.T) {
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	} else if utils.RadauthFailed != string(reply.AVPs[0].RawValue) {
+		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func testRAitAuthCHAPWithChallengeAVP(t *testing.T) {
+	if raAuthClnt, err = radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil, utils.Logger); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
+	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	// Use a challenge different from the Request Authenticator
+	chapChallenge := []byte("customchallenge!")
+	if err := authReq.AddAVPWithName("CHAP-Challenge", string(chapChallenge), ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("CHAP-Password", "CGRateSPassword1", ""); err != nil {
+		t.Error(err)
+	}
+	authReq.AVPs[2].RawValue = radigo.EncodeCHAPPassword([]byte("CGRateSPassword1"), chapChallenge)
+	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585362", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessAccept {
+		t.Errorf("Received reply: %+v", utils.ToJSON(reply))
+	}
+	if len(reply.AVPs) != 1 {
+		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
+	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func testRAitAuthCHAPWithChallengeAVPTCP(t *testing.T) {
+	if raAuthClnt, err = radigo.NewClient(utils.TCP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil, utils.Logger); err != nil {
+		t.Fatal(err)
+	}
+	authReq := raAuthClnt.NewRequest(radigo.AccessRequest, 1)
+	if err := authReq.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	// Use a challenge different from the Request Authenticator
+	chapChallenge := []byte("customchallenge!")
+	if err := authReq.AddAVPWithName("CHAP-Challenge", string(chapChallenge), ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("CHAP-Password", "CGRateSPassword1", ""); err != nil {
+		t.Error(err)
+	}
+	authReq.AVPs[2].RawValue = radigo.EncodeCHAPPassword([]byte("CGRateSPassword1"), chapChallenge)
+	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585362", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAuthClnt.SendRequest(authReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Code != radigo.AccessAccept {
+		t.Errorf("Received reply: %+v", utils.ToJSON(reply))
+	}
+	if len(reply.AVPs) != 1 {
+		t.Errorf("Received AVPs: %+v", utils.ToJSON(reply.AVPs))
+	} else if !bytes.Equal([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
