@@ -79,8 +79,8 @@ github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5NcAOjdRyX0v76ZFkolu3X70fbs=
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b/go.mod h1:bKByLko2HF33K+PbiiToAgevrrbr96C+7Pp3HGS6oag=
-github.com/cgrates/go-diameter v0.0.0-20251006100929-4b565c81dba6 h1:FfPsEHEKxgGGjnhTJrQWoVWGhvp75xmTfLHkd/gz+U4=
-github.com/cgrates/go-diameter v0.0.0-20251006100929-4b565c81dba6/go.mod h1:Vfjo2o1DEmpI+csUo3cYRpCzfM9DajXZ8CR73MNeNh4=
+github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf h1:GHRbG17c8E+RjPKrH5WTdxC+nBDmUfESJw5h99ISX2g=
+github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf/go.mod h1:Vfjo2o1DEmpI+csUo3cYRpCzfM9DajXZ8CR73MNeNh4=
 github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b h1:SqTeoUV65ki0ls7zvCAn2LmKRL1jPUZO70JOspplu84=
 github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b/go.mod h1:te9B6PUvoE0jWCM7Zj4Ftrsco3mREKZ0Y29ODxAYDpY=
 github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73 h1:7AYhvpegrSkY9tLGCQsZgNl8yTjL5CaQOTr3/kYlPek=
