@@ -7653,3 +7653,22 @@ func TestUnsetRecurrentAction(t *testing.T) {
 		t.Errorf("expected trigger2.Recurrent to remain true")
 	}
 }
+
+func TestAccountActions(t *testing.T) {
+	for actType := range accountActions {
+		a := &Action{
+			ActionType: actType,
+			Balance: &BalanceFilter{
+				Type:  utils.StringPointer("test"),
+				Value: &utils.ValueFormula{Static: 1.1},
+			},
+		}
+		at := &ActionTiming{
+			actions: []*Action{a},
+		}
+		err := at.Execute(nil, "")
+		if err != nil {
+			t.Errorf("Got error for action account type %s, error %v ", actType, err)
+		}
+	}
+}
