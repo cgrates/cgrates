@@ -102,7 +102,7 @@ func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int,
 	}
 
 	var acntIDs []string // start with the indexes and check the references
-	if acntIDs, err = dm.DataDB().GetKeysForPrefix(utils.AccountActionPlansPrefix); err != nil {
+	if acntIDs, err = dm.DataDB().GetKeysForPrefix(utils.AccountActionPlansPrefix, utils.EmptyString); err != nil {
 		err = fmt.Errorf("error <%s> querying keys for accountActionPlans", err.Error())
 		return
 	}
@@ -133,7 +133,7 @@ func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int,
 	}
 
 	var apIDs []string // we have all the indexes in cache now do a reverse check
-	if apIDs, err = dm.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
+	if apIDs, err = dm.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString); err != nil {
 		err = fmt.Errorf("error <%s> querying keys for actionPlans", err.Error())
 		return
 	}
@@ -219,7 +219,7 @@ func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int
 	}
 
 	var prefixes []string // start with the indexes and check the references
-	if prefixes, err = dm.DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix); err != nil {
+	if prefixes, err = dm.DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix, utils.EmptyString); err != nil {
 		err = fmt.Errorf("error <%s> querying keys for reverseDestinations", err.Error())
 		return
 	}
@@ -249,7 +249,7 @@ func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int
 	}
 
 	var dstIDs []string // we have all the indexes in cache now do a reverse check
-	if dstIDs, err = dm.DataDB().GetKeysForPrefix(utils.DestinationPrefix); err != nil {
+	if dstIDs, err = dm.DataDB().GetKeysForPrefix(utils.DestinationPrefix, utils.EmptyString); err != nil {
 		err = fmt.Errorf("error <%s> querying keys for destinations", err.Error())
 		return
 	}
@@ -531,7 +531,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 	}
 	objPrfx := utils.CacheIndexesToPrefix[indxType]
 	var ids []string
-	if ids, err = dm.dataDB.GetKeysForPrefix(objPrfx); err != nil {
+	if ids, err = dm.dataDB.GetKeysForPrefix(objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingFltrs := utils.StringSet{} // for checking multiple filters that are missing(to not append the same ID in case)
@@ -560,7 +560,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 	// check the indexes( index->filter->obj relation)
 	idxPrfx := utils.CacheInstanceToPrefix[indxType]
 	var indexKeys []string
-	if indexKeys, err = dm.dataDB.GetKeysForPrefix(idxPrfx); err != nil {
+	if indexKeys, err = dm.dataDB.GetKeysForPrefix(idxPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}
@@ -646,7 +646,7 @@ func getRevFltrIdxHealthFromObj(dm *DataManager, fltrCache, revFltrIdxCache, obj
 	}
 	objPrfx := utils.CacheIndexesToPrefix[indxType]
 	var ids []string
-	if ids, err = dm.dataDB.GetKeysForPrefix(objPrfx); err != nil {
+	if ids, err = dm.dataDB.GetKeysForPrefix(objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids { // get all the objects
@@ -723,7 +723,7 @@ func getRevFltrIdxHealthFromObj(dm *DataManager, fltrCache, revFltrIdxCache, obj
 // getRevFltrIdxHealthFromReverse parses the reverse indexes and updates the reply
 func getRevFltrIdxHealthFromReverse(dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache, rply map[string]*ReverseFilterIHReply) (_ map[string]*ReverseFilterIHReply, err error) {
 	var revIndexKeys []string
-	if revIndexKeys, err = dm.dataDB.GetKeysForPrefix(utils.FilterIndexPrfx); err != nil {
+	if revIndexKeys, err = dm.dataDB.GetKeysForPrefix(utils.FilterIndexPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}

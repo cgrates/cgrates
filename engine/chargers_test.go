@@ -610,7 +610,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	cfg.ChargerSCfg().NestedFields = false
 
 	dbm := &DataDBMock{
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}

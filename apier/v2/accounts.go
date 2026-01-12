@@ -38,7 +38,7 @@ func (apiv2 *APIerSv2) GetAccounts(ctx *context.Context, attr *utils.AttrGetAcco
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
+		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix+tnt, utils.EmptyString); err != nil {
 			return err
 		}
 	} else {
@@ -91,7 +91,7 @@ func (apiv2 *APIerSv2) GetAccountsCount(ctx *context.Context, attr *utils.AttrGe
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
-	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
+	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix+tnt, utils.EmptyString); err != nil {
 		return err
 	}
 	if len(accountKeys) == 0 {

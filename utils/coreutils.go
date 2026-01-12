@@ -809,6 +809,7 @@ func NewTenantID(input string) *TenantID {
 
 type PaginatorWithTenant struct {
 	Tenant string
+	Search string // Global matching pattern in items returned, partially used in some APIs
 	Paginator
 }
 

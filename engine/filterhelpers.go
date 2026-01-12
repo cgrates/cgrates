@@ -50,7 +50,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	guardian.Guardian.Guard(func() (_ error) {
 		if !indexedSelects {
 			var keysWithID []string
-			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {
+			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID], utils.EmptyString); err != nil {
 				return
 			}
 			var sliceIDs []string

@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RatingProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RatingProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

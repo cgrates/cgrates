@@ -56,7 +56,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 
 	}
 	//ThresholdProfiles
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

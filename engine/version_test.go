@@ -144,7 +144,7 @@ func (sM *storageMock) Flush(string) error {
 	return nil
 }
 
-func (sM *storageMock) GetKeysForPrefix(string) ([]string, error) {
+func (sM *storageMock) GetKeysForPrefix(string, string) ([]string, error) {
 	return nil, nil
 }
 

@@ -142,7 +142,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
-			if ids, err = dm.DataDB().GetKeysForPrefix(prfx); err != nil {
+			if ids, err = dm.DataDB().GetKeysForPrefix(prfx, utils.EmptyString); err != nil {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
@@ -334,7 +334,7 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		var keys []string
-		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DestinationPrefix); err != nil {
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DestinationPrefix, utils.EmptyString); err != nil {
 			return
 		}
 		for _, key := range keys {
@@ -351,7 +351,7 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		var keys []string
-		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString); err != nil {
 			return
 		}
 		accIDs := make(map[string][]string)
@@ -1458,7 +1458,7 @@ func (dm *DataManager) GetTrendProfileIDs(tenants []string) (tps map[string][]st
 	prfx := utils.TrendsProfilePrefix
 	var keys []string
 	if len(tenants) == 0 {
-		keys, err = dm.dataDB.GetKeysForPrefix(prfx)
+		keys, err = dm.dataDB.GetKeysForPrefix(prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1466,7 +1466,7 @@ func (dm *DataManager) GetTrendProfileIDs(tenants []string) (tps map[string][]st
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx)
+			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}
@@ -1598,7 +1598,7 @@ func (dm *DataManager) GetRankingProfileIDs(tenants []string) (rns map[string][]
 	prfx := utils.RankingsProfilePrefix
 	var keys []string
 	if len(tenants) == 0 {
-		keys, err = dm.dataDB.GetKeysForPrefix(prfx)
+		keys, err = dm.dataDB.GetKeysForPrefix(prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1606,7 +1606,7 @@ func (dm *DataManager) GetRankingProfileIDs(tenants []string) (rns map[string][]
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx)
+			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}

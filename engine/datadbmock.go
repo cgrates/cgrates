@@ -23,7 +23,7 @@ import (
 )
 
 type DataDBMock struct {
-	GetKeysForPrefixF         func(string) ([]string, error)
+	GetKeysForPrefixF         func(string, string) ([]string, error)
 	GetChargerProfileDrvF     func(string, string) (*ChargerProfile, error)
 	GetFilterDrvF             func(string, string) (*Filter, error)
 	GetIndexesDrvF            func(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
@@ -65,9 +65,9 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(prf string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(prf string, srch string) ([]string, error) {
 	if dbM.GetKeysForPrefixF != nil {
-		return dbM.GetKeysForPrefixF(prf)
+		return dbM.GetKeysForPrefixF(prf, srch)
 	}
 	return nil, utils.ErrNotImplemented
 }

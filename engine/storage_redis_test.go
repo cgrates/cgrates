@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func BenchmarkRedisScan(b *testing.B) {
@@ -60,7 +62,7 @@ func BenchmarkRedisScan(b *testing.B) {
 	for _, v := range prfx {
 		b.Run(fmt.Sprintf("test case: prefix = %q", v), func(b *testing.B) {
 			for b.Loop() {
-				rs.GetKeysForPrefix(v)
+				rs.GetKeysForPrefix(v, utils.EmptyString)
 			}
 		})
 	}

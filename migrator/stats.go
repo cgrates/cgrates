@@ -61,7 +61,7 @@ type v1Stat struct {
 func (m *Migrator) migrateCurrentStats() (err error) {
 	//StatQueueProfile
 	var ids []string
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix, utils.EmptyString); err != nil {
 		return err
 	}
 	for _, id := range ids {

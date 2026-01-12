@@ -53,7 +53,7 @@ type v1ActionTriggers []*v1ActionTrigger
 
 func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

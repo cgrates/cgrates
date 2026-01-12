@@ -47,7 +47,7 @@ type v1AttributeProfile struct {
 
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}
