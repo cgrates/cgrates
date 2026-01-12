@@ -106,8 +106,9 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 	return nil
 }
 
-// GetKeysForPrefix returns the keys from cache that have the given prefix
-func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error) {
+// GetKeysForPrefix returns the keys from cache that have the given prefix. If search is
+// populated it will also match the string given in search parameter
+func (iDB *InternalDB) GetKeysForPrefix(prefix, search string) (ids []string, err error) {
 	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -118,6 +119,15 @@ func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error)
 	ids = iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], queryPrefix)
 	for i := range ids {
 		ids[i] = category + ids[i]
+	}
+	if search != utils.EmptyString {
+		var matchingIds []string // contains only the ids matching prefix and search
+		for _, id := range ids {
+			if strings.Contains(id, search) {
+				matchingIds = append(matchingIds, id)
+			}
+		}
+		return matchingIds, err
 	}
 	return
 }
@@ -409,7 +419,7 @@ func (iDB *InternalDB) RemoveActionPlanDrv(key string) (err error) {
 
 func (iDB *InternalDB) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	var keys []string
-	if keys, err = iDB.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
+	if keys, err = iDB.GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString); err != nil {
 		return
 	}
 

@@ -364,7 +364,7 @@ func (apierSv1 *APIerSv1) GetActionTriggers(ctx *context.Context, attr *AttrGetA
 		}
 
 	} else {
-		keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix)
+		keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix, utils.EmptyString)
 		if err != nil {
 			return err
 		}

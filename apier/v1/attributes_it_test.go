@@ -24,6 +24,7 @@ package v1
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -875,6 +876,52 @@ func testAttributeSGetAttPrfIDs(t *testing.T) {
 		t.Error(err)
 	} else if 10 < len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+	expected = []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_Header", "ATTR_PASS", "ATTR_RAD"}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{
+		Tenant:    "cgrates.org",
+		Search:    "ATTR", // test for prefix
+		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
+	}, &result); err != nil {
+		t.Error(err)
+	}
+	slices.Sort(result)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+	expected = []string{"ATTR_2"}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{
+		Tenant:    "cgrates.org",
+		Search:    "_2", // test for suffix
+		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
+	}, &result); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+	expected = []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_Header", "ATTR_PASS", "ATTR_RAD"}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{
+		Tenant:    "cgrates.org",
+		Search:    "TTR_", // test for middle of body
+		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
+	}, &result); err != nil {
+		t.Error(err)
+	}
+	slices.Sort(result)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	expected = []string{}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{
+		Tenant:    "cgrates.org",
+		Search:    "non matching string", // test for non matching
+		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
+	}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected error <%v>, received <%v>", utils.ErrNotFound, err)
 	}
 }
 

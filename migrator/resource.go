@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateCurrentResource() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

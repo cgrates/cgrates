@@ -669,7 +669,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant strin
 		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
+	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}

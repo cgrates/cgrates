@@ -29,7 +29,7 @@ import (
 
 func (m *Migrator) migrateCurrentDispatcher() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 
 func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherHostPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherHostPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

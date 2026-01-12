@@ -45,7 +45,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 			}, nil
 		},
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return []string{s + "cgrates.org:chr1"}, nil
 		},
 		GetFilterDrvF: func(s1, s2 string) (*Filter, error) {
@@ -106,7 +106,7 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 				},
 			}, nil
 		},
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return []string{s + "cgrates.org:chr1"}, nil
 		},
 		GetFilterDrvF: func(s1, s2 string) (*Filter, error) {
@@ -164,7 +164,7 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 			}, nil
 		},
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return []string{s + "cgrates.org:chr1"}, nil
 		},
 		GetFilterDrvF: func(s1, s2 string) (*Filter, error) {
@@ -716,7 +716,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}

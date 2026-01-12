@@ -526,7 +526,7 @@ func (apierSv1 *APIerSv1) GetRatingProfileIDs(ctx *context.Context, args *utils.
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.RatingProfilePrefix + "*out:" + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, args.Search)
 	if err != nil {
 		return err
 	}
@@ -1504,7 +1504,7 @@ func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(ctx *context.Context, _ strin
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetActionPlanIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.ActionPlanPrefix
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix, args.Search)
 	if err != nil {
 		return err
 	}
@@ -1522,7 +1522,7 @@ func (apierSv1 *APIerSv1) GetActionPlanIDs(ctx *context.Context, args *utils.Pag
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetRatingPlanIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	prfx := utils.RatingPlanPrefix
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix, args.Search)
 	if err != nil {
 		return err
 	}
@@ -1571,7 +1571,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 		switch item {
 		case utils.MetaAttributes:
 			prfx := utils.AttributeProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1609,7 +1609,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaChargers:
 			prfx := utils.ChargerProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1647,7 +1647,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaDispatchers:
 			prfx := utils.DispatcherProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1685,7 +1685,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaDispatcherHosts:
 			prfx := utils.DispatcherHostPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1721,7 +1721,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaFilters:
 			prfx := utils.FilterPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1759,7 +1759,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaResources:
 			prfx := utils.ResourceProfilesPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1797,7 +1797,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaIPs:
 			prfx := utils.IPProfilesPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1835,7 +1835,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaStats:
 			prfx := utils.StatQueueProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1873,7 +1873,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaRankings:
 			prfx := utils.RankingsProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1907,7 +1907,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaTrends:
 			prfx := utils.TrendsProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1942,7 +1942,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaRoutes:
 			prfx := utils.RouteProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}
@@ -1980,7 +1980,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 			csvWriter.Flush()
 		case utils.MetaThresholds:
 			prfx := utils.ThresholdProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 			if err != nil {
 				return err
 			}

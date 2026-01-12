@@ -163,7 +163,7 @@ func TestRemoveKeysForPrefix(t *testing.T) {
 func TestGetKeysForPrefix(t *testing.T) {
 	sqlStorage := SQLStorage{}
 	testPrefix := "1"
-	keys, err := sqlStorage.GetKeysForPrefix(testPrefix)
+	keys, err := sqlStorage.GetKeysForPrefix(testPrefix, utils.EmptyString)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
 	}

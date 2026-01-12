@@ -41,7 +41,7 @@ type v1Actions []*v1Action
 
 func (m *Migrator) migrateCurrentActions() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}
