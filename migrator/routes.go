@@ -110,7 +110,7 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 
 func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RouteProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RouteProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

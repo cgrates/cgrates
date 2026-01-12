@@ -38,7 +38,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	rpcCl := map[string]chan birpc.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetKeysForPrefixF: func(string) ([]string, error) {
+		GetKeysForPrefixF: func(string, string) ([]string, error) {
 			return []string{"dpp_cgrates.org:123"}, nil
 		},
 	}, nil, connMng)

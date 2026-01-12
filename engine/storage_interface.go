@@ -33,7 +33,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(string, string) ([]string, error)
 	RemoveKeysForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)

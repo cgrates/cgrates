@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -221,7 +222,7 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	var keys []string
-	keys, err = rs.GetKeysForPrefix("")
+	keys, err = rs.GetKeysForPrefix(utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		return
 	}
@@ -233,7 +234,7 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 
 func (rs *RedisStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	var keys []string
-	if keys, err = rs.GetKeysForPrefix(prefix); err != nil {
+	if keys, err = rs.GetKeysForPrefix(prefix, utils.EmptyString); err != nil {
 		return
 	}
 	for _, key := range keys {
@@ -272,7 +273,9 @@ func (rs *RedisStorage) RebbuildActionPlanKeys() (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+// GetKeysForPrefix returns the keys from redis that have the given prefix. If search is
+// populated it will also match the string given in search parameter
+func (rs *RedisStorage) GetKeysForPrefix(prefix, search string) ([]string, error) {
 	var keys []string
 	if prefix == utils.ActionPlanPrefix {
 		if err := rs.Cmd(&keys, redis_SMEMBERS, utils.ActionPlanIndexes); err != nil {
@@ -285,11 +288,46 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 			return nil, fmt.Errorf("failed to scan keys for prefix %s: %v", prefix, err)
 		}
 	}
+	if search != utils.EmptyString {
+		if searchKeys, err := rs.scanKeysContaining(search); err != nil {
+			return nil, fmt.Errorf("failed to scan keys for matching <%s>: %v", search, err)
+		} else {
+			var newKeys []string // keys matching prefix and search
+			for _, key := range keys {
+				if slices.Contains(searchKeys, key) {
+					newKeys = append(newKeys, key)
+				}
+			}
+			keys = newKeys
+		}
+	}
 	if len(keys) == 0 {
 		return nil, nil
 	}
 	if filterIndexesPrefixMap.Has(prefix) {
 		return rs.getKeysForFilterIndexesKeys(keys)
+	}
+	return keys, nil
+}
+
+// scanKeysContaining performs a non-blocking scan for keys matching the given search value.
+func (rs *RedisStorage) scanKeysContaining(search string) ([]string, error) {
+	if search == utils.EmptyString {
+		return nil, nil
+	}
+	var keys []string
+	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
+		Command: redis_SCAN,
+		Pattern: utils.Meta + search + utils.Meta, // Match all keys with the given prefix
+	})
+	var key string
+	for scanner.Next(&key) {
+		if strings.Contains(key, search) {
+			keys = append(keys, key)
+		}
+	}
+	if err := scanner.Close(); err != nil {
+		return nil, err
 	}
 	return keys, nil
 }
@@ -725,7 +763,7 @@ func (rs *RedisStorage) SetActionPlanDrv(key string, ats *ActionPlan) (err error
 
 func (rs *RedisStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	var keys []string
-	if keys, err = rs.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
+	if keys, err = rs.GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString); err != nil {
 		return
 	}
 	if len(keys) == 0 {

@@ -92,7 +92,7 @@ func (a *APIerSv1) GetIPProfileIDs(ctx *context.Context, args *utils.PaginatorWi
 		tnt = a.Config.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.IPProfilesPrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := a.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := a.DataManager.DataDB().GetKeysForPrefix(prfx, args.Search)
 	if err != nil {
 		return err
 	}

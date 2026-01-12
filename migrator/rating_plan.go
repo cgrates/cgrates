@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RatingPlanPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RatingPlanPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

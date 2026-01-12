@@ -672,7 +672,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 	lastID := ""
 
 	dbm := &DataDBMock{
-		GetKeysForPrefixF: func(s string) ([]string, error) {
+		GetKeysForPrefixF: func(s, _ string) ([]string, error) {
 			return nil, utils.ErrExists
 		},
 	}

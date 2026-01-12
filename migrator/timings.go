@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateCurrentTiming() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.TimingsPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.TimingsPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

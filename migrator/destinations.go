@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateCurrentDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DestinationPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DestinationPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (m *Migrator) migrateDestinations() (err error) {
 
 func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

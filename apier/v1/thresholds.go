@@ -86,7 +86,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(ctx *context.Context, args *uti
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, args.Search)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileCount(ctx *context.Context, args *u
 	}
 	var keys []string
 	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
+	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, utils.EmptyString); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

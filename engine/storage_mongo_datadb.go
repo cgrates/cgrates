@@ -25,7 +25,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -495,14 +497,31 @@ func (ms *MongoStorage) IsDBEmpty() (isEmpty bool, err error) {
 }
 
 func (ms *MongoStorage) getAllKeysMatchingField(sctx mongo.SessionContext, col, prefix,
-	subject, field string) (keys []string, err error) {
+	subject, field, search string) (keys []string, err error) {
 	fieldResult := bson.M{}
-	iter, err := ms.getCol(col).Find(sctx,
-		bson.M{
-			field: primitive.Regex{
-				Pattern: subject,
-			},
+	filter := bson.M{
+		field: primitive.Regex{
+			Pattern: subject, // filter only for subject
 		},
+	}
+	if search != utils.EmptyString { // include search string in the subject filter
+		filter = bson.M{
+			"$and": []bson.M{
+				{
+					field: primitive.Regex{
+						Pattern: subject,
+					},
+				},
+				{
+					field: primitive.Regex{
+						Pattern: ".*" + regexp.QuoteMeta(search) + ".*",
+					},
+				},
+			},
+		}
+	}
+	iter, err := ms.getCol(col).Find(sctx,
+		filter,
 		options.Find().SetProjection(
 			bson.M{
 				field: 1,
@@ -523,16 +542,33 @@ func (ms *MongoStorage) getAllKeysMatchingField(sctx mongo.SessionContext, col, 
 }
 
 func (ms *MongoStorage) getAllKeysMatchingTenantID(sctx mongo.SessionContext, col, prefix,
-	subject string, tntID *utils.TenantID) (keys []string, err error) {
+	subject, search string, tntID *utils.TenantID) (keys []string, err error) {
 	idResult := struct{ Tenant, ID string }{}
 	elem := bson.M{}
 	if tntID.Tenant != "" {
 		elem["tenant"] = tntID.Tenant
 	}
+	var idOpts []bson.M
 	if tntID.ID != "" {
-		elem["id"] = primitive.Regex{
-			Pattern: subject,
-		}
+		idOpts = append(idOpts, bson.M{
+			"id": primitive.Regex{Pattern: subject},
+		})
+	}
+	if search != utils.EmptyString {
+		idOpts = append(idOpts, bson.M{
+			"id": primitive.Regex{
+				Pattern: ".*" + regexp.QuoteMeta(search) + ".*",
+			},
+		})
+	}
+
+	switch len(idOpts) {
+	case 1:
+		// either id or search is populated
+		maps.Copy(elem, idOpts[0])
+	case 2:
+		// id and search is populated
+		elem["$and"] = idOpts
 	}
 	iter, err := ms.getCol(col).Find(sctx, elem,
 		options.Find().SetProjection(bson.M{"tenant": 1, "id": 1}),
@@ -576,7 +612,7 @@ func (ms *MongoStorage) getAllIndexKeys(sctx mongo.SessionContext, prefix string
 }
 
 // GetKeysForPrefix retrieves keys matching the specified prefix across different categories.
-func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err error) {
+func (ms *MongoStorage) GetKeysForPrefix(prefix, search string) (keys []string, err error) {
 	var category, subject string
 	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
@@ -589,67 +625,67 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 		var qryErr error
 		switch category {
 		case utils.DestinationPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColDst, utils.DestinationPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColDst, utils.DestinationPrefix, subject, "key", search)
 		case utils.ReverseDestinationPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRds, utils.ReverseDestinationPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRds, utils.ReverseDestinationPrefix, subject, "key", search)
 		case utils.RatingPlanPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRpl, utils.RatingPlanPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRpl, utils.RatingPlanPrefix, subject, "key", search)
 		case utils.RatingProfilePrefix:
 			if strings.HasPrefix(prefix[keyLen:], utils.MetaOut) {
 				// Rewrite the id as it starts with '*' (from "*out").
 				subject = "^\\" + prefix[keyLen:]
 			}
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRpf, utils.RatingProfilePrefix, subject, "id")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColRpf, utils.RatingProfilePrefix, subject, "id", search)
 		case utils.ActionPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAct, utils.ActionPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAct, utils.ActionPrefix, subject, "key", search)
 		case utils.ActionPlanPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColApl, utils.ActionPlanPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColApl, utils.ActionPlanPrefix, subject, "key", search)
 		case utils.ActionTriggerPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAtr, utils.ActionTriggerPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAtr, utils.ActionTriggerPrefix, subject, "key", search)
 		case utils.SharedGroupPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColShg, utils.SharedGroupPrefix, subject, "id")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColShg, utils.SharedGroupPrefix, subject, "id", search)
 		case utils.AccountPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAcc, utils.AccountPrefix, subject, "id")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAcc, utils.AccountPrefix, subject, "id", search)
 		case utils.ResourceProfilesPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, search, tntID)
 		case utils.ResourcesPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, subject, search, tntID)
 		case utils.IPProfilesPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPp, utils.IPProfilesPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPp, utils.IPProfilesPrefix, subject, search, tntID)
 		case utils.IPAllocationsPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPs, utils.IPAllocationsPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPs, utils.IPAllocationsPrefix, subject, search, tntID)
 		case utils.StatQueuePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, subject, search, tntID)
 		case utils.RankingsProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingsProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingsProfilePrefix, subject, search, tntID)
 		case utils.TrendsProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrp, utils.TrendsProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrp, utils.TrendsProfilePrefix, subject, search, tntID)
 		case utils.StatQueueProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, search, tntID)
 		case utils.AccountActionPlansPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key", search)
 		case utils.TimingsPrefix:
-			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
+			keys, qryErr = ms.getAllKeysMatchingField(sctx, ColTmg, utils.TimingsPrefix, subject, "id", search)
 		case utils.TrendPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrd, utils.TrendPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrd, utils.TrendPrefix, subject, search, tntID)
 		case utils.RankingPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRnk, utils.RankingPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRnk, utils.RankingPrefix, subject, search, tntID)
 		case utils.FilterPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColFlt, utils.FilterPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColFlt, utils.FilterPrefix, subject, search, tntID)
 		case utils.ThresholdPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColThs, utils.ThresholdPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColThs, utils.ThresholdPrefix, subject, search, tntID)
 		case utils.ThresholdProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTps, utils.ThresholdProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTps, utils.ThresholdProfilePrefix, subject, search, tntID)
 		case utils.RouteProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRts, utils.RouteProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRts, utils.RouteProfilePrefix, subject, search, tntID)
 		case utils.AttributeProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColAttr, utils.AttributeProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColAttr, utils.AttributeProfilePrefix, subject, search, tntID)
 		case utils.ChargerProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColCpp, utils.ChargerProfilePrefix, subject, search, tntID)
 		case utils.DispatcherProfilePrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, search, tntID)
 		case utils.DispatcherHostPrefix:
-			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColDph, utils.DispatcherHostPrefix, subject, search, tntID)
 		case utils.AttributeFilterIndexes:
 			keys, qryErr = ms.getAllIndexKeys(sctx, utils.AttributeFilterIndexes)
 		case utils.ResourceFilterIndexes:
@@ -1300,7 +1336,7 @@ func (ms *MongoStorage) RemoveActionPlanDrv(key string) error {
 }
 
 func (ms *MongoStorage) GetAllActionPlansDrv() (map[string]*ActionPlan, error) {
-	keys, err := ms.GetKeysForPrefix(utils.ActionPlanPrefix)
+	keys, err := ms.GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString)
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,7 @@ func (at *v1ActionPlan) IsASAP() bool {
 
 func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString)
 	if err != nil {
 		return
 	}

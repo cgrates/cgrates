@@ -29,7 +29,7 @@ import (
 
 func (m *Migrator) migrateCurrentCharger() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

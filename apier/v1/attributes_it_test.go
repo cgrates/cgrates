@@ -24,6 +24,7 @@ package v1
 import (
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -874,6 +875,19 @@ func testAttributeSGetAttPrfIDs(t *testing.T) {
 	}, &result); err != nil {
 		t.Error(err)
 	} else if 10 < len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+	expected = []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_Header", "ATTR_PASS", "ATTR_RAD"}
+	if err := attrSRPC.Call(context.Background(), utils.APIerSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{
+		Tenant:    "cgrates.org",
+		Search:    "ATTR",
+		Paginator: utils.Paginator{Limit: utils.IntPointer(10)},
+	}, &result); err != nil {
+		t.Error(err)
+	}
+	slices.Sort(result)
+	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }

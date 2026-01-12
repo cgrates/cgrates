@@ -364,7 +364,7 @@ func (apierSv1 *APIerSv1) GetAccounts(ctx *context.Context, attr *utils.AttrGetA
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
+		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix+tnt, utils.EmptyString); err != nil {
 			return err
 		}
 	} else {
@@ -777,7 +777,7 @@ func (apierSv1 *APIerSv1) GetAccountsCount(ctx *context.Context, attr *utils.Ten
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
-	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
+	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix+tnt, utils.EmptyString); err != nil {
 		return
 	}
 	*reply = len(accountKeys)

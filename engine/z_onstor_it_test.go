@@ -241,7 +241,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCAp := []string{"apl_MORE_MINUTES"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCAp, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAp, itm)
@@ -308,7 +308,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCAt := []string{"atr_testOnStorITCacheActionTrigger"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCAt, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAt, itm)
@@ -368,7 +368,7 @@ func testOnStorITHasData(t *testing.T) {
 		t.Error(err)
 	}
 	expectedRP := []string{"rpl_HasData"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
@@ -475,7 +475,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 		}
 	}
 	expectedRP := []string{"rpl_HasData", "rpl_CRUDRatingPlan"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
@@ -571,7 +571,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 	}
 
 	expectedCRPl := []string{"rpf_*out:test:1:trp"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCRPl, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCRPl, itm)
@@ -786,7 +786,7 @@ func testOnStorITActions(t *testing.T) {
 		}
 	}
 	expectedCA := []string{"act_MINI"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCA, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
@@ -1272,7 +1272,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST2"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -1328,7 +1328,7 @@ func testOnStorITResource(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"res_cgrates.org:RL1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ResourcesPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ResourcesPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1388,7 +1388,7 @@ func testOnStorITTiming(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
 	}
 	expectedT := []string{"tmg_TEST"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.TimingsPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.TimingsPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1534,7 +1534,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"sqp_cgrates.org:test"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -1599,7 +1599,7 @@ func testOnStorITStatQueue(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"stq_cgrates.org:Test_StatQueue"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueuePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1681,7 +1681,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"thp_cgrates.org:test"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
@@ -1731,7 +1731,7 @@ func testOnStorITThreshold(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedT := []string{"thd_cgrates.org:TH1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1799,7 +1799,7 @@ func testOnStorITFilter(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	expectedT := []string{"ftr_cgrates.org:Filter1", "ftr_cgrates.org:TestFilter2"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.FilterPrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.FilterPrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedT), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedT), len(itm))
@@ -1898,7 +1898,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	expectedT := []string{"rpp_cgrates.org:SPRF_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RouteProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RouteProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -1998,7 +1998,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	expectedT := []string{"alp_cgrates.org:AttrPrf1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -2164,7 +2164,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	expectedT := []string{"cpp_cgrates.org:CPP_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
@@ -2219,7 +2219,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
 	}
 	expectedT := []string{"dpp_cgrates.org:Dsp1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)

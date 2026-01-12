@@ -37,7 +37,7 @@ const (
 
 func (m *Migrator) migrateCurrentAccounts() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AccountPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AccountPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

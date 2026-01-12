@@ -34,7 +34,7 @@ type v1SharedGroup struct {
 
 func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SharedGroupPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SharedGroupPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

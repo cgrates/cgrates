@@ -190,7 +190,7 @@ func (apiv2 *APIerSv2) GetActions(ctx *context.Context, attr *AttrGetActions, re
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
-		if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
+		if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix, utils.EmptyString); err != nil {
 			return err
 		}
 	} else {
@@ -240,7 +240,7 @@ type AttrGetActionsCount struct{}
 // returns ErrNotFound in case of 0 actions
 func (apiv2 *APIerSv2) GetActionsCount(ctx *context.Context, attr *AttrGetActionsCount, reply *int) (err error) {
 	var actionKeys []string
-	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
+	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix, utils.EmptyString); err != nil {
 		return err
 	}
 	*reply = len(actionKeys)
@@ -258,7 +258,7 @@ type AttrGetDestinations struct {
 func (apiv2 *APIerSv2) GetDestinations(ctx *context.Context, attr *AttrGetDestinations, reply *[]*engine.Destination) (err error) {
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
-		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DestinationPrefix); err != nil {
+		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DestinationPrefix, utils.EmptyString); err != nil {
 			return
 		}
 		for i, destID := range attr.DestinationIDs {

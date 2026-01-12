@@ -72,7 +72,7 @@ func (rs *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+func (sqls *SQLStorage) GetKeysForPrefix(prefix, _ string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 

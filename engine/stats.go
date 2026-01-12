@@ -549,7 +549,7 @@ func (sS *StatService) V1GetQueueIDs(ctx *context.Context, tenant string, qIDs *
 		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := sS.dm.DataDB().GetKeysForPrefix(prfx)
+	keys, err := sS.dm.DataDB().GetKeysForPrefix(prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}
