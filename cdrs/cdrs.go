@@ -126,7 +126,7 @@ func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGR
 		utils.AccountSv1DebitAbstracts, cgrEv, acntCost); err != nil {
 		return
 	}
-	cgrEv.APIOpts[utils.MetaAccountSCost] = acntCost
+	cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
 	return
 }
 
@@ -257,10 +257,10 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		if !acntS {
 			continue
 		}
-		if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
+		if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountsCost]; wasCharged {
 			ecCostMap, ok := ecCostIface.(*utils.EventCharges)
 			if !ok {
-				return nil, fmt.Errorf("expected %s to be a  *utils.EventCharges, got %T", utils.MetaAccountSCost, ecCostMap)
+				return nil, fmt.Errorf("expected %s to be a  *utils.EventCharges, got %T", utils.MetaAccountsCost, ecCostMap)
 			}
 
 			// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
@@ -412,7 +412,7 @@ func populateCost(cgrOpts map[string]any) *utils.Decimal {
 		return nil
 	}
 	// check firstly in accounts
-	if accCost, has := cgrOpts[utils.MetaAccountSCost]; has {
+	if accCost, has := cgrOpts[utils.MetaAccountsCost]; has {
 		return accCost.(*utils.EventCharges).Concretes
 	}
 	// after check in rates

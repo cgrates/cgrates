@@ -786,7 +786,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]any{
-			utils.MetaAccountSCost: &utils.EventCharges{},
+			utils.MetaAccountsCost: &utils.EventCharges{},
 			utils.MetaSubsys:       utils.MetaAccounts,
 		},
 	}
@@ -808,7 +808,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]any{
-			utils.MetaAccountSCost: cgrEv.APIOpts[utils.MetaAccountSCost],
+			utils.MetaAccountsCost: cgrEv.APIOpts[utils.MetaAccountsCost],
 			utils.MetaSubsys:       utils.MetaAccounts,
 		},
 	}
@@ -2167,7 +2167,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
 
 	apiOpts := map[string]any{
-		utils.MetaAccountSCost: &utils.EventCharges{},
+		utils.MetaAccountsCost: &utils.EventCharges{},
 		utils.MetaSubsys:       utils.AccountSConnsCfg,
 	}
 	eChrgs := &utils.EventCharges{
@@ -2243,7 +2243,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
 
 	apiOpts := map[string]any{
-		utils.MetaAccountSCost: &utils.EventCharges{},
+		utils.MetaAccountsCost: &utils.EventCharges{},
 		utils.MetaSubsys:       utils.AccountSConnsCfg,
 	}
 	eChrgs := &utils.EventCharges{
@@ -2266,7 +2266,7 @@ func TestPopulateCost(t *testing.T) {
 			utils.Usage: "10s",
 		},
 		APIOpts: map[string]any{
-			utils.MetaAccountSCost: &utils.EventCharges{
+			utils.MetaAccountsCost: &utils.EventCharges{
 				Concretes: utils.NewDecimal(400, 0),
 			},
 		},
@@ -2358,7 +2358,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: &utils.EventCharges{
+			utils.MetaAccountsCost: &utils.EventCharges{
 				Concretes: utils.NewDecimal(400, 0),
 			},
 		},
@@ -2396,7 +2396,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: &utils.EventCharges{
+			utils.MetaAccountsCost: &utils.EventCharges{
 				Concretes: utils.NewDecimal(1, 2),
 			},
 		},
@@ -2434,7 +2434,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.MetaAccounts:     true,
 			"*context":             utils.MetaCDRs,
-			utils.MetaAccountSCost: &utils.EventCharges{},
+			utils.MetaAccountsCost: &utils.EventCharges{},
 		},
 	}
 	expErr := "PARTIALLY_EXECUTED"

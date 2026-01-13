@@ -72,6 +72,7 @@ type SessionsOpts struct {
 	Routes                 []*DynamicBoolOpt
 	Stats                  []*DynamicBoolOpt
 	Thresholds             []*DynamicBoolOpt
+	Authorize              []*DynamicBoolOpt
 	Initiate               []*DynamicBoolOpt
 	Update                 []*DynamicBoolOpt
 	Terminate              []*DynamicBoolOpt
@@ -100,6 +101,10 @@ type SessionsOpts struct {
 	TTLUsage               []*DynamicDurationPointerOpt
 	OriginID               []*DynamicStringOpt
 	AccountsForceUsage     []*DynamicBoolOpt
+	AccountsAuthorize      []*DynamicBoolOpt
+	AccountsInitialize     []*DynamicBoolOpt
+	AccountsUpdate         []*DynamicBoolOpt
+	AccountsTerminate      []*DynamicBoolOpt
 }
 
 // SessionSCfg is the config section for SessionS

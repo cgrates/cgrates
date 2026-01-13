@@ -838,7 +838,7 @@ const (
 	MetaRadDMRTemplate      = "*radDMRTemplate"
 	MetaCost                = "*cost"
 	MetaRateSCost           = "*rateSCost"
-	MetaAccountSCost        = "*accountSCost"
+	MetaAccountsCost        = "*accountsCost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
 	MetaFileName            = "*fileName"

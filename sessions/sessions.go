@@ -953,6 +953,24 @@ func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent)
 	return
 }
 
+// authorizeIPs will authorize the event with IPs subsystem
+func (sS *SessionS) authorizeIPs(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
+	if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
+		err = errors.New("IPs is disabled")
+		return
+	}
+	var alcIP utils.AllocatedIP
+	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
+		utils.IPsV1AuthorizeIP,
+		cgrEv, &alcIP); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s could not authorize IP for event: %+v",
+				utils.SessionS, err.Error(), cgrEv))
+	}
+	return &alcIP, nil
+
+}
+
 // getSessions is used to return in a thread-safe manner active or passive sessions
 func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work

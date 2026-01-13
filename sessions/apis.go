@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -784,25 +785,25 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 
 // BiRPCv1ProcessEvent processes an CGREvent with various subsystems
 func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
-	args *utils.CGREvent, authReply *V1ProcessEventReply) (err error) {
-	if args == nil {
+	apiArgs *utils.CGREvent, apiRply *V1ProcessEventReply) (err error) {
+	if apiArgs == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if args.Event == nil {
+	if apiArgs.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if args.APIOpts == nil {
-		args.APIOpts = make(map[string]any)
+	if apiArgs.APIOpts == nil {
+		apiArgs.APIOpts = make(map[string]any)
 	}
-	if args.ID == "" {
-		args.ID = utils.GenUUID()
+	if apiArgs.ID == "" {
+		apiArgs.ID = utils.GenUUID()
 	}
-	if args.Tenant == "" {
-		args.Tenant = sS.cfg.GeneralCfg().DefaultTenant
+	if apiArgs.Tenant == "" {
+		apiArgs.Tenant = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if sS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, apiArgs.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -810,14 +811,118 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*authReply = *cachedResp.Result.(*V1ProcessEventReply)
+				*apiRply = *cachedResp.Result.(*V1ProcessEventReply)
 			}
 			return cachedResp.Error
 		}
 		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: authReply, Error: err},
+			&utils.CachedRPCResponse{Result: apiRply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
+
+	cgrEvs := map[string]*utils.CGREvent{
+		utils.MetaDefault: apiArgs,
+	}
+
+	cch := make(map[string]any)
+
+	// processing AttributeS first gives us the opportunity of enhancing all the other flags
+	// check for *attribute
+	if attrS, errAttrS := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
+		utils.MetaAttributes); errAttrS != nil {
+		return errAttrS
+	} else {
+		cch[utils.MetaAttributes] = attrS
+	}
+	if cch[utils.MetaAttributes].(bool) {
+		apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
+		if rplyAttr, errProc := sS.processAttributes(ctx, apiArgs); errProc != nil {
+			if errProc.Error() != utils.ErrNotFound.Error() {
+				return utils.NewErrAttributeS(errProc)
+			}
+		} else {
+			*apiArgs = *rplyAttr.CGREvent
+			apiRply.Attributes[utils.MetaDefault] = &rplyAttr
+		}
+	}
+
+	// ChargerS will multiply/alter the event before any auth/accounting/cdr taking place
+	if chrgS, errChrg := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
+		utils.MetaChargers); errChrg != nil {
+		return errChrg
+	} else {
+		cch[utils.MetaChargers] = chrgS
+	}
+	if cch[utils.MetaChargers].(bool) {
+		delete(cgrEvs, utils.MetaDefault) // ChargerS becomes responsive of charging
+		var chrgrs []*chargers.ChrgSProcessEventReply
+		if chrgrs, err = sS.processChargerS(ctx, apiArgs); err != nil {
+			return
+		}
+		for _, chrgr := range chrgrs {
+			cgrEvs[utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])] = chrgr.CGREvent
+		}
+	}
+
+	// same processing for each event
+	for runID, cgrEv := range cgrEvs {
+		cchEv := make(map[string]any)
+		//var partiallyExecuted bool // will be	 added to the final answer if true
+		if blkrErr, errBlkr := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
+			utils.OptsSesBlockerError, utils.MetaBlockerErrorCfg); errBlkr != nil {
+			return errBlkr
+		} else {
+			cchEv[utils.OptsSesBlockerError] = blkrErr
+		}
+
+		// IPs Enabled
+		if ipS, errIPs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPs,
+			utils.MetaIPs); errIPs != nil {
+			return errIPs
+		} else {
+			cchEv[utils.MetaIPs] = ipS
+		}
+
+		// AccountS Enabled
+		if acntS, errAcnts := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Accounts,
+			utils.MetaIPs); errAcnts != nil {
+			return errAcnts
+		} else {
+			cchEv[utils.MetaAccounts] = acntS
+		}
+
+		// Auth the events
+		if auth, errAuth := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
+			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
+			utils.MetaAuthorize); errAuth != nil {
+			return errAuth
+		} else {
+			cchEv[utils.MetaAuthorize] = auth
+		}
+
+		//IPsAuthorizeBool
+		if ipsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
+			utils.MetaIPsAuthorizeCfg); errBool != nil {
+			return errBool
+		} else {
+			cchEv[utils.MetaIPsAuthorizeCfg] = ipsAuthBool
+		}
+		// IPAuthorization
+		if cchEv[utils.MetaIPsAuthorizeCfg].(bool) ||
+			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaIPs].(bool)) {
+			var authIP *utils.AllocatedIP
+			if authIP, err = sS.authorizeIPs(ctx, cgrEv); err != nil {
+				return
+			}
+			apiRply.IPsAllocation[runID] = authIP
+		}
+	}
 	return
 }

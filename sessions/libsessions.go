@@ -326,8 +326,9 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
 	AccountSUsage      map[string]time.Duration                      `json:",omitempty"`
-	RateSCost          map[string]float64                            `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
+	RateSCost          map[string]float64                            `json:",omitempty"`
 	ResourceAllocation map[string]string                             `json:",omitempty"`
+	IPsAllocation      map[string]*utils.AllocatedIP                 `json:",omitempty"`
 	Attributes         map[string]*attributes.AttrSProcessEventReply `json:",omitempty"`
 	RouteProfiles      map[string]routes.SortedRoutesList            `json:",omitempty"`
 	ThresholdIDs       map[string][]string                           `json:",omitempty"`
