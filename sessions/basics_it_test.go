@@ -220,7 +220,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 		for costKey, want := range wantCosts {
 			switch costKey {
 			case utils.Abstracts, utils.Concretes:
-				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				cd := getCostDetails(t, cdr, utils.MetaAccountsCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}
@@ -260,7 +260,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 		for costKey, want := range wantCosts {
 			switch costKey {
 			case "abstracts", "concretes":
-				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				cd := getCostDetails(t, cdr, utils.MetaAccountsCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}
@@ -288,7 +288,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 		for costKey, want := range wantCosts {
 			switch costKey {
 			case utils.Abstracts, utils.Concretes:
-				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				cd := getCostDetails(t, cdr, utils.MetaAccountsCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}
