@@ -21,8 +21,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"cmp"
 	"net/netip"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -215,6 +217,9 @@ cgrates.org,IPs2,*string:~*req.Account:1002,,2s,false,20,POOL1,*string:~*req.Des
 		if err != nil {
 			t.Fatal(err)
 		}
+		slices.SortFunc(profile.Pools, func(a, b *engine.IPPool) int {
+			return cmp.Compare(a.ID, b.ID)
+		})
 		verifyIPProfile(t, &profile, expectedIPs1Profile)
 
 		err = client.Call(context.Background(), utils.APIerSv1GetIPProfile,
@@ -494,11 +499,11 @@ func getIPAllocations(t *testing.T, client *birpc.Client, profileID string) *eng
 	return &allocs
 }
 
-func verifyAllocatedIP(t *testing.T, got, expected *engine.AllocatedIP) {
+func verifyAllocatedIP(t *testing.T, got, want *engine.AllocatedIP) {
 	t.Helper()
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("AllocatedIP mismatch:\nExpected: %s\nGot: %s",
-			utils.ToIJSON(expected), utils.ToIJSON(got))
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("AllocatedIP mismatch:\nwant: %s\ngot: %s",
+			utils.ToJSON(want), utils.ToJSON(got))
 	}
 }
 
@@ -543,10 +548,10 @@ func verifyIPAllocation(t *testing.T, client *birpc.Client, profileID, allocID, 
 	}
 }
 
-func verifyIPProfile(t *testing.T, got, expected *engine.IPProfile) {
+func verifyIPProfile(t *testing.T, got, want *engine.IPProfile) {
 	t.Helper()
-	if !reflect.DeepEqual(got, expected) {
+	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Profile mismatch:\nwant: %s\ngot: %s",
-			utils.ToIJSON(expected), utils.ToIJSON(got))
+			utils.ToJSON(want), utils.ToJSON(got))
 	}
 }
