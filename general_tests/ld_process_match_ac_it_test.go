@@ -187,7 +187,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 				"ToR":         "*voice",
 			},
 			APIOpts: map[string]any{
-				utils.MetaAccountSCost: map[string]any{
+				utils.MetaAccountsCost: map[string]any{
 					"Abstracts":  0,
 					"Accounting": map[string]any{},
 					"Accounts": map[string]any{
