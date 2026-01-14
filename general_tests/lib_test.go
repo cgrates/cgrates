@@ -50,11 +50,13 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 // TestEnvironment holds the setup parameters and configurations
 // required for running integration tests.
 type TestEnvironment struct {
-	ConfigPath string            // file path to the main configuration file
-	ConfigJSON string            // contains the configuration JSON content if ConfigPath is missing
-	TpPath     string            // specifies the path to the tariff plans
-	TpFiles    map[string]string // maps CSV filenames to their content for tariff plan loading
-	LogBuffer  io.Writer         // captures the log output of the test environment
+	ConfigPath     string            // file path to the main configuration file
+	ConfigJSON     string            // contains the configuration JSON content if ConfigPath is missing
+	TpPath         string            // specifies the path to the tariff plans
+	TpFiles        map[string]string // maps CSV filenames to their content for tariff plan loading
+	PreserveDataDB bool              // prevents automatic data_db flush when set
+	PreserveStorDB bool              // prevents automatic stor_db flush when set
+	LogBuffer      io.Writer         // captures the log output of the test environment
 }
 
 // Setup initializes the testing environment using the provided configuration. It loads the configuration
@@ -76,7 +78,7 @@ func (env TestEnvironment) Setup(t *testing.T, engineDelay int) (*rpc.Client, *c
 		cfg, env.ConfigPath = initCfg(t, env.ConfigJSON)
 	}
 
-	flushDBs(t, cfg, true, true)
+	flushDBs(t, cfg, !env.PreserveDataDB, !env.PreserveStorDB)
 	startEngine(t, cfg, env.ConfigPath, engineDelay, env.LogBuffer)
 
 	client, err := newRPCClient(cfg.ListenCfg())
