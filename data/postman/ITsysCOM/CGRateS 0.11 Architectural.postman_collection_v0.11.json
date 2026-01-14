@@ -1,0 +1,4017 @@
+{
+	"info": {
+		"_postman_id": "5f07cf53-3494-4bdd-b015-fe691da2c32a",
+		"name": "CGRateS 0.11 Architectural",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50854024",
+		"_collection_link": "https://armir-veliaj-6785241.postman.co/workspace/Armir-Veliaj's-Workspace~21f08ff6-63e6-4768-8232-94ed953c13a2/collection/50854024-5f07cf53-3494-4bdd-b015-fe691da2c32a?action=share&source=collection_link&creator=50854024"
+	},
+	"item": [
+		{
+			"name": "AttributeS",
+			"item": [
+				{
+					"name": "AttributeSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"AttributeSv1.Ping\",\n\t\"params\": [{\n\t\t\"Tenant\": \"\",\n\t\t\"ID\": \"\",\n\t\t\"Time\": null,\n\t\t\"Event\": null\n\t}],\n\t\"id\": 33\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetAttributeProfile/accountAliasing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetAttributeProfile\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"ATTR_ACC_ALIAS\",\n    \"Contexts\": [\"*any\"],\n    \"FilterIDs\": [\"*string:~*req.SubscriberId:1006\"],\n    \"Attributes\": [\n      {\n        \"Path\": \"*req.Account\",\n        \"Type\": \"*constant\",\n        \"Value\": [{\"Rules\": \"1001\"}]\n      },\n      {\n        \"Path\": \"*req.RequestType\",\n        \"Type\": \"*constant\",\n        \"Value\": [{\"Rules\": \"*prepaid\"}]\n      }\n    ],\n    \"Blocker\": false,\n    \"Weight\": 10\n  }],\n  \"id\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv2.SetAttributeProfile/simpleAuth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetAttributeProfile\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"ATTR_1001_SIMPLEAUTH\",\n    \"Contexts\": [\"simpleauth\"],\n    \"FilterIDs\": [\"*string:~*req.Account:1001\"],\n    \"Attributes\": [\n      {\n        \"Path\": \"*req.Password\",\n        \"Type\": \"*constant\",\n        \"Value\": [{\"Rules\": \"CGRateS.org\"}]\n      }\n    ],\n    \"Blocker\": false,\n    \"Weight\": 20\n  }],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AdminSv1.GetAttributeProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.GetAttributeProfile\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"ATTR_ACC_ALIAS\"\n  }],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AttributeSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AttributeSv1.ProcessEvent\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"Event\": {\n      \"SubscriberId\": \"1006\"\n    },\n    \"APIOpts\": {\n      \"*context\": \"*any\"\n    }\n  }],\n  \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AttributeSv1.GetAttributeForEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"AttributeSv1.GetAttributeForEvent\",\n\t\"params\": [{\n\t\t\"AttributeIDs\": null,\n\t\t\"Context\": \"*sessions\",\n\t\t\"ProcessRuns\": null,\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"testAttributeSGetAttributeForEvent\",\n\t\t\"Time\": null,\n\t\t\"Event\": {\n\t\t\t \"SubscriberId\": \"1006\"\n\t\t}\n\t}],\n\t\"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveAttributeProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.RemoveAttributeProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"ATTR_ACC_ALIAS\",\n\t\t\"Cache\": null\n\t}],\n\t\"id\": 28\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Accounting",
+			"item": [
+				{
+					"name": "ApierV2.SetAccount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV2.SetAccount\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Account\": \"1001\",\n\t\t\"ActionPlanIDs\": null,\n\t\t\"ActionPlansOverwrite\": true,\n\t\t\"ActionTriggerIDs\": null,\n\t\t\"ActionTriggerOverwrite\": false,\n\t\t\"ReloadScheduler\": false\n\t}],\n\t\"id\": 17\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV2.SetAccountDisable",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV2.SetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"1001\",\n            \"ExtraOptions\": {\n                \"Disabled\": false\n            }\n        }\n    ],\n    \"id\": 17\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV2.GetAccount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV2.GetAccount\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Account\": \"1001\"\n\t}],\n\t\"id\": 12\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.SetBalance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetBalance\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"1001\",\n            \"BalanceType\": \"*monetary\",\n            \"Balance\": {\n                \"ID\": \"test2\",\n                \"Value\": 500\n            },\n            \"ActionExtraData\": null,\n            \"Cdrlog\": false\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetMaxUsage",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.GetMaxUsage\",\n\t\"params\": [{\n\t\t\"ToR\": \"*voice\",\n\t\t\"RequestType\": \"*prepaid\",\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Category\": \"call\",\n\t\t\"Account\": \"1001\",\n\t\t\"Destination\": \"1002\",\n\t\t\"SetupTime\": \"*now\",\n\t\t\"Usage\": \"72h\",\n\t\t\"ExtraFields\": null\n\t}],\n\t\"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ChargerS",
+			"item": [
+				{
+					"name": "ChargerSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ChargerSv1.Ping\",\n\t\"params\": [{\n\t\t\"Tenant\": \"\",\n\t\t\"ID\": \"\",\n\t\t\"Time\": null,\n\t\t\"Event\": null\n\t}],\n\t\"id\": 14\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.SetChargerProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.SetChargerProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"Charger1\",\n\t\t\"FilterIDs\": [\"*string:~Account:1001\"],\n\t\t\"ActivationInterval\": {\n\t\t\t\"ActivationTime\": \"2014-07-29T15:00:00Z\",\n\t\t\t\"ExpiryTime\": \"0001-01-01T00:00:00Z\"\n\t\t},\n\t\t\"RunID\": \"*default\",\n\t\t\"AttributeIDs\": [\"ATTR_1001_SIMPLEAUTH\"],\n\t\t\"Weight\": 20,\n\t\t\"Cache\": null\n\t}],\n\t\"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetChargerProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.GetChargerProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"Charger1\"\n\t}],\n\t\"id\": 7\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChargerSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ChargerSv1.ProcessEvent\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"event1\",\n\t\t\"Time\": null,\n\t\t\"Event\": {\n\t\t\t\"Account\": \"1001\"\n\n\t\t}\n\t}],\n\t\"id\": 5\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChargerSv1.GetChargersForEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ChargerSv1.GetChargersForEvent\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"event1\",\n\t\t\"Time\": null,\n\t\t\"Event\": {\n\t\t\t\"Account\": \"1001\"\n\t\t}\n\t}],\n\t\"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveChargerProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.RemoveChargerProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"Charger1\"\n\t}],\n\t\"id\": 11\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DefaultCharger",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.SetChargerProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"ChargerCustomer\",\n\t\t\"RunID\": \"*default\",\n\t\t\"AttributeIDs\": [\"ATTR_1001_SIMPLEAUTH\"],\n\t\t\"Weight\": 20,\n\t\t\"Cache\": null\n\t}],\n\t\"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetChargerProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetChargerProfileIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"Opts\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChargerSupplier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.SetChargerProfile\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"ChargerSupplier\",\n\t\t\"RunID\": \"ChargerSupplier\",\n\t\t\"AttributeIDs\": [\"ATTR_CHARGER_1\"],\n\t\t\"Weight\": 10,\n\t\t\"Cache\": null\n\t}],\n\t\"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CacheS",
+			"item": [
+				{
+					"name": "CacheSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.Ping\",\n\t\"params\": [null],\n\t\"id\": 23\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.LoadCache",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.LoadCache\",\n\t\"params\": [{\n\t\t\"DestinationIDs\": null,\n\t\t\"ReverseDestinationIDs\": null,\n\t\t\"RatingPlanIDs\": null,\n\t\t\"RatingProfileIDs\": [\"*out:cgrates.org:sms:1003\"],\n\t\t\"ActionIDs\": null,\n\t\t\"ActionPlanIDs\": null,\n\t\t\"AccountActionPlanIDs\": null,\n\t\t\"ActionTriggerIDs\": null,\n\t\t\"SharedGroupIDs\": null,\n\t\t\"ResourceProfileIDs\": null,\n\t\t\"ResourceIDs\": null,\n\t\t\"StatsQueueIDs\": null,\n\t\t\"StatsQueueProfileIDs\": null,\n\t\t\"ThresholdIDs\": null,\n\t\t\"ThresholdProfileIDs\": null,\n\t\t\"FilterIDs\": null,\n\t\t\"SupplierProfileIDs\": null,\n\t\t\"AttributeProfileIDs\": [\"cgrates.org:ATTR_1001_SIMPLEAUTH\"],\n\t\t\"ChargerProfileIDs\": null,\n\t\t\"DispatcherProfileIDs\": null,\n\t\t\"DispatcherHostIDs\": null,\n\t\t\"DispatcherRoutesIDs\": null,\n\t\t\"FlushAll\": false\n\t}],\n\t\"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.ReloadCache",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.ReloadCache\",\n\t\"params\": [{\n\t\t\"DestinationIDs\": null,\n\t\t\"ReverseDestinationIDs\": null,\n\t\t\"RatingPlanIDs\": null,\n\t\t\"RatingProfileIDs\": null,\n\t\t\"ActionIDs\": null,\n\t\t\"ActionPlanIDs\": null,\n\t\t\"AccountActionPlanIDs\": null,\n\t\t\"ActionTriggerIDs\": null,\n\t\t\"SharedGroupIDs\": null,\n\t\t\"ResourceProfileIDs\": null,\n\t\t\"ResourceIDs\": null,\n\t\t\"StatsQueueIDs\": null,\n\t\t\"StatsQueueProfileIDs\": null,\n\t\t\"ThresholdIDs\": null,\n\t\t\"ThresholdProfileIDs\": null,\n\t\t\"FilterIDs\": null,\n\t\t\"SupplierProfileIDs\": null,\n\t\t\"AttributeProfileIDs\": null,\n\t\t\"ChargerProfileIDs\": null,\n\t\t\"DispatcherProfileIDs\": null,\n\t\t\"DispatcherHostIDs\": null,\n\t\t\"DispatcherRoutesIDs\": null,\n\t\t\"FlushAll\": false\n\t}],\n\t\"id\": 14\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.GetCacheStats",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.GetCacheStats\",\n\t\"params\": [null],\n\t\"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.GetItemIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.GetItemIDs\",\n\t\"params\": [{\n\t\t\"CacheID\": \"*load_ids\",\n\t\t\"ItemIDPrefix\": \"\"\n\t}],\n\t\"id\": 8\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.HasItem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.HasItem\",\n\t\"params\": [{\n\t\t\"CacheID\": \"*attribute_profiles\",\n\t\t\"ItemID\": \"cgrates.org:ATTR_1001_SIMPLEAUTH\"\n\t}],\n\t\"id\": 10\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.GetItemExpiryTime",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.GetItemExpiryTime\",\n\t\"params\": [{\n\t\t\"CacheID\": \"*attribute_profiles\",\n\t\t\"ItemID\": \"cgrates.org:ATTR_1001_SIMPLEAUTH\"\n\t}],\n\t\"id\": 12\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.RemoveItem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CacheSv1.RemoveItem\",\n\t\"params\": [{\n\t\t\"CacheID\": \"*attribute_profiles\",\n\t\t\"ItemID\": \"cgrates.org:ATTR_1001_SIMPLEAUTH\"\n\t}],\n\t\"id\": 16\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CacheSv1.Clear",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"CacheSv1.Clear\",\n    \"params\": [\n        {\n            \"APIOpts\": null,\n            \"Tenant\": \"\",\n            \"CacheIDs\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CDRs",
+			"item": [
+				{
+					"name": "CDRsV1.GetCDRs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 3,\n    \"method\": \"CDRsV1.GetCDRs\",\n    \"params\": [\n        {\n            \"Accounts\": null,\n            \"AnswerTimeEnd\": \"\",\n            \"AnswerTimeStart\": \"\",\n            \"APIOpts\": null,\n            \"Categories\": null,\n            \"CGRIDs\": null,\n            \"Costs\": null,\n            \"CreatedAtEnd\": \"\",\n            \"CreatedAtStart\": \"\",\n            \"DestinationPrefixes\": null,\n            \"ExtraArgs\": null,\n            \"ExtraFields\": null,\n            \"Limit\": null,\n            \"MaxUsage\": \"\",\n            \"MinUsage\": \"\",\n            \"NotAccounts\": null,\n            \"NotCategories\": null,\n            \"NotCGRIDs\": null,\n            \"NotCosts\": null,\n            \"NotDestinationPrefixes\": null,\n            \"NotExtraFields\": null,\n            \"NotOriginHosts\": null,\n            \"NotOriginIDs\": null,\n            \"NotRequestTypes\": null,\n            \"NotRunIDs\": null,\n            \"NotSources\": null,\n            \"NotSubjects\": null,\n            \"NotTenants\": null,\n            \"NotToRs\": null,\n            \"Offset\": null,\n            \"OrderBy\": \"\",\n            \"OriginHosts\": null,\n            \"OriginIDs\": null,\n            \"RequestTypes\": null,\n            \"RunIDs\": null,\n            \"SetupTimeEnd\": \"\",\n            \"SetupTimeStart\": \"\",\n            \"Sources\": null,\n            \"Subjects\": null,\n            \"Tenant\": \"\",\n            \"Tenants\": null,\n            \"ToRs\": null,\n            \"UpdatedAtEnd\": \"\",\n            \"UpdatedAtStart\": \"\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CDRsV1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"CDRsV1.ProcessEvent\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"63d1bf7\",\n\t\t\"Time\": null,\n\t\t\"Event\": {\n\t\t\t\"Account\": \"TestDynamicDebit\",\n\t\t\t\"AnswerTime\": \"2025-01-07T17:00:10Z\",\n\t\t\t\"CGRDebitInterval\": 30000000,\n\t\t\t\"CGRID\": \"1dfsdf5a90d510e2d97483f2c0de0004d9ed231737\",\n\t\t\t\"Category\": \"call\",\n\t\t\t\"Cost\": 0,\n\t\t\t\"CostDetails\": \"{\\\"CGRID\\\":\\\"1df5a90a510e2a974c83f2c01e0004d9ed231738\\\",\\\"RunID\\\":\\\"CustomerCharges\\\",\\\"StartTime\\\":\\\"2025-01-07T17:00:10Z\\\",\\\"Usage\\\":60000000,\\\"Cost\\\":0,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"7fda268\\\",\\\"Increments\\\":[{\\\"Usage\\\":5000000,\\\"Cost\\\":0,\\\"AccountingID\\\":\\\"cd3d54b\\\",\\\"CompressFactor\\\":6}],\\\"CompressFactor\\\":2}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"TestDynamicDebit\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"731f205b-d54d-441c-b2c7-f557f5da4e83\\\",\\\"ID\\\":\\\"TestDynamicDebitBalance\\\",\\\"Type\\\":\\\"*voice\\\",\\\"Value\\\":1880000000,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"7fda268\\\":{\\\"ConnectFee\\\":0,\\\"RoundingMethod\\\":\\\"\\\",\\\"RoundingDecimals\\\":0,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"1e50ab1\\\",\\\"RatingFiltersID\\\":\\\"803f0ce\\\"}},\\\"Accounting\\\":{\\\"cd3d54b\\\":{\\\"AccountID\\\":\\\"cgrates.org:TestDynamicDebit\\\",\\\"BalanceUUID\\\":\\\"731f205b-d54d-441c-b2c7-f557f5da4e83\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":5000000,\\\"ExtraChargeID\\\":\\\"*none\\\"}},\\\"RatingFilters\\\":{\\\"803f0ce\\\":{\\\"DestinationID\\\":\\\"*any\\\",\\\"DestinationPrefix\\\":\\\"TEST\\\",\\\"RatingPlanID\\\":\\\"*none\\\",\\\"Subject\\\":\\\"731f205b-d54d-441c-b2c7-f557f5da4e83\\\"}},\\\"Rates\\\":{\\\"1e50ab1\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0,\\\"RateIncrement\\\":5000000,\\\"RateUnit\\\":5000000}]},\\\"Timings\\\":{}}\",\n\t\t\t\"CostSource\": \"*sessions\",\n\t\t\t\"Destination\": \"TEST\",\n\t\t\t\"OriginID\": \"TestDynamicTDebits\",\n\t\t\t\"RequestType\": \"*prepaid\",\n\t\t\t\"RunID\": \"CustomerCharges\",\n\t\t\t\"SetupTime\": \"2025-01-07T17:00:00Z\",\n\t\t\t\"Subject\": \"TEST\",\n\t\t\t\"Tenant\": \"cgrates.org\",\n\t\t\t\"ToR\": \"*voice\",\n\t\t\t\"Usage\": 60000000\n\t\t},\n\t\t\"AttributeS\": false,\n\t\t\"RALs\": null,\n\t\t\"ChargerS\": false,\n\t\t\"Store\": null,\n\t\t\"Export\": null,\n\t\t\"ThresholdS\": null,\n\t\t\"StatS\": null\n\t}],\n\t\"id\": 13\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CDRsV1.GetCDRsCount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"CDRsV1.GetCDRsCount\",\n    \"params\": [\n        {\n            \"CGRIDs\": null,\n            \"NotCGRIDs\": null,\n            \"RunIDs\": null,\n            \"NotRunIDs\": null,\n            \"OriginIDs\": null,\n            \"NotOriginIDs\": null,\n            \"OriginHosts\": null,\n            \"NotOriginHosts\": null,\n            \"Sources\": null,\n            \"NotSources\": null,\n            \"ToRs\": null,\n            \"NotToRs\": null,\n            \"RequestTypes\": null,\n            \"NotRequestTypes\": null,\n            \"Tenants\": null,\n            \"NotTenants\": null,\n            \"Categories\": null,\n            \"NotCategories\": null,\n            \"Accounts\": null,\n            \"NotAccounts\": null,\n            \"Subjects\": null,\n            \"NotSubjects\": null,\n            \"DestinationPrefixes\": null,\n            \"NotDestinationPrefixes\": null,\n            \"Costs\": null,\n            \"NotCosts\": null,\n            \"ExtraFields\": null,\n            \"NotExtraFields\": null,\n            \"SetupTimeStart\": \"\",\n            \"SetupTimeEnd\": \"\",\n            \"AnswerTimeStart\": \"\",\n            \"AnswerTimeEnd\": \"\",\n            \"CreatedAtStart\": \"\",\n            \"CreatedAtEnd\": \"\",\n            \"UpdatedAtStart\": \"\",\n            \"UpdatedAtEnd\": \"\",\n            \"MinUsage\": \"\",\n            \"MaxUsage\": \"\",\n            \"OrderBy\": \"\",\n            \"ExtraArgs\": null,\n            \"Limit\": null,\n            \"Offset\": null,\n            \"APIOpts\": null,\n            \"Tenant\": \"\"\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveCDRs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveCDRs\",\n    \"params\": [\n        {\n            \"OriginIDs\": [\n                \"1dfsdf5a90d510e2d97483f2c0de0004d9ed231737\"\n            ]\n        }\n    ],\n    \"id\": 7\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CoreS",
+			"item": [
+				{
+					"name": "CoreSv1.Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"CoreSv1.Status\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Opts\": null\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CoreSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"CoreSv1.Ping\",\n    \"params\": [],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ConfigS",
+			"item": [
+				{
+					"name": "ConfigSv1.GetConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ConfigSv1.GetConfig\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Section\": \"general\"\n            \n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ConfigSv1.ReloadConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ConfigSv1.ReloadConfig\",\n  \"params\": [\n    {\n      \"Path\": \"/etc/cgrates\",\n      \"APIOpts\": {},\n      \"Tenant\": \"cgrates.org\",\n      \"Section\": \"\",\n      \"DryRun\": false\n    }\n  ],\n  \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DispatcherS",
+			"item": [
+				{
+					"name": "ApierV1.SetDispatcherProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetDispatcherProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSP_TRAINING_1\",\n            \"Subsystems\": [\n                \"*attributes\",\n                \"*sessions\",\n                \"*rals\",\n                \"*cdrs\"\n            ],\n            \"FilterIDs\": [\n                \"*string:~Account:1001\"\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2019-03-01T00:00:00Z\",\n                \"ExpiryTime\": \"2020-04-01T00:00:00Z\"\n            },\n            \"Strategy\": \"*weight\",\n            \"StrategyParams\": null,\n            \"Weight\": 20,\n            \"Hosts\": [\n                {\n                    \"ID\": \"DSH_1\",\n                    \"Weight\": 10\n                },\n                {\n                    \"ID\": \"DSH_2\",\n                    \"Weight\": 30\n                },\n                {\n                    \"ID\": \"DSH_3\",\n                    \"Weight\": 20\n                }\n            ],\n            \"Cache\": null\n        }\n    ],\n    \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetDispatcherProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetDispatcherProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSP_TRAINING_1\"\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetDispatcherProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetDispatcherProfileIDs\",\n    \"params\": [\n        {\"Tenant\": \"cgrates.org\"}\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.SetDispatcherHost",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetDispatcherHost\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"DSH_1\",\n    \"Conns\": [\n      {\n        \"Address\": \"127.0.0.1:2012\",\n        \"Transport\": \"*json\"\n      }\n    ]\n  }],\n  \"id\": 15\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetDispatcherHost",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetDispatcherHost\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSH_1\"\n        }\n    ],\n    \"id\": 16\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetDispatcherHostIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetDispatcherHostIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\"\n        }\n    ],\n    \"id\": 14\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveDispatcherProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveDispatcherProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSP_TRAINING_1\",\n            \"Cache\": null\n        }\n    ],\n    \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveDispatcherHost",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveDispatcherHost\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSH_1\",\n            \"Cache\": null\n        }\n    ],\n    \"id\": 17\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DispatcherSv1.GetProfileForEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"DispatcherSv1.GetProfilesForEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"DSP_TRAINING_1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\"\n            },\n            \"Subsystem\": \"*rals\"\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "EeS",
+			"item": [
+				{
+					"name": "EeSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"EeSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"IDs\": [\"CSVExporter\"],\n            \"Opts\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"voiceEvent\",\n            \"Time\": \"2020-11-18T13:54:18.433316625+02:00\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2013-11-07T08:42:26Z\",\n                \"CGRID\": \"dbafe9c8614c785a65aabd116dd3959c3c56f7f6\",\n                \"Category\": \"call\",\n                \"Cost\": 1.01,\n                \"Destination\": \"1002\",\n                \"OriginHost\": \"192.168.1.1\",\n                \"OriginID\": \"dsafdsaf\",\n                \"RequestType\": \"*rated\",\n                \"RunID\": \"*default\",\n                \"SetupTime\": \"2013-11-07T08:42:25Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 10000000000\n            }\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "FilterS",
+			"item": [
+				{
+					"name": "ApierV1.SetFilter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetFilter\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"FLTR_1\",\n            \"Rules\": [\n                {\n                    \"Type\": \"*string\",\n                    \"Element\": \"~*req.Account\",\n                    \"Values\": [\n                        \"1001\"\n                    ]\n                }\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"2029-07-14T14:25:00Z\"\n            },\n            \"Cache\": null,\n            \"Opts\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetFilter2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetFilter\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"FLTR_2\",\n            \"Rules\": [\n                {\n                    \"Type\": \"*string\",\n                    \"Element\": \"~*req.Account\",\n                    \"Values\": [\n                        \"1002\"\n                    ]\n                }\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"2029-07-14T14:25:00Z\"\n            },\n            \"Cache\": null,\n            \"Opts\": null\n        }\n    ],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetFilter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetFilter\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"FLTR_2\"\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetFilterIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetFilterIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.ComputeFilterIndexes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.ComputeFilterIndexes\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"AttributeS\": true\n  }],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetFilterIndexes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.GetFilterIndexes\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"Context\": \"*sessions\",\n    \"ItemType\": \"*attributes\"\n  }],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveFilterIndexes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveFilterIndexes\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Context\": \"\",\n            \"ItemType\": \"*thresholds\"\n        }\n    ],\n    \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveFilter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveFilter\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"FLTR_2\",\n            \"Cache\": null\n        }\n    ],\n    \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IPs",
+			"item": [
+				{
+					"name": "APIerSv1.SetIPProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456789012345\",\n      \"TTL\": -1,\n      \"Weight\": 10,\n      \"ActivationInterval\": {\n        \"ActivationTime\": \"2025-12-19T00:00:00Z\"\n      },\n      \"Pools\": [\n        {\n          \"ID\": \"DEFAULT\",\n          \"Type\": \"*ipv4\",\n          \"Range\": \"192.168.1.0/32\"\n        }\n      ]\n    }\n  ],\n  \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetIPProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.GetIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456789012345\"\n    }\n  ],\n  \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IPsV1.AuthorizeIP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"IPsV1.AuthorizeIP\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"3f5ec5a\",\n            \"Time\": \"2026-01-13T02:56:04.912637562-05:00\",\n            \"Event\": {\n                \"APN\": \"internet.test.apn\",\n                \"Account\": \"123456789012345\",\n                \"AnswerTime\": \"1768290964\",\n                \"CallingStationId\": \"987654321098765\",\n                \"Category\": \"ips\",\n                \"Destination\": \"internet.test.apn\",\n                \"FramedPool\": \"test-pool-primary\",\n                \"FramedProtocol\": \"GPRS-PDP-Context\",\n                \"IMSI\": \"123456789012345\",\n                \"NAS-IP\": \"192.168.1.10\",\n                \"NAS-Identifier\": \"test-nas-server-1\",\n                \"OriginID\": \"auth-session-12345-67890\",\n                \"RequestType\": \"*rated\",\n                \"ServiceType\": \"Framed\",\n                \"SetupTime\": \"1768290964\",\n                \"Subject\": \"123456789012345\"\n            },\n            \"APIOpts\": {\n                \"*ipAllocationID\": \"auth-session-12345-67890\"\n            }\n        }\n    ],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IPsV1.GetIPAllocations",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"IPsV1.GetIPAllocations\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"IMSI_123456789012345\",\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IPsV1.AllocateIP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"IPsV1.AllocateIP\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"d95d5f6\",\n            \"Time\": \"2026-01-13T02:56:04.922853793-05:00\",\n            \"Event\": {\n                \"APN\": \"internet.test.apn\",\n                \"Account\": \"123456789012345\",\n                \"AcctAuthentic\": \"RADIUS\",\n                \"AcctDelayTime\": \"0\",\n                \"AllocatedIP\": \"10.100.0.1\",\n                \"AnswerTime\": \"1768290964\",\n                \"CallingStationId\": \"987654321098765\",\n                \"Category\": \"ips\",\n                \"Destination\": \"internet.test.apn\",\n                \"FramedProtocol\": \"GPRS-PDP-Context\",\n                \"IMSI\": \"123456789012345\",\n                \"NAS-Identifier\": \"test-nas-server-1\",\n                \"NASPortType\": \"Virtual\",\n                \"OriginHost\": \"192.168.1.10\",\n                \"OriginID\": \"acct-session-abcdef-123456\",\n                \"RemoteAddr\": \"127.0.0.1\",\n                \"RequestType\": \"*rated\",\n                \"ServiceType\": \"Framed\",\n                \"SetupTime\": \"1768290964\",\n                \"Subject\": \"123456789012345\"\n            },\n            \"APIOpts\": {\n                \"*ipAllocationID\": \"acct-session-abcdef-123456\"\n            }\n        }\n    ],\n    \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IPsV1.GetIPAllocationForEvent",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"IPsV1.GetIPAllocationForEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"GetIPsForEvent1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"2001\"\n            },\n            \"APIOpts\": {\n                \"*ipAllocationID\": \"test_allocation\"\n            }\n        }\n    ],\n    \"id\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IPsV1.ReleaseIP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"IPsV1.ReleaseIP\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ad3bbdd\",\n            \"Time\": \"2026-01-13T02:56:05.144146292-05:00\",\n            \"Event\": {\n                \"APN\": \"internet.test.apn\",\n                \"Account\": \"123456789012345\",\n                \"AcctInputOctets\": \"9876543\",\n                \"AcctOutputOctets\": \"1234567\",\n                \"AcctTerminateCause\": \"User-Request\",\n                \"CGRID\": \"8ee63f9e99da8f63428efa7bea6ec358c161e22d\",\n                \"CallingStationId\": \"987654321098765\",\n                \"Category\": \"ips\",\n                \"Destination\": \"internet.test.apn\",\n                \"FramedProtocol\": \"GPRS-PDP-Context\",\n                \"IMSI\": \"123456789012345\",\n                \"NAS-Identifier\": \"test-nas-server-1\",\n                \"OriginHost\": \"192.168.1.10\",\n                \"OriginID\": \"acct-session-abcdef-123456\",\n                \"RequestType\": \"*rated\",\n                \"ServiceType\": \"Framed\",\n                \"SetupTime\": \"1768290965\",\n                \"Subject\": \"123456789012345\",\n                \"Usage\": \"1768290965\"\n            },\n            \"APIOpts\": {\n                \"*ipAllocationID\": \"acct-session-abcdef-123456\"\n            }\n        }\n    ],\n    \"id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveIPProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.RemoveIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456789012345\"\n    }\n  ],\n  \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loader",
+			"item": [
+				{
+					"name": "ApierV1.LoadTariffPlanFromStorDb",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.LoadTariffPlanFromStorDb\",\n\t\"params\": [{\n\t\t\"TPid\": \"CGR_API_TESTS\",\n\t\t\"FlushDb\": false,\n\t\t\"DryRun\": false,\n\t\t\"Validate\": false\n\t}],\n\t\"id\": 175\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.LoadTariffPlanFromFolder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/share/cgrates/tariffplans/tutorial\",\n            \"DryRun\": false,\n            \"Validate\": false,\n            \"APIOpts\": null,\n            \"Caching\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveTPFromStorDB",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveTPFromStorDB\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"DryRun\": false,\n            \"Validate\": true\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveTPFromFolder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveTPFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/share/cgrates/tariffplans/tutorial\",\n            \"DryRun\": false,\n            \"Validate\": true\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OfflineTP",
+			"item": [
+				{
+					"name": "APIerSv1.ImportTariffPlanFromFolder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.ImportTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/share/cgrates/tariffplans/tutorial\",\n            \"TPid\": \"CGR_API_TESTS\",\n            \"RunId\": \"\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetTPIds",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetTPIds\",\n    \"params\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetTPDestinationIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetTPDestinationIDs\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetTPDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"Id\": \"DST_DE_MOBILE\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetTPDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.SetTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"DST_DE_MOBILE\",\n            \"Prefixes\": [\n                \"+49151\"\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveTPDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.RemoveTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"Id\": \"DST_DE_MOBILE\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OnlineTP",
+			"item": [
+				{
+					"name": "APIerSv1.SetDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.SetDestination\",\n    \"params\": [\n        {\n            \"ID\": \"DST_FS\",\n            \"Prefixes\": [\n                \"10\",\"20\",\"30\",\"40\"\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetTPDestinationIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetTPDestinationIDs\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.GetDestination\",\n    \"params\": [\n        \"DST_FS\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveTPDestination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.RemoveTPDestination\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"Id\": \"DST_FS\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RouteS",
+			"item": [
+				{
+					"name": "APIerSv1.SetRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TEST_PROFILE1\",\n            \"FilterIDs\": [\n                \"FLTR_1\"\n            ],\n            \"ActivationInterval\": null,\n            \"Sorting\": \"Sort1\",\n            \"SortingParameters\": [\n                \"Param1\",\n                \"Param2\"\n            ],\n            \"Routes\": [\n                {\n                    \"ID\": \"ROUTE1\",\n                    \"FilterIDs\": [\n                        \"FLTR_1\"\n                    ],\n                    \"AccountIDs\": [\n                        \"Acc\"\n                    ],\n                    \"RatingPlanIDs\": [\n                        \"RP1\"\n                    ],\n                    \"ResourceIDs\": [\n                        \"Res1\",\n                        \"ResGroup2\"\n                    ],\n                    \"StatIDs\": [\n                        \"Stat1\"\n                    ],\n                    \"Weight\": 20,\n                    \"Blocker\": false,\n                    \"RouteParameters\": \"SortingParameter1\"\n                }\n            ],\n            \"Weight\": 10,\n            \"Cache\": null,\n            \"Opts\": null\n        }\n    ],\n    \"id\": 24\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TEST_PROFILE1\"\n        }\n    ],\n    \"id\": 25\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.GetRoutes\",\n    \"params\": [\n        {\n            \"IgnoreErrors\": false,\n            \"MaxCost\": \"\",\n            \"Opts\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testV1RouteGetWeightRoutes\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"dan.bogos\",\n                \"Destination\": \"100100\"\n            },\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveRouteProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.RemoveRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TEST_PROFILE1\",\n            \"Cache\": null,\n            \"Opts\": null\n        }\n    ],\n    \"id\": 34\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.Ping\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"ID\": \"\",\n            \"Time\": null,\n            \"Event\": null\n        }\n    ],\n    \"id\": 30\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetRouteProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfileIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 29\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRouteProfilesForEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"RouteSv1.GetRouteProfilesForEvent\",\n    \"params\": [\n        {\n            \"Opts\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testV1RouteGetHighestCostRoutes\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1000\",\n                \"Destination\": \"1001\",\n                \"SetupTime\": \"*now\",\n                \"Subject\": \"TEST\"\n            }\n        }\n    ],\n    \"id\": 35\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RankingS",
+			"item": [
+				{
+					"name": "APIerSv1.SetRankingProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetRankingProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Ranking1\",\n      \"Schedule\": \"@every 4s\",\n      \"StatIDs\": [\"Stats1\", \"Stats2\"],\n      \"MetricIDs\": [\"*acc\", \"*sum\"],\n      \"Sorting\": \"*desc\",\n      \"ThresholdIDs\": [\"THD1\", \"THD2\"],\n       \"Stored\": true\n    }\n  ],\n  \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetRankingProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.GetRankingProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Ranking1\"\n    }\n  ],\n  \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RankingSv1.ScheduleQueries",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"RankingSv1.ScheduleQueries\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"RankingIDs\": [\"Ranking1\"]\n  }],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RankingSv1.GetRanking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"RankingSv1.GetRanking\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"Ranking1\"\n  }],\n  \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveRankingProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.RemoveRankingProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Ranking1\"\n    }\n  ],\n  \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rating",
+			"item": [
+				{
+					"name": "ApierV1.GetCost-Call",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.GetCost\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Category\": \"call\",\n\t\t\"Subject\": \"1001\",\n\t\t\"AnswerTime\": \"*now\",\n\t\t\"Destination\": \"1002\",\n\t\t\"Usage\": \"1m59s\"\n\t}],\n\t\"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetCost-Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.GetCost\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Category\": \"data\",\n\t\t\"Subject\": \"1001\",\n\t\t\"AnswerTime\": \"*now\",\n\t\t\"Destination\": \"\",\n\t\t\"Usage\": \"2048\"\n\t}],\n\t\"id\": 7\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetCost-SMS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ApierV1.GetCost\",\n\t\"params\": [{\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"Category\": \"sms\",\n\t\t\"Subject\": \"1003\",\n\t\t\"AnswerTime\": \"*now\",\n\t\t\"Destination\": \"1002\",\n\t\t\"Usage\": \"1\"\n\t}],\n\t\"id\": 8\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ResourceS",
+			"item": [
+				{
+					"name": "ResourceSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ResourceSv1.Ping\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"ID\": \"\",\n            \"Time\": null,\n            \"Event\": null\n        }\n    ],\n    \"id\": 10\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.SetResourceProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.SetResourceProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"RES_TRAINING_1\",\n            \"FilterIDs\": [\"*string:~*req.Account:1001\"],\n            \"UsageTTL\": -1,\n            \"Limit\": 2,\n            \"AllocationMessage\": \"Account1Channels\",\n            \"Blocker\": false,\n            \"Stored\": false,\n            \"Weight\": 20,\n            \"ThresholdIDs\": [\n                \"*none\"\n            ],\n            \"Cache\": null\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetResourceProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetResourceProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ResGroup1\"\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ResourceSv1.GetResourcesForEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ResourceSv1.GetResourcesForEvent\",\n    \"params\": [\n        {\n            \"Opts\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Event1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"3002\"\n            },\n            \"UsageID\": \"651a8db2-4f67-4cf8-b622-169e8a482e21\",\n            \"UsageTTL\": null,\n            \"Units\": 1\n        }\n    ],\n    \"id\": 7\n},\n\"UsageID\": \"RandomUsageID\",\n\"UsageTTL\": null,\n\"Units\": 0\n}\n],\n\"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ResourceSv1.AllocateResources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ResourceSv1.AllocateResources\",\n    \"params\": [\n        {\n            \"APIOpts\": {\n                \"*rsUsageID\": \"12345\"\n            },\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"660f571\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"3002\"\n            },\n            \"UsageID\": \"651a8db2-4f67-4cf8-b622-169e8a482e23\",\n            \"UsageTTL\": null,\n            \"Units\": 1\n        }\n    ],\n    \"id\": 7\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ResourceSv1.ReleaseResources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ResourceSv1.ReleaseResources\",\n    \"params\": [\n        {\n            \"Opts\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"59de81f\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"3002\"\n            },\n            \"UsageID\": \"651a8db2-4f67-4cf8-b622-169e8a482e21\",\n            \"UsageTTL\": null,\n            \"Units\": 0\n        }\n    ],\n    \"id\": 11\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ResourceSv1.AuthorizeResources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ResourceSv1.AuthorizeResources\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"someid\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"1002\",\n                \"Subject\": \"1001\"\n            },\n            \"UsageID\": \"channel_1\",\n            \"UsageTTL\": null,\n            \"Units\": 1\n        }\n    ],\n    \"id\": 16\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetResourceProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetResourceProfileIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 28\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveResourceProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveResourceProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"RES_GR_TEST\"\n        }\n    ],\n    \"id\": 7\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SchedulerS",
+			"item": [
+				{
+					"name": "ServiceManagerV1.StartService",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ServiceManagerV1.StartService\",\n\t\"params\": [{\n\t\t\"ServiceID\": \"*scheduler\"\n\t}],\n\t\"id\": 180\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ServiceManagerV1.ServiceStatus",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ServiceManagerV1.ServiceStatus\",\n\t\"params\": [{\n\t\t\"ServiceID\": \"*scheduler\"\n\t}],\n\t\"id\": 181\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SchedulerSv1.Reload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"SchedulerSv1.Reload\",\n\t\"params\": [],\n\t\"id\": 182\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV2.SetActions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV2.SetActions\",\n    \"params\": [\n        {\n            \"ActionsId\": \"ACT_LOG\",\n            \"Overwrite\": true,\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*log\"\n                }\n            ]\n        }\n    ],\n    \"id\": 19\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetActionPlan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"APIerSv1.GetActionPlan\",\n\t\"params\": [{}],\n\t\"id\": 167\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ServiceManagerV1.StopService",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"ServiceManagerV1.StopService\",\n\t\"params\": [{\n\t\t\"ServiceID\": \"*scheduler\"\n\t}],\n\t\"id\": 178\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.ExecuteAction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.ExecuteAction\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"1001\",\n            \"ActionsId\": \"ACT_LOG\"\n        }\n    ],\n    \"id\": 20\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV2.GetActions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV2.GetActions\",\n    \"params\": [\n        {\n            \"ActionIDs\": [\n                \"ACT_LOG\"\n            ],\n            \"Offset\": 0,\n            \"Limit\": 0\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SessionS",
+			"item": [
+				{
+					"name": "SessionSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.Ping\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"ID\": \"\",\n            \"Time\": null,\n            \"Event\": null,\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.AuthorizeEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.AuthorizeEvent\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"AuthorizeIP\": false,\n            \"AuthorizeResources\": false,\n            \"GetMaxUsage\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": false,\n            \"ProcessStats\": false,\n            \"GetRoutes\": true,\n            \"RoutesMaxCost\": \"\",\n            \"RoutesIgnoreErrors\": false,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSessionS\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSSv1It1\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2025-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 10\n            },\n            \"APIOpts\": null,\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.AuthorizeEventWithDigest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.AuthorizeEventWithDigest\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"AuthorizeIP\": false,\n            \"AuthorizeResources\": false,\n            \"GetMaxUsage\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": false,\n            \"ProcessStats\": false,\n            \"GetRoutes\": true,\n            \"RoutesMaxCost\": \"\",\n            \"RoutesIgnoreErrors\": false,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": [\n                \"Stat_1\"\n            ],\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSessionS\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSSv1It1\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2025-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 10\n            },\n            \"APIOpts\": {\n                \"*rouProfileCount\": 1\n            },\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.InitiateSession",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.InitiateSession\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"AllocateIP\": false,\n            \"AllocateResources\": false,\n            \"InitSession\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": false,\n            \"ProcessStats\": false,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": [\n                \"Stat_1\"\n            ],\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSSv1ItInitiateSessionS2202\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2025-01-07T17:00:10Z\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSessionSTests2121\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2025-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 5\n            },\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.ProcessCDR",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.ProcessCDR\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSSv1ItProcessCDRs55\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2018-01-07T17:00:10Z\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSSv1It41Test25896358\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2018-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 5000\n            },\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 10\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.GetActiveSessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"SessionSv1.GetActiveSessions\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\"\n  }],\n  \"id\": 5\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.UpdateSession",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.UpdateSession\",\n    \"params\": [\n        {\n            \"GetAttributes\": true,\n            \"UpdateSession\": true,\n            \"ForceDuration\": false,\n            \"ProcessThresholds\": false,\n            \"ProcessStats\": false,\n            \"AttributeIDs\": null,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSSv1ItUpdateSession1234567851918\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2018-01-07T17:00:10Z\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSSv1It123456784959829\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2018-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 300000000000\n            },\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Flags\": [\n                \"*rals:*initiate\",\n                \"*rals:*derived_reply\",\n                \"*resources:*allocate\",\n                \"*resources:*derived_reply\",\n                \"*attributes\",\n                \"*chargers\"\n            ],\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"testSSv1ItProcessEventInitiateSession\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2018-01-07T17:00:10Z\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"testSSv1ItProcessEvent\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2018-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 300000000000\n            },\n            \"APIOpts\": null,\n            \"Limit\": null,\n            \"Offset\": null\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.TerminateSession",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.TerminateSession\",\n    \"params\": [\n        {\n            \"TerminateSession\": true,\n            \"ForceDuration\": false,\n            \"ReleaseIP\": false,\n            \"ReleaseResources\": true,\n            \"ProcessThresholds\": false,\n            \"ProcessStats\": false,\n            \"ThresholdIDs\": null,\n            \"StatIDs\": null,\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"TestSSv1ItUpdateSession\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"AnswerTime\": \"2018-01-07T17:00:10Z\",\n                \"Destination\": \"1002\",\n                \"OriginID\": \"TestSSv1It1\",\n                \"RequestType\": \"*prepaid\",\n                \"SetupTime\": \"2018-01-07T17:00:00Z\",\n                \"Subject\": \"1001\",\n                \"Tenant\": \"cgrates.org\",\n                \"ToR\": \"*voice\",\n                \"Usage\": 50\n            },\n            \"APIOpts\": null\n        }\n    ],\n    \"id\": 8\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SessionSv1.ForceDisconnect",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"SessionSv1.ForceDisconnect\",\n    \"params\": [\n        {\n            \"OriginID\": \"TestSSv1It\"\n        }\n    ],\n    \"id\": 17\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "StatS",
+			"item": [
+				{
+					"name": "StatSv1.Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.Ping\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"ID\": \"\",\n            \"Time\": null,\n            \"Event\": null\n        }\n    ],\n    \"id\": 12\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.SetStatQueueProfile/1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats1\",\n            \"FilterIDs\":   [\"FLTR_1\"],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"2050-07-14T15:25:00Z\"\n            },\n            \"QueueLength\": 100,\n            \"TTL\": 3600000000000,\n            \"MinItems\": 1,\n            \"Metrics\": [\n                {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*acd\"\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*tcd\"\n                },\n                  {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*tcc\"\n                }\n            ],\n            \"Stored\": true,\n            \"Blocker\": true,\n            \"Weight\": 20,\n            \"ThresholdIDs\": [\n                \"Val1\",\n                \"Val2\"\n            ],\n            \"Cache\": null\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.SetStatQueueProfile/2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.SetStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats2\",\n            \"FilterIDs\":   [\"FLTR_2\"],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:25:00Z\",\n                \"ExpiryTime\": \"2050-07-14T15:25:00Z\"\n            },\n            \"QueueLength\": 100,\n            \"TTL\": 3600000000000,\n            \"MinItems\": 1,\n            \"Metrics\": [\n                {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*acd\"\n                },\n                {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*tcd\"\n                },\n                  {\n                    \"FilterIDs\": null,\n                    \"MetricID\": \"*tcc\"\n                }\n            ],\n            \"Stored\": true,\n            \"Blocker\": true,\n            \"Weight\": 20,\n            \"ThresholdIDs\": [\n                \"Val1\",\n                \"Val2\"\n            ],\n            \"Cache\": null\n        }\n    ],\n    \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetStatQueueProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats2\"\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.GetQueueIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.GetQueueIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\"\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"StatIDs\": \"\",\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"event1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Destination\": \"1003\",\n                \"RunID\": \"*default\",\n                \"AnswerTime\": \"2018-07-14T14:28:00Z\",\n                \"Cost\": 350,\n                \"PDD\": 4500000,\n                \"Usage\": 850000000\n            }\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.GetQueueStringMetrics",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.GetQueueStringMetrics\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats1\"\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveStatQueueProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats1\"\n        }\n    ],\n    \"id\": 9\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ResetStatQueue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ResetStatQueue\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"Stats1\",\n            \"Opts\": null\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ThresholdS",
+			"item": [
+				{
+					"name": "ApierV1.SetThresholdProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.SetThresholdProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"THD_TRAINING_1\",\n            \"FilterIDs\": [\n                \"*string:~Account:1001\"\n            ],\n            \"ActivationInterval\": {\n                \"ActivationTime\": \"2014-07-14T14:35:00Z\",\n                \"ExpiryTime\": \"2020-07-14T14:35:00Z\"\n            },\n            \"MaxHits\": -1,\n            \"MinHits\": 0,\n            \"MinSleep\": 300000000000,\n            \"Blocker\": false,\n            \"Weight\": 20,\n            \"ActionIDs\": [\n                \"ACT_LOG\"\n            ],\n            \"Async\": false,\n            \"Cache\": null\n        }\n    ],\n    \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetThresholdProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.GetThresholdProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"THD_TRAINING_1\"\n        }\n    ],\n    \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ThresholdSv1.GetThresholdIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ThresholdSv1.GetThresholdIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\"\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ThresholdSv1.GetThreshold",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ThresholdSv1.GetThreshold\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"THD_TRAINING_1\"\n        }\n    ],\n    \"id\": 13\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ThresholdSv1.ProcessEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ThresholdSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"event1\",\n            \"Time\": null,\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Usage\": \"2m30s\"\n            }\n        }\n    ],\n    \"id\": 14\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.GetThresholdProfileIDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ThresholdSv1.GetThresholdIDs\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"Opts\": null\n        }\n    ],\n    \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ThresholdSv1.ResetThreshold",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ThresholdSv1.ResetThreshold\",\n    \"params\": [\n        {\n            \"Tenant\": \"\",\n            \"ID\": \"THD_TRAINING_1\",\n            \"Opts\": null\n        }\n    ],\n    \"id\": 57\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApierV1.RemoveThresholdProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"ApierV1.RemoveThresholdProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"THD_Test\",\n            \"Cache\": null\n        }\n    ],\n    \"id\": 9\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TrendS",
+			"item": [
+				{
+					"name": "APIerSv1.SetTrendProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.SetTrendProfile\",\n  \"params\": [{\n    \"TPid\": \"\",\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"Trend1\",\n    \"Schedule\": \"@every 4s\",\n    \"StatID\": \"Stats1\",\n     \n    \"TTL\": 3600000000000,\n    \"QueueLength\": 50,\n    \"MinItems\": 1,\n    \"CorrelationType\": \"*average\",\n    \"Tolerance\": 0,\n    \"Stored\": true,\n    \"ThresholdIDs\": []\n  }],\n  \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetTrendProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.GetTrendProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Trend1\"\n    }\n  ],\n  \"id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TrendSv1ScheduleQueries",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\":\"TrendSv1.ScheduleQueries\",\n    \"params\":[{\n        \"Tenant\":\"cgrates.org\",\n        \"TrendIDs\" :[\"Trend1\"]\n    }]\n}\n"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TrendSv1.GetScheduledTrends",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"TrendSv1.GetScheduledTrends\",\n  \"params\": [{\n    \"TrendIDs\": [\"Trend1\"],\n    \"Tenant\": \"cgrates.org\"\n  }],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TrendSv1.GetTrend",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"TrendSv1.GetTrend\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Trend1\"\n    }\n  ],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.RemoveTrendProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"APIerSv1.RemoveTrendProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"Trend1\"\n    }\n  ],\n  \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "cgrdev1:2080/jsonrpc",
+							"host": [
+								"cgrdev1"
+							],
+							"port": "2080",
+							"path": [
+								"jsonrpc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
