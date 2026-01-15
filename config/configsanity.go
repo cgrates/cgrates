@@ -156,10 +156,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.sessionSCfg.ThresholdSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.SessionS)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}

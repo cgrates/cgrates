@@ -171,3 +171,8 @@ func (ssv1 *SessionSv1) RegisterInternalBiJSONConn(ctx *context.Context, args st
 func (ssv1 *SessionSv1) BackupActiveSessions(ctx *context.Context, args string, rply *int) (err error) {
 	return ssv1.sS.BiRPCv1BackupActiveSessions(ctx, args, rply)
 }
+
+// unfinished remove later
+func (ssv1 *SessionSv1) TestSessToThresh(ctx *context.Context, args *string, rply *[]string) (err error) {
+	return ssv1.sS.BiRPCv1TestSessToThresh(ctx, args, rply)
+}

@@ -105,8 +105,6 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled                bool
-	ListenBiJSON           string
-	ListenBiGob            string
 	ChargerSConns          []string
 	RALsConns              []string
 	IPsConns               []string
@@ -144,12 +142,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		scfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.ListenBiJSON != nil {
-		scfg.ListenBiJSON = *jsnCfg.ListenBiJSON
-	}
-	if jsnCfg.ListenBiGob != nil {
-		scfg.ListenBiGob = *jsnCfg.ListenBiGob
-	}
 	if jsnCfg.ChargerSConns != nil {
 		scfg.ChargerSConns = make([]string, len(*jsnCfg.ChargerSConns))
 		for idx, connID := range *jsnCfg.ChargerSConns {
@@ -177,7 +169,14 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ResourceSConns = tagInternalConns(*jsnCfg.ResourceSConns, utils.MetaResources)
 	}
 	if jsnCfg.ThresholdSConns != nil {
-		scfg.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+		scfg.ThresholdSConns = make([]string, len(*jsnCfg.ThresholdSConns))
+		for idx, attrConn := range *jsnCfg.ThresholdSConns {
+			scfg.ThresholdSConns[idx] = attrConn
+			if attrConn == utils.MetaInternal ||
+				attrConn == rpcclient.BiRPCInternal {
+				scfg.ThresholdSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaThresholds)
+			}
+		}
 	}
 	if jsnCfg.StatSConns != nil {
 		scfg.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
@@ -305,8 +304,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	initialMP = map[string]any{
 		utils.EnabledCfg:                scfg.Enabled,
-		utils.ListenBijsonCfg:           scfg.ListenBiJSON,
-		utils.ListenBigobCfg:            scfg.ListenBiGob,
 		utils.ChargerSConnsCfg:          stripInternalConns(scfg.ChargerSConns),
 		utils.RALsConnsCfg:              stripInternalConns(scfg.RALsConns),
 		utils.IPsConnsCfg:               stripInternalConns(scfg.IPsConns),
@@ -370,7 +367,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:                scfg.Enabled,
-		ListenBiJSON:           scfg.ListenBiJSON,
 		IPsConns:               slices.Clone(scfg.IPsConns),
 		DebitInterval:          scfg.DebitInterval,
 		StoreSCosts:            scfg.StoreSCosts,

@@ -60,6 +60,11 @@ func NewSessionS(cgrCfg *config.CGRConfig,
 	}
 }
 
+// PopulateCtx inserts the ctx parameter to the sessions ctx
+func (sS *SessionS) PopulateCtx(ctx *context.Context) {
+	sS.ctx = ctx
+}
+
 // biJClient contains info we need to reach back a bidirectional json client
 type biJClient struct {
 	conn  birpc.ClientConnector // connection towards BiJ client
@@ -71,6 +76,7 @@ type SessionS struct {
 	cgrCfg  *config.CGRConfig // Separate from smCfg since there can be multiple
 	dm      *engine.DataManager
 	connMgr *engine.ConnManager
+	ctx     *context.Context
 
 	biJMux   sync.RWMutex                     // mux protecting BI-JSON connections
 	biJClnts map[birpc.ClientConnector]string // index BiJSONConnection so we can sync them later
@@ -4728,4 +4734,19 @@ func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
 		*reply = sessCount
 	}
 	return nil
+}
+
+// BiRPCv1TestSessToThresh is used to test birpc calls. unfinished remove later
+func (sS *SessionS) BiRPCv1TestSessToThresh(_ *context.Context,
+	args *string, rply *[]string) (err error) {
+	if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+		utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithAPIOpts{
+			Tenant: sS.cgrCfg.GeneralCfg().DefaultTenant,
+		}, rply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> could not test and get thresholdsIDs. reply <%+v> err: %s",
+				utils.SessionS, rply, err.Error()))
+	}
+	return
 }

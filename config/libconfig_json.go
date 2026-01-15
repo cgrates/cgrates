@@ -60,6 +60,8 @@ type ListenJsonCfg struct {
 	Rpc_json_tls *string
 	Rpc_gob_tls  *string
 	Http_tls     *string
+	Birpc_json   *string
+	Birpc_gob    *string
 }
 
 type HTTPClientOptsJson struct {
@@ -418,8 +420,6 @@ type EventExporterJsonCfg struct {
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled                *bool              `json:"enabled"`
-	ListenBiJSON           *string            `json:"listen_bijson"`
-	ListenBiGob            *string            `json:"listen_bigob"`
 	ChargerSConns          *[]string          `json:"chargers_conns"`
 	RALsConns              *[]string          `json:"rals_conns"`
 	IPsConns               *[]string          `json:"ips_conns"`

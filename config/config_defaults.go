@@ -239,7 +239,9 @@ const CGRATES_CFG_JSON = `
 	"http": "127.0.0.1:2080",		// HTTP listening address
 	"rpc_json_tls" : "127.0.0.1:2022",	// RPC JSON TLS listening address
 	"rpc_gob_tls": "127.0.0.1:2023",	// RPC GOB TLS listening address
-	"http_tls": "127.0.0.1:2280"		// HTTP TLS listening address
+	"http_tls": "127.0.0.1:2280",		// HTTP TLS listening address
+	"birpc_json": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests(for agents<->sessions and sessions<->thresholds)
+	"birpc_gob": "",					// address where to listen for bidirectional GOB-RPC requests (for agents<->sessions and sessions<->thresholds)
 },
 
 
@@ -666,8 +668,6 @@ const CGRATES_CFG_JSON = `
 
 "sessions": {
 	"enabled": false,			// starts the session service: <true|false>
-	"listen_bijson": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
-	"listen_bigob": "",			// address where to listen for bidirectional GOB-RPC requests
 	"chargers_conns": [],			// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	"rals_conns": [],			// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],			// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>

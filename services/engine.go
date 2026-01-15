@@ -233,6 +233,33 @@ func startRPC(server *cores.Server, internalRaterChan,
 	}
 }
 
+func startBiRPC(smg *SessionService, tS *ThresholdService, server *cores.Server,
+	shdChan *utils.SyncedChan) {
+	var onConns []func(c birpc.ClientConnector)
+	var onDiss []func(c birpc.ClientConnector)
+	// wait for conn funcs to be populated only if service should run and BiRPC is populated
+	if smg.ShouldRun() {
+		onConn, onDisconn := smg.GetSessionSOnBiJSONFuncs()
+		onConns = append(onConns, onConn)
+		onDiss = append(onDiss, onDisconn)
+	}
+	if tS.ShouldRun() {
+		onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
+		onConns = append(onConns, onConn)
+		onDiss = append(onDiss, onDisconn)
+	}
+	if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
+		if smg.ShouldRun() {
+			smg.DisableBiRPC()
+		}
+		if tS.ShouldRun() {
+			tS.DisableBiRPC()
+		}
+		shdChan.CloseOnce()
+	}
+}
+
 func writePid() {
 	utils.Logger.Info(*pidFile)
 	f, err := os.Create(*pidFile)
@@ -432,7 +459,8 @@ func RunCGREngine(args []string) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs):            internalERsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 
-		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS):   internalSessionSChan,
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaThresholds): internalThresholdSChan,
 	})
 	srvDep := map[string]*sync.WaitGroup{
 		utils.AnalyzerS:       new(sync.WaitGroup),
@@ -570,7 +598,7 @@ func RunCGREngine(args []string) {
 	cdrS := NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz, srvDep)
 
-	smg := NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, anz, srvDep)
+	smg := NewSessionService(cfg, dmService, server, internalSessionSChan, connManager, anz, srvDep)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, ips, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
@@ -632,6 +660,12 @@ func RunCGREngine(args []string) {
 	err = initConfigSv1(internalConfigChan, server, anz)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Start Serving BiRPC
+	if cfg.ListenCfg().BiJSONListen != utils.EmptyString ||
+		cfg.ListenCfg().BiGobListen != utils.EmptyString {
+		go startBiRPC(smg, tS, server, shdChan)
 	}
 
 	// Serve rpc connections
