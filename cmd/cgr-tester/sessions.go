@@ -78,7 +78,7 @@ func callSessions(ctx *context.Context, authDur, initDur, updateDur, terminateDu
 	if err != nil {
 		return err
 	}
-	brpc, err = utils.NewBiJSONrpcClient(tstCfg.SessionSCfg().ListenBiJSON, srv)
+	brpc, err = utils.NewBiJSONrpcClient(tstCfg.ListenCfg().BiJSONListen, srv)
 	if err != nil {
 		return err
 	}

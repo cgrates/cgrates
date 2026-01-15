@@ -62,6 +62,10 @@ func (tSv1 *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.Tena
 	return tSv1.tS.V1ResetThreshold(ctx, tntID.TenantID, reply)
 }
 
+func (tSv1 *ThresholdSv1) RegisterInternalBiJSONConn(ctx *context.Context, args string, rply *string) (err error) {
+	return tSv1.tS.BiRPCv1RegisterInternalBiJSONConn(ctx, args, rply)
+}
+
 // GetThresholdProfile returns a Threshold Profile
 func (apierSv1 *APIerSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing

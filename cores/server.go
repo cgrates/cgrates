@@ -255,9 +255,13 @@ func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, pprofPath string, useBasi
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
-	s.birpcSrv.OnConnect(onConn)
-	s.birpcSrv.OnDisconnect(onDis)
+func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConns, onDiss []func(birpc.ClientConnector)) (err error) {
+	for _, onConn := range onConns {
+		s.birpcSrv.OnConnect(onConn)
+	}
+	for _, onDis := range onDiss {
+		s.birpcSrv.OnDisconnect(onDis)
+	}
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
 		if ljson, err = listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
@@ -307,6 +311,9 @@ func acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCo
 
 // StopBiRPC stops the go routine create with ServeBiJSON
 func (s *Server) StopBiRPC() {
+	if s.birpcSrv == nil {
+		return
+	}
 	s.stopBiRPCServer <- struct{}{}
 	s.Lock()
 	s.birpcSrv = nil

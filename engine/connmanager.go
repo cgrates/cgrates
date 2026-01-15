@@ -157,12 +157,22 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 		for _, c := range connCfg.Conns {
 			if c.Address == rpcclient.BiRPCInternal { // register only on internal
 				var rply string
-				if err = conn.Call(ctx, utils.SessionSv1RegisterInternalBiJSONConn,
-					connID, &rply); err != nil {
-					utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
-						utils.SessionS, err.Error()))
-					return
+				if strings.HasSuffix(connID, utils.MetaThresholds) {
+					if err = conn.Call(ctx, utils.ThresholdSv1RegisterInternalBiJSONConn,
+						connID, &rply); err != nil {
+						utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
+							utils.ThresholdS, err.Error()))
+						return
+					}
+				} else if strings.HasSuffix(connID, utils.MetaSessionS) {
+					if err = conn.Call(ctx, utils.SessionSv1RegisterInternalBiJSONConn,
+						connID, &rply); err != nil {
+						utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
+							utils.SessionS, err.Error()))
+						return
+					}
 				}
+
 				break
 			}
 		}

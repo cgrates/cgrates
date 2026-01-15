@@ -28,6 +28,8 @@ type ListenCfg struct {
 	RPCJSONTLSListen string // RPC JSON TLS listening address
 	RPCGOBTLSListen  string // RPC GOB TLS listening address
 	HTTPTLSListen    string // HTTP TLS listening address
+	BiJSONListen     string // Bidirectional RPC JSON listening address
+	BiGobListen      string // Bidirectional RPC GOB listening address
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -53,6 +55,12 @@ func (lstcfg *ListenCfg) loadFromJSONCfg(jsnListenCfg *ListenJsonCfg) (err error
 	if jsnListenCfg.Http_tls != nil && *jsnListenCfg.Http_tls != "" {
 		lstcfg.HTTPTLSListen = *jsnListenCfg.Http_tls
 	}
+	if jsnListenCfg.Birpc_json != nil {
+		lstcfg.BiJSONListen = *jsnListenCfg.Birpc_json
+	}
+	if jsnListenCfg.Birpc_gob != nil {
+		lstcfg.BiGobListen = *jsnListenCfg.Birpc_gob
+	}
 	return nil
 }
 
@@ -65,6 +73,8 @@ func (lstcfg *ListenCfg) AsMapInterface() map[string]any {
 		utils.RPCJSONTLSListenCfg: lstcfg.RPCJSONTLSListen,
 		utils.RPCGOBTLSListenCfg:  lstcfg.RPCGOBTLSListen,
 		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
+		utils.BijsonListenCfg:     lstcfg.BiJSONListen,
+		utils.BigobListenCfg:      lstcfg.BiGobListen,
 	}
 }
 
@@ -77,5 +87,7 @@ func (lstcfg ListenCfg) Clone() *ListenCfg {
 		RPCJSONTLSListen: lstcfg.RPCJSONTLSListen,
 		RPCGOBTLSListen:  lstcfg.RPCGOBTLSListen,
 		HTTPTLSListen:    lstcfg.HTTPTLSListen,
+		BiJSONListen:     lstcfg.BiJSONListen,
+		BiGobListen:      lstcfg.BiGobListen,
 	}
 }
