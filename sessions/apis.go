@@ -920,6 +920,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			if authIP, err = sS.ipsAuthorize(ctx, cgrEv); err != nil {
 				return
 			}
+			if apiRply.IPsAllocation == nil {
+				apiRply.IPsAllocation = make(map[string]*utils.AllocatedIP)
+			}
 			apiRply.IPsAllocation[runID] = authIP
 		}
 
