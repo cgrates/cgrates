@@ -2478,6 +2478,7 @@ const (
 	MetaResourcesReleaseCfg       = "*resourcesRelease"
 	MetaResourcesDerivedReplyCfg  = "*resourcesDerivedReply"
 	MetaIPsAuthorizeCfg           = "*ipsAuthorize"
+	MetaAccountsAuthorizeCfg      = "*accountsAuthorize"
 	MetaIPsAllocateCfg            = "*ipsAllocate"
 	MetaIPsReleaseCfg             = "*ipsRelease"
 	MetaRoutesDerivedReplyCfg     = "*routesDerivedReply"

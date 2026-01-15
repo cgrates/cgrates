@@ -953,8 +953,8 @@ func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent)
 	return
 }
 
-// authorizeIPs will authorize the event with IPs subsystem
-func (sS *SessionS) authorizeIPs(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
+// ipsAuthorize will authorize the event with the IPs subsystem
+func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
 		err = errors.New("IPs is disabled")
 		return
@@ -968,7 +968,20 @@ func (sS *SessionS) authorizeIPs(ctx *context.Context, cgrEv *utils.CGREvent) (r
 				utils.SessionS, err.Error(), cgrEv))
 	}
 	return &alcIP, nil
+}
 
+// accountsMaxAbstracts will query the AccountS cost for Event
+func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
+	if len(sS.cfg.SessionSCfg().AccountSConns) == 0 {
+		err = errors.New("AccountS is disabled")
+		return
+	}
+	var acntCost utils.EventCharges
+	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().AccountSConns,
+		utils.AccountSv1MaxAbstracts, cgrEv, &acntCost); err != nil {
+		return
+	}
+	return &acntCost, nil
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions

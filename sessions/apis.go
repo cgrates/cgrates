@@ -906,7 +906,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cchEv[utils.MetaAuthorize] = auth
 		}
 
-		//IPsAuthorizeBool
+		// IPs Authorization
 		if ipsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
 			utils.MetaIPsAuthorizeCfg); errBool != nil {
@@ -914,14 +914,31 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else {
 			cchEv[utils.MetaIPsAuthorizeCfg] = ipsAuthBool
 		}
-		// IPAuthorization
 		if cchEv[utils.MetaIPsAuthorizeCfg].(bool) ||
 			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaIPs].(bool)) {
 			var authIP *utils.AllocatedIP
-			if authIP, err = sS.authorizeIPs(ctx, cgrEv); err != nil {
+			if authIP, err = sS.ipsAuthorize(ctx, cgrEv); err != nil {
 				return
 			}
 			apiRply.IPsAllocation[runID] = authIP
+		}
+
+		// AccountS Authorization
+		if acntsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsAuthorize,
+			utils.MetaAccountsAuthorizeCfg); errBool != nil {
+			return errBool
+		} else {
+			cchEv[utils.MetaAccountsAuthorizeCfg] = acntsAuthBool
+		}
+		if cchEv[utils.MetaAccountsAuthorizeCfg].(bool) ||
+			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaAccounts].(bool)) {
+			var acntCost *utils.EventCharges
+			if acntCost, err = sS.accountsMaxAbstracts(ctx, cgrEv); err != nil {
+				return
+			}
+			maxDur, _ := acntCost.Abstracts.Duration()
+			apiRply.AccountSUsage[runID] = maxDur
 		}
 	}
 	return
