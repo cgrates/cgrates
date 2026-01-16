@@ -956,8 +956,7 @@ func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent)
 // ipsAuthorize will authorize the event with the IPs subsystem
 func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
-		err = errors.New("IPs is disabled")
-		return
+		return nil, utils.NewErrNotConnected(utils.IPs)
 	}
 	var alcIP utils.AllocatedIP
 	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
@@ -968,6 +967,33 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 				utils.SessionS, err.Error(), cgrEv))
 	}
 	return &alcIP, nil
+}
+
+// ipsAuthorize will authorize the event with the IPs subsystem
+func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (resID string, err error) {
+	if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
+		return utils.EmptyString, utils.NewErrNotConnected(utils.ResourceS)
+	}
+	var resUsageID string
+	if resUsageID, err = engine.GetStringOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+		nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesUsageID,
+		utils.OptsResourcesUsageID); err != nil {
+		return
+	}
+	cgrEv.APIOpts[utils.OptsResourcesUsageID] = resUsageID
+	var resUnits int
+	if resUnits, err = engine.GetIntOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+		nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesUnits,
+		utils.OptsResourcesUnits); err != nil {
+		return
+	}
+	cgrEv.APIOpts[utils.OptsResourcesUnits] = resUnits
+	var resMessage string
+	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ResourceSConns,
+		utils.ResourceSv1AuthorizeResources,
+		cgrEv, &resMessage); err != nil {
+	}
+	return resMessage, nil
 }
 
 // accountsMaxAbstracts will query the AccountS cost for Event

@@ -2477,6 +2477,7 @@ const (
 	MetaResourcesAllocateCfg      = "*resourcesAllocate"
 	MetaResourcesReleaseCfg       = "*resourcesRelease"
 	MetaResourcesDerivedReplyCfg  = "*resourcesDerivedReply"
+	MetaResourcesUsageID          = "*resourcesUsageID"
 	MetaIPsAuthorizeCfg           = "*ipsAuthorize"
 	MetaAccountsAuthorizeCfg      = "*accountsAuthorize"
 	MetaIPsAllocateCfg            = "*ipsAllocate"
@@ -2744,9 +2745,9 @@ const (
 	OptsRatesIntervalStart = "*rtsIntervalStart"
 
 	// Resources
-	OptsResourcesUnits    = "*rsUnits"
-	OptsResourcesUsageID  = "*rsUsageID"
-	OptsResourcesUsageTTL = "*rsUsageTTL"
+	OptsResourcesUnits    = "*resUnits"
+	OptsResourcesUsageID  = "*resUsageID"
+	OptsResourcesUsageTTL = "*resUsageTTL"
 
 	// IPs
 	OptsIPsAllocationID = "*ipAllocationID"

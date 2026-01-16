@@ -84,6 +84,8 @@ type SessionsOpts struct {
 	ResourcesAllocate      []*DynamicBoolOpt
 	ResourcesRelease       []*DynamicBoolOpt
 	ResourcesDerivedReply  []*DynamicBoolOpt
+	ResourcesUsageID       []*DynamicStringOpt
+	ResourcesUnits         []*DynamicIntOpt
 	IPsAuthorize           []*DynamicBoolOpt
 	IPsAllocate            []*DynamicBoolOpt
 	IPsRelease             []*DynamicBoolOpt

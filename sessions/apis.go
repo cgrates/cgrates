@@ -867,23 +867,29 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		}
 	}
 
+	//var partiallyExecuted bool // will be	 added to the final answer if true
+	if blkrErr, errBlkr := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
+		cch, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
+		utils.OptsSesBlockerError, utils.MetaBlockerErrorCfg); errBlkr != nil {
+		return errBlkr
+	} else {
+		cch[utils.OptsSesBlockerError] = blkrErr
+	}
+
 	// same processing for each event
 	for runID, cgrEv := range cgrEvs {
 		cchEv := make(map[string]any)
-		//var partiallyExecuted bool // will be	 added to the final answer if true
-		if blkrErr, errBlkr := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
-			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
-			utils.OptsSesBlockerError, utils.MetaBlockerErrorCfg); errBlkr != nil {
-			return errBlkr
-		} else {
-			cchEv[utils.OptsSesBlockerError] = blkrErr
-		}
 
 		// IPs Enabled
 		if ipS, errIPs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPs,
 			utils.MetaIPs); errIPs != nil {
-			return errIPs
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errIPs
+			}
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s authorizing event: %+v with %s",
+					utils.SessionS, err.Error(), cgrEv, utils.IPs))
 		} else {
 			cchEv[utils.MetaIPs] = ipS
 		}
@@ -891,10 +897,19 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		// AccountS Enabled
 		if acntS, errAcnts := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Accounts,
-			utils.MetaIPs); errAcnts != nil {
+			utils.MetaAccounts); errAcnts != nil {
 			return errAcnts
 		} else {
 			cchEv[utils.MetaAccounts] = acntS
+		}
+
+		// ResourceS Enabled
+		if rscS, errRscS := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Resources,
+			utils.MetaResources); errRscS != nil {
+			return errRscS
+		} else {
+			cchEv[utils.MetaResources] = rscS
 		}
 
 		// Auth the events
@@ -926,6 +941,23 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			apiRply.IPsAllocation[runID] = authIP
 		}
 
+		// ResourceS Authorization
+		if resAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAuthorize,
+			utils.MetaResourcesAuthorizeCfg); errBool != nil {
+			return errBool
+		} else {
+			cchEv[utils.MetaResourcesAuthorizeCfg] = resAuthBool
+		}
+		if cchEv[utils.MetaResourcesAuthorizeCfg].(bool) ||
+			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaResources].(bool)) {
+			var resID string
+			if resID, err = sS.resourcesAuthorize(ctx, cgrEv); err != nil {
+				return
+			}
+			apiRply.ResourceAllocation[runID] = resID
+		}
+
 		// AccountS Authorization
 		if acntsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsAuthorize,
@@ -943,6 +975,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			maxDur, _ := acntCost.Abstracts.Duration()
 			apiRply.AccountSUsage[runID] = maxDur
 		}
+
 	}
 	return
 }
