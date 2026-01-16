@@ -955,6 +955,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			if resID, err = sS.resourcesAuthorize(ctx, cgrEv); err != nil {
 				return
 			}
+			if apiRply.ResourceAllocation == nil {
+				apiRply.ResourceAllocation = make(map[string]string)
+			}
 			apiRply.ResourceAllocation[runID] = resID
 		}
 
