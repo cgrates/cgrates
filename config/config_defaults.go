@@ -722,6 +722,7 @@ const CGRATES_CFG_JSON = `
 			"password": "CGRateS.org",
 			"connect_attempts": 3,
 			"reconnects": 5,
+			"ari_websocket": false,
 			"max_reconnect_interval": ""
 		}
 	]

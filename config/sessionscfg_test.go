@@ -814,7 +814,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		utils.CreateCdrCfg:     false,
 		utils.RouteProfileCfg:  false,
 		utils.AsteriskConnsCfg: []map[string]any{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s"},
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AriWebSocketCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -842,7 +842,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		utils.CreateCdrCfg:     true,
 		utils.RouteProfileCfg:  true,
 		utils.AsteriskConnsCfg: []map[string]any{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s"},
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s", utils.AriWebSocketCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

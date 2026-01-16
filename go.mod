@@ -17,7 +17,7 @@ require (
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/blevesearch/bleve/v2 v2.4.2
-	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
+	github.com/cgrates/aringo v0.0.0-20260113175100-995e59121190
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201129173550-63ea3d835706
@@ -50,8 +50,8 @@ require (
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/ugorji/go/codec v1.2.12
 	go.mongodb.org/mongo-driver v1.16.1
-	golang.org/x/crypto v0.31.0
-	golang.org/x/net v0.33.0
+	golang.org/x/crypto v0.47.0
+	golang.org/x/net v0.49.0
 	golang.org/x/oauth2 v0.24.0
 	google.golang.org/api v0.192.0
 	gorm.io/driver/mysql v1.5.7
@@ -89,6 +89,7 @@ require (
 	github.com/blevesearch/zapx/v16 v16.1.5 // indirect
 	github.com/cenkalti/hub v1.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/couchbase/ghistogram v0.1.0 // indirect
 	github.com/couchbase/moss v0.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -137,11 +138,11 @@ require (
 	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 // indirect
-	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240730163845-b1a4ccb954bf // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
