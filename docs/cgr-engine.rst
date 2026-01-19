@@ -86,4 +86,5 @@ The components from the diagram can be found documented in the links bellow:
    datadb
    stordb
    rpcconns
+   rsr
    
