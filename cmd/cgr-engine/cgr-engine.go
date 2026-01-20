@@ -18,8 +18,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package main
 
-import "github.com/cgrates/cgrates/services"
+import (
+	"os"
+
+	"github.com/cgrates/cgrates/services"
+)
 
 func main() {
-	services.RunCGREngine()
+	services.RunCGREngine(os.Args[1:])
 }
