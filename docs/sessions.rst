@@ -18,9 +18,6 @@ Configured within **sessions** section within :ref:`JSON configuration <configur
 enabled
 	Will enable starting of the service. Possible values: <true|false>.
 
-listen_bijson
-	Address where the *SessionS* listens for bidirectional JSON requests.
-
 chargers_conns
 	Connections towards :ref:`ChargerS` component to query charges for events.
 

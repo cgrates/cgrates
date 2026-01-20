@@ -34,7 +34,7 @@ else
    # Execute tests for all db types if no arguments have been passed
    for db in "${dbtypes[@]}"; do
       for pkg in "${packages[@]}"; do
-         execute_test "$pkg" "integration" "-dbtype=$db"
+         execute_test "$pkg" "integration" "-dbtype=$db" "-timeout=8m"
          [ "$pkg" == "apier/v1" ] && execute_test "$pkg" "offline" "-dbtype=$db"
       done
    done

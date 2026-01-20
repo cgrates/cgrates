@@ -121,7 +121,7 @@ func testSessionSv1ItStartEngine(t *testing.T) {
 }
 
 func testSessionSv1ItRpcConn(t *testing.T) {
-	dummyClnt, err := utils.NewBiJSONrpcClient(sSv1Cfg2.SessionSCfg().ListenBiJSON,
+	dummyClnt, err := utils.NewBiJSONrpcClient(sSv1Cfg2.ListenCfg().BiJSONListen,
 		nil)
 	if err != nil {
 		t.Fatal(err)
@@ -130,7 +130,7 @@ func testSessionSv1ItRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sSv1BiRpc2, err = utils.NewBiJSONrpcClient(sSv1Cfg2.SessionSCfg().ListenBiJSON,
+	if sSv1BiRpc2, err = utils.NewBiJSONrpcClient(sSv1Cfg2.ListenCfg().BiJSONListen,
 		srv); err != nil {
 		t.Fatal(err)
 	}

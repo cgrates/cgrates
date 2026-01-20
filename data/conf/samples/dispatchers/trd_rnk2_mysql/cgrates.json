@@ -1,44 +1,43 @@
 {
+  "general": {
+    "node_id": "ALL2",
+    "log_level": 7
+  },
 
-"general": {
-	"node_id": "ALL2",
-	"log_level": 7
-},
+  "listen": {
+    "rpc_json": ":7012",
+    "rpc_gob": ":7013",
+    "http": ":7080",
+    "birpc_json": ":7014"
+  },
 
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "12"
+  },
 
-"listen": {
-	"rpc_json": ":7012",
-	"rpc_gob": ":7013",
-	"http": ":7080"
-},
+  "stor_db": {
+    "db_type": "*internal"
+  },
 
-"data_db": {								
-	"db_type": "redis",						
-	"db_port": 6379, 						
-	"db_name": "12" 						
-},
+  "trends": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
-"stor_db": {
-	"db_type":"*internal"
-},
+  "rankings": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
-"trends": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1"
-},
+  "stats": {
+    "enabled": true
+  },
 
-"rankings": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1" 
-},
-
-"stats": {
-	"enabled": true
-},
-
-"apiers": {
-	"enabled": true
-}
+  "apiers": {
+    "enabled": true
+  }
 }

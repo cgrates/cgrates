@@ -17,6 +17,7 @@
  	"rpc_json": ":2012",
  	"rpc_gob": ":2013",
 	"http": ":2080",
+	"birpc_json": ":3014",
 },
 
 "stor_db": {
@@ -39,7 +40,6 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": ":3014",
 },
 
 "dispatchers":{

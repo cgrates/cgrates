@@ -40,7 +40,7 @@ import (
 func TestRadiusAgentReloadStartShut(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	cfg.RadiusAgentCfg().Enabled = true
 	cfg.RadiusAgentCfg().Listeners = []config.RadiusListener{
 		{
@@ -68,7 +68,7 @@ func TestRadiusAgentReloadStartShut(t *testing.T) {
 	server := cores.NewServer(nil)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	srvMngr.AddServices(srv, sS, db)
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
@@ -97,7 +97,7 @@ func TestRadiusAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -122,7 +122,7 @@ func TestRadiusAgentReload1(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS, db)
@@ -192,7 +192,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS, db)

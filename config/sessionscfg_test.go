@@ -68,7 +68,6 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Enabled:             utils.BoolPointer(true),
-		ListenBiJSON:        utils.StringPointer("127.0.0.1:2018"),
 		ChargerSConns:       &[]string{utils.MetaInternal, "*conn1"},
 		RALsConns:           &[]string{utils.MetaInternal, "*conn1"},
 		IPsConns:            &[]string{utils.MetaInternal, "*conn1"},
@@ -99,7 +98,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	expected := &SessionSCfg{
 		Enabled:             true,
-		ListenBiJSON:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
@@ -238,7 +236,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	}
 	expected := &SessionSCfg{
 		Enabled:             false,
-		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		RALsConns:           []string{},
 		IPsConns:            []string{},
@@ -349,8 +346,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
-		utils.ListenBijsonCfg:           "127.0.0.1:2014",
-		utils.ListenBigobCfg:            "",
 		utils.ChargerSConnsCfg:          []string{},
 		utils.RALsConnsCfg:              []string{},
 		utils.CDRsConnsCfg:              []string{},
@@ -402,7 +397,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 		"sessions": {
 			"enabled": true,
-			"listen_bijson": "127.0.0.1:2018",
 			"chargers_conns": ["*internal:*chargers", "*conn1"],
 			"rals_conns": ["*internal:*responder", "*conn1"],
 			"cdrs_conns": ["*internal:*cdrs", "*conn1"],
@@ -431,8 +425,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	}`
 	eMap := map[string]any{
 		utils.EnabledCfg:                true,
-		utils.ListenBijsonCfg:           "127.0.0.1:2018",
-		utils.ListenBigobCfg:            "",
 		utils.ChargerSConnsCfg:          []string{utils.MetaInternal, "*conn1"},
 		utils.RALsConnsCfg:              []string{utils.MetaInternal, "*conn1"},
 		utils.CDRsConnsCfg:              []string{utils.MetaInternal, "*conn1"},
@@ -950,7 +942,6 @@ func TestFsAgentCfgClone(t *testing.T) {
 func TestSessionSCfgClone(t *testing.T) {
 	ban := &SessionSCfg{
 		Enabled:             true,
-		ListenBiJSON:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},

@@ -278,6 +278,8 @@ func TestDfListenJsonCfg(t *testing.T) {
 		Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
 		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
 		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
+		Birpc_json:   utils.StringPointer("127.0.0.1:2014"),
+		Birpc_gob:    utils.StringPointer(""),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -939,8 +941,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:                utils.BoolPointer(false),
-		ListenBiJSON:           utils.StringPointer("127.0.0.1:2014"),
-		ListenBiGob:            utils.StringPointer(""),
 		ChargerSConns:          &[]string{},
 		RALsConns:              &[]string{},
 		CDRsConns:              &[]string{},

@@ -1,51 +1,43 @@
 {
+  "general": {
+    "node_id": "DispatcherEngine2",
+    "log_level": 7,
+    "reconnects": 1
+  },
 
-"general": {
-	"node_id": "DispatcherEngine2",
-	"log_level": 7,
-	"reconnects": 1,
-},
+  "listen": {
+    "rpc_json": ":3012",
+    "rpc_gob": ":3013",
+    "http": ":3080",
+    "birpc_json": ":3014"
+  },
 
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "11"
+  },
 
-"listen": {
-	"rpc_json": ":3012",
-	"rpc_gob": ":3013",
-	"http": ":3080",
-},
+  "stor_db": {
+    "db_type": "*internal"
+  },
 
+  "caches": {
+    "partitions": {
+      "*dispatcher_routes": { "limit": -1, "ttl": "1h" }
+    }
+  },
 
-"data_db": {
-	"db_type": "redis",
-	"db_port": 6379,
-	"db_name": "11",
-},
+  "schedulers": {
+    "enabled": true
+  },
 
+  "dispatchers": {
+    "enabled": true
+  },
 
-"stor_db": {
-	"db_type": "*internal",
-},
-	
-"caches":{
-	"partitions": {
-		"*dispatcher_routes": {"limit": -1, "ttl": "1h"}
-	},
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-	
-	
-"dispatchers":{
-	 "enabled": true,
-},
-	
-	
-"apiers": {
-	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
-
-	
+  "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+  }
 }

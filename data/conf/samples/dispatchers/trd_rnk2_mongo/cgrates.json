@@ -1,48 +1,46 @@
 {
+  "general": {
+    "node_id": "ALL2",
+    "log_level": 7
+  },
 
-"general": {
-	"node_id": "ALL2",
-	"log_level": 7
-},
+  "listen": {
+    "rpc_json": ":7012",
+    "rpc_gob": ":7013",
+    "http": ":7080",
+    "birpc_json": ":7014"
+  },
 
-"listen": {
-	"rpc_json": ":7012",
-	"rpc_gob": ":7013",
-	"http": ":7080"
-},
+  "data_db": {
+    "db_type": "mongo",
+    "db_name": "12",
+    "db_port": 27017
+  },
 
-"data_db": {
-	"db_type": "mongo",
-	"db_name": "12",
-	"db_port": 27017
-},
+  "stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017,
+    "db_password": ""
+  },
 
-"stor_db": {
-	"db_type": "mongo",
-	"db_name": "cgrates",
-	"db_port": 27017,
-	"db_password": ""
-},
+  "trends": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
+  "rankings": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
-"trends": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1"
-},
+  "stats": {
+    "enabled": true
+  },
 
-"rankings": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1" 
-},
-
-"stats": {
-	"enabled": true
-},
-
-"apiers": {
-	"enabled": true
-}
-
+  "apiers": {
+    "enabled": true
+  }
 }

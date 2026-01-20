@@ -1,42 +1,36 @@
 {
+  "general": {
+    "log_level": 7,
+    "node_id": "EngineRedis"
+  },
 
-"general": {
-	"log_level": 7,
-	"node_id": "EngineRedis"
-},
+  "listen": {
+    "rpc_json": ":2022",
+    "rpc_gob": ":2023",
+    "http": ":2280",
+    "birpc_json": ":2024"
+  },
 
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "10"
+  },
 
-"listen": {
-	"rpc_json": ":2022",
-	"rpc_gob": ":2023",
-	"http": ":2280",
-},
+  "stor_db": {
+    "db_password": "CGRateS.org"
+  },
 
-"data_db": {
-	"db_type": "redis",
-	"db_port": 6379,
-	"db_name": "10",
-},
+  "rals": {
+    "enabled": true
+  },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+  "schedulers": {
+    "enabled": true
+  },
 
-
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-
-
-"apiers": {
-	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
-
-
+  "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+  }
 }

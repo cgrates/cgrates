@@ -39,7 +39,7 @@ import (
 func TestAsteriskAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -69,7 +69,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 	db := NewDataDBService(cfg, cm, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, cm, anz, srvDep)
+		cm, anz, srvDep)
 	astService := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(astService, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -112,7 +112,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 func TestAsteriskAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -141,7 +141,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	db := NewDataDBService(cfg, cm, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, cm, anz, srvDep)
+		cm, anz, srvDep)
 	astSrv := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(astSrv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {

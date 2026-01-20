@@ -150,8 +150,6 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"alterable_fields":           []any{},
 		"client_protocol":            2.,
 		"debit_interval":             "0",
-		"listen_bijson":              "127.0.0.1:2014",
-		"listen_bigob":               "",
 		"stale_chan_max_extra_usage": "0",
 		"session_ttl":                "0",
 		"session_indexes":            []any{utils.OriginID},
@@ -188,8 +186,6 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		var empty []string
 		exp = map[string]any{
 			"enabled":               true,
-			"listen_bijson":         "127.0.0.1:2014",
-			"listen_bigob":          "",
 			"chargers_conns":        []string{utils.MetaInternal},
 			"rals_conns":            []string{utils.MetaInternal},
 			"resources_conns":       []string{utils.MetaLocalHost},
@@ -242,8 +238,6 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 	exp := map[string]any{
 		"enabled":                    true,
-		"listen_bijson":              "127.0.0.1:2014",
-		"listen_bigob":               "",
 		"chargers_conns":             []any{utils.MetaInternal},
 		"rals_conns":                 []any{utils.MetaInternal},
 		"resources_conns":            []any{utils.MetaLocalHost},
@@ -284,7 +278,6 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		var empty []string
 		exp = map[string]any{
 			"enabled":                    true,
-			"listen_bijson":              "127.0.0.1:2014",
 			"chargers_conns":             []string{utils.MetaInternal},
 			"rals_conns":                 []string{utils.MetaInternal},
 			"resources_conns":            []string{utils.MetaLocalHost},

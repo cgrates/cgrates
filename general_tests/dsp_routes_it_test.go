@@ -44,7 +44,8 @@ const (
 "listen": {
 	"rpc_json": ":%[2]d12",
 	"rpc_gob": ":%[2]d13",
-	"http": ":%[2]d80"
+	"http": ":%[2]d80",
+    "birpc_json": ":%[2]d14"
 },
 "dispatchers":{
 	"enabled": true,
@@ -334,7 +335,8 @@ func TestDispatchersLoadBalanceWithAuth(t *testing.T) {
 "listen": {
 	"rpc_json": ":%[2]d12",
 	"rpc_gob": ":%[2]d13",
-	"http": ":%[2]d80"
+	"http": ":%[2]d80",
+    "birpc_json": ":%[2]d14"
 },
 "apiers": {
 	"enabled": true
@@ -444,6 +446,7 @@ func TestDispatchersRoutingOnAcc(t *testing.T) {
 	"rpc_json": ":%[2]d12",
 	"rpc_gob": ":%[2]d13",
 	"http": ":%[2]d80"
+	"birpc_json": "127.0.0.1:%[2]d14",
 },
 "rals": {
 	"enabled": true
@@ -462,7 +465,6 @@ func TestDispatchersRoutingOnAcc(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:%[2]d14",
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 	"rals_conns": ["*internal"]

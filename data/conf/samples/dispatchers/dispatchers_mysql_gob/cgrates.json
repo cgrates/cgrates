@@ -14,9 +14,10 @@
 	
 	
 	"listen": {
-		 "rpc_json": ":2012",
-		 "rpc_gob": ":2013",
+		"rpc_json": ":2012",
+		"rpc_gob": ":2013",
 		"http": ":2080",
+		"birpc_json": ":3014",
 	},
 	
 
@@ -67,7 +68,6 @@
 		"rals_conns": ["conn1"],
 		"resources_conns": ["conn1"],
 		"chargers_conns": ["conn1"],
-		"listen_bijson": ":3014",
 	},
 	
 	

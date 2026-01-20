@@ -10,6 +10,7 @@
 		"rpc_json": "127.0.0.1:22012",
 		"rpc_gob": "127.0.0.1:22013",
 		"http": "127.0.0.1:22080",
+		"birpc_json": "127.0.0.1:22014",
 	},
 
 
@@ -24,7 +25,6 @@
 
 	"sessions": {
 		"enabled": true,
-		"listen_bijson": "127.0.0.1:22014",
 		"chargers_conns": ["*internal"],
 	},
 

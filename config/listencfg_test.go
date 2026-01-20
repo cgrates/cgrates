@@ -32,6 +32,7 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
 		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
 		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
+		Birpc_json:   utils.StringPointer("127.0.0.1:2018"),
 	}
 	expected := &ListenCfg{
 		RPCJSONListen:    "127.0.0.1:2012",
@@ -40,6 +41,7 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		RPCJSONTLSListen: "127.0.0.1:2022",
 		RPCGOBTLSListen:  "127.0.0.1:2023",
 		HTTPTLSListen:    "127.0.0.1:2280",
+		BiJSONListen:     "127.0.0.1:2018",
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -60,6 +62,8 @@ func TestListenCfgAsMapInterface(t *testing.T) {
 		utils.RPCJSONTLSListenCfg: "127.0.0.1:2022",
 		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2023",
 		utils.HTTPTLSListenCfg:    "127.0.0.1:2280",
+		utils.BijsonListenCfg:     "127.0.0.1:2014",
+		utils.BigobListenCfg:      "",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -76,6 +80,7 @@ func TestListenCfgAsMapInterface1(t *testing.T) {
         "rpc_json_tls" : "127.0.0.1:2025",		
         "rpc_gob_tls": "127.0.0.1:2001",		
         "http_tls": "127.0.0.1:2288",			
+        "birpc_json": "127.0.0.1:2014",			
 	}
 }`
 	eMap := map[string]any{
@@ -85,6 +90,8 @@ func TestListenCfgAsMapInterface1(t *testing.T) {
 		utils.RPCJSONTLSListenCfg: "127.0.0.1:2025",
 		utils.RPCGOBTLSListenCfg:  "127.0.0.1:2001",
 		utils.HTTPTLSListenCfg:    "127.0.0.1:2288",
+		utils.BijsonListenCfg:     "127.0.0.1:2014",
+		utils.BigobListenCfg:      "",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -101,6 +108,7 @@ func TestListenCfgClone(t *testing.T) {
 		RPCJSONTLSListen: "127.0.0.1:2022",
 		RPCGOBTLSListen:  "127.0.0.1:2023",
 		HTTPTLSListen:    "127.0.0.1:2280",
+		BiJSONListen:     "127.0.0.1:2018",
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

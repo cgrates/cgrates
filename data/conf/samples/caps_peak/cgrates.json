@@ -17,7 +17,8 @@
     "listen": {
         "rpc_json": ":2012",
         "rpc_gob": ":2013",
-        "http": ":2080"
+        "http": ":2080",
+        "birpc_json": "127.0.0.1:2014"
     },
     
     
@@ -40,7 +41,6 @@
     
     "sessions": {
         "enabled": true,
-        "listen_bijson": "127.0.0.1:2014"
     },
     
     

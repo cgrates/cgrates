@@ -8,7 +8,8 @@
 "listen": {
     "rpc_json": ":22012",
     "rpc_gob": ":22013",
-    "http": ":22080"
+    "http": ":22080",
+    "birpc_json": "127.0.0.1:22014"		
 },
 
 "data_db": {
@@ -34,7 +35,6 @@
     "enabled": true,
     "rals_conns": ["*localhost"],
     "cdrs_conns": ["*localhost"],
-    "listen_bijson": "127.0.0.1:22014"		
 },
 
 "apiers": {

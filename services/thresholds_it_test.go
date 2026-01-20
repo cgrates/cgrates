@@ -37,7 +37,6 @@ import (
 )
 
 func TestThresholdSReload(t *testing.T) {
-	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ApierCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -115,9 +114,9 @@ func TestThresholdSReload(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+	tS.server.StopBiRPC() // needed when running tests in bulk
 }
 func TestThresholdSReload2(t *testing.T) {
-	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ApierCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -192,4 +191,5 @@ func TestThresholdSReload2(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+	tS.server.StopBiRPC() // needed when running tests in bulk
 }

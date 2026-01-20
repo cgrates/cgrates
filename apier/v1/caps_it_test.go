@@ -102,7 +102,7 @@ func testCapsRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if capsBiRPC, err = utils.NewBiJSONrpcClient(capsCfg.SessionSCfg().ListenBiJSON,
+	if capsBiRPC, err = utils.NewBiJSONrpcClient(capsCfg.ListenCfg().BiJSONListen,
 		nil); err != nil {
 		t.Fatal(err)
 	}
