@@ -1,42 +1,41 @@
 {
-// CGRateS Configuration file
-//
-// Used for multiple RAL configuration tests
-// Starts RAL
+  // CGRateS Configuration file
+  //
+  // Used for multiple RAL configuration tests
+  // Starts RAL
 
-"general": {
-		"node_id":"node2",
-},
+  "general": {
+    "node_id": "node2"
+  },
 
-"listen": {
-	"rpc_json": ":12012",
-	"rpc_gob": ":12013",
-	"http": ":12080",
-},
+  "listen": {
+    "rpc_json": ":12012",
+    "rpc_gob": ":12013",
+    "http": ":12080",
+    "birpc_json": ":12014"
+  },
 
-"data_db": {
-	"db_type": "*internal",	
-},
+  "data_db": {
+    "db_type": "*internal"
+  },
 
+  "stor_db": {
+    "db_type": "*internal"
+  },
 
-"stor_db": {
-	"db_type": "*internal",	
-},
+  "rals": {
+    "enabled": true
+  },
 
-"rals": {
-	"enabled": true,
-},
+  "cdrs": {
+    "enabled": true
+  },
 
-"cdrs": {
-	"enabled": true,
-},
+  "chargers": {
+    "enabled": true
+  },
 
-"chargers": {
-	"enabled": true,
-},
-
-"sessions": {
-	"enabled": true,
-},
-
+  "sessions": {
+    "enabled": true
+  }
 }

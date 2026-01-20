@@ -55,7 +55,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:6012",
 	"rpc_gob": "127.0.0.1:6013",
-	"http": "127.0.0.1:6080"
+	"http": "127.0.0.1:6080",
+	"birpc_json": "127.0.0.1:6014"
 },
 "chargers": {
 	"enabled": true
@@ -78,7 +79,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:5012",
 	"rpc_gob": "127.0.0.1:5013",
-	"http": "127.0.0.1:5080"
+	"http": "127.0.0.1:5080",
+	"birpc_json": "127.0.0.1:5014"
 },
 "rals": {
 	"enabled": true
@@ -90,7 +92,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:5112",
 	"rpc_gob": "127.0.0.1:5113",
-	"http": "127.0.0.1:5180"
+	"http": "127.0.0.1:5180",
+	"birpc_json": "127.0.0.1:5114"
 },
 "rals": {
 	"enabled": true
@@ -102,7 +105,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:5212",
 	"rpc_gob": "127.0.0.1:5213",
-	"http": "127.0.0.1:5280"
+	"http": "127.0.0.1:5280",
+	"birpc_json": "127.0.0.1:5214"
 },
 "rals": {
 	"enabled": true
@@ -114,7 +118,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:5312",
 	"rpc_gob": "127.0.0.1:5313",
-	"http": "127.0.0.1:5380"
+	"http": "127.0.0.1:5380",
+	"birpc_json": "127.0.0.1:5314"
 },
 "rals": {
 	"enabled": true
@@ -126,7 +131,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:4012",
 	"rpc_gob": "127.0.0.1:4013",
-	"http": "127.0.0.1:4080"
+	"http": "127.0.0.1:4080",
+	"birpc_json": "127.0.0.1:4014"
 },
 "rpc_conns": {
 	"conn_dsp1": {
@@ -138,7 +144,6 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2014",
 	"chargers_conns": ["conn_shared"],
 	"rals_conns": ["conn_dsp1"],
 	"cdrs_conns": ["conn_shared"]
@@ -150,7 +155,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:4112",
 	"rpc_gob": "127.0.0.1:4113",
-	"http": "127.0.0.1:4180"
+	"http": "127.0.0.1:4180",
+	"birpc_json": "127.0.0.1:4114"
 },
 "rpc_conns": {
 	"conn_dsp1": {
@@ -162,7 +168,6 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2114",
 	"chargers_conns": ["conn_shared"],
 	"rals_conns": ["conn_dsp1"],
 	"cdrs_conns": ["conn_shared"]
@@ -174,7 +179,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:4212",
 	"rpc_gob": "127.0.0.1:4213",
-	"http": "127.0.0.1:4280"
+	"http": "127.0.0.1:4280",
+	"birpc_json": "127.0.0.1:2214"
 },
 "rpc_conns": {
 	"conn_dsp2": {
@@ -186,7 +192,6 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2214",
 	"chargers_conns": ["conn_shared"],
 	"rals_conns": ["conn_dsp2"],
 	"cdrs_conns": ["conn_shared"]
@@ -198,7 +203,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:4312",
 	"rpc_gob": "127.0.0.1:4313",
-	"http": "127.0.0.1:4380"
+	"http": "127.0.0.1:4380",
+	"birpc_json": "127.0.0.1:2314"
 },
 "rpc_conns": {
 	"conn_dsp2": {
@@ -210,7 +216,6 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2314",
 	"chargers_conns": ["conn_shared"],
 	"rals_conns": ["conn_dsp2"],
 	"cdrs_conns": ["conn_shared"]
@@ -222,7 +227,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:3012",
 	"rpc_gob": "127.0.0.1:3013",
-	"http": "127.0.0.1:3080"
+	"http": "127.0.0.1:3080",
+	"birpc_json": "127.0.0.1:3014"
 },
 "dispatchers": {
 	"enabled": true,
@@ -235,7 +241,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:3112",
 	"rpc_gob": "127.0.0.1:3113",
-	"http": "127.0.0.1:3180"
+	"http": "127.0.0.1:3180",
+	"birpc_json": "127.0.0.1:3114"
 },
 "dispatchers": {
 	"enabled": true,
@@ -359,7 +366,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 "listen": {
 	"rpc_json": "127.0.0.1:2112",
 	"rpc_gob": "127.0.0.1:2113",
-	"http": "127.0.0.1:2180"
+	"http": "127.0.0.1:2180",
+	"birpc_json": "127.0.0.1:2114"
 },
 "rpc_conns": {
 	"conn_dsp2": {

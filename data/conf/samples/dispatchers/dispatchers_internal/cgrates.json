@@ -11,6 +11,7 @@
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
+	"birpc_json": ":3014",
 },
 	
 	
@@ -55,7 +56,6 @@
 	"rals_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"listen_bijson": ":3014",
 },
 	
 	

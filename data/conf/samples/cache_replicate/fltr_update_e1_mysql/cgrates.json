@@ -1,42 +1,42 @@
 {
-
-"general": {
+  "general": {
     "node_id": "fltr_update_e1_mysql",
     "log_level": 7
-},
+  },
 
-
-"listen": {
+  "listen": {
     "rpc_json": ":22012",
     "rpc_gob": ":22013",
-    "http": ":22080"
-},
+    "http": ":22080",
+    "birpc_json": ":22014"
+  },
 
-"data_db": {								
-    "db_type": "redis",						
-    "db_port": 6379, 						
-    "db_name": "10"					
-},
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "10"
+  },
 
-"stor_db": {
+  "stor_db": {
     "db_password": "CGRateS.org"
-},
+  },
 
-"rpc_conns": {
+  "rpc_conns": {
     "cache_conn": {
-        "strategy": "*broadcast_sync",
-        "conns": [{"address": "127.0.0.1:22012", "transport":"*json"},{"address": "127.0.0.1:2012", "transport": "*json"}]
+      "strategy": "*broadcast_sync",
+      "conns": [
+        { "address": "127.0.0.1:22012", "transport": "*json" },
+        { "address": "127.0.0.1:2012", "transport": "*json" }
+      ]
     }
-},
+  },
 
-"attributes": {
+  "attributes": {
     "enabled": true
-},
+  },
 
-"apiers": {
+  "apiers": {
     "enabled": true,
-    "caches_conns":["cache_conn"]
+    "caches_conns": ["cache_conn"]
+  }
 }
-    
-}
-    

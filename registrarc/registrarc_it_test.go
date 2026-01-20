@@ -71,7 +71,8 @@ func TestRegistrarC(t *testing.T) {
 "listen": {
         "rpc_json": ":%[2]d12",
         "rpc_gob": ":%[2]d13",
-        "http": ":%[2]d80"
+        "http": ":%[2]d80",
+    	"birpc_json": ":%[2]d14"
 },
 "rpc_conns": {
         "dispConn": {

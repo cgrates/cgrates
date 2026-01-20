@@ -9,6 +9,7 @@
 	"rpc_json": ":2032",
 	"rpc_gob": ":2033",
 	"http": ":2380",
+    "birpc_json": ":2034"
 },
 
 "rpc_conns": {

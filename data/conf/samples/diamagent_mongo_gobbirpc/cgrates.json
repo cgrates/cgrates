@@ -13,6 +13,7 @@
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",					// RPC GOB listening address
 	"http": ":2080",					// HTTP listening address
+	"birpc_gob": "127.0.0.1:2015",
 },
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
@@ -59,7 +60,6 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bigob": "127.0.0.1:2015",
 	"attributes_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
 	"rals_conns": ["*localhost"],

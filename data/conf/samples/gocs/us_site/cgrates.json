@@ -9,6 +9,7 @@
     "rpc_json": ":4012",
     "rpc_gob": ":4013",
     "http": ":4080",
+    "birpc_json": ":4014",
   },
 
   "rpc_conns": {
@@ -98,7 +99,6 @@
 
   "sessions": {
     "enabled": true,
-    "listen_bijson": ":4014",
     "rals_conns": ["*internal"],
     "cdrs_conns": ["*internal"],
     "chargers_conns": ["*internal"],

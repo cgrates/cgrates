@@ -1,45 +1,43 @@
 {
+  "general": {
+    "node_id": "ALL",
+    "log_level": 7
+  },
 
-"general": {
-	"node_id": "ALL",
-	"log_level": 7
-},
+  "listen": {
+    "rpc_json": ":6012",
+    "rpc_gob": ":6013",
+    "http": ":6080",
+    "birpc_json": ":6014"
+  },
 
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "11"
+  },
 
-"listen": {
-	"rpc_json": ":6012",
-	"rpc_gob": ":6013",
-	"http": ":6080"
-},
+  "stor_db": {
+    "db_password": "CGRateS.org"
+  },
 
-"data_db": {								
-	"db_type": "redis",						
-	"db_port": 6379, 						
-	"db_name": "11" 						
-},
+  "trends": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
-"stor_db": {
-	"db_password": "CGRateS.org"
-},
+  "rankings": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "store_interval": "-1"
+  },
 
-"trends": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1"
-},
+  "stats": {
+    "enabled": true
+  },
 
-"rankings": {
-	"enabled": true,
-	"stats_conns":["*internal"],
-	"store_interval": "-1" 
-},
-
-"stats": {
-	"enabled": true
-},
-
-"apiers": {
-	"enabled": true
-}
-
+  "apiers": {
+    "enabled": true
+  }
 }

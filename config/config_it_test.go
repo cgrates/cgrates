@@ -524,7 +524,6 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
 		RALsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		IPsConns:        []string{},
@@ -980,7 +979,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
 		RALsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		IPsConns:        []string{utils.MetaLocalHost},
@@ -1043,7 +1041,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.MetaLocalHost},
 		RALsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		IPsConns:        []string{utils.MetaLocalHost},
@@ -1077,7 +1074,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 
 	var rcv string
-	expected := `{"sessions":{"alterable_fields":[],"attributes_conns":["*localhost"],"backup_interval":"0","cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":2,"debit_interval":"0","default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"ips_conns":["*localhost"],"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stale_chan_max_extra_usage":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	expected := `{"sessions":{"alterable_fields":[],"attributes_conns":["*localhost"],"backup_interval":"0","cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":2,"debit_interval":"0","default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"ips_conns":["*localhost"],"min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stale_chan_max_extra_usage":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
 
 	if err := cfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: SessionSJson}, &rcv); err != nil {
 		t.Error(err)
@@ -1106,7 +1103,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
 		RALsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		IPsConns:        []string{},

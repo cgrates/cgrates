@@ -105,7 +105,7 @@ func TestSessionSReload1(t *testing.T) {
 	if err := dmService.Start(); err != nil {
 		t.Fatal(err)
 	}
-	srv := NewSessionService(cfg, dmService, server, make(chan birpc.ClientConnector, 1), shdChan, conMng, anz, srvDep)
+	srv := NewSessionService(cfg, dmService, server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
 	err := srv.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -135,7 +135,7 @@ func TestSessionSReload1(t *testing.T) {
 	}
 
 	rply := new(sessions.V1InitSessionReply)
-	srv.(*SessionService).sm.BiRPCv1InitiateSession(context.Background(), args, rply)
+	srv.sm.BiRPCv1InitiateSession(context.Background(), args, rply)
 	if err = srv.Shutdown(); err != nil {
 		t.Error(err)
 	}
@@ -180,9 +180,9 @@ func TestSessionSReload2(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srv.(*SessionService).sm = &sessions.SessionS{}
+	srv.sm = &sessions.SessionS{}
 	if !srv.IsRunning() {
 		t.Fatalf("\nExpecting service to be running")
 	}
@@ -196,7 +196,7 @@ func TestSessionSReload2(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	time.Sleep(10 * time.Millisecond)
-	srv.(*SessionService).sm = nil
+	srv.sm = nil
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -244,10 +244,10 @@ func TestSessionSReload3(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 
-	srv.(*SessionService).sm = &sessions.SessionS{}
+	srv.sm = &sessions.SessionS{}
 	if !srv.IsRunning() {
 		t.Fatalf("\nExpecting service to be running")
 	}
@@ -255,8 +255,4 @@ func TestSessionSReload3(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		server.StopBiRPC()
 	}()
-	err2 := srv.(*SessionService).start()
-	if err2 != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
-	}
 }

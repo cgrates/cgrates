@@ -63,6 +63,8 @@ func TestDspConfigIT(t *testing.T) {
 
 func testDspConfigSv1GetJSONSection(t *testing.T) {
 	expected := map[string]any{
+		"birpc_gob":    "",
+		"birpc_json":   ":6014",
 		"http":         ":6080",
 		"http_tls":     "127.0.0.1:2280",
 		"rpc_gob":      ":6013",

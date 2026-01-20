@@ -16,6 +16,7 @@
 	"rpc_json_tls" : "*env:DOCKER_IP:2022",		// RPC JSON TLS listening address
 	"rpc_gob_tls": "*env:DOCKER_IP:2023",		// RPC GOB TLS listening address
 	"http_tls": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
+	"birpc_json": "*env:DOCKER_IP:2014",
 },
 
 "rpc_conns": {
@@ -100,7 +101,6 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "*env:DOCKER_IP:2014",
 	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],

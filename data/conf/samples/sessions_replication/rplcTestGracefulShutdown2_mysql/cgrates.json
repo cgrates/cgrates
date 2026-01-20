@@ -10,6 +10,7 @@
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",
 	"http": "127.0.0.1:2080",
+	"birpc_json": "127.0.0.1:2014",
 },
 
 
@@ -34,7 +35,6 @@
 	"enabled": true,
 	"replication_conns": ["rplConn"],
 	"chargers_conns": ["*internal"],
-	"listen_bijson": "127.0.0.1:2014",
 },
 
 "apiers": {

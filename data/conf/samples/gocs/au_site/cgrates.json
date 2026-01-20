@@ -1,95 +1,90 @@
 {
-
   "general": {
     "log_level": 7,
-    "node_id": "AU_SITE",
+    "node_id": "AU_SITE"
   },
 
   "listen": {
     "rpc_json": ":3012",
     "rpc_gob": ":3013",
     "http": ":3080",
+    "birpc_json": ":3014"
   },
-
 
   "rpc_conns": {
     "conn1": {
       "strategy": "*first",
-      "conns": [{"address": "127.0.0.1:3012", "transport":"*json"}],
+      "conns": [{ "address": "127.0.0.1:3012", "transport": "*json" }]
     },
     "rmtConn": {
       "strategy": "*first",
-      "conns": [{"address": "127.0.0.1:4013", "transport":"*gob"}],
+      "conns": [{ "address": "127.0.0.1:4013", "transport": "*gob" }]
     },
     "*internal": {
       "strategy": "*first",
-      "conns": [{"address": "*internal"}],
+      "conns": [{ "address": "*internal" }]
     }
   },
-
 
   "data_db": {
     "db_type": "*internal",
     "remote_conns": ["rmtConn"],
-    "items":{
-      "*accounts":{"remote":true},
-      "*reverse_destinations": {"remote":true},
-      "*destinations": {"remote":true},
-      "*rating_plans": {"remote":true},
-      "*rating_profiles":{"remote":true},
-      "*actions":{"remote":true},
-      "*action_plans": {"remote":true},
-      "*account_action_plans":{"remote":true},
-      "*action_triggers":{"remote":true},
-      "*shared_groups":{"remote":true},
-      "*timings": {"remote":true},
-      "*filters": {"remote":true},
-      "*route_profiles":{"remote":true},
-      "*attribute_profiles":{"remote":true},
-      "*charger_profiles": {"remote":true},
-      "*dispatcher_profiles":{"remote":true},
-      "*dispatcher_hosts":{"remote":true},
-      "*load_ids":{"remote":true},
-      "*resource_filter_indexes" : {"remote":true},
-		  "*stat_filter_indexes" : {"remote":true},
-		  "*threshold_filter_indexes" : {"remote":true},
-		  "*route_filter_indexes" : {"remote":true},
-		  "*attribute_filter_indexes" : {"remote":true},
-		  "*charger_filter_indexes" : {"remote":true},
-		  "*dispatcher_filter_indexes" : {"remote":true},
-		  "*reverse_filter_indexes" : {"remote":true},
+    "items": {
+      "*accounts": { "remote": true },
+      "*reverse_destinations": { "remote": true },
+      "*destinations": { "remote": true },
+      "*rating_plans": { "remote": true },
+      "*rating_profiles": { "remote": true },
+      "*actions": { "remote": true },
+      "*action_plans": { "remote": true },
+      "*account_action_plans": { "remote": true },
+      "*action_triggers": { "remote": true },
+      "*shared_groups": { "remote": true },
+      "*timings": { "remote": true },
+      "*filters": { "remote": true },
+      "*route_profiles": { "remote": true },
+      "*attribute_profiles": { "remote": true },
+      "*charger_profiles": { "remote": true },
+      "*dispatcher_profiles": { "remote": true },
+      "*dispatcher_hosts": { "remote": true },
+      "*load_ids": { "remote": true },
+      "*resource_filter_indexes": { "remote": true },
+      "*stat_filter_indexes": { "remote": true },
+      "*threshold_filter_indexes": { "remote": true },
+      "*route_filter_indexes": { "remote": true },
+      "*attribute_filter_indexes": { "remote": true },
+      "*charger_filter_indexes": { "remote": true },
+      "*dispatcher_filter_indexes": { "remote": true },
+      "*reverse_filter_indexes": { "remote": true }
     }
   },
 
   "stor_db": {
-    "db_password": "CGRateS.org",
+    "db_password": "CGRateS.org"
   },
-
 
   "rals": {
     "enabled": true,
-    "max_increments":3000000,
+    "max_increments": 3000000
   },
-
 
   "schedulers": {
-    "enabled": true,
+    "enabled": true
   },
 
-
   "chargers": {
-    "enabled": true,
+    "enabled": true
   },
 
   "sessions": {
     "enabled": true,
     "rals_conns": ["*internal"],
-    "chargers_conns": ["*internal"],
+    "chargers_conns": ["*internal"]
   },
 
   "apiers": {
     "enabled": true,
-    "caches_conns":["conn1"],
-    "scheduler_conns": ["conn1"],
+    "caches_conns": ["conn1"],
+    "scheduler_conns": ["conn1"]
   }
 }

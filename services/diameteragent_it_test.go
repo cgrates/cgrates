@@ -38,7 +38,7 @@ import (
 func TestDiameterAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -58,7 +58,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	diamSrv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(diamSrv, sS, db)
@@ -108,7 +108,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 func TestDiameterAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)

@@ -40,7 +40,7 @@ import (
 func TestDNSAgentStartReloadShut(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners = []config.DnsListener{
 		{
@@ -66,7 +66,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	server := cores.NewServer(nil)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	srvMngr.AddServices(srv, sS, db)
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
@@ -95,7 +95,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -120,7 +120,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		nil, anz, srvDep)
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS, db)
@@ -181,7 +181,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().Listeners[0].Network = "test"
 	cfg.DNSAgentCfg().Listeners[0].Address = "test"

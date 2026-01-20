@@ -41,7 +41,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -70,7 +70,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	db := NewDataDBService(cfg, cm, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, cm, anz, srvDep)
+		cm, anz, srvDep)
 	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
 	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -99,7 +99,7 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -139,7 +139,7 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)

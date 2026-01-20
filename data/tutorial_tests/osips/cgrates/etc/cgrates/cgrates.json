@@ -9,6 +9,7 @@
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
+	"birpc_json": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 },
 
 
@@ -47,7 +48,6 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"chargers_conns": ["*internal"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],

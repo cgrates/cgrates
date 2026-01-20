@@ -8,7 +8,8 @@
 "listen": {
 	"rpc_json": ":6012",
 	"rpc_gob": ":6013",
-	"http": ":6080"
+	"http": ":6080",
+	"birpc_json": ":6014",
 },
 
 "data_db": {
@@ -98,7 +99,6 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": ":6014",
 	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],

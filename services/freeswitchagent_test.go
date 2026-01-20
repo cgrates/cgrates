@@ -33,7 +33,7 @@ import (
 func TestFreeSwitchAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBiJSON = ""
+	cfg.ListenCfg().BiJSONListen = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()

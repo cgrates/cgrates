@@ -10,6 +10,7 @@
 	"rpc_json": "127.0.0.1:22012",				// RPC JSON listening address
 	"rpc_gob": "127.0.0.1:22013",					// RPC GOB listening address
 	"http": "127.0.0.1:22080",					// HTTP listening address
+	"birpc_json": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
 },
 
 
@@ -64,7 +65,6 @@
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"debit_interval": "5ms",					// interval to perform debits on.
-	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
 	"replication_conns": ["rplConn"],
 	"rals_conns": ["conn1"],
 	"cdrs_conns": ["*internal"],

@@ -1,35 +1,28 @@
 {
+  "general": {
+    "node_id": "EngineWithConfigSActive",
+    "log_level": 7,
+    "reply_timeout": "50s"
+  },
 
+  "listen": {
+    "rpc_json": ":3012",
+    "rpc_gob": ":3013",
+    "http": ":3080",
+    "birpc_json": ":3014"
+  },
 
-"general": {
-	"node_id": "EngineWithConfigSActive",
-	"log_level": 7,
-	"reply_timeout": "50s",
-},
+  "data_db": {
+    "db_type": "*internal"
+  },
 
+  "stor_db": {
+    "db_type": "*internal"
+  },
 
-"listen": {
-	"rpc_json": ":3012",
-	"rpc_gob": ":3013",
-	"http": ":3080",
-},
-
-
-"data_db": {
-	"db_type": "*internal",
-},
-
-
-"stor_db": {
-	"db_type": "*internal"
-},
-
-
-"configs": {
-	"enabled": true,
-	"url": "/configs/",
-	"root_dir": "/usr/share/cgrates/conf/samples",
-},
-
-
+  "configs": {
+    "enabled": true,
+    "url": "/configs/",
+    "root_dir": "/usr/share/cgrates/conf/samples"
+  }
 }
