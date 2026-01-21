@@ -151,7 +151,27 @@ type TPResourceProfile struct {
 	Weights           string   // Weight to sort the ResourceLimits
 	ThresholdIDs      []string // Thresholds to check after changing Limit
 }
+type TPIPPool struct {
+	ID        string
+	FilterIDs []string
+	Type      string
+	Range     string
+	Strategy  string
+	Message   string
+	Weights   string
+	Blockers  string
+}
 
+type TPIPProfile struct {
+	TPid      string
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	TTL       string
+	Stored    bool
+	Weights   string
+	Pools     []*TPIPPool
+}
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
 	APIOpts          map[string]any

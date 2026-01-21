@@ -45,6 +45,7 @@ type CSVStorage struct {
 	generator func() csvReaderCloser
 	// file names
 	resProfilesFn       []string
+	ipsFn               []string
 	statsFn             []string
 	trendsFn            []string
 	rankingsFn          []string
@@ -60,13 +61,14 @@ type CSVStorage struct {
 
 // NewCSVStorage creates a CSV storege that takes the data from the paths specified
 func NewCSVStorage(sep rune,
-	resProfilesFn, statsFn, rankingsFn, trendsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, ipsFn, statsFn, rankingsFn, trendsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn,
 	rateProfilesFn, actionProfilesFn, accountsFn []string) *CSVStorage {
 	return &CSVStorage{
 		sep:                 sep,
 		generator:           NewCsvFile,
 		resProfilesFn:       resProfilesFn,
+		ipsFn:               ipsFn,
 		statsFn:             statsFn,
 		rankingsFn:          rankingsFn,
 		trendsFn:            trendsFn,
@@ -88,6 +90,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 		return nil, fmt.Errorf("could not retrieve any folders from %q: %v", dataPath, err)
 	}
 	resourcesPaths := appendName(allFoldersPath, utils.ResourcesCsv)
+	ipsPaths := appendName(allFoldersPath, utils.IPsCsv)
 	statsPaths := appendName(allFoldersPath, utils.StatsCsv)
 	rankingsPaths := appendName(allFoldersPath, utils.RankingsCsv)
 	trendsPaths := appendName(allFoldersPath, utils.TrendsCsv)
@@ -101,6 +104,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 	accountsFn := appendName(allFoldersPath, utils.AccountsCsv)
 	return NewCSVStorage(sep,
 		resourcesPaths,
+		ipsPaths,
 		statsPaths,
 		rankingsPaths,
 		trendsPaths,
@@ -117,11 +121,11 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 
 // NewStringCSVStorage creates a csv storage from strings
 func NewStringCSVStorage(sep rune,
-	resProfilesFn, statsFn, rankingsFn, trendsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, ipsFn, statsFn, rankingsFn, trendsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn,
 	rateProfilesFn, actionProfilesFn, accountsFn string) *CSVStorage {
 	c := NewCSVStorage(sep,
-		[]string{resProfilesFn}, []string{statsFn}, []string{rankingsFn}, []string{trendsFn}, []string{thresholdsFn}, []string{filterFn},
+		[]string{resProfilesFn}, []string{ipsFn}, []string{statsFn}, []string{rankingsFn}, []string{trendsFn}, []string{thresholdsFn}, []string{filterFn},
 		[]string{routeProfilesFn}, []string{attributeProfilesFn}, []string{chargerProfilesFn},
 		[]string{rateProfilesFn},
 		[]string{actionProfilesFn}, []string{accountsFn})
@@ -147,6 +151,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 	}
 	c := NewCSVStorage(sep,
 		getIfExist(utils.ResourcesStr),
+		getIfExist(utils.IPs),
 		getIfExist(utils.Stats),
 		getIfExist(utils.Rankings),
 		getIfExist(utils.Trends),
@@ -170,6 +175,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 // NewURLCSVStorage returns a CSVStorage that can parse URLs
 func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	var resourcesPaths []string
+	var ipsPaths []string
 	var statsPaths []string
 	var rankingsPaths []string
 	var trendsPaths []string
@@ -185,6 +191,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	for _, baseURL := range strings.Split(dataPath, utils.InfieldSep) {
 		if !strings.HasSuffix(baseURL, utils.CSVSuffix) {
 			resourcesPaths = append(resourcesPaths, joinURL(baseURL, utils.ResourcesCsv))
+			ipsPaths = append(ipsPaths, joinURL(baseURL, utils.IPsCsv))
 			statsPaths = append(statsPaths, joinURL(baseURL, utils.StatsCsv))
 			rankingsPaths = append(rankingsPaths, joinURL(baseURL, utils.RankingsCsv))
 			trendsPaths = append(trendsPaths, joinURL(baseURL, utils.TrendsCsv))
@@ -201,6 +208,8 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 		switch {
 		case strings.HasSuffix(baseURL, utils.ResourcesCsv):
 			resourcesPaths = append(resourcesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.IPsCsv):
+			ipsPaths = append(ipsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.StatsCsv):
 			statsPaths = append(statsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.RankingsCsv):
@@ -229,6 +238,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 
 	c := NewCSVStorage(sep,
 		resourcesPaths,
+		ipsPaths,
 		statsPaths,
 		rankingsPaths,
 		trendsPaths,
@@ -318,6 +328,18 @@ func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 		return nil, err
 	}
 	return tpResLimits.AsTPResources(), nil
+}
+
+func (csvs *CSVStorage) GetTPIPs(tpid, tenant, id string) ([]*utils.TPIPProfile, error) {
+	var tpIPS IPMdls
+	if err := csvs.proccesData(IPMdl{}, csvs.ipsFn, func(tp any) {
+		tpIP := tp.(IPMdl)
+		tpIP.Tpid = tpid
+		tpIPS = append(tpIPS, &tpIP)
+	}); err != nil {
+		return nil, err
+	}
+	return tpIPS.AsTPIPs(), nil
 }
 
 func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
