@@ -582,6 +582,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		APIOpts:              map[string]any{},
 		Tenant:               "cgrates.org",
 		ResourceProfileIDs:   []string{"cgrates.org:resourceProfilesID"},
+		IPProfileIDs:         []string{"cgrates.org:ipProfilesID"},
 		StatsQueueProfileIDs: []string{"cgrates.org:statProfilesID"},
 		ThresholdProfileIDs:  []string{"cgrates.org:thresholdProfilesID"},
 		FilterIDs:            []string{"cgrates.org:filtersID"},
@@ -589,6 +590,8 @@ func TestTPReaderReloadCache(t *testing.T) {
 		AttributeProfileIDs:  []string{"cgrates.org:attributeProfilesID"},
 		ChargerProfileIDs:    []string{"cgrates.org:chargerProfilesID"},
 		ResourceIDs:          []string{"cgrates.org:resourceProfilesID"},
+		TrendProfileIDs:      []string{"cgrates.org:trendProfilesID"},
+		RankingProfileIDs:    []string{"cgrates.org:rankingProfileID"},
 		StatsQueueIDs:        []string{"cgrates.org:statProfilesID"},
 		ThresholdIDs:         []string{"cgrates.org:thresholdProfilesID"},
 
@@ -617,11 +620,20 @@ func TestTPReaderReloadCache(t *testing.T) {
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
 		},
+		ipProfiles: map[utils.TenantID]*utils.TPIPProfile{
+			{Tenant: "cgrates.org", ID: "ipProfilesID"}: {},
+		},
+		rgProfiles: map[utils.TenantID]*utils.TPRankingProfile{
+			{Tenant: "cgrates.org", ID: "rankingProfileID"}: {},
+		},
 		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
 		},
 		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
 			{Tenant: "cgrates.org", ID: "thresholdProfilesID"}: {},
+		},
+		trProfiles: map[utils.TenantID]*utils.TPTrendsProfile{
+			{Tenant: "cgrates.org", ID: "trendProfilesID"}: {},
 		},
 		filters: map[utils.TenantID]*utils.TPFilterProfile{
 			{Tenant: "cgrates.org", ID: "filtersID"}: {},

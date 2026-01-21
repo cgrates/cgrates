@@ -26,6 +26,8 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestLoaderCSV(t *testing.T) {
@@ -85,6 +87,14 @@ func TestLoaderCSV(t *testing.T) {
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
 cgrates.org,ResGroup21,*string:~*req.Account:1001,;10,1s,2,call,true,true,
 cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,true,
+`
+	IPCSVContent := `
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],TTL[4],Stored[5],PoolID[6],PoolFilterIDs[7],PoolType[8],PoolRange[9],PoolStrategy[10],PoolMessage[11],PoolWeights[12],PoolBlockers[13]
+cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,true,,,,,,,,
+cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*ascending,alloc_success,;15,
+cgrates.org,IPs1,,,,,POOL1,,,,,,*exists:~*req.NeedMoreWeight:;50,*exists:~*req.ShouldBlock:;true
+cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/32,*random,alloc_new,;25,;true
+cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Destination:3001,*ipv4,127.0.0.1/32,*descending,alloc_msg,;35,;true
 `
 	StatsCSVContent := `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],Blockers[4],QueueLength[5],TTL[6],MinItems[7],Stored[8],ThresholdIDs[9],Metrics[10],MetricFilterIDs[11],MetricBlockers[12]
@@ -171,7 +181,7 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, config.CgrConfig().DbCfg())
 	csvr, err := NewTpReader(dbCM, NewStringCSVStorage(utils.CSVSep,
-		ResourcesCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		ResourcesCSVContent, IPCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil)
 	if err != nil {
@@ -182,6 +192,9 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	}
 	if err := csvr.LoadResourceProfiles(); err != nil {
 		log.Print("error in LoadResourceProfiles:", err)
+	}
+	if err := csvr.LoadIPs(); err != nil {
+		log.Print("error in LoadIPProfiles:")
 	}
 	if err := csvr.LoadStats(); err != nil {
 		log.Print("error in LoadStats:", err)
@@ -246,6 +259,85 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 		}
 	})
 
+	t.Run("load IPProfiles", func(t *testing.T) {
+		eIPsProfiles := map[utils.TenantID]*utils.TPIPProfile{
+			{Tenant: "cgrates.org", ID: "IPs1"}: {
+				TPid:      "LoaderCSVTests",
+				Tenant:    "cgrates.org",
+				ID:        "IPs1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights:   ";10",
+				TTL:       "1s",
+				Stored:    true,
+				Pools: []*utils.TPIPPool{
+					{
+						ID:        "POOL1",
+						FilterIDs: []string{"*string:~*req.Destination:2001"},
+						Type:      "*ipv4",
+						Range:     "172.16.1.1/32",
+						Strategy:  "*ascending",
+						Message:   "alloc_success",
+						Weights:   ";15",
+						Blockers:  "",
+					},
+					{
+						ID:        "POOL1",
+						FilterIDs: nil,
+						Type:      "",
+						Range:     "",
+						Strategy:  "",
+						Message:   "",
+						Weights:   "*exists:~*req.NeedMoreWeight:;50",
+						Blockers:  "*exists:~*req.ShouldBlock:;true",
+					},
+					{
+						ID:        "POOL2",
+						FilterIDs: []string{"*string:~*req.Destination:2002"},
+						Type:      "*ipv4",
+						Range:     "192.168.122.1/32",
+						Strategy:  "*random",
+						Message:   "alloc_new",
+						Weights:   ";25",
+						Blockers:  ";true",
+					},
+				},
+			},
+			{Tenant: "cgrates.org", ID: "IPs2"}: {
+				TPid:      "LoaderCSVTests",
+				Tenant:    "cgrates.org",
+				ID:        "IPs2",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Weights:   ";20",
+				TTL:       "2s",
+				Stored:    false,
+				Pools: []*utils.TPIPPool{
+					{
+						ID:        "POOL1",
+						FilterIDs: []string{"*string:~*req.Destination:3001"},
+						Type:      "*ipv4",
+						Range:     "127.0.0.1/32",
+						Strategy:  "*descending",
+						Message:   "alloc_msg",
+						Weights:   ";35",
+						Blockers:  ";true",
+					},
+				},
+			}}
+
+		if len(csvr.ipProfiles) != len(eIPsProfiles) {
+			t.Errorf("Failed to load IPProfiles: %s", utils.ToIJSON(csvr.ipProfiles))
+		}
+		for key, val := range eIPsProfiles {
+			if diff := cmp.Diff(val, csvr.ipProfiles[key], cmpopts.SortSlices(func(a, b *utils.TPIPPool) bool {
+				if a.ID != b.ID {
+					return a.ID < b.ID
+				}
+				return a.Weights < b.Weights
+			})); diff != "" {
+				t.Errorf("IPProfile mismatch (-want +got):\n%s", diff)
+			}
+		}
+	})
 	t.Run("load StatProfiles", func(t *testing.T) {
 		eStats := map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "TestStats"}: {

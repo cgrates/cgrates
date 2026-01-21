@@ -19,6 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/trends"
 	"github.com/cgrates/cgrates/utils"
@@ -129,6 +132,21 @@ func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *utils.TrendProf
 	if err = adms.dm.SetTrendProfile(ctx, arg.TrendProfile); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for CacheTrendProfiles and store it in database
+	loadID := time.Now().UnixNano()
+	if err = adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheTrendProfiles: loadID}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.SetTrendProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
+	//handle caching for TrendProfile
+	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheTrendProfiles,
+		arg.TenantID(), utils.EmptyString, nil, arg.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -143,6 +161,21 @@ func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.Tenan
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	if err := adms.dm.RemoveTrendProfile(ctx, tnt, args.ID); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	// delay if needed before cache call
+	if adms.cfg.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<AdminSv1.RemoveTrendProfile> Delaying cache call for %v", adms.cfg.GeneralCfg().CachingDelay))
+		time.Sleep(adms.cfg.GeneralCfg().CachingDelay)
+	}
+	//handle caching for TrendProfile
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheTrendProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheTrendProfiles and store it in database
+	loadID := time.Now().UnixNano()
+	if err := adms.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheTrendProfiles: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

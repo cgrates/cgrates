@@ -36,6 +36,7 @@ type TpReader struct {
 	lr                LoadReader
 	resProfiles       map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles        map[utils.TenantID]*utils.TPStatProfile
+	ipProfiles        map[utils.TenantID]*utils.TPIPProfile
 	trProfiles        map[utils.TenantID]*utils.TPTrendsProfile
 	rgProfiles        map[utils.TenantID]*utils.TPRankingProfile
 	thProfiles        map[utils.TenantID]*utils.TPThresholdProfile
@@ -67,6 +68,7 @@ func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
 
 func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
+	tpr.ipProfiles = make(map[utils.TenantID]*utils.TPIPProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
 	tpr.rgProfiles = make(map[utils.TenantID]*utils.TPRankingProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
@@ -118,6 +120,26 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 
 func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
+}
+
+func (tpr *TpReader) LoadIPsFiltered(tag string) (err error) {
+	tps, err := tpr.lr.GetTPIPs(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapIPs := make(map[utils.TenantID]*utils.TPIPProfile)
+	for _, ip := range tps {
+		if err = verifyInlineFilterS(ip.FilterIDs); err != nil {
+			return
+		}
+		mapIPs[utils.TenantID{Tenant: ip.Tenant, ID: ip.ID}] = ip
+	}
+	tpr.ipProfiles = mapIPs
+	return nil
+}
+
+func (tpr *TpReader) LoadIPs() error {
+	return tpr.LoadIPsFiltered("")
 }
 
 func (tpr *TpReader) LoadRankingsFiltered(tag string) error {
@@ -330,6 +352,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadRankings(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
+	if err = tpr.LoadIPs(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
 	if err = tpr.LoadTrends(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -403,6 +428,25 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if len(tpr.resProfiles) != 0 {
 		loadIDs[utils.CacheResourceProfiles] = loadID
 		loadIDs[utils.CacheResources] = loadID
+	}
+	if verbose {
+		log.Print("IPProfiles")
+	}
+	for _, tpIP := range tpr.ipProfiles {
+		var ip *utils.IPProfile
+		if ip, err = APItoIP(tpIP); err != nil {
+			return
+		}
+		if err = tpr.dm.SetIPProfile(context.TODO(), ip, true); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", ip.TenantID())
+		}
+	}
+	if len(tpr.ipProfiles) != 0 {
+		loadIDs[utils.CacheIPProfiles] = loadID
+		loadIDs[utils.CacheIPAllocations] = loadID
 	}
 	if verbose {
 		log.Print("StatQueueProfiles:")
@@ -594,6 +638,8 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 func (tpr *TpReader) ShowStatistics() {
 	// resource profiles
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
+	// ip profiles
+	log.Print("IPProfiels", len(tpr.ipProfiles))
 	// stats
 	log.Print("Stats: ", len(tpr.sqProfiles))
 	// thresholds
@@ -627,7 +673,30 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-
+	case utils.IPProfilesPrefix:
+		keys := make([]string, len(tpr.ipProfiles))
+		i := 0
+		for k := range tpr.ipProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.TrendProfilePrefix:
+		keys := make([]string, len(tpr.trProfiles))
+		i := 0
+		for k := range tpr.trProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.RankingProfilePrefix:
+		keys := make([]string, len(tpr.rgProfiles))
+		i := 0
+		for k := range tpr.rgProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
 	case utils.StatQueueProfilePrefix:
 		keys := make([]string, len(tpr.sqProfiles))
 		i := 0
@@ -711,6 +780,17 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 	}
 	if verbose {
+		log.Print("IPProfiles")
+	}
+	for _, tpIP := range tpr.ipProfiles {
+		if err = tpr.dm.RemoveIPProfile(context.TODO(), tpIP.Tenant, tpIP.ID, true); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", utils.ConcatenatedKey(tpIP.Tenant, tpIP.ID))
+		}
+	}
+	if verbose {
 		log.Print("StatQueueProfiles:")
 	}
 	for _, tpST := range tpr.sqProfiles {
@@ -732,6 +812,26 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 			log.Print("\t", utils.ConcatenatedKey(tpTH.Tenant, tpTH.ID))
 		}
 	}
+	if verbose {
+		log.Print("TrendProfiles:")
+	}
+
+	for _, tpTr := range tpr.trProfiles {
+		if err = tpr.dm.RemoveTrendProfile(context.TODO(), tpTr.Tenant, tpTr.ID); err != nil {
+			return
+		}
+		log.Print("\t", utils.ConcatenatedKey(tpTr.Tenant, tpTr.ID))
+	}
+	if verbose {
+		log.Print("RankingProfiles:")
+	}
+	for _, tpRnk := range tpr.rgProfiles {
+		if err = tpr.dm.RemoveRankingProfile(context.TODO(), tpRnk.Tenant, tpRnk.ID); err != nil {
+			return
+		}
+		log.Print("\t", utils.ConcatenatedKey(tpRnk.Tenant, tpRnk.ID))
+	}
+
 	if verbose {
 		log.Print("RouteProfiles:")
 	}
@@ -829,6 +929,10 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		loadIDs[utils.CacheResourceProfiles] = loadID
 		loadIDs[utils.CacheResources] = loadID
 	}
+	if len(tpr.ipProfiles) != 0 {
+		loadIDs[utils.CacheIPProfiles] = loadID
+		loadIDs[utils.CacheIPAllocations] = loadID
+	}
 	if len(tpr.sqProfiles) != 0 {
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
 		loadIDs[utils.CacheStatQueues] = loadID
@@ -836,6 +940,14 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
 		loadIDs[utils.CacheThresholds] = loadID
+	}
+	if len(tpr.trProfiles) != 0 {
+		loadIDs[utils.CacheTrendProfiles] = loadID
+		loadIDs[utils.CacheTrends] = loadID
+	}
+	if len(tpr.rgProfiles) != 0 {
+		loadIDs[utils.CacheRankingProfiles] = loadID
+		loadIDs[utils.CacheRankings] = loadID
 	}
 	if len(tpr.routeProfiles) != 0 {
 		loadIDs[utils.CacheRouteProfiles] = loadID
@@ -867,6 +979,9 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
+	trnpfIDs, _ := tpr.GetLoadedIds(utils.TrendProfilePrefix)
+	rnkpfIDs, _ := tpr.GetLoadedIds(utils.RankingProfilePrefix)
+	ippfIDs, _ := tpr.GetLoadedIds(utils.IPProfilesPrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
 	apfIDs, _ := tpr.GetLoadedIds(utils.AttributeProfilePrefix)
@@ -889,12 +1004,18 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 		utils.CacheChargerProfiles:   chargerIDs,
 		utils.CacheRateProfiles:      ratePrfIDs,
 		utils.CacheActionProfiles:    actionPrfIDs,
+		utils.CacheTrendProfiles:     trnpfIDs,
+		utils.CacheRankingProfiles:   rnkpfIDs,
+		utils.CacheIPProfiles:        ippfIDs,
 	}
 
 	// verify if we need to clear indexes
 	var cacheIDs []string
 	if len(apfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes)
+	}
+	if len(ippfIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheIPFilterIndexes)
 	}
 	if len(routeIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheRouteFilterIndexes)
