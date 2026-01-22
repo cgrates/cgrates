@@ -940,6 +940,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		IPProfileIDs:          []string{"cgrates.org:ipProfilesID"},
 		StatsQueueProfileIDs:  []string{"cgrates.org:statProfilesID"},
 		ThresholdProfileIDs:   []string{"cgrates.org:thresholdProfilesID"},
+		TrendProfileIDs:       []string{"cgrates.org:trendProfilesID"},
 		FilterIDs:             []string{"cgrates.org:filtersID"},
 		RouteProfileIDs:       []string{"cgrates.org:routeProfilesID"},
 		AttributeProfileIDs:   []string{"cgrates.org:attributeProfilesID"},
@@ -1013,6 +1014,9 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
 			{Tenant: "cgrates.org", ID: "thresholdProfilesID"}: {},
+		},
+		trProfiles: map[utils.TenantID]*utils.TPTrendsProfile{
+			{Tenant: "cgrates.org", ID: "trendProfilesID"}: {},
 		},
 		filters: map[utils.TenantID]*utils.TPFilterProfile{
 			{Tenant: "cgrates.org", ID: "filtersID"}: {},

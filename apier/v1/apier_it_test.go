@@ -1671,7 +1671,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	// expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
-	expStats[utils.CacheLoadIDs].Items = 19
+	expStats[utils.CacheLoadIDs].Items = 20
 	expStats[utils.CacheRPCConnections].Items = 2
 	if err := rater.Call(context.Background(), utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())

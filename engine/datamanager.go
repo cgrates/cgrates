@@ -1661,7 +1661,7 @@ func (dm *DataManager) RemoveRankingProfile(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldSgs, err := dm.GetRankingProfile(tenant, id, true, false, utils.NonTransactional)
+	oldSgs, err := dm.GetRankingProfile(tenant, id, false, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1680,7 +1680,7 @@ func (dm *DataManager) RemoveRankingProfile(tenant, id string) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
-	return
+	return dm.RemoveRanking(tenant, id)
 }
 func (dm *DataManager) GetRanking(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *Ranking, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)

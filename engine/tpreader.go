@@ -99,6 +99,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
 	tpr.rgProfiles = make(map[utils.TenantID]*utils.TPRankingProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
+	tpr.trProfiles = make(map[utils.TenantID]*utils.TPTrendsProfile)
 	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
@@ -1672,6 +1673,9 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			log.Print("\t", tr.TenantID())
 		}
 	}
+	if len(tpr.trProfiles) != 0 {
+		loadIDs[utils.CacheTrendProfiles] = loadID
+	}
 	if verbose {
 		log.Print("RankingProfiles:")
 	}
@@ -1883,6 +1887,10 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Stats: ", len(tpr.sqProfiles))
 	// thresholds
 	log.Print("Thresholds: ", len(tpr.thProfiles))
+	// trends
+	log.Print("Trends: ", len(tpr.trProfiles))
+	// rankings
+	log.Print("Rankings: ", len(tpr.rgProfiles))
 	// filters
 	log.Print("Filters: ", len(tpr.filters))
 	// Route profiles
@@ -2008,6 +2016,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.rgProfiles))
 		i := 0
 		for k := range tpr.rgProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.TrendsProfilePrefix:
+		keys := make([]string, len(tpr.trProfiles))
+		i := 0
+		for k := range tpr.trProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2207,6 +2223,17 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 	}
 	if verbose {
+		log.Print("TrendProfiles:")
+	}
+	for _, tpTR := range tpr.trProfiles {
+		if err = tpr.dm.RemoveTrendProfile(tpTR.Tenant, tpTR.ID); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", utils.ConcatenatedKey(tpTR.Tenant, tpTR.ID))
+		}
+	}
+	if verbose {
 		log.Print("ThresholdProfiles:")
 	}
 	for _, tpTH := range tpr.thProfiles {
@@ -2361,6 +2388,9 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.rgProfiles) != 0 {
 		loadIDs[utils.CacheRankingProfiles] = loadID
 	}
+	if len(tpr.trProfiles) != 0 {
+		loadIDs[utils.CacheTrendProfiles] = loadID
+	}
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
 		loadIDs[utils.CacheThresholds] = loadID
@@ -2405,6 +2435,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 	aatIDs, _ := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
 	sgIDS, _ := tpr.GetLoadedIds(utils.RankingsProfilePrefix)
+	trIDS, _ := tpr.GetLoadedIds(utils.TrendsProfilePrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
@@ -2433,6 +2464,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]a
 		utils.CacheStatQueues:          stqpIDs,
 		utils.CacheStatQueueProfiles:   stqpIDs,
 		utils.CacheRankingProfiles:     sgIDS,
+		utils.CacheTrendProfiles:       trIDS,
 		utils.CacheThresholds:          trspfIDs,
 		utils.CacheThresholdProfiles:   trspfIDs,
 		utils.CacheFilters:             flrIDs,
