@@ -69,8 +69,7 @@ func TestRadiusAgentReloadStartShut(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, sS, db)
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if err := srv.Shutdown(); err != nil {
@@ -126,8 +125,7 @@ func TestRadiusAgentReload1(t *testing.T) {
 		shdChan, nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -197,8 +195,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 		shdChan, nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

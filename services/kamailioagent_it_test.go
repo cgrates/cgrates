@@ -76,8 +76,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, cm, anz, srvDep)
 	srv := NewKamailioAgent(cfg, shdChan, cm, srvDep)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), cm, anz, srvDep), db)
+	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

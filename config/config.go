@@ -46,7 +46,6 @@ var (
 	dfltKamConnConfig *KamConnCfg // Default Kamailio Connection configuration
 	dfltRemoteHost    *RemoteHost
 	dfltAstConnCfg    *AsteriskConnCfg
-	dfltLoaderConfig  *LoaderSCfg
 )
 
 func newDbDefaults() dbDefaults {
@@ -171,7 +170,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.migratorCgrCfg.OutDataDBOpts = &DataDBOpts{}
 	cfg.migratorCgrCfg.OutStorDBOpts = &StorDBOpts{}
 	cfg.mailerCfg = new(MailerCfg)
-	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
 	cfg.eesCfg = &EEsCfg{
@@ -230,7 +228,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
-	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	dfltRemoteHost = new(RemoteHost)
 	*dfltRemoteHost = *cfg.rpcConns[utils.MetaLocalHost].Conns[0]
 	err = cfg.checkConfigSanity()
@@ -288,7 +285,6 @@ type CGRConfig struct {
 	dfltEvRdr *EventReaderCfg   // default event reader
 	dfltEvExp *EventExporterCfg // default event exporter
 
-	loaderCfg    LoaderSCfgs   // LoaderS configs
 	httpAgentCfg HTTPAgentCfgs // HttpAgent configs
 
 	rldChans map[string]chan struct{} // index here the channels used for reloads
@@ -374,7 +370,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
 		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadPrometheusAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg, cfg.loadTrendSCfg,
-		cfg.loadRankingSCfg, cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
+		cfg.loadRankingSCfg, cfg.loadThresholdSCfg, cfg.loadRouteSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
@@ -690,23 +686,6 @@ func (cfg *CGRConfig) loadRouteSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.routeSCfg.loadFromJSONCfg(jsnRouteSCfg)
 }
 
-// loadLoaderSCfg loads the LoaderS section of the configuration
-func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnLoaderCfg []*LoaderJsonCfg
-	if jsnLoaderCfg, err = jsnCfg.LoaderJsonCfg(); err != nil {
-		return
-	}
-	// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
-	for _, profile := range jsnLoaderCfg {
-		loadSCfgp := NewDfltLoaderSCfg()
-		if err = loadSCfgp.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
-			return
-		}
-		cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use append so the loaderS profile to be loaded from multiple files
-	}
-	return
-}
-
 // loadMailerCfg loads the Mailer section of the configuration
 func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnMailerCfg *MailerJsonCfg
@@ -1019,13 +998,6 @@ func (cfg *CGRConfig) CacheCfg() *CacheCfg {
 	return cfg.cacheCfg
 }
 
-// LoaderCfg returns the Loader Service
-func (cfg *CGRConfig) LoaderCfg() LoaderSCfgs {
-	cfg.lks[LoaderJson].Lock()
-	defer cfg.lks[LoaderJson].Unlock()
-	return cfg.loaderCfg
-}
-
 // LoaderCgrCfg returns the config for cgr-loader
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
 	cfg.lks[CgrLoaderCfgJson].Lock()
@@ -1311,7 +1283,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RANKINGS_JSON:       cfg.loadRankingSCfg,
 		THRESHOLDS_JSON:     cfg.loadThresholdSCfg,
 		RouteSJson:          cfg.loadRouteSCfg,
-		LoaderJson:          cfg.loadLoaderSCfg,
 		MAILER_JSN:          cfg.loadMailerCfg,
 		SURETAX_JSON:        cfg.loadSureTaxCfg,
 		CgrLoaderCfgJson:    cfg.loadLoaderCgrCfg,
@@ -1487,7 +1458,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, ApierS, IPsJSON,
+		RouteSJson, DispatcherSJson, ApierS, IPsJSON,
 	})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
@@ -1572,8 +1543,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[RouteSJson] <- struct{}{}
 		case JanusAgentJson:
 			cfg.rldChans[JanusAgentJson] <- struct{}{}
-		case LoaderJson:
-			cfg.rldChans[LoaderJson] <- struct{}{}
 		case DispatcherSJson:
 			cfg.rldChans[DispatcherSJson] <- struct{}{}
 		case AnalyzerCfgJson:
@@ -1595,7 +1564,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 // AsMapInterface returns the config as a map[string]any
 func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 	return map[string]any{
-		LoaderJson:          cfg.loaderCfg.AsMapInterface(separator),
 		HttpAgentJson:       cfg.httpAgentCfg.AsMapInterface(separator),
 		RPCConnsJsonName:    cfg.rpcConns.AsMapInterface(),
 		GENERAL_JSN:         cfg.generalCfg.AsMapInterface(),
@@ -1778,8 +1746,6 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.DispatcherSCfg().AsMapInterface()
 	case RegistrarCJson:
 		mp = cfg.RegistrarCCfg().AsMapInterface()
-	case LoaderJson:
-		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case CgrLoaderCfgJson:
 		mp = cfg.LoaderCgrCfg().AsMapInterface()
 	case CgrMigratorCfgJson:
@@ -1954,8 +1920,6 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.DispatcherSCfg().AsMapInterface()
 	case RegistrarCJson:
 		mp = cfg.RegistrarCCfg().AsMapInterface()
-	case LoaderJson:
-		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case CgrLoaderCfgJson:
 		mp = cfg.LoaderCgrCfg().AsMapInterface()
 	case CgrMigratorCfgJson:
@@ -2042,7 +2006,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 
 		dfltEvRdr:          cfg.dfltEvRdr.Clone(),
 		dfltEvExp:          cfg.dfltEvExp.Clone(),
-		loaderCfg:          cfg.loaderCfg.Clone(),
 		httpAgentCfg:       cfg.httpAgentCfg.Clone(),
 		rpcConns:           cfg.rpcConns.Clone(),
 		templates:          cfg.templates.Clone(),

@@ -71,8 +71,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, cm, anz, srvDep)
 	astService := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
-	srvMngr.AddServices(astService, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(astService, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -144,8 +143,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, cm, anz, srvDep)
 	astSrv := NewAsteriskAgent(cfg, shdChan, cm, srvDep)
-	srvMngr.AddServices(astSrv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(astSrv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

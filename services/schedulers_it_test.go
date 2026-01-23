@@ -54,8 +54,7 @@ func TestSchedulerSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(schS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(schS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

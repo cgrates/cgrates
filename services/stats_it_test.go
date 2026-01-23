@@ -61,8 +61,7 @@ func TestStatSReload(t *testing.T) {
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	sS := NewStatService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(tS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(tS, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

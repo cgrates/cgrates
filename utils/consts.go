@@ -906,7 +906,6 @@ const (
 	OrderIDEnd              = "OrderIDEnd"
 	MinCost                 = "MinCost"
 	MaxCost                 = "MaxCost"
-	MetaLoaders             = "*loaders"
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
 	MetaRadDAReq            = "*radDAReq"
@@ -1209,7 +1208,6 @@ const (
 	ErS         = "ErS"
 	FilterS     = "FilterS"
 	GuardianS   = "GuardianS"
-	LoaderS     = "LoaderS"
 	RALs        = "RALs"
 	RegistrarC  = "RegistrarC"
 	ReplicatorS = "ReplicatorS"
@@ -1236,7 +1234,6 @@ const (
 	DispatcherSLow = "dispatchers"
 	AnalyzerSLow   = "analyzers"
 	SchedulerSLow  = "schedulers"
-	LoaderSLow     = "loaders"
 	RALsLow        = "rals"
 	ReplicatorLow  = "replicator"
 	ApierSLow      = "apiers"
@@ -2046,14 +2043,6 @@ const (
 	AnalyzerSv1            = "AnalyzerSv1"
 	AnalyzerSv1Ping        = "AnalyzerSv1.Ping"
 	AnalyzerSv1StringQuery = "AnalyzerSv1.StringQuery"
-)
-
-// LoaderS APIs
-const (
-	LoaderSv1       = "LoaderSv1"
-	LoaderSv1Load   = "LoaderSv1.Load"
-	LoaderSv1Remove = "LoaderSv1.Remove"
-	LoaderSv1Ping   = "LoaderSv1.Ping"
 )
 
 // CacheS APIs

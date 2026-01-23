@@ -66,8 +66,7 @@ func TestHTTPAgentReload(t *testing.T) {
 		shdChan, nil, anz, srvDep)
 	srv := NewHTTPAgent(cfg, filterSChan, server, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

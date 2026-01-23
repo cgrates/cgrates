@@ -134,13 +134,6 @@ func TestCgrEngineFlags(t *testing.T) {
 			want:       7,
 		},
 		{
-			name:       "preload",
-			flags:      []string{"-preload", "TestPreloadID"},
-			flagVar:    preload,
-			defaultVal: "",
-			want:       "TestPreloadID",
-		},
-		{
 			name:       "setVersions",
 			flags:      []string{"-set_versions"},
 			flagVar:    setVersions,

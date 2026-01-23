@@ -58,9 +58,7 @@ func TestChargerSReload(t *testing.T) {
 	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(attrS, chrS,
-		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(attrS, chrS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

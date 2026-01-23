@@ -303,45 +303,6 @@ func TestCmdPingSessionsLow(t *testing.T) {
 	}
 }
 
-func TestCmdPingLoaderSLow(t *testing.T) {
-	// commands map is initiated in init function
-	command := commands["ping"]
-	castCommand, canCast := command.(*CmdApierPing)
-	if !canCast {
-		t.Fatalf("cannot cast")
-	}
-	castCommand.item = utils.LoaderSLow
-	result2 := command.RpcMethod()
-	if !reflect.DeepEqual(result2, utils.LoaderSv1Ping) {
-		t.Errorf("Expected <%+v>, Received <%+v>", utils.LoaderSv1Ping, result2)
-	}
-	srv, err := engine.NewService(&v1.LoaderSv1{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	mType, ok := srv.Methods["Ping"]
-	if !ok {
-		t.Fatal("method not found")
-	}
-	m := mType.Method
-	if m.Type.NumIn() != 4 { // expecting 4 inputs
-		t.Fatalf("invalid number of input parameters ")
-	}
-	// for coverage purpose
-	result := command.RpcParams(true)
-	if !reflect.DeepEqual(result, new(StringWrapper)) {
-		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
-	}
-	// verify the type of output parameter
-	if ok := m.Type.In(3).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
-		t.Fatalf("cannot assign output parameter")
-	}
-	// for coverage purpose
-	if err := command.PostprocessRpcParams(); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestCmdPingDispatcherSLow(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["ping"]

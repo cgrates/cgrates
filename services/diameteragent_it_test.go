@@ -61,8 +61,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 		shdChan, nil, anz, srvDep)
 	diamSrv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(diamSrv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(diamSrv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

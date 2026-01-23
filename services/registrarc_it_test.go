@@ -60,9 +60,7 @@ func TestDispatcherHReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	connMngr := engine.NewConnManager(cfg, nil)
 	srv := NewRegistrarCService(cfg, server, connMngr, anz, srvDep)
-	srvMngr.AddServices(srv,
-		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

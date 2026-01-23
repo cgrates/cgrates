@@ -70,8 +70,7 @@ func TestEventReaderSReload(t *testing.T) {
 	intERsConn := make(chan birpc.ClientConnector, 1)
 	erS := NewEventReaderService(cfg, db, filterSChan, shdChan, nil, server, intERsConn, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(erS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(erS, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

@@ -74,8 +74,7 @@ func TestRalsReload(t *testing.T) {
 		make(chan birpc.ClientConnector, 1),
 		make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep, filterSChan)
-	srvMngr.AddServices(ralS, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	srvMngr.AddServices(ralS, schS, tS, db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
