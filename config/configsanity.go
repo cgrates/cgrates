@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"path"
 	"slices"
 	"strings"
 
@@ -116,51 +115,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
-			}
-		}
-	}
-	// Loaders sanity checks
-	for _, ldrSCfg := range cfg.loaderCfg {
-		if !ldrSCfg.Enabled {
-			continue
-		}
-		if _, err := os.Stat(ldrSCfg.TpInDir); err != nil && os.IsNotExist(err) { // if loader is enabled tpInDir must exist
-			return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.TpInDir)
-		}
-		if ldrSCfg.TpOutDir != utils.EmptyString { // tpOutDir support empty string for no moving files after process
-			if _, err := os.Stat(ldrSCfg.TpOutDir); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.TpOutDir)
-			}
-		}
-		if ldrSCfg.LockFilePath != utils.EmptyString { // tpOutDir support empty string for no moving files after process
-			pathL := ldrSCfg.GetLockFilePath()
-			if _, err := os.Stat(path.Dir(pathL)); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, pathL)
-			}
-		}
-		for _, data := range ldrSCfg.Data {
-			if !possibleLoaderTypes.Has(data.Type) {
-				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
-			}
-
-			for _, field := range data.Fields {
-				if field.Type != utils.MetaComposed && field.Type != utils.MetaString && field.Type != utils.MetaVariable {
-					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
-				}
-				if field.Path == utils.EmptyString {
-					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, utils.NewErrMandatoryIeMissing(utils.Path), data.Type, field.Tag)
-				}
-				if err := utils.IsPathValidForExporters(field.Path); err != nil {
-					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, field.Path, utils.Path)
-				}
-				for _, val := range field.Value {
-					if err := utils.IsPathValidForExporters(val.path); err != nil {
-						return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, val.path, utils.Values)
-					}
-				}
-				if err := utils.CheckInLineFilter(field.Filters); err != nil {
-					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, field.Filters, utils.Filters)
-				}
 			}
 		}
 	}

@@ -48,7 +48,6 @@ const (
 	TRENDS_JSON         = "trends"
 	RANKINGS_JSON       = "rankings"
 	RouteSJson          = "routes"
-	LoaderJson          = "loaders"
 	MAILER_JSN          = "mailer"
 	SURETAX_JSON        = "suretax"
 	DispatcherSJson     = "dispatchers"
@@ -77,7 +76,7 @@ var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, PrometheusAgentJSON, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, TRENDS_JSON, RANKINGS_JSON,
-		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, JanusAgentJson,
+		THRESHOLDS_JSON, RouteSJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, JanusAgentJson,
 		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, SentryPeerCfgJson, CoreSCfgJson, IPsJSON}
 )
 
@@ -428,18 +427,6 @@ func (jsnCfg CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
 	}
 	cfg := new(RouteSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[LoaderJson]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := make([]*LoaderJsonCfg, 0)
-	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil

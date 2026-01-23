@@ -56,8 +56,7 @@ func TestAnalyzerSReload(t *testing.T) {
 	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(anz,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(anz, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

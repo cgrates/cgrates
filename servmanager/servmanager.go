@@ -204,8 +204,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.HTTPAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.PrometheusAgentJSON):
 			go srvMngr.reloadService(utils.PrometheusAgent)
-		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderJson):
-			go srvMngr.reloadService(utils.LoaderS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AnalyzerCfgJson):
 			go srvMngr.reloadService(utils.AnalyzerS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherSJson):

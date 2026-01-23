@@ -800,27 +800,6 @@ type RouteSJsonCfg struct {
 	Opts                  *RoutesOptsJson
 }
 
-type LoaderJsonDataType struct {
-	Type      *string
-	File_name *string
-	Flags     *[]string
-	Fields    *[]*FcTemplateJsonCfg
-}
-
-type LoaderJsonCfg struct {
-	ID              *string
-	Enabled         *bool
-	Tenant          *string
-	Dry_run         *bool
-	Run_delay       *string
-	Lockfile_path   *string
-	Caches_conns    *[]string
-	Field_separator *string
-	Tp_in_dir       *string
-	Tp_out_dir      *string
-	Data            *[]*LoaderJsonDataType
-}
-
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string

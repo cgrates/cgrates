@@ -68,8 +68,7 @@ func TestEventExporterSReload(t *testing.T) {
 		anz, srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
 		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
-	srvMngr.AddServices(ees, attrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(ees, attrS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

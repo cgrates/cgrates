@@ -69,8 +69,7 @@ func TestApiersReload(t *testing.T) {
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 
 	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
-	srvMngr.AddServices(apiSv1, apiSv2, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	srvMngr.AddServices(apiSv1, apiSv2, schS, tS, db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

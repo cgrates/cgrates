@@ -28,7 +28,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -36,7 +35,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/registrarc"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -64,7 +62,6 @@ var (
 	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "Logger type <*syslog|*stdout>")
 	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "Node ID of the engine")
 	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)")
-	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "Loader IDs used to load data before engine starts")
 	setVersions       = cgrEngineFlags.Bool(utils.SetVersionsCgr, false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
 
 	cfg *config.CGRConfig
@@ -145,7 +142,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalIPsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalTrendSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
+	internalRALsv1Chan, internalCacheSChan,
 	internalEEsChan, internalERsChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
@@ -174,8 +171,6 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalSuplSChan <- splS
 		case analyzerS := <-internalAnalyzerSChan:
 			internalAnalyzerSChan <- analyzerS
-		case loaderS := <-internalLoaderSChan:
-			internalLoaderSChan <- loaderS
 		case ralS := <-internalRALsv1Chan:
 			internalRALsv1Chan <- ralS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
@@ -300,32 +295,6 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	}
 }
 
-func runPreload(loader *services.LoaderService, internalLoaderSChan chan birpc.ClientConnector,
-	shdChan *utils.SyncedChan) {
-	if !cfg.LoaderCfg().Enabled() {
-		utils.Logger.Err(fmt.Sprintf("<%s> not enabled but required by preload mechanism", utils.LoaderS))
-		shdChan.CloseOnce()
-		return
-	}
-
-	ldrs := <-internalLoaderSChan
-	internalLoaderSChan <- ldrs
-
-	var reply string
-	for _, loaderID := range strings.Split(*preload, utils.FieldsSep) {
-		if err := loader.GetLoaderS().V1Load(context.TODO(),
-			&loaders.ArgsProcessFolder{
-				ForceLock:   true, // force lock will unlock the file in case is locked and return error
-				LoaderID:    loaderID,
-				StopOnError: true,
-			}, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err.Error()))
-			shdChan.CloseOnce()
-			return
-		}
-	}
-}
-
 func main() {
 	cgrEngineFlags.Parse(os.Args[1:])
 	vers, err := utils.GetCGRVersion()
@@ -443,7 +412,6 @@ func main() {
 	internalResponderChan := make(chan birpc.ClientConnector, 1)
 	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
 	internalAPIerSv2Chan := make(chan birpc.ClientConnector, 1)
-	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	internalEEsChan := make(chan birpc.ClientConnector, 1)
 	internalERsChan := make(chan birpc.ClientConnector, 1)
 
@@ -457,7 +425,6 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       internalChargerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs):            internalIPsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
@@ -498,7 +465,6 @@ func main() {
 		utils.GlobalVarS:      new(sync.WaitGroup),
 		utils.HTTPAgent:       new(sync.WaitGroup),
 		utils.KamailioAgent:   new(sync.WaitGroup),
-		utils.LoaderS:         new(sync.WaitGroup),
 		utils.RadiusAgent:     new(sync.WaitGroup),
 		utils.RALService:      new(sync.WaitGroup),
 		utils.ResourceS:       new(sync.WaitGroup),
@@ -617,9 +583,6 @@ func main() {
 
 	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, anz, srvDep)
 
-	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
-		internalLoaderSChan, connManager, anz, srvDep)
-
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, ips, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
@@ -630,7 +593,7 @@ func main() {
 		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),            // no reload
 		services.NewPrometheusAgent(cfg, connManager, server, srvDep),
-		ldrs, anz, dspS, dspH, dmService, storDBService,
+		anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
 		services.NewEventReaderService(cfg, dmService, filterSChan,
@@ -659,7 +622,6 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, internalCDRServerChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, internalChargerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, internalResourceSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.IPsV1, internalIPsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.Responder, internalResponderChan)
@@ -683,16 +645,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *preload != utils.EmptyString {
-		runPreload(ldrs, internalLoaderSChan, shdChan)
-	}
-
 	// Serve rpc connections
 	go startRPC(server, internalResponderChan, internalCDRServerChan,
 		internalResourceSChan, internalIPsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalTrendSChan, internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
-		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
+		internalDispatcherSChan, internalRALsChan,
 		internalCacheSChan, internalEEsChan, internalERsChan, shdChan)
 
 	if *memProfDir != utils.EmptyString {

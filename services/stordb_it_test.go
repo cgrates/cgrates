@@ -61,9 +61,7 @@ func TestStorDBReload(t *testing.T) {
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
-	srvMngr.AddServices(cdrS, ralS, schS, chrS,
-		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS, db, stordb)
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
 	}
