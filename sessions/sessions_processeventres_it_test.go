@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -213,6 +214,107 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "" {
 			t.Fatalf("expected empty allocation msg, got %q", msg)
+		}
+	})
+
+	t.Run("authorizeWithoutResourcesFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "authorizeWithoutResourcesFlag",
+				APIOpts: map[string]any{
+					utils.MetaAuthorize:        true,
+					utils.OptsResourcesUsageID: "usage3",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(rply.ResourceAllocation) != 0 {
+			t.Fatalf("expected no allocation without resources flag, got %v", rply.ResourceAllocation)
+		}
+	})
+
+	t.Run("multipleResourceAllocations", func(t *testing.T) {
+		for i := 1; i <= 3; i++ {
+			var rply V1ProcessEventReply
+			err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+				&utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "multipleResourceAllocations",
+					APIOpts: map[string]any{
+						utils.MetaResourcesAuthorizeCfg: true,
+						utils.OptsResourcesUsageID:      utils.ConcatenatedKey("usage-multi", strconv.Itoa(i)),
+						utils.OptsResourcesUnits:        1,
+					},
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				}, &rply)
+
+			if err != nil {
+				t.Fatalf("allocation %d failed: %v", i, err)
+			}
+
+			if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+				t.Fatalf("allocation %d: unexpected msg: %q", i, msg)
+			}
+		}
+	})
+
+	t.Run("resourcesWithZeroUnits", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "resourcesWithZeroUnits",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAuthorizeCfg: true,
+					utils.OptsResourcesUsageID:      "usage-zero",
+					utils.OptsResourcesUnits:        0,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply)
+
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if _, exists := rply.ResourceAllocation[utils.MetaDefault]; !exists {
+			t.Fatal("expected allocation entry")
+		}
+	})
+
+	t.Run("resourcesAuthorizeCfgWithAuthorize", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "resourcesAuthorizeCfgWithAuthorize",
+				APIOpts: map[string]any{
+					utils.MetaAuthorize:             true,
+					utils.MetaResourcesAuthorizeCfg: true,
+					utils.OptsResourcesUsageID:      "usage-both-flags",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
 	})
 }

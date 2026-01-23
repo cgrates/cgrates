@@ -389,3 +389,269 @@ func TestResourceProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(dp))
 	}
 }
+
+func TestResourceProfileCloneCacheClone(t *testing.T) {
+	var nilRP *ResourceProfile
+	if nilRP.Clone() != nil {
+		t.Fatal("Expected nil clone for nil ResourceProfile")
+	}
+
+	rp := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RP1",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{"TH1"},
+		UsageTTL:          10,
+		Limit:             100,
+		AllocationMessage: "ok",
+		Blocker:           true,
+		Stored:            true,
+		Weights: DynamicWeights{
+			{Weight: 10},
+		},
+	}
+
+	tests := []struct {
+		name  string
+		clone func(*ResourceProfile) *ResourceProfile
+	}{
+		{
+			name: "Clone",
+			clone: func(r *ResourceProfile) *ResourceProfile {
+				return r.Clone()
+			},
+		},
+		{
+			name: "CacheClone",
+			clone: func(r *ResourceProfile) *ResourceProfile {
+				cc := r.CacheClone()
+				cl, ok := cc.(*ResourceProfile)
+				if !ok {
+					t.Fatalf("CacheClone returned %T, expected *ResourceProfile", cc)
+				}
+				return cl
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cl := tt.clone(rp)
+
+			if !reflect.DeepEqual(rp, cl) {
+				t.Fatalf("%s not equal\nexp=%v\ngot=%v",
+					tt.name, ToJSON(rp), ToJSON(cl))
+			}
+
+			cl.FilterIDs[0] = "changed"
+			cl.ThresholdIDs[0] = "changed"
+			cl.Weights[0].Weight = 99
+
+			if rp.FilterIDs[0] == "changed" {
+				t.Errorf("%s did not deep-copy FilterIDs", tt.name)
+			}
+			if rp.ThresholdIDs[0] == "changed" {
+				t.Errorf("%s did not deep-copy ThresholdIDs", tt.name)
+			}
+			if rp.Weights[0].Weight == 99 {
+				t.Errorf("%s did not deep-copy Weights", tt.name)
+			}
+		})
+	}
+}
+
+func TestResourceCloneAndCacheClone(t *testing.T) {
+	var nilR *Resource
+	if nilR.Clone() != nil {
+		t.Fatal("Expected nil clone for nil Resource")
+	}
+
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"u1": {
+				Tenant:     "cgrates.org",
+				ID:         "U1",
+				Units:      10,
+				ExpiryTime: time.Now().Add(time.Hour),
+			},
+			"u2": {
+				Tenant: "cgrates.org",
+				ID:     "U2",
+				Units:  20,
+			},
+		},
+		TTLIdx: []string{"u1", "u2"},
+	}
+
+	tests := []struct {
+		name  string
+		clone func(*Resource) *Resource
+	}{
+		{
+			name: "Clone",
+			clone: func(res *Resource) *Resource {
+				return res.Clone()
+			},
+		},
+		{
+			name: "CacheClone",
+			clone: func(res *Resource) *Resource {
+				cc := res.CacheClone()
+				cl, ok := cc.(*Resource)
+				if !ok {
+					t.Fatalf("CacheClone returned %T, expected *Resource", cc)
+				}
+				return cl
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cl := tt.clone(r)
+
+			if !reflect.DeepEqual(r, cl) {
+				t.Fatalf("%s not equal\nexp=%v\ngot=%v",
+					tt.name, ToJSON(r), ToJSON(cl))
+			}
+
+			delete(cl.Usages, "u1")
+			if _, ok := r.Usages["u1"]; !ok {
+				t.Errorf("%s did not deep-copy Usages map", tt.name)
+			}
+
+			cl.Usages["u2"].Units = 999
+			if r.Usages["u2"].Units == 999 {
+				t.Errorf("%s did not deep-copy ResourceUsage", tt.name)
+			}
+
+			cl.TTLIdx[0] = "changed"
+			if r.TTLIdx[0] == "changed" {
+				t.Errorf("%s did not deep-copy TTLIdx", tt.name)
+			}
+		})
+	}
+}
+
+func TestResourceAsMapStringInterface(t *testing.T) {
+	var nilR *Resource
+	if nilR.AsMapStringInterface() != nil {
+		t.Fatal("Expected nil map for nil Resource")
+	}
+
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"u1": {
+				Tenant: "cgrates.org",
+				ID:     "U1",
+				Units:  10,
+			},
+		},
+		TTLIdx: []string{"u1"},
+	}
+
+	m := r.AsMapStringInterface()
+
+	if m == nil {
+		t.Fatal("Expected non-nil map")
+	}
+
+	if v, ok := m[Tenant].(string); !ok || v != r.Tenant {
+		t.Errorf("Tenant mismatch, expected %v got %v", r.Tenant, m[Tenant])
+	}
+	if v, ok := m[ID].(string); !ok || v != r.ID {
+		t.Errorf("ID mismatch, expected %v got %v", r.ID, m[ID])
+	}
+
+	usg, ok := m[Usages].(map[string]*ResourceUsage)
+	if !ok {
+		t.Fatalf("Expected Usages as map[string]*ResourceUsage, got %T", m[Usages])
+	}
+	if !reflect.DeepEqual(usg, r.Usages) {
+		t.Errorf("Usages mismatch\nexp=%v\ngot=%v", ToJSON(r.Usages), ToJSON(usg))
+	}
+
+	ttl, ok := m[TTLIdx].([]string)
+	if !ok {
+		t.Fatalf("Expected TTLIdx as []string, got %T", m[TTLIdx])
+	}
+	if !reflect.DeepEqual(ttl, r.TTLIdx) {
+		t.Errorf("TTLIdx mismatch\nexp=%v\ngot=%v", ToJSON(r.TTLIdx), ToJSON(ttl))
+	}
+}
+
+func TestMapStringInterfaceToResource(t *testing.T) {
+	m := map[string]any{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]any{
+			"u1": map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "U1",
+				Units:  10.0,
+			},
+			"u2": &ResourceUsage{
+				Tenant: "cgrates.org",
+				ID:     "U2",
+				Units:  20,
+			},
+		},
+		TTLIdx: []any{"u1", "u2"},
+	}
+
+	r := MapStringInterfaceToResource(m)
+
+	if r == nil {
+		t.Fatal("Expected non-nil Resource")
+	}
+
+	if r.Tenant != "cgrates.org" {
+		t.Errorf("Tenant mismatch, got %v", r.Tenant)
+	}
+	if r.ID != "RES1" {
+		t.Errorf("ID mismatch, got %v", r.ID)
+	}
+
+	if len(r.Usages) != 2 {
+		t.Fatalf("Expected 2 usages, got %d", len(r.Usages))
+	}
+
+	if u1 := r.Usages["u1"]; u1 == nil || u1.ID != "U1" || u1.Units != 10 {
+		t.Errorf("Usage u1 not correctly mapped: %+v", u1)
+	}
+	if u2 := r.Usages["u2"]; u2 == nil || u2.ID != "U2" || u2.Units != 20 {
+		t.Errorf("Usage u2 not correctly mapped: %+v", u2)
+	}
+
+	if !reflect.DeepEqual(r.TTLIdx, []string{"u1", "u2"}) {
+		t.Errorf("TTLIdx mismatch, got %v", r.TTLIdx)
+	}
+}
+
+func TestResourceProfileLockKey(t *testing.T) {
+	tnt := "cgrates.org"
+	id := "RP1"
+
+	exp := ConcatenatedKey(CacheResourceProfiles, tnt, id)
+	got := ResourceProfileLockKey(tnt, id)
+
+	if exp != got {
+		t.Errorf("ResourceProfileLockKey mismatch\nexp=%v\ngot=%v", exp, got)
+	}
+}
+
+func TestResourceLockKey(t *testing.T) {
+	tnt := "cgrates.org"
+	id := "RES1"
+
+	exp := ConcatenatedKey(CacheResources, tnt, id)
+	got := ResourceLockKey(tnt, id)
+
+	if exp != got {
+		t.Errorf("ResourceLockKey mismatch\nexp=%v\ngot=%v", exp, got)
+	}
+}
