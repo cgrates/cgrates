@@ -134,8 +134,11 @@ func (acc *Account) setBalanceAction(a *Action, fltrS *FilterS) error {
 		if !found {
 			return fmt.Errorf("cannot find balance with uuid: <%s>", *a.Balance.Uuid)
 		}
-	} else { // balance id match
+	} else {
 		for balanceType := range acc.BalanceMap {
+			if a.Balance.Type != nil && *a.Balance.Type != "" && *a.Balance.Type != balanceType {
+				continue
+			}
 			for _, b := range acc.BalanceMap[balanceType] {
 				if a.Balance.ID != nil && b.ID == *a.Balance.ID && !b.IsExpiredAt(time.Now()) {
 					previousSharedGroups = b.SharedGroups
