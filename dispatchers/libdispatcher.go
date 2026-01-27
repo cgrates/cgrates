@@ -24,7 +24,9 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -230,6 +232,9 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 	if routeID != nil && *routeID != "" {
 		// overwrite routeID with RouteID:Subsystem
 		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
+		guardID := utils.ConcatenatedKey(utils.DispatcherS, utils.RouteID, *routeID)
+		refID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, guardID)
+		defer guardian.Guardian.UnguardIDs(refID)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			*routeID); ok && x != nil {
@@ -316,6 +321,9 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 	if routeID != nil && *routeID != "" {
 		// overwrite routeID with RouteID:Subsystem
 		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
+		guardID := utils.ConcatenatedKey(utils.DispatcherS, utils.RouteID, *routeID)
+		refID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, guardID)
+		defer guardian.Guardian.UnguardIDs(refID)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			*routeID); ok && x != nil {
