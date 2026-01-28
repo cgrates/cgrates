@@ -2863,11 +2863,15 @@ const (
 	AWSToken  = "awsToken"
 
 	// sqs
-	SQSQueueID = "sqsQueueID"
+	SQSQueueID        = "sqsQueueID"
+	SQSForcePathStyle = "sqsForcePathStyle"
+	SQSSkipTlsVerify  = "sqsSkipTlsVerify"
 
 	// s3
-	S3Bucket     = "s3BucketID"
-	S3FolderPath = "s3FolderPath"
+	S3Bucket         = "s3BucketID"
+	S3FolderPath     = "s3FolderPath"
+	S3ForcePathStyle = "s3ForcePathStyle"
+	S3SkipTlsVerify  = "s3SkipTlsVerify"
 
 	// sql
 	SQLDefaultDBName    = "cgrates"

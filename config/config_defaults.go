@@ -477,9 +477,13 @@ const CGRATES_CFG_JSON = `
 
 				// SQS
 				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS readers from were the events are read
+				// "sqsForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
+				// "sqsSkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// S3
 				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from were the events are read
+				// "s3ForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
+				// "s3SkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// nats
 				// "natsJetStream": false,		// controls if the nats reader uses the JetStream

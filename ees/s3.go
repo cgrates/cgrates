@@ -20,7 +20,9 @@ package ees
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -46,14 +48,16 @@ func NewS3EE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *S3EE {
 
 // S3EE is a s3 poster
 type S3EE struct {
-	awsRegion  string
-	awsID      string
-	awsKey     string
-	awsToken   string
-	bucket     string
-	folderPath string
-	session    *session.Session
-	up         *s3manager.Uploader
+	awsRegion      string
+	awsID          string
+	awsKey         string
+	awsToken       string
+	bucket         string
+	folderPath     string
+	forcePathStyle bool
+	skipTlsVerify  bool
+	session        *session.Session
+	up             *s3manager.Uploader
 
 	cfg          *config.EventExporterCfg
 	em           *utils.ExporterMetrics
@@ -82,6 +86,12 @@ func (pstr *S3EE) parseOpts(opts *config.EventExporterOpts) {
 	if opts.AWSToken != nil {
 		pstr.awsToken = *opts.AWSToken
 	}
+	if opts.S3ForcePathStyle != nil {
+		pstr.forcePathStyle = *opts.S3ForcePathStyle
+	}
+	if opts.S3SkipTlsVerify != nil {
+		pstr.skipTlsVerify = *opts.S3SkipTlsVerify
+	}
 }
 
 func (pstr *S3EE) Cfg() *config.EventExporterCfg { return pstr.cfg }
@@ -97,6 +107,18 @@ func (pstr *S3EE) Connect() (err error) {
 		if len(pstr.awsID) != 0 &&
 			len(pstr.awsKey) != 0 {
 			cfg.Credentials = credentials.NewStaticCredentials(pstr.awsID, pstr.awsKey, pstr.awsToken)
+		}
+		if pstr.forcePathStyle {
+			cfg.S3ForcePathStyle = aws.Bool(true) // Required for custom S3-compatible endpoints
+		}
+		if pstr.skipTlsVerify {
+			cfg.HTTPClient = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true, // Equivalent to verify=False for self-signed certificates
+					},
+				},
+			}
 		}
 		pstr.session, err = session.NewSessionWithOptions(
 			session.Options{
