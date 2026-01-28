@@ -136,6 +136,7 @@ type LoadReader interface {
 	GetTpTableIds(string, string, []string,
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
+	GetTPIPs(string, string, string) ([]*utils.TPIPProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPRankings(tpid, tenant, id string) ([]*utils.TPRankingProfile, error)
 	GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error)

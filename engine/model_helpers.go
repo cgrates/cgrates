@@ -310,6 +310,246 @@ func ResourceProfileToAPI(rp *utils.ResourceProfile) (tpRL *utils.TPResourceProf
 	return
 }
 
+type IPMdls []*IPMdl
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps IPMdls) CSVHeader() []string {
+	return []string{
+		"#" + utils.Tenant,
+		utils.ID,
+		utils.FilterIDs,
+		utils.Weights,
+		utils.TTL,
+		utils.Stored,
+		utils.PoolID,
+		utils.PoolFilterIDs,
+		utils.PoolType,
+		utils.PoolRange,
+		utils.PoolStrategy,
+		utils.PoolMessage,
+		utils.PoolWeights,
+		utils.PoolBlockers,
+	}
+}
+
+func (tps IPMdls) AsTPIPs() []*utils.TPIPProfile {
+	filterMap := make(map[string]utils.StringSet)
+	mst := make(map[string]*utils.TPIPProfile)
+	poolMap := make(map[string]map[string]*utils.TPIPPool)
+	for _, mdl := range tps {
+		tenID := (&utils.TenantID{Tenant: mdl.Tenant, ID: mdl.ID}).TenantID()
+		tpip, found := mst[tenID]
+		if !found {
+			tpip = &utils.TPIPProfile{
+				TPid:   mdl.Tpid,
+				Tenant: mdl.Tenant,
+				ID:     mdl.ID,
+				Stored: mdl.Stored,
+			}
+		}
+		// Handle Pool
+		if mdl.PoolID != utils.EmptyString {
+			if _, has := poolMap[tenID]; !has {
+				poolMap[tenID] = make(map[string]*utils.TPIPPool)
+			}
+			poolID := mdl.PoolID
+			if mdl.PoolFilterIDs != utils.EmptyString {
+				poolID = utils.ConcatenatedKey(poolID,
+					utils.NewStringSet(strings.Split(mdl.PoolFilterIDs, utils.InfieldSep)).Sha1())
+			}
+			pool, found := poolMap[tenID][poolID]
+			if !found {
+				pool = &utils.TPIPPool{
+					ID:       mdl.PoolID,
+					Type:     mdl.PoolType,
+					Range:    mdl.PoolRange,
+					Strategy: mdl.PoolStrategy,
+					Message:  mdl.PoolMessage,
+					Weights:  mdl.PoolWeights,
+					Blockers: mdl.PoolBlockers,
+				}
+			}
+			if mdl.PoolFilterIDs != utils.EmptyString {
+				poolFilterSplit := strings.Split(mdl.PoolFilterIDs, utils.InfieldSep)
+				pool.FilterIDs = append(pool.FilterIDs, poolFilterSplit...)
+			}
+			poolMap[tenID][poolID] = pool
+		}
+		// Profile-level fields
+		if mdl.TTL != utils.EmptyString {
+			tpip.TTL = mdl.TTL
+		}
+		if mdl.Weights != "" {
+			tpip.Weights = mdl.Weights
+		}
+		if mdl.Stored {
+			tpip.Stored = mdl.Stored
+		}
+
+		if mdl.FilterIDs != utils.EmptyString {
+			if _, has := filterMap[tenID]; !has {
+				filterMap[tenID] = make(utils.StringSet)
+			}
+			filterMap[tenID].AddSlice(strings.Split(mdl.FilterIDs, utils.InfieldSep))
+		}
+		mst[tenID] = tpip
+	}
+	// Build result with Pools
+	result := make([]*utils.TPIPProfile, len(mst))
+	i := 0
+	for tntID, tpip := range mst {
+		result[i] = tpip
+		for _, poolData := range poolMap[tntID] {
+			result[i].Pools = append(result[i].Pools, poolData)
+		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		i++
+	}
+	return result
+}
+
+func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
+	if tp == nil {
+		return nil
+	}
+	var mdls IPMdls
+	// Handle case with no pools
+	if len(tp.Pools) == 0 {
+		mdl := &IPMdl{
+			Tpid:    tp.TPid,
+			Tenant:  tp.Tenant,
+			ID:      tp.ID,
+			TTL:     tp.TTL,
+			Stored:  tp.Stored,
+			Weights: tp.Weights,
+		}
+		for i, val := range tp.FilterIDs {
+			if i != 0 {
+				mdl.FilterIDs += utils.InfieldSep
+			}
+			mdl.FilterIDs += val
+		}
+		mdls = append(mdls, mdl)
+		return mdls
+	}
+	for i, pool := range tp.Pools {
+		mdl := &IPMdl{
+			Tpid:   tp.TPid,
+			Tenant: tp.Tenant,
+			ID:     tp.ID,
+			Stored: tp.Stored,
+		}
+		if i == 0 {
+			// Profile-level fields only on first row
+			mdl.TTL = tp.TTL
+			mdl.Weights = tp.Weights
+			for j, val := range tp.FilterIDs {
+				if j != 0 {
+					mdl.FilterIDs += utils.InfieldSep
+				}
+				mdl.FilterIDs += val
+			}
+		}
+		// Pool fields on every row
+		mdl.PoolID = pool.ID
+		mdl.PoolType = pool.Type
+		mdl.PoolRange = pool.Range
+		mdl.PoolStrategy = pool.Strategy
+		mdl.PoolMessage = pool.Message
+		mdl.PoolWeights = pool.Weights
+		mdl.PoolBlockers = pool.Blockers
+		for j, val := range pool.FilterIDs {
+			if j != 0 {
+				mdl.PoolFilterIDs += utils.InfieldSep
+			}
+			mdl.PoolFilterIDs += val
+		}
+		mdls = append(mdls, mdl)
+	}
+	return mdls
+}
+
+func APItoIP(tp *utils.TPIPProfile) (*utils.IPProfile, error) {
+	ipp := &utils.IPProfile{
+		Tenant:    tp.Tenant,
+		ID:        tp.ID,
+		Stored:    tp.Stored,
+		FilterIDs: make([]string, len(tp.FilterIDs)),
+		Pools:     make([]*utils.IPPool, len(tp.Pools)),
+	}
+	if tp.Weights != utils.EmptyString {
+		var err error
+		ipp.Weights, err = utils.NewDynamicWeightsFromString(tp.Weights, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if tp.TTL != utils.EmptyString {
+		var err error
+		if ipp.TTL, err = utils.ParseDurationWithNanosecs(tp.TTL); err != nil {
+			return nil, err
+		}
+	}
+
+	copy(ipp.FilterIDs, tp.FilterIDs)
+
+	for i, pool := range tp.Pools {
+		ipp.Pools[i] = &utils.IPPool{
+			ID:        pool.ID,
+			FilterIDs: pool.FilterIDs,
+			Type:      pool.Type,
+			Range:     pool.Range,
+			Strategy:  pool.Strategy,
+			Message:   pool.Message,
+		}
+		if pool.Weights != utils.EmptyString {
+			var err error
+			ipp.Pools[i].Weights, err = utils.NewDynamicWeightsFromString(pool.Weights, utils.InfieldSep, utils.ANDSep)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if pool.Blockers != utils.EmptyString {
+			var err error
+			ipp.Pools[i].Blockers, err = utils.NewDynamicBlockersFromString(pool.Blockers, utils.InfieldSep, utils.ANDSep)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return ipp, nil
+}
+
+func IPProfileToAPI(ipp *utils.IPProfile) *utils.TPIPProfile {
+	tp := &utils.TPIPProfile{
+		Tenant:    ipp.Tenant,
+		ID:        ipp.ID,
+		FilterIDs: make([]string, len(ipp.FilterIDs)),
+		Weights:   ipp.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Stored:    ipp.Stored,
+		Pools:     make([]*utils.TPIPPool, len(ipp.Pools)),
+	}
+	if ipp.TTL != time.Duration(0) {
+		tp.TTL = ipp.TTL.String()
+	}
+
+	copy(tp.FilterIDs, ipp.FilterIDs)
+
+	for i, pool := range ipp.Pools {
+		tp.Pools[i] = &utils.TPIPPool{
+			ID:        pool.ID,
+			FilterIDs: pool.FilterIDs,
+			Type:      pool.Type,
+			Range:     pool.Range,
+			Blockers:  pool.Blockers.String(utils.InfieldSep, utils.ANDSep),
+			Weights:   pool.Weights.String(utils.InfieldSep, utils.ANDSep),
+			Strategy:  pool.Strategy,
+			Message:   pool.Message,
+		}
+	}
+	return tp
+}
+
 type StatMdls []*StatMdl
 
 // CSVHeader return the header for csv fields as a slice of string

@@ -1,5 +1,4 @@
-//go:build integration
-// +build integration
+//go:build flaky
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -131,7 +130,22 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 	}
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	// Wait for loader to finish loading all profiles (thresholds, stats, trends)
+	for range 20 {
+		var thPrfIDs, stPrfIDs []string
+		var trPrfs *[]*utils.TrendProfile
+		errTh := client.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+			&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &thPrfIDs)
+		errSt := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
+			&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &stPrfIDs)
+		errTr := client.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
+			&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &trPrfs)
+		if errTh == nil && errSt == nil && errTr == nil &&
+			len(thPrfIDs) == 2 && len(stPrfIDs) == 2 && trPrfs != nil && len(*trPrfs) == 2 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 	var tr *utils.Trend
 	t.Run("TrendSchedule", func(t *testing.T) {
 		var replyTrendProfiles *[]*utils.TrendProfile

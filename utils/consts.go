@@ -74,8 +74,8 @@ var (
 		CacheThresholds:                  ThresholdPrefix,
 		CacheFilters:                     FilterPrefix,
 		CacheRouteProfiles:               RouteProfilePrefix,
-		CacheRankingProfiles:             RankingPrefix,
-		CacheRankings:                    RankingProfilePrefix,
+		CacheRankingProfiles:             RankingProfilePrefix,
+		CacheRankings:                    RankingPrefix,
 		CacheAttributeProfiles:           AttributeProfilePrefix,
 		CacheChargerProfiles:             ChargerProfilePrefix,
 		CacheRateProfiles:                RateProfilePrefix,
@@ -855,6 +855,13 @@ const (
 	SortingData             = "SortingData"
 	ProfileID               = "ProfileID"
 	PoolID                  = "PoolID"
+	PoolFilterIDs           = "PoolFilterIDs"
+	PoolType                = "PoolType"
+	PoolRange               = "PoolRange"
+	PoolStrategy            = "PoolStrategy"
+	PoolMessage             = "PoolMessage"
+	PoolWeights             = "PoolWeights"
+	PoolBlockers            = "PoolBlockers"
 	SortedRoutes            = "SortedRoutes"
 	MetaMonthly             = "*monthly"
 	MetaYearly              = "*yearly"
@@ -1946,6 +1953,7 @@ const (
 // Table Name
 const (
 	TBLTPResources       = "tp_resources"
+	TBLTPIPs             = "tp_ips"
 	TBLTPStats           = "tp_stats"
 	TBLTPRankings        = "tp_rankings"
 	TBLTPTrends          = "tp_trends"
