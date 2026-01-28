@@ -141,3 +141,47 @@ func TestRadiusDPFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: flopsy, received: <%s>", data)
 	}
 }
+
+func TestRadiusDPFieldAsInterfaceCached(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "cgr1", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Acct-Session-Time", "3600", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Password", "pass123", ""); err != nil {
+		t.Error(err)
+	}
+
+	dp := newRADataProvider(pkt)
+
+	if data, err := dp.FieldAsInterface([]string{"User-Name"}); err != nil {
+		t.Error(err)
+	} else if data != "cgr1" {
+		t.Errorf("Expecting: cgr1, received: <%v>", data)
+	}
+
+	if data, err := dp.FieldAsInterface([]string{"Acct-Session-Time"}); err != nil {
+		t.Error(err)
+	} else if data != "3600" {
+		t.Errorf("Expecting: 3600, received: <%v>", data)
+	}
+
+	if data, err := dp.FieldAsInterface([]string{"Password"}); err != nil {
+		t.Error(err)
+	} else if data != "pass123" {
+		t.Errorf("Expecting: pass123, received: <%v>", data)
+	}
+
+	if data, err := dp.FieldAsInterface([]string{"Non-Existent-Field"}); err != nil {
+		t.Error(err)
+	} else if data != nil {
+		t.Errorf("Expecting: nil, received: <%v>", data)
+	}
+
+	if _, err := dp.FieldAsInterface([]string{"Field1", "Field2"}); err != utils.ErrNotFound {
+		t.Errorf("Expecting: ErrNotFound, received: <%v>", err)
+	}
+
+}
