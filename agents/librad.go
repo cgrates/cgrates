@@ -83,8 +83,8 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	} else {
 		return // data found in cache
 	}
-	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
-		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
+	if attrs := pk.req.AttributesWithName(fldPath[0], ""); len(attrs) != 0 {
+		data = attrs[0].GetStringValue()
 	}
 	pk.cache.Set(fldPath, data)
 	return
