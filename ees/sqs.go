@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
+	"crypto/tls"
+	"net/http"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -44,14 +46,16 @@ func NewSQSee(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *SQSee {
 
 // SQSee is a poster for sqs
 type SQSee struct {
-	awsRegion string
-	awsID     string
-	awsKey    string
-	awsToken  string
-	queueURL  *string
-	queueID   string
-	session   *session.Session
-	svc       *sqs.SQS
+	awsRegion      string
+	awsID          string
+	awsKey         string
+	awsToken       string
+	queueURL       *string
+	queueID        string
+	forcePathStyle bool
+	skipTlsVerify  bool
+	session        *session.Session
+	svc            *sqs.SQS
 
 	cfg          *config.EventExporterCfg
 	em           *utils.ExporterMetrics
@@ -77,6 +81,12 @@ func (pstr *SQSee) parseOpts(opts *config.EventExporterOpts) {
 	if opts.AWSToken != nil {
 		pstr.awsToken = *opts.AWSToken
 	}
+	if opts.SQSForcePathStyle != nil {
+		pstr.forcePathStyle = *opts.SQSForcePathStyle
+	}
+	if opts.SQSSkipTlsVerify != nil {
+		pstr.skipTlsVerify = *opts.SQSSkipTlsVerify
+	}
 }
 
 func (pstr *SQSee) Cfg() *config.EventExporterCfg { return pstr.cfg }
@@ -92,6 +102,18 @@ func (pstr *SQSee) Connect() (err error) {
 		if len(pstr.awsID) != 0 &&
 			len(pstr.awsKey) != 0 {
 			cfg.Credentials = credentials.NewStaticCredentials(pstr.awsID, pstr.awsKey, pstr.awsToken)
+		}
+		if pstr.forcePathStyle {
+			cfg.S3ForcePathStyle = aws.Bool(true) // Required for custom S3-compatible endpoints
+		}
+		if pstr.skipTlsVerify {
+			cfg.HTTPClient = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true, // Equivalent to verify=False for self-signed certificates
+					},
+				},
+			}
 		}
 		pstr.session, err = session.NewSessionWithOptions(
 			session.Options{
