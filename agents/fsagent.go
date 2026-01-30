@@ -524,7 +524,7 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
 		return
 	}
-	if _, err = fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_broadcast %s  playback!manager_request::%s aleg\n\n", channelID, fsa.cfg.LowBalanceAnnFile)); err != nil {
+	if _, err = fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_broadcast %s  playback::%s aleg\n\n", channelID, fsa.cfg.LowBalanceAnnFile)); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Could not send uuid_broadcast to freeswitch, error: %s, connection id: %v",
 			utils.FreeSWITCHAgent, err.Error(), connIdx))
 		return
