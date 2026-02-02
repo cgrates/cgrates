@@ -317,7 +317,7 @@ func testFiltersGetFilterIDsAfterSet(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyFilterIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -331,7 +331,7 @@ func testFiltersGetFilterIDsAfterSet(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyFilterIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -356,7 +356,7 @@ func testFiltersGetFilterCountAfterSet(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -366,7 +366,7 @@ func testFiltersGetFilterCountAfterSet(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -519,7 +519,7 @@ func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyFilterIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -533,7 +533,7 @@ func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyFilterIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -558,7 +558,7 @@ func testFiltersGetFilterCountAfterRemove(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -568,7 +568,7 @@ func testFiltersGetFilterCountAfterRemove(t *testing.T) {
 	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {

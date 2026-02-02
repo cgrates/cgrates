@@ -27,7 +27,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error)
+	GetKeysForPrefix(ctx *context.Context, prefix string, search string) ([]string, error)
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)

@@ -298,7 +298,7 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 			return nil, err
 		}
 		var ids []string
-		if ids, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+		if ids, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType], utils.EmptyString); err != nil {
 			return nil, err
 		}
 		for _, id := range ids {

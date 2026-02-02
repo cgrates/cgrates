@@ -105,7 +105,7 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 }
 
 // GetKeysForPrefix returns the keys from cache that have the given prefix
-func (iDB *InternalDB) GetKeysForPrefix(_ *context.Context, prefix string) (ids []string, err error) {
+func (iDB *InternalDB) GetKeysForPrefix(_ *context.Context, prefix, search string) (ids []string, err error) {
 	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -116,6 +116,15 @@ func (iDB *InternalDB) GetKeysForPrefix(_ *context.Context, prefix string) (ids 
 	ids = iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], queryPrefix)
 	for i := range ids {
 		ids[i] = category + ids[i]
+	}
+	if search != utils.EmptyString {
+		var matchingIds []string // contains only the ids matching prefix and search
+		for _, id := range ids {
+			if strings.Contains(id, search) {
+				matchingIds = append(matchingIds, id)
+			}
+		}
+		return matchingIds, err
 	}
 	return
 }

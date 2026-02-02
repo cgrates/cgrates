@@ -107,13 +107,12 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	}
 	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -184,13 +183,13 @@ func (admS *AdminSv1) GetRateProfilesCount(ctx *context.Context, args *utils.Arg
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

@@ -203,7 +203,7 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -310,7 +310,7 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -385,7 +385,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -426,7 +426,7 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:key1", "thp_cgrates.org:key2", "thp_cgrates.org:key3"}, nil
 		},
 	}
@@ -472,7 +472,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -543,7 +543,7 @@ func TestThresholdsGetThresholdProfilesCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -859,7 +859,7 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*engine.ThresholdProfile{
 		{
@@ -935,7 +935,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -961,7 +961,7 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -978,7 +978,7 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetThresholdProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}

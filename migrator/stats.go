@@ -69,7 +69,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 	}
 	//StatQueueProfile
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(context.Background(), utils.StatQueueProfilePrefix); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(context.Background(), utils.StatQueueProfilePrefix, utils.EmptyString); err != nil {
 		return err
 	}
 	for _, id := range ids {

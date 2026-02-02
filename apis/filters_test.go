@@ -731,7 +731,7 @@ func TestFiltersGetFiltersCountError(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1483,7 +1483,7 @@ func TestFiltersGetFiltersOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*engine.Filter{
 		{
@@ -1559,7 +1559,7 @@ func TestFiltersGetFiltersGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -1585,7 +1585,7 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 		RemoveFilterDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:TEST"}, nil
 		},
 	}
@@ -1602,7 +1602,7 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 
 	if err := adms.GetFilters(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1628,7 +1628,7 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 		RemoveFilterDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
 		},
 	}
@@ -1674,7 +1674,7 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 		RemoveFilterDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
 		},
 	}

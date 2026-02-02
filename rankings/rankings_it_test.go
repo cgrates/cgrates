@@ -256,7 +256,7 @@ func testRankingsGetRankingProfileIDsAfterSet(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyRankingProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -270,7 +270,7 @@ func testRankingsGetRankingProfileIDsAfterSet(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyRankingProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -295,7 +295,7 @@ func testRankingsGetRankingProfileCountAfterSet(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -305,7 +305,7 @@ func testRankingsGetRankingProfileCountAfterSet(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -415,7 +415,7 @@ func testRankingsGetRankingProfileIDsAfterRemove(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyRankingProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -429,7 +429,7 @@ func testRankingsGetRankingProfileIDsAfterRemove(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyRankingProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -454,7 +454,7 @@ func testRankingsGetRankingProfileCountAfterRemove(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -464,7 +464,7 @@ func testRankingsGetRankingProfileCountAfterRemove(t *testing.T) {
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {

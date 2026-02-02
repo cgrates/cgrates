@@ -78,10 +78,17 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 }
 
 // returns all keys in table matching the Tenant and ID
-func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID) (ids []string, err error) {
+func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID, search string) (ids []string, err error) {
+	var binary string // add case sensitivity for mysql
+	if sqls.DataDB.GetStorageType() == utils.MetaMySQL {
+		binary = "BINARY"
+	}
+	tx := sqls.db.Table(table).Select("tenant, id").Where(binary+" tenant = ? AND id LIKE ?", tntID.Tenant, tntID.ID+"%")
+	if search != utils.EmptyString {
+		tx.Where(binary+" id LIKE ?", "%"+search+"%")
+	}
 	matchingTntID := []utils.TenantID{}
-	if err = sqls.db.Table(table).Select("tenant, id").Where("tenant = ? AND id LIKE ?", tntID.Tenant, tntID.ID+"%").
-		Find(&matchingTntID).Error; err != nil {
+	if err = tx.Find(&matchingTntID).Error; err != nil {
 		return nil, err
 	}
 	ids = make([]string, len(matchingTntID))
@@ -92,7 +99,7 @@ func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table str
 }
 
 // GetKeysForPrefix will look for keys matching the prefix given
-func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
+func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix, search string) (keys []string, err error) {
 	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
@@ -102,43 +109,43 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 
 	switch category {
 	case utils.AccountPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAccounts, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAccounts, tntID, search)
 	case utils.IPProfilesPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPProfiles, tntID, search)
 	case utils.IPAllocationsPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLIPAllocations, tntID, search)
 	case utils.ActionProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLActionProfiles, tntID, search)
 	case utils.ChargerProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLChargerProfiles, tntID, search)
 	case utils.AttributeProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAttributeProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLAttributeProfiles, tntID, search)
 	case utils.ResourceProfilesPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResourceProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResourceProfiles, tntID, search)
 	case utils.ResourcesPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResources, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLResources, tntID, search)
 	case utils.StatQueueProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueueProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueueProfiles, tntID, search)
 	case utils.StatQueuePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueues, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLStatQueues, tntID, search)
 	case utils.ThresholdProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholdProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholdProfiles, tntID, search)
 	case utils.ThresholdPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholds, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLThresholds, tntID, search)
 	case utils.FilterPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLFilters, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLFilters, tntID, search)
 	case utils.RouteProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRouteProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRouteProfiles, tntID, search)
 	case utils.RateProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRateProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRateProfiles, tntID, search)
 	case utils.RankingProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankingProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankingProfiles, tntID, search)
 	case utils.RankingPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankings, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLRankings, tntID, search)
 	case utils.TrendProfilePrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrendProfiles, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrendProfiles, tntID, search)
 	case utils.TrendPrefix:
-		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrends, tntID)
+		keys, err = sqls.getAllKeysMatchingTenantID(ctx, utils.TBLTrends, tntID, search)
 	case utils.AttributeFilterIndexes:
 		keys, err = sqls.getAllIndexKeys(utils.AttributeFilterIndexes, tntID.Tenant)
 	case utils.ResourceFilterIndexes:
@@ -1612,9 +1619,13 @@ func (sqls *SQLStorage) RemoveLoadIDsDrv() (err error) {
 }
 
 func (sqls *SQLStorage) getAllIndexKeys(tenant, typePrefix string) ([]string, error) {
+	var binary string // add case sensitivity for mysql
+	if sqls.DataDB.GetStorageType() == utils.MetaMySQL {
+		binary = "BINARY"
+	}
 	var keys []string
 	if err := sqls.db.Model(&IndexMdl{}).
-		Where("tenant = ? AND type LIKE ?", tenant, typePrefix+"%").
+		Where(binary+" tenant = ? AND type LIKE ?", tenant, typePrefix+"%").
 		Pluck("key", &keys).Error; err != nil {
 		return nil, err
 	}

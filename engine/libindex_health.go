@@ -292,7 +292,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids { // get all the objects from DB
@@ -311,7 +311,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 	// check the indexes( index->filter->obj relation)
 	idxPrfx := utils.CacheInstanceToPrefix[indxType]
 	var indexKeys []string
-	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, idxPrfx); err != nil {
+	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, idxPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}
@@ -390,7 +390,7 @@ func getRevFltrIdxHealthFromObj(ctx *context.Context, dm *DataManager, fltrCache
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids { // get all the objects
@@ -438,7 +438,7 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 		return
 	}
 	var revIndexKeys []string
-	if revIndexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.FilterIndexPrfx); err != nil {
+	if revIndexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.FilterIndexPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}
@@ -565,7 +565,7 @@ func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCac
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids {
@@ -585,7 +585,7 @@ func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCac
 
 	// check the indexes( index->filter->obj relation)
 	var indexKeys []string
-	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.RateFilterIndexPrfx); err != nil {
+	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.RateFilterIndexPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, dataID := range indexKeys {
@@ -670,7 +670,7 @@ func getRevFltrIdxHealthFromRateRates(ctx *context.Context, dm *DataManager, flt
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids {

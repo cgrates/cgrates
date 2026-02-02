@@ -612,7 +612,7 @@ func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOp
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}

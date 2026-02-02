@@ -202,7 +202,7 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -309,7 +309,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -383,7 +383,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -424,7 +424,7 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:key1", "thp_cgrates.org:key2", "thp_cgrates.org:key3"}, nil
 		},
 	}
@@ -470,7 +470,7 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -541,7 +541,7 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -963,7 +963,7 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*engine.StatQueueProfile{
 		{
@@ -1057,7 +1057,7 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -1083,7 +1083,7 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -1100,7 +1100,7 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetStatQueueProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}

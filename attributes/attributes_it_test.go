@@ -374,7 +374,7 @@ func testAttributesGetAttributeProfileIDsAfterSet(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyAttributeProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -388,7 +388,7 @@ func testAttributesGetAttributeProfileIDsAfterSet(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyAttributeProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -413,7 +413,7 @@ func testAttributesGetAttributeProfileCountAfterSet(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -423,7 +423,7 @@ func testAttributesGetAttributeProfileCountAfterSet(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -596,7 +596,7 @@ func testAttributesGetAttributeProfileIDsAfterRemove(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyAttributeProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -610,7 +610,7 @@ func testAttributesGetAttributeProfileIDsAfterRemove(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyAttributeProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -635,7 +635,7 @@ func testAttributesGetAttributeProfileCountAfterRemove(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -645,7 +645,7 @@ func testAttributesGetAttributeProfileCountAfterRemove(t *testing.T) {
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -1487,6 +1487,69 @@ func testAttributeGetAttributeProfileAllIDs(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", expectedIds, rply)
 		}
 	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "", // test for empty
+		}, &rply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply)
+		sort.Strings(expectedIds)
+		if !reflect.DeepEqual(expectedIds, rply) {
+			t.Errorf("Expected %+v, received %+v", expectedIds, rply)
+		}
+	}
+	expectedIds = []string{"TEST_ATTRIBUTES_IT_TEST"}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "TEST", // test for prefix
+		}, &rply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply)
+		sort.Strings(expectedIds)
+		if !reflect.DeepEqual(expectedIds, rply) {
+			t.Errorf("Expected %+v, received %+v", expectedIds, rply)
+		}
+	}
+	expectedIds = []string{"TestA_ATTRIBUTE1", "TestB_ATTRIBUTE1"}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "TRIBUTE1", // test for suffix
+		}, &rply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply)
+		sort.Strings(expectedIds)
+		if !reflect.DeepEqual(expectedIds, rply) {
+			t.Errorf("Expected %+v, received %+v", expectedIds, rply)
+		}
+	}
+	expectedIds = []string{"TestA_ATTRIBUTE1", "TestA_ATTRIBUTE3"}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "A_ATTR", // test for middle of body
+		}, &rply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply)
+		sort.Strings(expectedIds)
+		if !reflect.DeepEqual(expectedIds, rply) {
+			t.Errorf("Expected %+v, received %+v", expectedIds, rply)
+		}
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "non matching string", // test for non matching
+		}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected error <%v>, received <%v>", utils.ErrNotFound, err)
+	}
+
 }
 
 func testAttributeGetAttributeProfileAllCount(t *testing.T) {
@@ -1500,6 +1563,49 @@ func testAttributeGetAttributeProfileAllCount(t *testing.T) {
 		t.Error(err)
 	} else if rply != 9 {
 		t.Errorf("Expected %+v, received %+v", 9, rply)
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "", // test for empty
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != 9 {
+		t.Errorf("Expected %+v, received %+v", 9, rply)
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "TEST", // test for prefix
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != 1 {
+		t.Errorf("Expected %+v, received %+v", 9, rply)
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "TRIBUTE1", // test for suffix
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != 2 {
+		t.Errorf("Expected %+v, received %+v", 9, rply)
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "A_ATTR", // test for middle of body
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != 2 {
+		t.Errorf("Expected %+v, received %+v", 9, rply)
+	}
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsSearch: "non matching string", // test for non matching
+		}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected error <%v>, received <%v>", utils.ErrNotFound, err)
 	}
 }
 

@@ -680,7 +680,7 @@ func (tS *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.Tenant
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}

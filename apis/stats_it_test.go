@@ -534,7 +534,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
 	var reply []*engine.StatQueueProfile
 	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "SQ_2",
+		ItemsSearch: "SQ_2",
 	}
 	exp := []*engine.StatQueueProfile{
 		{

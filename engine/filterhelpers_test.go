@@ -110,7 +110,9 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 		"Field":          "profile",
 	}}
 	data := &DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) { return []string{}, utils.ErrNotImplemented },
+		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+			return []string{}, utils.ErrNotImplemented
+		},
 	}
 	cfg := config.NewDefaultCGRConfig()
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())

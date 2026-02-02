@@ -52,13 +52,12 @@ func (a *AdminS) V1GetRankingProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	}
 	prfx := utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := a.dm.DBConns().GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -105,13 +104,13 @@ func (a *AdminS) V1GetRankingProfilesCount(ctx *context.Context, args *utils.Arg
 	if tnt == utils.EmptyString {
 		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := a.dm.DBConns().GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

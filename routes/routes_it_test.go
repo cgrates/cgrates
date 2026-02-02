@@ -343,7 +343,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -357,7 +357,7 @@ func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -382,7 +382,7 @@ func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -392,7 +392,7 @@ func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -560,7 +560,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -574,7 +574,7 @@ func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -599,7 +599,7 @@ func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -609,7 +609,7 @@ func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {

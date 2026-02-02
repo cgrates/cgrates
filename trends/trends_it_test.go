@@ -254,7 +254,7 @@ func testTrendsGetTrendProfileIDsAfterSet(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend",
+			ItemsSearch: "Trend",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -280,7 +280,7 @@ func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend",
+			ItemsSearch: "Trend",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -290,7 +290,7 @@ func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend1",
+			ItemsSearch: "Trend1",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 1 {
@@ -371,7 +371,7 @@ func testTrendsGetTrendProfileIDsAfterRemove(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend",
+			ItemsSearch: "Trend",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -385,7 +385,7 @@ func testTrendsGetTrendProfileIDsAfterRemove(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend1",
+			ItemsSearch: "Trend1",
 		}, &replyTrendProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -410,7 +410,7 @@ func testTrendsGetTrendProfileCountAfterRemove(t *testing.T) {
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "Trend",
+			ItemsSearch: "Trend",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {

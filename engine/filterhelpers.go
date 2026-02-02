@@ -56,7 +56,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				return
 			}
 			var keysWithID []string
-			if keysWithID, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
+			if keysWithID, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID], utils.EmptyString); err != nil {
 				return
 			}
 			var sliceIDs []string

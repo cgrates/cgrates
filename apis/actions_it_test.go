@@ -394,7 +394,7 @@ func testActionsSetActionProfilesWithPrefix(t *testing.T) {
 		},
 	}
 	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "aa",
+		ItemsSearch: "aa",
 	}
 	var rplyActs []*utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,

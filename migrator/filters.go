@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.FilterPrefix, utils.EmptyString)
 	if err != nil {
 		return
 	}
@@ -359,7 +359,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}
@@ -404,7 +404,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}
@@ -445,7 +445,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
@@ -488,7 +488,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
