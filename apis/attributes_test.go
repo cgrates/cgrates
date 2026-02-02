@@ -168,7 +168,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
@@ -313,7 +313,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
@@ -364,7 +364,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
@@ -394,7 +394,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -431,7 +431,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
@@ -455,7 +455,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	}
 
 	dbMockNew := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -562,7 +562,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*utils.APIAttributeProfile{
 		{
@@ -650,7 +650,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -676,7 +676,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -693,7 +693,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetAttributeProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -719,7 +719,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
 		},
 	}
@@ -765,7 +765,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
 		},
 	}

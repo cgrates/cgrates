@@ -51,13 +51,12 @@ func (a *AdminS) V1GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsItem
 	}
 	prfx := utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := a.dm.DBConns().GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -104,13 +103,13 @@ func (a *AdminS) V1GetTrendProfilesCount(ctx *context.Context, args *utils.ArgsI
 	if tnt == utils.EmptyString {
 		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := a.dm.DBConns().GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

@@ -315,7 +315,7 @@ func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyChargerProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -329,7 +329,7 @@ func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyChargerProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -354,7 +354,7 @@ func testChargersGetChargerProfileCountAfterSet(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 3 {
@@ -364,7 +364,7 @@ func testChargersGetChargerProfileCountAfterSet(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -507,7 +507,7 @@ func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyChargerProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -521,7 +521,7 @@ func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyChargerProfileIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -546,7 +546,7 @@ func testChargersGetChargerProfileCountAfterRemove(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestA",
+			ItemsSearch: "TestA",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -556,7 +556,7 @@ func testChargersGetChargerProfileCountAfterRemove(t *testing.T) {
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "TestB",
+			ItemsSearch: "TestB",
 		}, &replyCount); err != nil {
 		t.Error(err)
 	} else if replyCount != 2 {
@@ -683,7 +683,7 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 	}
 	var reply2 []*utils.ChargerProfile
 	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "aTEST",
+		ItemsSearch: "aTEST",
 	}
 	expected := []*utils.ChargerProfile{
 		{

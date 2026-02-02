@@ -1062,7 +1062,7 @@ func testRateSetRateProfilesWithPrefix(t *testing.T) {
 	var reply2 []*utils.RateProfile
 	args := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "PrefixTEST",
+		ItemsSearch: "PrefixTEST",
 	}
 	expected := []*utils.RateProfile{
 		{

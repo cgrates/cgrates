@@ -55,13 +55,12 @@ func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.Args
 	}
 	prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -108,13 +107,13 @@ func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.A
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

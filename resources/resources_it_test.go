@@ -803,7 +803,7 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 
 	var rplyRes []*utils.ResourceProfile
 	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "PrefixRes",
+		ItemsSearch: "PrefixRes",
 	}
 	exp := []*utils.ResourceProfile{
 		{

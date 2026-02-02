@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AccountPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AccountPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

@@ -61,7 +61,7 @@ func (v1rs *redisMigrator) DataManager() *engine.DataManager {
 // get
 func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.CDRsStatsPrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.CDRsStatsPrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -87,7 +87,7 @@ func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 
 func (v1rs *redisMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -127,7 +127,7 @@ func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 // get
 func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -168,7 +168,7 @@ func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
 // get
 func (v1rs *redisMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.FilterPrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -194,7 +194,7 @@ func (v1rs *redisMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 
 func (v1rs *redisMigrator) getV4Filter() (v4Fltr *engine.Filter, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.FilterPrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -236,7 +236,7 @@ func (v1rs *redisMigrator) remV1Filter(tenant, id string) (err error) {
 
 func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -262,7 +262,7 @@ func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile
 
 func (v1rs *redisMigrator) getV1RouteProfile() (v1chrPrf *utils.RouteProfile, err error) {
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix, utils.EmptyString)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {

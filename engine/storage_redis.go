@@ -222,7 +222,7 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	var keys []string
-	keys, err = rs.GetKeysForPrefix(context.TODO(), "")
+	keys, err = rs.GetKeysForPrefix(context.TODO(), utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		return
 	}
@@ -261,17 +261,33 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 // 	return nil, nil
 // }
 
-func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
-	scan := radix.NewScanner(rs.client, radix.ScanOpts{
-		Command: redisSCAN,
-		Pattern: prefix + utils.Meta,
-	})
-	var key string
-	for scan.Next(&key) {
-		keys = append(keys, key)
-	}
-	if err = scan.Close(); err != nil {
-		return nil, err
+func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix, search string) (keys []string, err error) {
+	if search != utils.EmptyString {
+		scanner := radix.NewScanner(rs.client, radix.ScanOpts{
+			Command: redisSCAN,
+			Pattern: prefix + utils.Meta + search + utils.Meta, // Match all keys with the given prefix and containing search value
+		})
+		var key string
+		for scanner.Next(&key) {
+			if strings.Contains(key, search) {
+				keys = append(keys, key)
+			}
+		}
+		if err := scanner.Close(); err != nil {
+			return nil, err
+		}
+	} else {
+		scan := radix.NewScanner(rs.client, radix.ScanOpts{
+			Command: redisSCAN,
+			Pattern: prefix + utils.Meta,
+		})
+		var key string
+		for scan.Next(&key) {
+			keys = append(keys, key)
+		}
+		if err = scan.Close(); err != nil {
+			return nil, err
+		}
 	}
 	if len(keys) != 0 {
 		if filterIndexesPrefixMap.Has(prefix) {

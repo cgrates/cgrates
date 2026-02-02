@@ -113,7 +113,7 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		return nil, err
 	}
 	var dbKeys []string
-	if dbKeys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if dbKeys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
 		return nil, err
 	}
 	profileIDs = make([]string, 0, len(dbKeys))

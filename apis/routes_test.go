@@ -220,7 +220,7 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -325,7 +325,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -397,7 +397,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -461,7 +461,7 @@ func TestRoutesGetRouteProfilesCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -569,7 +569,7 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*utils.RouteProfile{
 		{
@@ -654,7 +654,7 @@ func TestRoutesGetRouteProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -680,7 +680,7 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -697,7 +697,7 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetRouteProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -723,7 +723,7 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -769,7 +769,7 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}

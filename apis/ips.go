@@ -52,12 +52,11 @@ func (s *AdminSv1) GetIPProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	}
 	prfx := utils.IPProfilesPrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := s.dm.DBConns().GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch)
 	if err != nil {
 		return err
 	}
@@ -104,12 +103,12 @@ func (s *AdminSv1) GetIPProfilesCount(ctx *context.Context, args *utils.ArgsItem
 	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.IPProfilesPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.IPProfilesPrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := s.dm.DBConns().GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch)
 	if err != nil {
 		return err
 	}

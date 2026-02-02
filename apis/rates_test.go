@@ -245,7 +245,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(*context.Context, string) ([]string, error) {
+		GetKeysForPrefixF: func(*context.Context, string, string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -366,7 +366,7 @@ func TestRatesGetRateProfilesCountKeysLenError(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(*context.Context, string) ([]string, error) {
+		GetKeysForPrefixF: func(*context.Context, string, string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -1724,7 +1724,7 @@ func TestRatesGetRateProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*utils.RateProfile{
 		{
@@ -1806,7 +1806,7 @@ func TestRatesGetRateProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -1832,7 +1832,7 @@ func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -1849,7 +1849,7 @@ func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetRateProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1875,7 +1875,7 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
 		},
 	}
@@ -1921,7 +1921,7 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
 		},
 	}

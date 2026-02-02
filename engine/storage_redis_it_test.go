@@ -66,13 +66,13 @@ func BenchmarkRedisGetKeysForPrefix(b *testing.B) {
 		rs.SetChargerProfileDrv(context.Background(), chargerProfile)
 	}
 	for i := 0; i < b.N; i++ {
-		rs.GetKeysForPrefix(context.Background(), "TestA")
+		rs.GetKeysForPrefix(context.Background(), "TestA", "")
 	}
 	prfx := []string{"TestA", "TestB", "Test"}
 	for _, v := range prfx {
 		b.Run(fmt.Sprintf("test case: prefix = %q", v), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				rs.GetKeysForPrefix(context.Background(), v)
+				rs.GetKeysForPrefix(context.Background(), v, "")
 			}
 		})
 	}

@@ -28,7 +28,7 @@ type DataDBMock struct {
 	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile, bool) error
 	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
 	GetRateProfileRatesDrvF    func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
-	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
+	GetKeysForPrefixF          func(*context.Context, string, string) ([]string, error)
 	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error)
@@ -92,9 +92,9 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(ctx *context.Context, prf string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(ctx *context.Context, prf, srch string) ([]string, error) {
 	if dbM.GetKeysForPrefixF != nil {
-		return dbM.GetKeysForPrefixF(ctx, prf)
+		return dbM.GetKeysForPrefixF(ctx, prf, srch)
 	}
 	return nil, utils.ErrNotImplemented
 }

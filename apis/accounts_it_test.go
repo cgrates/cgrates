@@ -285,7 +285,7 @@ func testAccGetAccIDsCount(t *testing.T) {
 	var reply int
 	args := &utils.ArgsItemIDs{
 		Tenant:      utils.CGRateSorg,
-		ItemsPrefix: "",
+		ItemsSearch: "",
 	}
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
@@ -480,7 +480,7 @@ func testAccGetAccIDsCount2(t *testing.T) {
 	var reply int
 	args := &utils.ArgsItemIDs{
 		Tenant:      utils.CGRateSorg,
-		ItemsPrefix: "",
+		ItemsSearch: "",
 	}
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
@@ -639,7 +639,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 
 	var reply2 *[]*utils.Account
 	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "aTEST",
+		ItemsSearch: "aTEST",
 	}
 	expected := &[]*utils.Account{
 		{

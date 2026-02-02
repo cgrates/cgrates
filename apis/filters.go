@@ -127,13 +127,12 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	}
 	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -185,13 +184,13 @@ func (admS *AdminSv1) GetFiltersCount(ctx *context.Context, args *utils.ArgsItem
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

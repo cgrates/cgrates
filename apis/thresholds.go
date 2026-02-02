@@ -52,13 +52,12 @@ func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.A
 	}
 	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
 	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -105,13 +104,13 @@ func (adms *AdminSv1) GetThresholdProfilesCount(ctx *context.Context, args *util
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
 	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

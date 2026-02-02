@@ -27,7 +27,7 @@ import (
 type ArgsItemIDs struct {
 	Tenant      string
 	APIOpts     map[string]any
-	ItemsPrefix string
+	ItemsSearch string // Search for items containing this string
 }
 
 type ArgsSubItemIDs struct {

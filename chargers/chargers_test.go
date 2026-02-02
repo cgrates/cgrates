@@ -613,7 +613,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	cfg.ChargerSCfg().NestedFields = false
 
 	dbm := &engine.DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}
@@ -936,7 +936,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 			}, nil
 		},
-		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
 			return []string{s + "cgrates.org:chr1"}, nil
 		},
 		GetFilterDrvF: func(ctx *context.Context, s1, s2 string) (*engine.Filter, error) {
@@ -1494,7 +1494,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &engine.DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}

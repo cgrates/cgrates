@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

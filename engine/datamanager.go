@@ -287,7 +287,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 					err.Error(),
 					fmt.Sprintf("DataManager error <%s> for prefix <%s>", err.Error(), prfx))
 			}
-			if ids, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
+			if ids, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
@@ -1368,7 +1368,7 @@ func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string
 		return nil, err
 	}
 	if len(tenants) == 0 {
-		keys, err = dataDB.GetKeysForPrefix(ctx, prfx)
+		keys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1376,7 +1376,7 @@ func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx)
+			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}
@@ -1523,7 +1523,7 @@ func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []stri
 		return nil, err
 	}
 	if len(tenants) == 0 {
-		keys, err = dataDB.GetKeysForPrefix(ctx, prfx)
+		keys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1531,7 +1531,7 @@ func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []stri
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx)
+			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}

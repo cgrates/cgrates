@@ -4093,7 +4093,9 @@ func TestDMCacheDataFromDBPrefixKeysErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) { return []string{}, utils.ErrNotImplemented },
+		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+			return []string{}, utils.ErrNotImplemented
+		},
 	}
 
 	if err := dm.CacheDataFromDB(context.Background(), utils.FilterIndexPrfx, []string{utils.MetaAny}, false); err.Error() != utils.ErrNotImplemented.Error() {

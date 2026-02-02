@@ -398,7 +398,7 @@ func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
-			ItemsPrefix: "THD_2",
+			ItemsSearch: "THD_2",
 		}, &ths); err != nil {
 		t.Error(err)
 	} else {

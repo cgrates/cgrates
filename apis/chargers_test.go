@@ -296,7 +296,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -732,7 +732,7 @@ func TestChargersGetChargerProfilesOK(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 	}
 	exp := []*utils.ChargerProfile{
 		{
@@ -799,7 +799,7 @@ func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
 
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
-		ItemsPrefix: "test_ID",
+		ItemsSearch: "test_ID",
 		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
@@ -825,7 +825,7 @@ func TestChargersGetChargerProfilesGetProfileErr(t *testing.T) {
 		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"chp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -842,7 +842,7 @@ func TestChargersGetChargerProfilesGetProfileErr(t *testing.T) {
 
 	if err := adms.GetChargerProfiles(context.Background(),
 		&utils.ArgsItemIDs{
-			ItemsPrefix: "TEST",
+			ItemsSearch: "TEST",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -868,7 +868,7 @@ func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
 		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -914,7 +914,7 @@ func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
 		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -985,7 +985,7 @@ func TestChargersGetChargerProfilesCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}

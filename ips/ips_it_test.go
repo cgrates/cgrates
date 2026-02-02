@@ -268,7 +268,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		err = client.Call(context.Background(), utils.AdminSv1GetIPProfiles,
 			&utils.ArgsItemIDs{
 				Tenant:      "cgrates.org",
-				ItemsPrefix: "IPs",
+				ItemsSearch: "IPs",
 			}, &ipps)
 		if err != nil {
 			t.Fatal(err)
