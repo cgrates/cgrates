@@ -23,7 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -284,6 +287,99 @@ func TestComposeURI(t *testing.T) {
 			url := composeMongoURI(tt.scheme, tt.host, tt.port, tt.db, tt.user, tt.pass)
 			if url != tt.expected {
 				t.Errorf("expected %v,\nreceived %v", tt.expected, url)
+			}
+		})
+	}
+}
+
+func TestInternalDBGetSetSection(t *testing.T) {
+	db, _ := NewInternalDB(nil, nil, nil, nil)
+	defer db.Close()
+
+	tests := []struct {
+		name    string
+		section string
+		input   any
+		output  any
+	}{
+		{
+			name:    "GeneralJsonCfg",
+			section: config.GeneralJSON,
+			input: &config.GeneralJsonCfg{
+				Node_id:           utils.StringPointer("node1"),
+				Rounding_decimals: utils.IntPointer(5),
+				Default_tenant:    utils.StringPointer("cgrates.org"),
+			},
+			output: &config.GeneralJsonCfg{},
+		},
+		{
+			name:    "CoreSJsonCfg",
+			section: config.CoreSJSON,
+			input: &config.CoreSJsonCfg{
+				Caps:             utils.IntPointer(100),
+				Shutdown_timeout: utils.StringPointer("1s"),
+				Ees_conns:        utils.SliceStringPointer([]string{"conn1", "conn2"}),
+			},
+			output: &config.CoreSJsonCfg{},
+		},
+		{
+			name:    "CacheJsonCfg",
+			section: config.CacheJSON,
+			input: &config.CacheJsonCfg{
+				Partitions: map[string]*config.CacheParamJsonCfg{
+					utils.CacheFilters: {
+						Limit:  utils.IntPointer(100),
+						Ttl:    utils.StringPointer("1h"),
+						Remote: utils.BoolPointer(false),
+					},
+				},
+			},
+			output: &config.CacheJsonCfg{},
+		},
+		{
+			name:    "ListenJsonCfg",
+			section: config.ListenJSON,
+			input: &config.ListenJsonCfg{
+				Rpc_json:     utils.StringPointer("127.0.0.1:2012"),
+				Rpc_gob:      utils.StringPointer("127.0.0.1:2013"),
+				Http:         utils.StringPointer("127.0.0.1:2080"),
+				Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
+			},
+			output: &config.ListenJsonCfg{},
+		},
+		{
+			name:    "FilterSJsonCfg",
+			section: config.FilterSJSON,
+			input: &config.FilterSJsonCfg{
+				Stats_conns:     &[]string{"*internal"},
+				Resources_conns: &[]string{"*localhost"},
+				Accounts_conns:  &[]string{"*internal", "*localhost"},
+			},
+			output: &config.FilterSJsonCfg{},
+		},
+		{
+			name:    "RateSJsonCfg",
+			section: config.RateSJSON,
+			input: &config.RateSJsonCfg{
+				Enabled:               utils.BoolPointer(true),
+				Indexed_selects:       utils.BoolPointer(true),
+				String_indexed_fields: &[]string{"Account", "Destination"},
+				Nested_fields:         utils.BoolPointer(false),
+			},
+			output: &config.RateSJsonCfg{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := db.SetSection(context.Background(), tc.section, tc.input); err != nil {
+				t.Fatalf("SetSection(%s) error: %v", tc.section, err)
+			}
+			if err := db.GetSection(context.Background(), tc.section, tc.output); err != nil {
+				t.Fatalf("GetSection(%s) error: %v", tc.section, err)
+			}
+			if diff := cmp.Diff(tc.input, tc.output); diff != "" {
+				t.Errorf("GetSection(%s) mismatch (-want +got):\n%s", tc.section, diff)
 			}
 		})
 	}
