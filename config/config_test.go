@@ -6257,3 +6257,95 @@ func TestCfgloadCfgWithLocks(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestConfigV1StoreCfgInDBs(t *testing.T) {
+	tests := []struct {
+		section  string
+		setup    func(cfg *CGRConfig)
+		expected func() any
+	}{
+		{
+			section: TrendSJSON,
+			setup: func(cfg *CGRConfig) {
+				cfg.trendSCfg.Enabled = true
+				cfg.trendSCfg.StoreInterval = 10 * time.Second
+				cfg.trendSCfg.StoreUncompressedLimit = 100
+			},
+			expected: func() any {
+				return &TrendSJsonCfg{
+					Enabled:                  utils.BoolPointer(true),
+					Store_interval:           utils.StringPointer("10s"),
+					Store_uncompressed_limit: utils.IntPointer(100),
+					Scheduled_ids:            map[string][]string{},
+				}
+			},
+		},
+		{
+			section: RankingSJSON,
+			setup: func(cfg *CGRConfig) {
+				cfg.rankingSCfg.Enabled = true
+				cfg.rankingSCfg.StoreInterval = 5 * time.Second
+			},
+			expected: func() any {
+				return &RankingSJsonCfg{
+					Enabled:        utils.BoolPointer(true),
+					Store_interval: utils.StringPointer("5s"),
+					Scheduled_ids:  map[string][]string{},
+				}
+			},
+		},
+		// {
+		// 	section: TPeSJSON,
+		// 	setup: func(cfg *CGRConfig) {
+		// 		cfg.tpeSCfg.Enabled = true
+		// 	},
+		// 	expected: func() any {
+		// 		return &TpeSCfgJson{
+		// 			Enabled: utils.BoolPointer(true),
+		// 		}
+		// 	},
+		// },
+		{
+			section: AccountSJSON,
+			setup: func(cfg *CGRConfig) {
+			},
+			expected: func() any {
+				return &AccountSJsonCfg{
+					Opts: &AccountsOptsJson{},
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.section, func(t *testing.T) {
+			cfg := NewDefaultCGRConfig()
+			cfg.rldCh = make(chan string, 100)
+			db := make(CgrJsonCfg)
+			cfg.db = db
+
+			tt.setup(cfg)
+
+			var reply string
+			if err := cfg.V1StoreCfgInDB(
+				context.Background(),
+				&SectionWithAPIOpts{Sections: []string{tt.section}},
+				&reply,
+			); err != nil {
+				t.Fatal(err)
+			}
+
+			exp := tt.expected()
+			expType := reflect.TypeOf(exp)
+			rpl := reflect.New(expType.Elem()).Interface()
+
+			if err := db.GetSection(context.Background(), tt.section, rpl); err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(exp, rpl) {
+				t.Errorf("Mismatch for section %s!\nExpected: %+v\nReceived: %+v", tt.section, exp, rpl)
+			}
+		})
+	}
+}
