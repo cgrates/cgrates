@@ -19,13 +19,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (iDB *InternalDB) GetSection(_ *context.Context, section string, val any) error {
-	val, _ = iDB.db.Get(utils.CacheConfig, section)
-	return nil
+	result, ok := iDB.db.Get(utils.CacheConfig, section)
+	if !ok || result == nil {
+		return nil
+	}
+	b, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, val)
 }
 func (iDB *InternalDB) SetSection(_ *context.Context, section string, val any) error {
 	iDB.db.Set(utils.CacheConfig, section, val, nil,
