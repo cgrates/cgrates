@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net"
 	"sync"
 	"time"
@@ -1035,8 +1036,8 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		PerformRounding: cd.PerformRounding,
 		CgrID:           cd.CgrID,
 		RunID:           cd.RunID,
+		ExtraFields:     maps.Clone(cd.ExtraFields),
 	}
-
 }
 
 // AccountSummary returns the AccountSummary for cached account

@@ -43,6 +43,9 @@ var async = flag.Bool("async", false, "Run dispatcher sessions concurrently")
 func TestDispatcherMultiChain(t *testing.T) {
 	// Shared engine: Chargers, CDRs, Apiers (port 6012/6013/6080)
 	cfgShared := `{
+"general": {
+	"node_id": "shared"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:6012",
 	"rpc_gob": "127.0.0.1:6013",
@@ -80,6 +83,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// RALS1: port 5012/5013/5080
 	cfgRALS1 := `{
+"general": {
+	"node_id": "rals1"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:5012",
 	"rpc_gob": "127.0.0.1:5013",
@@ -106,6 +112,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// RALS2: port 5112/5113/5180
 	cfgRALS2 := `{
+"general": {
+	"node_id": "ral2"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:5112",
 	"rpc_gob": "127.0.0.1:5113",
@@ -132,6 +141,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// RALS3: port 5212/5213/5280
 	cfgRALS3 := `{
+"general": {
+	"node_id": "rals3"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:5212",
 	"rpc_gob": "127.0.0.1:5213",
@@ -158,6 +170,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// RALS4: port 5312/5313/5380
 	cfgRALS4 := `{
+"general": {
+	"node_id": "rals4"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:5312",
 	"rpc_gob": "127.0.0.1:5313",
@@ -184,6 +199,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// SM1: port 4012/4013/4080, routes RALs through DSP1
 	cfgSM1 := `{
+"general": {
+	"node_id": "sm1"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:4012",
 	"rpc_gob": "127.0.0.1:4013",
@@ -222,6 +240,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// SM2: port 4112/4113/4180, routes RALs through DSP1
 	cfgSM2 := `{
+"general": {
+	"node_id": "sm2"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:4112",
 	"rpc_gob": "127.0.0.1:4113",
@@ -260,6 +281,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// SM3: port 4212/4213/4280, routes RALs through DSP2
 	cfgSM3 := `{
+"general": {
+	"node_id": "sm3"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:4212",
 	"rpc_gob": "127.0.0.1:4213",
@@ -298,6 +322,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// SM4: port 4312/4313/4380, routes RALs through DSP2
 	cfgSM4 := `{
+"general": {
+	"node_id": "sm4"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:4312",
 	"rpc_gob": "127.0.0.1:4313",
@@ -336,6 +363,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// DSP1: port 3012/3013/3080, routes sessions to SM1/SM2, RALs to RALS1/RALS2
 	cfgDSP1 := `{
+"general": {
+	"node_id": "dsp1"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:3012",
 	"rpc_gob": "127.0.0.1:3013",
@@ -357,12 +387,15 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "dispatchers": {
 	"enabled": true,
-	"prefix_indexed_fields": ["Account"]
+	"string_indexed_fields": ["Agent"]
 }
 }`
 
 	// DSP2: port 3112/3113/3180, routes sessions to SM3/SM4, RALs to RALS3/RALS4
 	cfgDSP2 := `{
+"general": {
+	"node_id": "dsp2"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:3112",
 	"rpc_gob": "127.0.0.1:3113",
@@ -384,12 +417,15 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "dispatchers": {
 	"enabled": true,
-	"prefix_indexed_fields": ["Account"]
+	"string_indexed_fields": ["Agent"]
 }
 }`
 
 	// HA1: HTTPAgent on port 2012/2013/2080, sends to DSP1
 	cfgHA1 := `{
+"general": {
+	"node_id": "ha1"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",
@@ -425,7 +461,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 			{
 				"id": "auth",
 				"filters": ["*string:~*req.request_type:auth"],
-				"flags": ["*authorize", "*accounts"],
+				"flags": ["*auth", "*accounts"],
 				"request_fields": [
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.session_id"},
@@ -437,6 +473,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -459,6 +496,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -481,6 +519,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -502,6 +541,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -515,6 +555,9 @@ func TestDispatcherMultiChain(t *testing.T) {
 
 	// HA2: HTTPAgent on port 2112/2113/2180, sends to DSP2
 	cfgHA2 := `{
+"general": {
+	"node_id": "ha2"
+},
 "listen": {
 	"rpc_json": "127.0.0.1:2112",
 	"rpc_gob": "127.0.0.1:2113",
@@ -550,7 +593,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 			{
 				"id": "auth",
 				"filters": ["*string:~*req.request_type:auth"],
-				"flags": ["*authorize", "*accounts"],
+				"flags": ["*auth", "*accounts"],
 				"request_fields": [
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.session_id"},
@@ -562,6 +605,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -584,6 +628,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -606,6 +651,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -627,6 +673,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*cgreq.*route_id", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -647,21 +694,21 @@ RT_ANY,0,1,1s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_ANY,DR_ANY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,1002,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,1003,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,1004,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,1005,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2001,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2002,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2003,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2004,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2005,2014-01-14T00:00:00Z,RP_ANY,`,
+cgrates.org,call,1001,,RP_ANY,
+cgrates.org,call,1002,,RP_ANY,
+cgrates.org,call,1003,,RP_ANY,
+cgrates.org,call,1004,,RP_ANY,
+cgrates.org,call,1005,,RP_ANY,
+cgrates.org,call,2001,,RP_ANY,
+cgrates.org,call,2002,,RP_ANY,
+cgrates.org,call,2003,,RP_ANY,
+cgrates.org,call,2004,,RP_ANY,
+cgrates.org,call,2005,,RP_ANY,`,
 		utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
 cgrates.org,DEFAULT,,,*default,*none,0`,
 		utils.FiltersCsv: `#Tenant,ID,Type,Path,Values,ActivationInterval
-cgrates.org,FLTR_ACNT_10xx,*prefix,~*req.Account,10,
-cgrates.org,FLTR_ACNT_20xx,*prefix,~*req.Account,20,`,
+cgrates.org,FLTR_HA1,*string,~*req.Agent,ha1,
+cgrates.org,FLTR_HA2,*string,~*req.Agent,ha2,`,
 		utils.DispatcherHostsCsv: `#Tenant,ID,Address,Transport,TLS
 cgrates.org,SM1,127.0.0.1:4012,*json,false
 cgrates.org,SM2,127.0.0.1:4112,*json,false
@@ -672,13 +719,13 @@ cgrates.org,RALS2,127.0.0.1:5112,*json,false
 cgrates.org,RALS3,127.0.0.1:5212,*json,false
 cgrates.org,RALS4,127.0.0.1:5312,*json,false`,
 		utils.DispatcherProfilesCsv: `#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
-cgrates.org,DSP1_SM,*sessions,FLTR_ACNT_10xx,,*round_robin,,SM1,,10,false,,10
+cgrates.org,DSP1_SM,*sessions,FLTR_HA1,,*round_robin,,SM1,,10,false,,10
 cgrates.org,DSP1_SM,,,,,,SM2,,10,,,
-cgrates.org,DSP1_RALS,*responder,FLTR_ACNT_10xx,,*round_robin,,RALS1,,10,false,,10
+cgrates.org,DSP1_RALS,*responder,FLTR_HA1,,*round_robin,,RALS1,,10,false,,10
 cgrates.org,DSP1_RALS,,,,,,RALS2,,10,,,
-cgrates.org,DSP2_SM,*sessions,FLTR_ACNT_20xx,,*round_robin,,SM3,,10,false,,10
+cgrates.org,DSP2_SM,*sessions,FLTR_HA2,,*round_robin,,SM3,,10,false,,10
 cgrates.org,DSP2_SM,,,,,,SM4,,10,,,
-cgrates.org,DSP2_RALS,*responder,FLTR_ACNT_20xx,,*round_robin,,RALS3,,10,false,,10
+cgrates.org,DSP2_RALS,*responder,FLTR_HA2,,*round_robin,,RALS3,,10,false,,10
 cgrates.org,DSP2_RALS,,,,,,RALS4,,10,,,`,
 	}
 
