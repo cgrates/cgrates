@@ -215,6 +215,65 @@ func (rs *Responder) Debit(ctx *context.Context, arg *CallDescriptorWithAPIOpts,
 	return
 }
 
+func (rs *Responder) DebitMonetary(ctx *context.Context, cdr *CDRWithAPIOpts, reply *CallCost) (err error) {
+	// RPC caching
+	if cdr.Tenant == utils.EmptyString {
+		cdr.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
+	if cdr.CGRID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderDebit, cdr.CGRID)
+		refID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*CallCost)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+
+	if cdr.Subject == "" {
+		cdr.Subject = cdr.Account
+	}
+	timeStart := cdr.AnswerTime
+	if timeStart.IsZero() { // Fix for FreeSWITCH unanswered calls
+		timeStart = cdr.SetupTime
+	}
+	cd := &CallDescriptor{
+		ToR:             cdr.ToR,
+		Tenant:          cdr.Tenant,
+		Category:        cdr.Category,
+		Subject:         cdr.Subject,
+		Account:         cdr.Account,
+		Destination:     cdr.Destination,
+		ExtraFields:     cdr.ExtraFields,
+		TimeStart:       timeStart,
+		TimeEnd:         timeStart.Add(cdr.Usage),
+		DurationIndex:   cdr.Usage,
+		PerformRounding: true,
+	}
+	if ralsDryRun, exists := cdr.APIOpts[utils.MetaRALsDryRun]; exists {
+		if cd.DryRun, err = utils.IfaceAsBool(ralsDryRun); err != nil {
+			return err
+		}
+	}
+	var r *CallCost
+	if r, err = cd.DebitMonetary(rs.FilterS, cdr.Cost); err != nil {
+		return
+	}
+	if r != nil {
+		*reply = *r
+	}
+	return
+}
+
 func (rs *Responder) MaxDebit(ctx *context.Context, arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
