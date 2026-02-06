@@ -6605,3 +6605,168 @@ func TestCGRConfigIPsCfg(t *testing.T) {
 		t.Errorf("expected: %+v, got: %+v", expectedIPsCfg, result)
 	}
 }
+
+func TestConfigV1StoreCfgInDBsAPIBan(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.apiBanCfg.Enabled = true
+	cfg.apiBanCfg.Keys = []string{"key1", "key2"}
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{APIBanJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &APIBanJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Keys:    &[]string{"key1", "key2"},
+	}
+
+	var result APIBanJsonCfg
+	if err := db.GetSection(context.Background(), APIBanJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for APIBan section!\nExpected: %+v\nReceived: %+v", expected, &result)
+	}
+}
+
+func TestConfigV1StoreCfgInDBsAdmins(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.admS.Enabled = true
+	cfg.admS.CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}
+	cfg.admS.ActionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}
+	cfg.admS.AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}
+	cfg.admS.EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{AdminSJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &AdminSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Caches_conns:     &[]string{utils.MetaInternal, "*conn1"},
+		Actions_conns:    &[]string{utils.MetaInternal, "*conn1"},
+		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
+		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
+	}
+
+	var result AdminSJsonCfg
+	if err := db.GetSection(context.Background(), AdminSJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for Admins section!\nExpected: %+v\nReceived: %+v",
+			utils.ToJSON(expected), utils.ToJSON(&result))
+	}
+}
+
+func TestConfigV1StoreCfgInDBsRegistrarC(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.registrarCCfg.RPC.RegistrarSConns = []string{"*conn1", "*conn2"}
+	cfg.registrarCCfg.RPC.Hosts = map[string][]*RemoteHost{
+		utils.MetaDefault: {
+			{
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Transport: utils.MetaGOB,
+			},
+		},
+		"cgrates.net": {
+			{
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
+				TLS:       true,
+			},
+			{
+				ID:        "Host2",
+				Transport: utils.MetaGOB,
+				TLS:       true,
+			},
+		},
+	}
+	cfg.registrarCCfg.RPC.RefreshInterval = 5 * time.Second
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{RegistrarCJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &RegistrarCJsonCfgs{
+		RPC: &RegistrarCJsonCfg{
+			Registrars_conns: &[]string{"*conn1", "*conn2"},
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: nil,
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host1"),
+						Transport: utils.StringPointer(utils.MetaJSON),
+					},
+				},
+				{
+					Tenant: nil,
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host2"),
+						Transport: utils.StringPointer(utils.MetaGOB),
+					},
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host1"),
+						Transport: utils.StringPointer(utils.MetaJSON),
+						Tls:       utils.BoolPointer(true),
+					},
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host2"),
+						Transport: utils.StringPointer(utils.MetaGOB),
+						Tls:       utils.BoolPointer(true),
+					},
+				},
+			},
+			Refresh_interval: utils.StringPointer("5s"),
+		},
+	}
+
+	var result RegistrarCJsonCfgs
+	if err := db.GetSection(context.Background(), RegistrarCJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for RegistrarC section!\nExpected: %+v\nReceived: %+v",
+			utils.ToJSON(expected), utils.ToJSON(&result))
+	}
+}
