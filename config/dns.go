@@ -34,9 +34,7 @@ type DNSListener struct {
 type DNSAgentCfg struct {
 	Enabled           bool
 	Listeners         []DNSListener
-	SessionSConns     []string
-	StatSConns        []string
-	ThresholdSConns   []string
+	Conns             map[string][]*DynamicStringSliceOpt
 	Timezone          string
 	RequestProcessors []*RequestProcessor
 }
@@ -73,14 +71,11 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.SessionSConns != nil {
-		da.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
-	}
-	if jsnCfg.StatSConns != nil {
-		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
-	}
-	if jsnCfg.ThresholdSConns != nil {
-		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			da.Conns[connType] = opts
+		}
 	}
 	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.RequestProcessors)
 	return
@@ -106,9 +101,7 @@ func (da DNSAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:           da.Enabled,
 		utils.ListenersCfg:         listeners,
-		utils.SessionSConnsCfg:     stripInternalConns(da.SessionSConns),
-		utils.StatSConnsCfg:        stripInternalConns(da.StatSConns),
-		utils.ThresholdSConnsCfg:   stripInternalConns(da.ThresholdSConns),
+		utils.ConnsCfg:             stripConns(da.Conns),
 		utils.TimezoneCfg:          da.Timezone,
 		utils.RequestProcessorsCfg: requestProcessors,
 	}
@@ -121,12 +114,10 @@ func (da DNSAgentCfg) CloneSection() Section { return da.Clone() }
 // Clone returns a deep copy of DNSAgentCfg
 func (da DNSAgentCfg) Clone() *DNSAgentCfg {
 	clone := &DNSAgentCfg{
-		Enabled:         da.Enabled,
-		Listeners:       slices.Clone(da.Listeners),
-		SessionSConns:   slices.Clone(da.SessionSConns),
-		StatSConns:      slices.Clone(da.StatSConns),
-		ThresholdSConns: slices.Clone(da.ThresholdSConns),
-		Timezone:        da.Timezone,
+		Enabled:   da.Enabled,
+		Listeners: slices.Clone(da.Listeners),
+		Conns:     CloneConnsOpt(da.Conns),
+		Timezone:  da.Timezone,
 	}
 	if da.RequestProcessors != nil {
 		clone.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -144,13 +135,11 @@ type ListenerJsnCfg struct {
 
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
-	Enabled           *bool                  `json:"enabled"`
-	Listeners         *[]*ListenerJsnCfg     `json:"listeners"`
-	SessionSConns     *[]string              `json:"sessions_conns"`
-	StatSConns        *[]string              `json:"stats_conns"`
-	ThresholdSConns   *[]string              `json:"thresholds_conns"`
-	Timezone          *string                `json:"timezone"`
-	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled           *bool                               `json:"enabled"`
+	Listeners         *[]*ListenerJsnCfg                  `json:"listeners"`
+	Conns             map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Timezone          *string                             `json:"timezone"`
+	RequestProcessors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonCfg {
@@ -195,14 +184,8 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 
 	d.Listeners = diffListeners
 
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

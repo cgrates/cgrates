@@ -42,7 +42,7 @@ type StatSCfg struct {
 	IndexedSelects         bool
 	StoreInterval          time.Duration // Dump regularly from cache into dataDB
 	StoreUncompressedLimit int
-	ThresholdSConns        []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
@@ -50,7 +50,6 @@ type StatSCfg struct {
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
 	Opts                   *StatsOpts
-	EEsConns               []string
 	EEsExporterIDs         []string
 }
 
@@ -104,11 +103,11 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Store_uncompressed_limit != nil {
 		st.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
-	if jsnCfg.Thresholds_conns != nil {
-		st.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
-	}
-	if jsnCfg.Ees_conns != nil {
-		st.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			st.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		st.EEsExporterIDs = append(st.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -150,6 +149,7 @@ func (st StatSCfg) AsMapInterface() any {
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
 		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.ConnsCfg:                  stripConns(st.Conns),
 		utils.EEsExporterIDsCfg:         slices.Clone(st.EEsExporterIDs),
 		utils.OptsCfg:                   opts,
 	}
@@ -170,12 +170,6 @@ func (st StatSCfg) AsMapInterface() any {
 	}
 	if st.NotExistsIndexedFields != nil {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*st.NotExistsIndexedFields)
-	}
-	if st.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(st.ThresholdSConns)
-	}
-	if st.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(st.EEsConns)
 	}
 	return mp
 }
@@ -210,14 +204,9 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		IndexedSelects:         st.IndexedSelects,
 		StoreInterval:          st.StoreInterval,
 		StoreUncompressedLimit: st.StoreUncompressedLimit,
+		Conns:                  CloneConnsOpt(st.Conns),
 		NestedFields:           st.NestedFields,
 		Opts:                   st.Opts.Clone(),
-	}
-	if st.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(st.ThresholdSConns)
-	}
-	if st.EEsConns != nil {
-		cln.EEsConns = slices.Clone(st.EEsConns)
 	}
 	if st.EEsExporterIDs != nil {
 		cln.EEsExporterIDs = slices.Clone(st.EEsExporterIDs)
@@ -252,7 +241,7 @@ type StatServJsonCfg struct {
 	Indexed_selects          *bool
 	Store_interval           *string
 	Store_uncompressed_limit *int
-	Thresholds_conns         *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
@@ -260,7 +249,6 @@ type StatServJsonCfg struct {
 	Notexists_indexed_fields *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 	Opts                     *StatsOptsJson
-	Ees_conns                *[]string
 	Ees_exporter_ids         *[]string
 }
 
@@ -296,11 +284,8 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	if v1.StoreUncompressedLimit != v2.StoreUncompressedLimit {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs

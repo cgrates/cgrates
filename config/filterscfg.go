@@ -19,19 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // FilterSCfg the filters config section
 type FilterSCfg struct {
-	StatSConns     []string
-	ResourceSConns []string
-	AccountSConns  []string
-	TrendSConns    []string
-	RankingSConns  []string
+	Conns map[string][]*DynamicStringSliceOpt
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
@@ -47,41 +41,22 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Stats_conns != nil {
-		fSCfg.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
-	}
-	if jsnCfg.Resources_conns != nil {
-		fSCfg.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
-	}
-	if jsnCfg.Accounts_conns != nil {
-		fSCfg.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
-	}
-	if jsnCfg.Trends_conns != nil {
-		fSCfg.TrendSConns = tagInternalConns(*jsnCfg.Trends_conns, utils.MetaTrends)
-	}
-	if jsnCfg.Rankings_conns != nil {
-		fSCfg.RankingSConns = tagInternalConns(*jsnCfg.Rankings_conns, utils.MetaRankings)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		if fSCfg.Conns == nil {
+			fSCfg.Conns = make(map[string][]*DynamicStringSliceOpt)
+		}
+		for connType, opts := range tagged {
+			fSCfg.Conns[connType] = opts
+		}
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (fSCfg FilterSCfg) AsMapInterface() any {
-	mp := make(map[string]any)
-	if fSCfg.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(fSCfg.StatSConns)
-	}
-	if fSCfg.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = stripInternalConns(fSCfg.ResourceSConns)
-	}
-	if fSCfg.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = stripInternalConns(fSCfg.AccountSConns)
-	}
-	if fSCfg.TrendSConns != nil {
-		mp[utils.TrendSConnsCfg] = stripInternalConns(fSCfg.TrendSConns)
-	}
-	if fSCfg.RankingSConns != nil {
-		mp[utils.RankingSConnsCfg] = stripInternalConns(fSCfg.RankingSConns)
+	mp := map[string]any{
+		utils.ConnsCfg: stripConns(fSCfg.Conns),
 	}
 	return mp
 }
@@ -91,52 +66,23 @@ func (fSCfg FilterSCfg) CloneSection() Section { return fSCfg.Clone() }
 
 // Clone returns a deep copy of FilterSCfg
 func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
-	cln = new(FilterSCfg)
-	if fSCfg.StatSConns != nil {
-		cln.StatSConns = slices.Clone(fSCfg.StatSConns)
-	}
-	if fSCfg.ResourceSConns != nil {
-		cln.ResourceSConns = slices.Clone(fSCfg.ResourceSConns)
-	}
-	if fSCfg.AccountSConns != nil {
-		cln.AccountSConns = slices.Clone(fSCfg.AccountSConns)
-	}
-	if fSCfg.TrendSConns != nil {
-		cln.TrendSConns = slices.Clone(fSCfg.TrendSConns)
-	}
-	if fSCfg.RankingSConns != nil {
-		cln.RankingSConns = slices.Clone(fSCfg.RankingSConns)
+	cln = &FilterSCfg{
+		Conns: CloneConnsOpt(fSCfg.Conns),
 	}
 	return
 }
 
 // Filters config
 type FilterSJsonCfg struct {
-	Stats_conns     *[]string
-	Resources_conns *[]string
-	Accounts_conns  *[]string
-	Trends_conns    *[]string
-	Rankings_conns  *[]string
+	Conns map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 }
 
 func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 	if d == nil {
 		d = new(FilterSJsonCfg)
 	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
-	}
-	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
-	}
-	if !slices.Equal(v1.TrendSConns, v2.TrendSConns) {
-		d.Trends_conns = utils.SliceStringPointer(stripInternalConns(v2.TrendSConns))
-	}
-	if !slices.Equal(v1.RankingSConns, v2.RankingSConns) {
-		d.Rankings_conns = utils.SliceStringPointer(stripInternalConns(v2.RankingSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	return d
 }

@@ -30,10 +30,8 @@ type TrendSCfg struct {
 	Enabled                bool
 	StoreInterval          time.Duration
 	StoreUncompressedLimit int
-	StatSConns             []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	ScheduledIDs           map[string][]string
-	ThresholdSConns        []string
-	EEsConns               []string
 	EEsExporterIDs         []string
 }
 
@@ -60,17 +58,14 @@ func (t *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendSJsonCfg) (err error) {
 	if jsnCfg.Store_uncompressed_limit != nil {
 		t.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
-	if jsnCfg.Stats_conns != nil {
-		t.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			t.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Scheduled_ids != nil {
 		t.ScheduledIDs = jsnCfg.Scheduled_ids
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		t.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
-	}
-	if jsnCfg.Ees_conns != nil {
-		t.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		t.EEsExporterIDs = append(t.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -88,17 +83,9 @@ func (t *TrendSCfg) AsMapInterface() any {
 	if t.StoreInterval != 0 {
 		mp[utils.StoreIntervalCfg] = t.StoreInterval.String()
 	}
-	if t.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(t.StatSConns)
-	}
+	mp[utils.ConnsCfg] = stripConns(t.Conns)
 	if t.ScheduledIDs != nil {
 		mp[utils.ScheduledIDsCfg] = t.ScheduledIDs
-	}
-	if t.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(t.ThresholdSConns)
-	}
-	if t.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(t.EEsConns)
 	}
 	return mp
 }
@@ -111,21 +98,13 @@ func (t *TrendSCfg) Clone() (cln *TrendSCfg) {
 		Enabled:                t.Enabled,
 		StoreInterval:          t.StoreInterval,
 		StoreUncompressedLimit: t.StoreUncompressedLimit,
-	}
-	if t.StatSConns != nil {
-		cln.StatSConns = slices.Clone(t.StatSConns)
+		Conns:                  CloneConnsOpt(t.Conns),
 	}
 	if t.ScheduledIDs != nil {
 		cln.ScheduledIDs = make(map[string][]string)
 		for key, value := range t.ScheduledIDs {
 			cln.ScheduledIDs[key] = slices.Clone(value)
 		}
-	}
-	if t.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(t.ThresholdSConns)
-	}
-	if t.EEsConns != nil {
-		cln.EEsConns = slices.Clone(t.EEsConns)
 	}
 	if t.EEsExporterIDs != nil {
 		cln.EEsExporterIDs = slices.Clone(t.EEsExporterIDs)
@@ -137,10 +116,8 @@ type TrendSJsonCfg struct {
 	Enabled                  *bool
 	Store_interval           *string
 	Store_uncompressed_limit *int
-	Stats_conns              *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Scheduled_ids            map[string][]string
-	Thresholds_conns         *[]string
-	Ees_conns                *[]string
 	Ees_exporter_ids         *[]string
 }
 
@@ -157,16 +134,10 @@ func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
 	if v1.StoreUncompressedLimit != v2.StoreUncompressedLimit {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
+	}
 	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
-	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs
 	}

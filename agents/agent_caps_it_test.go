@@ -82,7 +82,9 @@ func TestAgentCapsIT(t *testing.T) {
 	{
 		"id": "caps_test",
 		"url": "/caps_test",
-		"sessions_conns": ["*internal"],
+		"conns": {
+			"*sessions": [{"Values": ["*internal"]}]
+		},
 		"request_payload": "*url",
 		"reply_payload": "*xml",
 		"request_processors": []
@@ -104,7 +106,9 @@ func TestAgentCapsIT(t *testing.T) {
 	"enabled": true,
 	"listen": "127.0.0.1:5099",
 	"listen_net": "udp",
-	"sessions_conns": ["*internal"],
+	"conns": {
+		"*sessions": [{"Values": ["*internal"]}]
+	},
 	"request_processors": []
 }
 }`

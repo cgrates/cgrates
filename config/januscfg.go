@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +35,7 @@ type JanusConn struct {
 type JanusAgentCfg struct {
 	Enabled           bool
 	URL               string
-	SessionSConns     []string
+	Conns             map[string][]*DynamicStringSliceOpt
 	JanusConns        []*JanusConn // connections towards Janus
 	RequestProcessors []*RequestProcessor
 }
@@ -102,8 +100,11 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err erro
 	if jsnCfg.Url != nil {
 		jaCfg.URL = *jsnCfg.Url
 	}
-	if jsnCfg.Sessions_conns != nil {
-		jaCfg.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	for connType, opts := range jsnCfg.Conns {
+		if jaCfg.Conns == nil {
+			jaCfg.Conns = make(map[string][]*DynamicStringSliceOpt)
+		}
+		jaCfg.Conns[connType] = tagInternalConnsOpt(opts, connType)
 	}
 	if jsnCfg.Janus_conns != nil {
 		jaCfg.JanusConns = make([]*JanusConn, len(*jsnCfg.Janus_conns))
@@ -130,9 +131,7 @@ func (jaCfg JanusAgentCfg) AsMapInterface() any {
 		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
-	if jaCfg.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(jaCfg.SessionSConns)
-	}
+	mp[utils.ConnsCfg] = stripConns(jaCfg.Conns)
 	janConns := make([]map[string]any, len(jaCfg.JanusConns))
 	for i, jc := range jaCfg.JanusConns {
 		janConns[i] = jc.AsMapInterface()
@@ -149,9 +148,7 @@ func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
 		Enabled: jaCfg.Enabled,
 		URL:     jaCfg.URL,
 	}
-	if jaCfg.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(jaCfg.SessionSConns)
-	}
+	cln.Conns = CloneConnsOpt(jaCfg.Conns)
 	if jaCfg.JanusConns != nil {
 		cln.JanusConns = make([]*JanusConn, len(jaCfg.JanusConns))
 		for i, jc := range jaCfg.JanusConns {
@@ -168,11 +165,11 @@ func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
 }
 
 type JanusAgentJsonCfg struct {
-	Enabled            *bool                  `json:"enabled"`
-	Url                *string                `json:"url"`
-	Sessions_conns     *[]string              `json:"sessions_conns"`
-	Janus_conns        *[]*JanusConnJsonCfg   `json:"janus_conns"`
-	Request_processors *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled            *bool                               `json:"enabled"`
+	Url                *string                             `json:"url"`
+	Conns              map[string][]*DynamicStringSliceOpt `json:"conns"`
+	Janus_conns        *[]*JanusConnJsonCfg                `json:"janus_conns"`
+	Request_processors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 type JanusConnJsonCfg struct {
@@ -245,8 +242,8 @@ func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg) *JanusA
 	if v1.URL != v2.URL {
 		d.Url = utils.StringPointer(v2.URL)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	d.Janus_conns = diffJanusConnsJsonCfg(d.Janus_conns, v1.JanusConns, v2.JanusConns)

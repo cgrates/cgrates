@@ -41,7 +41,7 @@ func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 
-	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, routes, ev, extraOpts)
+	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, nil, routes, ev, extraOpts)
 	errExpect := "MANDATORY_IE_MISSING: [connIDs]"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
@@ -50,7 +50,7 @@ func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 
 func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -64,7 +64,7 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 
-	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, routes, ev, extraOpts)
+	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, nil, routes, ev, extraOpts)
 	errExpect := "MANDATORY_IE_MISSING: [ResourceIDs]"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
@@ -78,7 +78,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -134,7 +134,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 		},
 	}
 
-	rcv, err := populateResourcesForRoutes(context.Background(), cfg, cM, routes, ev, extraOpts)
+	rcv, err := populateResourcesForRoutes(context.Background(), cfg, cM, nil, routes, ev, extraOpts)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
@@ -152,7 +152,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -196,7 +196,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 		},
 	}
 
-	rcv, err := populateResourcesForRoutes(context.Background(), cfg, cM, routes, ev, extraOpts)
+	rcv, err := populateResourcesForRoutes(context.Background(), cfg, cM, nil, routes, ev, extraOpts)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
@@ -215,7 +215,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -267,7 +267,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	extraOpts := &optsGetRoutes{}
 
 	expErr := "NOT_IMPLEMENTED:inexistent"
-	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, routes, ev, extraOpts)
+	_, err := populateResourcesForRoutes(context.Background(), cfg, cM, nil, routes, ev, extraOpts)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
@@ -276,7 +276,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 func TestResourceDescendentSorterSortRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	rds := NewResourceDescendentSorter(cfg, cM)
+	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
@@ -295,9 +295,9 @@ func TestResourceDescendentSorterSortRoutesNoResourceSConns(t *testing.T) {
 
 func TestResourceDescendentSorterSortRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
-	rds := NewResourceDescendentSorter(cfg, cM)
+	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -325,7 +325,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res1 := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -383,7 +383,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
-	rds := NewResourceDescendentSorter(cfg, cM)
+	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{
 		"RW1": {
@@ -453,7 +453,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 
 func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -466,7 +466,7 @@ func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
-	rds := NewResourceDescendentSorter(cfg, cM)
+	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
@@ -501,7 +501,7 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -531,7 +531,7 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
-	rds := NewResourceDescendentSorter(cfg, cM)
+	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{
 		"RW": {

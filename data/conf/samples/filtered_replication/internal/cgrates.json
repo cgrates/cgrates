@@ -70,7 +70,9 @@
 "resources": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": ["*internal"]
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 "admins": {

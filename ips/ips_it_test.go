@@ -139,7 +139,9 @@ func TestIPsIT(t *testing.T) {
 
 "sessions": {
 	"enabled": true,
-	"ips_conns": ["*localhost"],
+	"conns": {
+			"*ips": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+		},
 	"opts": {
 		// "*ips": [
 		// 	{

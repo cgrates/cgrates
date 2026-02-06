@@ -30,35 +30,31 @@ import (
 
 // NewHttpAgent will construct a HTTPAgent
 func NewHTTPAgent(connMgr *engine.ConnManager,
-	sessionConns, statsConns, thresholdsConns []string,
+	conns map[string][]*config.DynamicStringSliceOpt,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor, caps *engine.Caps) *HTTPAgent {
 	return &HTTPAgent{
-		connMgr:         connMgr,
-		filterS:         filterS,
-		dfltTenant:      dfltTenant,
-		reqPayload:      reqPayload,
-		rplyPayload:     rplyPayload,
-		reqProcessors:   reqProcessors,
-		sessionConns:    sessionConns,
-		statsConns:      statsConns,
-		thresholdsConns: thresholdsConns,
-		caps:            caps,
+		connMgr:       connMgr,
+		filterS:       filterS,
+		dfltTenant:    dfltTenant,
+		reqPayload:    reqPayload,
+		rplyPayload:   rplyPayload,
+		reqProcessors: reqProcessors,
+		conns:         conns,
+		caps:          caps,
 	}
 }
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	connMgr         *engine.ConnManager
-	filterS         *engine.FilterS
-	dfltTenant      string
-	reqPayload      string
-	rplyPayload     string
-	reqProcessors   []*config.RequestProcessor
-	sessionConns    []string
-	statsConns      []string
-	thresholdsConns []string
-	caps            *engine.Caps
+	connMgr       *engine.ConnManager
+	filterS       *engine.FilterS
+	dfltTenant    string
+	reqPayload    string
+	rplyPayload   string
+	reqProcessors []*config.RequestProcessor
+	conns         map[string][]*config.DynamicStringSliceOpt
+	caps          *engine.Caps
 }
 
 // ServeHTTP implements http.Handler interface
@@ -87,9 +83,12 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS, nil)
+		sessConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaSessionS], agReq.Tenant, agReq, ha.filterS)
+		statConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaStats], agReq.Tenant, agReq, ha.filterS)
+		thConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaThresholds], agReq.Tenant, agReq, ha.filterS)
 		lclProcessed, err := processRequest(context.TODO(),
 			reqProcessor, agReq, utils.HTTPAgent, ha.connMgr,
-			ha.sessionConns, ha.statsConns, ha.thresholdsConns,
+			sessConns, statConns, thConns,
 			agReq.filterS)
 		if err != nil {
 			utils.Logger.Warning(

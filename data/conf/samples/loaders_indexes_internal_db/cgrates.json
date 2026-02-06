@@ -67,14 +67,18 @@
 "loaders": [{
     "id": "*default",
     "enabled": true,
-    "caches_conns": ["engine"],
+    "conns": {
+    	"*caches": [{"Values": ["engine"]}]
+    },
     "tp_in_dir": "/usr/share/cgrates/tariffplans/tutorial/",
     "tp_out_dir": ""
 }],
 
 "admins": {
     "enabled": true,
-	"caches_conns":["engine"]
+	"conns": {
+		"*caches": [{"Values": ["engine"]}]
+	},
 }
 
 }

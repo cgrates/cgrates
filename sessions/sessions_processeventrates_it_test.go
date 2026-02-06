@@ -51,7 +51,9 @@ func TestSessionSv1ProcessEventRates(t *testing.T) {
 		ConfigJSON: `{
 "sessions": {
     "enabled": true,
-    "rates_conns": ["*localhost"]
+    "conns": {
+    	"*rates": [{"Values": ["*localhost"]}]
+    },
 },
 "rates": {
     "enabled": true
@@ -129,7 +131,7 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		}
 		const wantCost = 1.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*default] = %g, want %g", cost, wantCost)
+			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 
@@ -162,7 +164,7 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		}
 		const wantCost = 2.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*default] = %g, want %g", cost, wantCost)
+			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 

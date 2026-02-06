@@ -41,7 +41,9 @@
 
 "ers": {
 	"enabled": true,
-	"ees_conns": ["*internal"],
+	"conns": {
+		"*ees": [{"Values": ["*internal"]}]
+	},
 	"readers": [
 		{
 			"id": "mysql",

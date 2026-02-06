@@ -565,7 +565,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -578,7 +578,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
-		filterS: filterS,
+		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
 	}
@@ -637,7 +637,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}}
 	cfg.TemplatesCfg()["CustomTemplate"] = []*config.FCTemplate{
 		{
 			Tag:    "Tenant",
@@ -687,7 +687,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
-		filterS: filterS,
+		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
 	}
@@ -728,7 +728,7 @@ func TestExportAction(t *testing.T) {
 	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
@@ -782,7 +782,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
@@ -839,7 +839,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
@@ -885,7 +885,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
@@ -931,7 +931,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
@@ -977,7 +977,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)

@@ -176,6 +176,20 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.MapStorage{}
+	var (
+		sessionsConns   []string
+		statsConns      []string
+		thresholdsConns []string
+	)
+	if sessionsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaSessionS], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+		return
+	}
+	if statsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaStats], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+		return
+	}
+	if thresholdsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaThresholds], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+		return
+	}
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		if lclProcessed, err = processRequest(
@@ -189,9 +203,7 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
 				da.fltrS, nil),
 			utils.DNSAgent, da.connMgr,
-			da.cgrCfg.DNSAgentCfg().SessionSConns,
-			da.cgrCfg.DNSAgentCfg().StatSConns,
-			da.cgrCfg.DNSAgentCfg().ThresholdSConns,
+			sessionsConns, statsConns, thresholdsConns,
 			da.fltrS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing message: %s from %s",

@@ -72,9 +72,9 @@ func TestACExecuteCDRLog(t *testing.T) {
 	expectedActs := []actioner{
 		&actCDRLog{cfg, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
 		actHttp,
-		&actExport{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaExport}},
-		&actResetStat{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaResetStatQueue}},
-		&actResetThreshold{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
+		&actExport{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaExport}},
+		&actResetStat{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaResetStatQueue}},
+		&actResetThreshold{utils.CGRateSorg, cfg, fltr, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
 		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaAddBalance}, utils.CGRateSorg, false},
 		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaSetBalance}, utils.CGRateSorg, true},
 		&actRemBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaRemBalance}, utils.CGRateSorg},

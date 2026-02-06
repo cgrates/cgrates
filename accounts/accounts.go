@@ -239,8 +239,16 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 	}
 	blcsWithWeight.Sort()
 	var blncOpers []balanceOperator
+	attrConns, err := engine.GetConnIDs(ctx, aS.cfg.AccountSCfg().Conns[utils.MetaAttributes], cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS)
+	if err != nil {
+		return nil, err
+	}
+	rateConns, err := engine.GetConnIDs(ctx, aS.cfg.AccountSCfg().Conns[utils.MetaRates], cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS)
+	if err != nil {
+		return nil, err
+	}
 	if blncOpers, err = newBalanceOperators(ctx, acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
-		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
+		attrConns, rateConns); err != nil {
 		return
 	}
 	for _, blncOper := range blncOpers {

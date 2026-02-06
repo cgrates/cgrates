@@ -62,8 +62,14 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Actions_conns:         &[]string{"*internal"},
-		Nested_fields:         utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaActions: {
+				{
+					Values: []string{"*internal"},
+				},
+			},
+		},
+		Nested_fields: utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
 			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
@@ -84,9 +90,15 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		t.Error(err)
 	}
 	rsCfg := &config.ResourceSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		Thresholds_conns:      &[]string{"*birpc"},
+		Enabled:         utils.BoolPointer(true),
+		Indexed_selects: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaThresholds: {
+				{
+					Values: []string{"*birpc"},
+				},
+			},
+		},
 		Store_interval:        utils.StringPointer("2s"),
 		String_indexed_fields: &[]string{"*req.index11"},
 		Prefix_indexed_fields: &[]string{"*req.index22"},
@@ -181,8 +193,14 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Actions_conns:         &[]string{"*internal"},
-		Nested_fields:         utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaThresholds: {
+				{
+					Values: []string{"*internal"},
+				},
+			},
+		},
+		Nested_fields: utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
 			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
@@ -203,9 +221,15 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		t.Error(err)
 	}
 	rsCfg := &config.ResourceSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		Thresholds_conns:      &[]string{"*birpc"},
+		Enabled:         utils.BoolPointer(true),
+		Indexed_selects: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaThresholds: {
+				{
+					Values: []string{"*thresholds"},
+				},
+			},
+		},
 		Store_interval:        utils.StringPointer("2s"),
 		String_indexed_fields: &[]string{"*req.index11"},
 		Prefix_indexed_fields: &[]string{"*req.index22"},
@@ -297,8 +321,14 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Actions_conns:         &[]string{"*internal"},
-		Nested_fields:         utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.Actions: {
+				{
+					Values: []string{"*birpc"},
+				},
+			},
+		},
+		Nested_fields: utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
 			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
@@ -319,9 +349,15 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		t.Error(err)
 	}
 	rsCfg := &config.ResourceSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		Thresholds_conns:      &[]string{"*birpc"},
+		Enabled:         utils.BoolPointer(true),
+		Indexed_selects: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaThresholds: {
+				{
+					Values: []string{"*birpc"},
+				},
+			},
+		},
 		Store_interval:        utils.StringPointer("2s"),
 		String_indexed_fields: &[]string{"*req.index11"},
 		Prefix_indexed_fields: &[]string{"*req.index22"},

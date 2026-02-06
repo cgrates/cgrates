@@ -117,8 +117,12 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 		utils.MetaEEs)
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 
+	attrConns, err := engine.GetConnIDs(ctx, eeS.cfg.EEsNoLksCfg().Conns[utils.MetaAttributes], cgrEv.Tenant, cgrEv.AsDataProvider(), eeS.fltrS)
+	if err != nil {
+		return
+	}
 	if err = eeS.connMgr.Call(ctx,
-		eeS.cfg.EEsNoLksCfg().AttributeSConns,
+		attrConns,
 		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 	} else if err != nil &&
@@ -129,7 +133,7 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 }
 
 func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv any, key any,
-	connMngr *engine.ConnManager, tnt string) (err error) {
+	connMngr *engine.ConnManager, tnt string, fltrS *engine.FilterS) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
@@ -142,7 +146,14 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv any, key an
 					APIOpts:   exp.Cfg().Opts.AsMapInterface(),
 				}
 				var reply string
-				if err = connMngr.Call(ctx, exp.Cfg().EFsConns,
+				efsConns, errConn := engine.GetConnIDs(ctx, exp.Cfg().Conns[utils.MetaEFs], tnt, utils.MapStorage{}, fltrS)
+				if errConn != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Exporter <%s> could not resolve connections for <%s> service because err: <%s>",
+							utils.EEs, exp.Cfg().ID, utils.EFs, errConn.Error()))
+					return
+				}
+				if err = connMngr.Call(ctx, efsConns,
 					utils.EfSv1ProcessEvent, args, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> Exporter <%s> could not be written with <%s> service because err: <%s>",

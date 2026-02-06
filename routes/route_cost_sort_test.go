@@ -80,8 +80,16 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -182,12 +190,19 @@ func TestHightCostSorterSortRoutesErr(t *testing.T) {
 func TestHightCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
 				return nil
@@ -272,7 +287,13 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		}}
+
 	strOpts := []*config.DynamicInterfaceOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -318,7 +339,13 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+	}
 
 	cM := engine.NewConnManager(cfg)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -360,9 +387,16 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
@@ -419,9 +453,16 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
@@ -469,9 +510,16 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 	acntCost := &utils.EventCharges{
 		Concretes: utils.NewDecimal(5, 0),
 	}
@@ -532,9 +580,16 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+		utils.MetaAccounts: {
+			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+		},
+	}
 	acnt := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "accID1",
@@ -626,8 +681,13 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaRates: {
+			{
+				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+			},
+		},
+	}
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 

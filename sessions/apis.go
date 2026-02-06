@@ -132,7 +132,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.MaxUsage = getMaxUsageFromRuns(maxAbstracts)
 	}
 	if resourceS {
-		if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(resSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		originID, _ := args.OptAsString(utils.MetaOriginID)
@@ -142,14 +146,18 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMsg string
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AuthorizeResources,
+		if err = sS.connMgr.Call(ctx, resSConns, utils.ResourceSv1AuthorizeResources,
 			args, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 		authReply.ResourceAllocation = &allocMsg
 	}
 	if ipS {
-		if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(ipsConns) == 0 {
 			return utils.NewErrNotConnected(utils.IPs)
 		}
 		originID, _ := args.OptAsString(utils.MetaOriginID)
@@ -158,7 +166,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var allocIP utils.AllocatedIP
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
+		if err = sS.connMgr.Call(ctx, ipsConns,
 			utils.IPsV1AuthorizeIP, args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
@@ -356,13 +364,17 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 
 	if resourceS {
-		if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(resSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ResourceSConns,
+		if err = sS.connMgr.Call(ctx, resSConns,
 			utils.ResourceSv1AllocateResources, args, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -370,7 +382,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		defer func() { // we need to release the resources back in case of errors
 			if err != nil {
 				var reply string
-				if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ResourceSConns, utils.ResourceSv1ReleaseResources,
+				if err = sS.connMgr.Call(ctx, resSConns, utils.ResourceSv1ReleaseResources,
 					args, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s releasing resources for event %+v.",
@@ -381,12 +393,16 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 
 	}
 	if ipS {
-		if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(ipsConns) == 0 {
 			return utils.NewErrNotConnected(utils.IPs)
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var allocIP utils.AllocatedIP
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
+		if err = sS.connMgr.Call(ctx, ipsConns,
 			utils.IPsV1AllocateIP, args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
@@ -394,7 +410,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		defer func() { // we need to release the IPs back in case of errors
 			if err != nil {
 				var reply string
-				if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1ReleaseIP,
+				if err = sS.connMgr.Call(ctx, ipsConns, utils.IPsV1ReleaseIP,
 					args, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s releasing IPs for event %+v.",
@@ -687,25 +703,33 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 	}
 	if resourcesRelease {
-		if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(resSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var reply string
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ResourceSConns, utils.ResourceSv1ReleaseResources,
+		if err = sS.connMgr.Call(ctx, resSConns, utils.ResourceSv1ReleaseResources,
 			args, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 	}
 
 	if ipsRelease {
-		if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		if errConn != nil {
+			return errConn
+		}
+		if len(ipsConns) == 0 {
 			return utils.NewErrNotConnected(utils.IPs)
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var reply string
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1ReleaseIP,
+		if err = sS.connMgr.Call(ctx, ipsConns, utils.IPsV1ReleaseIP,
 			args, &reply); err != nil {
 			return utils.NewErrIPs(err)
 		}

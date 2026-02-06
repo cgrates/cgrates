@@ -44,7 +44,7 @@ func NewFSsessions(cgrcfg *config.CGRConfig, filterS *engine.FilterS,
 		timezone:    timezone,
 		connMgr:     connMgr,
 		caps:        caps,
-		filterS:     filterS,
+		fltrS:       filterS,
 	}
 	srv, _ := birpc.NewService(fsa, "", false)
 	fsa.ctx = context.WithClient(context.TODO(), srv)
@@ -77,7 +77,7 @@ type FSsessions struct {
 	connMgr     *engine.ConnManager
 	caps        *engine.Caps
 	ctx         *context.Context
-	filterS     *engine.FilterS
+	fltrS       *engine.FilterS
 }
 
 func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
@@ -197,7 +197,8 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	}
 	authArgs.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	sessionsConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), fsa.fltrS)
+	if err := fsa.connMgr.Call(fsa.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -311,8 +312,9 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
 	}
 	cgrEv.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
+	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), fsa.fltrS)
 	var initReply sessions.V1InitSessionReply
-	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1InitiateSession,
+	if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1InitiateSession,
 		cgrEv, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
@@ -352,12 +354,13 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		return // do not process this request
 	}
 
+	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), fsa.fltrS)
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
 		if cgrEv.APIOpts == nil {
 			cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}
 		}
 		cgrEv.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1TerminateSession,
+		if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1TerminateSession,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
@@ -366,7 +369,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		delete(cgrEv.Event, FsConnID) // Remove the connection ID
 	}
 	if fsa.cfg.CreateCDR {
-		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
+		if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
@@ -587,9 +590,9 @@ func (fsa *FSsessions) processRequest(fsev FSEvent) (*utils.CGREvent, error) {
 			reqProcessor.Tenant,
 			fsa.cgrcfg.GeneralCfg().DefaultTenant,
 			fsa.cgrcfg.GeneralCfg().DefaultTimezone,
-			fsa.filterS, nil,
+			fsa.fltrS, nil,
 		)
-		pass, err := fsa.filterS.Pass(context.TODO(), agReq.Tenant, reqProcessor.Filters, agReq)
+		pass, err := fsa.fltrS.Pass(context.TODO(), agReq.Tenant, reqProcessor.Filters, agReq)
 		if err != nil {
 			return nil, err
 		}

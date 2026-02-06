@@ -1,15 +1,29 @@
 {
   "sessions": {
     "enabled": true,
-    "ips_conns": [
-      "*localhost"
+    "conns":{
+    "*ips": [
+         {
+            "Tenant": "",
+            "FilterIDs": [],
+            "Values": ["*localhost"]
+         }
     ],
-    "cdrs_conns": [
-      "*localhost"
+    "*cdrs": [
+         {
+            "Tenant": "",
+            "FilterIDs": [],
+            "Values": ["*localhost"]
+         }
     ],
-    "chargers_conns": [
-      "*localhost"
+    "*chargers": [
+         {
+            "Tenant": "",
+            "FilterIDs": [],
+            "Values": ["*localhost"]
+         }
     ]
+            },
   },
   "ips": {
     "enabled": true,
@@ -23,9 +37,9 @@
   },
   "radius_agent": {
     "enabled": true,
-    "sessions_conns": [
-      "*bijson_localhost"
-    ],
+    "conns": {
+    	"*sessions": [{"Values": ["*bijson_localhost"]}]
+    },
     "listeners": [
       {
         "network": "udp",

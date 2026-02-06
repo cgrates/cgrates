@@ -71,7 +71,11 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
+	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns[utils.MetaCaches], arg.Tenant, arg, adms.fltrS)
+	if err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := callCacheForFilter(adms.connMgr, connIDs, ctx,
 		utils.IfaceAsString(arg.APIOpts[utils.MetaCache]),
 		adms.cfg.GeneralCfg().DefaultCaching,
 		arg.Tenant, argC, arg.APIOpts); err != nil {
@@ -167,7 +171,11 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
+	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns[utils.MetaCaches], arg.Tenant, utils.MapStorage{}, adms.fltrS)
+	if err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := callCacheForFilter(adms.connMgr, connIDs, ctx,
 		utils.IfaceAsString(arg.APIOpts[utils.MetaCache]),
 		adms.cfg.GeneralCfg().DefaultCaching,
 		arg.Tenant, map[string][]string{utils.CacheFilters: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {

@@ -65,7 +65,15 @@ func TestDiamPrometheus(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"cdrs_conns": ["*internal"]
+	"conns":  {
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	}
 },
 "cdrs": {
 	"enabled": true,
@@ -73,7 +81,9 @@ func TestDiamPrometheus(t *testing.T) {
 },
 "prometheus_agent": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}]
+	},
 	"stat_queue_ids": ["SQ_1","SQ_2"]
 },
 "stats": {
@@ -86,9 +96,11 @@ func TestDiamPrometheus(t *testing.T) {
 },
 "diameter_agent": {
 	"enabled": true,
-	"sessions_conns": ["*birpc_internal"],
-	"stats_conns": ["*internal"],
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*sessions": [{"Values": ["*birpc_internal"]}],
+		"*stats": [{"Values": ["*internal"]}],
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 	"request_processors": [{
 		"id": "message",
 		"filters": [

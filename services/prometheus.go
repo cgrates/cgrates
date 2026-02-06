@@ -37,9 +37,8 @@ func NewPrometheusAgent(cfg *config.CGRConfig) *PrometheusAgent {
 
 // PrometheusAgent implements the Service interface.
 type PrometheusAgent struct {
-	mu  sync.RWMutex
-	cfg *config.CGRConfig
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
 	stateDeps *StateDependencies
 }
 
@@ -57,11 +56,12 @@ func (s *PrometheusAgent) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fS := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	pa := agents.NewPrometheusAgent(s.cfg, cm)
+	pa := agents.NewPrometheusAgent(s.cfg, cm, fS)
 	cl.RegisterHttpHandler(s.cfg.PrometheusAgentCfg().Path, pa)
 	return
 }

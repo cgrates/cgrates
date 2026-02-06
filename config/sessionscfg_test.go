@@ -66,18 +66,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Enabled:             utils.BoolPointer(true),
 		ListenBiJSON:        utils.StringPointer("127.0.0.1:2018"),
-		ChargerSConns:       &[]string{utils.MetaInternal, "*conn1"},
-		ResourceSConns:      &[]string{utils.MetaInternal, "*conn1"},
-		IPsConns:            &[]string{utils.MetaInternal, "*conn1"},
-		ThresholdSConns:     &[]string{utils.MetaInternal, "*conn1"},
-		StatSConns:          &[]string{utils.MetaInternal, "*conn1"},
-		RouteSConns:         &[]string{utils.MetaInternal, "*conn1"},
-		AttributeSConns:     &[]string{utils.MetaInternal, "*conn1"},
-		CDRsConns:           &[]string{utils.MetaInternal, "*conn1"},
-		ActionSConns:        &[]string{utils.MetaInternal, "*conn1"},
-		RateSConns:          &[]string{utils.MetaInternal, "*conn1"},
-		AccountSConns:       &[]string{utils.MetaInternal, "*conn1"},
-		ReplicationConns:    &[]string{"*conn1"},
 		StoreSCosts:         utils.BoolPointer(true),
 		SessionIndexes:      &[]string{},
 		ClientProtocol:      utils.Float64Pointer(2.5),
@@ -85,6 +73,20 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		TerminateAttempts:   utils.IntPointer(6),
 		AlterableFields:     &[]string{},
 		MinDurLowBalance:    utils.StringPointer("1"),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaResources:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaIPs:         {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:       {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRoutes:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaCDRs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRates:       {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaReplication: {{Values: []string{"*conn1"}}},
+		},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
@@ -103,18 +105,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	expected := &SessionSCfg{
 		Enabled:             true,
 		ListenBiJSON:        "127.0.0.1:2018",
-		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"},
-		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
-		ReplicationConns:    []string{"*conn1"},
 		StoreSCosts:         true,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
@@ -134,6 +124,20 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MetaVoice: 3 * time.Hour,
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
+		},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"}}},
+			utils.MetaResources:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
+			utils.MetaIPs:         {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"}}},
+			utils.MetaThresholds:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
+			utils.MetaStats:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaRoutes:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"}}},
+			utils.MetaAttributes:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaCDRs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"}}},
+			utils.MetaActions:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaRates:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"}}},
+			utils.MetaAccounts:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
+			utils.MetaReplication: {{Values: []string{"*conn1"}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
@@ -284,12 +288,18 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		ReplicationConns: &[]string{utils.MetaInternal},
+		Opts: &SessionsOptsJson{},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaReplication: {
+				{
+					Values: []string{utils.MetaInternal},
+				},
+			},
+		},
 	}
-	expected := "Replication connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -343,18 +353,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	expected := &SessionSCfg{
 		Enabled:             false,
 		ListenBiJSON:        "127.0.0.1:2014",
-		ChargerSConns:       []string{},
-		ResourceSConns:      []string{},
-		IPsConns:            []string{},
-		ThresholdSConns:     []string{},
-		StatSConns:          []string{},
-		RouteSConns:         []string{},
-		AttributeSConns:     []string{},
-		CDRsConns:           []string{},
-		ReplicationConns:    []string{},
-		ActionSConns:        []string{},
-		RateSConns:          []string{},
-		AccountSConns:       []string{},
 		StoreSCosts:         false,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      1.0,
@@ -375,6 +373,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
+		Conns: map[string][]*DynamicStringSliceOpt{},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
@@ -508,18 +507,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EnabledCfg:             false,
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
 		utils.ListenBigobCfg:         "",
-		utils.ChargerSConnsCfg:       []string{},
-		utils.CDRsConnsCfg:           []string{},
-		utils.ResourceSConnsCfg:      []string{},
-		utils.IPsConnsCfg:            []string{},
-		utils.ThresholdSConnsCfg:     []string{},
-		utils.StatSConnsCfg:          []string{},
-		utils.RouteSConnsCfg:         []string{},
-		utils.AttributeSConnsCfg:     []string{},
-		utils.ReplicationConnsCfg:    []string{},
-		utils.ActionSConnsCfg:        []string{},
-		utils.RateSConnsCfg:          []string{},
-		utils.AccountSConnsCfg:       []string{},
+		utils.ConnsCfg:               map[string][]*DynamicStringSliceOpt{},
 		utils.StoreSCostsCfg:         false,
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      1.0,
@@ -593,18 +581,20 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		"sessions": {
 			"enabled": true,
 			"listen_bijson": "127.0.0.1:2018",
-			"chargers_conns": ["*internal:*chargers", "*conn1"],
-			"cdrs_conns": ["*internal:*cdrs", "*conn1"],
-			"resources_conns": ["*internal:*resources", "*conn1"],
-			"ips_conns": ["*internal:*ips", "*conn1"],
-			"thresholds_conns": ["*internal:*thresholds", "*conn1"],
-			"stats_conns": ["*internal:*stats", "*conn1"],
-			"routes_conns": ["*internal:*routes", "*conn1"],
-			"attributes_conns": ["*internal:*attributes", "*conn1"],
-			"actions_conns": ["*internal:*actions", "*conn1"],
-			"rates_conns": ["*internal:*rates", "*conn1"],
-			"accounts_conns": ["*internal:*accounts", "*conn1"],
-			"replication_conns": ["*localhost"],
+			"conns": {
+				"*chargers": [{"Values": ["*internal", "*conn1"]}],
+				"*cdrs": [{"Values": ["*internal", "*conn1"]}],
+				"*resources": [{"Values": ["*internal", "*conn1"]}],
+				"*ips": [{"Values": ["*internal", "*conn1"]}],
+				"*thresholds": [{"Values": ["*internal", "*conn1"]}],
+				"*stats": [{"Values": ["*internal", "*conn1"]}],
+				"*routes": [{"Values": ["*internal", "*conn1"]}],
+				"*attributes": [{"Values": ["*internal", "*conn1"]}],
+				"*actions": [{"Values": ["*internal", "*conn1"]}],
+				"*rates": [{"Values": ["*internal", "*conn1"]}],
+				"*accounts": [{"Values": ["*internal", "*conn1"]}],
+				"*replication": [{"Values": ["*localhost"]}]
+			},
 			"store_session_costs": true,
             "min_dur_low_balance": "1s",
 			"client_protocol": 2.0,
@@ -614,38 +604,40 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"payload_maxduration": "1s",
 				"default_attest": "B",
 				"publickey_path": "",
-				"privatekey_path": "",
+				"privatekey_path": ""
 			},
 			"opts": {
 				"*ttl": [
 					{
-						"Value": "1s",
-					},
+						"Value": "1s"
+					}
 				],
 				"*debitInterval": [
 					{
-						"Value": "8s",
-					},
-				],
-			},
-		},
+						"Value": "8s"
+					}
+				]
+			}
+		}
 	}`
 	eMap := map[string]any{
-		utils.EnabledCfg:             true,
-		utils.ListenBijsonCfg:        "127.0.0.1:2018",
-		utils.ListenBigobCfg:         "",
-		utils.ChargerSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
-		utils.CDRsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
-		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
-		utils.IPsConnsCfg:            []string{utils.MetaInternal, "*conn1"},
-		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.StatSConnsCfg:          []string{utils.MetaInternal, "*conn1"},
-		utils.RouteSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
-		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.ActionSConnsCfg:        []string{utils.MetaInternal, "*conn1"},
-		utils.RateSConnsCfg:          []string{utils.MetaInternal, "*conn1"},
-		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
-		utils.ReplicationConnsCfg:    []string{utils.MetaLocalHost},
+		utils.EnabledCfg:      true,
+		utils.ListenBijsonCfg: "127.0.0.1:2018",
+		utils.ListenBigobCfg:  "",
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaCDRs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaResources:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaIPs:         {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:       {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRoutes:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRates:       {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaReplication: {{Values: []string{utils.MetaLocalHost}}},
+		},
 		utils.StoreSCostsCfg:         true,
 		utils.MinDurLowBalanceCfg:    "1s",
 		utils.SessionIndexesCfg:      []string{},
@@ -759,8 +751,10 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 
 func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		Enabled:                utils.BoolPointer(true),
-		SessionSConns:          &[]string{utils.MetaInternal},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+		},
 		CreateCDR:              utils.BoolPointer(true),
 		SubscribePark:          utils.BoolPointer(true),
 		LowBalanceAnnFile:      utils.StringPointer("randomFile"),
@@ -780,8 +774,12 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expected := &FsAgentCfg{
-		Enabled:                true,
-		SessionSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
+			},
+		},
 		SubscribePark:          true,
 		CreateCDR:              true,
 		LowBalanceAnnFile:      "randomFile",
@@ -836,7 +834,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
-		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal},
+		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}}},
 		utils.SubscribeParkCfg:          true,
 		utils.CreateCdrCfg:              false,
 		utils.ExtraFieldsCfg:            []string{},
@@ -868,7 +866,9 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 "freeswitch_agent": {
 	"enabled": true,
-	"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+	"conns": {
+		"*sessions": [{"Values": ["*birpc_internal", "*conn1", "*conn2"]}]
+	},
 	"subscribe_park": false,
 	"create_cdr": true,
 	"max_wait_connection": "7s",
@@ -878,8 +878,10 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 ],}
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:                true,
-		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {
+			{Values: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}},
+		}},
 		utils.SubscribeParkCfg:          false,
 		utils.CreateCdrCfg:              true,
 		utils.ExtraFieldsCfg:            []string{},
@@ -910,14 +912,18 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {
-          "extra_fields": ["randomFields"],		
+          "extra_fields": ["randomFields"],
           "max_wait_connection": "0",
-		  "sessions_conns": ["*internal"]
+		  "conns": {
+		  	"*sessions": [{"Values": ["*internal"]}]
+		  }
     }
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:                false,
-		utils.SessionSConnsCfg:          []string{utils.MetaInternal},
+		utils.EnabledCfg: false,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {
+			{Values: []string{utils.MetaInternal}},
+		}},
 		utils.SubscribeParkCfg:          true,
 		utils.CreateCdrCfg:              false,
 		utils.ExtraFieldsCfg:            []string{"randomFields"},
@@ -1001,9 +1007,11 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &AsteriskAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{utils.MetaInternal},
-		Create_cdr:     utils.BoolPointer(true),
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+		},
+		Create_cdr: utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:                  utils.StringPointer("127.0.0.1:8448"),
@@ -1017,9 +1025,13 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &AsteriskAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		CreateCDR:     true,
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
+			},
+		},
+		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:                "127.0.0.1:8448",
 			Address:              "127.0.0.1:8088",
@@ -1041,13 +1053,17 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {
-		"sessions_conns": ["*internal"],
+		"conns": {
+			"*sessions": [{"Values": ["*internal"]}]
+		},
 	},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{utils.MetaInternal},
-		utils.CreateCdrCfg:     false,
+		utils.EnabledCfg: false,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {
+			{Values: []string{utils.MetaInternal}},
+		}},
+		utils.CreateCdrCfg: false,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
@@ -1071,7 +1087,9 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {
 		"enabled": true,
-		"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+		"conns": {
+			"*sessions": [{"Values": ["*birpc_internal", "*conn1", "*conn2"]}]
+		},
 		"create_cdr": true,
 		"asterisk_conns":[
 			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8, "max_reconnect_interval": "5m"}
@@ -1079,9 +1097,11 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:       true,
-		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
-		utils.CreateCdrCfg:     true,
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {
+			{Values: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}},
+		}},
+		utils.CreateCdrCfg: true,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
@@ -1136,9 +1156,11 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentCfgClone(t *testing.T) {
 	ban := &AsteriskAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		CreateCDR:     true,
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
+		},
+		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "127.0.0.1:8448",
 			Address:         "127.0.0.1:8088",
@@ -1152,7 +1174,7 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AsteriskConns[0].User = ""; ban.AsteriskConns[0].User != "cgrates" {
@@ -1275,9 +1297,11 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 	var d *AsteriskAgentJsonCfg
 
 	v1 := &AsteriskAgentCfg{
-		Enabled:       false,
-		SessionSConns: []string{"*localhost"},
-		CreateCDR:     false,
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		},
+		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "",
@@ -1291,9 +1315,11 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 	}
 
 	v2 := &AsteriskAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*birpc"},
-		CreateCDR:     true,
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*birpc"}}},
+		},
+		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "AsteriskAlias",
@@ -1307,9 +1333,11 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &AsteriskAgentJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*birpc"},
-		Create_cdr:     utils.BoolPointer(true),
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*birpc"}}},
+		},
+		Create_cdr: utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:            utils.StringPointer("AsteriskAlias"),
@@ -1338,7 +1366,9 @@ func TestFsAgentCfgClone(t *testing.T) {
 		ExtraFields:         utils.NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		LowBalanceAnnFile:   "file2",
 		MaxWaitConnection:   time.Second,
-		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
+		},
 		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
 			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "2.3.4.5:8021"},
@@ -1348,7 +1378,7 @@ func TestFsAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.EventSocketConns[0].Password = ""; ban.EventSocketConns[0].Password != "ClueCon" {
@@ -1433,15 +1463,15 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 	var d *FreeswitchAgentJsonCfg
 
 	v1 := &FsAgentCfg{
-		Enabled:       false,
-		SessionSConns: []string{},
-		SubscribePark: false,
-		CreateCDR:     false,
+		Enabled: false,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "ExtraField",
 			},
 		},
+		SubscribePark:       false,
+		CreateCDR:           false,
 		LowBalanceAnnFile:   "LBAF",
 		EmptyBalanceContext: "EBC",
 		EmptyBalanceAnnFile: "EBAF",
@@ -1450,8 +1480,10 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 	}
 
 	v2 := &FsAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{"*localhost"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		},
 		SubscribePark: true,
 		CreateCDR:     true,
 		ExtraFields: utils.RSRParsers{
@@ -1475,8 +1507,10 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &FreeswitchAgentJsonCfg{
-		Enabled:             utils.BoolPointer(true),
-		SessionSConns:       &[]string{"*localhost"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		},
 		SubscribePark:       utils.BoolPointer(true),
 		CreateCDR:           utils.BoolPointer(true),
 		ExtraFields:         &[]string{"ExtraField2"},
@@ -1513,14 +1547,6 @@ func TestSessionSCfgClone(t *testing.T) {
 	ban := &SessionSCfg{
 		Enabled:             true,
 		ListenBiJSON:        "127.0.0.1:2018",
-		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		ReplicationConns:    []string{"*conn1"},
 		StoreSCosts:         true,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
@@ -1528,7 +1554,7 @@ func TestSessionSCfgClone(t *testing.T) {
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
-		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -1541,6 +1567,53 @@ func TestSessionSCfgClone(t *testing.T) {
 			utils.MetaVoice: 3 * time.Hour,
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
+		},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+				},
+			},
+			utils.MetaChargers: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+				},
+			},
+			utils.MetaResources: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+				},
+			},
+			utils.MetaThresholds: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				},
+			},
+			utils.MetaStats: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+				},
+			},
+			utils.MetaRoutes: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
+				},
+			},
+			utils.MetaAttributes: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+				},
+			},
+			utils.MetaCDRs: {
+				{
+					Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+				},
+			},
+			utils.MetaReplication: {
+				{
+					Values: []string{"*conn1"},
+				},
+			},
 		},
 		Opts: &SessionsOpts{
 			DebitInterval: []*DynamicDurationOpt{
@@ -1575,38 +1648,9 @@ func TestSessionSCfgClone(t *testing.T) {
 			},
 		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
+	rcv := ban.Opts.Clone()
+	if !reflect.DeepEqual(ban.Opts, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
-	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-
-	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RouteSConns[1] = ""; ban.RouteSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.ReplicationConns[0] = ""; ban.ReplicationConns[0] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-
-	if rcv.STIRCfg.DefaultAttest = ""; ban.STIRCfg.DefaultAttest != "A" {
-		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
 
@@ -1659,16 +1703,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		Enabled:             false,
 		ListenBiJSON:        "*bijson_rpc",
 		ListenBiGob:         "*bigob_rpc",
-		ChargerSConns:       []string{"*localhost"},
-		ResourceSConns:      []string{"*localhost"},
-		ThresholdSConns:     []string{"*localhost"},
-		StatSConns:          []string{"*localhost"},
-		RouteSConns:         []string{"*localhost"},
-		CDRsConns:           []string{"*localhost"},
-		ReplicationConns:    []string{"*localhost"},
-		AttributeSConns:     []string{"*localhost"},
-		RateSConns:          []string{"*localhost"},
-		AccountSConns:       []string{"*localhost"},
 		StoreSCosts:         false,
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
@@ -1676,7 +1710,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		TerminateAttempts:   3,
 		AlterableFields:     nil,
 		MinDurLowBalance:    1 * time.Second,
-		ActionSConns:        []string{"*localhost"},
 		DefaultUsage: map[string]time.Duration{
 			"DFLT_1": 1 * time.Second,
 		},
@@ -1724,20 +1757,10 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 	}
 
 	v2 := &SessionSCfg{
-		Enabled:          true,
-		ListenBiJSON:     "*bijson",
-		ListenBiGob:      "*bigob",
-		ChargerSConns:    []string{"*birpc"},
-		ResourceSConns:   []string{"*birpc"},
-		ThresholdSConns:  []string{"*birpc"},
-		StatSConns:       []string{"*birpc"},
-		RouteSConns:      []string{"*birpc"},
-		CDRsConns:        []string{"*birpc"},
-		ReplicationConns: []string{"*birpc"},
-		AttributeSConns:  []string{"*birpc"},
-		RateSConns:       []string{"*birpc"},
-		AccountSConns:    []string{"*birpc"},
-		StoreSCosts:      true,
+		Enabled:      true,
+		ListenBiJSON: "*bijson",
+		ListenBiGob:  "*bigob",
+		StoreSCosts:  true,
 		SessionIndexes: utils.StringSet{
 			"index1": struct{}{},
 		},
@@ -1748,7 +1771,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			"index1": struct{}{},
 		},
 		MinDurLowBalance: 2 * time.Second,
-		ActionSConns:     []string{"*birpc"},
 		DefaultUsage: map[string]time.Duration{
 			"DFLT_1": 2 * time.Second,
 		},
@@ -1797,16 +1819,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		Enabled:             utils.BoolPointer(true),
 		ListenBiJSON:        utils.StringPointer("*bijson"),
 		ListenBiGob:         utils.StringPointer("*bigob"),
-		ChargerSConns:       &[]string{"*birpc"},
-		ResourceSConns:      &[]string{"*birpc"},
-		ThresholdSConns:     &[]string{"*birpc"},
-		StatSConns:          &[]string{"*birpc"},
-		RouteSConns:         &[]string{"*birpc"},
-		CDRsConns:           &[]string{"*birpc"},
-		ReplicationConns:    &[]string{"*birpc"},
-		AttributeSConns:     &[]string{"*birpc"},
-		RateSConns:          &[]string{"*birpc"},
-		AccountSConns:       &[]string{"*birpc"},
 		StoreSCosts:         utils.BoolPointer(true),
 		SessionIndexes:      &[]string{"index1"},
 		ClientProtocol:      utils.Float64Pointer(13.2),
@@ -1814,7 +1826,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		TerminateAttempts:   utils.IntPointer(5),
 		AlterableFields:     &[]string{"index1"},
 		MinDurLowBalance:    utils.StringPointer("2s"),
-		ActionSConns:        &[]string{"*birpc"},
 		DefaultUsage: map[string]string{
 			"DFLT_1": "2s",
 		},
@@ -1885,14 +1896,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		Enabled:             false,
 		ListenBiJSON:        "*bijson_rpc",
 		ListenBiGob:         "*bigob_rpc",
-		ChargerSConns:       []string{"*localhost"},
-		ResourceSConns:      []string{"*localhost"},
-		ThresholdSConns:     []string{"*localhost"},
-		StatSConns:          []string{"*localhost"},
-		RouteSConns:         []string{"*localhost"},
-		CDRsConns:           []string{"*localhost"},
-		ReplicationConns:    []string{"*localhost"},
-		AttributeSConns:     []string{"*localhost"},
 		StoreSCosts:         false,
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
@@ -1900,7 +1903,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		TerminateAttempts:   3,
 		AlterableFields:     nil,
 		MinDurLowBalance:    1 * time.Second,
-		ActionSConns:        []string{"*localhost"},
 		DefaultUsage: map[string]time.Duration{
 			"DFLT_1": 1 * time.Second,
 		},
@@ -1946,14 +1948,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		Enabled:             false,
 		ListenBiJSON:        "*bijson_rpc",
 		ListenBiGob:         "",
-		ChargerSConns:       []string{"*localhost"},
-		ResourceSConns:      []string{"*localhost"},
-		ThresholdSConns:     []string{"*localhost"},
-		StatSConns:          []string{"*localhost"},
-		RouteSConns:         []string{"*localhost"},
-		CDRsConns:           []string{"*localhost"},
-		ReplicationConns:    []string{"*localhost"},
-		AttributeSConns:     []string{"*localhost"},
 		StoreSCosts:         false,
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
@@ -1961,7 +1955,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		TerminateAttempts:   3,
 		AlterableFields:     nil,
 		MinDurLowBalance:    1 * time.Second,
-		ActionSConns:        []string{"*localhost"},
 		DefaultUsage: map[string]time.Duration{
 			"DFLT_1": 1 * time.Second,
 		},

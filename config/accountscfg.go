@@ -43,9 +43,7 @@ type AccountsOpts struct {
 // AccountSCfg is the configuration of ActionS
 type AccountSCfg struct {
 	Enabled                bool
-	AttributeSConns        []string
-	RateSConns             []string
-	ThresholdSConns        []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	IndexedSelects         bool
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -99,14 +97,11 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	if jsnCfg.Indexed_selects != nil {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
-	if jsnCfg.Attributes_conns != nil {
-		acS.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
-	}
-	if jsnCfg.Rates_conns != nil {
-		acS.RateSConns = tagInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		acS.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			acS.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		acS.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
@@ -152,16 +147,8 @@ func (acS AccountSCfg) AsMapInterface() any {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 		utils.MaxIterations:     acS.MaxIterations,
+		utils.ConnsCfg:          stripConns(acS.Conns),
 		utils.OptsCfg:           opts,
-	}
-	if acS.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = stripInternalConns(acS.AttributeSConns)
-	}
-	if acS.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = stripInternalConns(acS.RateSConns)
-	}
-	if acS.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*acS.StringIndexedFields)
@@ -210,20 +197,12 @@ func (acS AccountSCfg) CloneSection() Section { return acS.Clone() }
 func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 	cln = &AccountSCfg{
 		Enabled:        acS.Enabled,
+		Conns:          CloneConnsOpt(acS.Conns),
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
 		MaxIterations:  acS.MaxIterations,
 		MaxUsage:       acS.MaxUsage,
 		Opts:           acS.Opts.Clone(),
-	}
-	if acS.AttributeSConns != nil {
-		cln.AttributeSConns = slices.Clone(acS.AttributeSConns)
-	}
-	if acS.RateSConns != nil {
-		cln.RateSConns = slices.Clone(acS.RateSConns)
-	}
-	if acS.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*acS.StringIndexedFields))
@@ -253,9 +232,7 @@ type AccountsOptsJson struct {
 type AccountSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
-	Attributes_conns         *[]string
-	Rates_conns              *[]string
-	Thresholds_conns         *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
@@ -290,14 +267,8 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
-	}
-	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

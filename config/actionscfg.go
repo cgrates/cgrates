@@ -41,12 +41,7 @@ type ActionsOpts struct {
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled                  bool
-	CDRsConns                []string
-	EEsConns                 []string
-	ThresholdSConns          []string
-	StatSConns               []string
-	AccountSConns            []string
-	AdminSConns              []string
+	Conns                    map[string][]*DynamicStringSliceOpt
 	Tenants                  *[]string
 	IndexedSelects           bool
 	StringIndexedFields      *[]string
@@ -95,23 +90,11 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		acS.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Cdrs_conns != nil {
-		acS.CDRsConns = tagInternalConns(*jsnCfg.Cdrs_conns, utils.MetaCDRs)
-	}
-	if jsnCfg.Ees_conns != nil {
-		acS.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		acS.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
-	}
-	if jsnCfg.Stats_conns != nil {
-		acS.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
-	}
-	if jsnCfg.Accounts_conns != nil {
-		acS.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
-	}
-	if jsnCfg.Admins_conns != nil {
-		acS.AdminSConns = tagInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			acS.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Tenants != nil {
 		acS.Tenants = utils.SliceStringPointer(slices.Clone(*jsnCfg.Tenants))
@@ -156,28 +139,11 @@ func (acS ActionSCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:                acS.Enabled,
+		utils.ConnsCfg:                  stripConns(acS.Conns),
 		utils.IndexedSelectsCfg:         acS.IndexedSelects,
 		utils.NestedFieldsCfg:           acS.NestedFields,
 		utils.DynaprepaidActionplansCfg: acS.DynaprepaidActionProfile,
 		utils.OptsCfg:                   opts,
-	}
-	if acS.CDRsConns != nil {
-		mp[utils.CDRsConnsCfg] = stripInternalConns(acS.CDRsConns)
-	}
-	if acS.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(acS.ThresholdSConns)
-	}
-	if acS.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(acS.StatSConns)
-	}
-	if acS.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = stripInternalConns(acS.AccountSConns)
-	}
-	if acS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(acS.EEsConns)
-	}
-	if acS.AdminSConns != nil {
-		mp[utils.AdminSConnsCfg] = stripInternalConns(acS.AdminSConns)
 	}
 	if acS.Tenants != nil {
 		mp[utils.Tenants] = slices.Clone(*acS.Tenants)
@@ -227,27 +193,10 @@ func (actOpts *ActionsOpts) Clone() *ActionsOpts {
 func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	cln = &ActionSCfg{
 		Enabled:        acS.Enabled,
+		Conns:          CloneConnsOpt(acS.Conns),
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
 		Opts:           acS.Opts.Clone(),
-	}
-	if acS.CDRsConns != nil {
-		cln.CDRsConns = slices.Clone(acS.CDRsConns)
-	}
-	if acS.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(acS.ThresholdSConns)
-	}
-	if acS.StatSConns != nil {
-		cln.StatSConns = slices.Clone(acS.StatSConns)
-	}
-	if acS.AccountSConns != nil {
-		cln.AccountSConns = slices.Clone(acS.AccountSConns)
-	}
-	if acS.EEsConns != nil {
-		cln.EEsConns = slices.Clone(acS.EEsConns)
-	}
-	if acS.AdminSConns != nil {
-		cln.AdminSConns = slices.Clone(acS.AdminSConns)
 	}
 	if acS.Tenants != nil {
 		cln.Tenants = utils.SliceStringPointer(slices.Clone(*acS.Tenants))
@@ -283,12 +232,7 @@ type ActionsOptsJson struct {
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled                   *bool
-	Cdrs_conns                *[]string
-	Ees_conns                 *[]string
-	Thresholds_conns          *[]string
-	Stats_conns               *[]string
-	Accounts_conns            *[]string
-	Admins_conns              *[]string
+	Conns                     map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Tenants                   *[]string
 	Indexed_selects           *bool
 	String_indexed_fields     *[]string
@@ -324,25 +268,9 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.CDRsConns, v2.CDRsConns) {
-		d.Cdrs_conns = utils.SliceStringPointer(stripInternalConns(v2.CDRsConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
-	}
-	if !slices.Equal(v1.AdminSConns, v2.AdminSConns) {
-		d.Admins_conns = utils.SliceStringPointer(stripInternalConns(v2.AdminSConns))
-	}
-
 	if v1.Tenants != v2.Tenants {
 		d.Tenants = utils.SliceStringPointer(slices.Clone(*v2.Tenants))
 	}

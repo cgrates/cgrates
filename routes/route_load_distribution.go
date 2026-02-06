@@ -30,22 +30,20 @@ import (
 )
 
 // NewLoadDistributionSorter .
-func NewLoadDistributionSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *LoadDistributionSorter {
-	return &LoadDistributionSorter{cfg: cfg, connMgr: connMgr}
+func NewLoadDistributionSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *LoadDistributionSorter {
+	return &LoadDistributionSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // LoadDistributionSorter orders suppliers based on their Resource Usage
 type LoadDistributionSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 // SortRoutes .
 func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	if len(ws.cfg.RouteSCfg().StatSConns) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing("connIDs")
-	}
 	sortedRoutes = &SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaLoad,
@@ -73,7 +71,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			srtRoute.SortingData[utils.Blocker] = true
 		}
 		var metricSum *utils.Decimal
-		if metricSum, err = populateStatsForLoadRoute(ctx, ws.cfg, ws.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
+		if metricSum, err = populateStatsForLoadRoute(ctx, ws.cfg, ws.connMgr, ws.fltrS, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
@@ -87,10 +85,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 		srtRoute.sortingDataDecimal[utils.Load] = metricSum
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			ws.connMgr, ws.cfg.FilterSCfg().ResourceSConns,
-			ws.cfg.FilterSCfg().StatSConns,
-			ws.cfg.FilterSCfg().AccountSConns,
-			ws.cfg.FilterSCfg().TrendSConns, ws.cfg.FilterSCfg().RankingSConns); err != nil {
+			ws.cfg, ws.fltrS); err != nil {
 			return
 		} else if pass {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
@@ -112,14 +107,18 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 // populateStatsForLoadRoute will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
 func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *engine.ConnManager, statIDs []string, tenant string) (result *utils.Decimal, err error) {
+	connMgr *engine.ConnManager, fltrS *engine.FilterS, statIDs []string, tenant string) (result *utils.Decimal, err error) {
+	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaStats], tenant, utils.MapStorage{}, fltrS)
+	if err != nil {
+		return
+	}
 	result = utils.NewDecimalFromFloat64(0)
 	for _, statID := range statIDs {
 		// check if we get an ID in the following form (StatID:MetricID)
 		statWithMetric := strings.Split(statID, utils.InInFieldSep)
 		var metrics map[string]*utils.Decimal
 		if err = connMgr.Call(ctx,
-			cfg.RouteSCfg().StatSConns,
+			connIDs,
 			utils.StatSv1GetQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{

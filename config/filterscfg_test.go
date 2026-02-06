@@ -26,18 +26,22 @@ import (
 
 func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONS := &FilterSJsonCfg{
-		Stats_conns:     &[]string{utils.MetaInternal, "*conn1"},
-		Resources_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Accounts_conns:  &[]string{utils.MetaInternal, "*conn1"},
-		Trends_conns:    &[]string{utils.MetaInternal, "*conn1"},
-		Rankings_conns:  &[]string{utils.MetaInternal, "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaResources: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaTrends:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRankings:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 	}
 	expected := &FilterSCfg{
-		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		AccountSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
-		TrendSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends), "*conn1"},
-		RankingSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings), "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaResources: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
+			utils.MetaAccounts:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
+			utils.MetaTrends:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends), "*conn1"}}},
+			utils.MetaRankings:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings), "*conn1"}}},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
@@ -53,25 +57,29 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestFilterSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-		"filters": {								
-			"stats_conns": ["*internal:*stats", "*conn1"],						
-			"resources_conns": ["*internal:*resources", "*conn1"],
-            "accounts_conns": ["*internal:*apier", "*conn1"],
-			"trends_conns": ["*internal:*trends", "*conn1"],
-			"rankings_conns": ["*internal:*rankings", "*conn1"],
+		"filters": {
+			"conns": {
+				"*stats": [{"Values": ["*internal:*stats", "*conn1"]}],
+				"*resources": [{"Values": ["*internal:*resources", "*conn1"]}],
+				"*accounts": [{"Values": ["*internal:*accounts", "*conn1"]}],
+				"*trends": [{"Values": ["*internal:*trends", "*conn1"]}],
+				"*rankings": [{"Values": ["*internal:*rankings", "*conn1"]}]
+			}
 	},
 }`
 	eMap := map[string]any{
-		utils.StatSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.ResourceSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.AccountSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.TrendSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.RankingSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaResources: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaTrends:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRankings:  {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -80,36 +88,34 @@ func TestFilterSCfgAsMapInterface2(t *testing.T) {
       "filters": {}
 }`
 	eMap := map[string]any{
-		utils.StatSConnsCfg:     []string{},
-		utils.ResourceSConnsCfg: []string{},
-		utils.AccountSConnsCfg:  []string{},
-		utils.TrendSConnsCfg:    []string{},
-		utils.RankingSConnsCfg:  []string{},
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
 func TestFilterSCfgClone(t *testing.T) {
 	ban := &FilterSCfg{
-		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		AccountSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaResources: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
+			utils.MetaAccounts:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"}}},
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaStats][0].Values[1] = ""; ban.Conns[utils.MetaStats][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaResources][0].Values[1] = ""; ban.Conns[utils.MetaResources][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.AccountSConns[1] = ""; ban.AccountSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAccounts][0].Values[1] = ""; ban.Conns[utils.MetaAccounts][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
@@ -118,21 +124,23 @@ func TestDiffFilterSJsonCfg(t *testing.T) {
 	var d *FilterSJsonCfg
 
 	v1 := &FilterSCfg{
-		StatSConns:     []string{},
-		ResourceSConns: []string{},
-		AccountSConns:  []string{},
+		Conns: map[string][]*DynamicStringSliceOpt{},
 	}
 
 	v2 := &FilterSCfg{
-		StatSConns:     []string{"*localhost"},
-		ResourceSConns: []string{"*localhost"},
-		AccountSConns:  []string{"*localhost"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{"*localhost"}}},
+			utils.MetaResources: {{Values: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	expected := &FilterSJsonCfg{
-		Stats_conns:     &[]string{"*localhost"},
-		Resources_conns: &[]string{"*localhost"},
-		Accounts_conns:  &[]string{"*localhost"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{"*localhost"}}},
+			utils.MetaResources: {{Values: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	rcv := diffFilterSJsonCfg(d, v1, v2)
@@ -151,15 +159,19 @@ func TestDiffFilterSJsonCfg(t *testing.T) {
 
 func TestFilterSCloneSection(t *testing.T) {
 	fltrSCfg := &FilterSCfg{
-		StatSConns:     []string{"*localhost"},
-		ResourceSConns: []string{"*localhost"},
-		AccountSConns:  []string{"*localhost"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{"*localhost"}}},
+			utils.MetaResources: {{Values: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	exp := &FilterSCfg{
-		StatSConns:     []string{"*localhost"},
-		ResourceSConns: []string{"*localhost"},
-		AccountSConns:  []string{"*localhost"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:     {{Values: []string{"*localhost"}}},
+			utils.MetaResources: {{Values: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	rcv := fltrSCfg.CloneSection()

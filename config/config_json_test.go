@@ -73,7 +73,7 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 		Caps:                utils.IntPointer(0),
 		Caps_strategy:       utils.StringPointer(utils.MetaBusy),
 		Caps_stats_interval: utils.StringPointer("0"),
-		Ees_conns:           utils.SliceStringPointer([]string{}),
+		Conns:               map[string][]*DynamicStringSliceOpt{},
 		Shutdown_timeout:    utils.StringPointer("1s"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -619,15 +619,8 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(false),
 		Extra_fields:         &[]string{},
 		Session_cost_retries: utils.IntPointer(5),
-		Chargers_conns:       &[]string{},
-		Attributes_conns:     &[]string{},
-		Thresholds_conns:     &[]string{},
-		Stats_conns:          &[]string{},
+		Conns:                map[string][]*DynamicStringSliceOpt{},
 		Online_cdr_exports:   &[]string{},
-		Actions_conns:        &[]string{},
-		Ees_conns:            &[]string{},
-		Rates_conns:          &[]string{},
-		Accounts_conns:       &[]string{},
 		Opts:                 &CdrsOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -647,18 +640,6 @@ func TestSmgJsonCfg(t *testing.T) {
 		Enabled:             utils.BoolPointer(false),
 		ListenBiJSON:        utils.StringPointer("127.0.0.1:2014"),
 		ListenBiGob:         utils.StringPointer(""),
-		ChargerSConns:       &[]string{},
-		CDRsConns:           &[]string{},
-		ResourceSConns:      &[]string{},
-		IPsConns:            &[]string{},
-		ThresholdSConns:     &[]string{},
-		StatSConns:          &[]string{},
-		RouteSConns:         &[]string{},
-		AttributeSConns:     &[]string{},
-		ActionSConns:        &[]string{},
-		RateSConns:          &[]string{},
-		AccountSConns:       &[]string{},
-		ReplicationConns:    &[]string{},
 		StoreSCosts:         utils.BoolPointer(false),
 		SessionIndexes:      &[]string{},
 		ClientProtocol:      utils.Float64Pointer(1.0),
@@ -671,6 +652,7 @@ func TestSmgJsonCfg(t *testing.T) {
 			utils.MetaData:  "1048576",
 			utils.MetaSMS:   "1",
 		},
+		Conns: map[string][]*DynamicStringSliceOpt{},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
@@ -694,8 +676,15 @@ func TestSmgJsonCfg(t *testing.T) {
 
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
-		Enabled:                utils.BoolPointer(false),
-		SessionSConns:          &[]string{rpcclient.BiRPCInternal},
+		Enabled: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{rpcclient.BiRPCInternal},
+				},
+			},
+		},
+
 		SubscribePark:          utils.BoolPointer(true),
 		CreateCDR:              utils.BoolPointer(false),
 		ExtraFields:            &[]string{},
@@ -728,9 +717,16 @@ func TestFsAgentJsonCfg(t *testing.T) {
 
 func TestKamAgentJsonCfg(t *testing.T) {
 	eCfg := &KamAgentJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
-		Create_cdr:     utils.BoolPointer(false),
+		Enabled: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{rpcclient.BiRPCInternal},
+				},
+			},
+		},
+
+		Create_cdr: utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8448"),
@@ -755,9 +751,16 @@ func TestKamAgentJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
-		Create_cdr:     utils.BoolPointer(false),
+		Enabled: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{rpcclient.BiRPCInternal},
+				},
+			},
+		},
+
+		Create_cdr: utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8088"),
@@ -783,14 +786,18 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:                 utils.BoolPointer(false),
-		Listen:                  utils.StringPointer("127.0.0.1:3868"),
-		ListenNet:               utils.StringPointer(utils.TCP),
-		DictionariesPath:        utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		CEApplications:          nil,
-		SessionSConns:           &[]string{rpcclient.BiRPCInternal},
-		StatSConns:              &[]string{},
-		ThresholdSConns:         &[]string{},
+		Enabled:          utils.BoolPointer(false),
+		Listen:           utils.StringPointer("127.0.0.1:3868"),
+		ListenNet:        utils.StringPointer(utils.TCP),
+		DictionariesPath: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		CEApplications:   nil,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{rpcclient.BiRPCInternal},
+				},
+			},
+		},
 		ConnStatusStatQueueIDs:  &[]string{},
 		ConnStatusThresholdIDs:  &[]string{},
 		OriginHost:              utils.StringPointer("CGR-DA"),
@@ -833,9 +840,13 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		ClientDaAddresses: map[string]DAClientOptsJson{},
-		SessionSConns:     &[]string{utils.MetaInternal},
-		StatSConns:        &[]string{},
-		ThresholdSConns:   &[]string{},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{"*internal"},
+				},
+			},
+		},
 		DMRTemplate:       utils.StringPointer(utils.MetaDMR),
 		CoATemplate:       utils.StringPointer(utils.MetaCoA),
 		RequestsCacheKey:  utils.StringPointer(""),
@@ -877,9 +888,14 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 			},
 		},
 
-		SessionSConns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
-		StatSConns:        &[]string{},
-		ThresholdSConns:   &[]string{},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {
+				{
+					Values: []string{rpcclient.BiRPCInternal},
+				},
+			},
+		},
+
 		Timezone:          utils.StringPointer(""),
 		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
@@ -898,9 +914,7 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 func TestDfAttributeServJsonCfg(t *testing.T) {
 	eCfg := &AttributeSJsonCfg{
 		Enabled:                  utils.BoolPointer(false),
-		Stats_conns:              &[]string{},
-		Resources_conns:          &[]string{},
-		Accounts_conns:           &[]string{},
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Indexed_selects:          utils.BoolPointer(true),
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
@@ -925,8 +939,8 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 func TestDfChargerServJsonCfg(t *testing.T) {
 	eCfg := &ChargerSJsonCfg{
 		Enabled:                  utils.BoolPointer(false),
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Indexed_selects:          utils.BoolPointer(true),
-		Attributes_conns:         &[]string{},
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
@@ -948,11 +962,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
-		Stats_conns:     &[]string{},
-		Resources_conns: &[]string{},
-		Accounts_conns:  &[]string{},
-		Trends_conns:    &[]string{},
-		Rankings_conns:  &[]string{},
+		Conns: map[string][]*DynamicStringSliceOpt{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -969,8 +979,8 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	eCfg := &ResourceSJsonCfg{
 		Enabled:                  utils.BoolPointer(false),
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Indexed_selects:          utils.BoolPointer(true),
-		Thresholds_conns:         &[]string{},
 		Store_interval:           utils.StringPointer(""),
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
@@ -995,10 +1005,10 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 func TestDfStatServiceJsonCfg(t *testing.T) {
 	eCfg := &StatServJsonCfg{
 		Enabled:                  utils.BoolPointer(false),
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer(""),
 		Store_uncompressed_limit: utils.IntPointer(0),
-		Thresholds_conns:         &[]string{},
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
@@ -1006,7 +1016,6 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Notexists_indexed_fields: &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 		Opts:                     &StatsOptsJson{},
-		Ees_conns:                &[]string{},
 		Ees_exporter_ids:         &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -1024,6 +1033,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 func TestDfThresholdSJsonCfg(t *testing.T) {
 	eCfg := &ThresholdSJsonCfg{
 		Enabled:                  utils.BoolPointer(false),
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer(""),
 		String_indexed_fields:    nil,
@@ -1032,9 +1042,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Exists_indexed_fields:    &[]string{},
 		Notexists_indexed_fields: &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
-		Actions_conns:            &[]string{},
 		Opts:                     &ThresholdsOptsJson{},
-		Ees_conns:                &[]string{},
 		Ees_exporter_ids:         &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -1058,13 +1066,9 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{},
 		Exists_indexed_fields:    &[]string{},
 		Notexists_indexed_fields: &[]string{},
-		Attributes_conns:         &[]string{},
-		Resources_conns:          &[]string{},
-		Stats_conns:              &[]string{},
-		Rates_conns:              &[]string{},
-		Accounts_conns:           &[]string{},
 		Default_ratio:            utils.IntPointer(1),
 		Nested_fields:            utils.BoolPointer(false),
+		Conns:                    map[string][]*DynamicStringSliceOpt{},
 		Opts:                     &RoutesOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2153,11 +2157,10 @@ func TestDfAnalyzerCfg(t *testing.T) {
 
 func TestDfApierCfg(t *testing.T) {
 	eCfg := &AdminSJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Caches_conns:     &[]string{utils.MetaInternal},
-		Actions_conns:    &[]string{},
-		Attributes_conns: &[]string{},
-		Ees_conns:        &[]string{},
+		Enabled: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -2197,11 +2200,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := &ERsJsonCfg{
-		Enabled:         utils.BoolPointer(false),
-		SessionSConns:   &[]string{utils.MetaInternal},
-		EEsConns:        &[]string{},
-		StatSConns:      &[]string{},
-		ThresholdSConns: &[]string{},
+		Enabled: utils.BoolPointer(false),
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                   utils.StringPointer(utils.MetaDefault),
@@ -2249,8 +2249,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 
 func TestDfEventExporterCfg(t *testing.T) {
 	eCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Attributes_conns: &[]string{},
+		Enabled: utils.BoolPointer(false),
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
@@ -2276,7 +2276,13 @@ func TestDfEventExporterCfg(t *testing.T) {
 				ConcurrentRequests:   utils.IntPointer(0),
 				MetricsResetSchedule: utils.StringPointer(""),
 				FailedPostsDir:       utils.StringPointer("/var/spool/cgrates/failed_posts"),
-				EFsConns:             &[]string{utils.MetaInternal},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {
+						{
+							Values: []string{utils.MetaInternal},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -2751,12 +2757,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 func TestDfActionSJsonCfg(t *testing.T) {
 	eCfg := &ActionSJsonCfg{
 		Enabled:                   utils.BoolPointer(false),
-		Cdrs_conns:                &[]string{},
-		Ees_conns:                 &[]string{},
-		Thresholds_conns:          &[]string{},
-		Stats_conns:               &[]string{},
-		Accounts_conns:            &[]string{},
-		Admins_conns:              &[]string{},
+		Conns:                     map[string][]*DynamicStringSliceOpt{},
 		Tenants:                   &[]string{},
 		Indexed_selects:           utils.BoolPointer(true),
 		String_indexed_fields:     nil,

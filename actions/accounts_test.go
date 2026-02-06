@@ -67,7 +67,7 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	actCdrLG.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	actCdrLG.config.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	expected = "Closed unspilit syntax"
 	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -119,7 +119,7 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	actRemBal.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	actRemBal.config.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = context.DeadlineExceeded.Error()
 	if err := actRemBal.execute(ctx, nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
@@ -130,7 +130,7 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 
 func TestACExecuteAccountsParseError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)

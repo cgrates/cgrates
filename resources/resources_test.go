@@ -2967,7 +2967,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 
 	ccM := &ccMock{
@@ -3035,7 +3035,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 
 	ccM := &ccMock{
@@ -3097,7 +3097,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 
 func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().ThresholdSConns = []string{"connID"}
+	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{"connID"}}}
 	rS := &ResourceS{
 		cfg: cfg,
 	}

@@ -234,7 +234,7 @@ func TestNewRecordWithRemoveError(t *testing.T) {
 		f.ComputePath()
 	}
 	r := profileTest{
-		"Value": []string{},
+		"Values": []string{},
 	}
 	expErrMsg := `strconv.Atoi: parsing "NotVal": invalid syntax`
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil)).
@@ -254,7 +254,7 @@ func TestNewRecordSetFieldsError(t *testing.T) {
 		f.ComputePath()
 	}
 	r := profileTest{
-		"Value": []string{},
+		"Values": []string{},
 	}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != utils.ErrWrongPath {
@@ -272,7 +272,7 @@ func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
 		f.ComputePath()
 	}
 	r := profileTest{
-		"Value": []string{},
+		"Values": []string{},
 	}
 	expErrMsg := `NOT_FOUND:`
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil)).

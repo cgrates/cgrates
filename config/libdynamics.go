@@ -917,3 +917,32 @@ func (dynFlt *DynamicDurationPointerOpt) Value(dP utils.DataProvider) (*time.Dur
 	}
 	return dynFlt.value, nil
 }
+
+// CloneConnsOpt deep-copies a connections map.
+func CloneConnsOpt(in map[string][]*DynamicStringSliceOpt) map[string][]*DynamicStringSliceOpt {
+	if in == nil {
+		return nil
+	}
+	cl := make(map[string][]*DynamicStringSliceOpt, len(in))
+	for k, v := range in {
+		cl[k] = CloneDynamicStringSliceOpt(v)
+	}
+	return cl
+}
+
+// ConnsEqual checks equality of two connections opts maps.
+func ConnsEqual(v1, v2 map[string][]*DynamicStringSliceOpt) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for k, vals1 := range v1 {
+		vals2, has := v2[k]
+		if !has {
+			return false
+		}
+		if !DynamicStringSliceOptEqual(vals1, vals2) {
+			return false
+		}
+	}
+	return true
+}

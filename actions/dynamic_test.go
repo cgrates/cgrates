@@ -150,7 +150,7 @@ func TestActDynamicThresholdCfg(t *testing.T) {
 func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.ActionSCfg().AdminSConns = []string{"admins"}
+	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{"admins"}}}
 
 	connMgr := engine.NewConnManager(cfg)
 
@@ -464,7 +464,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -966,7 +966,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
 			if tc.name != "NoAdminSConns" {
-				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+				cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			}
 
 			connMgr := engine.NewConnManager(cfg)
@@ -1331,7 +1331,7 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
 			if tc.name != "NoAdminSConns" {
-				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+				cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			}
 
 			connMgr := engine.NewConnManager(cfg)
@@ -1761,7 +1761,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
 			if tc.name != "NoAdminSConns" {
-				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+				cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			}
 
 			connMgr := engine.NewConnManager(cfg)
@@ -2110,7 +2110,7 @@ func TestActDynamicTrendExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
 			if tc.name != "NoAdminSConns" {
-				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+				cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			}
 
 			connMgr := engine.NewConnManager(cfg)
@@ -2398,7 +2398,7 @@ func TestActDynamicRankingExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -2660,7 +2660,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -2953,7 +2953,7 @@ func TestActDynamicRouteExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -3252,7 +3252,7 @@ func TestActDynamicIPExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -3724,7 +3724,7 @@ func TestActDynamicRateExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -4146,7 +4146,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
 			if !strings.Contains(tc.expectErrContains, "no connection") {
-				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+				cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			}
 
 			connMgr := engine.NewConnManager(cfg)
@@ -4155,7 +4155,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
-			if len(cfg.ActionSCfg().AdminSConns) > 0 {
+			if len(cfg.ActionSCfg().Conns[utils.MetaAdminS]) > 0 {
 				rpcInternal := make(chan birpc.ClientConnector, 1)
 				rpcInternal <- ccM
 				connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
@@ -4295,7 +4295,7 @@ func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())

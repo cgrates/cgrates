@@ -1051,11 +1051,13 @@ func testSectConfigSReloadActions(t *testing.T) {
 		Tenant: "cgrates.org",
 		Config: `"actions": {
 			"enabled": false,
-			"cdrs_conns": [],
-			"ees_conns": [],
-			"thresholds_conns": [],
-			"stats_conns": [],
-			"accounts_conns": [],
+			"conns": {
+				"*cdrs": [],
+				"*ees": [],
+				"*thresholds": [],
+				"*stats": [],
+				"*accounts": []
+			},
 			"tenants": [],
 			"indexed_selects": true,
 			//"string_indexed_fields": [],
@@ -1071,11 +1073,13 @@ func testSectConfigSReloadActions(t *testing.T) {
 	}
 	cfgStr := `"actions": {
 		"enabled": false,
-		"cdrs_conns": [],
-		"ees_conns": [],
-		"thresholds_conns": [],
-		"stats_conns": [],
-		"accounts_conns": [],
+		"conns": {
+			"*cdrs": [],
+			"*ees": [],
+			"*thresholds": [],
+			"*stats": [],
+			"*accounts": []
+		},
 		"tenants": [],
 		"indexed_selects": true,
 		//"string_indexed_fields": [],
@@ -1111,9 +1115,11 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 		Config: `"accounts": {
 			"enabled": false,
 			"indexed_selects": true,
-			"attributes_conns": [],
-			"rates_conns": [],
-			"thresholds_conns": [],
+			"conns": {
+				"*attributes": [],
+				"*rates": [],
+				"*thresholds": []
+			},
 			//"string_indexed_fields": [],
 			"prefix_indexed_fields": [],
 			"suffix_indexed_fields": [],
@@ -1129,9 +1135,11 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 	cfgStr := `"accounts": {
 		"enabled": false,
 		"indexed_selects": true,
-		"attributes_conns": [],
-		"rates_conns": [],
-		"thresholds_conns": [],
+		"conns": {
+			"*attributes": [],
+			"*rates": [],
+			"*thresholds": []
+		},
 		//"string_indexed_fields": [],
 		"prefix_indexed_fields": [],
 		"suffix_indexed_fields": [],

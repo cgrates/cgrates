@@ -38,9 +38,11 @@
 },
 
 "filters": {								
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"]
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}],
+		"*resources": [{"Values": ["*localhost"]}],
+		"*accounts": [{"Values": ["*localhost"]}]
+	},
 },
 
 "accounts": {
@@ -72,12 +74,16 @@
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["*localhost"]
+	"conns": {
+		"*caches": [{"Values": ["*localhost"]}]
+	},
 }
 
 }

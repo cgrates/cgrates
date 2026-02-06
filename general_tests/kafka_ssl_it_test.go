@@ -103,8 +103,10 @@ func TestKafkaSSL(t *testing.T) {
 },
 "ers": {
 	"enabled": true,
-	"sessions_conns": [],
-	"ees_conns": ["*internal"],
+	"conns": {
+		"*sessions": [],
+		"*ees": [{"Values": ["*internal"]}]
+	},
 	"readers": [{
 		"id": "kafka_ssl",
 		"type": "*kafkaJSONMap",

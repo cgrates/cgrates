@@ -51,7 +51,9 @@ func TestSessionSv1ProcessEventDynamicRates(t *testing.T) {
 		ConfigJSON: `{
 "sessions": {
     "enabled": true,
-    "rates_conns": ["*localhost"],
+    "conns": {
+    	"*rates": [{"Values": ["*localhost"]}]
+    },
     "opts": {
         "*rates": [
             {

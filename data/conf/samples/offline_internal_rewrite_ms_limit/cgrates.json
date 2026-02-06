@@ -33,27 +33,37 @@
 	},
 	"cdrs": {
 		"enabled": true,
-		"chargers_conns": ["*localhost"]
+		"conns": {
+			"*chargers": [{"Values": ["*localhost"]}]
+		},
 	},
 	"attributes": {
 		"enabled": true,
-		"stats_conns": ["*localhost"],
-		"resources_conns": ["*localhost"],
-		"accounts_conns": ["*localhost"]
+		"conns": {
+			"*stats": [{"Values": ["*localhost"]}],
+			"*resources": [{"Values": ["*localhost"]}],
+			"*accounts": [{"Values": ["*localhost"]}]
+		},
 	},
 	"chargers": {
 		"enabled": true,
-		"attributes_conns": ["*localhost"]
+		"conns": {
+			"*attributes": [{"Values": ["*localhost"]}]
+		},
 	},
 	"resources": {
 		"enabled": true,
 		"store_interval": "-1",
-		"thresholds_conns": ["*localhost"]
+		"conns": {
+			"*thresholds": [{"Values": ["*localhost"]}]
+		},
 	},
 	"stats": {
 		"enabled": true,
 		"store_interval": "-1",
-		"thresholds_conns": ["*localhost"]
+		"conns": {
+			"*thresholds": [{"Values": ["*localhost"]}]
+		},
 	},
 	"thresholds": {
 		"enabled": true,
@@ -62,9 +72,11 @@
 	"routes": {
 		"enabled": true,
 		"prefix_indexed_fields": ["*req.Destination"],
-		"stats_conns": ["*localhost"],
-		"resources_conns": ["*localhost"],
-		"rates_conns": ["*localhost"]
+		"conns": {
+			"*stats": [{"Values": ["*localhost"]}],
+			"*resources": [{"Values": ["*localhost"]}],
+			"*rates": [{"Values": ["*localhost"]}]
+		},
 	},
 	"admins": {
 		"enabled": true
@@ -74,15 +86,19 @@
 	},
 	"actions": {
 		"enabled": true,
-		"accounts_conns": ["*localhost"]
+		"conns": {
+			"*accounts": [{"Values": ["*localhost"]}]
+		},
 	},
 	"accounts": {
 		"enabled": true
 	},
 	"filters": {
-		"stats_conns": ["*localhost"],
-		"resources_conns": ["*localhost"],
-		"accounts_conns": ["*localhost"]
+		"conns": {
+			"*stats": [{"Values": ["*localhost"]}],
+			"*resources": [{"Values": ["*localhost"]}],
+			"*accounts": [{"Values": ["*localhost"]}]
+		},
 	},
 	"loaders": [
 		{

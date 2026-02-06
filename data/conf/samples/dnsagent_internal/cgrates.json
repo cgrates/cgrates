@@ -18,17 +18,51 @@
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*internal"]
+	"conns": {
+		"*cdrs": [{"Values": ["*internal"]}]
+	},
 },
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"],
-	"opts": {
+	"conns":{
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*rals": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*routes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	]
+			},
+	"opts":{
 		"*attributes": [					
 			{
 				"Tenant": "*any",
@@ -53,7 +87,7 @@
 				"Value": "true",
 			},
 		],
-	}
+	},
 },
 
 
@@ -63,7 +97,9 @@
 
 "cdrs": {
 	"enabled": true,
-	"rates_conns": ["*internal"]
+	"conns": {
+		"*rates": [{"Values": ["*internal"]}]
+	},
 },
 
 "chargers": {
@@ -103,7 +139,9 @@
 			"network":"tcp-tls"
 		}
 	],
-	"sessions_conns": ["*localhost"]
+	"conns": {
+		"*sessions": [{"Values": ["*localhost"]}]
+	},
 },
 
 "admins": {

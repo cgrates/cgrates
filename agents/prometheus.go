@@ -139,9 +139,9 @@ var (
 // It collects stats from StatQueues and exposes them alongside
 // optional Go runtime and process metrics.
 type PrometheusAgent struct {
-	cfg *config.CGRConfig
-	cm  *engine.ConnManager
-
+	cfg               *config.CGRConfig
+	cm                *engine.ConnManager
+	fltrS             *engine.FilterS
 	handler           http.Handler
 	statMetrics       *prometheus.GaugeVec
 	cacheGroupsMetric *prometheus.GaugeVec
@@ -150,11 +150,12 @@ type PrometheusAgent struct {
 
 // NewPrometheusAgent creates and initializes a PrometheusAgent with
 // pre-registered metrics based on the provided configuration.
-func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *PrometheusAgent {
+func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager, fltrS *engine.FilterS) *PrometheusAgent {
 	reg := prometheus.NewRegistry()
 
-	if len(cfg.PrometheusAgentCfg().CoreSConns) != 0 {
-		coreMetricsCollector := newCoreMetricsCollector(cfg, cm)
+	coreConns, _ := engine.GetConnIDs(context.TODO(), cfg.PrometheusAgentCfg().Conns[utils.MetaCores], utils.MetaAny, utils.MapStorage{}, fltrS)
+	if len(coreConns) != 0 {
+		coreMetricsCollector := newCoreMetricsCollector(cfg, cm, fltrS)
 		reg.MustRegister(coreMetricsCollector)
 	}
 
@@ -199,6 +200,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *Promethe
 		cfg:               cfg,
 		cm:                cm,
 		handler:           handler,
+		fltrS:             fltrS,
 		statMetrics:       statMetrics,
 		cacheGroupsMetric: cacheGroupsMetric,
 		cacheItemsMetric:  cacheItemsMetric,
@@ -216,12 +218,14 @@ func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // updateStatsMetrics fetches and updates all StatQueue metrics by calling each
 // configured StatS connection.
 func (pa *PrometheusAgent) updateStatsMetrics() {
-	for connIdx, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
+	statConns, _ := engine.GetConnIDs(context.TODO(), pa.cfg.PrometheusAgentCfg().Conns[utils.MetaStats], utils.MetaAny, utils.MapStorage{}, pa.fltrS)
+	adminConns, _ := engine.GetConnIDs(context.TODO(), pa.cfg.PrometheusAgentCfg().Conns[utils.MetaAdminS], utils.MetaAny, utils.MapStorage{}, pa.fltrS)
+	for connIdx, connID := range statConns {
 		sqIDs := pa.cfg.PrometheusAgentCfg().StatQueueIDs
 
 		// When no StatQueueIDs set, fetch all available ones.
 		if len(sqIDs) == 0 {
-			adminsConnID := pa.cfg.PrometheusAgentCfg().AdminSConns[connIdx]
+			adminsConnID := adminConns[connIdx]
 			if err := pa.cm.Call(context.Background(), []string{adminsConnID},
 				utils.AdminSv1GetStatQueueProfileIDs,
 				&utils.ArgsItemIDs{}, &sqIDs); err != nil {
@@ -262,10 +266,11 @@ func (pa *PrometheusAgent) updateStatsMetrics() {
 // updateCacheStats fetches cache statistics from configured CacheS connections
 // and updates the corresponding Prometheus metrics.
 func (pa *PrometheusAgent) updateCacheStats() {
-	if len(pa.cfg.PrometheusAgentCfg().CacheSConns) == 0 {
+	cacheConns, _ := engine.GetConnIDs(context.TODO(), pa.cfg.PrometheusAgentCfg().Conns[utils.MetaCaches], utils.MetaAny, utils.MapStorage{}, pa.fltrS)
+	if len(cacheConns) == 0 {
 		return
 	}
-	for _, connID := range pa.cfg.PrometheusAgentCfg().CacheSConns {
+	for _, connID := range cacheConns {
 		var reply engine.CacheStatsWithMetadata
 		if err := pa.cm.Call(context.Background(), []string{connID},
 			utils.CacheSv1GetStats,
@@ -292,15 +297,15 @@ func (pa *PrometheusAgent) updateCacheStats() {
 
 // coreMetricsCollector collects CoreS metrics. Equivalent to Go/Process collectors.
 type coreMetricsCollector struct {
-	cfg *config.CGRConfig
-	cm  *engine.ConnManager
-
+	cfg   *config.CGRConfig
+	cm    *engine.ConnManager
+	fltrs *engine.FilterS
 	// Pre-defined descriptors
 	descs map[string]*prometheus.Desc
 }
 
 // newCoreMetricsCollector creates a new collector with pre-defined descriptors
-func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager) *coreMetricsCollector {
+func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager, fltrS *engine.FilterS) *coreMetricsCollector {
 	c := &coreMetricsCollector{
 		cfg:   cfg,
 		cm:    cm,
@@ -379,7 +384,8 @@ func (c *coreMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect implements prometheus.Collector.
 func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
-	for _, connID := range c.cfg.PrometheusAgentCfg().CoreSConns {
+	coreConns, _ := engine.GetConnIDs(context.TODO(), c.cfg.PrometheusAgentCfg().Conns[utils.MetaCores], utils.MetaAny, utils.MapStorage{}, c.fltrs)
+	for _, connID := range coreConns {
 		var reply map[string]any
 		if err := c.cm.Call(context.Background(), []string{connID},
 			utils.CoreSv1Status,

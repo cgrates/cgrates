@@ -29,13 +29,15 @@ import (
 func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			ID:              utils.StringPointer("RandomID"),
-			URL:             utils.StringPointer("/randomURL"),
-			SessionSConns:   &[]string{"*internal"},
-			StatSConns:      &[]string{"*internal"},
-			ThresholdSConns: &[]string{"*internal"},
-			ReplyPayload:    utils.StringPointer(utils.MetaXml),
-			RequestPayload:  utils.StringPointer(utils.MetaUrl),
+			ID:  utils.StringPointer("RandomID"),
+			URL: utils.StringPointer("/randomURL"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+				utils.MetaStats:      {{Values: []string{"*internal"}}},
+				utils.MetaThresholds: {{Values: []string{"*internal"}}},
+			},
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
 			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
@@ -59,13 +61,15 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	}
 	expected := HTTPAgentCfgs{
 		{
-			ID:              "RandomID",
-			URL:             "/randomURL",
-			SessionSConns:   []string{"*internal:*sessions"},
-			StatSConns:      []string{"*internal:*stats"},
-			ThresholdSConns: []string{"*internal:*thresholds"},
-			RequestPayload:  "*url",
-			ReplyPayload:    "*xml",
+			ID:  "RandomID",
+			URL: "/randomURL",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
+				utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
+				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+			},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -95,198 +99,13 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			ID:              utils.StringPointer("conecto1"),
-			URL:             utils.StringPointer("/conecto"),
-			SessionSConns:   &[]string{utils.MetaLocalHost},
-			StatSConns:      &[]string{utils.MetaLocalHost},
-			ThresholdSConns: &[]string{utils.MetaLocalHost},
-			RequestPayload:  utils.StringPointer(utils.MetaUrl),
-			ReplyPayload:    utils.StringPointer(utils.MetaXml),
-			RequestProcessors: &[]*ReqProcessorJsnCfg{
-				{
-					ID:             utils.StringPointer("OutboundAUTHDryRun"),
-					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-					Tenant:         utils.StringPointer("cgrates.org"),
-					Flags:          &[]string{utils.MetaDryRun},
-					Request_fields: &[]*FcTemplateJsonCfg{},
-					Reply_fields: &[]*FcTemplateJsonCfg{
-						{
-							Tag:       utils.StringPointer("Allow"),
-							Path:      utils.StringPointer("response.Allow"),
-							Type:      utils.StringPointer(utils.MetaConstant),
-							Value:     utils.StringPointer("1"),
-							Mandatory: utils.BoolPointer(true),
-							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
-						},
-					},
-				},
-				{
-					ID:      utils.StringPointer("mtcall_cdr"),
-					Filters: &[]string{"*string:*req.request_type:MTCALL_CDR"},
-					Tenant:  utils.StringPointer("cgrates.org"),
-					Flags:   &[]string{utils.MetaCDRs},
-					Request_fields: &[]*FcTemplateJsonCfg{
-						{
-							Tag:       utils.StringPointer("RequestType"),
-							Path:      utils.StringPointer("RequestType"),
-							Type:      utils.StringPointer(utils.MetaConstant),
-							Value:     utils.StringPointer("*pseudoprepaid"),
-							Mandatory: utils.BoolPointer(true),
-							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
-						},
-					},
-					Reply_fields: &[]*FcTemplateJsonCfg{
-						{
-							Tag:       utils.StringPointer("CDR_ID"),
-							Path:      utils.StringPointer("CDR_RESPONSE.CDR_ID"),
-							Type:      utils.StringPointer(utils.MetaComposed),
-							Value:     utils.StringPointer("~*req.CDR_ID"),
-							Mandatory: utils.BoolPointer(true),
-							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
-						},
-					},
-				}},
-		},
-		{
-			ID:              utils.StringPointer("conecto_xml"),
-			URL:             utils.StringPointer("/conecto_xml"),
-			SessionSConns:   &[]string{utils.MetaLocalHost},
-			StatSConns:      &[]string{utils.MetaLocalHost},
-			ThresholdSConns: &[]string{utils.MetaLocalHost},
-			RequestPayload:  utils.StringPointer("*xml"),
-			ReplyPayload:    utils.StringPointer("*xml"),
-			RequestProcessors: &[]*ReqProcessorJsnCfg{
-				{
-					ID:             utils.StringPointer("cdr_from_xml"),
-					Tenant:         utils.StringPointer("cgrates.org"),
-					Flags:          &[]string{utils.MetaCDRs},
-					Request_fields: &[]*FcTemplateJsonCfg{},
-					Reply_fields:   &[]*FcTemplateJsonCfg{},
-				},
+			ID:  utils.StringPointer("conecto1"),
+			URL: utils.StringPointer("/conecto"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
 			},
-		},
-	}
-	expected := HTTPAgentCfgs{
-		&HTTPAgentCfg{
-			ID:              "conecto1",
-			URL:             "/conecto",
-			SessionSConns:   []string{utils.MetaLocalHost},
-			StatSConns:      []string{utils.MetaLocalHost},
-			ThresholdSConns: []string{utils.MetaLocalHost},
-			RequestPayload:  utils.MetaUrl,
-			ReplyPayload:    utils.MetaXml,
-			RequestProcessors: []*RequestProcessor{
-				{
-					ID:            "OutboundAUTHDryRun",
-					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-					Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-					Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
-					RequestFields: []*FCTemplate{},
-					ReplyFields: []*FCTemplate{{
-						Tag:       "Allow",
-						Path:      "response.Allow",
-						Type:      utils.MetaConstant,
-						Value:     utils.NewRSRParsersMustCompile("1", utils.InfieldSep),
-						Mandatory: true,
-						Layout:    time.RFC3339,
-					}},
-				},
-				{
-					ID:      "mtcall_cdr",
-					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
-					Tenant:  utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-					Flags:   utils.FlagsWithParams{utils.MetaCDRs: {}},
-					RequestFields: []*FCTemplate{{
-						Tag:       "RequestType",
-						Path:      "RequestType",
-						Type:      utils.MetaConstant,
-						Value:     utils.NewRSRParsersMustCompile("*pseudoprepaid", utils.InfieldSep),
-						Mandatory: true,
-						Layout:    time.RFC3339,
-					}},
-					ReplyFields: []*FCTemplate{{
-						Tag:       "CDR_ID",
-						Path:      "CDR_RESPONSE.CDR_ID",
-						Type:      utils.MetaComposed,
-						Value:     utils.NewRSRParsersMustCompile("~*req.CDR_ID", utils.InfieldSep),
-						Mandatory: true,
-						Layout:    time.RFC3339,
-					}},
-				}},
-		}, &HTTPAgentCfg{
-			ID:              "conecto_xml",
-			URL:             "/conecto_xml",
-			SessionSConns:   []string{utils.MetaLocalHost},
-			StatSConns:      []string{utils.MetaLocalHost},
-			ThresholdSConns: []string{utils.MetaLocalHost},
-			RequestPayload:  utils.MetaXml,
-			ReplyPayload:    utils.MetaXml,
-			RequestProcessors: []*RequestProcessor{{
-				ID:            "cdr_from_xml",
-				Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-				Flags:         utils.FlagsWithParams{utils.MetaCDRs: {}},
-				RequestFields: []*FCTemplate{},
-				ReplyFields:   []*FCTemplate{},
-			}},
-		}}
-	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
-	expected[0].RequestProcessors[1].ReplyFields[0].ComputePath()
-	expected[0].RequestProcessors[1].RequestFields[0].ComputePath()
-	cfgJsn := NewDefaultCGRConfig()
-	if err := cfgJsn.httpAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cfgJsn.httpAgentCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpAgentCfg))
-	}
-}
-
-func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
-	jsnhttpCfg := &HttpAgentJsonCfg{
-		ID:             utils.StringPointer("conecto1"),
-		URL:            utils.StringPointer("/conecto"),
-		SessionSConns:  &[]string{utils.MetaLocalHost},
-		RequestPayload: utils.StringPointer("*url"),
-		ReplyPayload:   utils.StringPointer("*xml"),
-		RequestProcessors: &[]*ReqProcessorJsnCfg{
-			{
-				ID:             utils.StringPointer("OutboundAUTHDryRun"),
-				Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-				Tenant:         utils.StringPointer("cgrates.org"),
-				Flags:          &[]string{"*dryRun"},
-				Request_fields: &[]*FcTemplateJsonCfg{},
-				Reply_fields:   &[]*FcTemplateJsonCfg{},
-			},
-		},
-	}
-	expected := HTTPAgentCfg{
-		ID:             "conecto1",
-		URL:            "/conecto",
-		SessionSConns:  []string{utils.MetaLocalHost},
-		RequestPayload: "*url",
-		ReplyPayload:   "*xml",
-		RequestProcessors: []*RequestProcessor{{
-			ID:            "OutboundAUTHDryRun",
-			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-			Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-			Flags:         utils.FlagsWithParams{"*dryRun": {}},
-			RequestFields: []*FCTemplate{},
-			ReplyFields:   []*FCTemplate{},
-		}},
-	}
-	var httpcfg HTTPAgentCfg
-	if err := httpcfg.loadFromJSONCfg(jsnhttpCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, httpcfg) {
-		t.Errorf("Expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
-	}
-}
-
-func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
-	cfgJSON := &[]*HttpAgentJsonCfg{
-		{
-			ID:             utils.StringPointer("conecto1"),
-			URL:            utils.StringPointer("/conecto"),
-			SessionSConns:  &[]string{utils.MetaLocalHost},
 			RequestPayload: utils.StringPointer(utils.MetaUrl),
 			ReplyPayload:   utils.StringPointer(utils.MetaXml),
 			RequestProcessors: &[]*ReqProcessorJsnCfg{
@@ -335,9 +154,210 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 				}},
 		},
 		{
-			ID:             utils.StringPointer("conecto_xml"),
-			URL:            utils.StringPointer("/conecto_xml"),
-			SessionSConns:  &[]string{utils.MetaLocalHost},
+			ID:  utils.StringPointer("conecto_xml"),
+			URL: utils.StringPointer("/conecto_xml"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			},
+			RequestPayload: utils.StringPointer("*xml"),
+			ReplyPayload:   utils.StringPointer("*xml"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
+				{
+					ID:             utils.StringPointer("cdr_from_xml"),
+					Tenant:         utils.StringPointer("cgrates.org"),
+					Flags:          &[]string{utils.MetaCDRs},
+					Request_fields: &[]*FcTemplateJsonCfg{},
+					Reply_fields:   &[]*FcTemplateJsonCfg{},
+				},
+			},
+		},
+	}
+	expected := HTTPAgentCfgs{
+		&HTTPAgentCfg{
+			ID:  "conecto1",
+			URL: "/conecto",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			},
+			RequestPayload: utils.MetaUrl,
+			ReplyPayload:   utils.MetaXml,
+			RequestProcessors: []*RequestProcessor{
+				{
+					ID:            "OutboundAUTHDryRun",
+					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+					Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+					Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+					RequestFields: []*FCTemplate{},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "Allow",
+						Path:      "response.Allow",
+						Type:      utils.MetaConstant,
+						Value:     utils.NewRSRParsersMustCompile("1", utils.InfieldSep),
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					}},
+				},
+				{
+					ID:      "mtcall_cdr",
+					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
+					Tenant:  utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+					Flags:   utils.FlagsWithParams{utils.MetaCDRs: {}},
+					RequestFields: []*FCTemplate{{
+						Tag:       "RequestType",
+						Path:      "RequestType",
+						Type:      utils.MetaConstant,
+						Value:     utils.NewRSRParsersMustCompile("*pseudoprepaid", utils.InfieldSep),
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					}},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "CDR_ID",
+						Path:      "CDR_RESPONSE.CDR_ID",
+						Type:      utils.MetaComposed,
+						Value:     utils.NewRSRParsersMustCompile("~*req.CDR_ID", utils.InfieldSep),
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					}},
+				}},
+		}, &HTTPAgentCfg{
+			ID:  "conecto_xml",
+			URL: "/conecto_xml",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			},
+			RequestPayload: utils.MetaXml,
+			ReplyPayload:   utils.MetaXml,
+			RequestProcessors: []*RequestProcessor{{
+				ID:            "cdr_from_xml",
+				Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+				Flags:         utils.FlagsWithParams{utils.MetaCDRs: {}},
+				RequestFields: []*FCTemplate{},
+				ReplyFields:   []*FCTemplate{},
+			}},
+		}}
+	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
+	expected[0].RequestProcessors[1].ReplyFields[0].ComputePath()
+	expected[0].RequestProcessors[1].RequestFields[0].ComputePath()
+	cfgJsn := NewDefaultCGRConfig()
+	if err := cfgJsn.httpAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, cfgJsn.httpAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpAgentCfg))
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
+	jsnhttpCfg := &HttpAgentJsonCfg{
+		ID:  utils.StringPointer("conecto1"),
+		URL: utils.StringPointer("/conecto"),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+		},
+		RequestPayload: utils.StringPointer("*url"),
+		ReplyPayload:   utils.StringPointer("*xml"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
+			{
+				ID:             utils.StringPointer("OutboundAUTHDryRun"),
+				Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+				Tenant:         utils.StringPointer("cgrates.org"),
+				Flags:          &[]string{"*dryRun"},
+				Request_fields: &[]*FcTemplateJsonCfg{},
+				Reply_fields:   &[]*FcTemplateJsonCfg{},
+			},
+		},
+	}
+	expected := HTTPAgentCfg{
+		ID:  "conecto1",
+		URL: "/conecto",
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+		},
+		RequestPayload: "*url",
+		ReplyPayload:   "*xml",
+		RequestProcessors: []*RequestProcessor{{
+			ID:            "OutboundAUTHDryRun",
+			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+			Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Flags:         utils.FlagsWithParams{"*dryRun": {}},
+			RequestFields: []*FCTemplate{},
+			ReplyFields:   []*FCTemplate{},
+		}},
+	}
+	var httpcfg HTTPAgentCfg
+	if err := httpcfg.loadFromJSONCfg(jsnhttpCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, httpcfg) {
+		t.Errorf("Expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
+	}
+}
+
+func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
+	cfgJSON := &[]*HttpAgentJsonCfg{
+		{
+			ID:  utils.StringPointer("conecto1"),
+			URL: utils.StringPointer("/conecto"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+			},
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
+				{
+					ID:             utils.StringPointer("OutboundAUTHDryRun"),
+					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+					Tenant:         utils.StringPointer("cgrates.org"),
+					Flags:          &[]string{utils.MetaDryRun},
+					Request_fields: &[]*FcTemplateJsonCfg{},
+					Reply_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("Allow"),
+							Path:      utils.StringPointer("response.Allow"),
+							Type:      utils.StringPointer(utils.MetaConstant),
+							Value:     utils.StringPointer("1"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+				},
+				{
+					ID:      utils.StringPointer("mtcall_cdr"),
+					Filters: &[]string{"*string:*req.request_type:MTCALL_CDR"},
+					Tenant:  utils.StringPointer("cgrates.org"),
+					Flags:   &[]string{utils.MetaCDRs},
+					Request_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("RequestType"),
+							Path:      utils.StringPointer("RequestType"),
+							Type:      utils.StringPointer(utils.MetaConstant),
+							Value:     utils.StringPointer("*pseudoprepaid"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+					Reply_fields: &[]*FcTemplateJsonCfg{
+						{
+							Tag:       utils.StringPointer("CDR_ID"),
+							Path:      utils.StringPointer("CDR_RESPONSE.CDR_ID"),
+							Type:      utils.StringPointer(utils.MetaComposed),
+							Value:     utils.StringPointer("~*req.CDR_ID"),
+							Mandatory: utils.BoolPointer(true),
+							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
+						},
+					},
+				}},
+		},
+		{
+			ID:  utils.StringPointer("conecto_xml"),
+			URL: utils.StringPointer("/conecto_xml"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+			},
 			RequestPayload: utils.StringPointer("*xml"),
 			ReplyPayload:   utils.StringPointer("*xml"),
 			RequestProcessors: &[]*ReqProcessorJsnCfg{
@@ -384,7 +404,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 	{
 		"id": "RandomID",
 		},
-	],	
+	],
 }`
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
@@ -417,9 +437,11 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": ["*birpc_internal", "*localhost","conn1"],
-		"stats_conns": ["*birpc_internal", "*localhost","conn1"],
-		"thresholds_conns": ["*birpc_internal", "*localhost","conn1"],
+		"conns": {
+			"*sessions": [{"values": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*stats": [{"values": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*thresholds": [{"values": ["*birpc_internal", "*localhost", "conn1"]}]
+		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -445,17 +467,19 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 				},
 			],
 		},
-	],	
+	],
 }`
 	eMap := []map[string]any{
 		{
-			utils.IDCfg:              "conecto1",
-			utils.URLCfg:             "/conecto",
-			utils.SessionSConnsCfg:   []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
-			utils.StatSConnsCfg:      []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
-			utils.ThresholdSConnsCfg: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
-			utils.RequestPayloadCfg:  "*url",
-			utils.ReplyPayloadCfg:    "*xml",
+			utils.IDCfg:  "conecto1",
+			utils.URLCfg: "/conecto",
+			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+				utils.MetaStats:      {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+				utils.MetaThresholds: {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+			},
+			utils.RequestPayloadCfg: "*url",
+			utils.ReplyPayloadCfg:   "*xml",
 			utils.RequestProcessorsCfg: []map[string]any{
 				{
 					utils.IDCfg:            "OutboundAUTHDryRun",
@@ -478,20 +502,22 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpAgentCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
+		t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
 func TestHTTPAgentCfgsClone(t *testing.T) {
 	ban := HTTPAgentCfgs{
 		{
-			ID:              "RandomID",
-			URL:             "/randomURL",
-			SessionSConns:   []string{"*internal:*sessions", "*conn1"},
-			StatSConns:      []string{"*internal:*stats", "*conn1"},
-			ThresholdSConns: []string{"*internal:*thresholds", "*conn1"},
-			RequestPayload:  "*url",
-			ReplyPayload:    "*xml",
+			ID:  "RandomID",
+			URL: "/randomURL",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions", "*conn1"}}},
+				utils.MetaStats:      {{Values: []string{"*internal:*stats", "*conn1"}}},
+				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds", "*conn1"}}},
+			},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -513,13 +539,13 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, *rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(*rcv))
 	}
-	if (*rcv)[0].SessionSConns[1] = ""; ban[0].SessionSConns[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaSessionS][0].Values[1] = ""; ban[0].Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv)[0].StatSConns[1] = ""; ban[0].StatSConns[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaStats][0].Values[1] = ""; ban[0].Conns[utils.MetaStats][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv)[0].ThresholdSConns[1] = ""; ban[0].ThresholdSConns[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaThresholds][0].Values[1] = ""; ban[0].Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv)[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
@@ -530,13 +556,15 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 func TestEqualsHTTPAgentCfgs(t *testing.T) {
 	v1 := HTTPAgentCfgs{
 		{
-			ID:              "RANDOM_ID",
-			URL:             "/url",
-			SessionSConns:   []string{"*localhost"},
-			StatSConns:      []string{"*localhost"},
-			ThresholdSConns: []string{"*localhost"},
-			RequestPayload:  "*url",
-			ReplyPayload:    "*xml",
+			ID:  "RANDOM_ID",
+			URL: "/url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+				utils.MetaStats:      {{Values: []string{"*localhost"}}},
+				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:            "OutboundAUTHDryRun",
@@ -561,13 +589,15 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 
 	v2 := HTTPAgentCfgs{
 		{
-			ID:              "RANDOM_ID2",
-			URL:             "/url",
-			SessionSConns:   []string{"*localhost"},
-			StatSConns:      []string{"*localhost"},
-			ThresholdSConns: []string{"*localhost"},
-			RequestPayload:  "*url",
-			ReplyPayload:    "*xml",
+			ID:  "RANDOM_ID2",
+			URL: "/url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+				utils.MetaStats:      {{Values: []string{"*localhost"}}},
+				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:            "OutboundAUTHDryRun",
@@ -609,16 +639,20 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 func TestGetHttpAgentJsonCfg(t *testing.T) {
 	d := []*HttpAgentJsonCfg{
 		{
-			ID:            utils.StringPointer("ID_1"),
-			URL:           utils.StringPointer("/url"),
-			SessionSConns: &[]string{"*localhost"},
+			ID:  utils.StringPointer("ID_1"),
+			URL: utils.StringPointer("/url"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+			},
 		},
 	}
 
 	expected := &HttpAgentJsonCfg{
-		ID:            utils.StringPointer("ID_1"),
-		URL:           utils.StringPointer("/url"),
-		SessionSConns: &[]string{"*localhost"},
+		ID:  utils.StringPointer("ID_1"),
+		URL: utils.StringPointer("/url"),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	rcv, idx := getHttpAgentJsonCfg(d, "ID_1")
@@ -639,16 +673,20 @@ func TestGetHttpAgentJsonCfg(t *testing.T) {
 func TestGetHttpAgentCfg(t *testing.T) {
 	d := HTTPAgentCfgs{
 		{
-			ID:            "ID_1",
-			URL:           "/url",
-			SessionSConns: []string{"*localhost"},
+			ID:  "ID_1",
+			URL: "/url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+			},
 		},
 	}
 
 	expected := &HTTPAgentCfg{
-		ID:            "ID_1",
-		URL:           "/url",
-		SessionSConns: []string{"*localhost"},
+		ID:  "ID_1",
+		URL: "/url",
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	rcv := getHTTPAgentCfg(d, "ID_1")
@@ -667,13 +705,15 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	var d *HttpAgentJsonCfg
 
 	v1 := &HTTPAgentCfg{
-		ID:              "http_agent",
-		URL:             "http_url",
-		SessionSConns:   []string{"*localhost"},
-		StatSConns:      []string{"*localhost"},
-		ThresholdSConns: []string{"*localhost"},
-		RequestPayload:  "request_payload",
-		ReplyPayload:    "reply_payload",
+		ID:  "http_agent",
+		URL: "http_url",
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*localhost:*sessions"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		},
+		RequestPayload: "request_payload",
+		ReplyPayload:   "reply_payload",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID: "req_processors",
@@ -682,22 +722,26 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	}
 
 	v2 := &HTTPAgentCfg{
-		ID:                "http_agent2",
-		URL:               "http_url2",
-		SessionSConns:     []string{"*internal"},
-		StatSConns:        []string{"*internal"},
-		ThresholdSConns:   []string{"*internal"},
+		ID:  "http_agent2",
+		URL: "http_url2",
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
+			utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+		},
 		RequestPayload:    "request_payload2",
 		ReplyPayload:      "reply_payload2",
 		RequestProcessors: []*RequestProcessor{},
 	}
 
 	expected := &HttpAgentJsonCfg{
-		ID:                utils.StringPointer("http_agent2"),
-		URL:               utils.StringPointer("http_url2"),
-		SessionSConns:     &[]string{"*internal"},
-		StatSConns:        &[]string{"*internal"},
-		ThresholdSConns:   &[]string{"*internal"},
+		ID:  utils.StringPointer("http_agent2"),
+		URL: utils.StringPointer("http_url2"),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		RequestPayload:    utils.StringPointer("request_payload2"),
 		ReplyPayload:      utils.StringPointer("reply_payload2"),
 		RequestProcessors: &[]*ReqProcessorJsnCfg{},
@@ -723,13 +767,15 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	v1 := HTTPAgentCfgs{
 		{
-			ID:              "http_agent",
-			URL:             "http_url",
-			SessionSConns:   []string{"*localhost"},
-			StatSConns:      []string{"*localhost"},
-			ThresholdSConns: []string{"*localhost"},
-			RequestPayload:  "request_payload",
-			ReplyPayload:    "reply_payload",
+			ID:  "http_agent",
+			URL: "http_url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+				utils.MetaStats:      {{Values: []string{"*localhost"}}},
+				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			},
+			RequestPayload: "request_payload",
+			ReplyPayload:   "reply_payload",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID: "req_processors",
@@ -740,11 +786,13 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	v2 := HTTPAgentCfgs{
 		{
-			ID:                "http_agent2",
-			URL:               "http_url2",
-			SessionSConns:     []string{"*internal"},
-			StatSConns:        []string{"*internal"},
-			ThresholdSConns:   []string{"*internal"},
+			ID:  "http_agent2",
+			URL: "http_url2",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
+				utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
+				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+			},
 			RequestPayload:    "request_payload2",
 			ReplyPayload:      "reply_payload2",
 			RequestProcessors: []*RequestProcessor{},
@@ -753,11 +801,13 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	expected := &[]*HttpAgentJsonCfg{
 		{
-			ID:                utils.StringPointer("http_agent2"),
-			URL:               utils.StringPointer("http_url2"),
-			SessionSConns:     &[]string{"*internal"},
-			StatSConns:        &[]string{"*internal"},
-			ThresholdSConns:   &[]string{"*internal"},
+			ID:  utils.StringPointer("http_agent2"),
+			URL: utils.StringPointer("http_url2"),
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+				utils.MetaStats:      {{Values: []string{"*internal"}}},
+				utils.MetaThresholds: {{Values: []string{"*internal"}}},
+			},
 			RequestPayload:    utils.StringPointer("request_payload2"),
 			ReplyPayload:      utils.StringPointer("reply_payload2"),
 			RequestProcessors: &[]*ReqProcessorJsnCfg{},
@@ -801,23 +851,27 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 func TestHttpAgentCloneSection(t *testing.T) {
 	httpCfg := HTTPAgentCfgs{
 		{
-			ID:              "http_agent",
-			URL:             "http_url",
-			SessionSConns:   []string{"*localhost"},
-			StatSConns:      []string{"*localhost"},
-			ThresholdSConns: []string{"*localhost"},
-			RequestPayload:  "request_payload",
-			ReplyPayload:    "reply_payload",
+			ID:  "http_agent",
+			URL: "http_url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+				utils.MetaStats:      {{Values: []string{"*localhost"}}},
+				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			},
+			RequestPayload: "request_payload",
+			ReplyPayload:   "reply_payload",
 		},
 	}
 
 	exp := &HTTPAgentCfgs{
 		{
-			ID:                "http_agent",
-			URL:               "http_url",
-			SessionSConns:     []string{"*localhost"},
-			StatSConns:        []string{"*localhost"},
-			ThresholdSConns:   []string{"*localhost"},
+			ID:  "http_agent",
+			URL: "http_url",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+				utils.MetaStats:      {{Values: []string{"*localhost"}}},
+				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			},
 			RequestPayload:    "request_payload",
 			ReplyPayload:      "reply_payload",
 			RequestProcessors: []*RequestProcessor{},

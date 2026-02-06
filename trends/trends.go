@@ -70,7 +70,11 @@ func NewTrendService(dm *engine.DataManager,
 // Called by Cron service at scheduled intervals.
 func (t *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 	var floatMetrics map[string]float64
-	if err := t.connMgr.Call(context.Background(), t.cfg.TrendSCfg().StatSConns,
+	statConns, err := engine.GetConnIDs(ctx, t.cfg.TrendSCfg().Conns[utils.MetaStats], tP.Tenant, tP, t.fltrS)
+	if err != nil {
+		return
+	}
+	if err := t.connMgr.Call(context.Background(), statConns,
 		utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tP.Tenant, ID: tP.StatID}},
 		&floatMetrics); err != nil {
@@ -157,7 +161,11 @@ func (t *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	if len(t.cfg.TrendSCfg().ThresholdSConns) == 0 {
+	threshConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns[utils.MetaThresholds], trnd.Tenant, trnd.Config(), t.fltrS)
+	if err != nil {
+		return
+	}
+	if len(threshConns) == 0 {
 		return
 	}
 	opts := map[string]any{
@@ -186,7 +194,7 @@ func (t *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 	}
 	var withErrs bool
 	var tIDs []string
-	if err := t.connMgr.Call(context.TODO(), t.cfg.TrendSCfg().ThresholdSConns,
+	if err := t.connMgr.Call(context.TODO(), threshConns,
 		utils.ThresholdSv1ProcessEvent, trndEv, &tIDs); err != nil &&
 		(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 		utils.Logger.Warning(
@@ -205,7 +213,8 @@ func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	if len(t.cfg.TrendSCfg().EEsConns) == 0 {
+	eesConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns[utils.MetaEEs], trnd.Tenant, trnd.Config(), t.fltrS)
+	if len(eesConns) == 0 {
 		return
 	}
 	opts := map[string]any{
@@ -227,7 +236,7 @@ func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 	}
 	var withErrs bool
 	var reply map[string]map[string]any
-	if err := t.connMgr.Call(context.TODO(), t.cfg.TrendSCfg().EEsConns,
+	if err := t.connMgr.Call(context.TODO(), eesConns,
 		utils.EeSv1ProcessEvent, trndEv, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(

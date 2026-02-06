@@ -42,29 +42,39 @@
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*localhost"],
+	"conns": {
+		"*cdrs": [{"Values": ["*localhost"]}]
+	},
 },
 
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
+	"conns": {
+		"*thresholds": [{"Values": ["*localhost"]}]
+	},
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}]
+	},
 },
 
 
 "cdrs": {
 	"enabled": true,
 	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
-	"chargers_conns":["*localhost"],
+	"conns": {
+		"*chargers": [{"Values": ["*localhost"]}],
+		"*ees": [{"Values": ["*localhost"]}]
+	},
 	"online_cdr_exports": [],
-	"ees_conns": ["*localhost"]
 },
 
 
 "ees": {
 	"enabled": true,
-	"attributes_conns":["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 	"exporters": [
 		{
 			"id": "amqp_localhost",
@@ -100,12 +110,14 @@
 
 "sessions": {
 	"enabled": true,
-	"resources_conns": ["*localhost"],
-	"routes_conns": ["*localhost"],
-	"attributes_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns":{
+	"*resources": [{"Tenant": "", "Values": ["*localhost"]}],
+	"*routes": [{"Tenant": "", "Values": ["*localhost"]}],
+	"*attributes": [{"Tenant": "", "Values": ["*localhost"]}],
+	"*rals": [{"Tenant": "", "Values": ["*internal"]}],
+	"*cdrs": [{"Tenant": "", "Values": ["*internal"]}],
+	"*chargers": [{"Tenant": "", "Values": ["*internal"]}]
+			},
 },
 
 
@@ -117,21 +129,27 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*localhost"],
+	"conns": {
+		"*attributes": [{"Values": ["*localhost"]}]
+	},
 	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
+	"conns": {
+		"*thresholds": [{"Values": ["*localhost"]}]
+	},
 	"string_indexed_fields": ["*req.Account"]
 },
 
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
+	"conns": {
+		"*thresholds": [{"Values": ["*localhost"]}]
+	},
 	"string_indexed_fields": ["*req.Account"]
 },
 
@@ -156,7 +174,9 @@
 
 
 "filters": {								
-	"accounts_conns": ["*internal"],
+	"conns": {
+		"*accounts": [{"Values": ["*internal"]}]
+	},
 },
 
 "accounts": {

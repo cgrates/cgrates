@@ -51,7 +51,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps) (*DiameterAgent, error) {
 	da := &DiameterAgent{
 		cgrCfg:  cgrCfg,
-		filterS: filterS,
+		fltrS:   filterS,
 		connMgr: connMgr,
 		caps:    caps,
 		raa:     make(map[string]chan *diam.Message),
@@ -86,7 +86,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 // DiameterAgent describes the diameter server
 type DiameterAgent struct {
 	cgrCfg  *config.CGRConfig
-	filterS *engine.FilterS
+	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	caps    *engine.Caps
 
@@ -212,7 +212,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	if da.caps.IsLimited() {
 		if err := da.caps.Allocate(); err != nil {
-			diamErr(c, m, diam.TooBusy, reqVars, da.cgrCfg, da.filterS)
+			diamErr(c, m, diam.TooBusy, reqVars, da.cgrCfg, da.fltrS)
 			return
 		}
 		defer da.caps.Deallocate()
@@ -226,14 +226,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
 					utils.DiameterAgent, err.Error(), m))
-			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
 			return
 		}
 		// cache message data needed for building up the ASR
 		if errCh := engine.Cache.Set(context.TODO(), utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
 			nil, true, utils.NonTransactional); errCh != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed message: %s to set Cache: %s", utils.DiameterAgent, m, errCh.Error()))
-			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
 			return
 		}
 	}
@@ -241,6 +241,9 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	opts := utils.MapStorage{}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
+	sessConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaSessionS], utils.MetaAny, diamDP, da.fltrS)
+	statConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaStats], utils.MetaAny, diamDP, da.fltrS)
+	thrConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaThresholds], utils.MetaAny, diamDP, da.fltrS)
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
@@ -252,12 +255,12 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.filterS, nil),
+				da.fltrS, nil),
 			utils.DiameterAgent, da.connMgr,
-			da.cgrCfg.DiameterAgentCfg().SessionSConns,
-			da.cgrCfg.DiameterAgentCfg().StatSConns,
-			da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
-			da.filterS)
+			sessConns,
+			statConns,
+			thrConns,
+			da.fltrS)
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -270,14 +273,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
 		return
 	}
 	if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
 		return
 	}
 	a, err := diamAnswer(m, 0, false,
@@ -286,7 +289,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> err: %s, replying to message: %+v",
 				utils.DiameterAgent, err.Error(), m))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
 		return
 	}
 	writeOnConn(c, a)
@@ -333,7 +336,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
@@ -380,7 +383,7 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().RARTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot send RAR with OriginID: <%s>, err: %s",
@@ -452,7 +455,9 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 // sendConnStatusReport reports connection status changes to StatS and ThresholdS.
 func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status, localAddr, remoteAddr string) {
 	daCfg := da.cgrCfg.DiameterAgentCfg()
-	if len(daCfg.StatSConns) == 0 && len(daCfg.ThresholdSConns) == 0 {
+	statConns, _ := engine.GetConnIDs(da.ctx, daCfg.Conns[utils.MetaStats], utils.MetaAny, utils.MapStorage{}, da.fltrS)
+	threshConns, _ := engine.GetConnIDs(da.ctx, daCfg.Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, da.fltrS)
+	if len(statConns) == 0 && len(threshConns) == 0 {
 		return // nothing to do
 	}
 
@@ -472,20 +477,20 @@ func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status,
 		},
 	}
 
-	if len(daCfg.StatSConns) != 0 {
+	if len(statConns) != 0 {
 		ev.APIOpts[utils.OptsStatsProfileIDs] = daCfg.ConnStatusStatQueueIDs
 		var reply []string
-		if err := da.connMgr.Call(context.TODO(), daCfg.StatSConns,
+		if err := da.connMgr.Call(context.TODO(), statConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
 				utils.EventConnectionStatusReport, utils.StatS, err))
 		}
 		delete(ev.APIOpts, utils.OptsStatsProfileIDs)
 	}
-	if len(daCfg.ThresholdSConns) != 0 {
+	if len(threshConns) != 0 {
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = daCfg.ConnStatusThresholdIDs
 		var reply []string
-		if err := da.connMgr.Call(context.TODO(), daCfg.ThresholdSConns,
+		if err := da.connMgr.Call(context.TODO(), threshConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
 				utils.EventConnectionStatusReport, utils.ThresholdS, err))

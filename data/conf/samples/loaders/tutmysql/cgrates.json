@@ -47,7 +47,9 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":["*internal"],
+	"conns": {
+		"*chargers": [{"Values": ["*internal"]}]
+	},
 },
 
 
@@ -58,7 +60,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",									
 		"lockfile_path": ".cgr.lock",					
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/In",
 		"tp_out_dir": "/tmp/Out",
@@ -78,7 +82,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/LoaderIn",
 		"tp_out_dir": "",
@@ -99,7 +105,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathWithoutMove",
 		"tp_out_dir": "",
@@ -120,7 +128,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathLoaderWithMove",
 		"tp_out_dir": "/tmp/SubpathOut",
@@ -141,7 +151,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/templateLoaderIn",
 		"tp_out_dir": "/tmp/templateLoaderOut",
@@ -161,7 +173,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "-1",										
 		"lockfile_path": ".cgr.lock",						
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": "\t",							
 		"tp_in_dir": "/tmp/customSepLoaderIn",				
 		"tp_out_dir": "/tmp/customSepLoaderOut",									
@@ -191,21 +205,27 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"]
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 "thresholds": {
@@ -217,19 +237,59 @@
 "routes": {
 	"enabled": true,
 	"prefix_indexed_fields":["*req.Destination"],
-	"stats_conns": ["*internal"],
-	"resources_conns": ["*internal"],
+	"conns": {
+		"*stats": [{"Values": ["*internal"]}],
+		"*resources": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "sessions": {
 	"enabled": true,
-	"routes_conns": ["*internal"],
-	"resources_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
-	"rates_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns":{
+	"*routes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*resources": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 

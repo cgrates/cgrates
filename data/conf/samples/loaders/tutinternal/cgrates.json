@@ -39,7 +39,9 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":["*internal"],
+	"conns": {
+		"*chargers": [{"Values": ["*internal"]}]
+	},
 },
 
 
@@ -50,7 +52,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",									
 		"lockfile_path": ".cgr.lock",					
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/In",
 		"tp_out_dir": "/tmp/Out",
@@ -70,7 +74,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/LoaderIn",
 		"tp_out_dir": "",
@@ -91,7 +97,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathWithoutMove",
 		"tp_out_dir": "",
@@ -112,7 +120,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathLoaderWithMove",
 		"tp_out_dir": "/tmp/SubpathOut",
@@ -133,7 +143,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/templateLoaderIn",
 		"tp_out_dir": "/tmp/templateLoaderOut",
@@ -153,7 +165,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "-1",										
 		"lockfile_path": ".cgr.lock",						
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": "\t",							
 		"tp_in_dir": "/tmp/customSepLoaderIn",				
 		"tp_out_dir": "/tmp/customSepLoaderOut",									
@@ -184,7 +198,9 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "templates": {

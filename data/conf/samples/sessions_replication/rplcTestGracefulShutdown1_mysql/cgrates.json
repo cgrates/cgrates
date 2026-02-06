@@ -44,7 +44,15 @@
 "sessions": {
 	"enabled": true,
 	"listen_bijson": "127.0.0.1:22014",
-	"chargers_conns": ["*internal"]
+	"conns":{
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 "admins": {

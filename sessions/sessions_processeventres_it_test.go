@@ -53,7 +53,11 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 "logger": { "level": 7 },
 "sessions": {
 	"enabled": true,
-	"resources_conns": ["*localhost"]
+		"conns": {
+			"*resources": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+		},
+	"opts": {
+	}
 },
 "resources": {
 	"enabled": true,

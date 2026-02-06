@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -31,7 +30,7 @@ type CoreSCfg struct {
 	Caps              int
 	CapsStrategy      string
 	CapsStatsInterval time.Duration
-	EEsConns          []string
+	Conns             map[string][]*DynamicStringSliceOpt
 	ShutdownTimeout   time.Duration
 }
 
@@ -59,8 +58,11 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 			return
 		}
 	}
-	if jsnCfg.Ees_conns != nil {
-		cS.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			cS.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Shutdown_timeout != nil {
 		if cS.ShutdownTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Shutdown_timeout); err != nil {
@@ -77,12 +79,10 @@ func (cS CoreSCfg) AsMapInterface() any {
 		utils.CapsStrategyCfg:      cS.CapsStrategy,
 		utils.CapsStatsIntervalCfg: cS.CapsStatsInterval.String(),
 		utils.ShutdownTimeoutCfg:   cS.ShutdownTimeout.String(),
+		utils.ConnsCfg:             stripConns(cS.Conns),
 	}
 	if cS.CapsStatsInterval == 0 {
 		mp[utils.CapsStatsIntervalCfg] = "0"
-	}
-	if cS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(cS.EEsConns)
 	}
 	if cS.ShutdownTimeout == 0 {
 		mp[utils.ShutdownTimeoutCfg] = "0"
@@ -100,11 +100,8 @@ func (cS CoreSCfg) Clone() (cln *CoreSCfg) {
 		CapsStrategy:      cS.CapsStrategy,
 		CapsStatsInterval: cS.CapsStatsInterval,
 		ShutdownTimeout:   cS.ShutdownTimeout,
+		Conns:             CloneConnsOpt(cS.Conns),
 	}
-	if cS.EEsConns != nil {
-		cln.EEsConns = slices.Clone(cS.EEsConns)
-	}
-
 	return
 }
 
@@ -112,7 +109,7 @@ type CoreSJsonCfg struct {
 	Caps                *int
 	Caps_strategy       *string
 	Caps_stats_interval *string
-	Ees_conns           *[]string
+	Conns               map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Shutdown_timeout    *string
 }
 
@@ -129,8 +126,8 @@ func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 	if v1.CapsStatsInterval != v2.CapsStatsInterval {
 		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
 	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.ShutdownTimeout != v2.ShutdownTimeout {
 		d.Shutdown_timeout = utils.StringPointer(v2.ShutdownTimeout.String())

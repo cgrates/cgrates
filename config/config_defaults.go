@@ -59,7 +59,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ]
 	}
@@ -81,7 +81,14 @@ const CGRATES_CFG_JSON = `
 	"caps": 0,			// maximum concurrent request allowed ( 0 to disabled )
 	"caps_strategy": "*busy",	// strategy in case of concurrent requests reached	
 	"caps_stats_interval": "0",	// the interval duration we sample for caps stats ( 0 to disabled )
-	"ees_conns": [],		// connections to EventExporter
+	"conns": {
+		// "*ees": [	// connections to EventExporter
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+	},			
 	"shutdown_timeout": "1s"	// the duration to wait until all services are stopped
 },
 
@@ -306,11 +313,41 @@ const CGRATES_CFG_JSON = `
 
 
 "filters": {
-	"stats_conns": [],	// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"resources_conns": [],	// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"accounts_conns": [],	// connections to AccountS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"trends_conns": [],		// connections to TrendS for <*trends> filters, empty to disable trends functionality: <""|*internal|$rpc_conns_id>
-	"rankings_conns": []	// connections to RankingS for <*rankings> filters, empty to disable rankings functionality: <""|*internal|$rpc_conns_id> 
+	"conns": {
+	    // "*stats": [
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*resources": [
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*accounts": [
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*trends": [
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// "*rankings": [
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+	}	
 	},
 
 
@@ -319,15 +356,63 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,		// start the CDR Server:  <true|false>
 	"extra_fields": [],		// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 	"session_cost_retries": 5,	// number of queries to session_costs before recalculating CDR
-	"chargers_conns": [],		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
-	"attributes_conns": [],		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"stats_conns": [],		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*chargers": [		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*attributes": [		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*stats": [		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [	// connections to EventExporter
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*rates": [	// connections to RateS
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// "*accounts": [	// connections to AccountS
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},	
 	"online_cdr_exports":[],	// list of CDRE profiles to use for real-time CDR exports
-	"actions_conns": [],		// connections to SchedulerS in case of *dynaprepaid request
-	"ees_conns": [],		// connections to EventExporter
-	"rates_conns": [],		// connections to RateS
-	"accounts_conns": [],		// connections to AccountS
 	"opts": {
 		// "*accounts": [
 		// 	{
@@ -405,10 +490,35 @@ const CGRATES_CFG_JSON = `
 
 "ers": {				// EventReaderService
 	"enabled": false,		// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],	// RPC Connections IDs
-	"ees_conns": [],		// connection for routing processed and invalid messages through EEs
-	"stats_conns": [],		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],		// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+		// "*sessions": [	// RPC Connections IDs
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [		// connection for routing processed and invalid messages through EEs
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*stats": [		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// "*thresholds": [	// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},	
 	"partial_cache_ttl": "1s",	// the duration to cache partial records when not pairing	
 	"readers": [
 		{
@@ -527,7 +637,15 @@ const CGRATES_CFG_JSON = `
 
 "ees": {
 	"enabled": false,		// starts the EventReader service: <true|false>
-	"attributes_conns":[],		// RPC Connections IDs
+	"conns": {
+		// "*attributes": [  // RPC Connections IDs
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},	
 	"cache": {
 		"*fileCSV": {"limit": -1, "ttl": "5s", "static_ttl": false}
 	},
@@ -539,7 +657,9 @@ const CGRATES_CFG_JSON = `
 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 			"concurrent_requests": 0,				// maximum simultaneous requests to process, 0 for unlimited
 			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-			"efs_conns": ["*internal"],				// connID to efs service
+			"conns": {
+					"*efs": [{"Values": ["*internal"]}]	// connID to efs service
+					},		
 			"filters": [],						// limit parsing based on the filters
 			"flags": [],						// flags to influence the event processing
 			"attribute_ids": [],					// select Attribute profiles instead of discovering them
@@ -655,15 +775,6 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
 	"listen_bigob": "",			// address where to listen for bidirectional GOB-RPC requests
-	"chargers_conns": [],			// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
-	"cdrs_conns": [],			// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
-	"resources_conns": [],			// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
-	"ips_conns": [],			// connections to IPs for monitoring ip usage <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],			// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
-	"stats_conns": [],			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
-	"routes_conns": [],			// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
-	"attributes_conns": [],			// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
-	"replication_conns": [],		// replicate sessions towards these session services
 	"debit_interval": "0s",			// interval to perform debits on.
 	"store_session_costs": false,		// enable storing of the session costs within CDRs
 	"default_usage":{			// the usage if the event is missing the usage field
@@ -689,10 +800,7 @@ const CGRATES_CFG_JSON = `
 		"default_attest": "A",		// the default attest level if not mentioned in API
 		"publickey_path": "",		// the path to the public key 
 		"privatekey_path": "",		// the path to the private key
-	},
-	"actions_conns": [],			// connections to SchedulerS in case of *dynaprepaid request
-	"rates_conns": [], 			// connections to RateS
-	"accounts_conns": [],			// connections to AccountS
+	},																		
 	"opts": {
 		// "*accounts": [
 		// 	{
@@ -960,13 +1068,94 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": ""
 		// 	}
 		// ]
+	},
+	"conns": {
+	// "*attributes": [		// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*accounts": [		// connections to AccountS
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*rates": [		// connections to RateS
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*routes": [		// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*stats": [		// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*ips": [	// connections to IPs for monitoring ip usage <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*chargers": [	// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*cdrs": [	// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*replication": [	// replicate sessions towards these session services
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ]
 	}
 },
 
 
 "asterisk_agent": {
 	"enabled": false,			// starts the Asterisk agent: <true|false>
-	"sessions_conns": ["*birpc_internal"],
+	"conns": {
+		"*sessions":[{"Values":["*birpc_internal"]}]
+	},			
 	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[			// instantiate connections to multiple Asterisk servers
 		{
@@ -983,7 +1172,9 @@ const CGRATES_CFG_JSON = `
 
 "freeswitch_agent": {
 	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": ["*birpc_internal"],
+	"conns": {
+		"*sessions":[{"Values":["*birpc_internal"]}]
+	},
 	"subscribe_park": true,				// subscribe via fsock to receive park events
 	"create_cdr": false,				// creates CDR out of events and sends them to CDRS component
 	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
@@ -1007,7 +1198,9 @@ const CGRATES_CFG_JSON = `
 
 "kamailio_agent": {
 	"enabled": false,			// starts Kamailio agent: <true|false>
-	"sessions_conns": ["*birpc_internal"],
+	"conns": {
+		"*sessions":[{"Values":["*birpc_internal"]}]
+	},
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"timezone": "",				// timezone of the Kamailio server
 	"evapi_conns":[				// instantiate connections to multiple Kamailio servers
@@ -1026,9 +1219,23 @@ const CGRATES_CFG_JSON = `
 	"listen_net": "tcp",						// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
-	"sessions_conns": ["*birpc_internal"],
-	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],						// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+		"*sessions":[{"Values":["*birpc_internal"]}]
+		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+		 // 	{
+		 // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	     // 	{
+	     // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	},
 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,							// diameter Vendor-Id AVP used in replies
@@ -1070,9 +1277,23 @@ const CGRATES_CFG_JSON = `
 		// }
 	},
 	"requests_cache_key": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
-	"sessions_conns": ["*internal"],
-	"stats_conns": [],					// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],					// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+		"*sessions":[{"Values":["*internal"]}]
+		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+		 // 	{
+		 // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	     // 	{
+	     // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	},	
 	"dmr_template": "*dmr",					// template used to build the Disconnect-Request packet
 	"coa_template": "*coa",					// template used to build the CoA-Request packet
 	"request_processors": []				// request processors to be applied to Radius messages
@@ -1090,9 +1311,23 @@ const CGRATES_CFG_JSON = `
 			"network": "udp"		// network to listen on <udp|tcp|tcp-tls>
 		}
 	],
-	"sessions_conns": ["*internal"],
-	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],				// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+		"*sessions":[{"Values":["*birpc_internal"]}]
+		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+		 // 	{
+		 // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	     // 	{
+	     // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	},
 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"request_processors": []			// request processors to be applied to DNS messages
 },
@@ -1101,20 +1336,66 @@ const CGRATES_CFG_JSON = `
 "prometheus_agent": {
 	"enabled": false,			// enables the prometheus agent: <true|false>
 	"path": "/prometheus",			// endpoint for prometheus metrics
-	"admins_conns": [],			// connections to AdminS, empty to disable: <""|*internal|$rpc_conns_id>
-	"caches_conns": [], 			// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+	// "*admins": [		// connections to AdminS, empty to disable: <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*caches": [		// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*cores": [		// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	// "*stats": [	// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	// 	{
+	// 		"Tenant": "",
+	// 		"FilterIDs": [],
+	// 		"Values": []
+	// 	}
+	// ],
+	},				
 	"cache_ids": [],			// cache partition IDs to collect statistics for, empty for all partitions
-	"cores_conns": [],			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
-	"stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 	"stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
 },
 
 
 "attributes": {
 	"enabled": false,				// starts attribute service: <true|false>
-	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"resources_conns": [],				// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
-	"accounts_conns": [],				// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*stats": [		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*resources": [		// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*accounts": [		// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},					
 	"indexed_selects": true,			// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -1127,7 +1408,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ],
 		// "*processRuns": [			// number of run loops when processing event
@@ -1157,7 +1438,15 @@ const CGRATES_CFG_JSON = `
 
 "chargers": {
 	"enabled": false,		// starts charger service: <true|false>
-	"attributes_conns": [],		// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
+	"conns": {
+	 	// "*attributes": [		// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},			
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1171,7 +1460,15 @@ const CGRATES_CFG_JSON = `
 "resources": {
 	"enabled": false,		// starts ResourceLimiter service: <true|false>
 	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+		// "*thresholds": [		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},		
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1244,8 +1541,22 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,		// starts Stat service: <true|false>
 	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,	// used to compress data
-	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*ees": [	// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},		
 	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1259,7 +1570,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for statIDs
@@ -1290,15 +1601,29 @@ const CGRATES_CFG_JSON = `
 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"actions_conns": [],			// connections to ActionS to execute the actions
-	"ees_conns": [],			// connections to EEs to sent threshold events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*actions": [	// connections to ActionS to execute the actions
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [	// connections to EEs to sent threshold events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},				
 	"ees_exporter_ids": [],			// list of EventExporter profiles to use for real-time threshold exports
 	"opts":{
 		// "*thresholdsIDs": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for thresholdIDs
@@ -1316,10 +1641,30 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,		// starts TrendS service: <true|false>.
 	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,	// used to compress metrics
-	"stats_conns": [],		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>	
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},			
 	"scheduled_ids": {},		// autoload these trend ids on start
-	"thresholds_conns": [],		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"ees_conns": [],		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 	"ees_exporter_ids": []		// list of EventExporter profiles to use for real-time trendSummary exports
 },
 
@@ -1327,10 +1672,30 @@ const CGRATES_CFG_JSON = `
 "rankings":{
 	"enabled": false,	// starts RankingS service: <true|false>.
 	"store_interval": "",	// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [		// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},		
 	"scheduled_ids": {},	// autoload these ranking ids on start
-	"thresholds_conns": [],	// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"ees_conns": [],	// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 	"ees_exporter_ids": []	// list of EventExporter profiles to use for real-time rankingSummary exports
 },
 
@@ -1344,11 +1709,43 @@ const CGRATES_CFG_JSON = `
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"attributes_conns": [],		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
-	"resources_conns": [],		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
-	"stats_conns": [],		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"rates_conns": [],		// connections to RateS
-	"accounts_conns": [],		// connections to AccountS
+	"conns": {
+	    // "*attributes": [		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*resources": [		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*stats": [		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*rates": [		// connections to RateS
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*accounts": [	// connections to AccountS
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},		
 	"default_ratio":1,		// default ratio used in case of *load strategy
 	"opts":{
 		// "*context": [
@@ -1786,7 +2183,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ]
 	}
@@ -1795,10 +2192,30 @@ const CGRATES_CFG_JSON = `
 
 "admins": {
 	"enabled": false,
-	"caches_conns":["*internal"],
-	"actions_conns": [],		// connections to ActionS for reloads
-	"attributes_conns": [],		// connections to AttributeS for CDRExporter
-	"ees_conns": []			// connections to EEs
+	"conns": {
+		"*caches": [{"Values": ["*internal"]}],
+		// "*actions": [	// connections to ActionS for reloads
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*attributes": [		// connections to AttributeS for CDRExporter
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [	// connections to EEs
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	}
 },
 
 
@@ -1824,7 +2241,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ],
 		// "*startTime": [		// start time used for cost calculation
@@ -1863,9 +2280,23 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,		// enables the SIP agent: <true|false>
 	"listen": "127.0.0.1:5060",	// address where to listen for SIP requests <x.y.z.y:1234>
 	"listen_net": "udp",		// network to listen on <udp|tcp|tcp-tls>
-	"sessions_conns": ["*internal"],
-	"stats_conns": [],		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],		// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"conns": {
+		"*sessions":[{"Values":["*internal"]}]
+		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
+		 // 	{
+		 // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
+	     // 	{
+	     // 		"Tenant": "",
+	     // 		"FilterIDs": [],
+	     // 		"Values": []
+	     // 	}
+	     // ],
+	},
 	"timezone": "",			// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"retransmission_timer": "1s",	// the duration to wait to receive an ACK before resending the reply
 	"request_processors": []	// request processors to be applied to SIP messages
@@ -1874,7 +2305,7 @@ const CGRATES_CFG_JSON = `
 "janus_agent": {
 	"enabled": false,				// enables the Janus agent: <true|false>
 	"url": "/janus",
-	"sessions_conns": ["*internal"],
+	"conns": {"*sessions": [{"values": ["*internal"]}]},
 	"janus_conns": [{				// instantiate connections to multiple Janus Servers
 		"address": "127.0.0.1:8088",		// janus API address 
 		"type": "*ws",				// type of the transport to interact via janus API
@@ -2063,12 +2494,50 @@ const CGRATES_CFG_JSON = `
 
 "actions": {
 	"enabled": false,		// starts attribute service: <true|false>
-	"cdrs_conns": [],		// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
-	"ees_conns": [],		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],		// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
-	"stats_conns": [],		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
-	"accounts_conns": [],		// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
-	"admins_conns": [],		// connections to AdminS for *dynamic actions: <""|*internal|$rpc_conns_id>
+	"conns": {
+		// "*cdrs": [		// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*ees": [		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*stats": [		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*accounts": [	// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*admins": [		// connections to AdminS for *dynamic actions: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},		
 	"tenants":[],			// List of tenants to operate on
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -2083,7 +2552,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": [],
+		// 		"Values": [],
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for actionProfileIDs
@@ -2107,9 +2576,29 @@ const CGRATES_CFG_JSON = `
 "accounts": {
 	"enabled": false,		// starts service: <true|false>
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	"attributes_conns": [],		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
-	"rates_conns": [],		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"conns": {
+		// "*attributes": [		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*rates": [		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+		// "*thresholds": [		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"Values": ["*internal"]
+		// 	}
+		// ],
+	},			
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -2123,7 +2612,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
-		// 		"Value": []
+		// 		"Values": []
 		// 	}
 		// ],
 		// "*usage": [

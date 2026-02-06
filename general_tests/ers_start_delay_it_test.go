@@ -58,7 +58,9 @@ func TestErsStartDelay(t *testing.T) {
 		},
 		"cdrs":{
 		"enabled":true,
-		"rates_conns": ["*localhost"],	
+		"conns": {
+			"*rates": [{"Values": ["*localhost"]}]
+		},
 		"opts":{
 		"*rates":[
 		 {
@@ -69,7 +71,15 @@ func TestErsStartDelay(t *testing.T) {
 		},	
 		"sessions":{
 		   "enabled": true,
-		   "cdrs_conns":["*localhost"]
+		    "conns": {
+			"*cdrs": [ 
+			{
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+			}
+									]
+			}
         },
 		"logger": {
      	"level": 7,								},
@@ -88,7 +98,9 @@ func TestErsStartDelay(t *testing.T) {
 		},
 		"ers": {
 			"enabled": true,
-			"sessions_conns": ["*localhost"],
+			"conns": {
+				"*sessions": [{"Values": ["*localhost"]}]
+			},
 			"readers": [
 				{
 					"id": "file_csv_reader",

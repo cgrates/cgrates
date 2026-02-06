@@ -517,14 +517,24 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 			}
 			args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
 			var reply string
+			evNm := utils.MapStorage{
+				utils.MetaReq:  args.Event,
+				utils.MetaOpts: args.APIOpts,
+			}
+			actionConns, err := GetConnIDs(ctx, tS.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, tS.fltrS)
+			if err != nil {
+				withErrors = true
+				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", t.TenantID(), err.Error()))
+				continue
+			}
 			if !t.tPrfl.Async {
-				if err = tS.connMgr.Call(ctx, tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+				if err = tS.connMgr.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
 					withErrors = true
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), err.Error()))
 				}
 			} else {
 				go func() {
-					if errExec := tS.connMgr.Call(context.Background(), tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions,
+					if errExec := tS.connMgr.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
 						args, &reply); errExec != nil {
 						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
 					}
@@ -533,7 +543,7 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 			if !withErrors {
 				t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 			}
-			if err = tS.processEEs(args.APIOpts, t); err != nil {
+			if err = tS.processEEs(ctx, args.APIOpts, t, tnt, evNm); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
 				withErrors = true
@@ -556,7 +566,7 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 	return
 }
 
-func (t *ThresholdS) processEEs(opts map[string]any, th *Threshold) error {
+func (t *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *Threshold, tnt string, dP utils.DataProvider) error {
 	var targetEeIDs []string
 	if len(th.tPrfl.EeIDs) > 0 {
 		targetEeIDs = th.tPrfl.EeIDs
@@ -566,8 +576,12 @@ func (t *ThresholdS) processEEs(opts map[string]any, th *Threshold) error {
 	} else {
 		targetEeIDs = t.cfg.ThresholdSCfg().EEsExporterIDs
 	}
+	eesConns, err := GetConnIDs(ctx, t.cfg.ThresholdSCfg().Conns[utils.MetaEEs], tnt, dP, t.fltrS)
+	if err != nil {
+		return err
+	}
 	if len(targetEeIDs) > 0 {
-		if len(t.cfg.ThresholdSCfg().EEsConns) == 0 {
+		if len(eesConns) == 0 {
 			return utils.NewErrNotConnected(utils.EEs)
 		}
 	} else {
@@ -608,7 +622,7 @@ func (t *ThresholdS) processEEs(opts map[string]any, th *Threshold) error {
 	var reply map[string]map[string]any
 	if th.tPrfl.Async {
 		go func() {
-			if errExec := t.connMgr.Call(context.TODO(), t.cfg.ThresholdSCfg().EEsConns,
+			if errExec := t.connMgr.Call(context.TODO(), eesConns,
 				utils.EeSv1ProcessEvent,
 				cgrEventWithID, &reply); errExec != nil &&
 				errExec.Error() != utils.ErrNotFound.Error() {
@@ -616,7 +630,7 @@ func (t *ThresholdS) processEEs(opts map[string]any, th *Threshold) error {
 					fmt.Sprintf("<ThresholdS> error: %v processing event %+v with EEs.", errExec, cgrEv))
 			}
 		}()
-	} else if err := t.connMgr.Call(context.TODO(), t.cfg.ThresholdSCfg().EEsConns,
+	} else if err := t.connMgr.Call(context.TODO(), eesConns,
 		utils.EeSv1ProcessEvent,
 		cgrEventWithID, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {

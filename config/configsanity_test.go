@@ -28,67 +28,69 @@ func TestConfigSanityCDRServer(t *testing.T) {
 
 	cfg.cdrsCfg = &CdrsCfg{
 		Enabled: true,
+		Conns:   make(map[string][]*DynamicStringSliceOpt),
 	}
 
-	cfg.cdrsCfg.EEsConns = []string{"test"}
+	cfg.cdrsCfg.Conns[utils.MetaEEs] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected := "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
-	cfg.cdrsCfg.EEsConns = []string{utils.MetaInternal}
+	cfg.cdrsCfg.Conns[utils.MetaEEs] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<EEs> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
+	delete(cfg.cdrsCfg.Conns, utils.MetaEEs)
 
-	cfg.cdrsCfg.ChargerSConns = []string{utils.MetaInternal}
+	cfg.cdrsCfg.Conns[utils.MetaChargers] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<ChargerS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.ChargerSConns = []string{"test"}
+	cfg.cdrsCfg.Conns[utils.MetaChargers] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.ChargerSConns = []string{}
+	delete(cfg.cdrsCfg.Conns, utils.MetaChargers)
 
-	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
+	cfg.cdrsCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<AttributeS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.AttributeSConns = []string{"test"}
+	cfg.cdrsCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.AttributeSConns = []string{}
+	delete(cfg.cdrsCfg.Conns, utils.MetaAttributes)
 
-	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
+	cfg.cdrsCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<StatS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.StatSConns = []string{"test"}
+	cfg.cdrsCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.StatSConns = []string{}
+	delete(cfg.cdrsCfg.Conns, utils.MetaStats)
 
-	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
+	cfg.cdrsCfg.Conns[utils.MetaThresholds] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<ThresholdS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.cdrsCfg.ThresholdSConns = []string{"test"}
+	cfg.cdrsCfg.Conns[utils.MetaThresholds] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.ThresholdSConns = []string{}
+	delete(cfg.cdrsCfg.Conns, utils.MetaThresholds)
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"*default", "stringy"}
 	expected = "<CDRs> cannot find exporter with ID: <stringy>"
@@ -199,109 +201,13 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg = &SessionSCfg{
 		Enabled:           true,
 		TerminateAttempts: 0,
+		Opts:              &SessionsOpts{},
 	}
 	expected := "<SessionS> 'terminate_attempts' should be at least 1"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.TerminateAttempts = 1
-
-	cfg.sessionSCfg.ChargerSConns = []string{utils.MetaInternal}
-	expected = "<ChargerS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ChargerSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ChargerSConns = []string{}
-	cfg.chargerSCfg.Enabled = true
-
-	cfg.sessionSCfg.ResourceSConns = []string{utils.MetaInternal}
-	expected = "<ResourceS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ResourceSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ResourceSConns = []string{}
-	cfg.resourceSCfg.Enabled = true
-
-	cfg.sessionSCfg.ThresholdSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ThresholdSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ThresholdSConns = []string{}
-	cfg.thresholdSCfg.Enabled = true
-
-	cfg.sessionSCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.StatSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.StatSConns = []string{}
-	cfg.statsCfg.Enabled = true
-
-	cfg.sessionSCfg.RouteSConns = []string{utils.MetaInternal}
-	expected = "<RouteS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.RouteSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.RouteSConns = []string{}
-	cfg.routeSCfg.Enabled = true
-
-	cfg.sessionSCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.AttributeSConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.AttributeSConns = []string{}
-	cfg.attributeSCfg.Enabled = true
-
-	cfg.sessionSCfg.CDRsConns = []string{utils.MetaInternal}
-	expected = "<CDRs> not enabled but requested by <SessionS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.CDRsConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.CDRsConns = []string{}
-	cfg.cdrsCfg.Enabled = true
-	cfg.sessionSCfg.ReplicationConns = []string{"test"}
-	expected = "<SessionS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.sessionSCfg.ReplicationConns = []string{}
 
 	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 0
 	expected = "<CacheS> *closed_sessions needs to be != 0, received: 0"
@@ -323,14 +229,16 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 	}
 
 	cfg.fsAgentCfg = &FsAgentCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.MetaInternal},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	expected = "<SessionS> not enabled but requested by <FreeSWITCHAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.fsAgentCfg.SessionSConns = []string{"test"}
+	cfg.fsAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<FreeSWITCHAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -341,18 +249,19 @@ func TestConfigSanityKamailioAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.kamAgentCfg = &KamAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 	}
 	expected := "<KamailioAgent> no SessionS connections defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.kamAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.kamAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	expected = "<SessionS> not enabled but requested by <KamailioAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.kamAgentCfg.SessionSConns = []string{"test"}
+	cfg.kamAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<KamailioAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -363,18 +272,19 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.asteriskAgentCfg = &AsteriskAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 	}
 	expected := "<AsteriskAgent> no SessionS connections defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.asteriskAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.asteriskAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	expected = "<SessionS> not enabled but requested by <AsteriskAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.asteriskAgentCfg.SessionSConns = []string{"test"}
+	cfg.asteriskAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<AsteriskAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -392,6 +302,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.diameterAgentCfg = &DiameterAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",
@@ -413,12 +324,12 @@ func TestConfigSanityDAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.diameterAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.diameterAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	expected = "<SessionS> not enabled but requested by <DiameterAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.diameterAgentCfg.SessionSConns = []string{"test"}
+	cfg.diameterAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<DiameterAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -520,6 +431,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.radiusAgentCfg = &RadiusAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",
@@ -540,12 +452,12 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.radiusAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.radiusAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	expected = "<SessionS> not enabled but requested by <RadiusAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.radiusAgentCfg.SessionSConns = []string{"test"}
+	cfg.radiusAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<RadiusAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -621,6 +533,7 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.dnsAgentCfg = &DNSAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",
@@ -641,12 +554,12 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dnsAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.dnsAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	expected = "<SessionS> not enabled but requested by <DNSAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dnsAgentCfg.SessionSConns = []string{"test"}
+	cfg.dnsAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<DNSAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -723,7 +636,9 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 
 	cfg.httpAgentCfg = HTTPAgentCfgs{
 		&HTTPAgentCfg{
-			SessionSConns: []string{utils.MetaInternal},
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+			},
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:       "cgrates",
@@ -744,12 +659,12 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.httpAgentCfg[0].SessionSConns = []string{"test"}
+	cfg.httpAgentCfg[0].Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<HTTPAgent> template with ID <> has connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.httpAgentCfg[0].SessionSConns = []string{}
+	cfg.httpAgentCfg[0].Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{}
 
 	cfg.httpAgentCfg[0].RequestPayload = "test"
 	expected = "<HTTPAgent> unsupported request payload test"
@@ -850,6 +765,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 
 	cfg.sipAgentCfg = &SIPAgentCfg{
 		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",
@@ -872,12 +788,12 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 
 	expected = "<SessionS> not enabled but requested by <SIPAgent> component"
-	cfg.sipAgentCfg.SessionSConns = []string{utils.MetaInternal}
+	cfg.sipAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	expected = "<SIPAgent> connection with id: <test> not defined"
-	cfg.sipAgentCfg.SessionSConns = []string{"test"}
+	cfg.sipAgentCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -989,14 +905,16 @@ func TestConfigSanityChargerS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	cfg.chargerSCfg = &ChargerSCfg{
-		Enabled:         true,
-		AttributeSConns: []string{utils.MetaInternal},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	expected := "<AttributeS> not enabled but requested by <ChargerS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.chargerSCfg.AttributeSConns = []string{"test"}
+	cfg.chargerSCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<ChargerS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1006,14 +924,16 @@ func TestConfigSanityChargerS(t *testing.T) {
 func TestConfigSanityResourceLimiter(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.resourceSCfg = &ResourceSConfig{
-		Enabled:         true,
-		ThresholdSConns: []string{utils.MetaInternal},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	expected := "<ThresholdS> not enabled but requested by <ResourceS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.resourceSCfg.ThresholdSConns = []string{"test"}
+	cfg.resourceSCfg.Conns[utils.MetaThresholds] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<ResourceS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1023,14 +943,16 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 func TestConfigSanityStatS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.statsCfg = &StatSCfg{
-		Enabled:         true,
-		ThresholdSConns: []string{utils.MetaInternal},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	expected := "<ThresholdS> not enabled but requested by <StatS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.statsCfg.ThresholdSConns = []string{"test"}
+	cfg.statsCfg.Conns[utils.MetaThresholds] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<StatS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1041,54 +963,56 @@ func TestConfigSanityRouteS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.routeSCfg.Enabled = true
 
-	cfg.routeSCfg.ResourceSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.Conns[utils.MetaResources] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected := "<ResourceS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.ResourceSConns = []string{"test"}
+	cfg.routeSCfg.Conns[utils.MetaResources] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.ResourceSConns = []string{}
+	delete(cfg.routeSCfg.Conns, utils.MetaResources)
 
-	cfg.routeSCfg.StatSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<StatS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.StatSConns = []string{"test"}
+	cfg.routeSCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.StatSConns = []string{}
+	delete(cfg.routeSCfg.Conns, utils.MetaStats)
 
-	cfg.routeSCfg.AttributeSConns = []string{utils.MetaInternal}
+	cfg.routeSCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<AttributeS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.AttributeSConns = []string{"test"}
+	cfg.routeSCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<RouteS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.routeSCfg.AttributeSConns = []string{}
+	delete(cfg.routeSCfg.Conns, utils.MetaAttributes)
 }
 
 func TestConfigSanityEventReader(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"unexistedConn"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{"unexistedConn"}}},
+		},
 	}
 	expected := "<ERs> connection with id: <unexistedConn> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.ersCfg.SessionSConns = []string{utils.MetaInternal}
+	cfg.ersCfg.Conns[utils.MetaSessionS] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expected = "<SessionS> not enabled but requested by <ERs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1282,8 +1206,10 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	cfg.eesCfg = &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{utils.MetaInternal},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal}}},
+		},
 		Exporters: []*EventExporterCfg{
 			{
 				Fields: []*FCTemplate{
@@ -1298,12 +1224,12 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.eesCfg.AttributeSConns = []string{"test"}
+	cfg.eesCfg.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<EEs> connection with id: <test> not defined"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.eesCfg.AttributeSConns = []string{}
+	delete(cfg.eesCfg.Conns, utils.MetaAttributes)
 
 	expected = "<EEs> unsupported data type:  for exporter with ID: "
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
@@ -1583,24 +1509,24 @@ func TestConfigSanityAPIer(t *testing.T) {
 	for key := range utils.StatelessDataDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
-	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
+	cfg.admS.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <AdminS> component" {
 		t.Error(err)
 	}
-	cfg.admS.AttributeSConns = []string{"test"}
+	cfg.admS.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected := "<AdminS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
+	cfg.admS.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	cfg.attributeSCfg.Enabled = true
-	cfg.admS.ActionSConns = []string{utils.MetaInternal}
+	cfg.admS.Conns[utils.MetaActions] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <AdminS> component" {
 		t.Error(err)
 	}
-	cfg.admS.ActionSConns = []string{"test"}
+	cfg.admS.Conns[utils.MetaActions] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<AdminS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1627,36 +1553,36 @@ func TestConfigSanityFilterS(t *testing.T) {
 	for key := range utils.StatelessDataDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
-	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
+	cfg.filterSCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<StatS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
-	cfg.filterSCfg.StatSConns = []string{"test"}
+	cfg.filterSCfg.Conns[utils.MetaStats] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected := "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.filterSCfg.StatSConns = []string{}
+	delete(cfg.filterSCfg.Conns, utils.MetaStats)
 
-	cfg.filterSCfg.ResourceSConns = []string{utils.MetaInternal}
+	cfg.filterSCfg.Conns[utils.MetaResources] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ResourceS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
-	cfg.filterSCfg.ResourceSConns = []string{"test"}
+	cfg.filterSCfg.Conns[utils.MetaResources] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.filterSCfg.ResourceSConns = []string{}
+	delete(cfg.filterSCfg.Conns, utils.MetaResources)
 
-	cfg.filterSCfg.AccountSConns = []string{utils.MetaInternal}
+	cfg.filterSCfg.Conns[utils.MetaAccounts] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AccountS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
-	cfg.filterSCfg.AccountSConns = []string{"test"}
+	cfg.filterSCfg.Conns[utils.MetaAccounts] = []*DynamicStringSliceOpt{{Values: []string{"test"}}}
 	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1667,7 +1593,7 @@ func TestConfigSanityErs(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.ersCfg.Enabled = true
 
-	cfg.ersCfg.SessionSConns = []string{}
+	delete(cfg.ersCfg.Conns, utils.MetaSessionS)
 	cfg.ersCfg.Readers = []*EventReaderCfg{
 		{
 			Type: utils.MetaNone,
@@ -1723,11 +1649,42 @@ func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 		cdrsCfg: &CdrsCfg{
 			Enabled: false,
 		},
-
+		chargerSCfg: &ChargerSCfg{
+			Enabled: false,
+		},
+		resourceSCfg: &ResourceSConfig{
+			Enabled: false,
+		},
+		ipsCfg: &IPsCfg{
+			Enabled: false,
+		},
+		thresholdSCfg: &ThresholdSCfg{
+			Enabled: false,
+		},
+		statsCfg: &StatSCfg{
+			Enabled: false,
+		},
+		routeSCfg: &RouteSCfg{
+			Enabled: false,
+		},
+		attributeSCfg: &AttributeSCfg{
+			Enabled: false,
+		},
+		actionSCfg: &ActionSCfg{
+			Enabled: false,
+		},
+		rateSCfg: &RateSCfg{
+			Enabled: false,
+		},
+		accountSCfg: &AccountSCfg{
+			Enabled: false,
+		},
 		sessionSCfg: &SessionSCfg{
 			Enabled:           true,
 			TerminateAttempts: 1,
 			AlterableFields:   utils.NewStringSet([]string{"OriginHost"}),
+			Conns:             make(map[string][]*DynamicStringSliceOpt),
+			Opts:              &SessionsOpts{},
 		},
 		cacheCfg: &CacheCfg{
 
@@ -1765,7 +1722,9 @@ func TestCGRConfigcheckConfigSanityAdminSErrExportersCSV(t *testing.T) {
 		},
 	}
 	cfg.admS = &AdminSCfg{
-		AttributeSConns: []string{"test"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"test"}}},
+		},
 	}
 	cfg.ersCfg = &ERsCfg{
 		Enabled: true,
@@ -1816,7 +1775,9 @@ func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
 		},
 	}
 	cfg.admS = &AdminSCfg{
-		AttributeSConns: []string{"test"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"test"}}},
+		},
 	}
 	cfg.ersCfg = &ERsCfg{
 		Enabled: true,
@@ -1860,7 +1821,7 @@ func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 			},
 		},
 	}
-	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
+	cfg.admS.Conns[utils.MetaAttributes] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	expErr := "<CacheS> connection with id: <remote conn> not defined"
 	if err := cfg.checkConfigSanity(); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
@@ -1873,7 +1834,7 @@ func TestCGRConfigcheckConfigSanityCacheSTransportErr(t *testing.T) {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.cacheCfg.RemoteConns = []string{"con1"}
-	cfg.admS.ActionSConns = []string{utils.MetaInternal}
+	cfg.admS.Conns[utils.MetaActions] = []*DynamicStringSliceOpt{{Values: []string{utils.MetaInternal}}}
 	cfg.actionSCfg = &ActionSCfg{Enabled: true}
 	cfg.rpcConns = map[string]*RPCConn{
 		"con1": {
@@ -1949,7 +1910,6 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 	cfg, err := NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {
 	"enabled": true,
-	"sessions_conns": [],
 	"readers": [
 		{
 			"id": "*default",

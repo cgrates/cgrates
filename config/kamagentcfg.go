@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -77,11 +76,11 @@ func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 
 // KamAgentCfg is the Kamailio config section
 type KamAgentCfg struct {
-	Enabled       bool
-	SessionSConns []string
-	CreateCdr     bool
-	EvapiConns    []*KamConnCfg
-	Timezone      string
+	Enabled    bool
+	Conns      map[string][]*DynamicStringSliceOpt
+	CreateCdr  bool
+	EvapiConns []*KamConnCfg
+	Timezone   string
 }
 
 // loadKamAgentCfg loads the KamAgent section of the configuration
@@ -100,8 +99,11 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		ka.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sessions_conns != nil {
-		ka.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			ka.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Create_cdr != nil {
 		ka.CreateCdr = *jsnCfg.Create_cdr
@@ -133,9 +135,7 @@ func (ka KamAgentCfg) AsMapInterface() any {
 		}
 		mp[utils.EvapiConnsCfg] = evapiConns
 	}
-	if ka.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(ka.SessionSConns)
-	}
+	mp[utils.ConnsCfg] = stripConns(ka.Conns)
 	return mp
 }
 
@@ -148,9 +148,7 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		Enabled:   ka.Enabled,
 		CreateCdr: ka.CreateCdr,
 		Timezone:  ka.Timezone,
-	}
-	if ka.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(ka.SessionSConns)
+		Conns:     CloneConnsOpt(ka.Conns),
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
@@ -188,11 +186,11 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 
 // KamAgentJsonCfg kamailio config section
 type KamAgentJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]string
-	Create_cdr     *bool
-	Evapi_conns    *[]*KamConnJsonCfg
-	Timezone       *string
+	Enabled     *bool
+	Conns       map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Create_cdr  *bool
+	Evapi_conns *[]*KamConnJsonCfg
+	Timezone    *string
 }
 
 func equalsKamConnsCfg(v1, v2 []*KamConnCfg) bool {
@@ -217,8 +215,8 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.CreateCdr != v2.CreateCdr {
 		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)

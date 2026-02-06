@@ -545,7 +545,7 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
-	cfg.AdminSCfg().CachesConns = []string{}
+	delete(cfg.AdminSCfg().Conns, utils.MetaCaches)
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetFilterDrvF: func(ctx *context.Context, fltr *engine.Filter) error {
@@ -814,7 +814,12 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{
+		{
+			Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		},
+	}
+
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -986,7 +991,11 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{
+		{
+			Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		},
+	}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -1201,12 +1210,12 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
+	delete(cfg.AdminSCfg().Conns, utils.MetaCaches)
 	cfg.CacheCfg().ReplicationConns = []string{"rep"}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
 	cfg.RPCConns()["connID"] = &config.RPCConn{}
 	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
 	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"connID"}
-	cfg.AdminSCfg().CachesConns = []string{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {

@@ -49,16 +49,66 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": ["*localhost"],
-	"cdrs_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"routes_conns": ["*localhost"],
-	"attributes_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-	"thresholds_conns": ["*localhost"],
-	"chargers_conns": ["*localhost"],
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
+	"conns":{
+	"*rals": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*resources": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*routes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*stats": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*thresholds": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	]
+			},
 },
 
 

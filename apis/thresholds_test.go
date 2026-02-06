@@ -596,7 +596,9 @@ func TestThresholdsAPIs(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.ThresholdSCfg().ActionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}
+	cfg.ThresholdSCfg().Conns[utils.MetaActions] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}},
+	}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)

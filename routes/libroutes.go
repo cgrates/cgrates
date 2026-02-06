@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -273,19 +274,16 @@ func (sRs SortedRoutesList) AsNavigableMap() (nm *utils.DataNode) {
 
 // routeLazyPass filters the route based on
 func routeLazyPass(ctx *context.Context, filters []*engine.FilterRule, ev *utils.CGREvent, data utils.MapStorage,
-	connMgr *engine.ConnManager, resConns, statConns, acntConns, trdConns, rnkConns []string) (pass bool, err error) {
+	cfg *config.CGRConfig, fS *engine.FilterS) (pass bool, err error) {
 	if len(filters) == 0 {
 		return true, nil
 	}
-
-	dynDP := engine.NewDynamicDP(ctx, connMgr, resConns, statConns, acntConns, //construct the DP and pass it to filterS
-		trdConns, rnkConns, ev.Tenant, utils.MapStorage{
-			utils.MetaReq:  ev.Event,
-			utils.MetaOpts: ev.APIOpts,
-			utils.MetaVars: data,
-		})
-
-	for _, rule := range filters { // verify the rules remaining from PartialPass
+	dynDP := engine.NewDynamicDP(ctx, cfg, ev.Tenant, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+		utils.MetaVars: data,
+	}, fS)
+	for _, rule := range filters {
 		if pass, err = rule.Pass(ctx, dynDP); err != nil || !pass {
 			return
 		}

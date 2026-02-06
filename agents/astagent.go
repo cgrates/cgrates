@@ -57,12 +57,13 @@ const (
 
 // NewAsteriskAgent constructs a new Asterisk Agent
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	connMgr *engine.ConnManager, caps *engine.Caps) *AsteriskAgent {
+	connMgr *engine.ConnManager, caps *engine.Caps, fltrS *engine.FilterS) *AsteriskAgent {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
 		caps:        caps,
+		fltrS:       fltrS,
 		eventsCache: make(map[string]*utils.CGREvent),
 	}
 	srv, _ := birpc.NewService(sma, "", false)
@@ -75,6 +76,7 @@ type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	connMgr     *engine.ConnManager
 	caps        *engine.Caps
+	fltrS       *engine.FilterS
 	astConnIdx  int
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]any
@@ -185,7 +187,12 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	}
 	var authReply sessions.V1AuthorizeReply
-	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
+	//
+	sessionConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), sma.fltrS)
+	if err != nil {
+		return
+	}
+	if err := sma.connMgr.Call(sma.ctx, sessionConns,
 		utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> error: %s authorizing session for channelID: %s",
@@ -288,7 +295,12 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	}
 	//initit Session
 	var initReply sessions.V1InitSessionReply
-	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
+	var sessionConns []string
+	sessionConns, err = engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], cgrEvDisp.Tenant, ev.AsCGREvent().AsDataProvider(), sma.fltrS)
+	if err != nil {
+		return
+	}
+	if err := sma.connMgr.Call(sma.ctx, sessionConns,
 		utils.SessionSv1InitiateSession,
 		cgrEvDisp, &initReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -336,14 +348,15 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 
 	var reply string
-	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
+	sessConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], cgrEvDisp.Tenant, cgrEvDisp.AsDataProvider(), sma.fltrS)
+	if err := sma.connMgr.Call(sma.ctx, sessConns,
 		utils.SessionSv1TerminateSession,
 		cgrEvDisp, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
 			utils.AsteriskAgent, err.Error(), chID))
 	}
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
-		if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
+		if err := sma.connMgr.Call(sma.ctx, sessConns,
 			utils.SessionSv1ProcessCDR,
 			cgrEvDisp, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",

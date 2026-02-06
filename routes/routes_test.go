@@ -824,7 +824,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
-	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
+	cfg.RouteSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{"testConn"}}}
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1839,7 +1839,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	cfg.RouteSCfg().Opts.Context = []*config.DynamicStringOpt{
 		config.NewDynamicStringOpt([]string{"*string.invalid:filter"}, "cgrates.org", "value2", nil),
 	}
-	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
+	cfg.RouteSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{"testConn"}}}
 
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -1883,8 +1883,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
-	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaAttributes)}
+	cfg.RouteSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

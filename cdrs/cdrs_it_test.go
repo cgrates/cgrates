@@ -83,9 +83,11 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 
 "cdrs": {
 	"enabled": true,
-	"attributes_conns":["*internal"],
-	"chargers_conns":["*localhost"],
-	"rates_conns": ["*localhost"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}],
+		"*chargers": [{"Values": ["*localhost"]}],
+		"*rates": [{"Values": ["*localhost"]}]
+	},
 },
 
 "attributes": {
@@ -94,7 +96,9 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*localhost"]
+	"conns": {
+		"*attributes": [{"Values": ["*localhost"]}]
+	},
 },
 
 "admins": {

@@ -140,11 +140,11 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 	case utils.MetaHTTPPost:
 		return newActHTTPPost(ctx, tnt, cgrEv, fltrS, cfg, aCfg)
 	case utils.MetaExport:
-		return &actExport{tnt, cfg, connMgr, aCfg}, nil
+		return &actExport{tnt, cfg, connMgr, fltrS, aCfg}, nil
 	case utils.MetaResetStatQueue:
-		return &actResetStat{tnt, cfg, connMgr, aCfg}, nil
+		return &actResetStat{tnt, cfg, connMgr, fltrS, aCfg}, nil
 	case utils.MetaResetThreshold:
-		return &actResetThreshold{tnt, cfg, connMgr, aCfg}, nil
+		return &actResetThreshold{tnt, cfg, fltrS, connMgr, aCfg}, nil
 	case utils.MetaAddBalance:
 		return &actSetBalance{cfg, connMgr, fltrS, aCfg, tnt, false}, nil
 	case utils.MetaSetBalance:

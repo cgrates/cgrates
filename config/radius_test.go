@@ -38,9 +38,10 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		SessionSConns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		StatSConns:         &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		ThresholdSConns:    &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
@@ -73,11 +74,13 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		StatSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		ThresholdSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
-		CoATemplate:        utils.MetaCoA,
-		DMRTemplate:        utils.MetaDMR,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+		},
+		CoATemplate: utils.MetaCoA,
+		DMRTemplate: utils.MetaDMR,
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -166,22 +169,24 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "radius_agent": {
-	"enabled": true,												
+	"enabled": true,
 	"listeners":[
 		{
 			"network": "udp",
-			"auth_address": "127.0.0.1:1816",					
+			"auth_address": "127.0.0.1:1816",
 			"acct_address": "127.0.0.1:1892"
 		}
-	],														
-	"client_dictionaries": {									
+	],
+	"client_dictionaries": {
 		"*default": [
 			"/usr/share/cgrates/"
-		]			
+		]
 	},
-	"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
-	"stats_conns": ["*internal", "*conn1","*conn2"],
-	"thresholds_conns": ["*internal", "*conn1","*conn2"],
+	"conns": {
+		"*sessions": [{"Values": ["*birpc_internal", "*conn1", "*conn2"]}],
+		"*stats": [{"Values": ["*internal", "*conn1", "*conn2"]}],
+		"*thresholds": [{"Values": ["*internal", "*conn1", "*conn2"]}]
+	},
 	"dmr_template": "*dmr",
 	"coa_template": "*coa",
 	"requests_cache_key": "~*req.Acc-Session-Id",
@@ -196,7 +201,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 				{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
 			]
 		}
-	]									
+	]
 }
 }`
 	eMap := map[string]any{
@@ -215,12 +220,14 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
 		utils.ClientDaAddressesCfg: map[string]any{},
-		utils.SessionSConnsCfg:     []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
-		utils.StatSConnsCfg:        []string{utils.MetaInternal, "*conn1", "*conn2"},
-		utils.ThresholdSConnsCfg:   []string{utils.MetaInternal, "*conn1", "*conn2"},
-		utils.DMRTemplateCfg:       utils.MetaDMR,
-		utils.CoATemplateCfg:       utils.MetaCoA,
-		utils.RequestsCacheKeyCfg:  "~*req.Acc-Session-Id",
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}}},
+			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
+		},
+		utils.DMRTemplateCfg:      utils.MetaDMR,
+		utils.CoATemplateCfg:      utils.MetaCoA,
+		utils.RequestsCacheKeyCfg: "~*req.Acc-Session-Id",
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -262,9 +269,9 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		utils.ClientDaAddressesCfg: map[string]any{},
-		utils.SessionSConnsCfg:     []string{"*internal"},
-		utils.StatSConnsCfg:        []string{},
-		utils.ThresholdSConnsCfg:   []string{},
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+		},
 		utils.DMRTemplateCfg:       utils.MetaDMR,
 		utils.CoATemplateCfg:       utils.MetaCoA,
 		utils.RequestsCacheKeyCfg:  "",
@@ -289,7 +296,9 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
+		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -315,7 +324,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
@@ -343,10 +352,12 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{},
 		ClientDictionaries: map[string][]string{},
-		SessionSConns:      []string{"*localhost"},
-		StatSConns:         []string{"*localhost"},
-		ThresholdSConns:    []string{"*localhost"},
-		RequestProcessors:  []*RequestProcessor{},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		},
+		RequestProcessors: []*RequestProcessor{},
 	}
 
 	v2 := &RadiusAgentCfg{
@@ -364,9 +375,11 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		SessionSConns:   []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",
@@ -390,9 +403,11 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		SessionSConns:   &[]string{"*internal"},
-		StatSConns:      &[]string{"*internal"},
-		ThresholdSConns: &[]string{"*internal"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:      utils.StringPointer("REQ_PROC1"),
@@ -436,9 +451,11 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		SessionSConns:   []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",
@@ -462,9 +479,11 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		SessionSConns:   []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",

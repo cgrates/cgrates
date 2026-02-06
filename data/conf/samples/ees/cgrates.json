@@ -36,14 +36,18 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns": ["*localhost"],
-	"rates_conns": ["*internal"],
+	"conns": {
+		"*chargers": [{"Values": ["*localhost"]}],
+		"*rates": [{"Values": ["*internal"]}]
+	},
 	"session_cost_retries": 0
 },
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 
@@ -54,7 +58,9 @@
 
 "ees": {
 	"enabled": true,
-	"attributes_conns":["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 	"cache": {
 		"*fileCSV": {"limit": -1, "ttl": "500ms", "static_ttl": false},
 		"*fileFWV": {"limit": -1, "ttl": "500ms", "static_ttl": false}

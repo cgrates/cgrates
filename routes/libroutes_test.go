@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1585,7 +1586,7 @@ func TestRouteLazyPassErr(t *testing.T) {
 
 	expErr := "NOT_IMPLEMENTED:nr1"
 	if _, err := routeLazyPass(context.Background(), filters, ev,
-		data, nil, []string{""}, []string{""}, []string{""}, nil, nil); err == nil || err.Error() != expErr {
+		data, config.CgrConfig(), nil); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 
@@ -1626,11 +1627,7 @@ func TestRouteLazyPassTrue(t *testing.T) {
 	}
 
 	if ok, err := routeLazyPass(context.Background(), rules, ev,
-		data, nil,
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		nil, nil); err != nil {
+		data, config.CgrConfig(), nil); err != nil {
 		t.Error(err)
 	} else if !ok {
 		t.Error("Returned false, expecting true")

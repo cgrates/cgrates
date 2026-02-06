@@ -27,16 +27,13 @@ import (
 
 // PrometheusAgentJsonCfg holds the unparsed prometheus_agent as found in the config file.
 type PrometheusAgentJsonCfg struct {
-	Enabled               *bool     `json:"enabled"`
-	Path                  *string   `json:"path"`
-	CollectGoMetrics      *bool     `json:"collect_go_metrics"`
-	CollectProcessMetrics *bool     `json:"collect_process_metrics"`
-	AdminSConns           *[]string `json:"admins_conns"`
-	CacheSConns           *[]string `json:"caches_conns"`
-	CacheIDs              *[]string `json:"cache_ids"`
-	CoreSConns            *[]string `json:"cores_conns"`
-	StatSConns            *[]string `json:"stats_conns"`
-	StatQueueIDs          *[]string `json:"stat_queue_ids"`
+	Enabled               *bool                               `json:"enabled"`
+	Path                  *string                             `json:"path"`
+	CollectGoMetrics      *bool                               `json:"collect_go_metrics"`
+	CollectProcessMetrics *bool                               `json:"collect_process_metrics"`
+	Conns                 map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	CacheIDs              *[]string                           `json:"cache_ids"`
+	StatQueueIDs          *[]string                           `json:"stat_queue_ids"`
 }
 
 // PrometheusAgentCfg represents the configuration of the Prometheus Agent.
@@ -45,11 +42,8 @@ type PrometheusAgentCfg struct {
 	Path                  string
 	CollectGoMetrics      bool
 	CollectProcessMetrics bool
-	AdminSConns           []string
-	CacheSConns           []string
+	Conns                 map[string][]*DynamicStringSliceOpt
 	CacheIDs              []string
-	CoreSConns            []string
-	StatSConns            []string
 	StatQueueIDs          []string
 }
 
@@ -78,20 +72,14 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	if jc.CollectProcessMetrics != nil {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
-	if jc.AdminSConns != nil {
-		c.AdminSConns = tagInternalConns(*jc.AdminSConns, utils.MetaAdminS)
-	}
-	if jc.CacheSConns != nil {
-		c.CacheSConns = tagInternalConns(*jc.CacheSConns, utils.MetaCaches)
+	if jc.Conns != nil {
+		tagged := tagConns(jc.Conns)
+		for connType, opts := range tagged {
+			c.Conns[connType] = opts
+		}
 	}
 	if jc.CacheIDs != nil {
 		c.CacheIDs = *jc.CacheIDs
-	}
-	if jc.CoreSConns != nil {
-		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaCore)
-	}
-	if jc.StatSConns != nil {
-		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
 	if jc.StatQueueIDs != nil {
 		c.StatQueueIDs = *jc.StatQueueIDs
@@ -106,11 +94,8 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
-		utils.AdminSConnsCfg:           stripInternalConns(c.AdminSConns),
-		utils.CacheSConnsCfg:           stripInternalConns(c.CacheSConns),
-		utils.CacheIDsCfg:              stripInternalConns(c.CacheIDs),
-		utils.CoreSConnsCfg:            stripInternalConns(c.CoreSConns),
-		utils.StatSConnsCfg:            stripInternalConns(c.StatSConns),
+		utils.ConnsCfg:                 stripConns(c.Conns),
+		utils.CacheIDsCfg:              c.CacheIDs,
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
 	}
 }
@@ -125,11 +110,8 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		Path:                  c.Path,
 		CollectGoMetrics:      c.CollectGoMetrics,
 		CollectProcessMetrics: c.CollectProcessMetrics,
-		AdminSConns:           slices.Clone(c.AdminSConns),
-		CacheSConns:           slices.Clone(c.CacheSConns),
+		Conns:                 CloneConnsOpt(c.Conns),
 		CacheIDs:              slices.Clone(c.CacheIDs),
-		CoreSConns:            slices.Clone(c.CoreSConns),
-		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}
 }
@@ -147,18 +129,14 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 	if v1.CollectGoMetrics != v2.CollectGoMetrics {
 		d.CollectGoMetrics = utils.BoolPointer(v2.CollectGoMetrics)
 	}
-	// adding some changes
-	if v1.CollectProcessMetrics != v2.CollectProcessMetrics && true {
+	if v1.CollectProcessMetrics != v2.CollectProcessMetrics {
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
 	}
-	if !slices.Equal(v1.AdminSConns, v2.AdminSConns) {
-		d.AdminSConns = utils.SliceStringPointer(v2.AdminSConns)
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
-	if !slices.Equal(v1.CoreSConns, v2.CoreSConns) {
-		d.CoreSConns = utils.SliceStringPointer(v2.CoreSConns)
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(v2.StatSConns)
+	if !slices.Equal(v1.CacheIDs, v2.CacheIDs) {
+		d.CacheIDs = utils.SliceStringPointer(v2.CacheIDs)
 	}
 	if !slices.Equal(v1.StatQueueIDs, v2.StatQueueIDs) {
 		d.StatQueueIDs = utils.SliceStringPointer(v2.StatQueueIDs)

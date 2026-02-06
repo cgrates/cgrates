@@ -40,14 +40,18 @@
 "resources": {
     "enabled": true,
     "store_interval": "1s",
-    "thresholds_conns": ["*internal"]
+    "conns": {
+    	"*thresholds": [{"Values": ["*internal"]}]
+    },
 },
 
 
 "stats": {
     "enabled": true,
     "store_interval": "1s",
-    "thresholds_conns": ["*internal"]
+    "conns": {
+    	"*thresholds": [{"Values": ["*internal"]}]
+    },
 },
 
 "thresholds": {
@@ -57,10 +61,12 @@
 
 "routes": {
     "enabled": true,
-    "stats_conns": ["*internal"],
-    "resources_conns": ["*internal"],
-    "rates_conns": ["*internal"],
-    "accounts_conns": ["*internal"]
+    "conns": {
+    	"*stats": [{"Values": ["*internal"]}],
+    	"*resources": [{"Values": ["*internal"]}],
+    	"*rates": [{"Values": ["*internal"]}],
+    	"*accounts": [{"Values": ["*internal"]}]
+    },
 },
 
 "admins": {

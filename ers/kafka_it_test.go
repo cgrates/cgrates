@@ -78,7 +78,9 @@ func TestKafkaER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									
 	"enabled": true,						
-	"sessions_conns":["*localhost"],
+	"conns": {
+		"*sessions": [{"Values": ["*localhost"]}]
+	},
 	"readers": [
 		{
 			"id": "kafka",										

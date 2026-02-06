@@ -50,11 +50,11 @@ const (
 	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )
 
-func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS, cm *engine.ConnManager,
+func NewRadiusAgent(cfg *config.CGRConfig, fltrS *engine.FilterS, cm *engine.ConnManager,
 	caps *engine.Caps) (*RadiusAgent, error) {
 	ra := &RadiusAgent{
 		cfg:   cfg,
-		fltrs: fltrs,
+		fltrS: fltrS,
 		cm:    cm,
 		caps:  caps,
 	}
@@ -110,7 +110,7 @@ type RadiusAgent struct {
 	cfg    *config.CGRConfig // reference for future config reloads
 	cm     *engine.ConnManager
 	caps   *engine.Caps
-	fltrs  *engine.FilterS
+	fltrS  *engine.FilterS
 	rsAuth map[string]*radigo.Server
 	rsAcct map[string]*radigo.Server
 	dacCfg radiusDAClientCfg
@@ -179,7 +179,7 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.fltrs, nil)
+			ra.fltrS, nil)
 		var lclProcessed bool
 		if lclProcessed, processReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
 			processed = lclProcessed
@@ -245,7 +245,7 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 				reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone,
 			),
-			ra.fltrs, nil,
+			ra.fltrS, nil,
 		)
 		lclProcessed, err := ra.processRequest(reqPacket,
 			reqProcessor, agReq, replyPacket)
@@ -311,7 +311,7 @@ func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.Radius
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rpl *radigo.Packet) (processed bool, err error) {
 	startTime := time.Now()
-	if pass, err := ra.fltrs.Pass(context.TODO(), agReq.Tenant,
+	if pass, err := ra.fltrS.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
@@ -349,7 +349,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
@@ -359,7 +364,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateInitiate
@@ -369,7 +379,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateUpdate
@@ -379,7 +394,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaTerminate:
 		var rply string
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1TerminateSession,
 			cgrEv, &rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateTerminate
@@ -387,7 +407,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateMessage
 		}
@@ -402,7 +427,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
-		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
+		var sessionsConns []string
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateEvent
@@ -430,7 +460,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
-		if err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns,
+		sessConns, _ := engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err = ra.cm.Call(ra.ctx, sessConns,
 			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 			if replyState == utils.OK {
@@ -487,7 +518,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
-		if err := ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().StatSConns,
+		var statConns []string
+		statConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		if err := ra.cm.Call(ra.ctx, statConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.StatS, err)
@@ -499,7 +535,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
-		if err := ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().ThresholdSConns,
+		var thresholdConns []string
+		thresholdConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		if err != nil {
+			return
+		}
+		if err := ra.cm.Call(ra.ctx, thresholdConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.ThresholdS, err)
@@ -624,7 +665,7 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 		requestEv, requestVars, nil, nil, nil, nil,
 		ra.cfg.GeneralCfg().DefaultTenant,
 		ra.cfg.GeneralCfg().DefaultTimezone,
-		ra.fltrs, map[string]utils.DataProvider{
+		ra.fltrS, map[string]utils.DataProvider{
 			utils.MetaOReq: newRADataProvider(packet),
 		})
 	err := agReq.SetFields(ra.cfg.TemplatesCfg()[requestTemplate])
