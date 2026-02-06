@@ -301,6 +301,9 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithAPIOpts) (*CallCost, error) 
 					APIOpts:        cdr.APIOpts,
 				}, cc)
 		}
+	} else if cdr.RequestType == utils.MetaDirectDebit {
+		err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().RaterConns,
+			utils.ResponderDebitMonetary, &cdr, cc)
 	} else {
 		err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().RaterConns,
 			utils.ResponderGetCost,
@@ -719,6 +722,11 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingA
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))
 				err = utils.ErrPartiallyExecuted
 				return
+			}
+			if cdrs[i].RequestType == utils.MetaDirectDebit { // Cost field is mandatory for *directdebit requests
+				if missing := utils.MissingMapFields(cgrEv.Event, []string{utils.Cost}); len(missing) != 0 {
+					return outEvs, utils.NewErrMandatoryIeMissing(missing...)
+				}
 			}
 		}
 	}

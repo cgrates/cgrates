@@ -392,7 +392,7 @@ func (acc *Account) getAlldBalancesForPrefix(destination, category,
 func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool, fltrS *FilterS) (cc *CallCost, err error) {
 	usefulUnitBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, cd.TimeStart)
 	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, cd.TimeStart)
-	// intiValues map[UUID]float64 and pass them to publish updating initial value
+	// initValues map[UUID]float64 and pass them to publish updating initial value
 	initUnitBal, initMoneyBal := balancesValues(usefulUnitBalances), balancesValues(usefulMoneyBalances)
 
 	var leftCC *CallCost
@@ -493,7 +493,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}
 	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
-		// put AccountID ubformation in increments
+		// put AccountID information in increments
 		for _, ts := range leftCC.Timespans {
 			for _, inc := range ts.Increments {
 				if inc.BalanceInfo == nil {
@@ -577,9 +577,149 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 
 COMMIT:
 	if !dryRun {
-		// save darty shared balances
+		// save dirty shared balances
 		usefulMoneyBalances.SaveDirtyBalances(acc, initMoneyBal)
 		usefulUnitBalances.SaveDirtyBalances(acc, initUnitBal)
+	}
+	//log.Printf("Final CC: %+v", cc)
+	return
+}
+
+func (acc *Account) debitMonetaryBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool, fltrS *FilterS, costToBeDebited float64) (cc *CallCost, err error) {
+	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, cd.TimeStart)
+	// initValues map[UUID]float64 and pass them to publish updating initial value
+	initMoneyBal := balancesValues(usefulMoneyBalances)
+
+	var leftCC *CallCost
+	cc = cd.CreateCallCost()
+	// debit money
+	for _, balance := range usefulMoneyBalances {
+		partCC, costRemaining, debitErr := balance.debitFromCost(cd, balance.account,
+			usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, fltrS, costToBeDebited)
+		if debitErr != nil {
+			return nil, debitErr
+		}
+		if costRemaining != 0 { // if there is cost remaining that wasnt debited, debit it on the next coming balance
+			costToBeDebited = costRemaining
+		}
+		if partCC != nil {
+			cc.Timespans = append(cc.Timespans, partCC.Timespans...)
+			cc.negativeConnectFee = partCC.negativeConnectFee
+
+			cd.TimeStart = cc.GetEndTime()
+			// check if the calldescriptor is covered
+			if cd.GetDuration() <= 0 {
+				goto COMMIT
+			}
+			if dryRun && partCC.maxCostDisconect {
+				// only return if we are in dry run (max call duration)
+				return
+			}
+		}
+		// check for blocker
+		if balance.Blocker {
+			if cd.GetDuration() != 0 {
+				if !dryRun {
+					return nil, utils.ErrInsufficientCreditBalanceBlocker
+				}
+				return
+			}
+			goto COMMIT // don't go to next balances
+		}
+	}
+
+	// Handle remaining cost
+	leftCC, err = cd.getCost()
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+	}
+	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
+		// put AccountID information in increments
+		for _, ts := range leftCC.Timespans {
+			for _, inc := range ts.Increments {
+				if inc.BalanceInfo == nil {
+					inc.BalanceInfo = &DebitInfo{}
+				}
+				inc.BalanceInfo.AccountID = acc.ID
+			}
+		}
+		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
+	}
+
+	if leftCC.Cost > 0 && goNegative {
+		initialLength := len(cc.Timespans)
+		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
+
+		var debitedConnectFeeBalance Balance
+		var ok bool
+
+		if initialLength == 0 {
+			// this is the first add, debit the connect fee
+			ok, debitedConnectFeeBalance = acc.DebitConnectionFee(cc, usefulMoneyBalances, count, true, fltrS)
+		}
+		// get the default money balance
+		// and go negative on it with the amount still unpaid
+		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !acc.AllowNegative && !dryRun {
+			utils.Logger.Warning(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+		}
+		leftCC.Timespans.Decompress()
+		for tsIndex, ts := range leftCC.Timespans {
+			if ts.Increments == nil {
+				ts.createIncrementsSlice()
+			}
+
+			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
+
+				inc := &Increment{
+					Duration: 0,
+					Cost:     ts.RateInterval.Rating.ConnectFee,
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{
+							UUID:  debitedConnectFeeBalance.Uuid,
+							ID:    debitedConnectFeeBalance.ID,
+							Value: debitedConnectFeeBalance.Value,
+						},
+						AccountID: acc.ID,
+					},
+				}
+
+				incs := []*Increment{inc}
+				ts.Increments = append(incs, ts.Increments...)
+			}
+
+			for incIndex, increment := range ts.Increments {
+				// connect fee was processed and skip it
+				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
+					continue
+				}
+				cost := increment.Cost
+				defaultBalance := acc.GetDefaultMoneyBalance()
+				defaultBalance.SubtractValue(cost)
+
+				increment.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  defaultBalance.Uuid,
+					ID:    defaultBalance.ID,
+					Value: defaultBalance.Value,
+				}
+				increment.BalanceInfo.AccountID = acc.ID
+				if count {
+					acc.countUnits(
+						cost,
+						utils.MetaMonetary,
+						leftCC,
+						&Balance{
+							Value:          cost,
+							DestinationIDs: utils.NewStringMap(leftCC.Destination),
+						}, fltrS)
+				}
+			}
+		}
+	}
+
+COMMIT:
+	if !dryRun {
+		// save dirty shared balances
+		usefulMoneyBalances.SaveDirtyBalances(acc, initMoneyBal)
 	}
 	//log.Printf("Final CC: %+v", cc)
 	return
@@ -884,6 +1024,47 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		// there are no money for the connect fee; go negative
 		b := acc.GetDefaultMoneyBalance()
 		b.SubtractValue(connectFee)
+		debitedBalance = *b
+		// the conect fee is not refundable!
+		if count {
+			acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
+			acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
+		}
+	}
+	return true, debitedBalance
+}
+
+// SimulateConnectionFee simulates DebitConnectionFee without debiting
+func (acc *Account) SimulateConnectionFee(cc *CallCost, ufMoneyBalances Balances, count bool, block bool, fltrS *FilterS) (bool, Balance) {
+	var debitedBalance Balance
+	if !cc.deductConnectFee {
+		return true, debitedBalance
+	}
+	connectFee := cc.GetConnectFee()
+	var connectFeePaid bool
+	for _, b := range ufMoneyBalances {
+		if !b.IsActiveAt(cc.GetStartTime()) {
+			continue
+		}
+		if b.GetValue() >= connectFee {
+			// the conect fee is not refundable!
+			if count {
+				acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
+				acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
+			}
+			connectFeePaid = true
+			debitedBalance = *b
+			break
+		}
+		if b.Blocker && block { // stop here
+			return false, debitedBalance
+		}
+	}
+	// debit connect fee
+	if connectFee > 0 && !connectFeePaid {
+		cc.negativeConnectFee = true
+		// there are no money for the connect fee; go negative
+		b := acc.GetDefaultMoneyBalance()
 		debitedBalance = *b
 		// the conect fee is not refundable!
 		if count {

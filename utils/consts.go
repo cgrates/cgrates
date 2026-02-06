@@ -203,6 +203,8 @@ const (
 	MetaPostpaid             = "*postpaid"
 	PseudoPrepaid            = "pseudoprepaid"
 	MetaPseudoPrepaid        = "*pseudoprepaid"
+	MetaDirectDebit          = "*directdebit"
+	DirectDebit              = "directdebit"
 	MetaRated                = "*rated"
 	MetaNone                 = "*none"
 	MetaNow                  = "*now"
@@ -2008,6 +2010,7 @@ const (
 const (
 	Responder                            = "Responder"
 	ResponderDebit                       = "Responder.Debit"
+	ResponderDebitMonetary               = "Responder.DebitMonetary"
 	ResponderRefundIncrements            = "Responder.RefundIncrements"
 	ResponderGetMaxSessionTime           = "Responder.GetMaxSessionTime"
 	ResponderMaxDebit                    = "Responder.MaxDebit"

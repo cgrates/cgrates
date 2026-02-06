@@ -749,6 +749,36 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool, 
 	return
 }
 
+func (cd *CallDescriptor) debitMonetary(account *Account, dryRun bool, goNegative bool, fltrS *FilterS, cost float64) (cc *CallCost, err error) {
+	if cd.ToR == "" {
+		cd.ToR = utils.MetaVoice
+	}
+	//log.Printf("Debit CD: %+v", cd)
+	cc, err = account.debitMonetaryBalance(cd, !dryRun, dryRun, goNegative, fltrS, cost)
+	//log.Printf("HERE: %+v %v", cc, err)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
+		return nil, err
+	}
+	cc.updateCost()
+	cc.UpdateRatedUsage()
+	cc.Timespans.Compress()
+	if !dryRun {
+		dm.SetAccount(account)
+	}
+	if cd.PerformRounding {
+		cc.Round()
+		roundIncrements := cc.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			rcd := cc.CreateCallDescriptor()
+			rcd.Increments = roundIncrements
+			rcd.refundRounding(cd.account, fltrS)
+		}
+	}
+	//log.Printf("OUT CC: ", cc)
+	return
+}
+
 func (cd *CallDescriptor) Debit(fltrS *FilterS) (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	err = guardian.Guardian.Guard(func() (_ error) {
@@ -770,6 +800,36 @@ func (cd *CallDescriptor) Debit(fltrS *FilterS) (cc *CallCost, err error) {
 		}
 		return guardian.Guardian.Guard(func() (err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
+			if err == nil {
+				cc.AccountSummary = cd.AccountSummary(initialAcnt)
+			}
+			return err
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
+	return
+}
+
+func (cd *CallDescriptor) DebitMonetary(fltrS *FilterS, cost float64) (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
+	err = guardian.Guardian.Guard(func() (_ error) {
+		// lock all group members
+		account, err := cd.getAccount()
+		if err != nil {
+			return err
+		}
+		initialAcnt := account.AsAccountSummary()
+		acntIDs, sgerr := account.GetUniqueSharedGroupMembers(cd)
+		if sgerr != nil {
+			return sgerr
+		}
+		var lkIDs []string
+		for acntID := range acntIDs {
+			if acntID != cd.GetAccountKey() {
+				lkIDs = append(lkIDs, utils.AccountPrefix+acntID)
+			}
+		}
+		return guardian.Guardian.Guard(func() (err error) {
+			cc, err = cd.debitMonetary(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS, cost)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
