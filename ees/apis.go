@@ -208,7 +208,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 	}
 	extraData := exp.ExtraData(ev)
 
-	return ExportWithAttempts(ctx, exp, eEv, extraData, connMngr, tnt)
+	return ExportWithAttempts(ctx, exp, eEv, extraData, connMngr, tnt, filterS)
 }
 
 // V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.

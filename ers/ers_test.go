@@ -167,7 +167,7 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T13:00:00Z","Destination":"1003"},"APIOpts":null},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T12:00:00Z","Destination":"1002"},"APIOpts":null}]> due error <unsupported comparison type: string, kind: string>`
 	erS.onEvicted("id", value)
@@ -218,7 +218,7 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 	expLog := `[WARNING] <ERs> Converting CDR with originID: <ID> to record , ignoring due to error: <unsupported type: <>>
 `
@@ -277,7 +277,7 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T13:00:00Z","Destination":"1003"},"APIOpts":null},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T12:00:00Z","Destination":"1002"},"APIOpts":null}]> due error <unsupported comparison type: string, kind: string>`
@@ -316,7 +316,7 @@ func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 	erS.onEvicted("ID", value)
 

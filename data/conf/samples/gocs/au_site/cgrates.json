@@ -72,12 +72,28 @@
 
   "sessions": {
     "enabled": true,
-    "rates_conns": ["*internal"],
-    "chargers_conns": ["*internal"],
+    "conns":{
+    "*rates": [
+         {
+            "Tenant": "",
+            "FilterIDs": [],
+            "Values": ["*internal"]
+         }
+    ],
+    "*chargers": [
+         {
+            "Tenant": "",
+            "FilterIDs": [],
+            "Values": ["*internal"]
+         }
+    ]
+            },
   },
 
   "admins": {
     "enabled": true,
-    "caches_conns":["conn1"],
+    "conns": {
+    	"*caches": [{"Values": ["conn1"]}]
+    },
   }
 }

@@ -46,8 +46,7 @@ type ThresholdSCfg struct {
 	ExistsIndexedFields    *[]string
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
-	ActionSConns           []string // connections towards ActionS
-	EEsConns               []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	EEsExporterIDs         []string
 	Opts                   *ThresholdsOpts
 }
@@ -112,11 +111,11 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
-	if jsnCfg.Actions_conns != nil {
-		t.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
-	}
-	if jsnCfg.Ees_conns != nil {
-		t.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			t.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		t.EEsExporterIDs = slices.Clone(*jsnCfg.Ees_exporter_ids)
@@ -138,6 +137,7 @@ func (t ThresholdSCfg) AsMapInterface() any {
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.ConnsCfg:          stripConns(t.Conns),
 		utils.OptsCfg:           opts,
 	}
 	if t.StoreInterval != 0 {
@@ -158,12 +158,6 @@ func (t ThresholdSCfg) AsMapInterface() any {
 	}
 	if t.NotExistsIndexedFields != nil {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*t.NotExistsIndexedFields)
-	}
-	if t.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = stripInternalConns(t.ActionSConns)
-	}
-	if t.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(t.EEsConns)
 	}
 	if t.EEsExporterIDs != nil {
 		mp[utils.EEsExporterIDsCfg] = slices.Clone(t.EEsExporterIDs)
@@ -196,6 +190,7 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		IndexedSelects: t.IndexedSelects,
 		StoreInterval:  t.StoreInterval,
 		NestedFields:   t.NestedFields,
+		Conns:          CloneConnsOpt(t.Conns),
 		Opts:           t.Opts.Clone(),
 	}
 
@@ -213,12 +208,6 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	}
 	if t.NotExistsIndexedFields != nil {
 		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*t.NotExistsIndexedFields))
-	}
-	if t.ActionSConns != nil {
-		cln.ActionSConns = slices.Clone(t.ActionSConns)
-	}
-	if t.EEsConns != nil {
-		cln.EEsConns = slices.Clone(t.EEsConns)
 	}
 	if t.EEsExporterIDs != nil {
 		cln.EEsExporterIDs = slices.Clone(t.EEsExporterIDs)
@@ -241,9 +230,8 @@ type ThresholdSJsonCfg struct {
 	Suffix_indexed_fields    *[]string
 	Exists_indexed_fields    *[]string
 	Notexists_indexed_fields *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
-	Actions_conns            *[]string
-	Ees_conns                *[]string
+	Nested_fields            *bool                               // applies when indexed fields is not defined
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Ees_exporter_ids         *[]string
 	Opts                     *ThresholdsOptsJson
 }
@@ -282,11 +270,8 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs

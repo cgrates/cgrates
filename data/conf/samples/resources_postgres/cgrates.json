@@ -35,12 +35,16 @@
 
 "thresholds": {	
     "enabled": true,
-    "actions_conns": ["*internal"]
+    "conns": {
+    	"*actions": [{"Values": ["*internal"]}]
+    },
 },
 
 "resources": {
   "enabled": true,
-  "thresholds_conns": ["*internal"]
+  "conns": {
+  	"*thresholds": [{"Values": ["*internal"]}]
+  },
 },
 
 "admins": {

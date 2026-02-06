@@ -51,7 +51,9 @@ func TestSessionSv1ProcessEventRates(t *testing.T) {
 		ConfigJSON: `{
 "sessions": {
     "enabled": true,
-    "rates_conns": ["*localhost"]
+    "conns": {
+    	"*rates": [{"Values": ["*localhost"]}]
+    },
 },
 "rates": {
     "enabled": true
@@ -123,13 +125,13 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if rply.RateSCost == nil {
 			t.Fatal("RateSCost should not be nil with *rates flag")
 		}
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 		const wantCost = 1.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*default] = %g, want %g", cost, wantCost)
+			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 
@@ -156,13 +158,13 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if rply.RateSCost == nil {
 			t.Fatal("RateSCost should not be nil")
 		}
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 		const wantCost = 2.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*default] = %g, want %g", cost, wantCost)
+			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 

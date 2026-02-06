@@ -47,7 +47,9 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":["*internal"],
+	"conns": {
+		"*chargers": [{"Values": ["*internal"]}]
+	},
 },
 
 
@@ -58,21 +60,27 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": ["*internal"]
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 "thresholds": {
@@ -84,21 +92,61 @@
 "routes": {
 	"enabled": true,
 	"prefix_indexed_fields":["*req.Destination"],
-	"stats_conns": ["*internal"],
-	"resources_conns": ["*internal"],
-	"rates_conns": ["*internal"],
+	"conns": {
+		"*stats": [{"Values": ["*internal"]}],
+		"*resources": [{"Values": ["*internal"]}],
+		"*rates": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "sessions": {
 	"enabled": true,
 	"listen_bijson": "*env:DOCKER_IP:2014",
-	"routes_conns": ["*internal"],
-	"resources_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
-	"rates_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns":{
+	"*routes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*resources": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 
@@ -108,7 +156,9 @@
 
 
 "filters": {								
-	"accounts_conns": ["*internal"],
+	"conns": {
+		"*accounts": [{"Values": ["*internal"]}]
+	},
 },
 
 "accounts": {

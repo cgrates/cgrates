@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -31,9 +30,7 @@ type SIPAgentCfg struct {
 	Enabled             bool
 	Listen              string
 	ListenNet           string // udp or tcp
-	SessionSConns       []string
-	StatSConns          []string
-	ThresholdSConns     []string
+	Conns               map[string][]*DynamicStringSliceOpt
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
 	RequestProcessors   []*RequestProcessor
@@ -64,14 +61,11 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 	if jsnCfg.Timezone != nil {
 		sa.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.SessionSConns != nil {
-		sa.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
-	}
-	if jsnCfg.StatSConns != nil {
-		sa.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
-	}
-	if jsnCfg.ThresholdSConns != nil {
-		sa.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			sa.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.RetransmissionTimer != nil {
 		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.RetransmissionTimer); err != nil {
@@ -92,9 +86,7 @@ func (sa SIPAgentCfg) AsMapInterface() any {
 		utils.EnabledCfg:             sa.Enabled,
 		utils.ListenCfg:              sa.Listen,
 		utils.ListenNetCfg:           sa.ListenNet,
-		utils.SessionSConnsCfg:       stripInternalConns(sa.SessionSConns),
-		utils.StatSConnsCfg:          stripInternalConns(sa.StatSConns),
-		utils.ThresholdSConnsCfg:     stripInternalConns(sa.ThresholdSConns),
+		utils.ConnsCfg:               stripConns(sa.Conns),
 		utils.TimezoneCfg:            sa.Timezone,
 		utils.RetransmissionTimerCfg: sa.RetransmissionTimer.String(),
 		utils.RequestProcessorsCfg:   requestProcessors,
@@ -111,9 +103,7 @@ func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
 		Enabled:             sa.Enabled,
 		Listen:              sa.Listen,
 		ListenNet:           sa.ListenNet,
-		SessionSConns:       slices.Clone(sa.SessionSConns),
-		StatSConns:          slices.Clone(sa.StatSConns),
-		ThresholdSConns:     slices.Clone(sa.ThresholdSConns),
+		Conns:               CloneConnsOpt(sa.Conns),
 		Timezone:            sa.Timezone,
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
@@ -128,15 +118,13 @@ func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled             *bool                  `json:"enabled"`
-	Listen              *string                `json:"listen"`
-	ListenNet           *string                `json:"listen_net"`
-	SessionSConns       *[]string              `json:"sessions_conns"`
-	StatSConns          *[]string              `json:"stats_conns"`
-	ThresholdSConns     *[]string              `json:"thresholds_conns"`
-	Timezone            *string                `json:"timezone"`
-	RetransmissionTimer *string                `json:"retransmission_timer"`
-	RequestProcessors   *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled             *bool                               `json:"enabled"`
+	Listen              *string                             `json:"listen"`
+	ListenNet           *string                             `json:"listen_net"`
+	Conns               map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Timezone            *string                             `json:"timezone"`
+	RetransmissionTimer *string                             `json:"retransmission_timer"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonCfg {
@@ -152,14 +140,8 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonC
 	if v1.ListenNet != v2.ListenNet {
 		d.ListenNet = utils.StringPointer(v2.ListenNet)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

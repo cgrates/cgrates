@@ -118,8 +118,8 @@ func TestNewRankingService(t *testing.T) {
 		t.Errorf("Expected cfg to be %v, got %v", cgrcfg, rankingService.cgrcfg)
 	}
 
-	if rankingService.filterS != filterS {
-		t.Errorf("Expected fltrS to be %v, got %v", filterS, rankingService.filterS)
+	if rankingService.fltrS != filterS {
+		t.Errorf("Expected fltrS to be %v, got %v", filterS, rankingService.fltrS)
 	}
 
 	if rankingService.connMgr != connMgr {

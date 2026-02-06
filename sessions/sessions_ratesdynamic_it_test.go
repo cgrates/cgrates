@@ -51,7 +51,9 @@ func TestSessionSv1ProcessEventDynamicRates(t *testing.T) {
 		ConfigJSON: `{
 "sessions": {
     "enabled": true,
-    "rates_conns": ["*localhost"],
+    "conns": {
+    	"*rates": [{"Values": ["*localhost"]}]
+    },
     "opts": {
         "*rates": [
             {
@@ -105,9 +107,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			t.Fatal("RateSCost should not be nil when dynamic filter matches")
 		}
 
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 
 		if cost != 1.0 {

@@ -36,8 +36,10 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"*req.index1"},
 		Notexists_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:            utils.BoolPointer(true),
-		Actions_conns:            &[]string{utils.MetaInternal},
-		Opts:                     &ThresholdsOptsJson{},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {{Values: []string{utils.MetaInternal}}},
+		},
+		Opts: &ThresholdsOptsJson{},
 	}
 	expected := &ThresholdSCfg{
 		Enabled:                true,
@@ -49,12 +51,15 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ExistsIndexedFields:    &[]string{"*req.index1"},
 		NotExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:           true,
-		ActionSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {
+				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}},
+			},
+		},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 		},
-		EEsConns:       []string{},
 		EEsExporterIDs: []string{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -118,7 +123,7 @@ func TestThresholdSCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
-		"thresholds": {},		
+		"thresholds": {},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
@@ -129,14 +134,13 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
-		utils.ActionSConnsCfg:           []string{},
+		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
 				{},
 			},
 		},
-		utils.EEsConnsCfg:       []string{},
 		utils.EEsExporterIDsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -148,18 +152,20 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 
 func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
-		"thresholds": {								
-			"enabled": true,						
-			"store_interval": "96h",					
-			"indexed_selects": false,	
+		"thresholds": {
+			"enabled": true,
+			"store_interval": "96h",
+			"indexed_selects": false,
             "string_indexed_fields": ["*req.string"],
-			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
-            "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],		
-			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
-            "notexists_indexed_fields": [],	
-			"nested_fields": true,					
-			"actions_conns": ["*internal"],
-		},		
+			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
+            "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],
+			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
+            "notexists_indexed_fields": [],
+			"nested_fields": true,
+			"conns": {
+				"*actions": [{"Values": ["*internal"]}]
+			},
+		},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                true,
@@ -171,14 +177,15 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           true,
-		utils.ActionSConnsCfg:           []string{utils.MetaInternal},
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {{Values: []string{utils.MetaInternal}}},
+		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
 				{},
 			},
 		},
-		utils.EEsConnsCfg:       []string{},
 		utils.EEsExporterIDsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -223,7 +230,6 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index1"},
 		PrefixIndexedFields: &[]string{"req.index2"},
 		SuffixIndexedFields: &[]string{"req.index3"},
-		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []*DynamicStringSliceOpt{
@@ -248,8 +254,12 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index11"},
 		PrefixIndexedFields: &[]string{"req.index22"},
 		SuffixIndexedFields: &[]string{"req.index33"},
-		ActionSConns:        []string{"*internal"},
-		NestedFields:        true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {
+				{Values: []string{"*internal"}},
+			},
+		},
+		NestedFields: true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []*DynamicStringSliceOpt{
 				{
@@ -273,8 +283,12 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Actions_conns:         &[]string{"*internal"},
-		Nested_fields:         utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaActions: {
+				{Values: []string{"*internal"}},
+			},
+		},
+		Nested_fields: utils.BoolPointer(true),
 		Opts: &ThresholdsOptsJson{
 			ProfileIDs: []*DynamicStringSliceOpt{
 				{
@@ -314,7 +328,6 @@ func TestThresholdSCloneSection(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index1"},
 		PrefixIndexedFields: &[]string{"req.index2"},
 		SuffixIndexedFields: &[]string{"req.index3"},
-		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []*DynamicStringSliceOpt{},
@@ -328,7 +341,6 @@ func TestThresholdSCloneSection(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index1"},
 		PrefixIndexedFields: &[]string{"req.index2"},
 		SuffixIndexedFields: &[]string{"req.index3"},
-		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []*DynamicStringSliceOpt{},

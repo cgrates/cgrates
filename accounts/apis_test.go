@@ -438,7 +438,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AccountSCfg().RateSConns = []string{"*internal"}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{"*internal"}}}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -565,7 +565,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AccountSCfg().RateSConns = []string{"*internal"}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{"*internal"}}}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -694,7 +694,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AccountSCfg().RateSConns = []string{"*internal"}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{"*internal"}}}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -736,7 +736,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg.AccountSCfg().RateSConns = []string{"*internal"}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{"*internal"}}}
 	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
 	var rpEv utils.EventCharges

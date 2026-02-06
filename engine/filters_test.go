@@ -2651,8 +2651,13 @@ func TestFilterTrends(t *testing.T) {
 			shouldPass: true,
 		},
 	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().Conns[utils.MetaTrends] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}},
+	}
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), cM, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
+	fS := NewFilterS(cfg, cM, nil)
+	dp := NewDynamicDP(context.Background(), cfg, "cgrates.org", initDP, fS)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline("cgrates.org", tc.filter)
@@ -2712,8 +2717,13 @@ func TestFilterRanking(t *testing.T) {
 		{name: "RankingFailSortedStatIDsIdx", filter: "*string:~*rankings.Ranking1.SortedStatIDs[1]:Stat4", pass: false},
 	}
 
+	rankCfg := config.NewDefaultCGRConfig()
+	rankCfg.FilterSCfg().Conns[utils.MetaRankings] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}},
+	}
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), cM, nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
+	fS := NewFilterS(rankCfg, cM, nil)
+	dp := NewDynamicDP(context.Background(), rankCfg, "cgrates.org", initDP, fS)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline(dp.tenant, tc.filter)

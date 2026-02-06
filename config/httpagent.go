@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -88,9 +86,7 @@ func (hcfgs HTTPAgentCfgs) Clone() *HTTPAgentCfgs {
 type HTTPAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	URL               string
-	SessionSConns     []string
-	StatSConns        []string
-	ThresholdSConns   []string
+	Conns             map[string][]*DynamicStringSliceOpt
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*RequestProcessor
@@ -106,16 +102,12 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg.URL != nil {
 		ha.URL = *jsnCfg.URL
 	}
-	if jsnCfg.SessionSConns != nil {
-		ha.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+	for connType, opts := range jsnCfg.Conns {
+		if ha.Conns == nil {
+			ha.Conns = make(map[string][]*DynamicStringSliceOpt)
+		}
+		ha.Conns[connType] = tagInternalConnsOpt(opts, connType)
 	}
-	if jsnCfg.StatSConns != nil {
-		ha.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
-	}
-	if jsnCfg.ThresholdSConns != nil {
-		ha.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
-	}
-
 	if jsnCfg.RequestPayload != nil {
 		ha.RequestPayload = *jsnCfg.RequestPayload
 	}
@@ -135,9 +127,7 @@ func (ha *HTTPAgentCfg) AsMapInterface() map[string]any {
 	m := map[string]any{
 		utils.IDCfg:                ha.ID,
 		utils.URLCfg:               ha.URL,
-		utils.SessionSConnsCfg:     stripInternalConns(ha.SessionSConns),
-		utils.StatSConnsCfg:        stripInternalConns(ha.StatSConns),
-		utils.ThresholdSConnsCfg:   stripInternalConns(ha.ThresholdSConns),
+		utils.ConnsCfg:             stripConns(ha.Conns),
 		utils.RequestPayloadCfg:    ha.RequestPayload,
 		utils.ReplyPayloadCfg:      ha.ReplyPayload,
 		utils.RequestProcessorsCfg: requestProcessors,
@@ -150,9 +140,7 @@ func (ha HTTPAgentCfg) Clone() *HTTPAgentCfg {
 	clone := &HTTPAgentCfg{
 		ID:                ha.ID,
 		URL:               ha.URL,
-		SessionSConns:     slices.Clone(ha.SessionSConns),
-		StatSConns:        slices.Clone(ha.StatSConns),
-		ThresholdSConns:   slices.Clone(ha.ThresholdSConns),
+		Conns:             CloneConnsOpt(ha.Conns),
 		RequestPayload:    ha.RequestPayload,
 		ReplyPayload:      ha.ReplyPayload,
 		RequestProcessors: make([]*RequestProcessor, len(ha.RequestProcessors)),
@@ -165,14 +153,12 @@ func (ha HTTPAgentCfg) Clone() *HTTPAgentCfg {
 
 // Conecto Agent configuration section
 type HttpAgentJsonCfg struct {
-	ID                *string                `json:"id"`
-	URL               *string                `json:"url"`
-	SessionSConns     *[]string              `json:"sessions_conns"`
-	StatSConns        *[]string              `json:"stats_conns"`
-	ThresholdSConns   *[]string              `json:"thresholds_conns"`
-	RequestPayload    *string                `json:"request_payload"`
-	ReplyPayload      *string                `json:"reply_payload"`
-	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	ID                *string                             `json:"id"`
+	URL               *string                             `json:"url"`
+	Conns             map[string][]*DynamicStringSliceOpt `json:"conns"`
+	RequestPayload    *string                             `json:"request_payload"`
+	ReplyPayload      *string                             `json:"reply_payload"`
+	RequestProcessors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJsonCfg {
@@ -191,14 +177,8 @@ func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJ
 	if v1.ReplyPayload != v2.ReplyPayload {
 		d.ReplyPayload = utils.StringPointer(v2.ReplyPayload)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
@@ -211,7 +191,7 @@ func equalsHTTPAgentCfgs(v1, v2 HTTPAgentCfgs) bool {
 	for i := range v2 {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].URL != v2[i].URL ||
-			!slices.Equal(v1[i].SessionSConns, v2[i].SessionSConns) ||
+			!ConnsEqual(v1[i].Conns, v2[i].Conns) ||
 			v1[i].RequestPayload != v2[i].RequestPayload ||
 			v1[i].ReplyPayload != v2[i].ReplyPayload ||
 			!equalsRequestProcessors(v1[i].RequestProcessors, v2[i].RequestProcessors) {

@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -96,7 +95,7 @@ func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 // AsteriskAgentCfg the config section that describes the Asterisk Agent
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	SessionSConns []string
+	Conns         map[string][]*DynamicStringSliceOpt
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -117,8 +116,11 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sessions_conns != nil {
-		aCfg.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			aCfg.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Create_cdr != nil {
 		aCfg.CreateCDR = *jsnCfg.Create_cdr
@@ -139,6 +141,7 @@ func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:   aCfg.Enabled,
 		utils.CreateCDRCfg: aCfg.CreateCDR,
+		utils.ConnsCfg:     stripConns(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]any, len(aCfg.AsteriskConns))
@@ -146,9 +149,6 @@ func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 			conns[i] = item.AsMapInterface()
 		}
 		mp[utils.AsteriskConnsCfg] = conns
-	}
-	if aCfg.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(aCfg.SessionSConns)
 	}
 	return mp
 }
@@ -161,9 +161,7 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 	cln = &AsteriskAgentCfg{
 		Enabled:   aCfg.Enabled,
 		CreateCDR: aCfg.CreateCDR,
-	}
-	if aCfg.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(aCfg.SessionSConns)
+		Conns:     CloneConnsOpt(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))
@@ -186,7 +184,7 @@ type AstConnJsonCfg struct {
 
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]string
+	Conns          map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
@@ -242,8 +240,8 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.CreateCDR != v2.CreateCDR {
 		d.Create_cdr = utils.BoolPointer(v2.CreateCDR)

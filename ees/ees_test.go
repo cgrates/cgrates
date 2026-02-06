@@ -67,7 +67,9 @@ func TestAttrSProcessEvent(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.EEsNoLksCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}},
+	}
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
@@ -95,7 +97,9 @@ func TestAttrSProcessEvent2(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.EEsNoLksCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}},
+	}
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)

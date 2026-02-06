@@ -29,7 +29,7 @@ import (
 type ChargerSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
-	AttributeSConns        []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
@@ -57,8 +57,11 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	if jsnCfg.Indexed_selects != nil {
 		cS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
-	if jsnCfg.Attributes_conns != nil {
-		cS.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			cS.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		cS.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
@@ -87,9 +90,7 @@ func (cS ChargerSCfg) AsMapInterface() any {
 		utils.EnabledCfg:        cS.Enabled,
 		utils.IndexedSelectsCfg: cS.IndexedSelects,
 		utils.NestedFieldsCfg:   cS.NestedFields,
-	}
-	if cS.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = stripInternalConns(cS.AttributeSConns)
+		utils.ConnsCfg:          stripConns(cS.Conns),
 	}
 	if cS.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*cS.StringIndexedFields)
@@ -117,10 +118,8 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 	cln = &ChargerSCfg{
 		Enabled:        cS.Enabled,
 		IndexedSelects: cS.IndexedSelects,
+		Conns:          CloneConnsOpt(cS.Conns),
 		NestedFields:   cS.NestedFields,
-	}
-	if cS.AttributeSConns != nil {
-		cln.AttributeSConns = slices.Clone(cS.AttributeSConns)
 	}
 
 	if cS.StringIndexedFields != nil {
@@ -145,7 +144,7 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 type ChargerSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
-	Attributes_conns         *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
@@ -164,8 +163,8 @@ func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonC
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)

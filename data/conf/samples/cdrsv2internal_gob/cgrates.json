@@ -17,11 +17,13 @@
 
 	"cdrs": {
 		"enabled": true,
-		"attributes_conns":["*internal"],
-		"chargers_conns":["conn1"],
-		"rates_conns": ["conn1"],
-		"stats_conns": ["conn1"],
-		"thresholds_conns": ["conn1"],
+		"conns": {
+			"*attributes": [{"Values": ["*internal"]}],
+			"*chargers": [{"Values": ["conn1"]}],
+			"*rates": [{"Values": ["conn1"]}],
+			"*stats": [{"Values": ["conn1"]}],
+			"*thresholds": [{"Values": ["conn1"]}]
+		},
 	},
 
 	"attributes": {
@@ -31,18 +33,24 @@
 	"stats": {
 		"enabled": true,
 		"store_interval": "1s",
-		"thresholds_conns": ["*internal"]
+		"conns": {
+			"*thresholds": [{"Values": ["*internal"]}]
+		},
 	},
 
 	"thresholds": {
 		"enabled": true,
-		"actions_conns": ["*localhost"],
+		"conns": {
+			"*actions": [{"Values": ["*localhost"]}]
+		},
 		"store_interval": "1s"
 	},
 
 	"chargers": {
 		"enabled": true,
-		"attributes_conns": ["*internal"]
+		"conns": {
+			"*attributes": [{"Values": ["*internal"]}]
+		},
 	},
 
 	"admins": {

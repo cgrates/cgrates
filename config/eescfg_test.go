@@ -29,8 +29,8 @@ import (
 func TestEESClone(t *testing.T) {
 	cfgJSONStr := `{
   "ees": {
-     "enabled": true,						
-	"attributes_conns":["*internal", "*conn1"],					
+     "enabled": true,
+	"conns": {"*attributes": [{"Values": ["*internal","*conn1"]}]},
 	"cache": {
 		"*fileCSV": {"limit": -2, "ttl": "3s", "static_ttl": true},
 	},
@@ -61,8 +61,10 @@ func TestEESClone(t *testing.T) {
 },
 }`
 	expected := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
@@ -90,7 +92,9 @@ func TestEESClone(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 			},
 			{
 				ID:             utils.CGRateSLwr,
@@ -103,7 +107,9 @@ func TestEESClone(t *testing.T) {
 				AttributeSIDs:  []string{"randomID"},
 				Flags:          utils.FlagsWithParams{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
@@ -262,8 +268,10 @@ func TestEESCacheloadFromJsonCfg(t *testing.T) {
 
 func TestEventExporterSameID(t *testing.T) {
 	expectedEEsCfg := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"conn1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"conn1"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -1,
@@ -273,20 +281,22 @@ func TestEventExporterSameID(t *testing.T) {
 		},
 		Exporters: []*EventExporterCfg{
 			{
-				ID:             utils.MetaDefault,
-				Type:           utils.MetaNone,
-				ExportPath:     "/var/spool/cgrates/ees",
-				Attempts:       1,
-				Timezone:       utils.EmptyString,
-				Filters:        []string{},
-				AttributeSIDs:  []string{},
-				Flags:          utils.FlagsWithParams{},
-				Fields:         []*FCTemplate{},
-				contentFields:  []*FCTemplate{},
-				headerFields:   []*FCTemplate{},
-				trailerFields:  []*FCTemplate{},
-				Opts:           &EventExporterOpts{},
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				ID:            utils.MetaDefault,
+				Type:          utils.MetaNone,
+				ExportPath:    "/var/spool/cgrates/ees",
+				Attempts:      1,
+				Timezone:      utils.EmptyString,
+				Filters:       []string{},
+				AttributeSIDs: []string{},
+				Flags:         utils.FlagsWithParams{},
+				Fields:        []*FCTemplate{},
+				contentFields: []*FCTemplate{},
+				headerFields:  []*FCTemplate{},
+				trailerFields: []*FCTemplate{},
+				Opts:          &EventExporterOpts{},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -310,7 +320,9 @@ func TestEventExporterSameID(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 			},
 		},
 	}
@@ -325,7 +337,7 @@ func TestEventExporterSameID(t *testing.T) {
 	cfgJSONStr := `{
 "ees": {
 	"enabled": true,
-	"attributes_conns":["conn1"],
+	"conns": {"*attributes": [{"Values": ["conn1"]}]},
 	"exporters": [
 		{
 			"id": "file_exporter1",
@@ -353,8 +365,10 @@ func TestEventExporterSameID(t *testing.T) {
 
 func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Attributes_conns: &[]string{"*conn1", "*conn2"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*conn1", "*conn2"}}},
+		},
 		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
@@ -386,8 +400,10 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expectedCfg := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"*conn1", "*conn2"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*conn1", "*conn2"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
@@ -411,7 +427,9 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 			},
 			{
 				ID:            "CSVExporter",
@@ -439,7 +457,9 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 					{Tag: utils.MetaOriginID, Path: "*exp.*originID", Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep), Layout: time.RFC3339},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 			},
 		},
 	}
@@ -463,8 +483,10 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Attributes_conns: &[]string{"*conn1", "*conn2"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*conn1", "*conn2"}}},
+		},
 		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
@@ -501,8 +523,10 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		},
 	}
 	expectedCfg := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"*conn1", "*conn2"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*conn1", "*conn2"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
@@ -526,7 +550,9 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 			},
 			{
 				ID:            "CSVExporter",
@@ -538,7 +564,9 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
-				EFsConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+				Conns: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				},
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
@@ -605,7 +633,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
       "ees": {									
 	        "enabled": true,						
-            "attributes_conns":["*internal","*conn2"],					
+            "conns": {"*attributes": [{"Values": ["*internal","*conn2"]}]},					
             "cache": {
 		          "*fileCSV": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "static_ttl": false}
             },
@@ -637,8 +665,10 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	  }
     }`
 	eMap := map[string]any{
-		utils.EnabledCfg:         true,
-		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn2"},
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn2"}}},
+		},
 		utils.CacheCfg: map[string]any{
 			utils.MetaFileCSV: map[string]any{
 				utils.LimitCfg:     -2,
@@ -680,7 +710,9 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 					},
 				},
 				utils.FailedPostsDirCfg: "/var/spool/cgrates/failed_posts",
-				utils.EFsConnsCfg:       []string{utils.MetaInternal},
+				utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+					utils.MetaEFs: {{Values: []string{utils.MetaInternal}}},
+				},
 			},
 		},
 	}
@@ -752,8 +784,10 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Type: "*string",
 			},
 		},
-		Blocker:  true,
-		EFsConns: []string{"v1 efs test"},
+		Blocker: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEFs: {{Values: []string{"v1 efs test"}}},
+		},
 	}
 
 	v2 := &EventExporterCfg{
@@ -798,8 +832,10 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Type: "*prefix",
 			},
 		},
-		Blocker:  false,
-		EFsConns: []string{"efs test"},
+		Blocker: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEFs: {{Values: []string{"efs test"}}},
+		},
 	}
 
 	expected := &EventExporterJsonCfg{
@@ -825,8 +861,10 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Layout: utils.StringPointer(""),
 			},
 		},
-		Blocker:  utils.BoolPointer(false),
-		EFsConns: utils.SliceStringPointer([]string{"efs test"}),
+		Blocker: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEFs: {{Values: []string{"efs test"}}},
+		},
 	}
 
 	rcv := diffEventExporterJsonCfg(d, v1, v2)
@@ -1081,9 +1119,11 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 	var d *EEsJsonCfg
 
 	v1 := &EEsCfg{
-		Enabled:         false,
-		AttributeSConns: []string{"*localhost"},
-		Cache:           map[string]*CacheParamCfg{},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+		},
+		Cache: map[string]*CacheParamCfg{},
 		Exporters: []*EventExporterCfg{
 			{
 				Opts: &EventExporterOpts{},
@@ -1092,8 +1132,10 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 	}
 
 	v2 := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"*birpc"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			"CACHE_1": {
 				Limit: 1,
@@ -1108,8 +1150,10 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 	}
 
 	expected := &EEsJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Attributes_conns: &[]string{"*birpc"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+		},
 		Cache: map[string]*CacheParamJsonCfg{
 			"CACHE_1": {
 				Limit:      utils.IntPointer(1),
@@ -1159,8 +1203,10 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 
 func TestEeSCloneSection(t *testing.T) {
 	eeSCfg := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"*birpc"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			"CACHE_1": {
 				Limit: 1,
@@ -1169,8 +1215,10 @@ func TestEeSCloneSection(t *testing.T) {
 	}
 
 	exp := &EEsCfg{
-		Enabled:         true,
-		AttributeSConns: []string{"*birpc"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+		},
 		Cache: map[string]*CacheParamCfg{
 			"CACHE_1": {
 				Limit: 1,

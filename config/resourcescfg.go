@@ -42,7 +42,7 @@ type ResourcesOpts struct {
 type ResourceSConfig struct {
 	Enabled                bool
 	IndexedSelects         bool
-	ThresholdSConns        []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	StoreInterval          time.Duration // Dump regularly from cache into dataDB
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -97,8 +97,11 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 	if jsnCfg.Indexed_selects != nil {
 		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
-	if jsnCfg.Thresholds_conns != nil {
-		rlcfg.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			rlcfg.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
@@ -139,12 +142,10 @@ func (rlcfg ResourceSConfig) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:        rlcfg.Enabled,
 		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
+		utils.ConnsCfg:          stripConns(rlcfg.Conns),
 		utils.NestedFieldsCfg:   rlcfg.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
 		utils.OptsCfg:           opts,
-	}
-	if rlcfg.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(rlcfg.ThresholdSConns)
 	}
 	if rlcfg.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rlcfg.StringIndexedFields)
@@ -196,12 +197,10 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	cln = &ResourceSConfig{
 		Enabled:        rlcfg.Enabled,
 		IndexedSelects: rlcfg.IndexedSelects,
+		Conns:          CloneConnsOpt(rlcfg.Conns),
 		StoreInterval:  rlcfg.StoreInterval,
 		NestedFields:   rlcfg.NestedFields,
 		Opts:           rlcfg.Opts.Clone(),
-	}
-	if rlcfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(rlcfg.ThresholdSConns)
 	}
 
 	if rlcfg.StringIndexedFields != nil {
@@ -232,7 +231,7 @@ type ResourcesOptsJson struct {
 type ResourceSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
-	Thresholds_conns         *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Store_interval           *string
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
@@ -269,8 +268,8 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {
 		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())

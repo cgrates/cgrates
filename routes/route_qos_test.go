@@ -35,7 +35,7 @@ func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
-	if _, err := populatStatsForQOSRoute(context.Background(), cfg, cM, []string{"stat1", "stat2"}, "cgrates.org"); err == nil || err.Error() != expErr {
+	if _, err := populatStatsForQOSRoute(context.Background(), cfg, cM, nil, []string{"stat1", "stat2"}, "cgrates.org"); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 
@@ -48,7 +48,9 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	}
 
 	metrics := &map[string]*utils.Decimal{
 		"stat": utils.NewDecimal(5, 0),
@@ -77,7 +79,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 		"stat": utils.NewDecimal(5, 0),
 	}
 
-	if rcv, err := populatStatsForQOSRoute(context.Background(), cfg, cM, []string{"stat1", "stat2"}, "cgrates.org"); err != nil {
+	if rcv, err := populatStatsForQOSRoute(context.Background(), cfg, cM, nil, []string{"stat1", "stat2"}, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected \n<%+v>,\n received \n<%+v>", exp, rcv)
@@ -89,7 +91,7 @@ func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	qos := NewQOSRouteSorter(cfg, cM)
+	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{}
@@ -117,7 +119,9 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	}
 
 	metrics := &map[string]*utils.Decimal{
 		"*tcd": utils.NewDecimal(5, 0),
@@ -140,7 +144,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
-	qos := NewQOSRouteSorter(cfg, cM)
+	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
@@ -197,7 +201,9 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	}
 
 	metrics := &map[string]*utils.Decimal{
 		"*tcd": utils.NewDecimal(5, 0),
@@ -220,7 +226,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
-	qos := NewQOSRouteSorter(cfg, cM)
+	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
@@ -263,7 +269,9 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -276,7 +284,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
-	qos := NewQOSRouteSorter(cfg, cM)
+	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
@@ -321,7 +329,9 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -334,7 +344,7 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
-	qos := NewQOSRouteSorter(cfg, cM)
+	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{

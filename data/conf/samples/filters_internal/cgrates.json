@@ -29,14 +29,18 @@
 
 "rates": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"]
+	"conns": {
+		"*thresholds": [{"Values": ["*localhost"]}]
+	},
 },
 
 
 "filters": {								
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"]
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}],
+		"*resources": [{"Values": ["*localhost"]}],
+		"*accounts": [{"Values": ["*localhost"]}]
+	},
 },
 
 "accounts": {
@@ -60,7 +64,9 @@
 "thresholds": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"actions_conns": ["*localhost"],					
+	"conns": {
+		"*actions": [{"Values": ["*localhost"]}]
+	},
 	"store_interval": "-1"
 },
 
@@ -78,13 +84,17 @@
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["*localhost"],
+	"conns": {
+		"*caches": [{"Values": ["*localhost"]}]
+	},
 },
 
 "loaders": [

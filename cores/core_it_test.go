@@ -54,7 +54,7 @@ func TestCAPsStatusAllocated(t *testing.T) {
 		t.Fatalf("could not establish connection to engine: %v", err)
 	}
 
-	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"0","caps_strategy":"*queue","ees_conns":[],"shutdown_timeout":"1s"}}`
+	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"0","caps_strategy":"*queue","conns":{},"shutdown_timeout":"1s"}}`
 
 	var rpl string
 	if err := client.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -95,7 +95,7 @@ func TestCAPsStatusPeak(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not establish connection to engine: %v", err)
 	}
-	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"100ms","caps_strategy":"*queue","ees_conns":[],"shutdown_timeout":"1s"}}`
+	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"100ms","caps_strategy":"*queue","conns":{},"shutdown_timeout":"1s"}}`
 
 	var rpl string
 	if err := client.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{

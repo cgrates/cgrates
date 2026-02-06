@@ -5,7 +5,9 @@
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": ["*localhost"],
+		"conns": {
+			"*sessions": [{"Values": ["*localhost"]}]
+		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -91,7 +93,9 @@
 	{
 		"id": "conecto_xml",
 		"url": "/conecto_xml",
-		"sessions_conns": ["*localhost"],
+		"conns": {
+			"*sessions": [{"Values": ["*localhost"]}]
+		},
 		"request_payload":	"*xml",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -124,7 +128,9 @@
 	{
 		"id": "textplain",
 		"url": "/textplain",
-		"sessions_conns": ["*localhost"],
+		"conns": {
+			"*sessions": [{"Values": ["*localhost"]}]
+		},
 		"request_payload":	"*url",
 		"reply_payload":	"*text_plain",
 		"request_processors": [

@@ -67,9 +67,11 @@ func TestTrendSchedule(t *testing.T) {
 "trends": {
 	"enabled": true,
 	"store_interval": "-1",
-	"stats_conns":["*localhost"],
-	"thresholds_conns": [],	
-    "ees_conns": [],
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}],
+		"*thresholds": [],
+		"*ees": []
+	},
 },
 
 "stats": {
@@ -88,7 +90,9 @@ func TestTrendSchedule(t *testing.T) {
 
 "ees": {
 	"enabled": true,
-	"attributes_conns":["*localhost"],
+	"conns": {
+		"*attributes": [{"Values": ["*localhost"]}]
+	},
 	"exporters": [
 		{
 			"id": "exporter1",

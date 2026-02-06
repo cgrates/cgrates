@@ -42,16 +42,44 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
-	"replication_conns": ["rplConn"],
-	"rates_conns": ["conn1"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns":{
+	"*replication": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["rplConn"]
+		 }
+	],
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["conn1"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 "admins": {

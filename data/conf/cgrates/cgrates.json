@@ -37,7 +37,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ]
 // 	}
@@ -984,7 +984,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ],
 // 		// "*processRuns": [			// number of run loops when processing event
@@ -1081,7 +1081,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for statIDs
@@ -1118,7 +1118,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for thresholdIDs
@@ -1584,7 +1584,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ]
 // 	}
@@ -1622,7 +1622,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ],
 // 		// "*startTime": [		// start time used for cost calculation
@@ -1814,7 +1814,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": [],
+// 		// 		"Values": [],
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for actionProfileIDs
@@ -1854,7 +1854,7 @@
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
-// 		// 		"Value": []
+// 		// 		"Values": []
 // 		// 	}
 // 		// ],
 // 		// "*usage": [

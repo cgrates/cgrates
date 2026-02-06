@@ -26,13 +26,11 @@ import (
 )
 
 type RankingSCfg struct {
-	Enabled         bool
-	StatSConns      []string
-	ThresholdSConns []string
-	ScheduledIDs    map[string][]string
-	StoreInterval   time.Duration
-	EEsConns        []string
-	EEsExporterIDs  []string
+	Enabled        bool
+	Conns          map[string][]*DynamicStringSliceOpt
+	ScheduledIDs   map[string][]string
+	StoreInterval  time.Duration
+	EEsExporterIDs []string
 }
 
 func (rnk *RankingSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
@@ -50,11 +48,14 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		rnk.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Stats_conns != nil {
-		rnk.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		rnk.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		if rnk.Conns == nil {
+			rnk.Conns = make(map[string][]*DynamicStringSliceOpt)
+		}
+		for connType, opts := range tagged {
+			rnk.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Scheduled_ids != nil {
 		rnk.ScheduledIDs = jsnCfg.Scheduled_ids
@@ -63,9 +64,6 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 		if rnk.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return
 		}
-	}
-	if jsnCfg.Ees_conns != nil {
-		rnk.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		rnk.EEsExporterIDs = append(rnk.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -79,20 +77,12 @@ func (rnk *RankingSCfg) AsMapInterface() any {
 		utils.StoreIntervalCfg:  utils.EmptyString,
 		utils.EEsExporterIDsCfg: slices.Clone(rnk.EEsExporterIDs),
 	}
-	if rnk.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(rnk.StatSConns)
-	}
-	if rnk.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = stripInternalConns(rnk.ThresholdSConns)
-	}
+	mp[utils.ConnsCfg] = stripConns(rnk.Conns)
 	if rnk.ScheduledIDs != nil {
 		mp[utils.ScheduledIDsCfg] = rnk.ScheduledIDs
 	}
 	if rnk.StoreInterval != 0 {
 		mp[utils.StoreIntervalCfg] = rnk.StoreInterval.String()
-	}
-	if rnk.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(rnk.EEsConns)
 	}
 	return mp
 }
@@ -103,22 +93,14 @@ func (rnk RankingSCfg) CloneSection() Section { return rnk.Clone() }
 func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 	cln = &RankingSCfg{
 		Enabled:       rnk.Enabled,
+		Conns:         CloneConnsOpt(rnk.Conns),
 		StoreInterval: rnk.StoreInterval,
-	}
-	if rnk.StatSConns != nil {
-		cln.StatSConns = slices.Clone(rnk.StatSConns)
-	}
-	if rnk.ThresholdSConns != nil {
-		cln.ThresholdSConns = slices.Clone(rnk.ThresholdSConns)
 	}
 	if rnk.ScheduledIDs != nil {
 		cln.ScheduledIDs = make(map[string][]string)
 		for key, value := range rnk.ScheduledIDs {
 			cln.ScheduledIDs[key] = slices.Clone(value)
 		}
-	}
-	if rnk.EEsConns != nil {
-		cln.EEsConns = slices.Clone(rnk.EEsConns)
 	}
 	if rnk.EEsExporterIDs != nil {
 		cln.EEsExporterIDs = slices.Clone(rnk.EEsExporterIDs)
@@ -128,11 +110,9 @@ func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 
 type RankingSJsonCfg struct {
 	Enabled          *bool
-	Stats_conns      *[]string
-	Thresholds_conns *[]string
+	Conns            map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Scheduled_ids    map[string][]string
 	Store_interval   *string
-	Ees_conns        *[]string
 	Ees_exporter_ids *[]string
 }
 
@@ -143,17 +123,11 @@ func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {
 		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs

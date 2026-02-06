@@ -62,3 +62,55 @@ func stripInternalConns(conns []string) []string {
 	}
 	return result
 }
+
+func tagInternalConnsOpt(opts []*DynamicStringSliceOpt, subsystem string) []*DynamicStringSliceOpt {
+	if len(opts) == 0 {
+		return opts
+	}
+	result := make([]*DynamicStringSliceOpt, len(opts))
+	for i, opt := range opts {
+		result[i] = &DynamicStringSliceOpt{
+			FilterIDs: opt.FilterIDs,
+			Tenant:    opt.Tenant,
+			Values:    tagInternalConns(opt.Values, subsystem),
+		}
+	}
+	return result
+}
+
+func stripInternalConnsOpt(opts []*DynamicStringSliceOpt) []*DynamicStringSliceOpt {
+	if len(opts) == 0 {
+		return opts
+	}
+	result := make([]*DynamicStringSliceOpt, len(opts))
+	for i, opt := range opts {
+		result[i] = &DynamicStringSliceOpt{
+			FilterIDs: opt.FilterIDs,
+			Tenant:    opt.Tenant,
+			Values:    stripInternalConns(opt.Values),
+		}
+	}
+	return result
+}
+
+func tagConns(conns map[string][]*DynamicStringSliceOpt) map[string][]*DynamicStringSliceOpt {
+	if conns == nil {
+		return nil
+	}
+	result := make(map[string][]*DynamicStringSliceOpt, len(conns))
+	for connType, opts := range conns {
+		result[connType] = tagInternalConnsOpt(opts, connType)
+	}
+	return result
+}
+
+func stripConns(conns map[string][]*DynamicStringSliceOpt) map[string][]*DynamicStringSliceOpt {
+	if conns == nil {
+		return nil
+	}
+	result := make(map[string][]*DynamicStringSliceOpt, len(conns))
+	for connType, opts := range conns {
+		result[connType] = stripInternalConnsOpt(opts)
+	}
+	return result
+}

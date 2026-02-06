@@ -29,18 +29,16 @@ import (
 
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
-	Enabled            *bool                       `json:"enabled"`
-	Listeners          *[]*RadiusListenerJsonCfg   `json:"listeners"`
-	ClientSecrets      map[string]string           `json:"client_secrets"`
-	ClientDictionaries map[string][]string         `json:"client_dictionaries"`
-	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
-	SessionSConns      *[]string                   `json:"sessions_conns"`
-	StatSConns         *[]string                   `json:"stats_conns"`
-	ThresholdSConns    *[]string                   `json:"thresholds_conns"`
-	RequestsCacheKey   *string                     `json:"requests_cache_key"`
-	DMRTemplate        *string                     `json:"dmr_template"`
-	CoATemplate        *string                     `json:"coa_template"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"request_processors"`
+	Enabled            *bool                               `json:"enabled"`
+	Listeners          *[]*RadiusListenerJsonCfg           `json:"listeners"`
+	ClientSecrets      map[string]string                   `json:"client_secrets"`
+	ClientDictionaries map[string][]string                 `json:"client_dictionaries"`
+	ClientDaAddresses  map[string]DAClientOptsJson         `json:"client_da_addresses"`
+	Conns              map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	RequestsCacheKey   *string                             `json:"requests_cache_key"`
+	DMRTemplate        *string                             `json:"dmr_template"`
+	CoATemplate        *string                             `json:"coa_template"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 type RadiusListenerJsonCfg struct {
@@ -63,9 +61,7 @@ type RadiusAgentCfg struct {
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
 	ClientDaAddresses  map[string]DAClientOpts
-	SessionSConns      []string
-	StatSConns         []string
-	ThresholdSConns    []string
+	Conns              map[string][]*DynamicStringSliceOpt
 	RequestsCacheKey   utils.RSRParsers
 	DMRTemplate        string
 	CoATemplate        string
@@ -130,14 +126,11 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jc *RadiusAgentJsonCfg) (err error) {
 			ra.ClientDaAddresses[hostKey] = cfg
 		}
 	}
-	if jc.SessionSConns != nil {
-		ra.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
-	}
-	if jc.StatSConns != nil {
-		ra.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
-	}
-	if jc.ThresholdSConns != nil {
-		ra.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
+	if jc.Conns != nil {
+		tagged := tagConns(jc.Conns)
+		for connType, opts := range tagged {
+			ra.Conns[connType] = opts
+		}
 	}
 	if jc.RequestsCacheKey != nil {
 		ra.RequestsCacheKey, err = utils.NewRSRParsers(*jc.RequestsCacheKey, utils.RSRSep)
@@ -181,9 +174,7 @@ func (ra RadiusAgentCfg) AsMapInterface() any {
 		utils.RequestsCacheKeyCfg:   ra.RequestsCacheKey.GetRule(),
 		utils.DMRTemplateCfg:        ra.DMRTemplate,
 		utils.CoATemplateCfg:        ra.CoATemplate,
-		utils.SessionSConnsCfg:      stripInternalConns(ra.SessionSConns),
-		utils.StatSConnsCfg:         stripInternalConns(ra.StatSConns),
-		utils.ThresholdSConnsCfg:    stripInternalConns(ra.ThresholdSConns),
+		utils.ConnsCfg:              stripConns(ra.Conns),
 		utils.RequestProcessorsCfg:  requestProcessors,
 	}
 	return mp
@@ -198,9 +189,7 @@ func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
 		Enabled:          ra.Enabled,
 		Listeners:        slices.Clone(ra.Listeners),
 		ClientSecrets:    maps.Clone(ra.ClientSecrets),
-		SessionSConns:    slices.Clone(ra.SessionSConns),
-		StatSConns:       slices.Clone(ra.StatSConns),
-		ThresholdSConns:  slices.Clone(ra.ThresholdSConns),
+		Conns:            CloneConnsOpt(ra.Conns),
 		DMRTemplate:      ra.DMRTemplate,
 		CoATemplate:      ra.CoATemplate,
 		RequestsCacheKey: ra.RequestsCacheKey,
@@ -320,14 +309,8 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 		}
 		d.ClientDaAddresses = clientDaAddresses
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	cacheKey1 := v1.RequestsCacheKey.GetRule()
 	cacheKey2 := v2.RequestsCacheKey.GetRule()

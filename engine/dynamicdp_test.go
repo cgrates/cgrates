@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -29,15 +30,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 	"github.com/nyaruka/phonenumbers"
+	"golang.org/x/exp/slices"
 )
 
 func TestDynamicDPnewDynamicDP(t *testing.T) {
 
 	expDDP := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		cfg:    config.CgrConfig(),
+		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
 		},
@@ -45,9 +45,8 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 		ctx:   context.Background(),
 	}
 
-	if rcv := NewDynamicDP(context.Background(), nil, []string{"conn1"}, []string{"conn2"},
-		[]string{"conn3"}, nil, nil, "cgrates.org",
-		utils.StringSet{"test": struct{}{}}); !reflect.DeepEqual(rcv, expDDP) {
+	if rcv := NewDynamicDP(context.Background(), config.CgrConfig(), "cgrates.org",
+		utils.StringSet{"test": struct{}{}}, nil); !reflect.DeepEqual(rcv, expDDP) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(expDDP), utils.ToJSON(rcv))
 	}
@@ -56,10 +55,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 func TestDynamicDPString(t *testing.T) {
 
 	rcv := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
 		},
@@ -77,10 +73,7 @@ func TestDynamicDPString(t *testing.T) {
 func TestDynamicDPFieldAsInterfaceErrFilename(t *testing.T) {
 
 	rcv := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
 		},
@@ -97,10 +90,7 @@ func TestDynamicDPFieldAsInterfaceErrFilename(t *testing.T) {
 func TestDynamicDPFieldAsInterfaceErrLenFldPath(t *testing.T) {
 
 	rcv := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
 		},
@@ -117,10 +107,7 @@ func TestDynamicDPFieldAsInterfaceErrLenFldPath(t *testing.T) {
 func TestDynamicDPFieldAsInterface(t *testing.T) {
 
 	DDP := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
 		},
@@ -406,10 +393,7 @@ func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 
 	dDP := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 
 		cache: utils.MapStorage{
 			"testField": "testValue",
@@ -436,10 +420,7 @@ func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 func TestDynamicDPfieldAsInterfaceErrMetaLibPhoneNumber(t *testing.T) {
 
 	dDP := &DynamicDP{
-		resConns:  []string{"conn1"},
-		stsConns:  []string{"conn2"},
-		actsConns: []string{"conn3"},
-		tenant:    "cgrates.org",
+		tenant: "cgrates.org",
 
 		cache: utils.MapStorage{
 			"testField": "testValue",
@@ -456,7 +437,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 
 	ms := utils.MapStorage{}
-	dDp := NewDynamicDP(context.Background(), nil, []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
+	dDp := NewDynamicDP(context.Background(), config.CgrConfig(), "cgrates.org", ms, nil)
 
 	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -465,29 +446,18 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
-				return utils.ErrNotImplemented
-			},
+	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
+	}
+	dDP := &DynamicDP{
+		cfg:    cfg,
+		tenant: "cgrates.org",
+		cache: utils.MapStorage{
+			"testField": "testValue",
 		},
+		ctx: context.Background(),
 	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cc
-	cM := NewConnManager(cfg)
-	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 
-	dDP := NewDynamicDP(context.Background(), cM,
-		nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		nil, nil, nil, "cgrates.org", utils.MapStorage{})
-
-	if _, err := dDP.fieldAsInterface([]string{utils.MetaStats, "fld1"}); err == nil || err != utils.ErrNotImplemented {
-		t.Error(err)
-	}
-}
-
-func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
 	cc := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
@@ -499,10 +469,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
-
-	dDP := NewDynamicDP(context.Background(), cM,
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-		nil, nil, nil, nil, "cgrates.org", utils.MapStorage{})
+	dDP.fs = NewFilterS(cfg, cM, nil)
 
 	if _, err := dDP.fieldAsInterface([]string{utils.MetaResources, "fld1"}); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
@@ -511,30 +478,17 @@ func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
-				return utils.ErrNotImplemented
-			},
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+	}
+	dDP := &DynamicDP{
+		cfg:    cfg,
+		tenant: "cgrates.org",
+		cache: utils.MapStorage{
+			"testField": "testValue",
 		},
+		ctx: context.Background(),
 	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cc
-	cM := NewConnManager(cfg)
-	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-
-	dDP := NewDynamicDP(context.Background(), cM,
-		nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		nil, nil, "cgrates.org", utils.MapStorage{})
-
-	if _, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "fld1"}); err == nil || err != utils.ErrNotImplemented {
-		t.Error(err)
-	}
-}
-
-func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
-	Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
 
 	customRply := &utils.Account{
 		Tenant:    "cgrates.org",
@@ -579,10 +533,7 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-
-	dDP := NewDynamicDP(context.Background(), cM,
-		nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		nil, nil, "cgrates.org", utils.MapStorage{})
+	dDP.fs = NewFilterS(cfg, cM, nil)
 
 	exp := &utils.Decimal{Big: decimal.New(1000, 0)}
 
@@ -595,7 +546,19 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	Cache.Clear(nil)
+
 	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
+	}
+	dDP := &DynamicDP{
+		cfg:    cfg,
+		tenant: "cgrates.org",
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
 
 	customRply := &utils.ResourceWithConfig{
 		Resource: &utils.Resource{
@@ -640,10 +603,7 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
-
-	dDP := NewDynamicDP(context.Background(), cM,
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-		nil, nil, nil, nil, "cgrates.org", utils.MapStorage{})
+	dDP.fs = NewFilterS(cfg, cM, nil)
 
 	var exp float64 = 9
 
@@ -656,7 +616,19 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	Cache.Clear(nil)
+
 	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().Conns[utils.MetaStats] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}},
+	}
+	dDP := &DynamicDP{
+		cfg:    cfg,
+		tenant: "cgrates.org",
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
 
 	customRply := &map[string]*utils.Decimal{
 		utils.MetaACD: utils.NewDecimal(1, 0),
@@ -680,10 +652,7 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
-
-	dDP := NewDynamicDP(context.Background(), cM,
-		nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		nil, nil, nil, "cgrates.org", utils.MapStorage{})
+	dDP.fs = NewFilterS(cfg, cM, nil)
 
 	exp := utils.NewDecimal(1, 0)
 
@@ -692,4 +661,135 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
 		t.Errorf("expected: <%+v><%T>,\nreceived: \n<%+v><%T>", utils.ToJSON(exp), exp, utils.ToJSON(rcv), rcv)
 	}
+}
+
+func TestDPFilterSConns(t *testing.T) {
+	acc1 := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Balances: map[string]*utils.Balance{
+			"Bal1": {
+				ID:    "Bal1",
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{Big: decimal.New(1000, 0)},
+			},
+		},
+	}
+
+	registerAccountsMock := func(cM *ConnManager, connName string) {
+		cc := &ccMock{
+			calls: map[string]func(ctx *context.Context, args any, reply any) error{
+				utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+					rpl, ok := reply.(*utils.Account)
+					if !ok {
+						return fmt.Errorf("wrong reply type %T", reply)
+					}
+					*rpl = *acc1
+					return nil
+				},
+			},
+		}
+		ch := make(chan birpc.ClientConnector, 1)
+		ch <- cc
+		cM.AddInternalConn(connName, utils.AccountSv1, ch)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "2003",
+		},
+	}
+
+	t.Run("CommonConnWithReqFilter", func(t *testing.T) {
+		cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+			"sessions": {
+				"conns": {
+					"*attributes": [
+						{"FilterIDs": ["*string:~*req.Account:1001"], "Values": ["conn"]},
+					]
+				}
+			}
+		}`)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+		dm := NewDataManager(dbCM, cfg, nil)
+		fS := NewFilterS(cfg, nil, dm)
+		NewConnManager(cfg)
+
+		got, err := GetConnIDs(context.TODO(), cfg.SessionSCfg().Conns[utils.MetaAttributes], "cgrates.org", ev.AsDataProvider(), fS)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Equal(got, []string{"conn"}) {
+			t.Errorf("expected [conn], got %v", got)
+		}
+	})
+
+	t.Run("CommonConnOptWithFilterConn", func(t *testing.T) {
+		cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+			"filters": {
+				"conns": {
+					"*accounts": [{"Values": ["*internal"]}]
+				}
+			},
+			"chargers": {
+				"conns": {
+					"*attributes": [{"Values": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
+				}
+			}
+		}`)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+		dm := NewDataManager(dbCM, cfg, nil)
+		cM := NewConnManager(cfg)
+		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
+		fS := NewFilterS(cfg, cM, dm)
+
+		got, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns[utils.MetaAttributes], "cgrates.org", ev.AsDataProvider(), fS)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Equal(got, []string{"conn2"}) {
+			t.Errorf("expected [conn2], got %v", got)
+		}
+	})
+
+	t.Run("ConnOptWithFilter", func(t *testing.T) {
+		cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+			"filters": {
+				"conns": {
+					"*accounts": [
+						{"FilterIDs": ["*string:~*req.Account:1001"], "Values": ["*internal"]},
+					]
+				}
+			},
+		}`)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+		dm := NewDataManager(dbCM, cfg, nil)
+		fS := NewFilterS(cfg, nil, dm)
+		cM := NewConnManager(cfg)
+		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
+
+		got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Equal(got, []string{"*internal:*accounts"}) {
+			t.Errorf("expected [*internal], got %v", got)
+		}
+	})
 }

@@ -51,21 +51,27 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"]
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 
@@ -77,8 +83,10 @@
 
 "routes": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}],
+		"*resources": [{"Values": ["*localhost"]}]
+	},
 },
 
 
@@ -94,7 +102,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",									
 		"lockfile_path": ".cgr.lock",					
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/In",
 		"tp_out_dir": "/tmp/Out",
@@ -114,7 +124,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/LoaderIn",
 		"tp_out_dir": "",
@@ -135,7 +147,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathWithoutMove",
 		"tp_out_dir": "",
@@ -156,7 +170,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathLoaderWithMove",
 		"tp_out_dir": "/tmp/SubpathOut",
@@ -177,7 +193,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/templateLoaderIn",
 		"tp_out_dir": "/tmp/templateLoaderOut",
@@ -197,7 +215,9 @@
 		"tenant": "cgrates.org",
 		"run_delay": "-1",										
 		"lockfile_path": ".cgr.lock",						
-		"caches_conns": ["*internal"],
+		"conns": {
+			"*caches": [{"Values": ["*internal"]}]
+		},
 		"field_separator": "\t",							
 		"tp_in_dir": "/tmp/customSepLoaderIn",				
 		"tp_out_dir": "/tmp/customSepLoaderOut",									
@@ -221,9 +241,29 @@
 
 "sessions": {
 	"enabled": true,
-	"rates_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns":{
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 

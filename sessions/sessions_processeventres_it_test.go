@@ -53,7 +53,11 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 "logger": { "level": 7 },
 "sessions": {
 	"enabled": true,
-	"resources_conns": ["*localhost"]
+		"conns": {
+			"*resources": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+		},
+	"opts": {
+	}
 },
 "resources": {
 	"enabled": true,
@@ -140,7 +144,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatal(err)
 		}
 
-		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
 	})
@@ -165,7 +169,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatal(err)
 		}
 
-		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
 	})
@@ -188,7 +192,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if _, exists := rply.ResourceAllocation[utils.MetaDefault]; !exists {
+		if _, exists := rply.ResourceAllocation[utils.MetaPrimary]; !exists {
 			t.Fatalf("expected allocation entry")
 		}
 	})
@@ -212,7 +216,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatal(err)
 		}
 
-		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "" {
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "" {
 			t.Fatalf("expected empty allocation msg, got %q", msg)
 		}
 	})
@@ -262,7 +266,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				t.Fatalf("allocation %d failed: %v", i, err)
 			}
 
-			if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+			if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 				t.Fatalf("allocation %d: unexpected msg: %q", i, msg)
 			}
 		}
@@ -288,7 +292,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if _, exists := rply.ResourceAllocation[utils.MetaDefault]; !exists {
+		if _, exists := rply.ResourceAllocation[utils.MetaPrimary]; !exists {
 			t.Fatal("expected allocation entry")
 		}
 	})
@@ -313,7 +317,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 			t.Fatal(err)
 		}
 
-		if msg := rply.ResourceAllocation[utils.MetaDefault]; msg != "ResourceAllocationSuccess" {
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
 	})

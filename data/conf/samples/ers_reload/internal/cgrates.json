@@ -22,7 +22,9 @@
     
     "chargers": {
         "enabled": true,
-        "attributes_conns": ["*internal"],
+        "conns": {
+        	"*attributes": [{"Values": ["*internal"]}]
+        },
     },
     
     
@@ -38,24 +40,60 @@
     
     "cdrs": {
         "enabled": true,
-        "chargers_conns": ["*localhost"],
-        "rates_conns": ["*internal"],
+        "conns": {
+        	"*chargers": [{"Values": ["*localhost"]}],
+        	"*rates": [{"Values": ["*internal"]}]
+        },
     },
     
     
     "sessions": {
         "enabled": true,
-        "chargers_conns": ["*localhost"],
-        "rates_conns": ["*internal"],
-        "cdrs_conns": ["*internal"],
-        "resources_conns": ["*internal"],
-        "attributes_conns": ["*internal"],
+        "conns":{
+        "*chargers": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*localhost"]
+                 }
+        ],
+        "*rates": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*cdrs": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*resources": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*attributes": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ]
+                        },
     },
     
     
     "ers": {
         "enabled": true,
-        "sessions_conns": ["*internal"],
+        "conns": {
+        	"*sessions": [{"Values": ["*internal"]}]
+        },
         "readers": [
             {
                 "id": "file_reader1",

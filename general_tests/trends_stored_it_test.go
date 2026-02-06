@@ -67,7 +67,9 @@ func TestTrendStore(t *testing.T) {
 "trends": {
 	"enabled": true,
 	"store_interval": "1500ms",
-	"stats_conns":["*localhost"],
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}]
+	},
 },
 
 "stats": {

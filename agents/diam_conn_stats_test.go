@@ -46,7 +46,7 @@ func TestDiamConnStats(t *testing.T) {
 	"log_level": 7
 },
 "admins": {
-	"enabled": true
+	"enabled": true,
 },
 // "prometheus_agent": {
 // 	"enabled": true,
@@ -71,7 +71,9 @@ func TestDiamConnStats(t *testing.T) {
 },
 "diameter_agent": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
+	 "conns":{
+	 "*stats": [{"Values":["*localhost"]}]
+	 },
 	// "thresholds_conns": ["*localhost"],
 	// "conn_status_stat_queue_ids": ["SQ_CONN_1", "SQ_CONN_2", "SQ_CONN_3"],
 	// "conn_status_threshold_ids": [],
@@ -80,8 +82,8 @@ func TestDiamConnStats(t *testing.T) {
 }`,
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
-		// LogBuffer:        &bytes.Buffer{},
-		GracefulShutdown: true,
+		//	LogBuffer:        &bytes.Buffer{},
+		//GracefulShutdown: true,
 	}
 	// t.Cleanup(func() {
 	// 	fmt.Println(ng.LogBuffer)

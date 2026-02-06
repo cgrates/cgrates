@@ -30,16 +30,20 @@ import (
 
 func TestScheduledIDsDiffTrendSJsonCfg(t *testing.T) {
 	v1 := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"thresh1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+		},
+		ScheduledIDs: map[string][]string{"tenant1": {"id1"}},
 	}
 	v2 := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"thresh1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id2"}},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+		},
+		ScheduledIDs: map[string][]string{"tenant1": {"id2"}},
 	}
 	expected := &TrendSJsonCfg{
 		Scheduled_ids: map[string][]string{"tenant1": {"id2"}},
@@ -55,13 +59,15 @@ func TestScheduledIDsDiffTrendSJsonCfg(t *testing.T) {
 
 func TestTrendSLoadFromJSONCfg_NilConfig(t *testing.T) {
 	trendCfg := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"connection1"},
-		ThresholdSConns: []string{"threshold1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
-		StoreInterval:   10 * time.Second,
-		EEsConns:        []string{"conn1"},
-		EEsExporterIDs:  []string{"exporter1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"connection1"}}},
+			utils.MetaThresholds: {{Values: []string{"threshold1"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1"}}},
+		},
+		ScheduledIDs:   map[string][]string{"tenant1": {"id1"}},
+		StoreInterval:  10 * time.Second,
+		EEsExporterIDs: []string{"exporter1"},
 	}
 	err := trendCfg.loadFromJSONCfg(nil)
 	if err != nil {
@@ -96,23 +102,26 @@ func TestLoadFromJSONCfgStoreInterval(t *testing.T) {
 
 func TestTrendSLoadFromJSONCfgEesConns(t *testing.T) {
 	trendCfg := &TrendSCfg{
-		EEsConns: []string{"old_conn1", "old_conn2"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEEs: {{Values: []string{"old_conn1", "old_conn2"}}},
+		},
 	}
 	jsnCfg := &TrendSJsonCfg{
-		Ees_conns: &[]string{"new_conn1", "new_conn2"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEEs: {{Values: []string{"new_conn1", "new_conn2"}}},
+		},
 	}
 	err := trendCfg.loadFromJSONCfg(jsnCfg)
 	if err != nil {
 		t.Errorf("Expected no error, but got: %v", err)
 	}
-	expectedConns := []string{"new_conn1", "new_conn2"}
-	if len(trendCfg.EEsConns) != len(expectedConns) {
-		t.Errorf("Expected EEsConns length to be %d, but got: %d", len(expectedConns), len(trendCfg.EEsConns))
+	// Loading replaces existing conn entries with new ones
+	if len(trendCfg.Conns[utils.MetaEEs]) != 1 {
+		t.Errorf("Expected EEs conns slice length to be 1, but got: %d", len(trendCfg.Conns[utils.MetaEEs]))
 	}
-	for i, conn := range expectedConns {
-		if trendCfg.EEsConns[i] != conn {
-			t.Errorf("Expected EEsConns[%d] to be %v, but got: %v", i, conn, trendCfg.EEsConns[i])
-		}
+	expectedFirst := []string{"new_conn1", "new_conn2"}
+	if !reflect.DeepEqual(trendCfg.Conns[utils.MetaEEs][0].Values, expectedFirst) {
+		t.Errorf("Expected first entry %v, but got: %v", expectedFirst, trendCfg.Conns[utils.MetaEEs][0].Values)
 	}
 }
 
@@ -142,29 +151,27 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 	storeInterval := 10 * time.Second
 	storeUncompressedLimit := 500
 	eesExporterIDs := []string{"exporter1", "exporter2"}
-	statSConns := []string{"statConn1"}
-	thresholdSConns := []string{"thresholdConn1"}
 	scheduledIDs := map[string][]string{"tenant1": {"id1"}}
-	eesConns := []string{"eesConn1"}
 
+	conns := map[string][]*DynamicStringSliceOpt{
+		utils.MetaStats:      {{Values: []string{"statConn1"}}},
+		utils.MetaThresholds: {{Values: []string{"thresholdConn1"}}},
+		utils.MetaEEs:        {{Values: []string{"eesConn1"}}},
+	}
 	trendCfg := TrendSCfg{
 		Enabled:                true,
-		StatSConns:             statSConns,
-		ThresholdSConns:        thresholdSConns,
+		Conns:                  conns,
 		ScheduledIDs:           scheduledIDs,
 		StoreInterval:          storeInterval,
 		StoreUncompressedLimit: storeUncompressedLimit,
-		EEsConns:               eesConns,
 		EEsExporterIDs:         eesExporterIDs,
 	}
 	expectedMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          storeInterval.String(),
 		utils.StoreUncompressedLimitCfg: storeUncompressedLimit,
-		utils.StatSConnsCfg:             stripInternalConns(statSConns),
-		utils.ThresholdSConnsCfg:        stripInternalConns(thresholdSConns),
+		utils.ConnsCfg:                  stripConns(conns),
 		utils.ScheduledIDsCfg:           scheduledIDs,
-		utils.EEsConnsCfg:               stripInternalConns(eesConns),
 		utils.EEsExporterIDsCfg:         eesExporterIDs,
 	}
 	result := trendCfg.AsMapInterface().(map[string]any)
@@ -184,22 +191,25 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 
 func TestDiffTrendSJsonCfg(t *testing.T) {
 	v1 := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"thresh1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+		},
+		ScheduledIDs: map[string][]string{"tenant1": {"id1"}},
 	}
 	v2 := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"thresh1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+		},
+		ScheduledIDs: map[string][]string{"tenant1": {"id1"}},
 	}
 	expected := &TrendSJsonCfg{
-		Enabled:          nil,
-		Stats_conns:      nil,
-		Thresholds_conns: nil,
-		Scheduled_ids:    nil,
+		Enabled:       nil,
+		Conns:         nil,
+		Scheduled_ids: nil,
 	}
 
 	d := diffTrendsJsonCfg(nil, v1, v2)
@@ -207,11 +217,8 @@ func TestDiffTrendSJsonCfg(t *testing.T) {
 	if d.Enabled != expected.Enabled {
 		t.Errorf("Enabled mismatch. Got: %v, expected: %v", d.Enabled, expected.Enabled)
 	}
-	if !reflect.DeepEqual(d.Stats_conns, expected.Stats_conns) {
-		t.Errorf("Stats_conns mismatch. Got: %v, expected: %v", d.Stats_conns, expected.Stats_conns)
-	}
-	if !reflect.DeepEqual(d.Thresholds_conns, expected.Thresholds_conns) {
-		t.Errorf("Thresholds_conns mismatch. Got: %v, expected: %v", d.Thresholds_conns, expected.Thresholds_conns)
+	if !reflect.DeepEqual(d.Conns, expected.Conns) {
+		t.Errorf("Conns mismatch. Got: %v, expected: %v", d.Conns, expected.Conns)
 	}
 
 	v2.Enabled = false
@@ -226,30 +233,44 @@ func TestDiffTrendSJsonCfg(t *testing.T) {
 	}
 
 	v2.Enabled = true
-	v2.StatSConns = []string{"conn2"}
+	v2.Conns = map[string][]*DynamicStringSliceOpt{
+		utils.MetaStats:      {{Values: []string{"conn2"}}},
+		utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+	}
 	expected = &TrendSJsonCfg{
-		Stats_conns: utils.SliceStringPointer([]string{"conn2"}),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn2"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+		},
 	}
 
 	d = diffTrendsJsonCfg(nil, v1, v2)
 
-	if !reflect.DeepEqual(d.Stats_conns, expected.Stats_conns) {
-		t.Errorf("Stats_conns mismatch. Got: %v, expected: %v", d.Stats_conns, expected.Stats_conns)
+	if !reflect.DeepEqual(d.Conns, expected.Conns) {
+		t.Errorf("Conns mismatch. Got: %v, expected: %v", d.Conns, expected.Conns)
 	}
 
-	v2.StatSConns = []string{"conn1"}
-	v2.ThresholdSConns = []string{"thresh2"}
+	v2.Conns = map[string][]*DynamicStringSliceOpt{
+		utils.MetaStats:      {{Values: []string{"conn1"}}},
+		utils.MetaThresholds: {{Values: []string{"thresh2"}}},
+	}
 	expected = &TrendSJsonCfg{
-		Thresholds_conns: utils.SliceStringPointer([]string{"thresh2"}),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh2"}}},
+		},
 	}
 
 	d = diffTrendsJsonCfg(nil, v1, v2)
 
-	if !reflect.DeepEqual(d.Thresholds_conns, expected.Thresholds_conns) {
-		t.Errorf("Thresholds_conns mismatch. Got: %v, expected: %v", d.Thresholds_conns, expected.Thresholds_conns)
+	if !reflect.DeepEqual(d.Conns, expected.Conns) {
+		t.Errorf("Conns mismatch. Got: %v, expected: %v", d.Conns, expected.Conns)
 	}
 
-	v2.ThresholdSConns = []string{"thresh1"}
+	v2.Conns = map[string][]*DynamicStringSliceOpt{
+		utils.MetaStats:      {{Values: []string{"conn1"}}},
+		utils.MetaThresholds: {{Values: []string{"thresh1"}}},
+	}
 	v2.ScheduledIDs = map[string][]string{"tenant1": {"id2"}}
 	expected = &TrendSJsonCfg{
 		Scheduled_ids: map[string][]string{"tenant1": {"id2"}},
@@ -265,13 +286,15 @@ func TestDiffTrendSJsonCfg(t *testing.T) {
 
 func TestTrendSCfgClone(t *testing.T) {
 	original := &TrendSCfg{
-		Enabled:                true,
-		StatSConns:             []string{"conn1", "conn2"},
-		ThresholdSConns:        []string{"thresh1", "thresh2"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
+			utils.MetaEEs:        {{Values: []string{"eeconn1", "eeconn2"}}},
+		},
 		ScheduledIDs:           map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
 		StoreInterval:          30 * time.Second,
 		StoreUncompressedLimit: 500,
-		EEsConns:               []string{"eeconn1", "eeconn2"},
 		EEsExporterIDs:         []string{"exporter1", "exporter2"},
 	}
 
@@ -280,11 +303,8 @@ func TestTrendSCfgClone(t *testing.T) {
 	if cloned.Enabled != original.Enabled {
 		t.Errorf("Enabled field mismatch: expected %v, got %v", original.Enabled, cloned.Enabled)
 	}
-	if !reflect.DeepEqual(cloned.StatSConns, original.StatSConns) {
-		t.Errorf("StatSConns mismatch: expected %v, got %v", original.StatSConns, cloned.StatSConns)
-	}
-	if !reflect.DeepEqual(cloned.ThresholdSConns, original.ThresholdSConns) {
-		t.Errorf("ThresholdSConns mismatch: expected %v, got %v", original.ThresholdSConns, cloned.ThresholdSConns)
+	if !reflect.DeepEqual(cloned.Conns, original.Conns) {
+		t.Errorf("Conns mismatch: expected %v, got %v", original.Conns, cloned.Conns)
 	}
 	if !reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Errorf("ScheduledIDs mismatch: expected %v, got %v", original.ScheduledIDs, cloned.ScheduledIDs)
@@ -295,30 +315,24 @@ func TestTrendSCfgClone(t *testing.T) {
 	if cloned.StoreUncompressedLimit != original.StoreUncompressedLimit {
 		t.Errorf("StoreUncompressedLimit mismatch: expected %v, got %v", original.StoreUncompressedLimit, cloned.StoreUncompressedLimit)
 	}
-	if !reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
-		t.Errorf("EEsConns mismatch: expected %v, got %v", original.EEsConns, cloned.EEsConns)
-	}
 	if !reflect.DeepEqual(cloned.EEsExporterIDs, original.EEsExporterIDs) {
 		t.Errorf("EEsExporterIDs mismatch: expected %v, got %v", original.EEsExporterIDs, cloned.EEsExporterIDs)
 	}
 
 	cloned.Enabled = false
-	cloned.StatSConns[0] = "modified_conn"
-	cloned.ThresholdSConns[0] = "modified_thresh"
+	cloned.Conns[utils.MetaStats][0].Values[0] = "modified_conn"
+	cloned.Conns[utils.MetaThresholds][0].Values[0] = "modified_thresh"
 	cloned.ScheduledIDs["tenant1"][0] = "modified_id"
 	cloned.StoreInterval = 45 * time.Second
 	cloned.StoreUncompressedLimit = 1000
-	cloned.EEsConns[0] = "modified_eeconn"
+	cloned.Conns[utils.MetaEEs][0].Values[0] = "modified_eeconn"
 	cloned.EEsExporterIDs[0] = "modified_exporter"
 
 	if cloned.Enabled == original.Enabled {
 		t.Error("Modifying cloned.Enabled should not affect original.Enabled")
 	}
-	if reflect.DeepEqual(cloned.StatSConns, original.StatSConns) {
-		t.Error("Modifying cloned.StatSConns should not affect original.StatSConns")
-	}
-	if reflect.DeepEqual(cloned.ThresholdSConns, original.ThresholdSConns) {
-		t.Error("Modifying cloned.ThresholdSConns should not affect original.ThresholdSConns")
+	if reflect.DeepEqual(cloned.Conns, original.Conns) {
+		t.Error("Modifying cloned.Conns should not affect original.Conns")
 	}
 	if reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Error("Modifying cloned.ScheduledIDs should not affect original.ScheduledIDs")
@@ -329,9 +343,6 @@ func TestTrendSCfgClone(t *testing.T) {
 	if cloned.StoreUncompressedLimit == original.StoreUncompressedLimit {
 		t.Error("Modifying cloned.StoreUncompressedLimit should not affect original.StoreUncompressedLimit")
 	}
-	if reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
-		t.Error("Modifying cloned.EEsConns should not affect original.EEsConns")
-	}
 	if reflect.DeepEqual(cloned.EEsExporterIDs, original.EEsExporterIDs) {
 		t.Error("Modifying cloned.EEsExporterIDs should not affect original.EEsExporterIDs")
 	}
@@ -339,10 +350,12 @@ func TestTrendSCfgClone(t *testing.T) {
 
 func TestTrendSCfgCloneSection(t *testing.T) {
 	original := TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1", "conn2"},
-		ThresholdSConns: []string{"thresh1", "thresh2"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
+			utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
+		},
+		ScheduledIDs: map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
 	}
 
 	clonedSection := original.CloneSection()
@@ -365,11 +378,8 @@ func TestTrendSCfgCloneSection(t *testing.T) {
 		t.Errorf("Enabled field mismatch: expected %v, got %v", original.Enabled, cloned.Enabled)
 	}
 
-	if !reflect.DeepEqual(cloned.StatSConns, original.StatSConns) {
-		t.Errorf("StatSConns mismatch: expected %v, got %v", original.StatSConns, cloned.StatSConns)
-	}
-	if !reflect.DeepEqual(cloned.ThresholdSConns, original.ThresholdSConns) {
-		t.Errorf("ThresholdSConns mismatch: expected %v, got %v", original.ThresholdSConns, cloned.ThresholdSConns)
+	if !reflect.DeepEqual(cloned.Conns, original.Conns) {
+		t.Errorf("Conns mismatch: expected %v, got %v", original.Conns, cloned.Conns)
 	}
 
 	if !reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
@@ -377,18 +387,15 @@ func TestTrendSCfgCloneSection(t *testing.T) {
 	}
 
 	cloned.Enabled = false
-	cloned.StatSConns[0] = "modified_conn"
-	cloned.ThresholdSConns[0] = "modified_thresh"
+	cloned.Conns[utils.MetaStats][0].Values[0] = "modified_conn"
+	cloned.Conns[utils.MetaThresholds][0].Values[0] = "modified_thresh"
 	cloned.ScheduledIDs["tenant1"][0] = "modified_id"
 
 	if cloned.Enabled == original.Enabled {
 		t.Error("Modifying cloned.Enabled should not affect original.Enabled")
 	}
-	if reflect.DeepEqual(cloned.StatSConns, original.StatSConns) {
-		t.Error("Modifying cloned.StatSConns should not affect original.StatSConns")
-	}
-	if reflect.DeepEqual(cloned.ThresholdSConns, original.ThresholdSConns) {
-		t.Error("Modifying cloned.ThresholdSConns should not affect original.ThresholdSConns")
+	if reflect.DeepEqual(cloned.Conns, original.Conns) {
+		t.Error("Modifying cloned.Conns should not affect original.Conns")
 	}
 	if reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Error("Modifying cloned.ScheduledIDs should not affect original.ScheduledIDs")
@@ -437,23 +444,31 @@ func TestDiffTrendsJsonCfgStoreInterval(t *testing.T) {
 
 func TestDiffTrendsJsonCfgEEsConns(t *testing.T) {
 	v1 := &TrendSCfg{
-		EEsConns: []string{"conn1", "conn2"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEEs: {{Values: []string{"conn1", "conn2"}}},
+		},
 	}
 	v2 := &TrendSCfg{
-		EEsConns: []string{"conn3", "conn4"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEEs: {{Values: []string{"conn3", "conn4"}}},
+		},
 	}
 	expected := &TrendSJsonCfg{
-		Ees_conns: utils.SliceStringPointer(([]string{"conn3", "conn4"})),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaEEs: {{Values: []string{"conn3", "conn4"}}},
+		},
 	}
 	d := diffTrendsJsonCfg(nil, v1, v2)
-	if !reflect.DeepEqual(d.Ees_conns, expected.Ees_conns) {
-		t.Errorf("Ees_conns mismatch. Got: %v, expected: %v", d.Ees_conns, expected.Ees_conns)
+	if !reflect.DeepEqual(d.Conns, expected.Conns) {
+		t.Errorf("Conns mismatch. Got: %v, expected: %v", d.Conns, expected.Conns)
 	}
-	v2.EEsConns = []string{"conn1", "conn2"}
-	expected.Ees_conns = nil
+	v2.Conns = map[string][]*DynamicStringSliceOpt{
+		utils.MetaEEs: {{Values: []string{"conn1", "conn2"}}},
+	}
+	expected.Conns = nil
 	d = diffTrendsJsonCfg(nil, v1, v2)
-	if d.Ees_conns != nil {
-		t.Errorf("Expected Ees_conns to be nil, but got: %v", d.Ees_conns)
+	if d.Conns != nil {
+		t.Errorf("Expected Conns to be nil, but got: %v", d.Conns)
 	}
 }
 

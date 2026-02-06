@@ -68,7 +68,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 "prometheus_agent": {
 	"enabled": true,
 	"path": "/metrics",
-	"caches_conns": ["*localhost", "external"],
+	"conns": {
+		"*caches": [{"Values": ["*localhost", "external"]}]
+	},
 	"cache_ids": [
 		"*statqueue_profiles",
 		"*statqueues",
@@ -76,7 +78,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*rpc_connections"
 	],
 	// "apiers_conns": ["*internal", "external"],
-	"stats_conns": ["*internal", "external"],
+	"conns": {
+		"*stats": [{"Values": ["*internal", "external"]}]
+	},
 	"stat_queue_ids": ["cgrates.org:SQ_1","SQ_2"]
 }
 }`

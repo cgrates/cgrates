@@ -28,19 +28,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewQOSRouteSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *QOSRouteSorter {
-	return &QOSRouteSorter{cfg: cfg, connMgr: connMgr}
+func NewQOSRouteSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *QOSRouteSorter {
+	return &QOSRouteSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // QOSSorter sorts route based on stats
 type QOSRouteSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	if len(qos.cfg.RouteSCfg().StatSConns) == 0 {
+	statSConns, err := engine.GetConnIDs(ctx, qos.cfg.RouteSCfg().Conns[utils.MetaStats], ev.Tenant, ev.AsDataProvider(), qos.fltrS)
+	if err != nil {
+		return nil, err
+	}
+	if len(statSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
 	sortedRoutes = &SortedRoutes{
@@ -63,7 +68,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 			srtRoute.SortingData[utils.Blocker] = true
 		}
 		var metricSupp map[string]*utils.Decimal
-		if metricSupp, err = populatStatsForQOSRoute(ctx, qos.cfg, qos.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
+		if metricSupp, err = populatStatsForQOSRoute(ctx, qos.cfg, qos.connMgr, qos.fltrS, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
@@ -94,11 +99,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 		}
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			qos.connMgr, qos.cfg.FilterSCfg().ResourceSConns,
-			qos.cfg.FilterSCfg().StatSConns,
-			qos.cfg.FilterSCfg().AccountSConns,
-			qos.cfg.FilterSCfg().TrendSConns,
-			qos.cfg.FilterSCfg().RankingSConns); err != nil {
+			qos.cfg, qos.fltrS); err != nil {
 			return
 		} else if pass {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
@@ -111,16 +112,20 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 // populatStatsForQOSRoute will query a list of statIDs and return composed metric values
 // first metric found is always returned
 func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *engine.ConnManager, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
+	connMgr *engine.ConnManager, fltrS *engine.FilterS, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
 	type metric struct {
 		sum *utils.Decimal
 		len int
+	}
+	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaStats], tenant, utils.MapStorage{}, fltrS)
+	if err != nil {
+		return
 	}
 	stsMetric = make(map[string]*utils.Decimal)
 	provStsMetrics := make(map[string]metric)
 	for _, statID := range statIDs {
 		var metrics map[string]*utils.Decimal
-		if err = connMgr.Call(ctx, cfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueDecimalMetrics,
+		if err = connMgr.Call(ctx, connIDs, utils.StatSv1GetQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(

@@ -76,7 +76,9 @@ func TestRankingStore(t *testing.T) {
 "rankings": {
 	"enabled": true,
 	"store_interval": "1500ms",
-	"stats_conns":["*localhost"],
+	"conns": {
+		"*stats": [{"Values": ["*localhost"]}]
+	},
 },
 
 "stats": {

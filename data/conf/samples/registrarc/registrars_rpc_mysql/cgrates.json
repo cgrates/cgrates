@@ -40,7 +40,9 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["conn1"]
+	"conns": {
+		"*attributes": [{"Values": ["conn1"]}]
+	},
 },
 
 "admins": {

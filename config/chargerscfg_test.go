@@ -28,7 +28,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &ChargerSJsonCfg{
 		Enabled:                  utils.BoolPointer(true),
 		Indexed_selects:          utils.BoolPointer(true),
-		Attributes_conns:         &[]string{utils.MetaInternal, "*conn1"},
+		Conns:                    map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}}},
 		String_indexed_fields:    &[]string{"*req.Field1"},
 		Prefix_indexed_fields:    &[]string{"*req.Field1", "*req.Field2"},
 		Suffix_indexed_fields:    &[]string{"*req.Field1", "*req.Field2"},
@@ -39,7 +39,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	expected := &ChargerSCfg{
 		Enabled:                true,
 		IndexedSelects:         true,
-		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		Conns:                  map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}}},
 		StringIndexedFields:    &[]string{"*req.Field1"},
 		PrefixIndexedFields:    &[]string{"*req.Field1", "*req.Field2"},
 		SuffixIndexedFields:    &[]string{"*req.Field1", "*req.Field2"},
@@ -62,17 +62,17 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestChargerSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"chargers": {								
-		"enabled": false,						
-		"attributes_conns": [],					
+	"chargers": {
+		"enabled": false,
+		"conns": {},
 		"indexed_selects":true,
 		"prefix_indexed_fields": [],
-		"nested_fields": false,					
-	},	
+		"nested_fields": false,
+	},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
-		utils.AttributeSConnsCfg:        []string{},
+		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
@@ -89,21 +89,21 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 
 func TestChargerSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-		"chargers": {								
-			"enabled": false,						
-			"attributes_conns": ["*internal:*attributes", "*conn1"],					
-			"indexed_selects":true,			
+		"chargers": {
+			"enabled": false,
+			"conns": {"*attributes": [{"Values": ["*internal", "*conn1"]}]},
+			"indexed_selects":true,
             "string_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
 			"prefix_indexed_fields": ["*req.DestinationPrefix"],
-            "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
+            "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
 			"exists_indexed_fields": ["*req.DestinationPrefix"],
-            "notexists_indexed_fields": [],	 
-			"nested_fields": false,					
-		},	
+            "notexists_indexed_fields": [],
+			"nested_fields": false,
+		},
 	}`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
-		utils.AttributeSConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}}},
 		utils.IndexedSelectsCfg:         true,
 		utils.StringIndexedFieldsCfg:    []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.DestinationPrefix"},
@@ -123,7 +123,7 @@ func TestChargerSCfgClone(t *testing.T) {
 	ban := &ChargerSCfg{
 		Enabled:             true,
 		IndexedSelects:      true,
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}}},
 		StringIndexedFields: &[]string{"*req.Field1"},
 		PrefixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
 		SuffixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
@@ -133,7 +133,7 @@ func TestChargerSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAttributes][0].Values[1] = ""; ban.Conns[utils.MetaAttributes][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.Field1" {
@@ -153,7 +153,7 @@ func TestDiffChargerSJsonCfg(t *testing.T) {
 	v1 := &ChargerSCfg{
 		Enabled:             false,
 		IndexedSelects:      false,
-		AttributeSConns:     []string{"*localhost"},
+		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{"*localhost"}}}},
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
@@ -163,7 +163,7 @@ func TestDiffChargerSJsonCfg(t *testing.T) {
 	v2 := &ChargerSCfg{
 		Enabled:             true,
 		IndexedSelects:      true,
-		AttributeSConns:     []string{"*birpc"},
+		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{"*birpc"}}}},
 		StringIndexedFields: &[]string{"*req.Account"},
 		PrefixIndexedFields: nil,
 		SuffixIndexedFields: nil,
@@ -173,7 +173,7 @@ func TestDiffChargerSJsonCfg(t *testing.T) {
 	expected := &ChargerSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(true),
-		Attributes_conns:      &[]string{"*birpc"},
+		Conns:                 map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{"*birpc"}}}},
 		String_indexed_fields: &[]string{"*req.Account"},
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
@@ -198,7 +198,7 @@ func TestChargerSCfgCloneSection(t *testing.T) {
 	chgrCfg := &ChargerSCfg{
 		Enabled:             false,
 		IndexedSelects:      false,
-		AttributeSConns:     []string{"*localhost"},
+		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{"*localhost"}}}},
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
@@ -208,7 +208,7 @@ func TestChargerSCfgCloneSection(t *testing.T) {
 	exp := &ChargerSCfg{
 		Enabled:             false,
 		IndexedSelects:      false,
-		AttributeSConns:     []string{"*localhost"},
+		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaAttributes: {{Values: []string{"*localhost"}}}},
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},

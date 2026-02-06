@@ -27,12 +27,14 @@ import (
 
 func TestERSClone(t *testing.T) {
 	cfgJSONStr := `{
-"ers": {									
-	"enabled": true,						
-	"sessions_conns":["*internal"],			
-	"ees_conns":["*internal"],			
-	"stats_conns":["*internal"],			
-	"thresholds_conns":["*internal"],			
+"ers": {
+	"enabled": true,
+	"conns": {
+		"*sessions": [{"Values": ["*internal"]}],
+		"*ees": [{"Values": ["*internal"]}],
+		"*stats": [{"Values": ["*internal"]}],
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 	"readers": [
          {
             "id": "file_reader1",
@@ -70,11 +72,13 @@ func TestERSClone(t *testing.T) {
 },
 }`
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"*internal:*sessions"},
-		EEsConns:        []string{"*internal:*ees"},
-		StatSConns:      []string{"*internal:*stats"},
-		ThresholdSConns: []string{"*internal:*thresholds"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
+			utils.MetaEEs:        {{Values: []string{"*internal:*ees"}}},
+			utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -248,11 +252,13 @@ func TestEventReaderloadFromJsonCase2(t *testing.T) {
 
 func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"conn1", "conn3"},
-		EEsConns:        []string{"conn1", "conn3"},
-		StatSConns:      []string{"conn1", "conn3"},
-		ThresholdSConns: []string{"conn1", "conn3"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaStats:      {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaThresholds: {{Values: []string{"conn1", "conn3"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -367,10 +373,12 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
-	"sessions_conns":["conn1","conn3"],
-	"ees_conns":["conn1","conn3"],
-	"stats_conns":["conn1","conn3"],
-	"thresholds_conns":["conn1","conn3"],
+	"conns": {
+		"*sessions": [{"Values": ["conn1","conn3"]}],
+		"*ees": [{"Values": ["conn1","conn3"]}],
+		"*stats": [{"Values": ["conn1","conn3"]}],
+		"*thresholds": [{"Values": ["conn1","conn3"]}]
+	},
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -541,11 +549,13 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 
 func TestERSloadFromJsonCase3(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:         utils.BoolPointer(true),
-		SessionSConns:   &[]string{"conn1"},
-		EEsConns:        &[]string{"conn1"},
-		StatSConns:      &[]string{"conn1"},
-		ThresholdSConns: &[]string{"conn1"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1"}}},
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"conn1"}}},
+		},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                 utils.StringPointer("file_reader1"),
@@ -571,11 +581,13 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"conn1"},
-		EEsConns:        []string{"conn1"},
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"conn1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1"}}},
+			utils.MetaStats:      {{Values: []string{"conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"conn1"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -690,11 +702,13 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 
 func TestERSloadFromJsonCase4(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:         utils.BoolPointer(true),
-		SessionSConns:   &[]string{"*conn1"},
-		EEsConns:        &[]string{"*conn1"},
-		StatSConns:      &[]string{"*conn1"},
-		ThresholdSConns: &[]string{"*conn1"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"*conn1"}}},
+			utils.MetaStats:      {{Values: []string{"*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"*conn1"}}},
+		},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                 utils.StringPointer("file_reader1"),
@@ -720,11 +734,13 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"*conn1"},
-		EEsConns:        []string{"*conn1"},
-		StatSConns:      []string{"*conn1"},
-		ThresholdSConns: []string{"*conn1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"*conn1"}}},
+			utils.MetaStats:      {{Values: []string{"*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"*conn1"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -861,11 +877,8 @@ func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 
 func TestEventReaderSameID(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"conn1"},
-		EEsConns:        []string{"conn1"},
-		StatSConns:      []string{"conn1"},
-		ThresholdSConns: []string{"conn1"},
+		Enabled: true,
+		Conns:   map[string][]*DynamicStringSliceOpt{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -961,10 +974,6 @@ func TestEventReaderSameID(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
-	"sessions_conns":["conn1"],
-	"ees_conns":["conn1"],
-	"stats_conns":["conn1"],
-	"thresholds_conns":["conn1"],
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -1005,10 +1014,12 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"ers": {
 		"enabled": true,
-		"sessions_conns":["conn1","conn3"],
-		"ees_conns":["conn1","conn3"],
-		"stats_conns":["conn1","conn3"],
-		"thresholds_conns":["conn1","conn3"],
+		"conns": {
+			"*sessions": [{"Values": ["conn1","conn3"]}],
+			"*ees": [{"Values": ["conn1","conn3"]}],
+			"*stats": [{"Values": ["conn1","conn3"]}],
+			"*thresholds": [{"Values": ["conn1","conn3"]}]
+		},
 		"readers": [
 			{
 				"id": "file_reader1",
@@ -1023,11 +1034,13 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	}
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:         true,
-		utils.SessionSConnsCfg:   []string{"conn1", "conn3"},
-		utils.EEsConnsCfg:        []string{"conn1", "conn3"},
-		utils.StatSConnsCfg:      []string{"conn1", "conn3"},
-		utils.ThresholdSConnsCfg: []string{"conn1", "conn3"},
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaStats:      {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaThresholds: {{Values: []string{"conn1", "conn3"}}},
+		},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1125,10 +1138,12 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 	"ers": {
 		"enabled": true,
-		"sessions_conns":["conn1","conn3"],
-		"ees_conns":["conn1","conn3"],
-		"stats_conns":["conn1","conn3"],
-		"thresholds_conns":["conn1","conn3"],
+		"conns": {
+			"*sessions": [{"Values": ["conn1","conn3"]}],
+			"*ees": [{"Values": ["conn1","conn3"]}],
+			"*stats": [{"Values": ["conn1","conn3"]}],
+			"*thresholds": [{"Values": ["conn1","conn3"]}]
+		},
 		"readers": [
 			{
 				"id": "file_reader1",
@@ -1164,11 +1179,13 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:         true,
-		utils.SessionSConnsCfg:   []string{"conn1", "conn3"},
-		utils.EEsConnsCfg:        []string{"conn1", "conn3"},
-		utils.StatSConnsCfg:      []string{"conn1", "conn3"},
-		utils.ThresholdSConnsCfg: []string{"conn1", "conn3"},
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaStats:      {{Values: []string{"conn1", "conn3"}}},
+			utils.MetaThresholds: {{Values: []string{"conn1", "conn3"}}},
+		},
 		utils.ReadersCfg: []map[string]any{
 			{
 				utils.FiltersCfg:              []string{},
@@ -1275,11 +1292,13 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 
 func TestERsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:         utils.BoolPointer(true),
-		SessionSConns:   &[]string{"*conn1"},
-		EEsConns:        &[]string{"*conn1"},
-		StatSConns:      &[]string{"*conn1"},
-		ThresholdSConns: &[]string{"*conn1"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"*conn1"}}},
+			utils.MetaStats:      {{Values: []string{"*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"*conn1"}}},
+		},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                   utils.StringPointer("file_reader1"),
@@ -1308,11 +1327,13 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expectedERsCfg := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"*conn1"},
-		EEsConns:        []string{"*conn1"},
-		StatSConns:      []string{"*conn1"},
-		ThresholdSConns: []string{"*conn1"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{"*conn1"}}},
+			utils.MetaStats:      {{Values: []string{"*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{"*conn1"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -1773,11 +1794,13 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	var d *ERsJsonCfg
 
 	v1 := &ERsCfg{
-		Enabled:         false,
-		SessionSConns:   []string{"*internal"},
-		EEsConns:        []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaEEs:        {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:   "ERS_ID",
@@ -1788,11 +1811,13 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	}
 
 	v2 := &ERsCfg{
-		Enabled:         true,
-		SessionSConns:   []string{"*localhost"},
-		EEsConns:        []string{"*localhost"},
-		StatSConns:      []string{"*localhost"},
-		ThresholdSConns: []string{"*localhost"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:   "ERS_ID2",
@@ -1803,11 +1828,13 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	}
 
 	expected := &ERsJsonCfg{
-		Enabled:         utils.BoolPointer(true),
-		SessionSConns:   &[]string{"*localhost"},
-		EEsConns:        &[]string{"*localhost"},
-		StatSConns:      &[]string{"*localhost"},
-		ThresholdSConns: &[]string{"*localhost"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:   utils.StringPointer("ERS_ID2"),
@@ -1825,11 +1852,13 @@ func TestDiffERsJsonCfg(t *testing.T) {
 
 func TestErSCloneSection(t *testing.T) {
 	erSCfg := &ERsCfg{
-		Enabled:         false,
-		SessionSConns:   []string{"*internal"},
-		EEsConns:        []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaEEs:        {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:   "ERS_ID",
@@ -1840,11 +1869,13 @@ func TestErSCloneSection(t *testing.T) {
 	}
 
 	exp := &ERsCfg{
-		Enabled:         false,
-		SessionSConns:   []string{"*internal"},
-		EEsConns:        []string{"*internal"},
-		StatSConns:      []string{"*internal"},
-		ThresholdSConns: []string{"*internal"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
+			utils.MetaEEs:        {{Values: []string{"*internal"}}},
+			utils.MetaStats:      {{Values: []string{"*internal"}}},
+			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		},
 		Readers: []*EventReaderCfg{
 			{
 				ID:   "ERS_ID",

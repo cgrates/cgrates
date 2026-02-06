@@ -25,14 +25,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewWeightSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *WeightSorter {
-	return &WeightSorter{cfg: cfg, connMgr: connMgr}
+func NewWeightSorter(cfg *config.CGRConfig, fS *engine.FilterS) *WeightSorter {
+	return &WeightSorter{cfg: cfg, fS: fS}
 }
 
 // WeightSorter orders routes based on their weight, no cost involved
 type WeightSorter struct {
-	cfg     *config.CGRConfig
-	connMgr *engine.ConnManager
+	cfg *config.CGRConfig
+	fS  *engine.FilterS
 }
 
 func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
@@ -58,11 +58,7 @@ func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
 		}
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			ws.connMgr, ws.cfg.FilterSCfg().ResourceSConns,
-			ws.cfg.FilterSCfg().StatSConns,
-			ws.cfg.FilterSCfg().AccountSConns,
-			ws.cfg.FilterSCfg().TrendSConns,
-			ws.cfg.FilterSCfg().RankingSConns); err != nil {
+			ws.cfg, ws.fS); err != nil {
 			return
 		} else if pass {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)

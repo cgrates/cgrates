@@ -129,8 +129,13 @@ func (ja *JanusAgent) authSession(origIP string) (err error) {
 			utils.Destination:  "echotest",
 		},
 	}
+	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	if err != nil {
+		return
+	}
 	rply := new(sessions.V1AuthorizeReply)
-	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, sessConns,
 		utils.SessionSv1AuthorizeEvent,
 		authArgs, rply)
 	return
@@ -149,8 +154,13 @@ func (ja *JanusAgent) acntStartSession(s *janus.Session) (err error) {
 		},
 	}
 
+	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	if err != nil {
+		return
+	}
 	rply := new(sessions.V1InitSessionReply)
-	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, sessConns,
 		utils.SessionSv1InitiateSession,
 		initArgs, rply)
 	return
@@ -170,8 +180,13 @@ func (ja *JanusAgent) acntStopSession(s *janus.Session) (err error) {
 			utils.Usage:        s.Data[utils.Usage],
 		},
 	}
+	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	if err != nil {
+		return
+	}
 	var rply string
-	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, sessConns,
 		utils.SessionSv1TerminateSession,
 		terminateArgs, &rply)
 	return
@@ -190,8 +205,13 @@ func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
 			utils.Usage:        s.Data[utils.Usage],
 		},
 	}
+	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	if err != nil {
+		return
+	}
 	var rply string
-	err = ja.connMgr.Call(ja.ctx, ja.cgrCfg.JanusAgentCfg().SessionSConns,
+	err = ja.connMgr.Call(ja.ctx, sessConns,
 		utils.SessionSv1ProcessCDR,
 		cgrEv, &rply)
 	return

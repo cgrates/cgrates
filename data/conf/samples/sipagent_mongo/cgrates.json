@@ -40,23 +40,59 @@
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": ["*localhost"],
-	"rates_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"],
+	"conns":{
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	],
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*routes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*localhost"]
+		 }
+	]
+			},
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"rates_conns": ["*internal"],
+	"conns": {
+		"*rates": [{"Values": ["*internal"]}]
+	},
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*localhost"],					// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
+	"conns": {
+		"*attributes": [{"Values": ["*localhost"]}]
+	},
 },
 
 
@@ -68,7 +104,9 @@
 
 "routes": {
 	"enabled": true,
-	"rates_conns": ["*localhost"],
+	"conns": {
+		"*rates": [{"Values": ["*localhost"]}]
+	},
 },
 
 

@@ -39,7 +39,9 @@
   },
 
   "filters": {								
-    "accounts_conns": ["*internal"],
+    "conns": {
+    	"*accounts": [{"Values": ["*internal"]}]
+    },
   },
   
   "accounts": {

@@ -150,7 +150,11 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			utils.MetaChargers)
 		clonedEv.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
 		var evReply attributes.AttrSProcessEventReply
-		if err = cS.connMgr.Call(ctx, cS.cfg.ChargerSCfg().AttributeSConns,
+		attrConns, err := engine.GetConnIDs(ctx, cS.cfg.ChargerSCfg().Conns[utils.MetaAttributes], tnt, clonedEv.AsDataProvider(), cS.fltrS)
+		if err != nil {
+			return nil, err
+		}
+		if err = cS.connMgr.Call(ctx, attrConns,
 			utils.AttributeSv1ProcessEvent, clonedEv, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				return nil, err

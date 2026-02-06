@@ -486,7 +486,7 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
-	cfg.AdminSCfg().CachesConns = []string{}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
@@ -890,7 +890,7 @@ func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
-	cfg.AdminSCfg().CachesConns = []string{}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {

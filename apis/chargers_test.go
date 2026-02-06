@@ -155,7 +155,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
-	cfg.AdminSCfg().CachesConns = []string{}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) {
@@ -616,7 +616,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.GeneralCfg().DefaultCaching = "123"
-	cfg.AdminSCfg().CachesConns = []string{}
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveChargerProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {

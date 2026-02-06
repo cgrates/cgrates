@@ -288,8 +288,12 @@ func (sS *StatS) storeStatQueue(ctx *context.Context, sq *StatQueue) {
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (sS *StatS) processThresholds(ctx *context.Context, sQs []*StatQueue, opts map[string]any) (err error) {
-	if len(sS.cfg.StatSCfg().ThresholdSConns) == 0 {
+func (sS *StatS) processThresholds(ctx *context.Context, sQs []*StatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+	threshConns, err := GetConnIDs(ctx, sS.cfg.StatSCfg().Conns[utils.MetaThresholds], tnt, dP, sS.fltrS)
+	if err != nil {
+		return
+	}
+	if len(threshConns) == 0 {
 		return
 	}
 	if opts == nil {
@@ -317,7 +321,7 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs []*StatQueue, opts 
 		}
 
 		var tIDs []string
-		if err := sS.connMgr.Call(ctx, sS.cfg.StatSCfg().ThresholdSConns,
+		if err := sS.connMgr.Call(ctx, threshConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(sq.sqPrfl.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -331,9 +335,13 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs []*StatQueue, opts 
 	return
 }
 
-// processThresholds will pass the event for statQueue to EEs
-func (sS *StatS) processEEs(ctx *context.Context, sQs []*StatQueue, opts map[string]any) (err error) {
-	if len(sS.cfg.StatSCfg().EEsConns) == 0 {
+// processEEs will pass the event for statQueue to EEs
+func (sS *StatS) processEEs(ctx *context.Context, sQs []*StatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+	eesConns, err := GetConnIDs(ctx, sS.cfg.StatSCfg().Conns[utils.MetaEEs], tnt, dP, sS.fltrS)
+	if err != nil {
+		return
+	}
+	if len(eesConns) == 0 {
 		return
 	}
 	var withErrs bool
@@ -361,7 +369,7 @@ func (sS *StatS) processEEs(ctx *context.Context, sQs []*StatQueue, opts map[str
 			EeIDs:    sS.cfg.StatSCfg().EEsExporterIDs,
 		}
 		var reply map[string]map[string]any
-		if err := sS.connMgr.Call(ctx, sS.cfg.StatSCfg().EEsConns,
+		if err := sS.connMgr.Call(ctx, eesConns,
 			utils.EeSv1ProcessEvent,
 			&cgrEventWithID, &reply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -399,7 +407,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	statQueueIDs = getStatQueueIDs(matchSQs)
 	var withErrors bool
 	for idx, sq := range matchSQs {
-		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, sS.connMgr, evNm); err != nil {
+		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
@@ -418,7 +426,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 
 	}
 
-	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil || sS.processEEs(ctx, matchSQs, args.APIOpts) != nil || withErrors {
+	if sS.processThresholds(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || sS.processEEs(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
 	return

@@ -50,7 +50,7 @@ func TestERsNewERService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrS := &engine.FilterS{}
 	expected := &ERService{cfg: cfg,
-		filterS:   fltrS,
+		fltrS:     fltrS,
 		rdrs:      make(map[string]EventReader),
 		rdrPaths:  make(map[string]string),
 		stopLsn:   make(map[string]chan struct{}),
@@ -61,8 +61,8 @@ func TestERsNewERService(t *testing.T) {
 
 	if !reflect.DeepEqual(expected.cfg, rcv.cfg) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.cfg, rcv.cfg)
-	} else if !reflect.DeepEqual(expected.filterS, rcv.filterS) {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.filterS, rcv.filterS)
+	} else if !reflect.DeepEqual(expected.fltrS, rcv.fltrS) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.fltrS, rcv.fltrS)
 	}
 }
 
@@ -445,7 +445,7 @@ func TestERsProcessEvent3(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -472,7 +472,7 @@ func TestERsProcessEvent4(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -499,7 +499,7 @@ func TestERsProcessEvent5(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -526,7 +526,7 @@ func TestERsProcessEvent6(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -552,7 +552,7 @@ func TestERsProcessEvent7(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -578,7 +578,7 @@ func TestERsProcessEvent8(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -605,7 +605,7 @@ func TestERsProcessEvent9(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -632,7 +632,7 @@ func TestERsProcessEvent10(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -675,7 +675,7 @@ func TestERsProcessEvent11(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	fltrS := &engine.FilterS{}
 	testMockClient := &testMockClients{
 		calls: map[string]func(ctx *context.Context, args, reply any) error{
@@ -743,7 +743,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 	erS.onEvicted("ID", value)
 
@@ -797,7 +797,7 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	erS.onEvicted("ID", value)
@@ -851,7 +851,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	erS.onEvicted("ID", value)
@@ -944,7 +944,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	erS.onEvicted("ID", value)
@@ -1027,7 +1027,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	erS.onEvicted("ID_JSON", value)
@@ -1116,7 +1116,7 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	//Should return nothing since there is no path therefore no writing implied.
@@ -1197,7 +1197,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted2","Event":{"Account":"1002","Additional_Field":"Additional_Value2","AnswerTime":"2021-06-01T13:00:00Z","Category":"call","Destination":"1003","OriginID":"1234567","ToR":"*sms","Usage":"12s","password":"secure_password"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4d"}},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","Additional_Field":"Additional_Value","AnswerTime":"2021-06-01T12:00:00Z","Category":"call","Destination":"1002","OriginHost":"local","OriginID":"123456","ToR":"*voice","Usage":"10s","password":"secure_pass"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4c"}}]>`
 	erS.onEvicted("ID", value)
@@ -1278,7 +1278,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	expLog := `Converting CDR with originID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
@@ -1356,7 +1356,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	erS.onEvicted("ID_JSON", value)
@@ -1443,7 +1443,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	expLog := ".tmp: no such file or directory"
@@ -1514,7 +1514,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 	erS := &ERService{
 		cfg:       cfg,
 		rdrEvents: make(chan *erEvent, 1),
-		filterS:   fltrS,
+		fltrS:     fltrS,
 	}
 
 	expLog := "error: json: unsupported type: func()"
@@ -1553,7 +1553,9 @@ func TestERsLineNr(t *testing.T) {
 },
 "ers": {
 	"enabled": true,
-	"sessions_conns": [],
+	"conns": {
+		"*sessions": []
+	},
 	"readers": [
 		{
 			"id": "file_csv_reader",

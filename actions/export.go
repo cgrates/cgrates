@@ -105,9 +105,9 @@ func (aL *actHTTPPost) execute(ctx *context.Context, data utils.MapStorage, _ st
 	for _, pstr := range aL.pstrs {
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
 			go ees.ExportWithAttempts(context.Background(), pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
-				nil, aL.config.GeneralCfg().DefaultTenant)
+				nil, aL.config.GeneralCfg().DefaultTenant, aL.fltrS)
 		} else if err = ees.ExportWithAttempts(ctx, pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
-			nil, aL.config.GeneralCfg().DefaultTenant); err != nil {
+			nil, aL.config.GeneralCfg().DefaultTenant, aL.fltrS); err != nil {
 			if pstr.Cfg().FailedPostsDir != utils.MetaNone {
 				err = nil
 			} else {
@@ -125,6 +125,7 @@ type actExport struct {
 	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 	aCfg    *utils.APAction
 }
 
@@ -142,8 +143,12 @@ func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	if expIDs, has := aL.cfg().Opts[utils.MetaExporterIDs]; has {
 		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)
 	}
+	var eesConns []string
+	if eesConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaEEs], aL.tnt, data, aL.fltrS); err != nil {
+		return
+	}
 	var rply map[string]map[string]any
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().EEsConns,
+	return aL.connMgr.Call(ctx, eesConns,
 		utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{

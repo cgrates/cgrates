@@ -50,7 +50,7 @@ func (actLog) execute(_ *context.Context, data utils.MapStorage, _ string) (err 
 // actCDRLog will log data to CGRateS logger
 type actCDRLog struct {
 	config  *config.CGRConfig
-	filterS *engine.FilterS
+	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	aCfg    *utils.APAction
 }
@@ -64,8 +64,12 @@ func (aL *actCDRLog) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
-	if len(aL.config.ActionSCfg().CDRsConns) == 0 {
+func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt string) (err error) {
+	cdrsConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaCDRs], tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(cdrsConns) == 0 {
 		return fmt.Errorf("no connection with CDR Server")
 	}
 	template := aL.config.TemplatesCfg()[utils.MetaCdrLog]
@@ -88,13 +92,13 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		utils.MetaOpts: optsMS,
 		utils.MetaCfg:  aL.config.GetDataProvider(),
 	}, aL.config.GeneralCfg().DefaultTenant,
-		aL.filterS, oNm)
+		aL.fltrS, oNm)
 
 	if err = cdrLogReq.SetFields(ctx, template); err != nil {
 		return
 	}
 	var rply string
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().CDRsConns,
+	return aL.connMgr.Call(ctx, cdrsConns,
 		utils.CDRsV1ProcessEvent,
 		utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
 			utils.NestingSep, optsMS),

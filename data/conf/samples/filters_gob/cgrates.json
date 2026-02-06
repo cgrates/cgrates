@@ -45,9 +45,11 @@
 },
 
 "filters": {								
-	"stats_conns": ["conn1"],
-	"resources_conns": ["conn1"],
-	"accounts_conns": ["conn1"]
+	"conns": {
+		"*stats": [{"Values": ["conn1"]}],
+		"*resources": [{"Values": ["conn1"]}],
+		"*accounts": [{"Values": ["conn1"]}]
+	},
 },
 
 "accounts": {
@@ -79,12 +81,16 @@
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["conn1"]
+	"conns": {
+		"*caches": [{"Values": ["conn1"]}]
+	},
 }
 
 }

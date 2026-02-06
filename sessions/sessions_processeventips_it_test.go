@@ -55,7 +55,11 @@ func TestSessionSv1ProcessEventIPsAuthorize(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"ips_conns": ["*localhost"]
+	"conns": {
+			"*ips": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+		},
+	"opts": {
+	}
 },
 "ips": {
 	"enabled": true,
@@ -162,9 +166,9 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil with *ips + *authorize flags")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
-			t.Fatal("No IP authorization for *default runID with *ips + *authorize flags")
+			t.Fatal("No IP authorization for *primary runID with *ips + *authorize flags")
 		}
 
 		if authorizedIP.Address.String() != "172.16.1.1" {
@@ -203,9 +207,9 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil with *ipsAuthorize flag")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
-			t.Fatal("No IP authorization for *default runID with *ipsAuthorize flag")
+			t.Fatal("No IP authorization for *primary runID with *ipsAuthorize flag")
 		}
 
 		if authorizedIP.Address.String() != "172.16.1.1" {
@@ -244,7 +248,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil for matching profile")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
 			t.Fatal("No IP authorization found for matching profile")
 		}
@@ -285,7 +289,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 		}
 
 		if len(rply.IPsAllocation) > 0 {
-			authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+			authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 			if exists && authorizedIP.Address.IsValid() {
 				t.Errorf("IPsAllocation should have no valid IP when no profile matches, got IP: %v",
 					authorizedIP.Address)

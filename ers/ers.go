@@ -56,7 +56,7 @@ func NewERService(dm *engine.DataManager, cfg *config.CGRConfig, filterS *engine
 		rdrEvents:     make(chan *erEvent),
 		partialEvents: make(chan *erEvent),
 		rdrErr:        make(chan error),
-		filterS:       filterS,
+		fltrS:         filterS,
 		connMgr:       connMgr,
 		dm:            dm,
 	}
@@ -76,7 +76,7 @@ type ERService struct {
 	partialEvents chan *erEvent            // receive here the partial events from readers
 	rdrErr        chan error               // receive here errors which should stop the app
 
-	filterS *engine.FilterS
+	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	dm      *engine.DataManager
 
@@ -180,7 +180,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
 		erS.rdrEvents, erS.partialEvents, erS.rdrErr,
-		erS.filterS, erS.stopLsn[rdrID], erS.dm); err != nil {
+		erS.fltrS, erS.stopLsn[rdrID], erS.dm); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr
@@ -227,7 +227,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 			ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 			var reply []string
-			if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().StatSConns,
+			var statConns []string
+			statConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+			if err != nil {
+				return
+			}
+			if err := erS.connMgr.Call(context.TODO(), statConns,
 				utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to process event in %s: %v",
 					utils.ERs, utils.StatS, err))
@@ -237,7 +242,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			thIDs := strings.Split(rawThIDs, utils.ANDSep)
 			ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 			var reply []string
-			if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().ThresholdSConns,
+			var thresholdConns []string
+			thresholdConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+			if err != nil {
+				return
+			}
+			if err := erS.connMgr.Call(context.TODO(), thresholdConns,
 				utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to process event in %s: %v",
 					utils.ERs, utils.ThresholdS, err))
@@ -274,7 +284,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
@@ -282,7 +297,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateInitiate
@@ -290,7 +310,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateUpdate
@@ -298,14 +323,24 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaTerminate:
 		rply := utils.StringPointer("")
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1TerminateSession,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateTerminate
 		}
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessMessage,
 			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -318,7 +353,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		}
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
-		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateEvent
@@ -331,7 +371,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	}
 	if rdrCfg.Flags.Has(utils.MetaExport) {
 		var reply map[string]map[string]any
-		if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
+		var eesConns []string
+		eesConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaEEs], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		if err := erS.connMgr.Call(context.TODO(), eesConns, utils.EeSv1ProcessEvent,
 			&utils.CGREventWithEeIDs{
 				EeIDs:    rdrCfg.EEsIDs,
 				CGREvent: cgrEv,
@@ -347,7 +392,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	// separate request so we can capture the Terminate/Event also here
 	if rdrCfg.Flags.Has(utils.MetaCDRs) {
 		var replyCDRs string
-		if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
+		var sessionConns []string
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		if err := erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &replyCDRs); err != nil {
 			replyState = utils.ErrReplyStateCDRs
 			return err
@@ -377,7 +427,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
-		if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().StatSConns,
+		var statsConns []string
+		statsConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		if err := erS.connMgr.Call(context.TODO(), statsConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			return fmt.Errorf("failed to process event in %s: %v",
 				utils.StatS, err)
@@ -389,7 +444,12 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
-		if err := erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().ThresholdSConns,
+		var thsConns []string
+		thsConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		if err != nil {
+			return
+		}
+		if err := erS.connMgr.Call(context.TODO(), thsConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			return fmt.Errorf("failed to process event in %s: %v",
 				utils.ThresholdS, err)
@@ -436,7 +496,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 
 	var cgrEv *utils.CGREvent
-	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.filterS, // merge the events
+	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.fltrS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
 		erS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -469,7 +529,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 	switch action {
 	case utils.MetaNone: // do nothing with the events
 	case utils.MetaPostCDR: // merge the events and post the to erS
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS,
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS,
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -487,7 +547,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -504,7 +564,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
-				erS.filterS, map[string]*utils.OrderedNavigableMap{
+				erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
 				})
 
@@ -555,7 +615,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -572,7 +632,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
-				erS.filterS, map[string]*utils.OrderedNavigableMap{
+				erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
 				})
 
@@ -630,7 +690,12 @@ func (erS *ERService) exportRawEvent(event *erEvent, processingFailed bool) erro
 	}
 
 	var reply map[string]map[string]any
-	return erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
+
+	eesConns, err := engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaEEs], event.cgrEvent.Tenant, event.cgrEvent.AsDataProvider(), erS.fltrS)
+	if err != nil {
+		return err
+	}
+	return erS.connMgr.Call(context.TODO(), eesConns, utils.EeSv1ProcessEvent,
 		&utils.CGREventWithEeIDs{
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{

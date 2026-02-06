@@ -52,9 +52,23 @@
 
 "sessions": {
 	"enabled": true,
-	"replication_conns": ["rplConn"],
-	"chargers_conns": ["*internal"],
-	"listen_bijson": "127.0.0.1:2014"
+	"listen_bijson": "127.0.0.1:2014",
+	"conns":{
+	"*replication": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["rplConn"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 
 "admins": {

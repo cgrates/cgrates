@@ -29,9 +29,13 @@ import (
 )
 
 func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *engine.ConnManager, routes map[string]*RouteWithWeight,
+	connMgr *engine.ConnManager, fltrS *engine.FilterS, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
-	if len(cfg.RouteSCfg().ResourceSConns) == 0 {
+	resSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaResources], ev.Tenant, ev.AsDataProvider(), fltrS)
+	if err != nil {
+		return nil, err
+	}
+	if len(resSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
 	sortedRoutes = make([]*SortedRoute, 0, len(routes))
@@ -58,7 +62,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		var tUsage float64
 		for _, resID := range route.ResourceIDs {
 			var res utils.Resource
-			if err = connMgr.Call(ctx, cfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
+			if err = connMgr.Call(ctx, resSConns, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: ev.Tenant, ID: resID}},
 				&res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -72,11 +76,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		srtRoute.sortingDataDecimal[utils.ResourceUsageStr] = utils.NewDecimalFromFloat64(tUsage)
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			connMgr, cfg.FilterSCfg().ResourceSConns,
-			cfg.FilterSCfg().StatSConns,
-			cfg.FilterSCfg().AccountSConns,
-			cfg.FilterSCfg().TrendSConns,
-			cfg.FilterSCfg().RankingSConns); err != nil {
+			cfg, fltrS); err != nil {
 			return
 		} else if pass {
 			sortedRoutes = append(sortedRoutes, srtRoute)
@@ -85,20 +85,21 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	return
 }
 
-func NewResourceAscendetSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ResourceAscendentSorter {
-	return &ResourceAscendentSorter{cfg: cfg, connMgr: connMgr}
+func NewResourceAscendetSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *ResourceAscendentSorter {
+	return &ResourceAscendentSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // ResourceAscendentSorter orders ascendent routes based on their Resource Usage
 type ResourceAscendentSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	var sRoutes []*SortedRoute
-	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, routes, ev, extraOpts); err != nil {
+	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
 	sortedRoutes = &SortedRoutes{
@@ -110,20 +111,21 @@ func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID strin
 	return
 }
 
-func NewResourceDescendentSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ResourceDescendentSorter {
-	return &ResourceDescendentSorter{cfg: cfg, connMgr: connMgr}
+func NewResourceDescendentSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *ResourceDescendentSorter {
+	return &ResourceDescendentSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // ResourceDescendentSorter orders suppliers based on their Resource Usage
 type ResourceDescendentSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 func (ws *ResourceDescendentSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	var sRoutes []*SortedRoute
-	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, routes, ev, extraOpts); err != nil {
+	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
 	sortedRoutes = &SortedRoutes{

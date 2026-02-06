@@ -246,7 +246,7 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(ctx *context.Context, attempt
 		keyFunc = utils.UUIDSha1Prefix
 	}
 	for _, ev := range expEv.Events {
-		if err = ees.ExportWithAttempts(context.Background(), ee, ev, keyFunc(), expEv.connMngr, tnt); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), ee, ev, keyFunc(), expEv.connMngr, tnt, nil); err != nil {
 			failedEvents.AddEvent(ev)
 		}
 	}

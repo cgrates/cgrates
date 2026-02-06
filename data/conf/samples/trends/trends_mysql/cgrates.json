@@ -29,7 +29,9 @@
 
 "trends": {
     "enabled": true,
-    "stats_conns":["*localhost"],
+    "conns": {
+    	"*stats": [{"Values": ["*localhost"]}]
+    },
     "scheduled_ids": {}    
 },
 

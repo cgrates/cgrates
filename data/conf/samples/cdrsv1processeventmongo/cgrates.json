@@ -40,12 +40,16 @@
 
 "chargers":{
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "ees": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 	"exporters": [
 		{
 			"id": "amqp_test_file",
@@ -73,13 +77,15 @@
 
 "cdrs": {
 	"enabled": true,
-	"rates_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
-	"stats_conns": ["*internal"],
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*rates": [{"Values": ["*internal"]}],
+		"*attributes": [{"Values": ["*internal"]}],
+		"*chargers": [{"Values": ["*internal"]}],
+		"*stats": [{"Values": ["*internal"]}],
+		"*thresholds": [{"Values": ["*internal"]}],
+		"*ees": [{"Values": ["*localhost"]}]
+	},
 	"online_cdr_exports": ["amqp_test_file"],
-	"ees_conns": ["*localhost"]
 },
 
 

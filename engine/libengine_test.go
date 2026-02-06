@@ -355,3 +355,81 @@ func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
 	}
 
 }
+
+func TestDynamicFiltersConns2(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+	}
+
+	mockAccount := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Balances: map[string]*utils.Balance{
+			"Concrete1": {
+				ID:    "Concrete1",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(1000, 0),
+			},
+		},
+	}
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+				rplCast, canCast := reply.(*utils.Account)
+				if !canCast {
+					t.Errorf("Wrong argument type: %T", reply)
+					return nil
+				}
+				*rplCast = *mockAccount
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	ev := &utils.CGREvent{
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "2003",
+			utils.SetupTime:    time.Now(),
+			utils.RequestType:  "*prepaid",
+		},
+		APIOpts: map[string]any{
+			"*processRuns": 2,
+		},
+	}
+
+	got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}) {
+		t.Errorf("expected [*localhost], got %v", got)
+	}
+
+	mockAccount.Balances["Concrete1"].Units = utils.NewDecimal(10, 0)
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
+		{Values: []string{utils.MetaLocalHost}, FilterIDs: []string{"*gte:~*accounts.1001.Balances[Concrete1].Units:20"}},
+	}
+
+	got2, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got2 != nil {
+		t.Errorf("expected nil connections when filter fails, got %v", got2)
+	}
+}

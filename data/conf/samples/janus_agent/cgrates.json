@@ -31,34 +31,44 @@
     
     "cdrs": {
         "enabled": true,
-        "chargers_conns":["*internal"]
+        "conns": {
+        	"*chargers": [{"Values": ["*internal"]}]
+        },
     },
     
     "attributes": {
         "enabled": true,
-        "stats_conns": ["*localhost"],
-        "resources_conns": ["*localhost"],
-        "accounts_conns": ["*localhost"]
+        "conns": {
+        	"*stats": [{"Values": ["*localhost"]}],
+        	"*resources": [{"Values": ["*localhost"]}],
+        	"*accounts": [{"Values": ["*localhost"]}]
+        },
     },
     
     
     "chargers": {
         "enabled": true,
-        "attributes_conns": ["*internal"]
+        "conns": {
+        	"*attributes": [{"Values": ["*internal"]}]
+        },
     },
     
     
     "resources": {
         "enabled": true,
         "store_interval": "-1",
-        "thresholds_conns": ["*internal"]
+        "conns": {
+        	"*thresholds": [{"Values": ["*internal"]}]
+        },
     },
     
     
     "stats": {
         "enabled": true,
         "store_interval": "-1",
-        "thresholds_conns": ["*internal"]
+        "conns": {
+        	"*thresholds": [{"Values": ["*internal"]}]
+        },
     },
     
     "thresholds": {
@@ -71,20 +81,60 @@
     "routes": {
         "enabled": true,
         "prefix_indexed_fields":["*req.Destination"],
-        "stats_conns": ["*internal"],
-        "resources_conns": ["*internal"],
-        "rates_conns": ["*internal"]
+        "conns": {
+        	"*stats": [{"Values": ["*internal"]}],
+        	"*resources": [{"Values": ["*internal"]}],
+        	"*rates": [{"Values": ["*internal"]}]
+        },
     },
     
     
     "sessions": {
         "enabled": true,
-        "rates_conns": ["*internal"],
-        "routes_conns": ["*internal"],
-        "resources_conns": ["*internal"],
-        "attributes_conns": ["*internal"],
-        "cdrs_conns": ["*internal"],
-        "chargers_conns": ["*internal"]
+        "conns":{
+        "*rates": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*routes": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*resources": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*attributes": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*cdrs": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ],
+        "*chargers": [
+                 {
+                        "Tenant": "",
+                        "FilterIDs": [],
+                        "Values": ["*internal"]
+                 }
+        ]
+                        },
     },
     
     
@@ -100,7 +150,9 @@
     
     "actions": {
         "enabled": true,
-        "accounts_conns": ["*localhost"]
+        "conns": {
+        	"*accounts": [{"Values": ["*localhost"]}]
+        },
     },
     
     
@@ -110,7 +162,9 @@
     "janus_agent": {
 	"enabled": true,
 	"url": "/janus",
-	"sessions_conns": ["*bijson_localhost"],
+	"conns": {
+		"*sessions": [{"Values": ["*bijson_localhost"]}]
+	},
 	"janus_conns": [{
 		"address": "localhost:8188",
 		"admin_address": "localhost:7188",
@@ -119,9 +173,11 @@
 },
     
     "filters": {
-        "stats_conns": ["*internal"],
-        "resources_conns": ["*internal"],
-        "accounts_conns": ["*internal"]
+        "conns": {
+        	"*stats": [{"Values": ["*internal"]}],
+        	"*resources": [{"Values": ["*internal"]}],
+        	"*accounts": [{"Values": ["*internal"]}]
+        },
     },
     
     "tpes": {

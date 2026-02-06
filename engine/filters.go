@@ -60,8 +60,7 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
-	dDP := NewDynamicDP(ctx, fS.connMgr, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
-		fS.cfg.FilterSCfg().AccountSConns, fS.cfg.FilterSCfg().TrendSConns, fS.cfg.FilterSCfg().RankingSConns, tenant, ev)
+	dDP := NewDynamicDP(ctx, fS.cfg, tenant, ev, fS)
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(ctx, tenant, fltrID,
 			true, true, utils.NonTransactional)
@@ -73,6 +72,31 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 		}
 		for _, fltr := range f.Rules {
 			if pass, err = fltr.Pass(ctx, dDP); err != nil || !pass {
+				return pass, err
+			}
+		}
+		pass = true
+	}
+	return
+}
+
+// PassWithDP evaluates filterIDs against dp directly without wrapping it in DynamicDP.
+func (fS *FilterS) PassWithDP(ctx *context.Context, tenant string, filterIDs []string,
+	dp utils.DataProvider) (pass bool, err error) {
+	if len(filterIDs) == 0 {
+		return true, nil
+	}
+	for _, fltrID := range filterIDs {
+		f, err := fS.dm.GetFilter(ctx, tenant, fltrID,
+			true, true, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefixNotFound(fltrID)
+			}
+			return false, err
+		}
+		for _, fltr := range f.Rules {
+			if pass, err = fltr.Pass(ctx, dp); err != nil || !pass {
 				return pass, err
 			}
 		}
@@ -121,8 +145,8 @@ func (fS *FilterS) LazyPass(ctx *context.Context, tenant string, filterIDs []str
 		return true, nil, nil
 	}
 	pass = true
-	dDP := NewDynamicDP(ctx, fS.connMgr, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
-		fS.cfg.FilterSCfg().AccountSConns, fS.cfg.FilterSCfg().TrendSConns, fS.cfg.FilterSCfg().RankingSConns, tenant, ev)
+
+	dDP := NewDynamicDP(ctx, fS.cfg, tenant, ev, fS)
 	for _, fltrID := range filterIDs {
 		var f *Filter
 		f, err = fS.dm.GetFilter(ctx, tenant, fltrID,

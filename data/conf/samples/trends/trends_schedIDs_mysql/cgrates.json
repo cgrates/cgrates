@@ -29,7 +29,9 @@
 
 "trends": {
     "enabled": true,
-    "stats_conns":["*localhost"],
+    "conns": {
+    	"*stats": [{"Values": ["*localhost"]}]
+    },
     "scheduled_ids": {"cgrates.org":["TR_1min"],"tenant1":["TR_5min"],"tenant2":[]}  
 },
 

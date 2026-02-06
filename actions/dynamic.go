@@ -32,6 +32,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// getAdminConns resolves the AdminS connection IDs for an action context.
+func getAdminConns(ctx *context.Context, cfg *config.CGRConfig, tnt string, data utils.MapStorage, fltrS *engine.FilterS) ([]string, error) {
+	return engine.GetConnIDs(ctx, cfg.ActionSCfg().Conns[utils.MetaAdminS], tnt, data, fltrS)
+}
+
 // parseParamStringToMap parses a string containing key-value pairs separated by "&" and assigns
 // these pairs to a given map. Each pair is expected to be in the format "key:value".
 func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
@@ -85,7 +90,11 @@ func (aL *actDynamicThreshold) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -208,7 +217,7 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 		}
 		// create the ThresholdProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetThresholdProfile, args, &rply); err != nil {
 			return err
 		}
@@ -260,7 +269,11 @@ func (aL *actDynamicStats) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -422,7 +435,7 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 
 		// create the StatQueueProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetStatQueueProfile, args, &rply); err != nil {
 			return err
 		}
@@ -471,7 +484,11 @@ func (aL *actDynamicAttribute) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -598,7 +615,7 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 
 		// create the AttributeProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetAttributeProfile, args, &rply); err != nil {
 			return err
 		}
@@ -647,7 +664,11 @@ func (aL *actDynamicResource) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -759,7 +780,7 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 
 		// create the ResourceProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetResourceProfile, args, &rply); err != nil {
 			return err
 		}
@@ -810,7 +831,11 @@ func (aL *actDynamicTrend) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -914,7 +939,7 @@ func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, 
 
 		// create the TrendProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetTrendProfile, args, &rply); err != nil {
 			return err
 		}
@@ -962,7 +987,11 @@ func (aL *actDynamicRanking) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -1045,7 +1074,7 @@ func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage
 
 		// create the RankingProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetRankingProfile, args, &rply); err != nil {
 			return err
 		}
@@ -1089,7 +1118,11 @@ func (aL *actDynamicFilter) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -1159,7 +1192,7 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 
 		// create the Filter based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetFilter, args, &rply); err != nil {
 			return err
 		}
@@ -1215,7 +1248,11 @@ func (aL *actDynamicRoute) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -1472,7 +1509,7 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 
 		// create the RouteProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetRouteProfile, args, &rply); err != nil {
 			return err
 		}
@@ -1528,7 +1565,11 @@ func (aL *actDynamicRate) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -1695,7 +1736,7 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 
 		// create the RateProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetRateProfile, args, &rply); err != nil {
 			return err
 		}
@@ -1748,7 +1789,11 @@ func (aL *actDynamicIP) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -1891,7 +1936,7 @@ func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trg
 
 		// create the IPProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetIPProfile, args, &rply); err != nil {
 			return err
 		}
@@ -1950,7 +1995,11 @@ func (aL *actDynamicAction) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	if err != nil {
+		return
+	}
+	if len(adminConns) == 0 {
 		return fmt.Errorf("no connection with AdminS")
 	}
 	data[utils.MetaNow] = time.Now()
@@ -2166,7 +2215,7 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 
 		// create the ActionProfile based on the populated parameters
 		var rply string
-		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		if err = aL.connMgr.Call(ctx, adminConns,
 			utils.AdminSv1SetActionProfile, args, &rply); err != nil {
 			return err
 		}

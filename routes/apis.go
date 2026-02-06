@@ -39,7 +39,11 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	if args.APIOpts == nil {
 		args.APIOpts = make(map[string]any)
 	}
-	if len(rpS.cfg.RouteSCfg().AttributeSConns) != 0 {
+	attrConns, err := engine.GetConnIDs(ctx, rpS.cfg.RouteSCfg().Conns[utils.MetaAttributes], tnt, args.AsDataProvider(), rpS.fltrS)
+	if err != nil {
+		return err
+	}
+	if len(attrConns) != 0 {
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		var context string
 		if context, err = engine.GetStringOpts(ctx, tnt, args.AsDataProvider(), nil, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
@@ -48,7 +52,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		}
 		args.APIOpts[utils.OptsContext] = context
 		var rplyEv attributes.AttrSProcessEventReply
-		if err := rpS.connMgr.Call(ctx, rpS.cfg.RouteSCfg().AttributeSConns,
+		if err := rpS.connMgr.Call(ctx, attrConns,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args = rplyEv.CGREvent
 			args.APIOpts = rplyEv.CGREvent.APIOpts

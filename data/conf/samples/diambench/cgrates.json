@@ -4,7 +4,9 @@
 },
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*internal"]
+	"conns": {
+		"*cdrs": [{"Values": ["*internal"]}]
+	},
 },
 "apiers": {
 	"enabled": true,
@@ -21,10 +23,36 @@
 },
 "sessions": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"]
+	"conns":{
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*rals": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"Values": ["*internal"]
+		 }
+	]
+			},
 },
 "chargers": {
 	"enabled": true
@@ -34,14 +62,18 @@
 },
 "cdrs": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}],
+		"*chargers": [{"Values": ["*internal"]}]
+	},
 	"rals_conns": ["*internal"]
 },
 "diameter_agent": {
 	"enabled": true,
 	"listen": "0.0.0.0:3868",
-	"sessions_conns": ["*birpc_internal"],
+	"conns": {
+		"*sessions": [{"Values": ["*birpc_internal"]}]
+	},
 	"request_processors": [{
 		"id": "message",
 		"filters": [

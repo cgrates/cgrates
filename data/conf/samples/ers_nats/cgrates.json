@@ -29,8 +29,10 @@
 
 "ers": {
     "enabled": true,
-    "sessions_conns":[],
-    "ees_conns": ["*localhost"],
+    "conns": {
+    	"*sessions": [],
+    	"*ees": [{"Values": ["*localhost"]}]
+    },
     "readers": [
         {
             "id": "nats_reader1",

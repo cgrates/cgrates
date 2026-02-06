@@ -49,7 +49,9 @@ func TestS3ER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
-	"sessions_conns":["*localhost"],
+	"conns": {
+		"*sessions": [{"Values": ["*localhost"]}]
+	},
 	"readers": [
 		{
 			"id": "s3",										// identifier of the EventReader profile

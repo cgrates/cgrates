@@ -29,10 +29,7 @@ import (
 // ERsCfg the config for ERs
 type ERsCfg struct {
 	Enabled         bool
-	SessionSConns   []string
-	EEsConns        []string
-	StatSConns      []string
-	ThresholdSConns []string
+	Conns           map[string][]*DynamicStringSliceOpt
 	Readers         []*EventReaderCfg
 	PartialCacheTTL time.Duration
 }
@@ -65,17 +62,11 @@ func (c *ERsCfg) loadFromJSONCfg(jc *ERsJsonCfg, msgTemplates map[string][]*FCTe
 	if jc.Enabled != nil {
 		c.Enabled = *jc.Enabled
 	}
-	if jc.SessionSConns != nil {
-		c.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
-	}
-	if jc.EEsConns != nil {
-		c.EEsConns = tagInternalConns(*jc.EEsConns, utils.MetaEEs)
-	}
-	if jc.StatSConns != nil {
-		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
-	}
-	if jc.ThresholdSConns != nil {
-		c.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
+	if jc.Conns != nil {
+		tagged := tagConns(jc.Conns)
+		for connType, opts := range tagged {
+			c.Conns[connType] = opts
+		}
 	}
 	if jc.PartialCacheTTL != nil {
 		if c.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jc.PartialCacheTTL); err != nil {
@@ -117,10 +108,7 @@ func (c ERsCfg) CloneSection() Section { return c.Clone() }
 func (c ERsCfg) Clone() *ERsCfg {
 	clone := &ERsCfg{
 		Enabled:         c.Enabled,
-		SessionSConns:   slices.Clone(c.SessionSConns),
-		EEsConns:        slices.Clone(c.EEsConns),
-		StatSConns:      slices.Clone(c.StatSConns),
-		ThresholdSConns: slices.Clone(c.ThresholdSConns),
+		Conns:           CloneConnsOpt(c.Conns),
 		Readers:         make([]*EventReaderCfg, len(c.Readers)),
 		PartialCacheTTL: c.PartialCacheTTL,
 	}
@@ -134,10 +122,7 @@ func (c ERsCfg) Clone() *ERsCfg {
 func (c ERsCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:         c.Enabled,
-		utils.SessionSConnsCfg:   stripInternalConns(c.SessionSConns),
-		utils.EEsConnsCfg:        stripInternalConns(c.EEsConns),
-		utils.StatSConnsCfg:      stripInternalConns(c.StatSConns),
-		utils.ThresholdSConnsCfg: stripInternalConns(c.ThresholdSConns),
+		utils.ConnsCfg:           stripConns(c.Conns),
 		utils.PartialCacheTTLCfg: "0",
 	}
 	if c.PartialCacheTTL != 0 {
@@ -1469,13 +1454,10 @@ func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg)
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled         *bool                  `json:"enabled"`
-	SessionSConns   *[]string              `json:"sessions_conns"`
-	EEsConns        *[]string              `json:"ees_conns"`
-	StatSConns      *[]string              `json:"stats_conns"`
-	ThresholdSConns *[]string              `json:"thresholds_conns"`
-	Readers         *[]*EventReaderJsonCfg `json:"readers"`
-	PartialCacheTTL *string                `json:"partial_cache_ttl"`
+	Enabled         *bool                               `json:"enabled"`
+	Conns           map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Readers         *[]*EventReaderJsonCfg              `json:"readers"`
+	PartialCacheTTL *string                             `json:"partial_cache_ttl"`
 }
 
 func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
@@ -1485,17 +1467,8 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.EEsConns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())

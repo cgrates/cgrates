@@ -43,9 +43,7 @@ type AttributesOpts struct {
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled                bool
-	ResourceSConns         []string
-	StatSConns             []string
-	AccountSConns          []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	IndexedSelects         bool
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -104,14 +102,11 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Stats_conns != nil {
-		alS.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
-	}
-	if jsnCfg.Resources_conns != nil {
-		alS.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
-	}
-	if jsnCfg.Accounts_conns != nil {
-		alS.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			alS.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Indexed_selects != nil {
 		alS.IndexedSelects = *jsnCfg.Indexed_selects
@@ -150,6 +145,7 @@ func (alS AttributeSCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:        alS.Enabled,
+		utils.ConnsCfg:          stripConns(alS.Conns),
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.NestedFieldsCfg:   alS.NestedFields,
 		utils.OptsCfg:           opts,
@@ -168,15 +164,6 @@ func (alS AttributeSCfg) AsMapInterface() any {
 	}
 	if alS.NotExistsIndexedFields != nil {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*alS.NotExistsIndexedFields)
-	}
-	if alS.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(alS.StatSConns)
-	}
-	if alS.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = stripInternalConns(alS.ResourceSConns)
-	}
-	if alS.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = stripInternalConns(alS.AccountSConns)
 	}
 	return mp
 }
@@ -213,20 +200,11 @@ func (alS AttributeSCfg) CloneSection() Section { return alS.Clone() }
 func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	cln = &AttributeSCfg{
 		Enabled:        alS.Enabled,
+		Conns:          CloneConnsOpt(alS.Conns),
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		Opts:           alS.Opts.Clone(),
 	}
-	if alS.ResourceSConns != nil {
-		cln.ResourceSConns = slices.Clone(alS.ResourceSConns)
-	}
-	if alS.StatSConns != nil {
-		cln.StatSConns = slices.Clone(alS.StatSConns)
-	}
-	if alS.AccountSConns != nil {
-		cln.AccountSConns = slices.Clone(alS.AccountSConns)
-	}
-
 	if alS.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*alS.StringIndexedFields))
 	}
@@ -255,9 +233,7 @@ type AttributesOptsJson struct {
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled                  *bool
-	Stats_conns              *[]string
-	Resources_conns          *[]string
-	Accounts_conns           *[]string
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Indexed_selects          *bool
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
@@ -294,14 +270,8 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

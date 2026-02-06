@@ -26,18 +26,22 @@ import (
 
 func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AdminSJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Caches_conns:     &[]string{utils.MetaInternal, "*conn1"},
-		Actions_conns:    &[]string{utils.MetaInternal, "*conn1"},
-		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
+		Enabled: utils.BoolPointer(false),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 	}
 	expected := &AdminSCfg{
-		Enabled:         false,
-		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.admS.loadFromJSONCfg(jsonCfg); err != nil {
@@ -55,16 +59,14 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 func TestApierCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"admins": {
-		"caches_conns":[],
+		"conns": {},
 	},
 }`
-	sls := make([]string, 0)
 	eMap := map[string]any{
-		utils.EnabledCfg:         false,
-		utils.CachesConnsCfg:     sls,
-		utils.ActionSConnsCfg:    sls,
-		utils.AttributeSConnsCfg: sls,
-		utils.EEsConnsCfg:        sls,
+		utils.EnabledCfg: false,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches: {{Values: []string{utils.MetaInternal}}},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -77,18 +79,22 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	myJSONStr := `{
     "admins": {
        "enabled": true,
-       "attributes_conns": ["*internal:*attributes", "*conn1"],
-       "ees_conns": ["*internal:*ees", "*conn1"],
-       "caches_conns": ["*internal:*caches", "*conn1"],
-       "actions_conns": ["*internal:*actions", "*conn1"],
+       "conns": {
+           "*attributes": [{"values": ["*internal:*attributes", "*conn1"]}],
+           "*ees":        [{"values": ["*internal:*ees", "*conn1"]}],
+           "*caches":     [{"values": ["*internal:*caches", "*conn1"]}],
+           "*actions":    [{"values": ["*internal:*actions", "*conn1"]}]
+       },
     },
 }`
 	expectedMap := map[string]any{
-		utils.EnabledCfg:         true,
-		utils.CachesConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.ActionSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.EnabledCfg: true,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaCaches:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -99,26 +105,28 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 
 func TestApierCfgClone(t *testing.T) {
 	sa := &AdminSCfg{
-		Enabled:         false,
-		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+		},
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
-	if rcv.CachesConns[1] = ""; sa.CachesConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaCaches][0].Values[1] = ""; sa.Conns[utils.MetaCaches][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ActionSConns[1] = ""; sa.ActionSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaActions][0].Values[1] = ""; sa.Conns[utils.MetaActions][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.AttributeSConns[1] = ""; sa.AttributeSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAttributes][0].Values[1] = ""; sa.Conns[utils.MetaAttributes][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.EEsConns[1] = ""; sa.EEsConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaEEs][0].Values[1] = ""; sa.Conns[utils.MetaEEs][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
@@ -127,27 +135,33 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 	var d *AdminSJsonCfg
 
 	v1 := &AdminSCfg{
-		Enabled:         false,
-		CachesConns:     []string{"*localhost"},
-		ActionSConns:    []string{"*localhost"},
-		AttributeSConns: []string{"*localhost"},
-		EEsConns:        []string{"*localhost"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	v2 := &AdminSCfg{
-		Enabled:         true,
-		CachesConns:     []string{"*birpc"},
-		ActionSConns:    []string{"*birpc"},
-		AttributeSConns: []string{"*birpc"},
-		EEsConns:        []string{"*birpc"},
+		Enabled: true,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{"*birpc"}}},
+			utils.MetaActions:    {{Values: []string{"*birpc"}}},
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+		},
 	}
 
 	expected := &AdminSJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Caches_conns:     &[]string{"*birpc"},
-		Actions_conns:    &[]string{"*birpc"},
-		Attributes_conns: &[]string{"*birpc"},
-		Ees_conns:        &[]string{"*birpc"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{"*birpc"}}},
+			utils.MetaActions:    {{Values: []string{"*birpc"}}},
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+		},
 	}
 
 	rcv := diffAdminSJsonCfg(d, v1, v2)
@@ -156,13 +170,7 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 	}
 
 	v2_2 := v1
-	expected2 := &AdminSJsonCfg{
-		Enabled:          nil,
-		Caches_conns:     nil,
-		Actions_conns:    nil,
-		Attributes_conns: nil,
-		Ees_conns:        nil,
-	}
+	expected2 := &AdminSJsonCfg{}
 
 	rcv = diffAdminSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(expected2, rcv) {
@@ -172,19 +180,23 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 
 func TestAdminSCloneSection(t *testing.T) {
 	admCfg := &AdminSCfg{
-		Enabled:         false,
-		CachesConns:     []string{"*localhost"},
-		ActionSConns:    []string{"*localhost"},
-		AttributeSConns: []string{"*localhost"},
-		EEsConns:        []string{"*localhost"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	exp := &AdminSCfg{
-		Enabled:         false,
-		CachesConns:     []string{"*localhost"},
-		ActionSConns:    []string{"*localhost"},
-		AttributeSConns: []string{"*localhost"},
-		EEsConns:        []string{"*localhost"},
+		Enabled: false,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		},
 	}
 
 	rcv := admCfg.CloneSection()

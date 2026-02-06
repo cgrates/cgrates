@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"maps"
 	"slices"
 	"time"
 
@@ -170,6 +171,64 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider,
 		}
 	}
 	return dftOpt, nil // return the default value if there are no options and none of the filters pass
+}
+
+// GetConnIDs resolves dynamic connection IDs.
+// If optNames are provided, *opts in dP are checked first.
+func GetConnIDs(ctx *context.Context, dynConns []*config.DynamicStringSliceOpt,
+	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
+	if len(optNames) > 0 {
+		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
+			return utils.IfaceAsStringSlice(opt)
+		} else if !errors.Is(err, utils.ErrNotFound) {
+			return nil, err
+		}
+	}
+	if len(dynConns) == 0 {
+		return nil, nil
+	}
+	for _, opt := range dynConns {
+		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
+			continue
+		}
+		if len(opt.FilterIDs) == 0 {
+			return opt.Values, nil
+		}
+		if pass, err := fltrS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil {
+			return nil, err
+		} else if pass {
+			return opt.Values, nil
+		}
+	}
+	return nil, nil
+}
+
+func getConnIDsWithDP(ctx *context.Context, dynConns []*config.DynamicStringSliceOpt,
+	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
+	if len(optNames) > 0 {
+		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
+			return utils.IfaceAsStringSlice(opt)
+		} else if !errors.Is(err, utils.ErrNotFound) {
+			return nil, err
+		}
+	}
+	if len(dynConns) == 0 {
+		return nil, nil
+	}
+	for _, opt := range dynConns {
+		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
+			continue
+		}
+		if len(opt.FilterIDs) == 0 {
+			return opt.Values, nil
+		}
+		if pass, err := fltrS.PassWithDP(ctx, tnt, opt.FilterIDs, dP); err != nil {
+			return nil, err
+		} else if pass {
+			return opt.Values, nil
+		}
+	}
+	return nil, nil
 }
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
@@ -356,13 +415,9 @@ func ConvertOptsToMapStringAny(in any) (map[string]any, error) {
 	out := make(map[string]any)
 	switch val := in.(type) {
 	case MapEvent:
-		for k, v := range val {
-			out[k] = v
-		}
+		maps.Copy(out, val)
 	case utils.MapStorage:
-		for k, v := range val {
-			out[k] = v
-		}
+		maps.Copy(out, val)
 	case map[string]any:
 		return val, nil
 	default:

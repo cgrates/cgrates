@@ -28,29 +28,32 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(1),
-		Chargers_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		Attributes_conns:     &[]string{utils.MetaInternal, "*conn1"},
-		Thresholds_conns:     &[]string{utils.MetaInternal, "*conn1"},
-		Stats_conns:          &[]string{utils.MetaInternal, "*conn1"},
-		Online_cdr_exports:   &[]string{"randomVal"},
-		Actions_conns:        &[]string{utils.MetaInternal, "*conn1"},
-		Ees_conns:            &[]string{utils.MetaInternal, "*conn1"},
-		Rates_conns:          &[]string{utils.MetaInternal, "*conn1"},
-		Accounts_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRates:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 	}
 	expected := &CdrsCfg{
 		Enabled: true,
 
-		SMCostRetries:    1,
-		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		OnlineCDRExports: []string{"randomVal"},
-		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
-		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"},
-		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
+		SMCostRetries: 1,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
+			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+			utils.MetaRates:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"}}},
+			utils.MetaAccounts:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
+		},
+		OnlineCDRExports: nil,
 		ExtraFields:      utils.RSRParsers{},
 		Opts: &CdrsOpts{
 			Accounts:   []*DynamicBoolOpt{{}},
@@ -175,33 +178,37 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 func TestCdrsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"cdrs": {
-		"enabled": true,						
+		"enabled": true,
 		"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
-		"session_cost_retries": 5,				
-		"chargers_conns":["*internal:*chargers","*conn1"],			
-		"attributes_conns": ["*internal:*attributes","*conn1"],					
-		"thresholds_conns": ["*internal:*thresholds","*conn1"],					
-		"stats_conns": ["*internal:*stats","*conn1"],						
+		"session_cost_retries": 5,
+		"conns": {
+			"*chargers": [{"values": ["*internal:*chargers","*conn1"]}],
+			"*attributes": [{"values": ["*internal:*attributes","*conn1"]}],
+			"*thresholds": [{"values": ["*internal:*thresholds","*conn1"]}],
+			"*stats": [{"values": ["*internal:*stats","*conn1"]}],
+			"*actions": [{"values": ["*internal:*actions","*conn1"]}],
+			"*ees": [{"values": ["*internal:*ees","*conn1"]}],
+			"*rates": [{"values": ["*internal:*rates","*conn1"]}],
+			"*accounts": [{"values": ["*internal:*accounts","*conn1"]}]
+		},
 		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
-		"actions_conns": ["*internal:*actions","*conn1"],		
-        "ees_conns": ["*internal:*ees","*conn1"],
-        "rates_conns": ["*internal:*rates","*conn1"],
-        "accounts_conns": ["*internal:*accounts","*conn1"],
 	},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:          true,
-		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
-		utils.SessionCostRetires:  5,
-		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.AttributeSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
+		utils.EnabledCfg:         true,
+		utils.ExtraFieldsCfg:     []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
+		utils.SessionCostRetires: 5,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaRates:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		},
 		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file"},
-		utils.ActionSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
-		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
-		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:   []*DynamicBoolOpt{{}},
 			utils.MetaAttributes: []*DynamicBoolOpt{{}},
@@ -226,24 +233,23 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
        "cdrs": {
           "enabled":true,
-          "chargers_conns": ["conn1", "conn2"],
-          "attributes_conns": ["*internal"],
-          "ees_conns": ["conn1"],
+          "conns": {
+              "*chargers": [{"values": ["conn1", "conn2"]}],
+              "*attributes": [{"values": ["*internal"]}],
+              "*ees": [{"values": ["conn1"]}]
+          },
        },
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:          true,
-		utils.ExtraFieldsCfg:      []string{},
-		utils.SessionCostRetires:  5,
-		utils.ChargerSConnsCfg:    []string{"conn1", "conn2"},
-		utils.AttributeSConnsCfg:  []string{"*internal"},
-		utils.ThresholdSConnsCfg:  []string{},
-		utils.StatSConnsCfg:       []string{},
+		utils.EnabledCfg:         true,
+		utils.ExtraFieldsCfg:     []string{},
+		utils.SessionCostRetires: 5,
+		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"conn1", "conn2"}}},
+			utils.MetaAttributes: {{Values: []string{"*internal"}}},
+			utils.MetaEEs:        {{Values: []string{"conn1"}}},
+		},
 		utils.OnlineCDRExportsCfg: []string(nil),
-		utils.ActionSConnsCfg:     []string{},
-		utils.EEsConnsCfg:         []string{"conn1"},
-		utils.RateSConnsCfg:       []string{},
-		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:   []*DynamicBoolOpt{{}},
 			utils.MetaAttributes: []*DynamicBoolOpt{{}},
@@ -268,13 +274,15 @@ func TestCdrsCfgClone(t *testing.T) {
 	ban := &CdrsCfg{
 		Enabled: true,
 
-		SMCostRetries:    1,
-		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		SMCostRetries: 1,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"}}},
+			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
+			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+		},
 		OnlineCDRExports: []string{"randomVal"},
 		ExtraFields:      utils.RSRParsers{},
 		Opts:             &CdrsOpts{},
@@ -283,22 +291,22 @@ func TestCdrsCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaChargers][0].Values[1] = ""; ban.Conns[utils.MetaChargers][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAttributes][0].Values[1] = ""; ban.Conns[utils.MetaAttributes][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaThresholds][0].Values[1] = ""; ban.Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaStats][0].Values[1] = ""; ban.Conns[utils.MetaStats][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ActionSConns[1] = ""; ban.ActionSConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaActions][0].Values[1] = ""; ban.Conns[utils.MetaActions][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.EEsConns[1] = ""; ban.EEsConns[1] != "*conn1" {
+	if rcv.Conns[utils.MetaEEs][0].Values[1] = ""; ban.Conns[utils.MetaEEs][0].Values[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
@@ -318,16 +326,18 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 			},
 		},
 
-		SMCostRetries:    2,
-		ChargerSConns:    []string{"*localhost"},
-		AttributeSConns:  []string{"*localhost"},
-		ThresholdSConns:  []string{"*localhost"},
-		StatSConns:       []string{"*localhost"},
+		SMCostRetries: 2,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+			utils.MetaRates:      {{Values: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
+		},
 		OnlineCDRExports: []string{},
-		ActionSConns:     []string{"*localhost"},
-		EEsConns:         []string{"*localhost"},
-		RateSConns:       []string{"*localhost"},
-		AccountSConns:    []string{"*localhost"},
 		Opts: &CdrsOpts{
 			Accounts: []*DynamicBoolOpt{
 				{
@@ -382,16 +392,18 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 			},
 		},
 
-		SMCostRetries:    1,
-		ChargerSConns:    []string{"*birpc"},
-		AttributeSConns:  []string{"*birpc"},
-		ThresholdSConns:  []string{"*birpc"},
-		StatSConns:       []string{"*birpc"},
+		SMCostRetries: 1,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"*birpc"}}},
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+			utils.MetaThresholds: {{Values: []string{"*birpc"}}},
+			utils.MetaStats:      {{Values: []string{"*birpc"}}},
+			utils.MetaActions:    {{Values: []string{"*birpc"}}},
+			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+			utils.MetaRates:      {{Values: []string{"*birpc"}}},
+			utils.MetaAccounts:   {{Values: []string{"*birpc"}}},
+		},
 		OnlineCDRExports: []string{"val1"},
-		ActionSConns:     []string{"*birpc"},
-		EEsConns:         []string{"*birpc"},
-		RateSConns:       []string{"*birpc"},
-		AccountSConns:    []string{"*birpc"},
 		Opts: &CdrsOpts{
 			Accounts: []*DynamicBoolOpt{
 				{
@@ -442,15 +454,17 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(true),
 		Extra_fields:         &[]string{"Rule2"},
 		Session_cost_retries: utils.IntPointer(1),
-		Chargers_conns:       &[]string{"*birpc"},
-		Attributes_conns:     &[]string{"*birpc"},
-		Thresholds_conns:     &[]string{"*birpc"},
-		Stats_conns:          &[]string{"*birpc"},
-		Online_cdr_exports:   &[]string{"val1"},
-		Actions_conns:        &[]string{"*birpc"},
-		Ees_conns:            &[]string{"*birpc"},
-		Rates_conns:          &[]string{"*birpc"},
-		Accounts_conns:       &[]string{"*birpc"},
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"*birpc"}}},
+			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
+			utils.MetaThresholds: {{Values: []string{"*birpc"}}},
+			utils.MetaStats:      {{Values: []string{"*birpc"}}},
+			utils.MetaActions:    {{Values: []string{"*birpc"}}},
+			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+			utils.MetaRates:      {{Values: []string{"*birpc"}}},
+			utils.MetaAccounts:   {{Values: []string{"*birpc"}}},
+		},
+		Online_cdr_exports: &[]string{"val1"},
 		Opts: &CdrsOptsJson{
 			Accounts: []*DynamicInterfaceOpt{
 				{
@@ -521,14 +535,16 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 				Rules: "Rule1",
 			},
 		},
-		SMCostRetries:    2,
-		ChargerSConns:    []string{"*localhost"},
-		AttributeSConns:  []string{"*localhost"},
-		ThresholdSConns:  []string{"*localhost"},
-		StatSConns:       []string{"*localhost"},
+		SMCostRetries: 2,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		},
 		OnlineCDRExports: []string{},
-		ActionSConns:     []string{"*localhost"},
-		EEsConns:         []string{"*localhost"},
 		Opts:             &CdrsOpts{},
 	}
 
@@ -539,14 +555,16 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 				Rules: "Rule1",
 			},
 		},
-		SMCostRetries:    2,
-		ChargerSConns:    []string{"*localhost"},
-		AttributeSConns:  []string{"*localhost"},
-		ThresholdSConns:  []string{"*localhost"},
-		StatSConns:       []string{"*localhost"},
+		SMCostRetries: 2,
+		Conns: map[string][]*DynamicStringSliceOpt{
+			utils.MetaChargers:   {{Values: []string{"*localhost"}}},
+			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+			utils.MetaActions:    {{Values: []string{"*localhost"}}},
+			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		},
 		OnlineCDRExports: []string{},
-		ActionSConns:     []string{"*localhost"},
-		EEsConns:         []string{"*localhost"},
 		Opts:             &CdrsOpts{},
 	}
 

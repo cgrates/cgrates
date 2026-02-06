@@ -46,7 +46,9 @@ func TestAMQPERv1(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
-	"sessions_conns":["*localhost"],
+	"conns": {
+		"*sessions": [{"Values": ["*localhost"]}]
+	},
 	"readers": [
 		{
 			"id": "amqpv1",										// identifier of the EventReader profile

@@ -41,7 +41,9 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "admins": {

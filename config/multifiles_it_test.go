@@ -87,9 +87,15 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 	}
 	expected := HTTPAgentCfgs{
 		{
-			ID:             "conecto1",
-			URL:            "/newConecto",
-			SessionSConns:  []string{utils.MetaLocalHost},
+			ID:  "conecto1",
+			URL: "/newConecto",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {
+					{
+						Values: []string{utils.MetaLocalHost},
+					},
+				},
+			},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{
@@ -160,9 +166,15 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			},
 		},
 		{
-			ID:             "conecto_xml",
-			URL:            "/conecto_xml",
-			SessionSConns:  []string{utils.MetaLocalHost},
+			ID:  "conecto_xml",
+			URL: "/conecto_xml",
+			Conns: map[string][]*DynamicStringSliceOpt{
+				utils.MetaSessionS: {
+					{
+						Values: []string{utils.MetaLocalHost},
+					},
+				},
+			},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{

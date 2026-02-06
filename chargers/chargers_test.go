@@ -993,8 +993,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -1090,7 +1089,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -1177,8 +1176,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 
@@ -1247,8 +1245,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 
@@ -1324,8 +1321,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 
@@ -1435,8 +1431,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
-	cfg.ChargerSCfg().AttributeSConns = []string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ChargerSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 

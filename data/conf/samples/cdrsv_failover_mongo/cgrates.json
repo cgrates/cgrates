@@ -40,13 +40,15 @@
 
 "cdrs": {
 	"enabled": true,
-	"attributes_conns":["*internal"],
-	"chargers_conns":["*localhost"],
-	"rates_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-	"thresholds_conns": ["*localhost"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}],
+		"*chargers": [{"Values": ["*localhost"]}],
+		"*rates": [{"Values": ["*localhost"]}],
+		"*stats": [{"Values": ["*localhost"]}],
+		"*thresholds": [{"Values": ["*localhost"]}],
+		"*ees": [{"Values": ["*localhost"]}]
+	},
 	"online_cdr_exports": ["s3_test_file"],
-	"ees_conns": ["*localhost"]
 },
 
 "attributes": {
@@ -56,7 +58,9 @@
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"]
+	"conns": {
+		"*thresholds": [{"Values": ["*internal"]}]
+	},
 },
 
 "thresholds": {
@@ -66,7 +70,9 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"]
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 },
 
 "admins": {
@@ -76,7 +82,9 @@
 
 "ees": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"Values": ["*internal"]}]
+	},
 	"exporters": [
 		{
 			"id": "s3_test_file",

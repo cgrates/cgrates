@@ -59,11 +59,7 @@ type RouteSCfg struct {
 	ExistsIndexedFields    *[]string
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
-	AttributeSConns        []string
-	ResourceSConns         []string
-	StatSConns             []string
-	RateSConns             []string
-	AccountSConns          []string
+	Conns                  map[string][]*DynamicStringSliceOpt
 	DefaultRatio           int
 	Opts                   *RoutesOpts
 }
@@ -155,20 +151,11 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Notexists_indexed_fields != nil {
 		rts.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
-	if jsnCfg.Attributes_conns != nil {
-		rts.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
-	}
-	if jsnCfg.Resources_conns != nil {
-		rts.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
-	}
-	if jsnCfg.Stats_conns != nil {
-		rts.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
-	}
-	if jsnCfg.Rates_conns != nil {
-		rts.RateSConns = tagInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
-	}
-	if jsnCfg.Accounts_conns != nil {
-		rts.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			rts.Conns[connType] = opts
+		}
 	}
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
@@ -245,6 +232,7 @@ func (rts RouteSCfg) AsMapInterface() any {
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
+		utils.ConnsCfg:          stripConns(rts.Conns),
 		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
@@ -262,21 +250,6 @@ func (rts RouteSCfg) AsMapInterface() any {
 	if rts.NotExistsIndexedFields != nil {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rts.NotExistsIndexedFields)
 	}
-	if rts.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = stripInternalConns(rts.AttributeSConns)
-	}
-	if rts.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = stripInternalConns(rts.ResourceSConns)
-	}
-	if rts.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = stripInternalConns(rts.StatSConns)
-	}
-	if rts.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = stripInternalConns(rts.RateSConns)
-	}
-	if rts.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = stripInternalConns(rts.AccountSConns)
-	}
 	return mp
 }
 
@@ -290,22 +263,8 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
+		Conns:          CloneConnsOpt(rts.Conns),
 		Opts:           rts.Opts.Clone(),
-	}
-	if rts.AttributeSConns != nil {
-		cln.AttributeSConns = slices.Clone(rts.AttributeSConns)
-	}
-	if rts.ResourceSConns != nil {
-		cln.ResourceSConns = slices.Clone(rts.ResourceSConns)
-	}
-	if rts.StatSConns != nil {
-		cln.StatSConns = slices.Clone(rts.StatSConns)
-	}
-	if rts.RateSConns != nil {
-		cln.RateSConns = slices.Clone(rts.RateSConns)
-	}
-	if rts.AccountSConns != nil {
-		cln.AccountSConns = slices.Clone(rts.AccountSConns)
 	}
 	if rts.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*rts.StringIndexedFields))
@@ -345,12 +304,8 @@ type RouteSJsonCfg struct {
 	Suffix_indexed_fields    *[]string
 	Exists_indexed_fields    *[]string
 	Notexists_indexed_fields *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
-	Attributes_conns         *[]string
-	Resources_conns          *[]string
-	Stats_conns              *[]string
-	Rates_conns              *[]string
-	Accounts_conns           *[]string
+	Nested_fields            *bool                               // applies when indexed fields is not defined
+	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 	Default_ratio            *int
 	Opts                     *RoutesOptsJson
 }
@@ -404,20 +359,8 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
-	}
-	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
-	}
-	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)

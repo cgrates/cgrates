@@ -135,16 +135,18 @@ func testCfgGetConfig(t *testing.T) {
 	var reply map[string]any
 	expected := map[string]any{
 		"attributes": map[string]any{
-			"accounts_conns":           []string{"*localhost"},
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
 			"prefix_indexed_fields":    []string{},
-			"resources_conns":          []string{"*localhost"},
-			"stats_conns":              []string{"*localhost"},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
+			utils.ConnsCfg: map[string][]*config.DynamicStringSliceOpt{
+				utils.MetaStats:     {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaResources: {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  {{Values: []string{utils.MetaLocalHost}}},
+			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil)},
@@ -176,13 +178,11 @@ func testCfgSetGetConfig(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]any{
 				"attributes": map[string]any{
-					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
 					"nested_fields":         false,
 					"prefix_indexed_fields": []string{},
-					"resources_conns":       []string{"*internal"},
-					"stats_conns":           []string{"*internal"},
+
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
@@ -203,16 +203,18 @@ func testCfgSetGetConfig(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"accounts_conns":           []any{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          false,
 			"nested_fields":            false,
 			"prefix_indexed_fields":    []any{},
-			"resources_conns":          []any{"*internal"},
-			"stats_conns":              []any{"*internal"},
 			"suffix_indexed_fields":    []any{},
 			"exists_indexed_fields":    []any{},
 			"notexists_indexed_fields": []any{},
+			utils.ConnsCfg: map[string]any{
+				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{
@@ -345,13 +347,15 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 			Tenant:  "",
 			Config: `{
 "attributes":{
-	"accounts_conns":["*internal"],
+	"conns": {
+		"*accounts": [{"Values": ["*internal"]}],
+		"*resources": [{"Values": ["*internal"]}],
+		"*stats": [{"Values": ["*localhost"]}]
+	},
 	"enabled":true,
 	"indexed_selects":false,
 	"nested_fields":false,
 	"prefix_indexed_fields":[],
-	"resources_conns":["*internal"],
-	"stats_conns":["*localhost"],
 	"suffix_indexed_fields":[],
 	"opts":{
 		"*processRuns": [
@@ -370,7 +374,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","Values":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -470,10 +474,24 @@ func testCfgGetConfigStore(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := &config.AttributeSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Stats_conns:           &[]string{"*localhost"},
-		Resources_conns:       &[]string{"*localhost"},
-		Accounts_conns:        &[]string{"*localhost"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaStats: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+			utils.MetaResources: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+			utils.MetaAccounts: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+		},
 		Indexed_selects:       nil,
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -495,13 +513,10 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]any{
 				"attributes": map[string]any{
-					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
 					"nested_fields":         false,
 					"prefix_indexed_fields": []string{},
-					"resources_conns":       []string{"*internal"},
-					"stats_conns":           []string{"*internal"},
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
@@ -519,16 +534,18 @@ func testCfgSetGetConfigStore(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"accounts_conns":           []string{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          false,
 			"nested_fields":            false,
 			"prefix_indexed_fields":    []string{},
-			"resources_conns":          []string{"*internal"},
-			"stats_conns":              []string{"*internal"},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
+			utils.ConnsCfg: map[string][]*config.DynamicStringSliceOpt{
+				utils.MetaStats:     {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaResources: {{Values: []string{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  {{Values: []string{utils.MetaLocalHost}}},
+			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil)},
@@ -558,10 +575,24 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := &config.AttributeSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Stats_conns:           &[]string{"*internal"},
-		Resources_conns:       &[]string{"*internal"},
-		Accounts_conns:        &[]string{"*internal"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaStats: {
+				{
+					Values: []string{utils.MetaLocalHost},
+				},
+			},
+			utils.MetaResources: {
+				{
+					Values: []string{utils.MetaLocalHost},
+				},
+			},
+			utils.MetaAccounts: {
+				{
+					Values: []string{utils.MetaLocalHost},
+				},
+			},
+		},
 		Indexed_selects:       utils.BoolPointer(false),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -576,10 +607,24 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 
 func testCfgMdfSectConfigStore(t *testing.T) {
 	attrSect := &config.AttributeSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Stats_conns:           &[]string{"*internal"},
-		Resources_conns:       &[]string{"*internal"},
-		Accounts_conns:        &[]string{"*internal"},
+		Enabled: utils.BoolPointer(true),
+		Conns: map[string][]*config.DynamicStringSliceOpt{
+			utils.MetaStats: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+			utils.MetaResources: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+			utils.MetaAccounts: {
+				{
+					Values: []string{"*localhost"},
+				},
+			},
+		},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -620,16 +665,18 @@ func testCfgReloadConfigStore(t *testing.T) {
 func testCfgGetAfterReloadStore(t *testing.T) {
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"accounts_conns":           []any{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
 			"prefix_indexed_fields":    []any{},
-			"resources_conns":          []any{"*internal"},
-			"stats_conns":              []any{"*internal"},
 			"suffix_indexed_fields":    []any{},
 			"exists_indexed_fields":    []any{},
 			"notexists_indexed_fields": []any{},
+			utils.ConnsCfg: map[string]any{
+				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []any{utils.MetaLocalHost}}},
+			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{

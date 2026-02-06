@@ -19,19 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
-	"slices"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // AdminSCfg is the configuration of Apier service
 type AdminSCfg struct {
-	Enabled         bool
-	CachesConns     []string // connections towards Cache
-	ActionSConns    []string // connections towards Scheduler
-	AttributeSConns []string // connections towards AttributeS
-	EEsConns        []string // connections towards EEs
+	Enabled bool
+	Conns   map[string][]*DynamicStringSliceOpt
 }
 
 // loadApierCfg loads the Apier section of the configuration
@@ -50,17 +45,11 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Caches_conns != nil {
-		aCfg.CachesConns = tagInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
-	}
-	if jsnCfg.Actions_conns != nil {
-		aCfg.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
-	}
-	if jsnCfg.Attributes_conns != nil {
-		aCfg.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
-	}
-	if jsnCfg.Ees_conns != nil {
-		aCfg.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		for connType, opts := range tagged {
+			aCfg.Conns[connType] = opts
+		}
 	}
 	return
 }
@@ -69,18 +58,7 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 func (aCfg AdminSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: aCfg.Enabled,
-	}
-	if aCfg.CachesConns != nil {
-		mp[utils.CachesConnsCfg] = stripInternalConns(aCfg.CachesConns)
-	}
-	if aCfg.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = stripInternalConns(aCfg.ActionSConns)
-	}
-	if aCfg.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = stripInternalConns(aCfg.AttributeSConns)
-	}
-	if aCfg.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(aCfg.EEsConns)
+		utils.ConnsCfg:   stripConns(aCfg.Conns),
 	}
 	return mp
 }
@@ -92,28 +70,14 @@ func (aCfg AdminSCfg) CloneSection() Section { return aCfg.Clone() }
 func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
 	cln = &AdminSCfg{
 		Enabled: aCfg.Enabled,
-	}
-	if aCfg.CachesConns != nil {
-		cln.CachesConns = slices.Clone(aCfg.CachesConns)
-	}
-	if aCfg.ActionSConns != nil {
-		cln.ActionSConns = slices.Clone(aCfg.ActionSConns)
-	}
-	if aCfg.AttributeSConns != nil {
-		cln.AttributeSConns = slices.Clone(aCfg.AttributeSConns)
-	}
-	if aCfg.EEsConns != nil {
-		cln.EEsConns = slices.Clone(aCfg.EEsConns)
+		Conns:   CloneConnsOpt(aCfg.Conns),
 	}
 	return
 }
 
 type AdminSJsonCfg struct {
-	Enabled          *bool
-	Caches_conns     *[]string
-	Actions_conns    *[]string
-	Attributes_conns *[]string
-	Ees_conns        *[]string
+	Enabled *bool
+	Conns   map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
 }
 
 func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
@@ -123,17 +87,8 @@ func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !slices.Equal(v1.CachesConns, v2.CachesConns) {
-		d.Caches_conns = utils.SliceStringPointer(stripInternalConns(v2.CachesConns))
-	}
-	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
-	}
-	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
-	}
-	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	return d
 }

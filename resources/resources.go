@@ -420,7 +420,8 @@ func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resource
 
 // processThresholds will pass the event for resource to ThresholdS
 func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) (err error) {
-	if len(rS.cfg.ResourceSCfg().ThresholdSConns) == 0 {
+	threshConns, err := engine.GetConnIDs(ctx, rS.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, rS.fltrS)
+	if len(threshConns) == 0 {
 		return
 	}
 	if opts == nil {
@@ -447,7 +448,7 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 			APIOpts: opts,
 		}
 		var tIDs []string
-		if err := rS.connMgr.Call(ctx, rS.cfg.ResourceSCfg().ThresholdSConns,
+		if err := rS.connMgr.Call(ctx, threshConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(r.rPrf.ResourceProfile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(

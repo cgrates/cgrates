@@ -33,9 +33,7 @@ type DiameterAgentCfg struct {
 	Listen                  string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath        string
 	CEApplications          []string
-	SessionSConns           []string
-	StatSConns              []string
-	ThresholdSConns         []string
+	Conns                   map[string][]*DynamicStringSliceOpt
 	OriginHost              string
 	OriginRealm             string
 	VendorID                int
@@ -79,14 +77,11 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 		da.CEApplications = make([]string, len(*jc.CEApplications))
 		copy(da.CEApplications, *jc.CEApplications)
 	}
-	if jc.SessionSConns != nil {
-		da.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
-	}
-	if jc.StatSConns != nil {
-		da.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
-	}
-	if jc.ThresholdSConns != nil {
-		da.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
+	if jc.Conns != nil {
+		tagged := tagConns(jc.Conns)
+		for connType, opts := range tagged {
+			da.Conns[connType] = opts
+		}
 	}
 	if jc.OriginHost != nil {
 		da.OriginHost = *jc.OriginHost
@@ -139,9 +134,7 @@ func (da DiameterAgentCfg) AsMapInterface() any {
 		utils.ListenNetCfg:               da.ListenNet,
 		utils.ListenCfg:                  da.Listen,
 		utils.DictionariesPathCfg:        da.DictionariesPath,
-		utils.SessionSConnsCfg:           stripInternalConns(da.SessionSConns),
-		utils.StatSConnsCfg:              stripInternalConns(da.StatSConns),
-		utils.ThresholdSConnsCfg:         stripInternalConns(da.ThresholdSConns),
+		utils.ConnsCfg:                   stripConns(da.Conns),
 		utils.ConnStatusStatQueueIDsCfg:  da.ConnStatusStatQueueIDs,
 		utils.ConnStatusThresholdIDsCfg:  da.ConnStatusThresholdIDs,
 		utils.OriginHostCfg:              da.OriginHost,
@@ -174,9 +167,7 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		Listen:                  da.Listen,
 		DictionariesPath:        da.DictionariesPath,
 		CEApplications:          slices.Clone(da.CEApplications),
-		SessionSConns:           slices.Clone(da.SessionSConns),
-		StatSConns:              slices.Clone(da.StatSConns),
-		ThresholdSConns:         slices.Clone(da.ThresholdSConns),
+		Conns:                   CloneConnsOpt(da.Conns),
 		OriginHost:              da.OriginHost,
 		OriginRealm:             da.OriginRealm,
 		VendorID:                da.VendorID,
@@ -204,26 +195,24 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled                 *bool                  `json:"enabled"`
-	Listen                  *string                `json:"listen"`
-	ListenNet               *string                `json:"listen_net"`
-	DictionariesPath        *string                `json:"dictionaries_path"`
-	CEApplications          *[]string              `json:"ce_applications"`
-	SessionSConns           *[]string              `json:"sessions_conns"`
-	StatSConns              *[]string              `json:"stats_conns"`
-	ThresholdSConns         *[]string              `json:"thresholds_conns"`
-	OriginHost              *string                `json:"origin_host"`
-	OriginRealm             *string                `json:"origin_realm"`
-	VendorID                *int                   `json:"vendor_id"`
-	ProductName             *string                `json:"product_name"`
-	SyncedConnRequests      *bool                  `json:"synced_conn_requests"`
-	ASRTemplate             *string                `json:"asr_template"`
-	RARTemplate             *string                `json:"rar_template"`
-	ForcedDisconnect        *string                `json:"forced_disconnect"`
-	ConnStatusStatQueueIDs  *[]string              `json:"conn_status_stat_queue_ids"`
-	ConnStatusThresholdIDs  *[]string              `json:"conn_status_threshold_ids"`
-	ConnHealthCheckInterval *string                `json:"conn_health_check_interval"`
-	RequestProcessors       *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled                 *bool                               `json:"enabled"`
+	Listen                  *string                             `json:"listen"`
+	ListenNet               *string                             `json:"listen_net"`
+	DictionariesPath        *string                             `json:"dictionaries_path"`
+	CEApplications          *[]string                           `json:"ce_applications"`
+	Conns                   map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	OriginHost              *string                             `json:"origin_host"`
+	OriginRealm             *string                             `json:"origin_realm"`
+	VendorID                *int                                `json:"vendor_id"`
+	ProductName             *string                             `json:"product_name"`
+	SyncedConnRequests      *bool                               `json:"synced_conn_requests"`
+	ASRTemplate             *string                             `json:"asr_template"`
+	RARTemplate             *string                             `json:"rar_template"`
+	ForcedDisconnect        *string                             `json:"forced_disconnect"`
+	ConnStatusStatQueueIDs  *[]string                           `json:"conn_status_stat_queue_ids"`
+	ConnStatusThresholdIDs  *[]string                           `json:"conn_status_threshold_ids"`
+	ConnHealthCheckInterval *string                             `json:"conn_health_check_interval"`
+	RequestProcessors       *[]*ReqProcessorJsnCfg              `json:"request_processors"`
 }
 
 func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg) *DiameterAgentJsonCfg {
@@ -245,14 +234,8 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	if !slices.Equal(v1.CEApplications, v2.CEApplications) {
 		d.CEApplications = utils.SliceStringPointer(v2.CEApplications)
 	}
-	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
-	}
-	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
-	}
-	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	if !ConnsEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.OriginHost != v2.OriginHost {
 		d.OriginHost = utils.StringPointer(v2.OriginHost)
