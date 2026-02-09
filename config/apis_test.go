@@ -1164,3 +1164,41 @@ func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ErrNotImplemented, err)
 	}
 }
+
+func TestTpeSCfgV1StoreCfgInDB(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	cfg.db = make(CgrJsonCfg)
+
+	cfg.tpeSCfg.Enabled = true
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{TPeSJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	if reply != utils.OK {
+		t.Errorf("V1StoreCfgInDB() reply = %v, want %v", reply, utils.OK)
+	}
+
+	expected := &TpeSCfgJson{
+		Enabled: utils.BoolPointer(true),
+	}
+
+	stored := new(TpeSCfgJson)
+	if err := cfg.db.GetSection(context.Background(), TPeSJSON, stored); err != nil {
+		t.Fatal(err)
+	}
+
+	if stored.Enabled == nil {
+		t.Fatal("stored.Enabled = nil, want non-nil")
+	}
+
+	if !reflect.DeepEqual(expected, stored) {
+		t.Errorf("Mismatch!\nExpected: %+v\nReceived: %+v", expected, stored)
+	}
+}
