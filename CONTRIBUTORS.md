@@ -90,6 +90,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @Juneezee | Eng Zer Jun |
 | @varundhand | Varun Dhand |
 | @armirveliaj | Armir Veliaj |
+| @caskings | Craig Askings |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
