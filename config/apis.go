@@ -624,6 +624,12 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffAccountSJsonCfg(jsn, v1.AccountSCfg(), v2.AccountSCfg()))
+	case TPeSJSON:
+		jsn := new(TpeSCfgJson)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffTpeSCfgJson(jsn, v1.TpeSCfg(), v2.TpeSCfg()))
 	}
 	return
 }

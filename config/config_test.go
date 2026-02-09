@@ -23,6 +23,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -6255,5 +6256,517 @@ func TestCfgloadCfgWithLocks(t *testing.T) {
 		}
 	} else {
 		t.Error(err)
+	}
+}
+
+func TestConfigV1StoreCfgInDBs(t *testing.T) {
+	tests := []struct {
+		section  string
+		setup    func(cfg *CGRConfig)
+		expected func() any
+	}{
+		{
+			section: TrendSJSON,
+			setup: func(cfg *CGRConfig) {
+				cfg.trendSCfg.Enabled = true
+				cfg.trendSCfg.StoreInterval = 10 * time.Second
+				cfg.trendSCfg.StoreUncompressedLimit = 100
+			},
+			expected: func() any {
+				return &TrendSJsonCfg{
+					Enabled:                  utils.BoolPointer(true),
+					Store_interval:           utils.StringPointer("10s"),
+					Store_uncompressed_limit: utils.IntPointer(100),
+					Scheduled_ids:            map[string][]string{},
+				}
+			},
+		},
+		{
+			section: RankingSJSON,
+			setup: func(cfg *CGRConfig) {
+				cfg.rankingSCfg.Enabled = true
+				cfg.rankingSCfg.StoreInterval = 5 * time.Second
+			},
+			expected: func() any {
+				return &RankingSJsonCfg{
+					Enabled:        utils.BoolPointer(true),
+					Store_interval: utils.StringPointer("5s"),
+					Scheduled_ids:  map[string][]string{},
+				}
+			},
+		},
+		{
+			section: TPeSJSON,
+			setup: func(cfg *CGRConfig) {
+				cfg.tpeSCfg.Enabled = true
+			},
+			expected: func() any {
+				return &TpeSCfgJson{
+					Enabled: utils.BoolPointer(true),
+				}
+			},
+		},
+		{
+			section: AccountSJSON,
+			setup: func(cfg *CGRConfig) {
+			},
+			expected: func() any {
+				return &AccountSJsonCfg{
+					Opts: &AccountsOptsJson{},
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.section, func(t *testing.T) {
+			cfg := NewDefaultCGRConfig()
+			cfg.rldCh = make(chan string, 100)
+			db := make(CgrJsonCfg)
+			cfg.db = db
+
+			tt.setup(cfg)
+
+			var reply string
+			if err := cfg.V1StoreCfgInDB(
+				context.Background(),
+				&SectionWithAPIOpts{Sections: []string{tt.section}},
+				&reply,
+			); err != nil {
+				t.Fatal(err)
+			}
+
+			exp := tt.expected()
+			expType := reflect.TypeOf(exp)
+			rpl := reflect.New(expType.Elem()).Interface()
+
+			if err := db.GetSection(context.Background(), tt.section, rpl); err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(exp, rpl) {
+				t.Errorf("Mismatch for section %s!\nExpected: %+v\nReceived: %+v", tt.section, exp, rpl)
+			}
+		})
+	}
+}
+
+func TestLoadConfigFromFile(t *testing.T) {
+	t.Run("successful load from valid JSON file", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "config_*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		jsonContent := `{
+"general": {
+	"node_id": "loadconfig",
+	"rounding_decimals": 5,
+	"dbdata_encoding": "*msgpack",
+	"tpexport_dir": "/var/spool/cgrates/tpe",
+	"default_request_type": "*rated",
+	"default_category": "call",
+	"default_tenant": "cgrates.org",
+	"default_timezone": "UTC",
+	"default_caching": "*reload",
+	"connect_attempts": 5,
+	"reconnects": -1,
+	"connect_timeout": "1s",
+	"reply_timeout": "2s"
+},
+"ips": {
+	"enabled": true,
+	"indexed_selects": true,
+	"store_interval": "-1",
+	"string_indexed_fields": ["*req.Account", "*req.Destination"],
+	"prefix_indexed_fields": ["*req.Prefix"],
+	"nested_fields": false
+}
+}`
+		if _, err := tmpFile.Write([]byte(jsonContent)); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		cfg := &CGRConfig{
+			generalCfg: &GeneralCfg{},
+			ipsCfg:     &IPsCfg{Opts: &IPsOpts{}},
+			lks:        make(map[string]*sync.RWMutex),
+		}
+
+		loadFuncs := Sections{
+			cfg.generalCfg,
+			cfg.ipsCfg,
+		}
+
+		ctx := &context.Context{}
+		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		if cfg.generalCfg.NodeID != "loadconfig" {
+			t.Errorf("expected NodeID 'loadconfig', got '%s'", cfg.generalCfg.NodeID)
+		}
+	})
+
+	t.Run("file does not exist", func(t *testing.T) {
+		cfg := &CGRConfig{}
+		loadFuncs := Sections{}
+		ctx := &context.Context{}
+
+		err := loadConfigFromFile(ctx, "/nonexistent/path/cgrates.json", loadFuncs, false, cfg)
+
+		if err == nil {
+			t.Error("expected error for nonexistent file, got nil")
+		}
+	})
+
+	t.Run("invalid JSON format", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "invalid_*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		invalidJSON := `{
+"general": {
+	"node_id": "test_node",
+	"default_tenant": "cgrates.org"
+}`
+		if _, err := tmpFile.Write([]byte(invalidJSON)); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		cfg := &CGRConfig{
+			generalCfg: &GeneralCfg{},
+			lks:        make(map[string]*sync.RWMutex),
+		}
+
+		loadFuncs := Sections{
+			cfg.generalCfg,
+		}
+
+		ctx := &context.Context{}
+		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
+
+		if err == nil {
+			t.Error("expected error for invalid JSON, got nil")
+		}
+
+		if !strings.Contains(err.Error(), tmpFile.Name()) {
+			t.Errorf("error should contain file path, got: %v", err)
+		}
+	})
+
+	t.Run("empty file", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "empty_*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+		tmpFile.Close()
+
+		cfg := &CGRConfig{
+			generalCfg: &GeneralCfg{},
+			lks:        make(map[string]*sync.RWMutex),
+		}
+
+		loadFuncs := Sections{
+			cfg.generalCfg,
+		}
+		ctx := &context.Context{}
+
+		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
+
+		if err == nil {
+			t.Error("expected error for empty file, got nil")
+		}
+	})
+
+	t.Run("file with no read permissions", func(t *testing.T) {
+		if os.Getuid() == 0 {
+			t.Skip("skipping permission test when running as root")
+		}
+
+		tmpFile, err := os.CreateTemp("", "noperm_*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		tmpFile.Write([]byte(`{"general": {}}`))
+		tmpFile.Close()
+
+		if err := os.Chmod(tmpFile.Name(), 0000); err != nil {
+			t.Fatal(err)
+		}
+		defer os.Chmod(tmpFile.Name(), 0644)
+
+		cfg := &CGRConfig{}
+		loadFuncs := Sections{}
+		ctx := &context.Context{}
+
+		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
+
+		if err == nil {
+			t.Error("expected error for file without read permissions, got nil")
+		}
+	})
+
+	t.Run("valid file with multiple sections", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "multi_*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		multiSectionJSON := `{
+"general": {
+	"node_id": "multi_node",
+	"default_tenant": "cgrates.org",
+	"rounding_decimals": 5
+},
+"ips": {
+	"enabled": true,
+	"store_interval": "-1",
+	"indexed_selects": false
+}
+}`
+		if _, err := tmpFile.Write([]byte(multiSectionJSON)); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		cfg := &CGRConfig{
+			generalCfg: &GeneralCfg{},
+			ipsCfg:     &IPsCfg{Opts: &IPsOpts{}},
+			lks:        make(map[string]*sync.RWMutex),
+		}
+
+		loadFuncs := Sections{
+			cfg.generalCfg,
+			cfg.ipsCfg,
+		}
+
+		ctx := &context.Context{}
+		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+}
+
+func TestCGRConfigIPsCfg(t *testing.T) {
+	expectedIPsCfg := &IPsCfg{
+		Enabled:                false,
+		IndexedSelects:         true,
+		StoreInterval:          72 * time.Hour,
+		StringIndexedFields:    &[]string{"*req.Account", "*req.Destination"},
+		PrefixIndexedFields:    &[]string{"*req.prefix1", "*req.prefix2"},
+		SuffixIndexedFields:    &[]string{"*req.suffix1"},
+		ExistsIndexedFields:    &[]string{"*req.exists1", "*req.exists2"},
+		NotExistsIndexedFields: &[]string{"*req.notexists1"},
+		NestedFields:           false,
+		Opts: &IPsOpts{
+			AllocationID: []*DynamicStringOpt{
+				{
+					FilterIDs: []string{},
+					Tenant:    "cgrates.org",
+				},
+			},
+			TTL: []*DynamicDurationOpt{
+				{
+					FilterIDs: []string{},
+					Tenant:    "cgrates.org",
+				},
+			},
+		},
+	}
+
+	cfg := &CGRConfig{
+		ipsCfg: expectedIPsCfg,
+		lks: map[string]*sync.RWMutex{
+			IPsJSON: {},
+		},
+	}
+
+	result := cfg.IPsCfg()
+
+	if result != expectedIPsCfg {
+		t.Errorf("expected same pointer")
+	}
+
+	if !reflect.DeepEqual(result, expectedIPsCfg) {
+		t.Errorf("expected: %+v, got: %+v", expectedIPsCfg, result)
+	}
+}
+
+func TestConfigV1StoreCfgInDBsAPIBan(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.apiBanCfg.Enabled = true
+	cfg.apiBanCfg.Keys = []string{"key1", "key2"}
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{APIBanJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &APIBanJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Keys:    &[]string{"key1", "key2"},
+	}
+
+	var result APIBanJsonCfg
+	if err := db.GetSection(context.Background(), APIBanJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for APIBan section!\nExpected: %+v\nReceived: %+v", expected, &result)
+	}
+}
+
+func TestConfigV1StoreCfgInDBsAdmins(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.admS.Enabled = true
+	cfg.admS.CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}
+	cfg.admS.ActionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}
+	cfg.admS.AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}
+	cfg.admS.EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{AdminSJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &AdminSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Caches_conns:     &[]string{utils.MetaInternal, "*conn1"},
+		Actions_conns:    &[]string{utils.MetaInternal, "*conn1"},
+		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
+		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
+	}
+
+	var result AdminSJsonCfg
+	if err := db.GetSection(context.Background(), AdminSJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for Admins section!\nExpected: %+v\nReceived: %+v",
+			utils.ToJSON(expected), utils.ToJSON(&result))
+	}
+}
+
+func TestConfigV1StoreCfgInDBsRegistrarC(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	db := make(CgrJsonCfg)
+	cfg.db = db
+
+	cfg.registrarCCfg.RPC.RegistrarSConns = []string{"*conn1", "*conn2"}
+	cfg.registrarCCfg.RPC.Hosts = map[string][]*RemoteHost{
+		utils.MetaDefault: {
+			{
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Transport: utils.MetaGOB,
+			},
+		},
+		"cgrates.net": {
+			{
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
+				TLS:       true,
+			},
+			{
+				ID:        "Host2",
+				Transport: utils.MetaGOB,
+				TLS:       true,
+			},
+		},
+	}
+	cfg.registrarCCfg.RPC.RefreshInterval = 5 * time.Second
+
+	var reply string
+	if err := cfg.V1StoreCfgInDB(
+		context.Background(),
+		&SectionWithAPIOpts{Sections: []string{RegistrarCJSON}},
+		&reply,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &RegistrarCJsonCfgs{
+		RPC: &RegistrarCJsonCfg{
+			Registrars_conns: &[]string{"*conn1", "*conn2"},
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: nil,
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host1"),
+						Transport: utils.StringPointer(utils.MetaJSON),
+					},
+				},
+				{
+					Tenant: nil,
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host2"),
+						Transport: utils.StringPointer(utils.MetaGOB),
+					},
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host1"),
+						Transport: utils.StringPointer(utils.MetaJSON),
+						Tls:       utils.BoolPointer(true),
+					},
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
+						Id:        utils.StringPointer("Host2"),
+						Transport: utils.StringPointer(utils.MetaGOB),
+						Tls:       utils.BoolPointer(true),
+					},
+				},
+			},
+			Refresh_interval: utils.StringPointer("5s"),
+		},
+	}
+
+	var result RegistrarCJsonCfgs
+	if err := db.GetSection(context.Background(), RegistrarCJSON, &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(expected, &result) {
+		t.Errorf("Mismatch for RegistrarC section!\nExpected: %+v\nReceived: %+v",
+			utils.ToJSON(expected), utils.ToJSON(&result))
 	}
 }
