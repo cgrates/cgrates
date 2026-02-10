@@ -1331,6 +1331,7 @@ const (
 	MetaDurationNanoseconds = "*duration_nanoseconds"
 	MetaDurationMinutes     = "*duration_minutes"
 	MetaGigawords           = "*gigawords"
+	Meta3GPPULI             = "*3gpp_uli"
 	CapAttributes           = "Attributes"
 	CapResourceAllocation   = "ResourceAllocation"
 	CapAllocatedIP          = "AllocatedIP"
