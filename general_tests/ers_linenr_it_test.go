@@ -18,14 +18,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -122,42 +120,28 @@ func TestERsLineNr(t *testing.T) {
 	}
 
 	verifyLogLines := func(t *testing.T, reader io.Reader) {
-		fieldRegex := regexp.MustCompile(`"Field":"test(\d+)"`)
-		lineNumberRegex := regexp.MustCompile(`"LineNumber":"(\d+)"`)
-		records := 0
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if !strings.Contains(line, `"Field":"test`) {
+		t.Helper()
+		data, err := io.ReadAll(reader)
+		if err != nil {
+			t.Fatal(err)
+		}
+		parts := strings.Split(string(data), "CGREvent: ")
+		var records int
+		for _, part := range parts[1:] {
+			var cgrEv utils.CGREvent
+			if err := json.NewDecoder(strings.NewReader(part)).Decode(&cgrEv); err != nil {
+				t.Fatalf("failed to decode CGREvent: %v", err)
+			}
+			field, _ := cgrEv.Event["Field"].(string)
+			if !strings.HasPrefix(field, "test") {
 				continue
 			}
-
 			records++
-
-			fieldMatch := fieldRegex.FindStringSubmatch(line)
-			lineNumberMatch := lineNumberRegex.FindStringSubmatch(line)
-
-			if len(fieldMatch) != 2 || len(lineNumberMatch) != 2 {
-				t.Fatalf("invalid log line format: %s", line)
-			}
-
-			testNumber, err := strconv.Atoi(fieldMatch[1])
-			if err != nil {
-				t.Fatal(err)
-			}
-			lineNumber, err := strconv.Atoi(lineNumberMatch[1])
-			if err != nil {
-				t.Fatal(err)
-			}
-			if testNumber != lineNumber {
-				t.Errorf("mismatch in line: %s, field number: %d, line number: %d", line, testNumber, lineNumber)
+			lineNumber, _ := cgrEv.Event["LineNumber"].(string)
+			if want := strings.TrimPrefix(field, "test"); lineNumber != want {
+				t.Errorf("got LineNumber=%s, want %s (Field=%s)", lineNumber, want, field)
 			}
 		}
-
-		if err := scanner.Err(); err != nil {
-			t.Errorf("error reading input: %v", err)
-		}
-
 		if records != 18 {
 			t.Errorf("expected ERs to process 18 records, but it processed %d records", records)
 		}
@@ -184,7 +168,7 @@ TRL6
   <field>test6</field>
 </root>`)
 
-	time.Sleep(5 * time.Millisecond) // wait for the files to be processed
+	time.Sleep(20 * time.Millisecond) // wait for the files to be processed
 
 	// Check that the suffixes of the 'test' fields match the LineNumber field.
 	logData := strings.NewReader(buf.String())
