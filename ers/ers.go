@@ -288,12 +288,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			}
 		}
 	}()
-	// log the event created if requested by flags
-	if rdrCfg.Flags.Has(utils.MetaLog) {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, reader: <%s>, message: %s",
-				utils.ERs, rdrCfg.ID, utils.ToIJSON(cgrEv)))
-	}
 	// find out reqType
 	var reqType string
 	for _, typ := range []string{
@@ -317,15 +311,21 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			err = nil // reset the error and continue the processing
 		}
 	}
+	if rdrCfg.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, reader: <%s>, CGREvent: %s",
+				utils.ERs, logPrefix, rdrCfg.ID, utils.ToIJSON(cgrEv)))
+	}
 	// execute the action based on reqType
 	switch reqType {
 	default:
 		return fmt.Errorf("unsupported reqType: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRYRUN, reader: <%s>, CGREvent: <%s>",
-				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
+	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			rdrCfg.Flags.Has(utils.MetaAttributes),

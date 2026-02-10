@@ -34,7 +34,7 @@ import (
 )
 
 func TestDiamULI(t *testing.T) {
-	// t.Skip("configuration reference for *3gpp_uli request_fields; does not assert values")
+	t.Skip("configuration reference for *3gpp_uli request_fields; does not verify anything")
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:

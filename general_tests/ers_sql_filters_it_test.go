@@ -23,6 +23,7 @@ package general_tests
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
@@ -368,25 +369,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -398,6 +394,33 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -531,25 +554,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -561,6 +579,33 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -700,25 +745,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -730,6 +770,33 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -909,25 +976,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -939,6 +1001,33 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -1098,25 +1187,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"ExtraInfo\":\"extraInfo\",\"Id\":\"2\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -1128,6 +1212,35 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"ExtraInfo":   "extraInfo",
+			"Id":          "2",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -1279,25 +1392,20 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
-		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
-			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+			if !strings.Contains(line, "<ERs> DRY_RUN, reader: <mysql>") {
 				continue
 			}
 			records++
-			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
-			}
-			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+			if strings.Contains(line, "[INFO] <ERs> DRY_RUN") {
 				ersLogsCount++
 			}
 		}
@@ -1309,6 +1417,33 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		}
 		if ersLogsCount != 1 {
 			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+		idx := strings.Index(buf.String(), "CGREvent: ")
+		if idx == -1 {
+			t.Fatal("CGREvent not found in log output")
+		}
+		var cgrEv utils.CGREvent
+		if err := json.NewDecoder(strings.NewReader(buf.String()[idx+len("CGREvent: "):])).Decode(&cgrEv); err != nil {
+			t.Fatal(err)
+		}
+		timeStartFormatted := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedEvent := map[string]any{
+			"Account":     "1001",
+			"AnswerTime":  timeStartFormatted,
+			"CGRID":       cgrID,
+			"Category":    "call",
+			"CostDetails": utils.ToJSON(cdr2.CostDetails),
+			"Destination": "1002",
+			"OriginID":    "oid2",
+			"RequestType": "*rated",
+			"SetupTime":   timeStartFormatted,
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       "10000000000",
+		}
+		if got, want := utils.ToJSON(cgrEv.Event), utils.ToJSON(expectedEvent); got != want {
+			t.Errorf("got event\n%s\nwant\n%s", got, want)
 		}
 	})
 
@@ -1520,7 +1655,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		GracefulShutdown: true,
 	}
 	ng.Run(t)
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
 		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
