@@ -23,6 +23,8 @@ package general_tests
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,7 +37,6 @@ import (
 )
 
 func TestDiamULI(t *testing.T) {
-	// t.Skip("configuration reference for *3gpp_uli request_fields; does not verify anything")
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -57,12 +58,6 @@ func TestDiamULI(t *testing.T) {
                     "*dryrun"
                 ],
                 "request_fields": [
-                    {
-                        "tag": "ULI",
-                        "path": "*cgreq.ULI",
-                        "type": "*variable",
-                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info"
-                    },
                     {
                         "tag": "DecodedULI",
                         "path": "*cgreq.DecodedULI",
@@ -116,6 +111,18 @@ func TestDiamULI(t *testing.T) {
                         "path": "*cgreq.ECGI-ECI",
                         "type": "*variable",
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI.ECI}"
+                    },
+                    {
+                        "tag": "MCC-Name",
+                        "path": "*cgreq.MCC-Name",
+                        "type": "*variable",
+                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}"
+                    },
+                    {
+                        "tag": "MNC-Name",
+                        "path": "*cgreq.MNC-Name",
+                        "type": "*variable",
+                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC.Name}"
                     }
                 ],
                 "reply_fields": []
@@ -124,15 +131,14 @@ func TestDiamULI(t *testing.T) {
     }
 }`
 
+	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
 		DBCfg:      engine.InternalDBCfg,
-		LogBuffer:  &bytes.Buffer{},
+		LogBuffer:  buf,
 	}
-	t.Cleanup(func() {
-		t.Log(ng.LogBuffer)
-	})
 	_, cfg := ng.Run(t)
+	time.Sleep(20 * time.Millisecond)
 
 	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
@@ -143,7 +149,7 @@ func TestDiamULI(t *testing.T) {
 	}
 
 	// Binary ULI from Wireshark capture: TAI+ECGI, MCC=547, MNC=05, TAC=1, ECI=257
-	uliBytes, err := hex.DecodeString("8245f750000145f75000000101")
+	uliBytes, err := hex.DecodeString("8262f210000162f21000000101")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +169,38 @@ func TestDiamULI(t *testing.T) {
 	)
 
 	if err := diamClient.SendMessage(ccr); err != nil {
-		t.Errorf("failed to send diameter message: %v", err)
+		t.Fatal(err)
 	}
 	_ = diamClient.ReceivedMessage(2 * time.Second)
+
+	expected := map[string]string{
+		"DecodedULI": `{"TAI":{"MCC":"262","MNC":"01","TAC":1},"ECGI":{"MCC":"262","MNC":"01","ECI":257}}`,
+		"TAI":        `{"MCC":"262","MNC":"01","TAC":1}`,
+		"ECGI":       `{"MCC":"262","MNC":"01","ECI":257}`,
+		"TAI-MCC":    "262",
+		"TAI-MNC":    "01",
+		"TAI-TAC":    "1",
+		"ECGI-MCC":   "262",
+		"ECGI-MNC":   "01",
+		"ECGI-ECI":   "257",
+		"MCC-Name":   "Germany",
+		"MNC-Name":   "Telekom Deutschland GmbH",
+	}
+
+	parts := strings.Split(buf.String(), "CGREvent: ")
+	if len(parts) < 2 {
+		t.Fatal("no CGREvent found in dryrun log")
+	}
+
+	var ev utils.CGREvent
+	if err := json.NewDecoder(strings.NewReader(parts[len(parts)-1])).Decode(&ev); err != nil {
+		t.Fatalf("failed to decode CGREvent: %v", err)
+	}
+
+	for field, want := range expected {
+		got := utils.IfaceAsString(ev.Event[field])
+		if got != want {
+			t.Errorf("%s: got %q, want %q", field, got, want)
+		}
+	}
 }

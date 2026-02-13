@@ -214,6 +214,9 @@ func TestULI_GetField(t *testing.T) {
 		{"NCGI.MCC", "310"},
 		{"NCGI.MNC", "260"},
 		{"NCGI.NCI", uint64(0x123456789)},
+		{"TAI.MCC.Name", "French Polynesia"},
+		{"NCGI.MCC.Name", "United States"},
+		{"NCGI.MNC.Name", "T-Mobile USA"},
 	}
 
 	for _, tt := range tests {
@@ -246,6 +249,9 @@ func TestULI_GetField_Errors(t *testing.T) {
 		{"invalid field", "TAI.INVALID"},
 		{"invalid component", "INVALID"},
 		{"empty path", ""},
+		{"invalid MCC subfield", "TAI.MCC.Invalid"},
+		{"invalid MNC subfield", "TAI.MNC.Invalid"},
+		{"subfield on TAC", "TAI.TAC.Name"},
 	}
 
 	for _, tt := range tests {
@@ -306,6 +312,18 @@ func TestULIConverter(t *testing.T) {
 			params:   "*3gpp_uli:NCGI.NCI",
 			hex:      "871300620123456789",
 			expected: uint64(0x123456789),
+		},
+		{
+			name:     "Extract TAI5GS.MCC.Name",
+			params:   "*3gpp_uli:TAI5GS.MCC.Name",
+			hex:      "88130062123456",
+			expected: "United States",
+		},
+		{
+			name:     "Extract NCGI.MNC.Name",
+			params:   "*3gpp_uli:NCGI.MNC.Name",
+			hex:      "871300620123456789",
+			expected: "T-Mobile USA",
 		},
 	}
 

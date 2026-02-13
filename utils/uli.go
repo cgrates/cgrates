@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package utils
 
+//go:generate go run ../data/scripts/gen_mccmnc.go
+
 import (
 	"encoding/binary"
 	"errors"
@@ -277,9 +279,9 @@ func decodeNCGI(data []byte) *NCGI {
 	}
 }
 
-// GetField retrieves a value found at the specified path (e.g. "TAI.MCC" or "ECGI.ECI").
+// GetField retrieves a value found at the specified path (e.g. "TAI.MCC", "ECGI.ECI", "TAI.MCC.Name").
 func (uli *ULI) GetField(path string) (any, error) {
-	parts := strings.SplitN(path, ".", 2)
+	parts := strings.SplitN(path, ".", 3)
 	if len(parts) == 0 || parts[0] == "" {
 		return nil, errors.New("empty path")
 	}
@@ -331,17 +333,32 @@ func (uli *ULI) GetField(path string) (any, error) {
 		return loc, nil
 	}
 
-	return uliFieldValue(loc, parts[1], mcc, mnc)
-}
-
-func uliFieldValue(loc any, field, mcc, mnc string) (any, error) {
-	switch field {
+	switch parts[1] {
 	case "MCC":
+		if len(parts) == 3 {
+			if parts[2] == "Name" {
+				return countryName(mcc)
+			}
+			return nil, fmt.Errorf("unknown MCC subfield: %s", parts[2])
+		}
 		return mcc, nil
 	case "MNC":
+		if len(parts) == 3 {
+			if parts[2] == "Name" {
+				return networkName(mcc, mnc)
+			}
+			return nil, fmt.Errorf("unknown MNC subfield: %s", parts[2])
+		}
 		return mnc, nil
+	default:
+		if len(parts) == 3 {
+			return nil, fmt.Errorf("unknown subfield: %s.%s", parts[1], parts[2])
+		}
+		return uliFieldValue(loc, parts[1])
 	}
+}
 
+func uliFieldValue(loc any, field string) (any, error) {
 	switch l := loc.(type) {
 	case *CGI:
 		switch field {
@@ -383,4 +400,18 @@ func uliFieldValue(loc any, field, mcc, mnc string) (any, error) {
 	}
 
 	return nil, fmt.Errorf("unknown field: %s", field)
+}
+
+func countryName(mcc string) (string, error) {
+	if name, ok := mccCountry[mcc]; ok {
+		return name, nil
+	}
+	return "", fmt.Errorf("unknown MCC: %s", mcc)
+}
+
+func networkName(mcc, mnc string) (string, error) {
+	if name, ok := mccmncNetwork[mcc+"-"+mnc]; ok {
+		return name, nil
+	}
+	return "", fmt.Errorf("unknown MCC-MNC: %s-%s", mcc, mnc)
 }
