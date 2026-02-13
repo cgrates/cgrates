@@ -22,6 +22,8 @@ package general_tests
 
 import (
 	"bytes"
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,7 +36,6 @@ import (
 )
 
 func TestDiamULI(t *testing.T) {
-	t.Skip("configuration reference for *3gpp_uli request_fields; does not verify anything")
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -57,14 +58,8 @@ func TestDiamULI(t *testing.T) {
                 ],
                 "request_fields": [
                     {
-                        "tag": "ULI",
-                        "path": "*cgreq.ULI",
-                        "type": "*variable",
-                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info"
-                    },
-                    {
-                        "tag": "DecodedULI",
-                        "path": "*cgreq.DecodedULI",
+                        "tag": "FullULI",
+                        "path": "*cgreq.FullULI",
                         "type": "*variable",
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli}"
                     },
@@ -73,6 +68,12 @@ func TestDiamULI(t *testing.T) {
                         "path": "*cgreq.TAI",
                         "type": "*variable",
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI}"
+                    },
+                    {
+                        "tag": "ECGI",
+                        "path": "*cgreq.ECGI",
+                        "type": "*variable",
+                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI}"
                     },
                     {
                         "tag": "TAI-MCC",
@@ -93,28 +94,22 @@ func TestDiamULI(t *testing.T) {
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.TAC}"
                     },
                     {
-                        "tag": "ECGI",
-                        "path": "*cgreq.ECGI",
-                        "type": "*variable",
-                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI}"
-                    },
-                    {
-                        "tag": "ECGI-MCC",
-                        "path": "*cgreq.ECGI-MCC",
-                        "type": "*variable",
-                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI.MCC}"
-                    },
-                    {
-                        "tag": "ECGI-MNC",
-                        "path": "*cgreq.ECGI-MNC",
-                        "type": "*variable",
-                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI.MNC}"
-                    },
-                    {
                         "tag": "ECGI-ECI",
                         "path": "*cgreq.ECGI-ECI",
                         "type": "*variable",
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:ECGI.ECI}"
+                    },
+                    {
+                        "tag": "MCC-Name",
+                        "path": "*cgreq.MCC-Name",
+                        "type": "*variable",
+                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}"
+                    },
+                    {
+                        "tag": "MNC-Name",
+                        "path": "*cgreq.MNC-Name",
+                        "type": "*variable",
+                        "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC.Name}"
                     }
                 ],
                 "reply_fields": []
@@ -123,14 +118,12 @@ func TestDiamULI(t *testing.T) {
     }
 }`
 
+	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
 		DBCfg:      engine.InternalDBCfg,
-		LogBuffer:  &bytes.Buffer{},
+		LogBuffer:  buf,
 	}
-	t.Cleanup(func() {
-		t.Log(ng.LogBuffer)
-	})
 	_, cfg := ng.Run(t)
 
 	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
@@ -141,7 +134,7 @@ func TestDiamULI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userLocInfoRaw := "8245f750000145f75000000101"
+	// TAI+ECGI (type 0x82) with PLMN 262/01 (Germany/Telekom), TAC=1, ECI=257
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.ServiceInformation, avp.Mbit, 10415,
 		&diam.GroupedAVP{
@@ -149,7 +142,8 @@ func TestDiamULI(t *testing.T) {
 				diam.NewAVP(avp.PSInformation, avp.Mbit, 10415,
 					&diam.GroupedAVP{
 						AVP: []*diam.AVP{
-							diam.NewAVP(avp.TGPPUserLocationInfo, avp.Mbit, 10415, datatype.OctetString(userLocInfoRaw)),
+							diam.NewAVP(avp.TGPPUserLocationInfo, avp.Mbit, 10415,
+								datatype.OctetString("8262f210000162f21000000101")),
 						},
 					},
 				),
@@ -158,7 +152,36 @@ func TestDiamULI(t *testing.T) {
 	)
 
 	if err := diamClient.SendMessage(ccr); err != nil {
-		t.Errorf("failed to send diameter message: %v", err)
+		t.Fatal(err)
 	}
 	_ = diamClient.ReceivedMessage(2 * time.Second)
+
+	expected := map[string]string{
+		"FullULI":  `{"TAI":{"MCC":"262","MNC":"01","TAC":1},"ECGI":{"MCC":"262","MNC":"01","ECI":257}}`,
+		"TAI":      `{"MCC":"262","MNC":"01","TAC":1}`,
+		"ECGI":     `{"MCC":"262","MNC":"01","ECI":257}`,
+		"TAI-MCC":  "262",
+		"TAI-MNC":  "01",
+		"TAI-TAC":  "1",
+		"ECGI-ECI": "257",
+		"MCC-Name": "Germany",
+		"MNC-Name": "Telekom Deutschland GmbH",
+	}
+
+	parts := strings.Split(buf.String(), "CGREvent: ")
+	if len(parts) < 2 {
+		t.Fatal("no CGREvent found in dryrun log")
+	}
+
+	var ev utils.CGREvent
+	if err := json.NewDecoder(strings.NewReader(parts[len(parts)-1])).Decode(&ev); err != nil {
+		t.Fatalf("failed to decode CGREvent: %v", err)
+	}
+
+	for field, want := range expected {
+		got := utils.IfaceAsString(ev.Event[field])
+		if got != want {
+			t.Errorf("%s: got %q, want %q", field, got, want)
+		}
+	}
 }

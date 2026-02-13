@@ -128,16 +128,15 @@ Converters transform the extracted value. Chain them with ``&``::
 * ``*e164Domain`` - extract domain from NAPTR record
 * ``*ip2hex`` - IP to hex
 * ``*sipuri_host``, ``*sipuri_user``, ``*sipuri_method`` - parse SIP URIs
-* ``*3gpp_uli`` - decode 3GPP-User-Location-Info hex to ULI object
+* ``*3gpp_uli`` - decode 3GPP-User-Location-Info hex to ULI object (JSON)
 * ``*3gpp_uli:path`` - extract specific field from ULI
 
-ULI component paths: ``CGI``, ``SAI``, ``RAI``, ``TAI``, ``ECGI``, ``TAI5GS``, ``NCGI``
-
-Field paths: ``TAI.MCC``, ``TAI.MNC``, ``TAI.TAC``, ``ECGI.MCC``, ``ECGI.MNC``, ``ECGI.ECI``, ``NCGI.NCI``, etc.
+Paths: ``TAI``, ``ECGI``, ``NCGI``, etc. return the component as JSON. Fields: ``TAI.MCC``, ``TAI.TAC``, ``ECGI.ECI``. Append ``.Name`` for lookup: ``TAI.MCC.Name`` (country), ``TAI.MNC.Name`` (operator).
 
 Example::
 
     ~*req.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC}
+    ~*req.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}
 
 **Time**
 
