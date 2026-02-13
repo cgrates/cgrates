@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package utils
 
+//go:generate go run ../data/scripts/gen_mccmnc.go
+
 import (
 	"encoding/binary"
 	"errors"
@@ -277,110 +279,166 @@ func decodeNCGI(data []byte) *NCGI {
 	}
 }
 
-// GetField retrieves a value found at the specified path (e.g. "TAI.MCC" or "ECGI.ECI").
+// uliFieldResolver provides field access for a decoded ULI location element.
+type uliFieldResolver interface {
+	plmn() (mcc, mnc string)
+	field(name string) (any, error)
+}
+
+func (c *CGI) plmn() (string, string)    { return c.MCC, c.MNC }
+func (s *SAI) plmn() (string, string)    { return s.MCC, s.MNC }
+func (r *RAI) plmn() (string, string)    { return r.MCC, r.MNC }
+func (t *TAI) plmn() (string, string)    { return t.MCC, t.MNC }
+func (e *ECGI) plmn() (string, string)   { return e.MCC, e.MNC }
+func (t *TAI5GS) plmn() (string, string) { return t.MCC, t.MNC }
+func (n *NCGI) plmn() (string, string)   { return n.MCC, n.MNC }
+
+func (c *CGI) field(name string) (any, error) {
+	switch name {
+	case "LAC":
+		return c.LAC, nil
+	case "CI":
+		return c.CI, nil
+	}
+	return nil, fmt.Errorf("unknown CGI field: %s", name)
+}
+
+func (s *SAI) field(name string) (any, error) {
+	switch name {
+	case "LAC":
+		return s.LAC, nil
+	case "SAC":
+		return s.SAC, nil
+	}
+	return nil, fmt.Errorf("unknown SAI field: %s", name)
+}
+
+func (r *RAI) field(name string) (any, error) {
+	switch name {
+	case "LAC":
+		return r.LAC, nil
+	case "RAC":
+		return r.RAC, nil
+	}
+	return nil, fmt.Errorf("unknown RAI field: %s", name)
+}
+
+func (t *TAI) field(name string) (any, error) {
+	if name == "TAC" {
+		return t.TAC, nil
+	}
+	return nil, fmt.Errorf("unknown TAI field: %s", name)
+}
+
+func (e *ECGI) field(name string) (any, error) {
+	if name == "ECI" {
+		return e.ECI, nil
+	}
+	return nil, fmt.Errorf("unknown ECGI field: %s", name)
+}
+
+func (t *TAI5GS) field(name string) (any, error) {
+	if name == "TAC" {
+		return t.TAC, nil
+	}
+	return nil, fmt.Errorf("unknown TAI5GS field: %s", name)
+}
+
+func (n *NCGI) field(name string) (any, error) {
+	if name == "NCI" {
+		return n.NCI, nil
+	}
+	return nil, fmt.Errorf("unknown NCGI field: %s", name)
+}
+
+func (uli *ULI) component(name string) (uliFieldResolver, error) {
+	switch name {
+	case "CGI":
+		if uli.CGI != nil {
+			return uli.CGI, nil
+		}
+	case "SAI":
+		if uli.SAI != nil {
+			return uli.SAI, nil
+		}
+	case "RAI":
+		if uli.RAI != nil {
+			return uli.RAI, nil
+		}
+	case "TAI":
+		if uli.TAI != nil {
+			return uli.TAI, nil
+		}
+	case "ECGI":
+		if uli.ECGI != nil {
+			return uli.ECGI, nil
+		}
+	case "TAI5GS":
+		if uli.TAI5GS != nil {
+			return uli.TAI5GS, nil
+		}
+	case "NCGI":
+		if uli.NCGI != nil {
+			return uli.NCGI, nil
+		}
+	default:
+		return nil, fmt.Errorf("unknown ULI component: %s", name)
+	}
+	return nil, fmt.Errorf("%s not present in ULI", name)
+}
+
+// GetField retrieves a value found at the specified path (e.g. "TAI.MCC", "ECGI.ECI", "TAI.MCC.Name").
 func (uli *ULI) GetField(path string) (any, error) {
-	parts := strings.SplitN(path, ".", 2)
+	parts := strings.SplitN(path, ".", 3)
 	if len(parts) == 0 || parts[0] == "" {
 		return nil, errors.New("empty path")
 	}
 
-	var loc any
-	var mcc, mnc string
-
-	switch parts[0] {
-	case "CGI":
-		if uli.CGI == nil {
-			return nil, errors.New("CGI not present in ULI")
-		}
-		loc, mcc, mnc = uli.CGI, uli.CGI.MCC, uli.CGI.MNC
-	case "SAI":
-		if uli.SAI == nil {
-			return nil, errors.New("SAI not present in ULI")
-		}
-		loc, mcc, mnc = uli.SAI, uli.SAI.MCC, uli.SAI.MNC
-	case "RAI":
-		if uli.RAI == nil {
-			return nil, errors.New("RAI not present in ULI")
-		}
-		loc, mcc, mnc = uli.RAI, uli.RAI.MCC, uli.RAI.MNC
-	case "TAI":
-		if uli.TAI == nil {
-			return nil, errors.New("TAI not present in ULI")
-		}
-		loc, mcc, mnc = uli.TAI, uli.TAI.MCC, uli.TAI.MNC
-	case "ECGI":
-		if uli.ECGI == nil {
-			return nil, errors.New("ECGI not present in ULI")
-		}
-		loc, mcc, mnc = uli.ECGI, uli.ECGI.MCC, uli.ECGI.MNC
-	case "TAI5GS":
-		if uli.TAI5GS == nil {
-			return nil, errors.New("TAI5GS not present in ULI")
-		}
-		loc, mcc, mnc = uli.TAI5GS, uli.TAI5GS.MCC, uli.TAI5GS.MNC
-	case "NCGI":
-		if uli.NCGI == nil {
-			return nil, errors.New("NCGI not present in ULI")
-		}
-		loc, mcc, mnc = uli.NCGI, uli.NCGI.MCC, uli.NCGI.MNC
-	default:
-		return nil, fmt.Errorf("unknown ULI component: %s", parts[0])
+	comp, err := uli.component(parts[0])
+	if err != nil {
+		return nil, err
 	}
-
 	if len(parts) == 1 {
-		return loc, nil
+		return comp, nil
 	}
 
-	return uliFieldValue(loc, parts[1], mcc, mnc)
-}
+	mcc, mnc := comp.plmn()
 
-func uliFieldValue(loc any, field, mcc, mnc string) (any, error) {
-	switch field {
+	switch parts[1] {
 	case "MCC":
+		if len(parts) == 3 {
+			if parts[2] == "Name" {
+				return countryName(mcc)
+			}
+			return nil, fmt.Errorf("unknown MCC subfield: %s", parts[2])
+		}
 		return mcc, nil
 	case "MNC":
+		if len(parts) == 3 {
+			if parts[2] == "Name" {
+				return networkName(mcc, mnc)
+			}
+			return nil, fmt.Errorf("unknown MNC subfield: %s", parts[2])
+		}
 		return mnc, nil
+	default:
+		if len(parts) == 3 {
+			return nil, fmt.Errorf("unknown subfield: %s.%s", parts[1], parts[2])
+		}
+		return comp.field(parts[1])
 	}
+}
 
-	switch l := loc.(type) {
-	case *CGI:
-		switch field {
-		case "LAC":
-			return l.LAC, nil
-		case "CI":
-			return l.CI, nil
-		}
-	case *SAI:
-		switch field {
-		case "LAC":
-			return l.LAC, nil
-		case "SAC":
-			return l.SAC, nil
-		}
-	case *RAI:
-		switch field {
-		case "LAC":
-			return l.LAC, nil
-		case "RAC":
-			return l.RAC, nil
-		}
-	case *TAI:
-		if field == "TAC" {
-			return l.TAC, nil
-		}
-	case *ECGI:
-		if field == "ECI" {
-			return l.ECI, nil
-		}
-	case *TAI5GS:
-		if field == "TAC" {
-			return l.TAC, nil
-		}
-	case *NCGI:
-		if field == "NCI" {
-			return l.NCI, nil
-		}
+func countryName(mcc string) (string, error) {
+	if name, ok := mccCountry[mcc]; ok {
+		return name, nil
 	}
+	return "", fmt.Errorf("unknown MCC: %s", mcc)
+}
 
-	return nil, fmt.Errorf("unknown field: %s", field)
+func networkName(mcc, mnc string) (string, error) {
+	if name, ok := mccmncNetwork[mcc+"-"+mnc]; ok {
+		return name, nil
+	}
+	return "", fmt.Errorf("unknown MCC-MNC: %s-%s", mcc, mnc)
 }
