@@ -880,6 +880,28 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	for runID, cgrEv := range cgrEvs {
 		cchEv := make(map[string]any)
 
+		// RateS Enabled
+		if rtS, errRTs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Rates,
+			utils.MetaRates); errRTs != nil {
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errRTs
+			}
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+					utils.SessionS, err.Error(), cgrEv, utils.RateS))
+		} else if rtS {
+			var rtsCost *utils.Decimal
+			if rtsCost, err = sS.ratesCost(ctx, cgrEv); err != nil {
+				return
+			}
+			if apiRply.RateSCost == nil {
+				apiRply.RateSCost = make(map[string]float64)
+			}
+			costFlt, _ := rtsCost.Float64()
+			apiRply.RateSCost[runID] = costFlt
+		}
+
 		// IPs Enabled
 		if ipS, errIPs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPs,

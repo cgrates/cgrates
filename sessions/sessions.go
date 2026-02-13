@@ -1010,6 +1010,20 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 	return &acntCost, nil
 }
 
+// ratesCost will query the RateS cost for Event
+func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (cost *utils.Decimal, err error) {
+	if len(sS.cfg.SessionSCfg().RateSConns) == 0 {
+		err = errors.New("RateS is disabled")
+		return
+	}
+	var rtsCost utils.RateProfileCost
+	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().RateSConns,
+		utils.RateSv1CostForEvent, cgrEv, &rtsCost); err != nil {
+		return
+	}
+	return rtsCost.Cost, nil
+}
+
 // getSessions is used to return in a thread-safe manner active or passive sessions
 func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work

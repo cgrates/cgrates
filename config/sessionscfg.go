@@ -64,6 +64,7 @@ const (
 
 type SessionsOpts struct {
 	Accounts               []*DynamicBoolOpt
+	Rates                  []*DynamicBoolOpt
 	Attributes             []*DynamicBoolOpt
 	CDRs                   []*DynamicBoolOpt
 	Chargers               []*DynamicBoolOpt
