@@ -876,18 +876,14 @@ func NewULIConverter(params string) (*ULIConverter, error) {
 }
 
 // Convert implements DataConverter interface.
+// Input must be raw bytes (as delivered by Diameter OctetString AVPs).
 func (c *ULIConverter) Convert(in any) (any, error) {
 	raw := IfaceAsString(in)
 	if raw == "" {
 		return nil, errors.New("empty ULI input")
 	}
 
-	data, err := hex.DecodeString(strings.TrimPrefix(raw, "0x"))
-	if err != nil {
-		return nil, fmt.Errorf("invalid ULI hex: %w", err)
-	}
-
-	uli, err := DecodeULI(data)
+	uli, err := DecodeULI([]byte(raw))
 	if err != nil {
 		return nil, err
 	}

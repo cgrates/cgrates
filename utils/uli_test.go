@@ -262,49 +262,49 @@ func TestULIConverter(t *testing.T) {
 	tests := []struct {
 		name     string
 		params   string
-		input    string
+		hex      string // raw ULI bytes in hex, decoded to binary before Convert
 		expected any
 	}{
 		{
 			name:     "Extract TAI.MCC",
 			params:   "*3gpp_uli:TAI.MCC",
-			input:    "8245f750000145f75000000101",
+			hex:      "8245f750000145f75000000101",
 			expected: "547",
 		},
 		{
 			name:     "Extract TAI.MNC",
 			params:   "*3gpp_uli:TAI.MNC",
-			input:    "8245f750000145f75000000101",
+			hex:      "8245f750000145f75000000101",
 			expected: "05",
 		},
 		{
 			name:     "Extract TAI.TAC",
 			params:   "*3gpp_uli:TAI.TAC",
-			input:    "8245f750000145f75000000101",
+			hex:      "8245f750000145f75000000101",
 			expected: uint16(1),
 		},
 		{
 			name:     "Extract ECGI.ECI",
 			params:   "*3gpp_uli:ECGI.ECI",
-			input:    "8245f750000145f75000000101",
+			hex:      "8245f750000145f75000000101",
 			expected: uint32(257),
 		},
 		{
 			name:     "Extract TAI5GS.MCC from 5GS TAI",
 			params:   "*3gpp_uli:TAI5GS.MCC",
-			input:    "88130062123456",
+			hex:      "88130062123456",
 			expected: "310",
 		},
 		{
 			name:     "Extract TAI5GS.TAC from 5GS TAI",
 			params:   "*3gpp_uli:TAI5GS.TAC",
-			input:    "88130062123456",
+			hex:      "88130062123456",
 			expected: uint32(0x123456),
 		},
 		{
 			name:     "Extract NCGI.NCI from NCGI",
 			params:   "*3gpp_uli:NCGI.NCI",
-			input:    "871300620123456789",
+			hex:      "871300620123456789",
 			expected: uint64(0x123456789),
 		},
 	}
@@ -315,7 +315,11 @@ func TestULIConverter(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewULIConverter failed: %v", err)
 			}
-			got, err := conv.Convert(tt.input)
+			raw, err := hex.DecodeString(tt.hex)
+			if err != nil {
+				t.Fatalf("invalid test hex: %v", err)
+			}
+			got, err := conv.Convert(string(raw))
 			if err != nil {
 				t.Fatalf("Convert failed: %v", err)
 			}
@@ -369,26 +373,16 @@ func TestDecodeULI_UnsupportedType(t *testing.T) {
 	}
 }
 
-func TestULIConverter_0xPrefix(t *testing.T) {
-	conv, err := NewULIConverter("*3gpp_uli:TAI.MCC")
-	if err != nil {
-		t.Fatalf("NewULIConverter failed: %v", err)
-	}
-	got, err := conv.Convert("0x8245f750000145f75000000101")
-	if err != nil {
-		t.Fatalf("Convert failed: %v", err)
-	}
-	if got != "547" {
-		t.Errorf("got %q, want %q", got, "547")
-	}
-}
-
 func TestULIConverter_EmptyPath(t *testing.T) {
 	conv, err := NewULIConverter("*3gpp_uli")
 	if err != nil {
 		t.Fatalf("NewULIConverter failed: %v", err)
 	}
-	got, err := conv.Convert("8013006204d2")
+	raw, err := hex.DecodeString("8013006204d2")
+	if err != nil {
+		t.Fatalf("invalid test hex: %v", err)
+	}
+	got, err := conv.Convert(string(raw))
 	if err != nil {
 		t.Fatalf("Convert failed: %v", err)
 	}
@@ -415,7 +409,8 @@ func TestULIConverter_Errors(t *testing.T) {
 		input any
 	}{
 		{"empty string", ""},
-		{"invalid hex", "zzzz"},
+		{"unsupported ULI type", string([]byte{0x03, 0x62, 0xF2, 0x10, 0x12, 0x34, 0x56, 0x78})},
+		{"truncated data", string([]byte{0x82, 0x45})},
 	}
 
 	for _, tt := range tests {
