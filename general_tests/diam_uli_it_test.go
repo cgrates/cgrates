@@ -22,6 +22,7 @@ package general_tests
 
 import (
 	"bytes"
+	"encoding/hex"
 	"testing"
 	"time"
 
@@ -34,7 +35,7 @@ import (
 )
 
 func TestDiamULI(t *testing.T) {
-	t.Skip("configuration reference for *3gpp_uli request_fields; does not verify anything")
+	// t.Skip("configuration reference for *3gpp_uli request_fields; does not verify anything")
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
@@ -141,7 +142,11 @@ func TestDiamULI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userLocInfoRaw := "8245f750000145f75000000101"
+	// Binary ULI from Wireshark capture: TAI+ECGI, MCC=547, MNC=05, TAC=1, ECI=257
+	uliBytes, err := hex.DecodeString("8245f750000145f75000000101")
+	if err != nil {
+		t.Fatal(err)
+	}
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.ServiceInformation, avp.Mbit, 10415,
 		&diam.GroupedAVP{
@@ -149,7 +154,7 @@ func TestDiamULI(t *testing.T) {
 				diam.NewAVP(avp.PSInformation, avp.Mbit, 10415,
 					&diam.GroupedAVP{
 						AVP: []*diam.AVP{
-							diam.NewAVP(avp.TGPPUserLocationInfo, avp.Mbit, 10415, datatype.OctetString(userLocInfoRaw)),
+							diam.NewAVP(avp.TGPPUserLocationInfo, avp.Mbit, 10415, datatype.OctetString(uliBytes)),
 						},
 					},
 				),
