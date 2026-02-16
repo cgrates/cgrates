@@ -35,6 +35,12 @@
 				"value": "sms"
 			},
 			{
+				"tag":"ProcessRuns",
+				"path":"*opts.*attrProcessRuns",
+				"type":"*constant",
+				"value": "2"
+			},
+			{
 				"tag": "Account",
 				"path": "*cgreq.Account",
 				"type": "*variable",
@@ -57,7 +63,7 @@
 				"type": "*variable",
 				"value": "~*cgrep.Attributes.MonBalance",
 				"mandatory": true
-			},
+			}
 
 		]
 	}]

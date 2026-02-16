@@ -57,53 +57,75 @@ func TestDiamBalanceEnquiry(t *testing.T) {
 	var reply string
 	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
 		utils.AttrSetBalance{
-			Tenant:      "cgrates.org",
+			Tenant:      "cgrates.com",
 			Account:     "1001",
-			Value:       10000,
-			BalanceType: utils.MetaMonetary,
+			Value:       50,
+			BalanceType: utils.MetaData,
 			Balance: map[string]any{
-				utils.ID: "balance_monetary",
+				utils.ID: "balance1",
 			},
 		}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
 		utils.AttrSetBalance{
-			Tenant:      "cgrates.org",
+			Tenant:      "cgrates.com",
 			Account:     "1001",
-			Value:       50,
-			BalanceType: utils.MetaSMS,
+			Value:       100,
+			BalanceType: utils.MetaData,
 			Balance: map[string]any{
-				utils.ID: "balance_sms",
+				utils.ID: "balance2",
 			},
 		}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ATTR_BALANCE_ENQUIRY",
-			FilterIDs: []string{"*string:~*req.Category:sms"},
-			Attributes: []*engine.Attribute{
-				{
-					Path: utils.MetaReq + utils.NestingSep + "MonBalance",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+	alsPrfs := []*engine.AttributeProfileWithAPIOpts{
+		{
+			AttributeProfile: &engine.AttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_BALANCE_ENQUIRY",
+				FilterIDs: []string{"*string:~*req.Category:sms"},
+				Attributes: []*engine.Attribute{
+					{
+						Path: utils.MetaTenant,
+						Type: utils.MetaConstant,
+						Value: config.RSRParsers{
+							&config.RSRParser{
+								Rules: "cgrates.com",
+							},
 						},
 					},
 				},
+				Weight: 20,
 			},
-			Weight: 10,
+		},
+		{
+			AttributeProfile: &engine.AttributeProfile{
+				Tenant:    "cgrates.com",
+				ID:        "ATTR_GET_BALANCE",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Attributes: []*engine.Attribute{
+					{
+						Path: utils.MetaReq + utils.NestingSep + "MonBalance",
+						Type: utils.MetaVariable,
+						Value: config.RSRParsers{
+							&config.RSRParser{
+								Rules: "~*accounts.1001.BalanceMap.*data.GetTotalValue",
+							},
+						},
+					},
+				},
+				Weight: 10,
+			},
 		},
 	}
-	alsPrf.Compile()
-	if err := client.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
-		alsPrf, &reply); err != nil {
-		t.Fatal(err)
+	for _, alsPrf := range alsPrfs {
+		alsPrf.Compile()
+		if err := client.Call(context.Background(), utils.APIerSv1SetAttributeProfile,
+			alsPrf, &reply); err != nil {
+			t.Fatal(err)
+		}
 	}
-
 	time.Sleep(300 * time.Millisecond)
 	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
@@ -166,7 +188,7 @@ func sendBalanceEnquiryQueryCCR(tb testing.TB, client *DiameterClient, replyTime
 
 	if monetaryVal, err := diamAVPAsString(balanceAVPs[0]); err != nil {
 		tb.Fatalf("failed to read monetary balance: %v", err)
-	} else if monetaryVal != "10000" {
+	} else if monetaryVal != "150" {
 		tb.Fatalf("monetary balance=%s, want 10000", monetaryVal)
 	}
 
