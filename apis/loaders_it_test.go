@@ -225,6 +225,7 @@ cgrates.org,Charger1,*string:~*req.Account:1001,;20,;true,,
 cgrates.org,Charger1,,,,*rated,ATTR_1001_SIMPLEAUTH
 cgrates.org,Charger2,,,,*rated,ATTR_1002_SIMPLEAUTH
 cgrates.org,Charger2,*string:~*req.Account:1002,;15,;false,,
+cgrates.org,Charger3,*string:~*req.Account:1001;*string:~*req.Account:1001;*string:~*req.Account:1002;*string:~*req.Account:1001;*string:~*req.Account:1003,;10,;false,*rated,ATTR_TEST
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -709,7 +710,6 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 		}
 	}
 }
-
 func testLoadersGetChargerProfiles(t *testing.T) {
 	expChrgs := []*utils.ChargerProfile{
 		{
@@ -738,6 +738,28 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 15,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: false,
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "Charger3",
+			FilterIDs: []string{
+				"*string:~*req.Account:1001",
+				"*string:~*req.Account:1002",
+				"*string:~*req.Account:1001",
+				"*string:~*req.Account:1003",
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_TEST"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
 				},
 			},
 			Blockers: utils.DynamicBlockers{

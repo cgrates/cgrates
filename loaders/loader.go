@@ -102,7 +102,9 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaRoutes:
 		return dm.SetRouteProfile(ctx, data.(*utils.RouteProfile), withIndex)
 	case utils.MetaChargers:
-		return dm.SetChargerProfile(ctx, data.(*utils.ChargerProfile), withIndex)
+		cp := data.(*utils.ChargerProfile)
+		cp.FilterIDs = slices.Compact(cp.FilterIDs)
+		return dm.SetChargerProfile(ctx, cp, withIndex)
 	case utils.MetaRateProfiles:
 		rpl := data.(*utils.RateProfile)
 		rpl.FilterIDs = slices.Compact(rpl.FilterIDs)

@@ -1476,3 +1476,73 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 		t.Errorf("Expected FilterIDs in DB: %v, received: %v", expectedFilterIDs, retrieved.FilterIDs)
 	}
 }
+
+func TestSetToDBChargerProfileDuplicateSequentialFilterIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+
+	cp := &utils.ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "cp1",
+		FilterIDs: []string{
+			"*string:~*req.Account:1001", "*string:~*req.Account:1001",
+			"*string:~*req.Subject:1002", "*string:~*req.Subject:1002", "*string:~*req.Subject:1002",
+			"*string:~*req.Destination:1001",
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_TEST"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+	}
+
+	if len(cp.FilterIDs) != 6 {
+		t.Fatalf("Expected 6 FilterIDs before setToDB, got %d", len(cp.FilterIDs))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaChargers, cp, true, false); err != nil {
+		t.Fatal(err)
+	}
+
+	expectedFilterIDs := []string{
+		"*string:~*req.Account:1001",
+		"*string:~*req.Subject:1002",
+		"*string:~*req.Destination:1001",
+	}
+
+	if !reflect.DeepEqual(cp.FilterIDs, expectedFilterIDs) {
+		t.Errorf("Expected FilterIDs after setToDB: %v, received: %v", expectedFilterIDs, cp.FilterIDs)
+	}
+
+	if len(cp.FilterIDs) != 3 {
+		t.Errorf("Expected 3 FilterIDs after compacting, got %d", len(cp.FilterIDs))
+	}
+
+	retrieved, err := dm.GetChargerProfile(
+		context.Background(),
+		"cgrates.org",
+		"cp1",
+		true,
+		true,
+		utils.NonTransactional,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(retrieved.FilterIDs, expectedFilterIDs) {
+		t.Errorf("Expected FilterIDs in DB: %v, received: %v", expectedFilterIDs, retrieved.FilterIDs)
+	}
+}
