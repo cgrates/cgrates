@@ -85,8 +85,8 @@ func (s *Server) RpcRegisterName(name string, rcvr any) {
 	s.Unlock()
 }
 
-func (s *Server) RpcUnregisterName(name string) {
-	s.rpcSrv.UnregisterName(name)
+func (s *Server) RpcUnregisterName(name string) error {
+	return s.rpcSrv.UnregisterName(name)
 }
 
 func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -118,8 +118,8 @@ func (s *Server) BiRPCRegisterName(name string, rcvr any) {
 	s.birpcSrv.RegisterName(name, rcvr)
 }
 
-func (s *Server) BiRPCUnregisterName(name string) {
-	s.birpcSrv.UnregisterName(name)
+func (s *Server) BiRPCUnregisterName(name string) error {
+	return s.birpcSrv.UnregisterName(name)
 }
 
 func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,

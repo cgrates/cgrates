@@ -130,7 +130,7 @@ func (smg *SessionService) Shutdown() (err error) {
 		return err
 	}
 	if smg.cfg.ListenCfg().BiJSONListen != "" {
-		smg.server.BiRPCUnregisterName(utils.SessionSv1)
+		_ = smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	}
 	smg.sm = nil
 	<-smg.connChan
