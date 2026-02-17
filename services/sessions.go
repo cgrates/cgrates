@@ -59,10 +59,9 @@ type SessionService struct {
 	sm       *sessions.SessionS
 	connChan chan birpc.ClientConnector
 
-	birpcEnabled bool
-	connMgr      *engine.ConnManager
-	anz          *AnalyzerService
-	srvDep       map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	anz     *AnalyzerService
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -110,8 +109,7 @@ func (smg *SessionService) Start() error {
 		smg.server.RpcRegister(legacySrv)
 	}
 	// Register BiRpc handlers
-	if smg.cfg.ListenCfg().BiJSONListen != utils.EmptyString {
-		smg.birpcEnabled = true
+	if smg.cfg.ListenCfg().BiJSONListen != "" {
 		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
 	}
 	return nil
@@ -129,15 +127,14 @@ func (smg *SessionService) Shutdown() (err error) {
 	defer smg.Unlock()
 	close(smg.stopChan)
 	if err = smg.sm.Shutdown(); err != nil {
-		return
+		return err
 	}
-	if smg.birpcEnabled {
-		smg.server.StopBiRPC()
-		smg.birpcEnabled = false
+	if smg.cfg.ListenCfg().BiJSONListen != "" {
+		smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	}
 	smg.sm = nil
 	<-smg.connChan
-	return
+	return nil
 }
 
 // IsRunning returns if the service is running
