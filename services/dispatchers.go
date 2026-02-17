@@ -88,7 +88,7 @@ func (dspS *DispatcherService) Start() error {
 
 	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr)
 
-	dspS.server.RpcUnregisterName(utils.AttributeSv1)
+	_ = dspS.server.RpcUnregisterName(utils.AttributeSv1)
 
 	srv, err := newDispatcherServiceMap(dspS.dspS)
 	if err != nil {
