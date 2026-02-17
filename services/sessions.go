@@ -109,7 +109,7 @@ func (smg *SessionService) Start() error {
 		smg.server.RpcRegister(legacySrv)
 	}
 	// Register BiRpc handlers
-	if smg.cfg.ListenCfg().BiJSONListen != "" {
+	if smg.cfg.ListenCfg().BiJSONListen != "" || smg.cfg.ListenCfg().BiGobListen != "" {
 		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
 	}
 	return nil
@@ -129,7 +129,7 @@ func (smg *SessionService) Shutdown() (err error) {
 	if err = smg.sm.Shutdown(); err != nil {
 		return err
 	}
-	if smg.cfg.ListenCfg().BiJSONListen != "" {
+	if smg.cfg.ListenCfg().BiJSONListen != "" || smg.cfg.ListenCfg().BiGobListen != "" {
 		_ = smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	}
 	smg.sm = nil
