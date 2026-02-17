@@ -44,9 +44,6 @@ var (
 	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)")
 	setVersions       = cgrEngineFlags.Bool(utils.SetVersionsCgr, false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)")
 
-	// ConfigHook allows external packages to modify config after logger init.
-	ConfigHook func(cfg *config.CGRConfig) error
-
 	cfg *config.CGRConfig
 )
 
@@ -305,7 +302,7 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	}
 }
 
-func RunCGREngine(args []string) {
+func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 	cgrEngineFlags.Parse(args)
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
@@ -389,9 +386,9 @@ func RunCGREngine(args []string) {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 
-	if ConfigHook != nil {
-		if err := ConfigHook(cfg); err != nil {
-			log.Fatalf("ConfigHook failed: %s", err.Error())
+	for _, hook := range hooks {
+		if err := hook(cfg); err != nil {
+			log.Fatalf("config hook failed: %s", err)
 		}
 	}
 
