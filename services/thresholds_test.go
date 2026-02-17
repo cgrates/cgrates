@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
@@ -66,5 +67,45 @@ func TestThresholdSCoverage(t *testing.T) {
 	shouldRun := tS2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+}
+
+func TestThresholdServiceStartBiRPC(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().Enabled = true
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheThresholds))
+	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
+	db.GetDMChan() <- nil
+	engine.NewConnManager(cfg, nil)
+
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+
+	done := make(chan error, 1)
+	go func() { done <- tS.Start() }()
+	t.Cleanup(func() {
+		if tS.IsRunning() {
+			_ = tS.Shutdown()
+		}
+	})
+
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("Start() returned error: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Start() blocked for 5s, likely deadlock")
+	}
+	if !tS.IsRunning() {
+		t.Error("expected service to be running after Start()")
 	}
 }

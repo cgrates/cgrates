@@ -30,25 +30,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type BiRPCThresholdSFuncs struct {
-	thresholdSOnBiJSONConnect    func(c birpc.ClientConnector) //store OnBiJSONConnect
-	thresholdSOnBiJSONDisconnect func(c birpc.ClientConnector) //store OnBiJSONDisconnect
-}
-
-// Returns a new BiRPCThresholdSFuncs struct
-func NewThresholdSBiJSONFuncs(onConn, onDisconn func(c birpc.ClientConnector)) *BiRPCThresholdSFuncs {
-	return &BiRPCThresholdSFuncs{
-		thresholdSOnBiJSONConnect:    onConn,
-		thresholdSOnBiJSONDisconnect: onDisconn,
-	}
-}
-
-// GetThresholdSOnBiJSONFuncs returns ThresholdSOnBiJSONConnect and ThresholdSOnBiJSONDisconnect (1 time use)
-func (thrs *ThresholdService) GetThresholdSOnBiJSONFuncs() (onConn, onDisconn func(c birpc.ClientConnector)) {
-	<-thrs.biRPCFuncsDone // Make sure funcs are initialized in the structure before getting them
-	return thrs.biRPCFuncs.thresholdSOnBiJSONConnect, thrs.biRPCFuncs.thresholdSOnBiJSONDisconnect
-}
-
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
@@ -56,31 +37,28 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *ThresholdService {
 	return &ThresholdService{
-		connChan:       internalThresholdSChan,
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		filterSChan:    filterSChan,
-		server:         server,
-		connMgr:        connMgr,
-		anz:            anz,
-		srvDep:         srvDep,
-		biRPCFuncsDone: make(chan struct{}),
+		connChan:    internalThresholdSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
+		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	filterSChan    chan *engine.FilterS
-	server         *cores.Server
-	birpcEnabled   bool
-	biRPCFuncs     *BiRPCThresholdSFuncs
-	biRPCFuncsDone chan struct{} // marks when biRPCFuncs are initialized
-	connMgr        *engine.ConnManager
+	cfg          *config.CGRConfig
+	dm           *DataDBService
+	cacheS       *engine.CacheS
+	filterSChan  chan *engine.FilterS
+	server       *cores.Server
+	birpcEnabled bool
+	connMgr      *engine.ConnManager
 
 	thrs     *engine.ThresholdService
 	connChan chan birpc.ClientConnector
@@ -123,19 +101,8 @@ func (thrs *ThresholdService) Start() error {
 	if thrs.cfg.ListenCfg().BiJSONListen != "" {
 		thrs.birpcEnabled = true
 		thrs.server.BiRPCRegisterName(utils.ThresholdSv1, srv)
-		thrs.biRPCFuncs = NewThresholdSBiJSONFuncs(thrs.thrs.OnBiJSONConnect, thrs.thrs.OnBiJSONDisconnect)
-		thrs.biRPCFuncsDone <- struct{}{}
 	}
 	return nil
-}
-
-func (thrs *ThresholdService) DisableBiRPC() {
-	if thrs == nil {
-		return
-	}
-	thrs.Lock()
-	thrs.birpcEnabled = false
-	thrs.Unlock()
 }
 
 // Reload handles the change of config

@@ -66,18 +66,6 @@ func TestThresholdSReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	go func() { // simulate cgr-engine starting birpc serve
-		var onConns []func(c birpc.ClientConnector)
-		var onDiss []func(c birpc.ClientConnector)
-		if tS.ShouldRun() {
-			onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
-			onConns = append(onConns, onConn)
-			onDiss = append(onDiss, onDisconn)
-		}
-		if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
-			t.Error(err)
-		}
-	}()
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
@@ -114,7 +102,6 @@ func TestThresholdSReload(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
-	tS.server.StopBiRPC() // needed when running tests in bulk
 }
 func TestThresholdSReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -146,18 +133,6 @@ func TestThresholdSReload2(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	go func() { // simulate cgr-engine starting birpc serve
-		var onConns []func(c birpc.ClientConnector)
-		var onDiss []func(c birpc.ClientConnector)
-		if tS.ShouldRun() {
-			onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
-			onConns = append(onConns, onConn)
-			onDiss = append(onDiss, onDisconn)
-		}
-		if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
-			t.Error(err)
-		}
-	}()
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
@@ -191,5 +166,4 @@ func TestThresholdSReload2(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
-	tS.server.StopBiRPC() // needed when running tests in bulk
 }
