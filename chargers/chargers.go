@@ -114,6 +114,11 @@ type ChrgSProcessEventReply struct {
 	CGREvent        *utils.CGREvent
 }
 
+// so we can compare from outside if event changed with AttributeS
+var ChargerSDefaultAlteredFields = []string{utils.MetaOptsRunID,
+	utils.MetaOpts + utils.NestingSep + utils.MetaChargeID,
+	utils.MetaOpts + utils.NestingSep + utils.MetaSubsys}
+
 func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	cPs, err := cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv)
 	if err != nil {
@@ -133,7 +138,7 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+					Fields:           slices.Clone(ChargerSDefaultAlteredFields),
 				},
 			},
 		}
