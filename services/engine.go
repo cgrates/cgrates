@@ -264,6 +264,10 @@ func startBiRPC(smg *SessionService, tS *ThresholdService, server *cores.Server,
 			}
 		},
 	}
+	go func() {
+		<-shdChan.Done()
+		server.StopBiRPC()
+	}()
 	if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		shdChan.CloseOnce()
