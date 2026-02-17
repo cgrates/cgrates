@@ -232,27 +232,40 @@ func startRPC(server *cores.Server, internalRaterChan,
 
 func startBiRPC(smg *SessionService, tS *ThresholdService, server *cores.Server,
 	shdChan *utils.SyncedChan) {
-	var onConns []func(c birpc.ClientConnector)
-	var onDiss []func(c birpc.ClientConnector)
-	// wait for conn funcs to be populated only if service should run and BiRPC is populated
-	if smg.ShouldRun() {
-		onConn, onDisconn := smg.GetSessionSOnBiJSONFuncs()
-		onConns = append(onConns, onConn)
-		onDiss = append(onDiss, onDisconn)
+	onConns := []func(c birpc.ClientConnector){
+		func(c birpc.ClientConnector) {
+			smg.RLock()
+			defer smg.RUnlock()
+			if smg.sm != nil {
+				smg.sm.OnBiJSONConnect(c)
+			}
+		},
+		func(c birpc.ClientConnector) {
+			tS.RLock()
+			defer tS.RUnlock()
+			if tS.thrs != nil {
+				tS.thrs.OnBiJSONConnect(c)
+			}
+		},
 	}
-	if tS.ShouldRun() {
-		onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
-		onConns = append(onConns, onConn)
-		onDiss = append(onDiss, onDisconn)
+	onDiss := []func(c birpc.ClientConnector){
+		func(c birpc.ClientConnector) {
+			smg.RLock()
+			defer smg.RUnlock()
+			if smg.sm != nil {
+				smg.sm.OnBiJSONDisconnect(c)
+			}
+		},
+		func(c birpc.ClientConnector) {
+			tS.RLock()
+			defer tS.RUnlock()
+			if tS.thrs != nil {
+				tS.thrs.OnBiJSONDisconnect(c)
+			}
+		},
 	}
 	if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-		if smg.ShouldRun() {
-			smg.DisableBiRPC()
-		}
-		if tS.ShouldRun() {
-			tS.DisableBiRPC()
-		}
 		shdChan.CloseOnce()
 	}
 }

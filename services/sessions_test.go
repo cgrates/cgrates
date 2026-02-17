@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/sessions"
@@ -87,5 +88,40 @@ func TestReload(t *testing.T) {
 	err := smg.Reload()
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
+	}
+}
+
+func TestSessionServiceStartBiRPC(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	// Default config already has BiJSONListen set.
+	shdChan := utils.NewSyncedChan()
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
+	engine.NewConnManager(cfg, nil)
+
+	smg := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+
+	done := make(chan error, 1)
+	go func() { done <- smg.Start() }()
+	t.Cleanup(func() {
+		if smg.IsRunning() {
+			_ = smg.Shutdown()
+		}
+	})
+
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("Start() returned error: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Start() blocked for 5s, likely deadlock")
+	}
+	if !smg.IsRunning() {
+		t.Error("expected service to be running after Start()")
 	}
 }
