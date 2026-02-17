@@ -52,13 +52,12 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
-	cfg          *config.CGRConfig
-	dm           *DataDBService
-	cacheS       *engine.CacheS
-	filterSChan  chan *engine.FilterS
-	server       *cores.Server
-	birpcEnabled bool
-	connMgr      *engine.ConnManager
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *cores.Server
+	connMgr     *engine.ConnManager
 
 	thrs     *engine.ThresholdService
 	connChan chan birpc.ClientConnector
@@ -99,7 +98,6 @@ func (thrs *ThresholdService) Start() error {
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
 	// Register BiRpc handlers
 	if thrs.cfg.ListenCfg().BiJSONListen != "" {
-		thrs.birpcEnabled = true
 		thrs.server.BiRPCRegisterName(utils.ThresholdSv1, srv)
 	}
 	return nil
@@ -119,13 +117,12 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
-	if thrs.birpcEnabled {
-		thrs.server.StopBiRPC()
-		thrs.birpcEnabled = false
+	if thrs.cfg.ListenCfg().BiJSONListen != "" {
+		thrs.server.BiRPCUnregisterName(utils.ThresholdSv1)
 	}
 	thrs.thrs = nil
 	<-thrs.connChan
-	return
+	return nil
 }
 
 // IsRunning returns if the service is running
