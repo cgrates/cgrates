@@ -109,3 +109,50 @@ func TestThresholdServiceStartBiRPC(t *testing.T) {
 		t.Error("expected service to be running after Start()")
 	}
 }
+
+func TestThresholdServiceRestart(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().Enabled = true
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheThresholds))
+	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
+	db.GetDMChan() <- nil
+	engine.NewConnManager(cfg, nil)
+
+	connChan := make(chan birpc.ClientConnector, 1)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, connChan, nil, anz, srvDep)
+
+	if err := tS.Start(); err != nil {
+		t.Fatalf("first Start() error: %v", err)
+	}
+	t.Cleanup(func() {
+		if tS.IsRunning() {
+			_ = tS.Shutdown()
+		}
+	})
+	if !tS.IsRunning() {
+		t.Fatal("expected service to be running after first Start()")
+	}
+
+	if err := tS.Shutdown(); err != nil {
+		t.Fatalf("Shutdown() error: %v", err)
+	}
+	if tS.IsRunning() {
+		t.Fatal("expected service to be stopped after Shutdown()")
+	}
+
+	if err := tS.Start(); err != nil {
+		t.Fatalf("second Start() error: %v", err)
+	}
+	if !tS.IsRunning() {
+		t.Fatal("expected service to be running after second Start()")
+	}
+}

@@ -125,3 +125,44 @@ func TestSessionServiceStartBiRPC(t *testing.T) {
 		t.Error("expected service to be running after Start()")
 	}
 }
+
+func TestSessionServiceRestart(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	shdChan := utils.NewSyncedChan()
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
+	engine.NewConnManager(cfg, nil)
+
+	connChan := make(chan birpc.ClientConnector, 1)
+	smg := NewSessionService(cfg, db, server, connChan, nil, anz, srvDep)
+
+	if err := smg.Start(); err != nil {
+		t.Fatalf("first Start() error: %v", err)
+	}
+	t.Cleanup(func() {
+		if smg.IsRunning() {
+			_ = smg.Shutdown()
+		}
+	})
+	if !smg.IsRunning() {
+		t.Fatal("expected service to be running after first Start()")
+	}
+
+	if err := smg.Shutdown(); err != nil {
+		t.Fatalf("Shutdown() error: %v", err)
+	}
+	if smg.IsRunning() {
+		t.Fatal("expected service to be stopped after Shutdown()")
+	}
+
+	if err := smg.Start(); err != nil {
+		t.Fatalf("second Start() error: %v", err)
+	}
+	if !smg.IsRunning() {
+		t.Fatal("expected service to be running after second Start()")
+	}
+}
