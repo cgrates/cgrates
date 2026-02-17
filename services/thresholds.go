@@ -118,7 +118,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
 	if thrs.cfg.ListenCfg().BiJSONListen != "" {
-		thrs.server.BiRPCUnregisterName(utils.ThresholdSv1)
+		_ = thrs.server.BiRPCUnregisterName(utils.ThresholdSv1)
 	}
 	thrs.thrs = nil
 	<-thrs.connChan
