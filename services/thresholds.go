@@ -97,7 +97,7 @@ func (thrs *ThresholdService) Start() error {
 	}
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
 	// Register BiRpc handlers
-	if thrs.cfg.ListenCfg().BiJSONListen != "" {
+	if thrs.cfg.ListenCfg().BiJSONListen != "" || thrs.cfg.ListenCfg().BiGobListen != "" {
 		thrs.server.BiRPCRegisterName(utils.ThresholdSv1, srv)
 	}
 	return nil
@@ -117,7 +117,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
-	if thrs.cfg.ListenCfg().BiJSONListen != "" {
+	if thrs.cfg.ListenCfg().BiJSONListen != "" || thrs.cfg.ListenCfg().BiGobListen != "" {
 		_ = thrs.server.BiRPCUnregisterName(utils.ThresholdSv1)
 	}
 	thrs.thrs = nil
