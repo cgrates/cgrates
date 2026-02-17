@@ -32,39 +32,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type BiRPCSessionSFuncs struct {
-	sessionSOnBiJSONConnect    func(c birpc.ClientConnector) //store OnBiJSONConnect
-	sessionSOnBiJSONDisconnect func(c birpc.ClientConnector) //store OnBiJSONDisconnect
-}
-
-// Returns a new BiRPCSessionSFuncs struct
-func NewSessionSBiJSONFuncs(onConn, onDisconn func(c birpc.ClientConnector)) *BiRPCSessionSFuncs {
-	return &BiRPCSessionSFuncs{
-		sessionSOnBiJSONConnect:    onConn,
-		sessionSOnBiJSONDisconnect: onDisconn,
-	}
-}
-
-// GetSessionSOnBiJSONFuncs returns sessionSOnBiJSONConnect and sessionSOnBiJSONDisconnect (1 time use)
-func (smg *SessionService) GetSessionSOnBiJSONFuncs() (onConn, onDisconn func(c birpc.ClientConnector)) {
-	<-smg.biRPCFuncsDone // Make sure funcs are initialized in the structure before getting them
-	return smg.biRPCFuncs.sessionSOnBiJSONConnect, smg.biRPCFuncs.sessionSOnBiJSONDisconnect
-}
-
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *SessionService {
 	return &SessionService{
-		connChan:       internalChan,
-		cfg:            cfg,
-		dm:             dm,
-		server:         server,
-		connMgr:        connMgr,
-		anz:            anz,
-		srvDep:         srvDep,
-		biRPCFuncsDone: make(chan struct{}),
+		connChan: internalChan,
+		cfg:      cfg,
+		dm:       dm,
+		server:   server,
+		connMgr:  connMgr,
+		anz:      anz,
+		srvDep:   srvDep,
 	}
 }
 
@@ -79,13 +59,10 @@ type SessionService struct {
 	sm       *sessions.SessionS
 	connChan chan birpc.ClientConnector
 
-	// in order to stop the bircp server if necesary
-	birpcEnabled   bool
-	biRPCFuncs     *BiRPCSessionSFuncs
-	biRPCFuncsDone chan struct{} // marks when biRPCFuncs are initialized
-	connMgr        *engine.ConnManager
-	anz            *AnalyzerService
-	srvDep         map[string]*sync.WaitGroup
+	birpcEnabled bool
+	connMgr      *engine.ConnManager
+	anz          *AnalyzerService
+	srvDep       map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -136,19 +113,8 @@ func (smg *SessionService) Start() error {
 	if smg.cfg.ListenCfg().BiJSONListen != utils.EmptyString {
 		smg.birpcEnabled = true
 		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
-		smg.biRPCFuncs = NewSessionSBiJSONFuncs(smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect)
-		smg.biRPCFuncsDone <- struct{}{}
 	}
 	return nil
-}
-
-func (smg *SessionService) DisableBiRPC() {
-	if smg == nil {
-		return
-	}
-	smg.Lock()
-	smg.birpcEnabled = false
-	smg.Unlock()
 }
 
 // Reload handles the change of config
