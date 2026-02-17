@@ -119,6 +119,11 @@ func (s *Server) BiRPCRegisterName(name string, rcvr any) {
 }
 
 func (s *Server) BiRPCUnregisterName(name string) error {
+	s.RLock()
+	defer s.RUnlock()
+	if s.birpcSrv == nil {
+		return nil
+	}
 	return s.birpcSrv.UnregisterName(name)
 }
 
