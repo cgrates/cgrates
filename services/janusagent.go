@@ -32,13 +32,14 @@ import (
 
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *cores.Server, connMgr *engine.ConnManager,
+	server *cores.Server, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &JanusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -55,6 +56,7 @@ type JanusAgent struct {
 	// if we registerd the jandlers
 	started bool
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -68,7 +70,7 @@ func (ja *JanusAgent) Start() (err error) {
 		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
-	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS)
+	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS, ja.caps)
 	if err != nil {
 		return
 	}
