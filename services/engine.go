@@ -622,7 +622,7 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 		NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload
 		NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
 		NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
-		NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),            // no reload
+		NewHTTPAgent(cfg, filterSChan, server, connManager, caps, srvDep),      // no reload
 		NewPrometheusAgent(cfg, connManager, server, srvDep),
 		anz, dspS, dspH, dmService, storDBService,
 		NewEventExporterService(cfg, filterSChan,

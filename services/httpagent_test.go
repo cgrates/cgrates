@@ -38,7 +38,7 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	rpcInternal := map[string]chan birpc.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
-	srv := NewHTTPAgent(cfg, filterSChan, server, cM, srvDep)
+	srv := NewHTTPAgent(cfg, filterSChan, server, cM, nil, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}
