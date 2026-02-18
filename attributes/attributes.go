@@ -315,9 +315,9 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 
 	var lastID string
 	matchedIDs := []*FieldsAltered{}
-	dynDP := engine.NewDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
-		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, nil, nil, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
+		dynDP := engine.NewDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
+			alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, nil, nil, tnt, eNV)
 		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
