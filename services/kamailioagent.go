@@ -33,12 +33,13 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &KamailioAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		caps:    caps,
 		srvDep:  srvDep,
 	}
 }
@@ -51,6 +52,7 @@ type KamailioAgent struct {
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -65,7 +67,7 @@ func (kam *KamailioAgent) Start() error {
 
 	var err error
 	kam.kam, err = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
-		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
+		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone), kam.caps)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: %s", utils.KamailioAgent, err))
 		return err
