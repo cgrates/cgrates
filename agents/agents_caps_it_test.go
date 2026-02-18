@@ -22,6 +22,8 @@ package agents
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"sync"
 	"testing"
 	"time"
@@ -72,7 +74,17 @@ func TestAgentCapsIT(t *testing.T) {
 			"network": "udp"
 		}
 	]
-}
+},
+"http_agent": [
+	{
+		"id": "caps_test",
+		"url": "/caps_test",
+		"sessions_conns": ["*internal"],
+		"request_payload": "*url",
+		"reply_payload": "*xml",
+		"request_processors": []
+	}
+]
 }`
 
 	ng := engine.TestEngine{
@@ -186,6 +198,26 @@ func TestAgentCapsIT(t *testing.T) {
 		<-doneCh
 
 	})
+
+	t.Run("HTTPAgent", func(t *testing.T) {
+		httpURL := fmt.Sprintf("http://%s/caps_test", cfg.ListenCfg().HTTPListen)
+
+		// There is currently no traffic. Expecting 200 OK because
+		// there are no request processors enabled (empty reply).
+		sendHTTPReq(t, httpURL, http.StatusOK)
+
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendHTTPReq(t, httpURL, http.StatusOK)
+		<-doneCh
+
+		// With caps limit reached, 429 Too Many Requests is expected.
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendHTTPReq(t, httpURL, http.StatusTooManyRequests)
+		<-doneCh
+	})
 }
 
 func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode string) {
@@ -281,6 +313,19 @@ func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
 		t.Error(err)
 	} else if rply.Rcode != wantRcode {
 		t.Errorf("reply Msg Rcode=%d, want %d", rply.Rcode, wantRcode)
+	}
+}
+
+func sendHTTPReq(t *testing.T, url string, wantStatus int) {
+	t.Helper()
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	io.Copy(io.Discard, resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != wantStatus {
+		t.Errorf("HTTP status=%d, want %d", resp.StatusCode, wantStatus)
 	}
 }
 

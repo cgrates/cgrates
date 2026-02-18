@@ -64,7 +64,7 @@ func TestHTTPAgentReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
-	srv := NewHTTPAgent(cfg, filterSChan, server, nil, srvDep)
+	srv := NewHTTPAgent(cfg, filterSChan, server, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
