@@ -602,7 +602,7 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 		NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
 		NewFreeswitchAgent(cfg, shdChan, connManager, caps, srvDep),
 		NewKamailioAgent(cfg, shdChan, connManager, caps, srvDep),
-		NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload
+		NewAsteriskAgent(cfg, shdChan, connManager, caps, srvDep),              // partial reload
 		NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
 		NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
 		NewHTTPAgent(cfg, filterSChan, server, connManager, caps, srvDep),      // no reload
