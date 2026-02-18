@@ -1137,9 +1137,9 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
 	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm := NewDataManager(dbCM, cfg, connMgr)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
@@ -2935,9 +2935,9 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
 	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm := NewDataManager(dbCM, cfg, connMgr)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 

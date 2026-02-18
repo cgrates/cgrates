@@ -87,7 +87,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 		srtRoute.sortingDataDecimal[utils.Load] = metricSum
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			ws.cfg.FilterSCfg().ResourceSConns,
+			ws.connMgr, ws.cfg.FilterSCfg().ResourceSConns,
 			ws.cfg.FilterSCfg().StatSConns,
 			ws.cfg.FilterSCfg().AccountSConns,
 			ws.cfg.FilterSCfg().TrendSConns, ws.cfg.FilterSCfg().RankingSConns); err != nil {

@@ -1419,7 +1419,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS, connMgr)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 
 	defer func() {
 		connMgr = tmpCMgr
@@ -2739,9 +2739,9 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
 	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm := NewDataManager(dbCM, cfg, connMgr)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, connMgr)
 
@@ -3252,9 +3252,9 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
 	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm := NewDataManager(dbCM, cfg, connMgr)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, connMgr)
 	th := &Threshold{

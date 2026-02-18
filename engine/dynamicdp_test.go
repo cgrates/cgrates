@@ -45,7 +45,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 		ctx:   context.Background(),
 	}
 
-	if rcv := NewDynamicDP(context.Background(), []string{"conn1"}, []string{"conn2"},
+	if rcv := NewDynamicDP(context.Background(), nil, []string{"conn1"}, []string{"conn2"},
 		[]string{"conn3"}, nil, nil, "cgrates.org",
 		utils.StringSet{"test": struct{}{}}); !reflect.DeepEqual(rcv, expDDP) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -456,7 +456,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 
 	ms := utils.MapStorage{}
-	dDp := NewDynamicDP(context.Background(), []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
+	dDp := NewDynamicDP(context.Background(), nil, []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
 
 	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -464,20 +464,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 }
 
 func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
-
-	dDP := &DynamicDP{
-
-		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-
-		tenant: "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
-
 	cc := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
@@ -490,25 +477,17 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 
+	dDP := NewDynamicDP(context.Background(), cM,
+		nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		nil, nil, nil, "cgrates.org", utils.MapStorage{})
+
 	if _, err := dDP.fieldAsInterface([]string{utils.MetaStats, "fld1"}); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
 func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
-
-	dDP := &DynamicDP{
-		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-
-		tenant: "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
-
 	cc := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
@@ -521,25 +500,17 @@ func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 
+	dDP := NewDynamicDP(context.Background(), cM,
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		nil, nil, nil, nil, "cgrates.org", utils.MapStorage{})
+
 	if _, err := dDP.fieldAsInterface([]string{utils.MetaResources, "fld1"}); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
 
 func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
-
-	dDP := &DynamicDP{
-
-		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		tenant:    "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
-
 	cc := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
@@ -552,6 +523,10 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
+	dDP := NewDynamicDP(context.Background(), cM,
+		nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		nil, nil, "cgrates.org", utils.MapStorage{})
+
 	if _, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "fld1"}); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
@@ -559,17 +534,6 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 	Cache.Clear(nil)
-
-	dDP := &DynamicDP{
-
-		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		tenant:    "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
 
 	customRply := &utils.Account{
@@ -616,6 +580,10 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
+	dDP := NewDynamicDP(context.Background(), cM,
+		nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		nil, nil, "cgrates.org", utils.MapStorage{})
+
 	exp := &utils.Decimal{Big: decimal.New(1000, 0)}
 
 	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "1001", "Balances", "ConcreteBalance1", "Units"}); err != nil {
@@ -627,17 +595,6 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	Cache.Clear(nil)
-
-	dDP := &DynamicDP{
-
-		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-		tenant:   "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
 
 	customRply := &utils.ResourceWithConfig{
@@ -684,6 +641,10 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 
+	dDP := NewDynamicDP(context.Background(), cM,
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		nil, nil, nil, nil, "cgrates.org", utils.MapStorage{})
+
 	var exp float64 = 9
 
 	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaResources, "ResGroup2", "TotalUsage"}); err != nil {
@@ -695,17 +656,6 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	Cache.Clear(nil)
-
-	dDP := &DynamicDP{
-
-		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		tenant:   "cgrates.org",
-
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
-		ctx: context.Background(),
-	}
 	cfg := config.NewDefaultCGRConfig()
 
 	customRply := &map[string]*utils.Decimal{
@@ -730,6 +680,10 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
+
+	dDP := NewDynamicDP(context.Background(), cM,
+		nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		nil, nil, nil, "cgrates.org", utils.MapStorage{})
 
 	exp := utils.NewDecimal(1, 0)
 

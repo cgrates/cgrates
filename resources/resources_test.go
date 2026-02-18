@@ -2879,9 +2879,10 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, engine.NewConnManager(cfg))
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	rS := NewResourceService(dm, cfg, nil, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	r := &resource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -3602,9 +3603,9 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
@@ -3641,9 +3642,9 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	rsPrf := &resourceProfile{

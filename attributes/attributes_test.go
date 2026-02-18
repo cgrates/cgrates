@@ -559,7 +559,7 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	attrIDs, err := utils.OptAsStringSlice(attrEvs[0].APIOpts, utils.OptsAttributesProfileIDs)
 	if err != nil {
@@ -630,7 +630,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	value := utils.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 
@@ -686,7 +686,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	}
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
-	_, err = attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err = attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
 	}
@@ -707,7 +707,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	attrPrf := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
@@ -755,7 +755,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 	}
 
 	expErr := `invalid converter value in string: <*>, err: unsupported converter definition: <*>`
-	_, err = attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err = attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
@@ -775,7 +775,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	attrPrf := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
@@ -821,7 +821,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 	}
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
-	_, err = attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err = attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
@@ -841,7 +841,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	attrPrf := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
@@ -899,7 +899,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 		CGREvent: ev,
 	}
 
-	rcv, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
@@ -946,7 +946,7 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
@@ -999,7 +999,7 @@ func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -1129,7 +1129,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
+	aA := NewAttributeService(dm, filterS, nil, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
@@ -1292,7 +1292,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	var ev utils.CGREvent
 	rply := &utils.APIAttributeProfile{}
 	err = alS.V1GetAttributeForEvent(context.Background(), &ev, rply)
@@ -1312,7 +1312,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 }
 
 func TestAttributeAddFilters(t *testing.T) {
@@ -1468,7 +1468,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[0], eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[0], eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1487,7 +1487,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 		},
 	}
 	if _, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM,
-		engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
+		engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -1509,7 +1509,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	if atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
+	if atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
@@ -3025,7 +3025,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	//refresh the DM
 	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
 		b.Error(err)
@@ -3090,7 +3090,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
 	//refresh the DM
 	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
@@ -3186,7 +3186,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_CONSTANT",
@@ -3226,7 +3226,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3255,7 +3255,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_VARIABLE",
@@ -3296,7 +3296,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3326,7 +3326,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_COMPOSED",
@@ -3373,7 +3373,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3403,7 +3403,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_USAGE_DIFF",
@@ -3445,7 +3445,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3475,7 +3475,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_SUM",
@@ -3517,7 +3517,7 @@ func TestProcessAttributeSum(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3547,7 +3547,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_DIFF",
@@ -3589,7 +3589,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3619,7 +3619,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_MULTIPLY",
@@ -3661,7 +3661,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3691,7 +3691,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_DIVIDE",
@@ -3733,7 +3733,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3763,7 +3763,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_VAL_EXP",
@@ -3805,7 +3805,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3835,7 +3835,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_UNIX_TIMESTAMP",
@@ -3877,7 +3877,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3907,7 +3907,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_PREFIX",
@@ -3948,7 +3948,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3978,7 +3978,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_SUFFIX",
@@ -4019,7 +4019,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -4052,7 +4052,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
 	//refresh the DM
 	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
@@ -4112,7 +4112,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
@@ -4206,7 +4206,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf1Exists := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_EXISTS",
@@ -4316,7 +4316,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
-	attrS = NewAttributeService(dmAtr, fltrs, cfg)
+	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf1NotEmpty := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_NOTEMPTY",
@@ -4426,7 +4426,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	attrS = NewAttributeService(dm, fltrs, cfg)
+	attrS = NewAttributeService(dm, fltrs, nil, cfg)
 	attr1 := &utils.AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_TNT",
@@ -4553,7 +4553,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 		t.Error(err)
 	}
 
-	attr := NewAttributeService(dm, fltrS, cfg)
+	attr := NewAttributeService(dm, fltrS, nil, cfg)
 
 	ev := &utils.CGREvent{
 		Event: map[string]any{
@@ -4606,7 +4606,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	attrS = NewAttributeService(dm, fltrs, cfg)
+	attrS = NewAttributeService(dm, fltrs, nil, cfg)
 	attrPrf1Exists := &utils.AttributeProfile{
 		Tenant:    cfg.GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
@@ -4825,7 +4825,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -4953,7 +4953,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -5052,7 +5052,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -5152,7 +5152,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -5502,7 +5502,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 
 	postpaid := utils.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
@@ -5616,7 +5616,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 
 	postpaid := utils.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
@@ -5812,7 +5812,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -5945,7 +5945,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -6045,7 +6045,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	rply := &utils.APIAttributeProfile{}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), nil, rply)
@@ -6134,7 +6134,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 		t.Error(err)
 	}
 
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -6163,7 +6163,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
+	aA := NewAttributeService(dm, filterS, nil, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
@@ -6213,7 +6213,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			},
 		},
 	}
-	if rcv2, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
+	if rcv2, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv2, exp2) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp2), utils.ToJSON(rcv2))
@@ -6256,7 +6256,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := aA.processEvent(context.Background(), args.Tenant, args, eNM2, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM2), utils.EmptyString, make(map[string]int), 0); err != nil {
+	if rcv, err := aA.processEvent(context.Background(), args.Tenant, args, eNM2, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM2), utils.EmptyString, make(map[string]int), 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
@@ -6272,7 +6272,7 @@ func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
+	aA := NewAttributeService(dm, filterS, nil, cfg)
 	args2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AcProcessEvent",
@@ -6287,7 +6287,7 @@ func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	_, err = aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err = aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != "cannot convert field: 1s to []string" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to []string", err)
 	}
@@ -6302,7 +6302,7 @@ func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
+	aA := NewAttributeService(dm, filterS, nil, cfg)
 	args2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AcProcessEvent",
@@ -6317,7 +6317,7 @@ func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	_, err = aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err = aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to bool", err)
 	}
@@ -6378,7 +6378,7 @@ func TestAttributesProcessEventSetError(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
+	aA := NewAttributeService(dm, filterS, nil, cfg)
 	acPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AC1",
@@ -6411,7 +6411,7 @@ func TestAttributesProcessEventSetError(t *testing.T) {
 		},
 	}
 
-	if _, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
+	if _, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, engine.NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
 		t.Error(err)
 	}
 }
@@ -6431,7 +6431,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
 	ap1 := &utils.AttributeProfile{
@@ -6487,7 +6487,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	alS := NewAttributeService(dm, filterS, cfg)
+	alS := NewAttributeService(dm, filterS, nil, cfg)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
 	ap1 := &utils.AttributeProfile{
@@ -6575,7 +6575,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	attrS := NewAttributeService(dm, filterS, cfg)
+	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
 	value := utils.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 

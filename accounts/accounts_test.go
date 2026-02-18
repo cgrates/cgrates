@@ -1454,7 +1454,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	// set the internal AttributeS within connMngr
 	attrSConn := make(chan birpc.ClientConnector, 1)
-	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, nil, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
 	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	// Set the internal rateS within connMngr
@@ -1971,7 +1971,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 
 	// set the internal AttributeS within connMngr
 	attrSConn := make(chan birpc.ClientConnector, 1)
-	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, nil, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
 	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	// Set the internal rateS within connMngr

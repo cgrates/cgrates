@@ -273,12 +273,12 @@ func (sRs SortedRoutesList) AsNavigableMap() (nm *utils.DataNode) {
 
 // routeLazyPass filters the route based on
 func routeLazyPass(ctx *context.Context, filters []*engine.FilterRule, ev *utils.CGREvent, data utils.MapStorage,
-	resConns, statConns, acntConns, trdConns, rnkConns []string) (pass bool, err error) {
+	connMgr *engine.ConnManager, resConns, statConns, acntConns, trdConns, rnkConns []string) (pass bool, err error) {
 	if len(filters) == 0 {
 		return true, nil
 	}
 
-	dynDP := engine.NewDynamicDP(ctx, resConns, statConns, acntConns, //construct the DP and pass it to filterS
+	dynDP := engine.NewDynamicDP(ctx, connMgr, resConns, statConns, acntConns, //construct the DP and pass it to filterS
 		trdConns, rnkConns, ev.Tenant, utils.MapStorage{
 			utils.MetaReq:  ev.Event,
 			utils.MetaOpts: ev.APIOpts,
