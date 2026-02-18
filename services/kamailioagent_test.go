@@ -47,7 +47,7 @@ func TestKamailioAgentCoverage(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srv := NewKamailioAgent(cfg, shdChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

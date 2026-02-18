@@ -75,7 +75,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		cm, anz, srvDep)
-	srv := NewKamailioAgent(cfg, shdChan, cm, srvDep)
+	srv := NewKamailioAgent(cfg, shdChan, cm, nil, srvDep)
 	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
@@ -106,7 +106,7 @@ func TestKamailioAgentReload(t *testing.T) {
 		Timezone:      "Local",
 	}
 
-	srv.(*KamailioAgent).kam, err = agents.NewKamailioAgent(kaCfg, cm, "")
+	srv.(*KamailioAgent).kam, err = agents.NewKamailioAgent(kaCfg, cm, "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestKamailioAgentReload2(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srv := NewKamailioAgent(cfg, shdChan, nil, nil, srvDep)
 	srvKam := &agents.KamailioAgent{}
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -153,7 +153,7 @@ func TestKamailioAgentReload3(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srv := NewKamailioAgent(cfg, shdChan, nil, nil, srvDep)
 	srvKam := &agents.KamailioAgent{}
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
