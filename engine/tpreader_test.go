@@ -648,6 +648,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
 		},
 		dm:         NewDataManager(dbCM, cfg, cnMgr),
+		connMgr:    cnMgr,
 		cacheConns: []string{connID},
 	}
 	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]any), "cgrates.org"); err != nil {
@@ -660,11 +661,11 @@ func TestTpReaderLoadAll(t *testing.T) {
 	storeCSV := &CSVStorage{}
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil)
+	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil)
+	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
