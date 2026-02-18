@@ -36,19 +36,21 @@ import (
 
 // NewAttributeService returns a new AttributeService
 func NewAttributeService(dm *engine.DataManager, filterS *engine.FilterS,
-	cgrcfg *config.CGRConfig) *AttributeS {
+	connMgr *engine.ConnManager, cgrcfg *config.CGRConfig) *AttributeS {
 	return &AttributeS{
-		dm:    dm,
-		fltrS: filterS,
-		cfg:   cgrcfg,
+		dm:      dm,
+		fltrS:   filterS,
+		connMgr: connMgr,
+		cfg:     cgrcfg,
 	}
 }
 
 // AttributeS the service for the API
 type AttributeS struct {
-	dm    *engine.DataManager
-	fltrS *engine.FilterS
-	cfg   *config.CGRConfig
+	dm      *engine.DataManager
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
 }
 
 // attributeProfileForEvent returns the matching attribute
@@ -316,7 +318,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	var lastID string
 	matchedIDs := []*FieldsAltered{}
 	for i := 0; i < processRuns; i++ {
-		dynDP := engine.NewDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
+		dynDP := engine.NewDynamicDP(ctx, alS.connMgr, alS.cfg.AttributeSCfg().ResourceSConns,
 			alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, nil, nil, tnt, eNV)
 		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply

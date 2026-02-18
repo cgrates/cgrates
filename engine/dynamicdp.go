@@ -27,9 +27,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewDynamicDP(ctx *context.Context, resConns, stsConns, actsConns, trdConns, rnkCOnns []string,
+func NewDynamicDP(ctx *context.Context, connMgr *ConnManager, resConns, stsConns, actsConns, trdConns, rnkCOnns []string,
 	tenant string, initialDP utils.DataProvider) *DynamicDP {
 	return &DynamicDP{
+		connMgr:   connMgr,
 		resConns:  resConns,
 		stsConns:  stsConns,
 		actsConns: actsConns,
@@ -43,6 +44,7 @@ func NewDynamicDP(ctx *context.Context, resConns, stsConns, actsConns, trdConns,
 }
 
 type DynamicDP struct {
+	connMgr   *ConnManager
 	resConns  []string
 	stsConns  []string
 	actsConns []string
@@ -98,7 +100,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		// fieldNameType (~*accounts), accountID(1001) and queried part (Balances.Balances[Concrete1].Units)
 
 		var account utils.Account
-		if err = connMgr.Call(dDP.ctx, dDP.actsConns, utils.AccountSv1GetAccount,
+		if err = dDP.connMgr.Call(dDP.ctx, dDP.actsConns, utils.AccountSv1GetAccount,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}
@@ -109,7 +111,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
 		var reply utils.ResourceWithConfig
-		if err := connMgr.Call(dDP.ctx, dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
+		if err := dDP.connMgr.Call(dDP.ctx, dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &reply); err != nil {
 			return nil, err
 		}
@@ -119,7 +121,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaStats:
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statValues map[string]*utils.Decimal
-		if err := connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetQueueDecimalMetrics,
+		if err := dDP.connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err
@@ -132,7 +134,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaTrends:
 		//sample of fieldName : ~*trends.TrendID.Metrics.*acd.Value
 		var trendSum utils.TrendSummary
-		if err := connMgr.Call(context.TODO(), dDP.trdConns, utils.TrendSv1GetTrendSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &trendSum); err != nil {
+		if err := dDP.connMgr.Call(context.TODO(), dDP.trdConns, utils.TrendSv1GetTrendSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &trendSum); err != nil {
 			return nil, err
 		}
 		dp := utils.NewObjectDP(trendSum)
@@ -141,7 +143,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaRankings:
 		// sample of fieldName : ~*rankings.RankingID.SortedStatIDs[0]
 		var rankingSum utils.RankingSummary
-		if err := connMgr.Call(context.TODO(), dDP.rnkConns, utils.RankingSv1GetRankingSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &rankingSum); err != nil {
+		if err := dDP.connMgr.Call(context.TODO(), dDP.rnkConns, utils.RankingSv1GetRankingSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &rankingSum); err != nil {
 			return nil, err
 		}
 		dp := utils.NewObjectDP(rankingSum)

@@ -399,7 +399,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	statQueueIDs = getStatQueueIDs(matchSQs)
 	var withErrors bool
 	for idx, sq := range matchSQs {
-		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
+		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, sS.connMgr, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))

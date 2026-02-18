@@ -221,7 +221,7 @@ func TestStatAddStatEvent(t *testing.T) {
 		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
-	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.Event})
+	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, nil, utils.MapStorage{utils.MetaOpts: ev1.Event})
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(50)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Value.Compare(utils.NewDecimal(1, 0)) != 0 || asrMetric.Count != 2 {
@@ -233,7 +233,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	*/
 	ev1.APIOpts = map[string]any{
 		utils.MetaStartTime: time.Now()}
-	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
+	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, nil, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Value.Compare(utils.NewDecimal(2, 0)) != 0 || asrMetric.Count != 3 {
@@ -686,7 +686,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 
 	//add ev1 with ttl 100ms (after 100ms the event should be removed)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
-	sq.ProcessEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+	sq.ProcessEvent(context.Background(), ev1.Tenant, ev1.ID, nil, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
 		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
@@ -696,7 +696,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 
 	//processing a new event should clean the expired events and add the new one
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
-	sq.ProcessEvent(context.Background(), ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
+	sq.ProcessEvent(context.Background(), ev2.Tenant, ev2.ID, nil, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" {
 		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
 	}
@@ -722,7 +722,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 
 	//add ev1 with ttl 100ms (after 100ms the event should be removed)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
-	sq.ProcessEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+	sq.ProcessEvent(context.Background(), ev1.Tenant, ev1.ID, nil, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 
 	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
 		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
@@ -732,7 +732,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 
 	//processing a new event should clean the expired events and add the new one
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
-	sq.ProcessEvent(context.Background(), ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
+	sq.ProcessEvent(context.Background(), ev2.Tenant, ev2.ID, nil, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_2" {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
@@ -740,7 +740,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 
 	//processing a new event should clean the expired events and add the new one
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_3"}
-	sq.ProcessEvent(context.Background(), ev3.Tenant, ev3.ID, nil, utils.MapStorage{utils.MetaReq: ev3.Event})
+	sq.ProcessEvent(context.Background(), ev3.Tenant, ev3.ID, nil, nil, utils.MapStorage{utils.MetaReq: ev3.Event})
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
@@ -1029,7 +1029,7 @@ func TestStatQueueProcessEventremExpiredErr(t *testing.T) {
 	}
 
 	experr := "remExpired mock error"
-	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, nil, evNm)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
@@ -1058,7 +1058,7 @@ func TestStatQueueProcessEventremOnQueueLengthErr(t *testing.T) {
 	}
 
 	experr := "remExpired mock error"
-	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, nil, evNm)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
@@ -1092,7 +1092,7 @@ func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 	}
 
 	experr := utils.ErrWrongPath
-	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, nil, evNm)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
@@ -1241,7 +1241,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 			},
 		},
 	}
-	err = sq.addStatEvent(context.Background(), tnt, evID, filters, evNm)
+	err = sq.addStatEvent(context.Background(), tnt, evID, filters, nil, evNm)
 	sq.unlock()
 
 	if err != nil {
@@ -2008,7 +2008,7 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 
 	expErr := `inline parse error for string: <*>`
-	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, nil, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 
@@ -2057,7 +2057,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 
 	expErr := `NOT_IMPLEMENTED:*stirng`
-	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, nil, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 
@@ -2151,7 +2151,7 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 		},
 	}
 
-	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err != nil {
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, nil, utils.MapStorage{utils.MetaOpts: ev1.Event}); err != nil {
 		t.Error(err)
 	}
 

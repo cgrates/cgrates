@@ -1585,7 +1585,7 @@ func TestRouteLazyPassErr(t *testing.T) {
 
 	expErr := "NOT_IMPLEMENTED:nr1"
 	if _, err := routeLazyPass(context.Background(), filters, ev,
-		data, []string{""}, []string{""}, []string{""}, nil, nil); err == nil || err.Error() != expErr {
+		data, nil, []string{""}, []string{""}, []string{""}, nil, nil); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 
@@ -1626,7 +1626,7 @@ func TestRouteLazyPassTrue(t *testing.T) {
 	}
 
 	if ok, err := routeLazyPass(context.Background(), rules, ev,
-		data,
+		data, nil,
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},

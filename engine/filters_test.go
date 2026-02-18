@@ -2656,7 +2656,7 @@ func TestFilterTrends(t *testing.T) {
 		},
 	}
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
+	dp := NewDynamicDP(context.Background(), connMgr, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline("cgrates.org", tc.filter)
@@ -2721,7 +2721,7 @@ func TestFilterRanking(t *testing.T) {
 	}
 
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
+	dp := NewDynamicDP(context.Background(), connMgr, nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline(dp.tenant, tc.filter)
