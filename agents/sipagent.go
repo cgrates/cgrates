@@ -52,11 +52,12 @@ var (
 
 // NewSIPAgent will construct a SIPAgent
 func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
-	filterS *engine.FilterS) (sa *SIPAgent, err error) {
+	filterS *engine.FilterS, caps *engine.Caps) (sa *SIPAgent, err error) {
 	sa = &SIPAgent{
 		connMgr:  connMgr,
 		filterS:  filterS,
 		cfg:      cfg,
+		caps:     caps,
 		ackMap:   make(map[string]chan struct{}),
 		stopChan: make(chan struct{}),
 	}
@@ -82,6 +83,7 @@ type SIPAgent struct {
 	connMgr  *engine.ConnManager
 	filterS  *engine.FilterS
 	cfg      *config.CGRConfig
+	caps     *engine.Caps
 	stopChan chan struct{}
 	ackMap   map[string]chan struct{}
 	ackLocks sync.RWMutex
@@ -296,6 +298,12 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 }
 
 func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message) {
+	if sa.caps.IsLimited() {
+		if err := sa.caps.Allocate(); err != nil {
+			return bareSipErr(sipMessage, "SIP/2.0 503 Service Unavailable")
+		}
+		defer sa.caps.Deallocate()
+	}
 	if sipMessage[userAgentHeader] != "" {
 		sipMessage[userAgentHeader] = fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version)
 	}
