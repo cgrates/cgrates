@@ -32,12 +32,13 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		caps:    caps,
 		srvDep:  srvDep,
 	}
 }
@@ -50,6 +51,7 @@ type FreeswitchAgent struct {
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -63,7 +65,7 @@ func (fS *FreeswitchAgent) Start() error {
 	defer fS.Unlock()
 
 	var err error
-	fS.fS, err = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
+	fS.fS, err = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr, fS.caps)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf(
 			"<%s> failed to initialize agent, error: %v",

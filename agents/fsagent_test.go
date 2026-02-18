@@ -223,7 +223,7 @@ func TestFsAgentNewFSsessions(t *testing.T) {
 	timezone := "UTC"
 	connMgr := &engine.ConnManager{}
 
-	fsa, err := NewFSsessions(fsAgentConfig, timezone, connMgr)
+	fsa, err := NewFSsessions(fsAgentConfig, timezone, connMgr, nil)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -282,7 +282,7 @@ func TestNewFSsessions(t *testing.T) {
 	fsAgentConfig := &config.FsAgentCfg{}
 	timezone := "UTC"
 	connMgr := &engine.ConnManager{}
-	fsSessions, err := NewFSsessions(fsAgentConfig, timezone, connMgr)
+	fsSessions, err := NewFSsessions(fsAgentConfig, timezone, connMgr, nil)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

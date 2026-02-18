@@ -71,7 +71,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		cm, anz, srvDep)
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
@@ -117,7 +117,7 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -157,7 +157,7 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -196,7 +196,7 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -221,7 +221,7 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 		},
 	}
 
-	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", nil)
+	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func TestFreeSwitchAgentReload5(t *testing.T) {
 	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -285,7 +285,7 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	cm := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	srv := NewFreeswitchAgent(cfg, shdChan, cm, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, cm, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -309,7 +309,7 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 			},
 		},
 	}
-	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", cm)
+	srv.(*FreeswitchAgent).fS, err = agents.NewFSsessions(agentCfg, "", cm, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
