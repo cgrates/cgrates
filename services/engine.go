@@ -600,7 +600,7 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, ips, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
-		NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
+		NewFreeswitchAgent(cfg, shdChan, connManager, caps, srvDep),
 		NewKamailioAgent(cfg, shdChan, connManager, srvDep),
 		NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload
 		NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
