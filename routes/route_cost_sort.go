@@ -119,7 +119,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			cfg.FilterSCfg().ResourceSConns,
+			connMgr, cfg.FilterSCfg().ResourceSConns,
 			cfg.FilterSCfg().StatSConns,
 			cfg.FilterSCfg().AccountSConns,
 			cfg.FilterSCfg().TrendSConns,

@@ -2265,7 +2265,7 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 		cfg:     cfg,
 		connMgr: nil,
 		sorter: RouteSortDispatcher{
-			utils.MetaWeight: NewWeightSorter(cfg),
+			utils.MetaWeight: NewWeightSorter(cfg, nil),
 		},
 	}
 

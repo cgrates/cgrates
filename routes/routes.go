@@ -38,7 +38,7 @@ func NewRouteService(dm *engine.DataManager,
 		cfg:     cfg,
 		connMgr: connMgr,
 		sorter: RouteSortDispatcher{
-			utils.MetaWeight: NewWeightSorter(cfg),
+			utils.MetaWeight: NewWeightSorter(cfg, connMgr),
 			utils.MetaLC:     NewLeastCostSorter(cfg, connMgr, filterS),
 			utils.MetaHC:     NewHighestCostSorter(cfg, connMgr, filterS),
 			utils.MetaQOS:    NewQOSRouteSorter(cfg, connMgr),

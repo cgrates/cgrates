@@ -294,11 +294,11 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) ProcessEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, connMgr *ConnManager, evNm utils.MapStorage) (err error) {
 
 	//processing metrics without storing in the queue
 	if oneEv := sq.isOneEvent(); oneEv {
-		return sq.addStatOneEvent(ctx, tnt, filterS, evNm)
+		return sq.addStatOneEvent(ctx, tnt, filterS, connMgr, evNm)
 	}
 	if _, err = sq.remExpired(); err != nil {
 		return
@@ -306,7 +306,7 @@ func (sq *StatQueue) ProcessEvent(ctx *context.Context, tnt, evID string, filter
 	if err = sq.remOnQueueLength(); err != nil {
 		return
 	}
-	return sq.addStatEvent(ctx, tnt, evID, filterS, evNm)
+	return sq.addStatEvent(ctx, tnt, evID, filterS, connMgr, evNm)
 }
 
 // remStatEvent removes an event from metrics
@@ -363,7 +363,7 @@ func (sq *StatQueue) remOnQueueLength() (err error) {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, connMgr *ConnManager, evNm utils.MapStorage) (err error) {
 	var expTime *time.Time
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
@@ -371,7 +371,7 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 	sq.SQItems = append(sq.SQItems, SQItem{EventID: evID, ExpiryTime: expTime})
 	var pass bool
 	// recreate the request without *opts
-	dDP := NewDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+	dDP := NewDynamicDP(ctx, connMgr, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().AccountSConns, config.CgrConfig().FilterSCfg().TrendSConns, config.CgrConfig().FilterSCfg().RankingSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
 	for idx, metricCfg := range sq.sqPrfl.Metrics {
 		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
@@ -402,10 +402,10 @@ func (sq *StatQueue) isOneEvent() bool {
 	return sq.ttl != nil && *sq.ttl == -1
 }
 
-func (sq *StatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *FilterS, connMgr *ConnManager, evNm utils.MapStorage) (err error) {
 	var pass bool
 
-	dDP := NewDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+	dDP := NewDynamicDP(ctx, connMgr, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().AccountSConns, config.CgrConfig().FilterSCfg().TrendSConns, config.CgrConfig().FilterSCfg().RankingSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
 
 	for idx, metricCfg := range sq.sqPrfl.Metrics {
