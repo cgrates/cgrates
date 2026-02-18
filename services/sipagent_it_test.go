@@ -62,7 +62,7 @@ func TestSIPAgentReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS, db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -123,7 +123,7 @@ func TestSIPAgentReload2(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -160,7 +160,7 @@ func TestSIPAgentReload3(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}

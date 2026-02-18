@@ -31,13 +31,14 @@ import (
 
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -51,6 +52,7 @@ type SIPAgent struct {
 
 	sip     *agents.SIPAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 
 	oldListen string
@@ -68,7 +70,7 @@ func (sip *SIPAgent) Start() (err error) {
 	sip.Lock()
 	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS)
+	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS, sip.caps)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 			utils.SIPAgent, err))
