@@ -518,13 +518,13 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 			args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
 			var reply string
 			if !t.tPrfl.Async {
-				if err = connMgr.Call(ctx, tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+				if err = tS.connMgr.Call(ctx, tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
 					withErrors = true
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), err.Error()))
 				}
 			} else {
 				go func() {
-					if errExec := connMgr.Call(context.Background(), tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions,
+					if errExec := tS.connMgr.Call(context.Background(), tS.cfg.ThresholdSCfg().ActionSConns, utils.ActionSv1ExecuteActions,
 						args, &reply); errExec != nil {
 						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
 					}
