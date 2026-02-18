@@ -131,7 +131,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, connMgr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -178,7 +178,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, connMgr)
 	if err != nil {
 		t.Error(err)
 	}

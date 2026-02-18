@@ -34,6 +34,7 @@ type TpReader struct {
 	timezone          string
 	dm                *DataManager
 	lr                LoadReader
+	connMgr           *ConnManager
 	resProfiles       map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles        map[utils.TenantID]*utils.TPStatProfile
 	ipProfiles        map[utils.TenantID]*utils.TPIPProfile
@@ -52,12 +53,13 @@ type TpReader struct {
 }
 
 func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
-	cacheConns, schedulerConns []string) (*TpReader, error) {
+	cacheConns, schedulerConns []string, connMgr *ConnManager) (*TpReader, error) {
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
 		dm:         NewDataManager(db, config.CgrConfig(), connMgr), // ToDo: add CGRConfig as parameter to the NewTpReader
 		lr:         lr,
+		connMgr:    connMgr,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,
 	}
@@ -1046,7 +1048,7 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)
 	}
 
-	if err = CallCache(connMgr, ctx, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose, tenant); err != nil {
+	if err = CallCache(tpr.connMgr, ctx, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose, tenant); err != nil {
 		return
 	}
 	//get loadIDs for all types
