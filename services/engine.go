@@ -613,7 +613,7 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 		NewEventReaderService(cfg, dmService, filterSChan,
 			shdChan, connManager, server, internalERsChan, anz, srvDep),
 		NewSIPAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
-		NewJanusAgent(cfg, filterSChan, server, connManager, srvDep),
+		NewJanusAgent(cfg, filterSChan, server, connManager, caps, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS
