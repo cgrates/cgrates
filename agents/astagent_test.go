@@ -45,7 +45,7 @@ func TestHandleChannelDestroyedFail(t *testing.T) {
 	cM := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	sma, err := NewAsteriskAgent(cfg, 1, cM)
+	sma, err := NewAsteriskAgent(cfg, 1, cM, new(engine.Caps))
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,7 +132,7 @@ func TestHandleChannelDestroyedCases(t *testing.T) {
 	cM := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
-	sma, err := NewAsteriskAgent(cfg, 1, cM)
+	sma, err := NewAsteriskAgent(cfg, 1, cM, new(engine.Caps))
 	if err != nil {
 		t.Error(err)
 	}

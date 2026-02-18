@@ -45,7 +45,7 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	astSrv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	astSrv := NewAsteriskAgent(cfg, shdChan, nil, nil, srvDep)
 	if astSrv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(astSrv))
 	}
@@ -100,7 +100,7 @@ func TestAsteriskReload(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	astSrv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	astSrv := NewAsteriskAgent(cfg, shdChan, nil, nil, srvDep)
 	if astSrv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(astSrv))
 	}

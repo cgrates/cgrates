@@ -32,12 +32,13 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		caps:    caps,
 		srvDep:  srvDep,
 	}
 }
@@ -51,6 +52,7 @@ type AsteriskAgent struct {
 
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -72,7 +74,7 @@ func (ast *AsteriskAgent) Start() (err error) {
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
+		ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr, ast.caps)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent for connection %d, error: %s!", utils.AsteriskAgent, connIdx, err))
 			return err
