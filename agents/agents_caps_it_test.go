@@ -250,6 +250,7 @@ func TestAgentCapsIT(t *testing.T) {
 }
 
 func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode string) {
+	t.Helper()
 	*reqIdx++
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(fmt.Sprintf("session%d", reqIdx)))
@@ -283,6 +284,7 @@ func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode s
 	resultCode, err := diamAVPAsString(avps[0])
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if resultCode != wantResultCode {
 		t.Errorf("Result-Code=%s, want %s", resultCode, wantResultCode)
@@ -290,39 +292,51 @@ func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode s
 }
 
 func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, reqIdx *int, wantReplyCode radigo.PacketCode) {
+	t.Helper()
 	*reqIdx++
 	req := client.NewRequest(reqType, uint8(*reqIdx))
 	if err := req.AddAVPWithName("User-Name", "1001", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("User-Password", "CGRateSPassword1", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// encode the password as required so we can decode it properly
 	req.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword1"), []byte("CGRateS.org"), req.Authenticator[:])
 	if err := req.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("Acct-Session-Id", fmt.Sprintf("session%d", reqIdx), ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
 	reply, err := client.SendRequest(req)
-	if err != nil && (wantReplyCode == radigo.AccessReject ||
-		wantReplyCode == radigo.AccountingResponse) {
-		t.Error(err)
-	}
-	if reply != nil && reply.Code != wantReplyCode {
-		t.Errorf("want non-nil negative reply, got: %s", utils.ToJSON(reply))
-	}
-	if reply != nil && reply.Code == wantReplyCode {
+
+	switch wantReplyCode {
+	case radigo.AccessAccept, 0:
+		return
+	case radigo.AccessReject, radigo.AccountingResponse:
+		if err != nil {
+			t.Errorf("SendRequest error: %v", err)
+			return
+		}
+		if reply == nil {
+			t.Error("expected rejection reply, got nil")
+			return
+		}
+		if reply.Code != wantReplyCode {
+			t.Errorf("Code=%v, want %v", reply.Code, wantReplyCode)
+			return
+		}
 		if len(reply.AVPs) != 1 {
-			t.Errorf("reply should have exactly 1 AVP, got: %s", utils.ToJSON(reply))
+			t.Errorf("want 1 AVP, got: %s", utils.ToJSON(reply))
+			return
 		}
 		got := string(reply.AVPs[0].RawValue)
 		want := utils.ErrMaxConcurrentRPCExceededNoCaps.Error()
@@ -333,6 +347,7 @@ func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, 
 }
 
 func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
+	t.Helper()
 	m := new(dns.Msg)
 	m.SetQuestion("cgrates.org.", dns.TypeA)
 	if err := conn.WriteMsg(m); err != nil {
