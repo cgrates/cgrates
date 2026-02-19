@@ -1123,11 +1123,9 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -1137,11 +1135,11 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
-	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dbCM, cfg, cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, connMgr)
+	sS := NewStatService(dm, cfg, filterS, cM)
 
 	sq := &StatQueue{
 		Tenant:    "cgrates.org",
@@ -2195,11 +2193,9 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2266,11 +2262,9 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2308,11 +2302,11 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, connMgr)
+	sS := NewStatService(dm, cfg, filterS, cM)
 
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2368,12 +2362,10 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	tmpLogger := utils.Logger
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 		utils.Logger = tmpLogger
 	}()
 	var buf bytes.Buffer
@@ -2395,11 +2387,11 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, connMgr)
+	sS := NewStatService(dm, cfg, filterS, cM)
 
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2923,11 +2915,9 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2935,11 +2925,11 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
-	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil, nil)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dbCM, cfg, cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, connMgr)
+	sS := NewStatService(dm, cfg, filterS, cM)
 
 	sq := &StatQueue{
 		Tenant:    "cgrates.org",

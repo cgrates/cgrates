@@ -70,7 +70,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()
-	attrService := attributes.NewAttributeService(dm, fs, attrS.cfg)
+	attrService := attributes.NewAttributeService(dm, fs, cms.ConnManager(), attrS.cfg)
 	srv, _ := engine.NewService(attrService)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
 	for _, s := range srv {

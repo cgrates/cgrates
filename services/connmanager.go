@@ -68,7 +68,6 @@ func (s *ConnManagerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceR
 // Shutdown stops the service.
 func (s *ConnManagerService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.connMgr = nil
-	engine.SetConnManager(nil)
 	return nil
 }
 

@@ -94,7 +94,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 		}
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
-			qos.cfg.FilterSCfg().ResourceSConns,
+			qos.connMgr, qos.cfg.FilterSCfg().ResourceSConns,
 			qos.cfg.FilterSCfg().StatSConns,
 			qos.cfg.FilterSCfg().AccountSConns,
 			qos.cfg.FilterSCfg().TrendSConns,

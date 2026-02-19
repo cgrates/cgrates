@@ -198,7 +198,7 @@ func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value 
 		return
 	}
 	var reply string
-	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
+	return chS.connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
 		&utils.ArgCacheReplicateSet{
 			CacheID: chID,
 			ItemID:  itmID,

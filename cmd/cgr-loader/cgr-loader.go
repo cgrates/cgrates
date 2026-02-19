@@ -315,7 +315,7 @@ func main() {
 
 	ldrCfg := loadConfig()
 	// we initialize connManager here with nil for InternalChannels
-	engine.NewConnManager(ldrCfg)
+	cM := engine.NewConnManager(ldrCfg)
 
 	if dataDB, err = engine.NewDataDBConn(ldrCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Host,
@@ -340,7 +340,7 @@ func main() {
 	if tpReader, err = engine.NewTpReader(dbcManager, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
-		ldrCfg.LoaderCgrCfg().ActionSConns); err != nil {
+		ldrCfg.LoaderCgrCfg().ActionSConns, cM); err != nil {
 		log.Fatal(err)
 	}
 	if err = tpReader.LoadAll(); err != nil {

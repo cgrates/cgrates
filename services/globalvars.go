@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -42,7 +40,6 @@ type GlobalVarS struct {
 
 // Start should handle the sercive start
 func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
-	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.RoutesDefaultRatio = gv.cfg.RouteSCfg().DefaultRatio
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -53,7 +50,6 @@ func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry)
 
 // Reload handles the change of config
 func (gv *GlobalVarS) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
-	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.RoutesDefaultRatio = gv.cfg.RouteSCfg().DefaultRatio
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale

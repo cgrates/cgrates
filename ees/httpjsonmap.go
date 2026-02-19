@@ -38,7 +38,7 @@ func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 	pstrJSON = &HTTPjsonMapEE{
 		cfg:    cfg,
 		em:     em,
-		client: &http.Client{Transport: engine.HTTPPstrTransport(), Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
+		client: &http.Client{Transport: cgrCfg.HTTPCfg().ClientOpts, Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
 		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
 	pstrJSON.hdr, err = pstrJSON.composeHeader(cgrCfg, filterS)

@@ -31,15 +31,13 @@ import (
 )
 
 // NewConnManager returns the Connection Manager
-func NewConnManager(cfg *config.CGRConfig) (cM *ConnManager) {
-	cM = &ConnManager{
+func NewConnManager(cfg *config.CGRConfig) *ConnManager {
+	return &ConnManager{
 		cfg:         cfg,
 		rpcInternal: make(map[string]chan context.ClientConnector),
 		dynIntCh:    make(RPCClientSet),
 		connCache:   ltcache.NewCache(-1, 0, true, false, nil),
 	}
-	SetConnManager(cM)
-	return
 }
 
 // ConnManager handle the RPC connections
