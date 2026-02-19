@@ -22,6 +22,9 @@ package agents
 
 import (
 	"fmt"
+	"io"
+	"net"
+	"net/http"
 	"sync"
 	"testing"
 	"time"
@@ -36,6 +39,7 @@ import (
 	"github.com/cgrates/go-diameter/diam/datatype"
 	"github.com/cgrates/go-diameter/diam/dict"
 	"github.com/cgrates/radigo"
+	"github.com/cgrates/sipingo"
 	"github.com/miekg/dns"
 )
 
@@ -72,6 +76,23 @@ func TestAgentCapsIT(t *testing.T) {
 			"network": "udp"
 		}
 	]
+},
+"http_agent": [
+	{
+		"id": "caps_test",
+		"url": "/caps_test",
+		"sessions_conns": ["*internal"],
+		"request_payload": "*url",
+		"reply_payload": "*xml",
+		"request_processors": []
+	}
+],
+"sip_agent": {
+	"enabled": true,
+	"listen": "127.0.0.1:5099",
+	"listen_net": "udp",
+	"sessions_conns": ["*internal"],
+	"request_processors": []
 }
 }`
 
@@ -186,9 +207,50 @@ func TestAgentCapsIT(t *testing.T) {
 		<-doneCh
 
 	})
+
+	t.Run("HTTPAgent", func(t *testing.T) {
+		httpURL := fmt.Sprintf("http://%s/caps_test", cfg.ListenCfg().HTTPListen)
+
+		// There is currently no traffic. Expecting 200 OK because
+		// there are no request processors enabled (empty reply).
+		sendHTTPReq(t, httpURL, http.StatusOK)
+
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendHTTPReq(t, httpURL, http.StatusOK)
+		<-doneCh
+
+		// With caps limit reached, 429 Too Many Requests is expected.
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendHTTPReq(t, httpURL, http.StatusTooManyRequests)
+		<-doneCh
+	})
+
+	t.Run("SIPAgent", func(t *testing.T) {
+		sipAddr := cfg.SIPAgentCfg().Listen
+
+		// There is currently no traffic. Expecting 500 Internal Server
+		// Error because there are no request processors enabled.
+		sendSIPReq(t, sipAddr, "SIP/2.0 500 Internal Server Error")
+
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendSIPReq(t, sipAddr, "SIP/2.0 500 Internal Server Error")
+		<-doneCh
+
+		// With caps limit reached, 503 Service Unavailable is expected.
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendSIPReq(t, sipAddr, "SIP/2.0 503 Service Unavailable")
+		<-doneCh
+	})
 }
 
 func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode string) {
+	t.Helper()
 	*reqIdx++
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(fmt.Sprintf("session%d", reqIdx)))
@@ -222,6 +284,7 @@ func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode s
 	resultCode, err := diamAVPAsString(avps[0])
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if resultCode != wantResultCode {
 		t.Errorf("Result-Code=%s, want %s", resultCode, wantResultCode)
@@ -229,39 +292,51 @@ func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode s
 }
 
 func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, reqIdx *int, wantReplyCode radigo.PacketCode) {
+	t.Helper()
 	*reqIdx++
 	req := client.NewRequest(reqType, uint8(*reqIdx))
 	if err := req.AddAVPWithName("User-Name", "1001", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("User-Password", "CGRateSPassword1", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// encode the password as required so we can decode it properly
 	req.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword1"), []byte("CGRateS.org"), req.Authenticator[:])
 	if err := req.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("Acct-Session-Id", fmt.Sprintf("session%d", reqIdx), ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err := req.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
 	reply, err := client.SendRequest(req)
-	if err != nil && (wantReplyCode == radigo.AccessReject ||
-		wantReplyCode == radigo.AccountingResponse) {
-		t.Error(err)
-	}
-	if reply != nil && reply.Code != wantReplyCode {
-		t.Errorf("want non-nil negative reply, got: %s", utils.ToJSON(reply))
-	}
-	if reply != nil && reply.Code == wantReplyCode {
+
+	switch wantReplyCode {
+	case radigo.AccessAccept, 0:
+		return
+	case radigo.AccessReject, radigo.AccountingResponse:
+		if err != nil {
+			t.Errorf("SendRequest error: %v", err)
+			return
+		}
+		if reply == nil {
+			t.Error("expected rejection reply, got nil")
+			return
+		}
+		if reply.Code != wantReplyCode {
+			t.Errorf("Code=%v, want %v", reply.Code, wantReplyCode)
+			return
+		}
 		if len(reply.AVPs) != 1 {
-			t.Errorf("reply should have exactly 1 AVP, got: %s", utils.ToJSON(reply))
+			t.Errorf("want 1 AVP, got: %s", utils.ToJSON(reply))
+			return
 		}
 		got := string(reply.AVPs[0].RawValue)
 		want := utils.ErrMaxConcurrentRPCExceededNoCaps.Error()
@@ -272,6 +347,7 @@ func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, 
 }
 
 func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
+	t.Helper()
 	m := new(dns.Msg)
 	m.SetQuestion("cgrates.org.", dns.TypeA)
 	if err := conn.WriteMsg(m); err != nil {
@@ -281,6 +357,53 @@ func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
 		t.Error(err)
 	} else if rply.Rcode != wantRcode {
 		t.Errorf("reply Msg Rcode=%d, want %d", rply.Rcode, wantRcode)
+	}
+}
+
+func sendHTTPReq(t *testing.T, url string, wantStatus int) {
+	t.Helper()
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	io.Copy(io.Discard, resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != wantStatus {
+		t.Errorf("HTTP status=%d, want %d", resp.StatusCode, wantStatus)
+	}
+}
+
+func sendSIPReq(t *testing.T, addr, wantStatus string) {
+	t.Helper()
+	conn, err := net.Dial("udp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	invite := "INVITE sip:1002@cgrates.org SIP/2.0\r\n" +
+		"Call-ID: caps-test-" + fmt.Sprint(time.Now().UnixNano()) + "\r\n" +
+		"CSeq: 1 INVITE\r\n" +
+		"From: \"1001\" <sip:1001@cgrates.org>;tag=caps1\r\n" +
+		"To: <sip:1002@cgrates.org>\r\n" +
+		"Via: SIP/2.0/UDP 127.0.0.1:9999;branch=z9hG4bK-caps-test\r\n" +
+		"Max-Forwards: 70\r\n" +
+		"Content-Length: 0\r\n\r\n"
+	if _, err = conn.Write([]byte(invite)); err != nil {
+		t.Fatal(err)
+	}
+	buf := make([]byte, bufferSize)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	n, err := conn.Read(buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	received, err := sipingo.NewMessage(string(buf[:n]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if received[requestHeader] != wantStatus {
+		t.Errorf("SIP status=%q, want %q", received[requestHeader], wantStatus)
 	}
 }
 

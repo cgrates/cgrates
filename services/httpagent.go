@@ -32,13 +32,14 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *cores.Server, connMgr *engine.ConnManager,
+	server *cores.Server, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -54,6 +55,7 @@ type HTTPAgent struct {
 	// if we registerd the handlers
 	started bool
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -74,7 +76,7 @@ func (ha *HTTPAgent) Start() (err error) {
 			agents.NewHTTPAgent(ha.connMgr,
 				agntCfg.SessionSConns, agntCfg.StatSConns, agntCfg.ThresholdSConns,
 				filterS, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
-				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
+				agntCfg.ReplyPayload, agntCfg.RequestProcessors, ha.caps))
 	}
 	ha.Unlock()
 	return

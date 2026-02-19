@@ -49,6 +49,7 @@ func TestNewHTTPAgent(t *testing.T) {
 		reqPayload,
 		rplyPayload,
 		reqProcessors,
+		nil,
 	)
 
 	if agent.connMgr != connMgr {
@@ -95,7 +96,9 @@ func TestNewHTTPAgent(t *testing.T) {
 }
 
 func TestHTTPAgentServeHTTP(t *testing.T) {
-	agent := &HTTPAgent{}
+	agent := &HTTPAgent{
+		caps: engine.NewCaps(0, ""),
+	}
 	req := httptest.NewRequest("GET", "http://cgrates.org", nil)
 	rr := httptest.NewRecorder()
 	agent.ServeHTTP(rr, req)

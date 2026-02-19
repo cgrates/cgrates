@@ -46,7 +46,7 @@ func TestFreeSwitchAgentCoverage(t *testing.T) {
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

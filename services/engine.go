@@ -617,20 +617,20 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, ips, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
-		NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
-		NewKamailioAgent(cfg, shdChan, connManager, srvDep),
-		NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload
+		NewFreeswitchAgent(cfg, shdChan, connManager, caps, srvDep),
+		NewKamailioAgent(cfg, shdChan, connManager, caps, srvDep),
+		NewAsteriskAgent(cfg, shdChan, connManager, caps, srvDep),              // partial reload
 		NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
 		NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
-		NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),            // no reload
+		NewHTTPAgent(cfg, filterSChan, server, connManager, caps, srvDep),      // no reload
 		NewPrometheusAgent(cfg, connManager, server, srvDep),
 		anz, dspS, dspH, dmService, storDBService,
 		NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
 		NewEventReaderService(cfg, dmService, filterSChan,
 			shdChan, connManager, server, internalERsChan, anz, srvDep),
-		NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
-		NewJanusAgent(cfg, filterSChan, server, connManager, srvDep),
+		NewSIPAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
+		NewJanusAgent(cfg, filterSChan, server, connManager, caps, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS

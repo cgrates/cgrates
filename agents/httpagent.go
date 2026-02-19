@@ -32,7 +32,7 @@ import (
 func NewHTTPAgent(connMgr *engine.ConnManager,
 	sessionConns, statsConns, thresholdsConns []string,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
-	reqProcessors []*config.RequestProcessor) *HTTPAgent {
+	reqProcessors []*config.RequestProcessor, caps *engine.Caps) *HTTPAgent {
 	return &HTTPAgent{
 		connMgr:         connMgr,
 		filterS:         filterS,
@@ -43,6 +43,7 @@ func NewHTTPAgent(connMgr *engine.ConnManager,
 		sessionConns:    sessionConns,
 		statsConns:      statsConns,
 		thresholdsConns: thresholdsConns,
+		caps:            caps,
 	}
 }
 
@@ -57,10 +58,18 @@ type HTTPAgent struct {
 	sessionConns    []string
 	statsConns      []string
 	thresholdsConns []string
+	caps            *engine.Caps
 }
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if ha.caps.IsLimited() {
+		if err := ha.caps.Allocate(); err != nil {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		defer ha.caps.Deallocate()
+	}
 	dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
