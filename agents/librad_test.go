@@ -155,7 +155,6 @@ func TestRadiusDPFieldAsInterfaceCached(t *testing.T) {
 	}
 
 	dp := newRADataProvider(pkt)
-
 	if data, err := dp.FieldAsInterface([]string{"User-Name"}); err != nil {
 		t.Error(err)
 	} else if data != "cgr1" {
@@ -180,8 +179,32 @@ func TestRadiusDPFieldAsInterfaceCached(t *testing.T) {
 		t.Errorf("Expecting: nil, received: <%v>", data)
 	}
 
-	if _, err := dp.FieldAsInterface([]string{"Field1", "Field2"}); err != utils.ErrNotFound {
+	if _, err := dp.FieldAsInterface([]string{"vendor", "attribute", "extra"}); err != utils.ErrNotFound {
 		t.Errorf("Expecting: ErrNotFound, received: <%v>", err)
 	}
+}
 
+func TestRadiusDPFieldAsInterfaceVSA(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Fatal(err)
+	}
+	dp := newRADataProvider(pkt)
+	if data, err := dp.FieldAsInterface([]string{"Cisco", "Cisco-NAS-Port"}); err != nil {
+		t.Error(err)
+	} else if data != "CGR1" {
+		t.Errorf("Expected CGR1, got: %v", data)
+	}
+}
+
+func TestLibradFieldAsInterfaceWithInvalidPathLength(t *testing.T) {
+	pk := &radiusDP{}
+	fldPath := []string{"vendor", "attribute", "extra"}
+	data, err := pk.FieldAsInterface(fldPath)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected ErrNotFound error, got: %v", err)
+	}
+	if data != nil {
+		t.Errorf("Expected nil data, got: %v", data)
+	}
 }
