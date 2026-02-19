@@ -29,7 +29,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -89,7 +88,7 @@ func (urlProvider) Open(dPath, fn string) (_ io.ReadCloser, err error) {
 	}
 	var req *http.Response
 	if req, err = (&http.Client{
-		Transport: engine.HTTPPstrTransport(),
+		Transport: config.CgrConfig().HTTPCfg().ClientOpts,
 		Timeout:   config.CgrConfig().GeneralCfg().ReplyTimeout,
 	}).Get(path); err != nil {
 		err = utils.ErrPathNotReachable(path)
