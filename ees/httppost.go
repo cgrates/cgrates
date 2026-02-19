@@ -34,7 +34,7 @@ func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filte
 	httpPost = &HTTPPostEE{
 		cfg:    cfg,
 		em:     em,
-		client: &http.Client{Transport: engine.HTTPPstrTransport(), Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
+		client: &http.Client{Transport: cgrCfg.HTTPCfg().ClientOpts, Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
 		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
 	httpPost.hdr, err = httpPost.composeHeader(cgrCfg, filterS)
