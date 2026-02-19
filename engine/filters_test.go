@@ -2574,10 +2574,6 @@ func TestHttpInlineFilter(t *testing.T) {
 }
 
 func TestFilterTrends(t *testing.T) {
-	tmpConn := connMgr
-	defer func() {
-		connMgr = tmpConn
-	}()
 	clientConn := make(chan context.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -2613,9 +2609,9 @@ func TestFilterTrends(t *testing.T) {
 		},
 	}
 	now3 := time.Now().Add(-time.Second * 3).Format(time.RFC3339)
-	connMgr = NewConnManager(config.NewDefaultCGRConfig())
+	cM := NewConnManager(config.NewDefaultCGRConfig())
 
-	connMgr.rpcInternal = map[string]chan context.ClientConnector{
+	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends): clientConn,
 	}
 	testCases := []struct {
@@ -2656,7 +2652,7 @@ func TestFilterTrends(t *testing.T) {
 		},
 	}
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), connMgr, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
+	dp := NewDynamicDP(context.Background(), cM, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline("cgrates.org", tc.filter)
@@ -2676,10 +2672,6 @@ func TestFilterTrends(t *testing.T) {
 }
 
 func TestFilterRanking(t *testing.T) {
-	tmpConn := connMgr
-	defer func() {
-		connMgr = tmpConn
-	}()
 	clientConn := make(chan context.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -2703,8 +2695,8 @@ func TestFilterRanking(t *testing.T) {
 			},
 		}}
 
-	connMgr = NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.rpcInternal = map[string]chan context.ClientConnector{
+	cM := NewConnManager(config.NewDefaultCGRConfig())
+	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
 	}
 	now := time.Now().Add(-2 * time.Second).Format(time.RFC3339)
@@ -2721,7 +2713,7 @@ func TestFilterRanking(t *testing.T) {
 	}
 
 	initDP := utils.MapStorage{}
-	dp := NewDynamicDP(context.Background(), connMgr, nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
+	dp := NewDynamicDP(context.Background(), cM, nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline(dp.tenant, tc.filter)

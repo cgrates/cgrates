@@ -1406,7 +1406,6 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 	tmp := config.CgrConfig()
 	tmpC := Cache
-	tmpCMgr := connMgr
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
@@ -1414,15 +1413,14 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	connMgr = NewConnManager(cfg)
+	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, connMgr)
+	dm := NewDataManager(dbCM, cfg, cM)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(nil, cfg, filterS, connMgr)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	tS := NewThresholdService(nil, cfg, filterS, cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	defer func() {
-		connMgr = tmpCMgr
 		Cache = tmpC
 		config.SetCgrConfig(tmp)
 		utils.Logger = tmpLogger
@@ -2724,11 +2722,9 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
 		utils.Logger = tmpLogger
 	}()
 
@@ -2739,11 +2735,11 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	connMgr = NewConnManager(cfg)
-	dm := NewDataManager(dbCM, cfg, connMgr)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dbCM, cfg, cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, connMgr)
+	tS := NewThresholdService(dm, cfg, filterS, cM)
 
 	th := &Threshold{
 		Tenant: "cgrates.org",
@@ -3236,12 +3232,9 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 
 	tmp := Cache
 	tmpC := config.CgrConfig()
-	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
-
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3252,11 +3245,11 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	connMgr = NewConnManager(cfg)
-	dm := NewDataManager(dbCM, cfg, connMgr)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dbCM, cfg, cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, connMgr)
+	tS := NewThresholdService(dm, cfg, filterS, cM)
 	th := &Threshold{
 		Hits:   2,
 		Tenant: "cgrates.org",

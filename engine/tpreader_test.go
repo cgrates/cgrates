@@ -33,10 +33,9 @@ import (
 )
 
 func TestTPReaderCallCacheNoCaching(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -60,10 +59,9 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 }
 
 func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -126,10 +124,9 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 }
 
 func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -207,10 +204,9 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 }
 
 func TestTPReaderCallCacheLoadCache(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -277,10 +273,9 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 }
 
 func TestTPReaderCallCacheRemoveItems(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -347,10 +342,9 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 }
 
 func TestTPReaderCallCacheClear(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+	tmpCache := Cache
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		Cache = tmpCache
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
