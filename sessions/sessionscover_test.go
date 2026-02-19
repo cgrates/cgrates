@@ -1485,7 +1485,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), connMgr)
 	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
-	engine.SetConnManager(connMgr)
 
 	if _, err := sessions.processChargerS(cgrEv); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
@@ -1632,7 +1631,6 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 	engine.Cache = cacheS
 	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
-	engine.SetConnManager(connMgr)
 
 	procIndt, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken")
 	if err != nil {
@@ -1723,7 +1721,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), connMgr)
 	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
-	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{
 		"ORIGIN_ID": {},
 	}
@@ -1951,7 +1948,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), connMgr)
 	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
-	engine.SetConnManager(connMgr)
 
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 
@@ -4283,7 +4279,6 @@ dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), connMgr)
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	engine.SetConnManager(connMgr)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
@@ -4673,7 +4668,6 @@ func TestSyncSessionsSync(t *testing.T) {
 	sessions.cfg.GeneralCfg().ReplyTimeout = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	engine.Cache = cacheS
-	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{}
 	var reply string
 	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {

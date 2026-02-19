@@ -274,7 +274,7 @@ func TestV1GetItemExpiryTimeFromCacheErr(t *testing.T) {
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	var reply time.Time
 	if err := cacheS.V1GetItemExpiryTime(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
@@ -302,7 +302,7 @@ func TestV1GetItemErr(t *testing.T) {
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	var reply any
 	if err := cacheS.V1GetItem(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
@@ -329,7 +329,7 @@ func TestV1GetItemIDsErr(t *testing.T) {
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	var reply []string
 	if err := cacheS.V1GetItemIDs(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
@@ -523,7 +523,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	args := &utils.ArgCacheReplicateSet{
 		Tenant: utils.CGRateSorg,
@@ -566,7 +566,7 @@ func TestCacheSV1ReplicateSetErr(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "fltr1",
@@ -607,7 +607,7 @@ func TestCacheSCacheDataFromDB(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	attrs := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -660,7 +660,7 @@ func TestCacheScacheDataFromDBErrCacheDataFromDB(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := NewCacheS(cfg, nil, connMgr, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 
 	attrs := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -688,7 +688,7 @@ func TestCacheScacheDataFromDBErrGetItemLoadIDs(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	attrs := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -722,7 +722,7 @@ func TestCacheSV1LoadCache(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	attrs := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -775,7 +775,7 @@ func TestCacheSV1ReloadCache(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	attrs := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -832,7 +832,7 @@ func TestCacheSV1RemoveGroup(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -875,7 +875,7 @@ func TestV1GetCacheStats(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
@@ -911,7 +911,7 @@ func TestCacheSV1Clear(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
@@ -952,7 +952,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	args := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:              utils.CGRateSorg,
@@ -995,7 +995,7 @@ func TestCacheSV1RemoveSingular(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheAccounts,
@@ -1052,7 +1052,7 @@ func TestCacheSV1GetItemExpiryTime(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1086,7 +1086,7 @@ func TestV1GetItemSingular(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1120,7 +1120,7 @@ func TestCacheSV1HasItem(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1154,7 +1154,7 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1182,7 +1182,7 @@ func TestCacheSGetPrecacheChannel(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := cacheS.Set(context.Background(), utils.MetaAccounts, "itemId", "valinterface", nil, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1216,7 +1216,7 @@ func TestCacheSV1PrecacheStatusDefault(t *testing.T) {
 		Tenant:   "cgrates.org",
 	}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
@@ -1262,7 +1262,7 @@ func TestCacheSV1PrecacheStatusErrUnknownCacheID(t *testing.T) {
 		Tenant:   "cgrates.org",
 	}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	expErr := "unknown cacheID: Inproper ID"
 	var reply map[string]string
@@ -1292,7 +1292,7 @@ func TestCacheSV1PrecacheStatusMetaReady(t *testing.T) {
 		Tenant:   "cgrates.org",
 	}
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	if err := Cache.Set(context.Background(), utils.MetaAccounts, "itemId", "valinterface", nil, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1337,7 +1337,7 @@ func TestCacheSPrecachePartitions(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
@@ -1396,7 +1396,7 @@ func TestCacheSPrecacheErr(t *testing.T) {
 		},
 	}
 
-	cacheS := NewCacheS(cfg, nil, connMgr, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 
 	cacheS.Precache(utils.NewSyncedChan())
 	time.Sleep(10 * time.Millisecond)
@@ -1423,7 +1423,7 @@ func TestCacheSBeginTransaction(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	expFormat := `........-....-....-....-............`
 	rcv := cacheS.BeginTransaction()
@@ -1448,7 +1448,7 @@ func TestCacheSRollbackTransaction(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	expFormat := `........-....-....-....-............`
 	tranId := cacheS.BeginTransaction()
@@ -1486,7 +1486,7 @@ func TestCacheSCommitTransaction(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	cacheS := NewCacheS(cfg, dm, nil, nil)
 
 	expFormat := `........-....-....-....-............`
 	tranId := cacheS.BeginTransaction()
