@@ -1698,3 +1698,24 @@ func TestToUnescapedJSON(t *testing.T) {
 		t.Errorf("Expected %v, received %v", ToJSON(exp), ToJSON(rcv))
 	}
 }
+
+// go test ./utils/ -bench BenchmarkToJSON -benchmem
+func BenchmarkToJSON(b *testing.B) {
+	v := map[string]any{
+		"Result-Code": "2001",
+		"Granted-Service-Unit": map[string]any{
+			"CC-Time": 300,
+		},
+		"Session-Id": "cgrates;1052943642;938",
+	}
+	b.Run("ToJSON", func(b *testing.B) {
+		for b.Loop() {
+			ToJSON(v)
+		}
+	})
+	b.Run("ToIJSON", func(b *testing.B) {
+		for b.Loop() {
+			ToIJSON(v)
+		}
+	})
+}
