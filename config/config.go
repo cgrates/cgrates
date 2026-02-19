@@ -148,6 +148,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			DefaultUsage: make(map[string]time.Duration),
 			Opts: &SessionsOpts{
 				Accounts:               []*DynamicBoolOpt{{value: SessionsAccountsDftOpt}},
+				Rates:                  []*DynamicBoolOpt{{value: SessionsRatesDftOpt}},
 				Attributes:             []*DynamicBoolOpt{{value: SessionsAttributesDftOpt}},
 				CDRs:                   []*DynamicBoolOpt{{value: SessionsCDRsDftOpt}},
 				Chargers:               []*DynamicBoolOpt{{value: SessionsChargersDftOpt}},
