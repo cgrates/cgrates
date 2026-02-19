@@ -603,7 +603,19 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 	val := &utils.DataLeaf{
 		Data: "cgrates.org",
 	}
-	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+	exp := `{
+ "Map": {
+  "Tenant": {
+   "Slice": [
+    {
+     "Value": {
+      "Data": "cgrates.org"
+     }
+    }
+   ]
+  }
+ }
+}`
 
 	if err := eeR.SetAsSlice(fullPath, val); err != nil {
 		t.Error(err)
@@ -734,7 +746,19 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 	val := &utils.DataLeaf{
 		Data: "cgrates.org",
 	}
-	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+	exp := `{
+ "Map": {
+  "Tenant": {
+   "Slice": [
+    {
+     "Value": {
+      "Data": "cgrates.org"
+     }
+    }
+   ]
+  }
+ }
+}`
 
 	if err := eeR.Append(fullPath, val); err != nil {
 		t.Error(err)
@@ -919,7 +943,19 @@ func TestExportRequestComposeDefaultOK(t *testing.T) {
 	val := &utils.DataLeaf{
 		Data: "cgrates.org",
 	}
-	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+	exp := `{
+ "Map": {
+  "Tenant": {
+   "Slice": [
+    {
+     "Value": {
+      "Data": "cgrates.org"
+     }
+    }
+   ]
+  }
+ }
+}`
 
 	if err := eeR.Compose(fullPath, val); err != nil {
 		t.Error(err)

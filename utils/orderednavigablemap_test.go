@@ -876,7 +876,15 @@ func TestOrderedNavigableMapString(t *testing.T) {
 			},
 		},
 	}
-	exp := `{"Map":{"Node1":{"Value":{"Data":"value"}}}}`
+	exp := `{
+ "Map": {
+  "Node1": {
+   "Value": {
+    "Data": "value"
+   }
+  }
+ }
+}`
 	rcv := onm.String()
 	if rcv != exp {
 		t.Errorf("Expected %v but received %v", exp, rcv)

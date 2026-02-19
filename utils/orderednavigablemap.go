@@ -42,7 +42,7 @@ type OrderedNavigableMap struct {
 
 // String returns the map as json string
 func (onm *OrderedNavigableMap) String() string {
-	return ToJSON(onm.nm)
+	return ToIJSON(onm.nm)
 }
 
 // GetFirstElement returns the first element from the order
