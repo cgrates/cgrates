@@ -72,7 +72,7 @@ func (pk *radiusDP) String() string {
 
 // FieldAsInterface is part of utils.DataProvider interface
 func (pk *radiusDP) FieldAsInterface(fldPath []string) (data any, err error) {
-	if len(fldPath) != 1 {
+	if len(fldPath) == 0 || len(fldPath) > 2 {
 		return nil, utils.ErrNotFound
 	}
 	if data, err = pk.cache.FieldAsInterface(fldPath); err != nil {
@@ -83,8 +83,14 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	} else {
 		return // data found in cache
 	}
-	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
-		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
+	var attrName, vendorName string
+	if len(fldPath) == 2 {
+		vendorName, attrName = fldPath[0], fldPath[1]
+	} else {
+		attrName = fldPath[0]
+	}
+	if avps := pk.req.AttributesWithName(attrName, vendorName); len(avps) != 0 {
+		data = avps[0].GetStringValue()
 	}
 	pk.cache.Set(fldPath, data)
 	return
