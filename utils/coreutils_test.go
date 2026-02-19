@@ -2017,6 +2017,27 @@ func TestGetEndOfMonth(t *testing.T) {
 	}
 }
 
+// go test ./utils/ -bench BenchmarkToJSON -benchtime=1s -benchmem
+func BenchmarkToJSON(b *testing.B) {
+	v := map[string]any{
+		"Result-Code": "2001",
+		"Granted-Service-Unit": map[string]any{
+			"CC-Time": 300,
+		},
+		"Session-Id": "cgrates;1052943642;938",
+	}
+	b.Run("ToJSON", func(b *testing.B) {
+		for b.Loop() {
+			ToJSON(v)
+		}
+	})
+	b.Run("ToIJSON", func(b *testing.B) {
+		for b.Loop() {
+			ToIJSON(v)
+		}
+	})
+}
+
 func TestParseBinarySize(t *testing.T) {
 	type args struct {
 		size string
