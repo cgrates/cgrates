@@ -39,6 +39,7 @@ var (
 	// Globals used
 	dataDbCsv       *DataManager // Each dataDb will have it's own sources to collect data
 	lCfg            *config.CGRConfig
+	loaderConnMgr   *ConnManager
 	loader          *TpReader
 	loaderConfigDIR string
 	loaderCfgPath   string
@@ -113,8 +114,8 @@ func testLoaderITInitDataDB(t *testing.T) {
 		return strings.TrimPrefix(key, "V1")
 	})
 	cacheChan <- srv
-	connMgr = NewConnManager(lCfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
+	loaderConnMgr = NewConnManager(lCfg)
+	loaderConnMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv
@@ -131,7 +132,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, connMgr)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderConnMgr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -178,7 +179,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, connMgr)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderConnMgr)
 	if err != nil {
 		t.Error(err)
 	}
