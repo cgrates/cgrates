@@ -701,6 +701,13 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false
 		// 	}
 		// ],
+		//  "*rates": [
+        //  {
+        //      "Tenant": "*any",
+        //      "FilterIDs": [],
+        //      "Value": false
+        //  }
+        // ],
 		// "*attributes": [
 		// 	{
 		// 		"Tenant": "*any",

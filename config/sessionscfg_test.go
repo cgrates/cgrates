@@ -137,6 +137,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
+			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
 			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
@@ -376,6 +377,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
+			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
 			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
@@ -540,6 +542,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
+			utils.MetaRates:                     []*DynamicBoolOpt{{}},
 			utils.MetaAttributes:                []*DynamicBoolOpt{{}},
 			utils.MetaCDRs:                      []*DynamicBoolOpt{{}},
 			utils.MetaChargers:                  []*DynamicBoolOpt{{}},
@@ -665,6 +668,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
+			utils.MetaRates:                     []*DynamicBoolOpt{{}},
 			utils.MetaAttributes:                []*DynamicBoolOpt{{}},
 			utils.MetaCDRs:                      []*DynamicBoolOpt{{}},
 			utils.MetaChargers:                  []*DynamicBoolOpt{{}},

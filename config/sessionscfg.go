@@ -30,6 +30,7 @@ import (
 
 const (
 	SessionsAccountsDftOpt               = false
+	SessionsRatesDftOpt                  = false
 	SessionsAttributesDftOpt             = false
 	SessionsCDRsDftOpt                   = false
 	SessionsChargersDftOpt               = false
@@ -158,6 +159,13 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 			return err
 		}
 		sesOpts.Accounts = append(opt, sesOpts.Accounts...)
+	}
+	if jsnCfg.Rates != nil {
+		opt, err := IfaceToBoolDynamicOpts(jsnCfg.Rates)
+		if err != nil {
+			return err
+		}
+		sesOpts.Rates = append(opt, sesOpts.Rates...)
 	}
 	if jsnCfg.Attributes != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Attributes)
@@ -533,6 +541,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 	}
 	opts := map[string]any{
 		utils.MetaAccounts:                  scfg.Opts.Accounts,
+		utils.MetaRates:                     scfg.Opts.Rates,
 		utils.MetaAttributes:                scfg.Opts.Attributes,
 		utils.MetaCDRs:                      scfg.Opts.CDRs,
 		utils.MetaChargers:                  scfg.Opts.Chargers,
@@ -634,6 +643,7 @@ func (scfg SessionSCfg) CloneSection() Section { return scfg.Clone() }
 func (o *SessionsOpts) Clone() *SessionsOpts {
 	return &SessionsOpts{
 		Accounts:               CloneDynamicBoolOpt(o.Accounts),
+		Rates:                  CloneDynamicBoolOpt(o.Rates),
 		Attributes:             CloneDynamicBoolOpt(o.Attributes),
 		CDRs:                   CloneDynamicBoolOpt(o.CDRs),
 		Chargers:               CloneDynamicBoolOpt(o.Chargers),
@@ -829,6 +839,7 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 
 type SessionsOptsJson struct {
 	Accounts               []*DynamicInterfaceOpt `json:"*accounts"`
+	Rates                  []*DynamicInterfaceOpt `json:"*rates"`
 	Attributes             []*DynamicInterfaceOpt `json:"*attributes"`
 	CDRs                   []*DynamicInterfaceOpt `json:"*cdrs"`
 	Chargers               []*DynamicInterfaceOpt `json:"*chargers"`
@@ -902,6 +913,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.Accounts, v2.Accounts) {
 		d.Accounts = BoolToIfaceDynamicOpts(v2.Accounts)
+	}
+	if !DynamicBoolOptEqual(v1.Rates, v2.Rates) {
+		d.Rates = BoolToIfaceDynamicOpts(v2.Rates)
 	}
 	if !DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
 		d.Attributes = BoolToIfaceDynamicOpts(v2.Attributes)
