@@ -862,6 +862,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if chrgrs, err = sS.processChargerS(ctx, apiArgs); err != nil {
 			return
 		}
+		apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
