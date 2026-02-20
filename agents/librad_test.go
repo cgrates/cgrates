@@ -166,9 +166,22 @@ func TestLibradRadiusDPString(t *testing.T) {
 	}
 }
 
+func TestRadiusDPFieldAsInterfaceVSA(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Fatal(err)
+	}
+	dp := newRADataProvider(pkt)
+	if data, err := dp.FieldAsInterface([]string{"Cisco", "Cisco-NAS-Port"}); err != nil {
+		t.Error(err)
+	} else if data != "CGR1" {
+		t.Errorf("Expected CGR1, got: %v", data)
+	}
+}
+
 func TestLibradFieldAsInterfaceWithInvalidPathLength(t *testing.T) {
 	pk := &radiusDP{}
-	fldPath := []string{"attribute1", "attribute2"}
+	fldPath := []string{"vendor", "attribute", "extra"}
 	data, err := pk.FieldAsInterface(fldPath)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected ErrNotFound error, got: %v", err)
