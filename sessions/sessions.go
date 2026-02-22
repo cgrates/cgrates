@@ -999,7 +999,7 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 // accountsMaxAbstracts will query the AccountS cost for Event
 func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
 	if len(sS.cfg.SessionSCfg().AccountSConns) == 0 {
-		err = errors.New("AccountS is disabled")
+		err = utils.NewErrNotConnected(utils.AccountS)
 		return
 	}
 	var acntCost utils.EventCharges
@@ -1013,7 +1013,7 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 // ratesCost will query the RateS cost for Event
 func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (cost *utils.Decimal, err error) {
 	if len(sS.cfg.SessionSCfg().RateSConns) == 0 {
-		err = errors.New("RateS is disabled")
+		err = utils.NewErrNotConnected(utils.RateS)
 		return
 	}
 	var rtsCost utils.RateProfileCost
@@ -2395,7 +2395,7 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 // processStats will receive the event and send it to StatS to be processed
 func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
 	if len(sS.cfg.SessionSCfg().StatSConns) == 0 {
-		return sIDs, utils.NewErrNotConnected(utils.StatS)
+		return nil, utils.NewErrNotConnected(utils.StatS)
 	}
 
 	cgrEv.SetCloneable(clnb)
@@ -2407,7 +2407,7 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply routes.SortedRoutesList, err error) {
 	if len(sS.cfg.SessionSCfg().RouteSConns) == 0 {
-		return routesReply, utils.NewErrNotConnected(utils.RouteS)
+		return nil, utils.NewErrNotConnected(utils.RouteS)
 	}
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd
@@ -2420,9 +2420,9 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 }
 
 // processAttributes will receive the event and send it to AttributeS to be processed
-func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv attributes.AttrSProcessEventReply, err error) {
+func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv *attributes.AttrSProcessEventReply, err error) {
 	if len(sS.cfg.SessionSCfg().AttributeSConns) == 0 {
-		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
+		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(engine.MapEvent)

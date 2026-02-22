@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 )
@@ -100,7 +101,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		rplyAttr, err := sS.processAttributes(ctx, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
-			authReply.Attributes = &rplyAttr
+			authReply.Attributes = rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -329,7 +330,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		rplyAttr, err := sS.processAttributes(ctx, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
-			rply.Attributes = &rplyAttr
+			rply.Attributes = rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -529,7 +530,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 		rplyAttr, err := sS.processAttributes(ctx, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
-			rply.Attributes = &rplyAttr
+			rply.Attributes = rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -844,7 +845,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			}
 		} else {
 			*apiArgs = *rplyAttr.CGREvent
-			apiRply.Attributes[utils.MetaDefault] = &rplyAttr
+			apiRply.Attributes[utils.MetaDefault] = rplyAttr
 		}
 	}
 
@@ -895,18 +896,49 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				return errRTs
 			}
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
 					utils.SessionS, err.Error(), cgrEv, utils.RateS))
 		} else if rtS {
 			var rtsCost *utils.Decimal
 			if rtsCost, err = sS.ratesCost(ctx, cgrEv); err != nil {
-				return
+				if cch[utils.OptsSesBlockerError].(bool) {
+					return
+				}
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.RateS))
 			}
 			if apiRply.RateSCost == nil {
 				apiRply.RateSCost = make(map[string]float64)
 			}
 			costFlt, _ := rtsCost.Float64()
 			apiRply.RateSCost[runID] = costFlt
+		}
+
+		// RouteS Enabled
+		if rous, errRous := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Routes,
+			utils.MetaRoutes); errRous != nil {
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errRous
+			}
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, err.Error(), cgrEv, utils.RouteS))
+		} else if rous {
+			var rous routes.SortedRoutesList
+			if rous, err = sS.getRoutes(ctx, cgrEv); err != nil {
+				if cch[utils.OptsSesBlockerError].(bool) {
+					return
+				}
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.RouteS))
+			}
+			if apiRply.RouteProfiles == nil {
+				apiRply.RouteProfiles = make(map[string]routes.SortedRoutesList)
+			}
+			apiRply.RouteProfiles[runID] = rous
 		}
 
 		// IPs Enabled
