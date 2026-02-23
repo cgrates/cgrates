@@ -38,7 +38,9 @@ import (
 	"github.com/cgrates/go-diameter/diam/avp"
 	"github.com/cgrates/go-diameter/diam/datatype"
 	"github.com/cgrates/go-diameter/diam/dict"
+	"github.com/cgrates/radigo"
 	"github.com/cgrates/sipingo"
+	"github.com/miekg/dns"
 )
 
 func TestAgentCapsIT(t *testing.T) {
@@ -86,6 +88,18 @@ func TestAgentCapsIT(t *testing.T) {
 		"request_processors": []
 	}
 ],
+"radius_agent": {
+	"enabled": true
+},
+"dns_agent": {
+	"enabled": true,
+	"listeners":[
+		{
+			"address": "127.0.0.1:2053",
+			"network": "udp"
+		}
+	]
+},
 "sip_agent": {
 	"enabled": true,
 	"listen": "127.0.0.1:5099",
@@ -102,79 +116,105 @@ func TestAgentCapsIT(t *testing.T) {
 	}
 	client, cfg := ng.Run(t)
 
-	time.Sleep(10 * time.Millisecond) // wait for DiameterAgent service to start
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
-		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
-		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
-	if err != nil {
-		t.Fatal(err)
-	}
+	var i int // shared request counter across subtests
 
-	reqIdx := 0
-	sendCCR := func(t *testing.T, replyTimeout time.Duration, wg *sync.WaitGroup, wantResultCode string) {
-		t.Helper()
-		if wg != nil {
-			defer wg.Done()
-		}
-		reqIdx++
-		ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-		ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(fmt.Sprintf("session%d", reqIdx)))
-		ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-		ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-		ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
-		ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
-		ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
-
-		if err := diamClient.SendMessage(ccr); err != nil {
-			t.Errorf("failed to send diameter message: %v", err)
-			return
-		}
-
-		reply := diamClient.ReceivedMessage(replyTimeout)
-		if reply == nil {
-			t.Error("received empty reply")
-			return
-		}
-
-		avps, err := reply.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+	t.Run("DiameterAgent", func(t *testing.T) {
+		time.Sleep(10 * time.Millisecond) // wait for DiameterAgent service to start
+		diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
 		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(avps) == 0 {
-			t.Error("missing AVPs in reply")
-			return
+			t.Fatal(err)
 		}
 
-		resultCode, err := diamAVPAsString(avps[0])
+		// There is currently no traffic. Expecting Result-Code 5012 (DIAMETER_UNABLE_TO_COMPLY),
+		// because there are no request processors enabled.
+		sendCCR(t, diamClient, &i, "5012")
+
+		// Caps limit is 2, therefore expecting the same result as in the scenario above.
+		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
+		sendCCR(t, diamClient, &i, "5012")
+		<-doneCh
+
+		// With caps limit reached, Result-Code 3004 (DIAMETER_TOO_BUSY) is expected.
+		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
+		sendCCR(t, diamClient, &i, "3004")
+		<-doneCh
+	})
+
+	t.Run("RadiusAgent auth", func(t *testing.T) {
+		radAuthClient, err := radigo.NewClient(utils.UDP, "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil, nil)
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
-		if resultCode != wantResultCode {
-			t.Errorf("Result-Code=%s, want %s", resultCode, wantResultCode)
+
+		// No traffic. With no request processors, the handler returns nil
+		// so the radius server sends no reply.
+		sendRadReq(t, radAuthClient, radigo.AccessRequest, &i, radigo.AccessAccept)
+
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendRadReq(t, radAuthClient, radigo.AccessRequest, &i, radigo.AccessAccept)
+		<-doneCh
+
+		// With caps limit reached, AccessReject with caps error is expected.
+		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendRadReq(t, radAuthClient, radigo.AccessRequest, &i, radigo.AccessReject)
+		<-doneCh
+	})
+
+	t.Run("RadiusAgent acct", func(t *testing.T) {
+		radAcctClient, err := radigo.NewClient(utils.UDP, "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil, nil)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
 
-	// There is currently no traffic. Expecting Result-Code 5012 (DIAMETER_UNABLE_TO_COMPLY),
-	// because there are no request processors enabled.
-	diamReplyTimeout := 2 * time.Second
-	sendCCR(t, diamReplyTimeout, nil, "5012")
+		// No traffic. With no request processors, the handler returns nil
+		// so the radius server sends no reply.
+		sendRadReq(t, radAcctClient, radigo.AccountingRequest, &i, 0)
 
-	// Caps limit is 2, therefore expecting the same result as in the scenario above.
-	doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
-	time.Sleep(time.Millisecond) // ensure traffic requests have been sent
-	sendCCR(t, diamReplyTimeout, nil, "5012")
-	<-doneCh
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendRadReq(t, radAcctClient, radigo.AccountingRequest, &i, 0)
+		<-doneCh
 
-	// With caps limit reached, Result-Code 3004 (DIAMETER_TOO_BUSY) is expected.
-	doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
-	time.Sleep(time.Millisecond) // ensure traffic requests have been sent
-	sendCCR(t, diamReplyTimeout, nil, "3004")
-	<-doneCh
+		// With caps limit reached, AccountingResponse with caps error is expected.
+		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		sendRadReq(t, radAcctClient, radigo.AccountingRequest, &i, radigo.AccountingResponse)
+		<-doneCh
+	})
 
-	// TODO: Check caps functionality with async diameter requests.
+	t.Run("DNSAgent", func(t *testing.T) {
+		dnsAddr := cfg.DNSAgentCfg().Listeners[0].Address
+		dnsConn, err := (&dns.Client{}).Dial(dnsAddr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer dnsConn.Close()
+
+		// No traffic. Expecting ServerFailure because there
+		// are no request processors enabled.
+		writeDNSMsg(t, dnsConn, dns.RcodeServerFailure)
+
+		// Caps limit is 2, therefore expecting the same result.
+		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		writeDNSMsg(t, dnsConn, dns.RcodeServerFailure)
+		<-doneCh
+
+		// With caps limit reached, Refused is expected.
+		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond)
+		writeDNSMsg(t, dnsConn, dns.RcodeRefused)
+		<-doneCh
+	})
 
 	t.Run("HTTPAgent", func(t *testing.T) {
 		httpURL := fmt.Sprintf("http://%s/caps_test", cfg.ListenCfg().HTTPListen)
@@ -215,6 +255,118 @@ func TestAgentCapsIT(t *testing.T) {
 		sendSIPReq(t, sipAddr, "SIP/2.0 503 Service Unavailable")
 		<-doneCh
 	})
+}
+
+func sendCCR(t *testing.T, client *DiameterClient, reqIdx *int, wantResultCode string) {
+	t.Helper()
+	*reqIdx++
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(fmt.Sprintf("session%d", *reqIdx)))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+
+	if err := client.SendMessage(ccr); err != nil {
+		t.Errorf("failed to send diameter message: %v", err)
+		return
+	}
+
+	reply := client.ReceivedMessage(2 * time.Second)
+	if reply == nil {
+		t.Error("received empty reply")
+		return
+	}
+
+	avps, err := reply.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(avps) == 0 {
+		t.Error("missing AVPs in reply")
+		return
+	}
+
+	resultCode, err := diamAVPAsString(avps[0])
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if resultCode != wantResultCode {
+		t.Errorf("Result-Code=%s, want %s", resultCode, wantResultCode)
+	}
+}
+
+func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, reqIdx *int, wantReplyCode radigo.PacketCode) {
+	t.Helper()
+	*reqIdx++
+	req := client.NewRequest(reqType, uint8(*reqIdx))
+	if err := req.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := req.AddAVPWithName("User-Password", "CGRateSPassword1", ""); err != nil {
+		t.Fatal(err)
+	}
+	req.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword1"), []byte("CGRateS.org"), req.Authenticator[:])
+	if err := req.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := req.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := req.AddAVPWithName("Acct-Session-Id", fmt.Sprintf("session%d", *reqIdx), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := req.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Fatal(err)
+	}
+
+	reply, err := client.SendRequest(req)
+
+	switch wantReplyCode {
+	case radigo.AccessAccept, 0:
+		return
+	case radigo.AccessReject, radigo.AccountingResponse:
+		if err != nil {
+			t.Errorf("SendRequest error: %v", err)
+			return
+		}
+		if reply == nil {
+			t.Error("expected rejection reply, got nil")
+			return
+		}
+		if reply.Code != wantReplyCode {
+			t.Errorf("Code=%v, want %v", reply.Code, wantReplyCode)
+			return
+		}
+		if len(reply.AVPs) != 1 {
+			t.Errorf("want 1 AVP, got: %s", utils.ToJSON(reply))
+			return
+		}
+		got := string(reply.AVPs[0].RawValue)
+		want := utils.ErrMaxConcurentRPCExceededNoCaps.Error()
+		if got != want {
+			t.Errorf("Reply-Message=%q, want %q", got, want)
+		}
+	}
+}
+
+func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
+	t.Helper()
+	m := new(dns.Msg)
+	m.SetQuestion("cgrates.org.", dns.TypeA)
+	if err := conn.WriteMsg(m); err != nil {
+		t.Fatal(err)
+	}
+	reply, err := conn.ReadMsg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Rcode != wantRcode {
+		t.Errorf("Rcode=%d, want %d", reply.Rcode, wantRcode)
+	}
 }
 
 func sendHTTPReq(t *testing.T, url string, wantStatus int) {
