@@ -52,9 +52,8 @@ func radAppendAttributes(packet *radigo.Packet, nm *utils.OrderedNavigableMap) e
 }
 
 // newRADataProvider constructs a DataProvider
-func newRADataProvider(req *radigo.Packet) (dP utils.DataProvider) {
-	dP = &radiusDP{req: req, cache: utils.MapStorage{}}
-	return
+func newRADataProvider(req *radigo.Packet) utils.DataProvider {
+	return &radiusDP{req: req, cache: utils.MapStorage{}}
 }
 
 // radiusDP implements utils.DataProvider, serving as radigo.Packet data decoder
@@ -71,37 +70,38 @@ func (pk *radiusDP) String() string {
 }
 
 // FieldAsInterface is part of utils.DataProvider interface
-func (pk *radiusDP) FieldAsInterface(fldPath []string) (data any, err error) {
+func (pk *radiusDP) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) == 0 || len(fldPath) > 2 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = pk.cache.FieldAsInterface(fldPath); err != nil {
-		if err != utils.ErrNotFound { // item found in cache
-			return
-		}
-		err = nil // cancel previous err
-	} else {
-		return // data found in cache
+	data, err := pk.cache.FieldAsInterface(fldPath)
+	if err == nil {
+		return data, nil
 	}
+	if err != utils.ErrNotFound {
+		return nil, err
+	}
+
 	var attrName, vendorName string
 	if len(fldPath) == 2 {
 		vendorName, attrName = fldPath[0], fldPath[1]
 	} else {
 		attrName = fldPath[0]
 	}
-	if avps := pk.req.AttributesWithName(attrName, vendorName); len(avps) != 0 {
-		data = avps[0].GetStringValue()
+	avps := pk.req.AttributesWithName(attrName, vendorName)
+	if len(avps) == 0 {
+		return nil, utils.ErrNotFound
 	}
+	data = avps[0].GetStringValue()
 	pk.cache.Set(fldPath, data)
-	return
+	return data, nil
 }
 
 // FieldAsString is part of utils.DataProvider interface
-func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface any
-	valIface, err = pk.FieldAsInterface(fldPath)
+func (pk *radiusDP) FieldAsString(fldPath []string) (string, error) {
+	valIface, err := pk.FieldAsInterface(fldPath)
 	if err != nil {
-		return
+		return "", err
 	}
 	return utils.IfaceAsString(valIface), nil
 }

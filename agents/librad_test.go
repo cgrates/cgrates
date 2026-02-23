@@ -179,6 +179,17 @@ func TestRadiusDPFieldAsInterfaceVSA(t *testing.T) {
 	}
 }
 
+func TestRadiusDPFieldAsInterfaceNotFound(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	dp := newRADataProvider(pkt)
+	if _, err := dp.FieldAsInterface([]string{"Nonexistent-Attr"}); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got: %v", err)
+	}
+	if _, err := dp.FieldAsInterface([]string{"Cisco", "Nonexistent-Attr"}); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound for VSA, got: %v", err)
+	}
+}
+
 func TestLibradFieldAsInterfaceWithInvalidPathLength(t *testing.T) {
 	pk := &radiusDP{}
 	fldPath := []string{"vendor", "attribute", "extra"}
