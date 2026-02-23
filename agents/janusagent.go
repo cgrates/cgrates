@@ -39,11 +39,12 @@ import (
 
 func NewJanusAgent(cgrCfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	filterS *engine.FilterS) (*JanusAgent, error) {
+	filterS *engine.FilterS, caps *engine.Caps) (*JanusAgent, error) {
 	jsa := &JanusAgent{
 		cgrCfg:  cgrCfg,
 		connMgr: connMgr,
 		filterS: filterS,
+		caps:    caps,
 	}
 	srv, _ := birpc.NewService(jsa, "", false)
 	jsa.ctx = context.WithClient(context.TODO(), srv)
@@ -54,6 +55,7 @@ type JanusAgent struct {
 	cgrCfg  *config.CGRConfig
 	connMgr *engine.ConnManager
 	filterS *engine.FilterS
+	caps    *engine.Caps
 	jnsConn *janus.Gateway
 	adminWs *websocket.Conn
 	ctx     *context.Context
@@ -91,6 +93,13 @@ func (ja *JanusAgent) CORSOptions(w http.ResponseWriter, req *http.Request) {
 // CreateSession will create a new session within janusgo
 func (ja *JanusAgent) CreateSession(w http.ResponseWriter, req *http.Request) {
 	janusAccessControlHeaders(w, req)
+	if ja.caps.IsLimited() {
+		if err := ja.caps.Allocate(); err != nil {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		defer ja.caps.Deallocate()
+	}
 	var msg janus.BaseMsg
 	if err := json.NewDecoder(req.Body).Decode(&msg); err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -191,6 +200,13 @@ func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
 // SessioNKeepalive sends keepalive once OPTIONS are coming for the session from HTTP
 func (ja *JanusAgent) SessionKeepalive(w http.ResponseWriter, r *http.Request) {
 	janusAccessControlHeaders(w, r)
+	if ja.caps.IsLimited() {
+		if err := ja.caps.Allocate(); err != nil {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		defer ja.caps.Deallocate()
+	}
 	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
@@ -223,6 +239,13 @@ func (ja *JanusAgent) SessionKeepalive(w http.ResponseWriter, r *http.Request) {
 // PollSession will create a long-poll request to be notified about events and incoming messages from session
 func (ja *JanusAgent) PollSession(w http.ResponseWriter, req *http.Request) {
 	janusAccessControlHeaders(w, req)
+	if ja.caps.IsLimited() {
+		if err := ja.caps.Allocate(); err != nil {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		defer ja.caps.Deallocate()
+	}
 	sessionID, err := strconv.ParseUint(req.PathValue("sessionID"), 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
@@ -274,6 +297,13 @@ func (ja *JanusAgent) PollSession(w http.ResponseWriter, req *http.Request) {
 // AttachPlugin will attach a plugin to a session
 func (ja *JanusAgent) AttachPlugin(w http.ResponseWriter, r *http.Request) {
 	janusAccessControlHeaders(w, r)
+	if ja.caps.IsLimited() {
+		if err := ja.caps.Allocate(); err != nil {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		defer ja.caps.Deallocate()
+	}
 	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
@@ -323,6 +353,13 @@ func (ja *JanusAgent) AttachPlugin(w http.ResponseWriter, r *http.Request) {
 // HandlePlugin will handle requests towards a plugin
 func (ja *JanusAgent) HandlePlugin(w http.ResponseWriter, r *http.Request) {
 	janusAccessControlHeaders(w, r)
+	if ja.caps.IsLimited() {
+		if err := ja.caps.Allocate(); err != nil {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		defer ja.caps.Deallocate()
+	}
 	sessionID, err := strconv.ParseUint(r.PathValue("sessionID"), 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid session ID", http.StatusBadRequest)
