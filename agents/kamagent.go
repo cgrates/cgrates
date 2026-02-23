@@ -45,11 +45,12 @@ var (
 )
 
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
-	connMgr *engine.ConnManager, timezone string) (ka *KamailioAgent) {
+	connMgr *engine.ConnManager, timezone string, caps *engine.Caps) (ka *KamailioAgent) {
 	ka = &KamailioAgent{
 		cfg:              kaCfg,
 		connMgr:          connMgr,
 		timezone:         timezone,
+		caps:             caps,
 		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
 		activeSessionIDs: make(chan []*sessions.SessionID),
 	}
@@ -62,6 +63,7 @@ type KamailioAgent struct {
 	cfg              *config.KamAgentCfg
 	connMgr          *engine.ConnManager
 	timezone         string
+	caps             *engine.Caps
 	conns            []*kamevapi.KamEvapi
 	activeSessionIDs chan []*sessions.SessionID
 	ctx              *context.Context
@@ -108,6 +110,15 @@ func (self *KamailioAgent) Shutdown() (err error) {
 
 // onCgrAuth is called when new event of type CGR_AUTH_REQUEST is coming
 func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting auth request: %v",
+					utils.KamailioAgent, err))
+			return
+		}
+		defer ka.caps.Deallocate()
+	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
@@ -153,6 +164,15 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting call start: %v",
+					utils.KamailioAgent, err))
+			return
+		}
+		defer ka.caps.Deallocate()
+	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
@@ -193,6 +213,15 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting call end: %v",
+					utils.KamailioAgent, err))
+			return
+		}
+		defer ka.caps.Deallocate()
+	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
@@ -262,6 +291,15 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting process message: %v",
+					utils.KamailioAgent, err))
+			return
+		}
+		defer ka.caps.Deallocate()
+	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
@@ -316,6 +354,15 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting process CDR: %v",
+					utils.KamailioAgent, err))
+			return
+		}
+		defer ka.caps.Deallocate()
+	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
