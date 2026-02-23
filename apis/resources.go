@@ -196,31 +196,31 @@ type ResourceSv1 struct {
 }
 
 // V1GetResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceSv1) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *resources.Resources) (err error) {
+func (rS *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *resources.Resources) (err error) {
 	return rS.rsS.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceSv1) V1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1AuthorizeResources(ctx, args, reply)
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (rS *ResourceSv1) V1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1AllocateResources(ctx, args, reply)
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (rS *ResourceSv1) V1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (rS *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1ReleaseResources(ctx, args, reply)
 }
 
 // V1GetResource returns a resource
-func (rS *ResourceSv1) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
+func (rS *ResourceSv1) GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	return rS.rsS.V1GetResource(ctx, arg, reply)
 }
 
 // V1GetResource returns a resource configuration
-func (rS *ResourceSv1) V1GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
+func (rS *ResourceSv1) GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
 	return rS.rsS.V1GetResourceWithConfig(ctx, arg, reply)
 }

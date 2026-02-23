@@ -192,11 +192,11 @@ type ChargerSv1 struct {
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (chgS *ChargerSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*chargers.ChrgSProcessEventReply) (err error) {
+func (chgS *ChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*chargers.ChrgSProcessEventReply) (err error) {
 	return chgS.chgs.V1ProcessEvent(ctx, args, reply)
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (chgS *ChargerSv1) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, rply *[]*utils.ChargerProfile) (err error) {
+func (chgS *ChargerSv1) GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, rply *[]*utils.ChargerProfile) (err error) {
 	return chgS.chgs.V1GetChargersForEvent(ctx, args, rply)
 }

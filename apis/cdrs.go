@@ -72,16 +72,16 @@ type CdrSv1 struct {
 }
 
 // V1ProcessEvent will process the CGREvent
-func (cdrS *CdrSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (cdrS *CdrSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return cdrS.cdrs.V1ProcessEvent(ctx, args, reply)
 }
 
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CdrSv1) V1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
+func (cdrS *CdrSv1) ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
 	return cdrS.cdrs.V1ProcessEventWithGet(ctx, args, evs)
 }
 
 // V1ProcessStoredEvents processes stored events based on provided filters.
-func (cdrS *CdrSv1) V1ProcessStoredEvents(ctx *context.Context, args *utils.CDRFilters, reply *string) (err error) {
+func (cdrS *CdrSv1) ProcessStoredEvents(ctx *context.Context, args *utils.CDRFilters, reply *string) (err error) {
 	return cdrS.cdrs.V1ProcessStoredEvents(ctx, args, reply)
 }
