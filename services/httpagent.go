@@ -54,6 +54,7 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, ha.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -62,6 +63,7 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	ha.mu.Lock()
 	defer ha.mu.Unlock()
@@ -71,7 +73,7 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 		cl.RegisterHttpHandler(agntCfg.URL,
 			agents.NewHTTPAgent(cm, agntCfg.SessionSConns, agntCfg.StatSConns, agntCfg.ThresholdSConns,
 				fs, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload, agntCfg.ReplyPayload,
-				agntCfg.RequestProcessors))
+				agntCfg.RequestProcessors, caps))
 	}
 	return
 }
