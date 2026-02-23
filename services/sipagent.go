@@ -51,6 +51,7 @@ func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -58,11 +59,12 @@ func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 	}
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	sip.mu.Lock()
 	defer sip.mu.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, fs)
+	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, fs, caps)
 	if err != nil {
 		return
 	}
