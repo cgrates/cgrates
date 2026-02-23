@@ -193,21 +193,21 @@ type RankingSv1 struct {
 }
 
 // V1ScheduleQueries manually schedules or reschedules ranking queries.
-func (rnkS *RankingSv1) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
+func (rnkS *RankingSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
 	return rnkS.rnkS.V1ScheduleQueries(ctx, args, scheduled)
 }
 
 // V1GetRanking retrieves ranking metrics with optional filtering.
-func (rnkS *RankingSv1) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
+func (rnkS *RankingSv1) GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
 	return rnkS.rnkS.V1GetRanking(ctx, arg, retRanking)
 }
 
 // V1GetSchedule retrieves information about currently scheduled rankings.
-func (rnkS *RankingSv1) V1GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
+func (rnkS *RankingSv1) GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
 	return rnkS.rnkS.V1GetSchedule(ctx, args, schedRankings)
 }
 
 // V1GetRankingSummary retrieves the most recent ranking summary.
-func (rnkS *RankingSv1) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+func (rnkS *RankingSv1) GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
 	return rnkS.rnkS.V1GetRankingSummary(ctx, arg, reply)
 }

@@ -195,32 +195,32 @@ type IPSv1 struct {
 }
 
 // V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
-func (ipS *IPSv1) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) error {
+func (ipS *IPSv1) GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocationForEvent(ctx, args, reply)
 }
 
 // V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
-func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
+func (ipS *IPSv1) AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AuthorizeIP(ctx, args, reply)
 }
 
 // V1AllocateIP allocates an IP address for the given event.
-func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
+func (ipS *IPSv1) AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AllocateIP(ctx, args, reply)
 }
 
 // V1ReleaseIP releases an allocated IP address for the given event.
-func (ipS *IPSv1) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (ipS *IPSv1) ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return ipS.ips.V1ReleaseIP(ctx, args, reply)
 }
 
 // V1GetIPAllocations returns all IP allocations for a tenantID.
-func (ipS *IPSv1) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
+func (ipS *IPSv1) GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocations(ctx, arg, reply)
 }
 
 // V1ClearIPAllocations clears IP allocations from an IPAllocations object.
 // If args.AllocationIDs is empty or nil, all allocations will be cleared.
-func (ipS *IPSv1) V1ClearIPAllocations(ctx *context.Context, arg *utils.ClearIPAllocationsArgs, reply *string) error {
+func (ipS *IPSv1) ClearIPAllocations(ctx *context.Context, arg *utils.ClearIPAllocationsArgs, reply *string) error {
 	return ipS.ips.V1ClearIPAllocations(ctx, arg, reply)
 }

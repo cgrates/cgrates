@@ -192,21 +192,21 @@ type TrendSv1 struct {
 }
 
 // V1ScheduleQueries manually schedules or reschedules trend queries.
-func (tS *TrendSv1) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
+func (tS *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
 	return tS.trndS.V1ScheduleQueries(ctx, args, scheduled)
 }
 
 // V1GetTrend retrieves trend metrics with optional time and index filtering.
-func (tS *TrendSv1) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
+func (tS *TrendSv1) GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
 	return tS.trndS.V1GetTrend(ctx, arg, retTrend)
 }
 
 // V1GetScheduledTrends retrieves information about currently scheduled trends.
-func (tS *TrendSv1) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
+func (tS *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
 	return tS.trndS.V1GetScheduledTrends(ctx, args, schedTrends)
 }
 
 // V1GetTrendSummary retrieves the most recent trend summary.
-func (tS *TrendSv1) V1GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
+func (tS *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
 	return tS.trndS.V1GetTrendSummary(ctx, arg, reply)
 }

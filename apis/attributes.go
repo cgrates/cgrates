@@ -196,11 +196,11 @@ type AttributeSv1 struct {
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (atrS *AttributeSv1) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent, attrPrf *utils.APIAttributeProfile) (err error) {
-	return atrS.V1GetAttributeForEvent(ctx, args, attrPrf)
+func (atrS *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent, attrPrf *utils.APIAttributeProfile) (err error) {
+	return atrS.atrs.V1GetAttributeForEvent(ctx, args, attrPrf)
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (atrS *AttributeSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *attributes.AttrSProcessEventReply) (err error) {
-	return atrS.V1ProcessEvent(ctx, args, attrEvntRpl)
+func (atrS *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *attributes.AttrSProcessEventReply) (err error) {
+	return atrS.atrs.V1ProcessEvent(ctx, args, attrEvntRpl)
 }

@@ -326,12 +326,12 @@ type RateSv1 struct {
 }
 
 // V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
-func (rtS *RateSv1) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+func (rtS *RateSv1) RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
 	return rtS.rtS.V1RateProfilesForEvent(ctx, args, rpIDs)
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rS *RateSv1) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
+func (rS *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
 	return rS.rtS.V1RateProfileRatesForEvent(ctx, args, rtIDs)
 }
 
@@ -339,6 +339,6 @@ func (rS *RateSv1) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.
 // profiles. If a higher priority profile fails, it tries the next matching
 // profile. This continues until a valid cost is found or all profiles are
 // exhausted.
-func (rS *RateSv1) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
+func (rS *RateSv1) CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	return rS.rtS.V1CostForEvent(ctx, args, rpCost)
 }
