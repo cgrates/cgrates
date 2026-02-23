@@ -50,6 +50,7 @@ func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanag
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, fS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -57,11 +58,12 @@ func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanag
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	fS.Lock()
 	defer fS.Unlock()
 
-	fS.fS, err = agents.NewFSsessions(fs.cfg, fs.FilterS(), fS.cfg.GeneralCfg().DefaultTimezone, cms.ConnManager())
+	fS.fS, err = agents.NewFSsessions(fs.cfg, fs.FilterS(), fS.cfg.GeneralCfg().DefaultTimezone, cms.ConnManager(), caps)
 	if err != nil {
 		return
 	}
