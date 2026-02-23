@@ -57,6 +57,7 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, ja.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -65,13 +66,14 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	ja.mu.Lock()
 	defer ja.mu.Unlock()
 	if ja.started {
 		return utils.ErrServiceAlreadyRunning
 	}
-	ja.jA, err = agents.NewJanusAgent(ja.cfg, cms.ConnManager(), fs.FilterS())
+	ja.jA, err = agents.NewJanusAgent(ja.cfg, cms.ConnManager(), fs.FilterS(), caps)
 	if err != nil {
 		return
 	}
