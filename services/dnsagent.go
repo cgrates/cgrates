@@ -53,6 +53,7 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -60,10 +61,11 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	dns.mu.Lock()
 	defer dns.mu.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager(), caps)
 	if err != nil {
 		dns.dns = nil
 		return
@@ -79,6 +81,7 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Se
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -86,6 +89,7 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Se
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	dns.mu.Lock()
 	defer dns.mu.Unlock()
@@ -94,7 +98,7 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Se
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager(), caps)
 	if err != nil {
 		dns.dns = nil
 		return
