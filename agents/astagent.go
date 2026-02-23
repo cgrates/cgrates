@@ -57,11 +57,12 @@ const (
 
 // NewAsteriskAgent constructs a new Asterisk Agent
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	connMgr *engine.ConnManager) *AsteriskAgent {
+	connMgr *engine.ConnManager, caps *engine.Caps) *AsteriskAgent {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
+		caps:        caps,
 		eventsCache: make(map[string]*utils.CGREvent),
 	}
 	srv, _ := birpc.NewService(sma, "", false)
@@ -73,6 +74,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	connMgr     *engine.ConnManager
+	caps        *engine.Caps
 	astConnIdx  int
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]any
@@ -154,6 +156,15 @@ func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
 }
 
 func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
+	if sma.caps.IsLimited() {
+		if err := sma.caps.Allocate(); err != nil {
+			sma.hangupChannel(ev.ChannelID(),
+				fmt.Sprintf("<%s> caps limit reached, rejecting channel %s: %v",
+					utils.AsteriskAgent, ev.ChannelID(), err))
+			return
+		}
+		defer sma.caps.Deallocate()
+	}
 	// Subscribe for channel updates even after we leave Stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST,
 		fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
@@ -244,6 +255,15 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	if ev.ChannelState() != channelUp {
 		return
 	}
+	if sma.caps.IsLimited() {
+		if err := sma.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting state change for channel %s: %v",
+					utils.AsteriskAgent, ev.ChannelID(), err))
+			return
+		}
+		defer sma.caps.Deallocate()
+	}
 	sma.evCacheMux.RLock()
 	cgrEvDisp, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
@@ -284,6 +304,15 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 
 // Channel disconnect
 func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
+	if sma.caps.IsLimited() {
+		if err := sma.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting destroy for channel %s: %v",
+					utils.AsteriskAgent, ev.ChannelID(), err))
+			return
+		}
+		defer sma.caps.Deallocate()
+	}
 	chID := ev.ChannelID()
 	sma.evCacheMux.RLock()
 	cgrEvDisp, hasIt := sma.eventsCache[chID]
