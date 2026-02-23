@@ -640,15 +640,11 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	expected := ""
-	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(out, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	if _, err := agReq.ParseField(tplFlds[0]); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got: %v", err)
 	}
-	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
-		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
-		t.Error(err)
+	if _, err := agReq.ParseField(tplFlds[1]); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got: %v", err)
 	}
 }
 
