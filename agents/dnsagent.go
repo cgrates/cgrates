@@ -33,8 +33,8 @@ import (
 
 // NewDNSAgent is the constructor for DNSAgent
 func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
-	connMgr *engine.ConnManager) (da *DNSAgent, err error) {
-	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, connMgr: connMgr}
+	connMgr *engine.ConnManager, caps *engine.Caps) (da *DNSAgent, err error) {
+	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, connMgr: connMgr, caps: caps}
 	err = da.initDNSServer()
 	return
 }
@@ -44,6 +44,7 @@ type DNSAgent struct {
 	sync.RWMutex
 	cgrCfg  *config.CGRConfig // loaded CGRateS configuration
 	fltrS   *engine.FilterS   // connection towards FilterS
+	caps    *engine.Caps
 	servers []*dns.Server
 	connMgr *engine.ConnManager
 }
@@ -113,6 +114,15 @@ func (da *DNSAgent) Reload() (err error) {
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
+	if da.caps.IsLimited() {
+		if err := da.caps.Allocate(); err != nil {
+			rply := newDnsReply(req)
+			rply.Rcode = dns.RcodeRefused
+			dnsWriteMsg(w, rply)
+			return
+		}
+		defer da.caps.Deallocate()
+	}
 	dnsDP := newDnsDP(req)
 
 	rply := newDnsReply(req)
