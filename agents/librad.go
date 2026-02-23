@@ -139,7 +139,11 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		vsaMSResponde := msResponse[0].Value.(*radigo.VSA).RawValue
 		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA).RawValue
 
-		userName := req.AttributesWithName("User-Name", utils.EmptyString)[0].StringValue
+		userNameAVPs := req.AttributesWithName("User-Name", "")
+		if len(userNameAVPs) == 0 {
+			return false, utils.NewErrMandatoryIeMissing("User-Name")
+		}
+		userName := userNameAVPs[0].StringValue
 
 		if len(vsaMSChallange) != 16 || len(vsaMSResponde) != 50 {
 			return false, nil
