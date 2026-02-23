@@ -173,10 +173,8 @@ func TestRadiusDPFieldAsInterfaceCached(t *testing.T) {
 		t.Errorf("Expecting: pass123, received: <%v>", data)
 	}
 
-	if data, err := dp.FieldAsInterface([]string{"Non-Existent-Field"}); err != nil {
-		t.Error(err)
-	} else if data != nil {
-		t.Errorf("Expecting: nil, received: <%v>", data)
+	if _, err := dp.FieldAsInterface([]string{"Non-Existent-Field"}); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got: %v", err)
 	}
 
 	if _, err := dp.FieldAsInterface([]string{"vendor", "attribute", "extra"}); err != utils.ErrNotFound {
@@ -194,6 +192,17 @@ func TestRadiusDPFieldAsInterfaceVSA(t *testing.T) {
 		t.Error(err)
 	} else if data != "CGR1" {
 		t.Errorf("Expected CGR1, got: %v", data)
+	}
+}
+
+func TestRadiusDPFieldAsInterfaceNotFound(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	dp := newRADataProvider(pkt)
+	if _, err := dp.FieldAsInterface([]string{"Nonexistent-Attr"}); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got: %v", err)
+	}
+	if _, err := dp.FieldAsInterface([]string{"Cisco", "Nonexistent-Attr"}); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound for VSA, got: %v", err)
 	}
 }
 
