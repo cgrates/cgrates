@@ -609,15 +609,14 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, grace
 		}
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)
+	var dialErr error
 	for range 16 {
 		time.Sleep(backoff())
-		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err == nil {
-			break
+		if _, dialErr = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); dialErr == nil {
+			return
 		}
 	}
-	if err != nil {
-		t.Fatalf("failed to start cgr-engine: %v", err)
-	}
+	t.Fatalf("engine did not open port <%s>: %v", cfg.ListenCfg().RPCJSONListen, dialErr)
 }
 
 // serviceReceivers maps service names to their RPC receiver names.
