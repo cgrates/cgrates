@@ -154,31 +154,6 @@ func StartEngineFromString(cfgJSON string, waitEngine int, t testing.TB) (*exec.
 	return engine, nil
 }
 
-// StartEngineWithContext return reference towards the command started so we can stop it if necessary
-func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int) (engine *exec.Cmd, err error) {
-	engine = exec.CommandContext(ctx, "cgr-engine", "-config_path", cfgPath)
-	if err = engine.Start(); err != nil {
-		return nil, err
-	}
-	var cfg *config.CGRConfig
-	if cfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath); err != nil {
-		return
-	}
-	fib := utils.FibDuration(time.Millisecond, 0)
-	for i := 0; i < 16; i++ {
-		time.Sleep(fib())
-		if _, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
-			continue
-		}
-		time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
-		return
-	}
-	utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
-		err.Error(), cfg.ListenCfg().RPCJSONListen))
-	err = fmt.Errorf("engine did not open port <%s>", cfg.ListenCfg().RPCJSONListen)
-	return
-}
-
 func KillEngine(waitEngine int) error {
 	return KillProcName("cgr-engine", waitEngine)
 }
@@ -445,71 +420,49 @@ type DBCfg struct {
 	DB *DBParams `json:"db,omitempty"`
 }
 
-// parseCfg initializes and returns a CGRConfig. It handles both static and
-// dynamic configs, including custom DB settings. For dynamic configs, it
-// creates temporary configuration files in a new directory.
-func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.CGRConfig) {
+func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) *config.CGRConfig {
 	t.Helper()
 	if cfgPath == "" && cfgJSON == "" {
 		t.Fatal("missing config source")
 	}
 
-	// Defer CGRConfig constructor to avoid repetition.
-	// cfg (named return) will be set by the deferred function.
-	// cfgPath is guaranteed non-empty on successful return.
-	defer func() {
-		t.Helper()
-		var err error
-		cfg, err = config.NewCGRConfigFromPath(context.TODO(), cfgPath)
+	if cfgPath != "" && cfgJSON == "" && dbCfg.DB == nil {
+		cfg, err := config.NewCGRConfigFromPath(context.TODO(), cfgPath)
 		if err != nil {
 			t.Fatalf("could not init config from path %s: %v", cfgPath, err)
 		}
-	}()
-
-	hasCustomDBConfig := dbCfg.DB != nil
-	if cfgPath != "" && cfgJSON == "" && !hasCustomDBConfig {
-		// Config file already exists and is static; no need for
-		// further processing.
-		return
+		return cfg
 	}
-
-	// Reaching this point means the configuration is at least partially dynamic.
 
 	tmp := t.TempDir()
 	if cfgPath != "" {
-		// An existing configuration directory is specified. Since
-		// configuration is not completely static, it's better to copy
-		// its contents to the temporary directory instead.
 		if err := os.CopyFS(tmp, os.DirFS(cfgPath)); err != nil {
 			t.Fatal(err)
 		}
 	}
-	cfgPath = tmp
 
-	if hasCustomDBConfig {
-		// Create a new JSON configuration file based on the DBConfigs object.
+	if dbCfg.DB != nil {
 		b, err := json.Marshal(dbCfg)
 		if err != nil {
 			t.Fatal(err)
 		}
-		dbFilePath := filepath.Join(cfgPath, "zzz_dynamic_db.json")
-		if err := os.WriteFile(dbFilePath, b, 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(tmp, "zzz_dynamic_db.json"), b, 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	if cfgJSON != "" {
-		// A JSON configuration string has been passed to the object.
-		// It can be standalone or used to overwrite sections from an
-		// existing configuration file. In case it's the latter, ensure
-		// the file is processed towards the end.
-		filePath := filepath.Join(cfgPath, "zzz_dynamic_cgrates.json")
+		filePath := filepath.Join(tmp, "zzz_dynamic_cgrates.json")
 		if err := os.WriteFile(filePath, []byte(cfgJSON), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	return
+	cfg, err := config.NewCGRConfigFromPath(context.TODO(), tmp)
+	if err != nil {
+		t.Fatalf("could not init config from path %s: %v", tmp, err)
+	}
+	return cfg
 }
 
 // setupLoader configures the *default loader to automatically load from the
@@ -553,9 +506,6 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 				t.Fatalf("could not write to file %s: %v", filePath, err)
 			}
 		}
-		t.Cleanup(func() {
-
-		})
 	}
 }
 
