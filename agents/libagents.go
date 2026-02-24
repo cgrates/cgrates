@@ -119,6 +119,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
+			reqProcessor.Flags.Has(utils.MetaSy),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1InitiateSession,
@@ -155,6 +156,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			reqProcessor.Flags.Has(utils.MetaSy),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		var rply string
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1TerminateSession,

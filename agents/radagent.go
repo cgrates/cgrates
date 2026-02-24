@@ -390,6 +390,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.GetBool(utils.MetaIPs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
+			false,
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
@@ -426,6 +427,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
+			false,
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		var rply string
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,

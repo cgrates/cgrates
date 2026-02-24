@@ -1163,6 +1163,7 @@ const (
 	MetaIPs                 = "*ips"
 	MetaResources           = "*resources"
 	MetaSessionsBackup      = "*sessions_backup"
+	MetaSy                  = "*sy"
 	MetaLoadIDs             = "*load_ids"
 	MetaNodeID              = "*node_id"
 	MetaAscending           = "*ascending"
