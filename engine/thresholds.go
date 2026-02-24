@@ -713,7 +713,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *
 
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
 func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant string, tIDs *[]string) (err error) {
-	// var rply string // unfinished remove later
+	// var rply string // unfinished remove later, used to test birpc calls
 	// if err := ctx.Client.Call(ctx, utils.SessionSv1Ping, &utils.CGREvent{}, &rply); err != nil {
 	// }
 	if tenant == utils.EmptyString {

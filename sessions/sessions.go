@@ -1011,8 +1011,8 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
-	for fieldName := range sS.cgrCfg.SessionSCfg().SessionIndexes {
-		for _, sr := range s.SRuns {
+	for _, sr := range s.SRuns {
+		for fieldName := range sS.cgrCfg.SessionSCfg().SessionIndexes {
 			splitFieldName := utils.SplitPath(fieldName, utils.NestingSep[0], -1)
 			fieldName := splitFieldName[len(splitFieldName)-1] // take only the last field name from the slice
 			fieldVal, err := sr.Event.GetString(fieldName)     // the only error from GetString is ErrNotFound
@@ -1033,11 +1033,30 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			}
 			ssIndx[fieldName][fieldVal][s.CGRID].Add(sr.CD.RunID)
 
-			// reverse index
+			// reverse index, used for unindexing
 			if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
 				ssRIdx[s.CGRID] = make([]*riFieldNameVal, 0)
 			}
 			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
+		}
+		// index *sy sessions
+		if sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaSy {
+			if _, hasFieldName := ssIndx[utils.RequestType]; !hasFieldName { // Init it here
+				ssIndx[utils.RequestType] = make(map[string]map[string]utils.StringSet)
+			}
+			if _, hasFieldVal := ssIndx[utils.RequestType][utils.MetaSy]; !hasFieldVal {
+				ssIndx[utils.RequestType][utils.MetaSy] = make(map[string]utils.StringSet)
+			}
+			if _, hasCGRID := ssIndx[utils.RequestType][utils.MetaSy][s.CGRID]; !hasCGRID {
+				ssIndx[utils.RequestType][utils.MetaSy][s.CGRID] = make(utils.StringSet)
+			}
+			ssIndx[utils.RequestType][utils.MetaSy][s.CGRID].Add(sr.CD.RunID)
+
+			// reverse index, used for unindexing
+			if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
+				ssRIdx[s.CGRID] = make([]*riFieldNameVal, 0)
+			}
+			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: utils.RequestType, fieldValue: utils.MetaSy})
 		}
 	}
 }
@@ -2349,7 +2368,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
-	resrc, ips, acnt bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
+	resrc, ips, acnt, sy bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateIP:        ips,
@@ -2357,6 +2376,7 @@ func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
 		InitSession:       acnt,
 		ProcessThresholds: thrslds,
 		ProcessStats:      stats,
+		DiamSy:            sy,
 		CGREvent:          cgrEv,
 		ForceDuration:     forceDuration,
 	}
@@ -2381,6 +2401,7 @@ type V1InitSessionArgs struct {
 	ForceDuration     bool
 	ProcessThresholds bool
 	ProcessStats      bool
+	DiamSy            bool
 	AttributeIDs      []string
 	ThresholdIDs      []string
 	StatIDs           []string
@@ -2517,7 +2538,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	if !args.GetAttributes && !args.AllocateResources && !args.AllocateIP && !args.InitSession {
+	if !args.GetAttributes && !args.AllocateResources && !args.AllocateIP && !args.InitSession &&
+		!args.DiamSy {
 		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -2567,7 +2589,38 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 		rply.AllocatedIP = &allocIP
 	}
-	if args.InitSession {
+	if args.DiamSy {
+		// make sure OriginID is populated
+		if originID == "" {
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		}
+		s, err := sS.initSession(args.CGREvent, sS.biJClntID(ctx.Client), originID, 0,
+			false, args.ForceDuration)
+		if err != nil {
+			return err
+		}
+
+		var sRunsUsage map[string]time.Duration
+		if sRunsUsage, err = sS.updateSession(s, nil, args.APIOpts, false); err != nil {
+			return utils.NewErrRALs(err)
+		}
+		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
+			sS.bkpSessionIDsMux.Lock()
+			sS.bkpSessionIDs.Add(s.CGRID)
+			sS.bkpSessionIDsMux.Unlock()
+		}
+
+		var maxUsage time.Duration
+		var maxUsageSet bool // so we know if we have set the 0 on purpose
+		for _, rplyMaxUsage := range sRunsUsage {
+			if !maxUsageSet || rplyMaxUsage < maxUsage {
+				maxUsage = rplyMaxUsage
+				maxUsageSet = true
+			}
+		}
+		rply.MaxUsage = &maxUsage
+
+	} else if args.InitSession {
 		var err error
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
@@ -2711,6 +2764,7 @@ type V1UpdateSessionArgs struct {
 	ForceDuration     bool
 	ProcessThresholds bool
 	ProcessStats      bool
+	DiamSy            bool
 	AttributeIDs      []string
 	ThresholdIDs      []string
 	StatIDs           []string
@@ -2794,7 +2848,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	if !args.GetAttributes && !args.UpdateSession {
+	if !args.GetAttributes && !args.UpdateSession && !args.DiamSy {
 		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 
@@ -2807,7 +2861,41 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if args.UpdateSession {
+	if args.DiamSy {
+		if originID, _ := args.CGREvent.FieldAsString(utils.OriginID); originID == "" {
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		}
+		ev := engine.MapEvent(args.CGREvent.Event)
+		cgrID := GetSetCGRID(ev)
+		s := sS.getRelocateSession(cgrID,
+			ev.GetStringIgnoreErrors(utils.InitialOriginID),
+			ev.GetStringIgnoreErrors(utils.OriginID),
+			ev.GetStringIgnoreErrors(utils.OriginHost))
+		if s == nil {
+			if s, err = sS.initSession(args.CGREvent, sS.biJClntID(ctx.Client), ev.GetStringIgnoreErrors(utils.OriginID),
+				0, false, args.ForceDuration); err != nil {
+				return err
+			}
+		}
+		var sRunsUsage map[string]time.Duration
+		if sRunsUsage, err = sS.updateSession(s, ev, args.APIOpts, false); err != nil {
+			return utils.NewErrRALs(err)
+		}
+		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
+			sS.bkpSessionIDsMux.Lock()
+			sS.bkpSessionIDs.Add(s.CGRID)
+			sS.bkpSessionIDsMux.Unlock()
+		}
+		var maxUsage time.Duration
+		var maxUsageSet bool // so we know if we have set the 0 on purpose
+		for _, rplyMaxUsage := range sRunsUsage {
+			if !maxUsageSet || rplyMaxUsage < maxUsage {
+				maxUsage = rplyMaxUsage
+				maxUsageSet = true
+			}
+		}
+		rply.MaxUsage = &maxUsage
+	} else if args.UpdateSession {
 		ev := engine.MapEvent(args.CGREvent.Event)
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
@@ -2870,7 +2958,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 // NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
 func NewV1TerminateSessionArgs(acnts, resrc, ips,
 	thrds bool, thresholdIDs []string, stats bool,
-	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
+	statIDs []string, sy bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
@@ -2879,6 +2967,7 @@ func NewV1TerminateSessionArgs(acnts, resrc, ips,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 		ForceDuration:     forceDuration,
+		DiamSy:            sy,
 	}
 	if len(thresholdIDs) != 0 {
 		args.ThresholdIDs = thresholdIDs
@@ -2897,6 +2986,7 @@ type V1TerminateSessionArgs struct {
 	ReleaseResources  bool
 	ProcessThresholds bool
 	ProcessStats      bool
+	DiamSy            bool
 	ThresholdIDs      []string
 	StatIDs           []string
 	*utils.CGREvent
@@ -2961,7 +3051,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-	if !args.TerminateSession && !args.ReleaseResources && !args.ReleaseIP {
+	if !args.TerminateSession && !args.ReleaseResources && !args.ReleaseIP && !args.DiamSy {
 		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 
@@ -2969,7 +3059,33 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	opts := engine.MapEvent(args.APIOpts)
 	cgrID := GetSetCGRID(ev)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
-	if args.TerminateSession {
+	if args.DiamSy {
+		if originID == "" {
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		}
+		var s *Session
+		fib := utils.FibDuration(time.Millisecond, 0)
+		for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+			if s = sS.getRelocateSession(cgrID,
+				ev.GetStringIgnoreErrors(utils.InitialOriginID),
+				ev.GetStringIgnoreErrors(utils.OriginID),
+				ev.GetStringIgnoreErrors(utils.OriginHost)); s != nil {
+				break
+			}
+			if i+1 < sS.cgrCfg.SessionSCfg().TerminateAttempts { // not last iteration
+				time.Sleep(fib())
+				continue
+			}
+		}
+		s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
+		if err = sS.terminateSession(s,
+			ev.GetDurationPtrIgnoreErrors(utils.Usage),
+			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
+			ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
+			false); err != nil {
+			return utils.NewErrRALs(err)
+		}
+	} else if args.TerminateSession {
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
