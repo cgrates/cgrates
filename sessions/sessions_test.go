@@ -1155,7 +1155,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		ForceDuration:     true,
 	}
-	rply := NewV1TerminateSessionArgs(true, false, false, true, nil, false, nil, cgrEv, true)
+	rply := NewV1TerminateSessionArgs(true, false, false, true, nil, false, nil, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1163,7 +1163,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		CGREvent:      cgrEv,
 		ForceDuration: true,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, false, nil, false, nil, cgrEv, true)
+	rply = NewV1TerminateSessionArgs(false, false, false, false, nil, false, nil, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1176,7 +1176,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		StatIDs:       []string{"test1", "test2"},
 		ForceDuration: true,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, false, thresholdIDs, false, statIDs, cgrEv, true)
+	rply = NewV1TerminateSessionArgs(false, false, false, false, thresholdIDs, false, statIDs, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1282,7 +1282,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		ForceDuration:     true,
 	}
-	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, false, true, cgrEv, true)
+	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, false, true, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1305,7 +1305,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		ForceDuration:     true,
 	}
-	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, false, true, cgrEv, true)
+	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, false, true, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1318,7 +1318,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		ForceDuration:     true,
 	}
-	rply = NewV1InitSessionArgs(true, nil, false, nil, true, nil, false, false, true, cgrEv, true)
+	rply = NewV1InitSessionArgs(true, nil, false, nil, true, nil, false, false, true, false, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
