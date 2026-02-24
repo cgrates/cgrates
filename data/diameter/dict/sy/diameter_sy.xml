@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diameter>
+
+	<application id="16777302" type="auth" name="Diameter Sy">
+		<!-- http://tools.ietf.org/html/rfc4006 -->
+
+		<command code="8388635" short="SL" name="Spending-Limit">
+			<!-- ===================== -->
+			<!-- SL-Request -->
+			<!-- ===================== -->
+			<request>
+				<rule avp="Session-Id" required="true" max="1"/>
+				<rule avp="DRMP" required="false" max="1"/>
+				<rule avp="Auth-Application-Id" required="true" max="1"/>
+				<rule avp="Origin-Host" required="true" max="1"/>
+				<rule avp="Origin-Realm" required="true" max="1"/>
+				<rule avp="Destination-Realm" required="true" max="1"/>
+				<rule avp="Destination-Host" required="false" max="1"/>
+				<rule avp="Origin-State-Id" required="false" max="1"/>
+				<rule avp="OC-Supported-Features" required="false" max="1"/>
+				<rule avp="Supported-Features" required="false"/>
+				<rule avp="SL-Request-Type" required="true" max="1"/>
+				<rule avp="Subscription-Id" required="false"/>
+				<rule avp="Policy-Counter-Identifier" required="false"/>
+				<rule avp="Logical-Access-ID" required="false" max="1"/>
+				<rule avp="Physical-Access-ID" required="false" max="1"/>
+				<rule avp="Proxy-Info" required="false"/>
+				<rule avp="Route-Record" required="false"/>
+				<!-- Catch-all AVP -->
+				<rule avp="AVP" required="false"/>
+			</request>
+			<!-- ===================== -->
+			<!-- SL-Answer -->
+			<!-- ===================== -->
+			<answer>
+				<rule avp="Session-Id" required="true" max="1"/>
+				<rule avp="DRMP" required="false" max="1"/>
+				<rule avp="Auth-Application-Id" required="true" max="1"/>
+				<rule avp="Origin-Host" required="true" max="1"/>
+				<rule avp="Origin-Realm" required="true" max="1"/>
+				<!-- Either Result-Code or Experimental-Result is required -->
+				<rule avp="Result-Code" required="false" max="1"/>
+				<rule avp="Experimental-Result" required="false" max="1"/>
+				<rule avp="OC-Supported-Features" required="false" max="1"/>
+				<rule avp="OC-OLR" required="false" max="1"/>
+				<rule avp="Supported-Features" required="false"/>
+				<rule avp="Policy-Counter-Status-Report" required="false"/>
+				<rule avp="Error-Message" required="false" max="1"/>
+				<rule avp="Error-Reporting-Host" required="false" max="1"/>
+				<rule avp="Failed-AVP" required="false" max="1"/>
+				<rule avp="Origin-State-Id" required="false" max="1"/>
+				<rule avp="Redirect-Host" required="false"/>
+				<rule avp="Redirect-Host-Usage" required="false" max="1"/>
+				<rule avp="Redirect-Max-Cache-Time" required="false" max="1"/>
+				<rule avp="Proxy-Info" required="false"/>
+				<rule avp="Load" required="false"/>
+			</answer>
+		</command>
+		<avp name="SL-Request-Type" code="2904" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="Enumerated">
+				<item code="0" name="INITIAL_REQUEST"/>
+				<item code="1" name="INTERMEDIATE_REQUEST"/>
+			</data>
+		</avp>
+		<avp name="Subscription-Id" code="443" must="M" may="P" must-not="V" may-encrypt="Y">
+			<!-- http://tools.ietf.org/html/rfc4006#section-8.46-->
+			<data type="Grouped">
+				<rule avp="Subscription-Id-Type" required="true" max="1" />
+				<rule avp="Subscription-Id-Data" required="true" max="1" />
+			</data>
+		</avp>
+		<avp name="Subscription-Id-Data" code="444" must="M" may="P" must-not="V" may-encrypt="Y">
+		<!-- http://tools.ietf.org/html/rfc4006#section-8.48-->
+			<data type="UTF8String" />
+		</avp>
+		<avp name="Subscription-Id-Type" code="450" must="M" may="P" must-not="V" may-encrypt="Y">
+		<!-- http://tools.ietf.org/html/rfc4006#section-8.47-->
+			<data type="Enumerated">
+				<item code="0" name="END_USER_E164" />
+				<item code="1" name="END_USER_IMSI" />
+				<item code="2" name="END_USER_SIP_URI" />
+				<item code="3" name="END_USER_NAI" />
+			</data>
+		</avp>
+		<avp name="Policy-Counter-Status-Report" code="2903" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="Grouped">
+				<rule avp="Policy-Counter-Identifier" required="true" max="1"/>
+				<rule avp="Policy-Counter-Status" required="true" max="1"/>
+				<rule avp="Pending-Policy-Counter-Information" required="false"/>
+				<rule avp="AVP" required="false"/>
+			</data>
+		</avp>
+		<avp name="Policy-Counter-Identifier" code="2901" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">   
+			<data type="UTF8String"/>
+		</avp>
+		<avp name="Policy-Counter-Status" code="2902" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="UTF8String"/>
+		</avp>
+		<avp name="Pending-Policy-Counter-Change-Time" code="2906" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="Time"/>
+		</avp>
+		<avp name="Pending-Policy-Counter-Information" code="2905" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="Grouped">
+				<rule avp="Policy-Counter-Identifier" required="true" max="1"/>
+				<rule avp="Policy-Counter-Status" required="true" max="1"/>
+				<rule avp="Pending-Policy-Counter-Change-Time" required="false" max="1"/>
+				<rule avp="AVP" required="false"/>
+			</data>
+		</avp>
+		<avp name="Logical-Access-ID" code="2908" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="OctetString"/>
+		</avp>
+		<avp name="Physical-Access-ID" code="2909" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
+			<data type="OctetString"/>
+		</avp>
+		
+    </application>
+</diameter>
