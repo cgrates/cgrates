@@ -89,7 +89,6 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 	time.Sleep(100 * time.Millisecond)
 
 	t.Run("noAttributes", func(t *testing.T) {
-		t.Skip("fails due to comparision of len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields)")
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
