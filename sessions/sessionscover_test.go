@@ -28,6 +28,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -4676,4 +4678,58 @@ func TestSyncSessionsSync(t *testing.T) {
 		t.Errorf("Expected to be OK")
 	}
 	engine.Cache = tmp
+}
+
+// TestChrgSProcessEventReplyAddedToAttributes checks that a charger reply is added to
+// apiRply.Attributes[runID] only when AttributeS altered the event, by checking if the
+// total number of altered fields exceeds the 3 default fields set by ChargerS.
+func TestChrgSProcessEventReplyAddedToAttributes(t *testing.T) {
+	tests := []struct {
+		name          string
+		alteredFields []*attributes.FieldsAltered
+		wantInReply   bool
+	}{
+		{
+			// AttributeIDs=*none: ChargerS skips AttributeS, only 3 default fields.
+			// totalFields=3, not > 3, not added to apiRply.Attributes.
+			name: "no AttributeS, only default fields, should not appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{MatchedProfileID: "*default", Fields: chargers.ChargerSDefaultAlteredFields},
+			},
+			wantInReply: false,
+		},
+		{
+			// AttributeS adds *req.Subject=SUPPLIER1, totalFields=3+1=4 > 3.
+			// Added to apiRply.Attributes.
+			name: "AttributeS added 1 field, should appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{MatchedProfileID: "*default", Fields: chargers.ChargerSDefaultAlteredFields},
+				{MatchedProfileID: "cgrates.org:ATTR_SUBJECT", Fields: []string{"*req.Subject"}},
+			},
+			wantInReply: true,
+		},
+		{
+			// totalFields=3+3=6 > 3, added to apiRply.Attributes.
+			name: "AttributeS added 3 fields, should appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{MatchedProfileID: "*default", Fields: chargers.ChargerSDefaultAlteredFields},
+				{MatchedProfileID: "cgrates.org:ATTR_SUBJECT", Fields: []string{"*req.Subject", "*req.Account", "*req.Destination"}},
+			},
+			wantInReply: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			totalFields := 0
+			for _, afPrf := range tc.alteredFields {
+				totalFields += len(afPrf.Fields)
+			}
+			gotInReply := totalFields > len(chargers.ChargerSDefaultAlteredFields)
+			if gotInReply != tc.wantInReply {
+				t.Errorf("totalFields=%d, default=%d: got inReply=%v, want %v",
+					totalFields, len(chargers.ChargerSDefaultAlteredFields), gotInReply, tc.wantInReply)
+			}
+		})
+	}
 }

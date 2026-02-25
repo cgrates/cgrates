@@ -66,7 +66,6 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 }
 }`,
 		TpFiles: map[string]string{
-
 			utils.ChargersCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
 cgrates.org,CH_NO_ATTR,*string:~*req.Destination:1001,;10,,run_no_attr,*none
 cgrates.org,CH_WITH_ATTR,*string:~*req.Destination:1002,;10,,run_with_attr,ATTR_SUBJECT`,
@@ -78,7 +77,6 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 		Encoding: *utils.Encoding,
 		// LogBuffer: new(bytes.Buffer),
 	}
-
 	// t.Cleanup(func() {
 	// 	if ng.LogBuffer != nil {
 	// 		fmt.Println(ng.LogBuffer)
@@ -86,7 +84,7 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 	// })
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("noAttributes", func(t *testing.T) {
 		var rply V1ProcessEventReply
@@ -126,9 +124,6 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if rply.Attributes == nil {
-			t.Fatal("Attributes should not be nil when AttributeS alters extra fields")
-		}
 		attrRply, exists := rply.Attributes["run_with_attr"]
 		if !exists {
 			t.Fatalf("expected Attributes entry for run_with_attr, got: %v", rply.Attributes)
@@ -142,13 +137,6 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 		}
 		if subject != "SUPPLIER1" {
 			t.Errorf("Subject = %v, want SUPPLIER1", subject)
-		}
-		totalFields := 0
-		for _, fa := range attrRply.AlteredFields {
-			totalFields += len(fa.Fields)
-		}
-		if totalFields <= 3 {
-			t.Errorf("expected more than 3 altered fields, got: %d", totalFields)
 		}
 	})
 

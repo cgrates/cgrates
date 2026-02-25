@@ -869,18 +869,18 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
+			totalFields := 0
 			for _, afPrf := range chrgr.AlteredFields {
-				if afPrf.MatchedProfileID != utils.MetaDefault {
-					apiRply.Attributes[runID] = &attributes.AttrSProcessEventReply{
-						AlteredFields: chrgr.AlteredFields,
-						CGREvent:      chrgr.CGREvent,
-					}
-					break
+				totalFields += len(afPrf.Fields)
+			}
+			if totalFields > len(chargers.ChargerSDefaultAlteredFields) {
+				apiRply.Attributes[runID] = &attributes.AttrSProcessEventReply{
+					AlteredFields: chrgr.AlteredFields,
+					CGREvent:      chrgr.CGREvent,
 				}
 			}
 		}
 	}
-
 	//var partiallyExecuted bool // will be	 added to the final answer if true
 	if blkrErr, errBlkr := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
 		cch, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
