@@ -52,7 +52,7 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 "logger": {"level": 7},
 "sessions": {
     "enabled": true,
-    "chargers_conns": ["*localhost"],
+    "chargers_conns": ["*localhost"]
 },
 "chargers": {
     "enabled": true,
@@ -86,10 +86,9 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 	// })
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("noAttributes", func(t *testing.T) {
-		t.Skip("fails due to comparision of len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields)")
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{

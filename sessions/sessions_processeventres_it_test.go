@@ -77,7 +77,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 	// })
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("noFlags", func(t *testing.T) {
 		var rply V1ProcessEventReply
