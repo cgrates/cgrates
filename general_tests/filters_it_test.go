@@ -1039,12 +1039,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			ChargerSProfile: "IntraCharger",
 			AlteredFields: []*attributes.FieldsAltered{
 				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
-				{
 					MatchedProfileID: "*constant:*req.Subject:intraState",
-					Fields:           []string{"*req.Subject"},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, "*req.Subject"},
 				},
 			},
 			CGREvent: &utils.CGREvent{ // matching Charger1
@@ -1091,12 +1087,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			ChargerSProfile: "InterCharger",
 			AlteredFields: []*attributes.FieldsAltered{
 				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
-				{
 					MatchedProfileID: "*constant:*req.Subject:interState",
-					Fields:           []string{"*req.Subject"},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, "*req.Subject"},
 				},
 			},
 			CGREvent: &utils.CGREvent{ // matching Charger1

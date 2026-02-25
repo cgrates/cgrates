@@ -177,12 +177,8 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			ChargerSProfile: "Raw",
 			AlteredFields: []*attributes.FieldsAltered{
 				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
-				{
 					MatchedProfileID: "*constant:*req.RequestType:*none",
-					Fields:           []string{"*req.RequestType"},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, "*req.RequestType"},
 				},
 			},
 			CGREvent: &utils.CGREvent{
@@ -201,14 +197,11 @@ func testRPCChargerSWithAttr(t *testing.T) {
 				},
 			},
 		}, {
-			ChargerSProfile: "SupplierCharges", AlteredFields: []*attributes.FieldsAltered{
-				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
+			ChargerSProfile: "SupplierCharges",
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: "cgrates.org:ATTR_SUPPLIER1",
-					Fields:           []string{"*req.Subject"},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, "*req.Subject"},
 				},
 			},
 			CGREvent: &utils.CGREvent{

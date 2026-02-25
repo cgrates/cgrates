@@ -158,7 +158,8 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			err = nil
 		}
 		if evReply.AlteredFields != nil {
-			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
+			evReply.AlteredFields[0].Fields = append(slices.Clone(ChargerSDefaultAlteredFields), evReply.AlteredFields[0].Fields...)
+			rply[i].AlteredFields = evReply.AlteredFields
 			rply[i].CGREvent = evReply.CGREvent
 		}
 	}

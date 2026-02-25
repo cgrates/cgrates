@@ -22,12 +22,15 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -4676,4 +4679,66 @@ func TestSyncSessionsSync(t *testing.T) {
 		t.Errorf("Expected to be OK")
 	}
 	engine.Cache = tmp
+}
+
+func TestChrgSProcessEventReplyAddedToAttributes(t *testing.T) {
+	tests := []struct {
+		name          string
+		alteredFields []*attributes.FieldsAltered
+		wantInReply   bool
+	}{
+		{
+			// AttributeIDs=*none: ChargerS skips AttributeS entirely.
+			// AlteredFields has 1 entry with exactly 3 default fields.
+			// totalFields=3, not > 3, not added to apiRply.Attributes.
+			name: "no AttributeS, only default fields, should not appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{MatchedProfileID: utils.MetaDefault, Fields: slices.Clone(chargers.ChargerSDefaultAlteredFields)},
+			},
+			wantInReply: false,
+		},
+		{
+			// AttributeS merges default fields + *req.Subject into a single entry.
+			// This mirrors what chargers.go produces after the fix:
+			// evReply.AlteredFields[0].Fields = append(clone(defaults), attr fields...)
+			// totalFields=4 > 3, added to apiRply.Attributes.
+			name: "AttributeS added 1 field merged with defaults, should appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{
+					MatchedProfileID: "cgrates.org:ATTR_SUBJECT",
+					Fields:           append(slices.Clone(chargers.ChargerSDefaultAlteredFields), utils.MetaReq+utils.NestingSep+utils.Subject),
+				},
+			},
+			wantInReply: true,
+		},
+		{
+			// AttributeS merges default fields + 3 extra fields into a single entry.
+			// Edge case: same number of fields as default (3+3=6) - still correctly detected.
+			// totalFields=6 > 3, added to apiRply.Attributes.
+			name: "AttributeS added 3 fields merged with defaults, should appear in apiRply.Attributes",
+			alteredFields: []*attributes.FieldsAltered{
+				{
+					MatchedProfileID: "cgrates.org:ATTR_SUBJECT",
+					Fields: append(slices.Clone(chargers.ChargerSDefaultAlteredFields),
+						utils.MetaReq+utils.NestingSep+utils.Subject,
+						utils.MetaReq+utils.NestingSep+utils.AccountField,
+						utils.MetaReq+utils.NestingSep+utils.Destination),
+				},
+			},
+			wantInReply: true,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			totalFields := 0
+			for _, afPrf := range tc.alteredFields {
+				totalFields += len(afPrf.Fields)
+			}
+			gotInReply := totalFields > len(chargers.ChargerSDefaultAlteredFields)
+			if gotInReply != tc.wantInReply {
+				t.Errorf("totalFields=%d, default=%d: got inReply=%v, want %v",
+					totalFields, len(chargers.ChargerSDefaultAlteredFields), gotInReply, tc.wantInReply)
+			}
+		})
+	}
 }
