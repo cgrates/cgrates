@@ -2368,7 +2368,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
-	resrc, ips, acnt, sy bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
+	resrc, ips, acnt bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateIP:        ips,
@@ -2376,7 +2376,6 @@ func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
 		InitSession:       acnt,
 		ProcessThresholds: thrslds,
 		ProcessStats:      stats,
-		DiamSy:            sy,
 		CGREvent:          cgrEv,
 		ForceDuration:     forceDuration,
 	}
@@ -2401,7 +2400,6 @@ type V1InitSessionArgs struct {
 	ForceDuration     bool
 	ProcessThresholds bool
 	ProcessStats      bool
-	DiamSy            bool
 	AttributeIDs      []string
 	ThresholdIDs      []string
 	StatIDs           []string
@@ -2537,9 +2535,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
-	if !args.GetAttributes && !args.AllocateResources && !args.AllocateIP && !args.InitSession &&
-		!args.DiamSy {
+	syRequest := args.CGREvent.Event[utils.RequestType] == utils.MetaSy // check if event is a dimeter sy request
+	if !args.GetAttributes && !args.AllocateResources && !args.AllocateIP && !args.InitSession && !syRequest {
 		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -2589,7 +2586,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 		rply.AllocatedIP = &allocIP
 	}
-	if args.DiamSy {
+	if syRequest {
 		// make sure OriginID is populated
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
@@ -2599,27 +2596,11 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if err != nil {
 			return err
 		}
-
-		var sRunsUsage map[string]time.Duration
-		if sRunsUsage, err = sS.updateSession(s, nil, args.APIOpts, false); err != nil {
-			return utils.NewErrRALs(err)
-		}
 		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
 			sS.bkpSessionIDsMux.Lock()
 			sS.bkpSessionIDs.Add(s.CGRID)
 			sS.bkpSessionIDsMux.Unlock()
 		}
-
-		var maxUsage time.Duration
-		var maxUsageSet bool // so we know if we have set the 0 on purpose
-		for _, rplyMaxUsage := range sRunsUsage {
-			if !maxUsageSet || rplyMaxUsage < maxUsage {
-				maxUsage = rplyMaxUsage
-				maxUsageSet = true
-			}
-		}
-		rply.MaxUsage = &maxUsage
-
 	} else if args.InitSession {
 		var err error
 		opts := engine.MapEvent(args.APIOpts)
@@ -2958,7 +2939,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 // NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
 func NewV1TerminateSessionArgs(acnts, resrc, ips,
 	thrds bool, thresholdIDs []string, stats bool,
-	statIDs []string, sy bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
+	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
@@ -2967,7 +2948,6 @@ func NewV1TerminateSessionArgs(acnts, resrc, ips,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 		ForceDuration:     forceDuration,
-		DiamSy:            sy,
 	}
 	if len(thresholdIDs) != 0 {
 		args.ThresholdIDs = thresholdIDs
@@ -2986,7 +2966,6 @@ type V1TerminateSessionArgs struct {
 	ReleaseResources  bool
 	ProcessThresholds bool
 	ProcessStats      bool
-	DiamSy            bool
 	ThresholdIDs      []string
 	StatIDs           []string
 	*utils.CGREvent
@@ -3051,7 +3030,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-	if !args.TerminateSession && !args.ReleaseResources && !args.ReleaseIP && !args.DiamSy {
+	syRequest := args.CGREvent.Event[utils.RequestType] == utils.MetaSy // check if event is a dimeter sy request
+	if !args.TerminateSession && !args.ReleaseResources && !args.ReleaseIP && !syRequest {
 		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 
@@ -3059,7 +3039,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	opts := engine.MapEvent(args.APIOpts)
 	cgrID := GetSetCGRID(ev)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
-	if args.DiamSy {
+	if syRequest {
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
