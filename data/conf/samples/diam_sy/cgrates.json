@@ -387,7 +387,7 @@
           "*string:~*vars.*cmd:SLR",
           "*string:~*req.SL-Request-Type:0" // initial request
         ],
-        "flags": ["*log", "*initiate", "*sy"],
+        "flags": ["*log", "*initiate"],
         "request_fields": [
           {
             "tag": "OriginID",
@@ -512,7 +512,7 @@
           "*string:~*vars.*cmd:SLR",
           "*string:~*req.SL-Request-Type:1" // intermediate request
         ],
-        "flags": ["*log", "*update", "*sy"],
+        "flags": ["*log", "*update"],
         "request_fields": [
           {
             "tag": "OriginID",
@@ -619,7 +619,7 @@
       {
         "id": "Sy_Terminate_STR",
         "filters": ["*string:~*vars.*cmd:STR"],
-        "flags": ["*log", "*terminate", "*sy"],
+        "flags": ["*log", "*terminate"],
         "request_fields": [
           {
             "tag": "OriginID",

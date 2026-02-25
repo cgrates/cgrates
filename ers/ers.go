@@ -361,7 +361,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaResources),
 			rdrCfg.Flags.Has(utils.MetaIPs),
 			rdrCfg.Flags.Has(utils.MetaAccounts),
-			rdrCfg.Flags.Has(utils.MetaSy),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
@@ -394,7 +393,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			rdrCfg.Flags.Has(utils.MetaStats),
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaSy),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := utils.StringPointer("")
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
