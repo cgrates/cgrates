@@ -86,6 +86,8 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 	client, _ := ng.Run(t)
 	time.Sleep(500 * time.Millisecond)
 
+	// CH_NO_ATTR has AttributeIDs=*none, ChargerS skips AttributeS.
+	// No attr profile modified the event, so run_no_attr should not appear in apiRply.Attributes.
 	t.Run("noAttributes", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
@@ -104,9 +106,12 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
 		if _, exists := rply.Attributes["run_no_attr"]; exists {
-			t.Errorf("Attributes[run_no_attr] should not exist when AttributeIDs=*none, got: %v", rply.Attributes)
+			t.Errorf("run_no_attr should not appear in apiRply.Attributes when no attr profile modified the event, got: %v", rply.Attributes)
 		}
 	})
+
+	// CH_WITH_ATTR calls ATTR_SUBJECT which modifies the charger event.
+	// Only run_with_attr should appear in apiRply.Attributes.
 	t.Run("withAttributes", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
@@ -126,20 +131,31 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 		}
 		attrRply, exists := rply.Attributes["run_with_attr"]
 		if !exists {
-			t.Fatalf("expected Attributes entry for run_with_attr, got: %v", rply.Attributes)
+			t.Fatalf("run_with_attr should appear in apiRply.Attributes when attr profile modified the event, got: %v", rply.Attributes)
 		}
 		if attrRply.CGREvent == nil {
-			t.Fatal("CGREvent in Attributes reply should not be nil")
+			t.Fatal("CGREvent should not be nil")
 		}
-		subject, has := attrRply.CGREvent.Event[utils.Subject]
-		if !has {
-			t.Fatal("Subject field missing from altered CGREvent")
+		// verify the event was modified with the expected value
+		if attrRply.CGREvent.Event[utils.Subject] != "SUPPLIER1" {
+			t.Errorf("Subject = %v, want SUPPLIER1", attrRply.CGREvent.Event[utils.Subject])
 		}
-		if subject != "SUPPLIER1" {
-			t.Errorf("Subject = %v, want SUPPLIER1", subject)
+		// verify only the profiles that modified the charger event appear in AlteredFields:
+		// *default (ChargerS sets runID/chargeID/subsys) + cgrates.org:ATTR_SUBJECT (sets Subject)
+		if len(attrRply.AlteredFields) != 2 {
+			t.Errorf("expected 2 AlteredFields entries (*default + cgrates.org:ATTR_SUBJECT), got: %v", attrRply.AlteredFields)
+		}
+		// verify cgrates.org:ATTR_SUBJECT modified only *req.Subject
+		if attrRply.AlteredFields[1].MatchedProfileID != "cgrates.org:ATTR_SUBJECT" {
+			t.Errorf("expected cgrates.org:ATTR_SUBJECT, got: %v", attrRply.AlteredFields[1].MatchedProfileID)
+		}
+		if len(attrRply.AlteredFields[1].Fields) != 1 || attrRply.AlteredFields[1].Fields[0] != utils.MetaReq+utils.NestingSep+utils.Subject {
+			t.Errorf("expected [*req.Subject], got: %v", attrRply.AlteredFields[1].Fields)
 		}
 	})
 
+	// without *chargers flag, ChargerS is not called at all.
+	// no charger events are processed, apiRply.Attributes should be empty.
 	t.Run("noChargersFlag", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
@@ -156,7 +172,7 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
 		if len(rply.Attributes) > 0 {
-			t.Errorf("Attributes should be empty without *chargers flag, got: %v", rply.Attributes)
+			t.Errorf("apiRply.Attributes should be empty when *chargers flag is not set, got: %v", rply.Attributes)
 		}
 	})
 }
