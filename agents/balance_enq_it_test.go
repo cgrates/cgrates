@@ -58,9 +58,33 @@ func TestDiamBalanceEnquiry(t *testing.T) {
 	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
 		utils.AttrSetBalance{
 			Tenant:      "cgrates.com",
+			Account:     "1002",
+			Value:       130,
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID: "balance2",
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
+		utils.AttrSetBalance{
+			Tenant:      "cgrates.com",
+			Account:     "1002",
+			Value:       80,
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID: "balance1",
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
+		utils.AttrSetBalance{
+			Tenant:      "cgrates.com",
 			Account:     "1001",
 			Value:       50,
-			BalanceType: utils.MetaData,
+			BalanceType: utils.MetaMonetary,
 			Balance: map[string]any{
 				utils.ID: "balance1",
 			},
@@ -72,7 +96,7 @@ func TestDiamBalanceEnquiry(t *testing.T) {
 			Tenant:      "cgrates.com",
 			Account:     "1001",
 			Value:       100,
-			BalanceType: utils.MetaData,
+			BalanceType: utils.MetaMonetary,
 			Balance: map[string]any{
 				utils.ID: "balance2",
 			},
@@ -103,14 +127,14 @@ func TestDiamBalanceEnquiry(t *testing.T) {
 			AttributeProfile: &engine.AttributeProfile{
 				Tenant:    "cgrates.com",
 				ID:        "ATTR_GET_BALANCE",
-				FilterIDs: []string{"*string:~*req.Account:1001"},
+				FilterIDs: []string{},
 				Attributes: []*engine.Attribute{
 					{
 						Path: utils.MetaReq + utils.NestingSep + "MonBalance",
 						Type: utils.MetaVariable,
 						Value: config.RSRParsers{
 							&config.RSRParser{
-								Rules: "~*accounts.1001.BalanceMap.*data.GetTotalValue",
+								Rules: "~*accounts.<~*req.Account>.BalanceMap.*monetary.GetTotalValue",
 							},
 						},
 					},
@@ -135,10 +159,11 @@ func TestDiamBalanceEnquiry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sendBalanceEnquiryQueryCCR(t, diamClient, 5*time.Second)
+	sendBalanceEnquiryQueryCCR(t, diamClient, 5*time.Second, "1001", "150")
+	sendBalanceEnquiryQueryCCR(t, diamClient, 5*time.Second, "1002", "210")
 }
 
-func sendBalanceEnquiryQueryCCR(tb testing.TB, client *DiameterClient, replyTimeout time.Duration) {
+func sendBalanceEnquiryQueryCCR(tb testing.TB, client *DiameterClient, replyTimeout time.Duration, account, expTotal string) {
 	tb.Helper()
 	sessionID := utils.UUIDSha1Prefix()
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
@@ -153,7 +178,7 @@ func sendBalanceEnquiryQueryCCR(tb testing.TB, client *DiameterClient, replyTime
 	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
-			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String(account)),
 		}})
 	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(1))
 	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(0))
@@ -188,8 +213,8 @@ func sendBalanceEnquiryQueryCCR(tb testing.TB, client *DiameterClient, replyTime
 
 	if monetaryVal, err := diamAVPAsString(balanceAVPs[0]); err != nil {
 		tb.Fatalf("failed to read monetary balance: %v", err)
-	} else if monetaryVal != "150" {
-		tb.Fatalf("monetary balance=%s, want 10000", monetaryVal)
+	} else if monetaryVal != expTotal {
+		tb.Fatalf("monetary balance=%s, want %s", monetaryVal, expTotal)
 	}
 
 }
