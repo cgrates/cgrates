@@ -887,6 +887,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.OptsSesBlockerError] = blkrErr
 	}
 
+	var withErrors bool // populate in case of non blocking errors
+
 	// same processing for each event
 	for runID, cgrEv := range cgrEvs {
 		cchEv := make(map[string]any)
@@ -898,15 +900,17 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			if cch[utils.OptsSesBlockerError].(bool) {
 				return errRTs
 			}
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, err.Error(), cgrEv, utils.RateS))
+					utils.SessionS, errRTs.Error(), cgrEv, utils.RateS))
 		} else if rtS {
 			var rtsCost *utils.Decimal
 			if rtsCost, err = sS.ratesCost(ctx, cgrEv); err != nil {
 				if cch[utils.OptsSesBlockerError].(bool) {
 					return
 				}
+				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
 						utils.SessionS, err.Error(), cgrEv, utils.RateS))
@@ -925,15 +929,17 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			if cch[utils.OptsSesBlockerError].(bool) {
 				return errRous
 			}
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, err.Error(), cgrEv, utils.RouteS))
+					utils.SessionS, errRous.Error(), cgrEv, utils.RouteS))
 		} else if rous {
 			var rous routes.SortedRoutesList
 			if rous, err = sS.getRoutes(ctx, cgrEv); err != nil {
 				if cch[utils.OptsSesBlockerError].(bool) {
 					return
 				}
+				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
 						utils.SessionS, err.Error(), cgrEv, utils.RouteS))
@@ -942,6 +948,62 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				apiRply.RouteProfiles = make(map[string]routes.SortedRoutesList)
 			}
 			apiRply.RouteProfiles[runID] = rous
+		}
+
+		// StatS Enabled
+		if sts, errSts := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
+			utils.MetaStats); errSts != nil {
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errSts
+			}
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errSts.Error(), cgrEv, utils.StatS))
+			withErrors = true
+		} else if sts {
+			var statIDs []string
+			if statIDs, err = sS.processStats(ctx, cgrEv, true); err != nil {
+				if cch[utils.OptsSesBlockerError].(bool) {
+					return
+				}
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.StatS))
+				withErrors = true
+			}
+			if apiRply.StatQueueIDs == nil {
+				apiRply.StatQueueIDs = make(map[string][]string)
+			}
+			apiRply.StatQueueIDs[runID] = statIDs
+		}
+
+		// ThresholdS Enabled
+		if thds, errThds := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
+			utils.MetaThresholds); errThds != nil {
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errThds
+			}
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errThds.Error(), cgrEv, utils.ThresholdS))
+			withErrors = true
+		} else if thds {
+			var thdIDs []string
+			if thdIDs, err = sS.processThreshold(ctx, cgrEv, true); err != nil {
+				if cch[utils.OptsSesBlockerError].(bool) {
+					return
+				}
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.ThresholdS))
+				withErrors = true
+			}
+			if apiRply.ThresholdIDs == nil {
+				apiRply.ThresholdIDs = make(map[string][]string)
+			}
+			apiRply.ThresholdIDs[runID] = thdIDs
 		}
 
 		// IPs Enabled
@@ -954,6 +1016,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s authorizing event: %+v with %s",
 					utils.SessionS, err.Error(), cgrEv, utils.IPs))
+			withErrors = true
 		} else {
 			cchEv[utils.MetaIPs] = ipS
 		}
@@ -1043,6 +1106,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			apiRply.AccountSUsage[runID] = maxDur
 		}
 
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
 	}
 	return
 }
