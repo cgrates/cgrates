@@ -626,6 +626,7 @@ const (
 	AccountingID             = "AccountingID"
 	MetaSessionS             = "*sessions"
 	MetaDefault              = "*default"
+	MetaPrimary              = "*primary"
 	Error                    = "Error"
 	MetaCgreq                = "*cgreq"
 	MetaCgrep                = "*cgrep"

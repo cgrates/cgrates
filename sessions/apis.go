@@ -823,7 +823,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// end of RPC caching
 
 	cgrEvs := map[string]*utils.CGREvent{
-		utils.MetaDefault: apiArgs,
+		utils.MetaPrimary: apiArgs,
 	}
 
 	cch := make(map[string]any)
@@ -845,7 +845,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			}
 		} else {
 			*apiArgs = *rplyAttr.CGREvent
-			apiRply.Attributes[utils.MetaDefault] = rplyAttr
+			apiRply.Attributes[utils.MetaPrimary] = rplyAttr
 		}
 	}
 
@@ -858,18 +858,20 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaChargers] = chrgS
 	}
 	if cch[utils.MetaChargers].(bool) {
-		delete(cgrEvs, utils.MetaDefault) // ChargerS becomes responsive of charging
+		delete(cgrEvs, utils.MetaPrimary) // Original Event is not longer processed
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(ctx, apiArgs); err != nil {
 			return
 		}
-		if apiRply.Attributes == nil {
-			apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
-		}
+
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
+
 			if len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields) {
+				if apiRply.Attributes == nil {
+					apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
+				}
 				apiRply.Attributes[runID] = &attributes.AttrSProcessEventReply{
 					AlteredFields: chrgr.AlteredFields,
 					CGREvent:      chrgr.CGREvent,
