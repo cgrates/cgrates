@@ -993,3 +993,81 @@ func TestOrderedNavigableMapSet2(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", order, nm.GetOrder())
 	}
 }
+
+func TestOrderedNavigableMapAsMap(t *testing.T) {
+	onm := NewOrderedNavigableMap()
+
+	onm.Set(&FullPath{
+		PathSlice: []string{"Tenant"},
+		Path:      "Tenant",
+	}, &DataLeaf{Data: "cgrates.org"})
+
+	onm.Set(&FullPath{
+		PathSlice: []string{"billing", "Category"},
+		Path:      "billing.Category",
+	}, &DataLeaf{Data: "call"})
+
+	m := onm.AsMap()
+	if m == nil {
+		t.Fatal("want non-nil map")
+	}
+	if m["Tenant"] != "cgrates.org" {
+		t.Errorf("want %q, got %v", "cgrates.org", m["Tenant"])
+	}
+	inner, ok := m["billing"].(map[string]any)
+	if !ok {
+		t.Fatalf("want nested map for billing, got %T", m["billing"])
+	}
+	if inner["Category"] != "call" {
+		t.Errorf("want %q, got %v", "call", inner["Category"])
+	}
+
+	onm.Append(&FullPath{
+		PathSlice: []string{"Routes"},
+		Path:      "Routes",
+	}, &DataLeaf{Data: "route1"})
+	onm.Append(&FullPath{
+		PathSlice: []string{"Routes"},
+		Path:      "Routes",
+	}, &DataLeaf{Data: "route2"})
+
+	m = onm.AsMap()
+	want := []any{"route1", "route2"}
+	if !reflect.DeepEqual(m["Routes"], want) {
+		t.Errorf("want %v, got %v", want, m["Routes"])
+	}
+}
+
+func TestOrderedNavigableMapAsMapAppendPreservesArray(t *testing.T) {
+	onm := NewOrderedNavigableMap()
+	fp := &FullPath{Path: "Routes", PathSlice: []string{"Routes"}}
+
+	if err := onm.Append(fp, &DataLeaf{Data: "route1"}); err != nil {
+		t.Fatal(err)
+	}
+	m := onm.AsMap()
+	want := []any{"route1"}
+	if got, ok := m["Routes"].([]any); !ok || !reflect.DeepEqual(got, want) {
+		t.Errorf("want %v, got %v (%T)", want, m["Routes"], m["Routes"])
+	}
+
+	if err := onm.Append(fp, &DataLeaf{Data: "route2"}); err != nil {
+		t.Fatal(err)
+	}
+	m = onm.AsMap()
+	want = []any{"route1", "route2"}
+	if got := m["Routes"].([]any); !reflect.DeepEqual(got, want) {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestOrderedNavigableMapAsMapNonMap(t *testing.T) {
+	onm := &OrderedNavigableMap{
+		nm:       NewLeafNode("not a map"),
+		orderIdx: NewPathItemList(),
+		orderRef: make(map[string][]*PathItemElement),
+	}
+	if m := onm.AsMap(); m != nil {
+		t.Errorf("Expected nil for non-map root, got %v", m)
+	}
+}

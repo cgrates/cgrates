@@ -178,16 +178,15 @@ func TestHTTPJsonMapPrepareOrderMap(t *testing.T) {
 		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
 		Path:      utils.MetaTenant,
 	}
-	val := &utils.DataLeaf{
-		Data: "value1",
-	}
-	onm.Append(fullPath, val)
+	onm.SetAsSlice(fullPath, []*utils.DataNode{utils.NewLeafNode("value1")})
 	rcv, err := httpEE.PrepareOrderMap(onm)
 	if err != nil {
 		t.Error(err)
 	}
 	valMp := map[string]any{
-		"*req.*tenant": "value1",
+		"*req": map[string]any{
+			"*tenant": "value1",
+		},
 	}
 	body, err := json.Marshal(valMp)
 	exp := &HTTPPosterRequest{

@@ -20,7 +20,6 @@ package ees
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -57,12 +56,5 @@ func (vEe *VirtualEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
 }
 
 func (vEe *VirtualEE) PrepareOrderMap(onm *utils.OrderedNavigableMap) (any, error) {
-	preparedMap := make(map[string]any)
-	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
-		path := el.Value
-		item, _ := onm.Field(path)
-		path = path[:len(path)-1] // remove the last index
-		preparedMap[strings.Join(path, utils.NestingSep)] = item.String()
-	}
-	return preparedMap, nil
+	return onm.AsMap(), nil
 }

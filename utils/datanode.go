@@ -112,7 +112,7 @@ func (n *DataNode) Field(path []string) (*DataLeaf, error) {
 			return nil, ErrNotFound
 		}
 		return node.Field(path[1:]) // let the next node handle the value
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		if len(path) == 0 { // do not return in this function the n.Slice
 			return nil, ErrWrongPath
 		}
@@ -160,7 +160,7 @@ func (n *DataNode) fieldAsInterface(path []string) (any, error) {
 			return nil, ErrNotFound
 		}
 		return node.fieldAsInterface(path[1:]) // let the next node handle the value
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		if len(path) == 0 { // last element form path so return the n.Slice
 			return n.Slice, nil
 		}
@@ -208,7 +208,7 @@ func (n *DataNode) Set(path []string, val any) (addedNew bool, err error) {
 				Data: val,
 			}
 		}
-		return
+		return addedNew, nil
 	}
 	switch n.Type { // the path has more elements so parse the nodes based on type
 	case NMDataType: // node is an leaf but the path expects a slice or a map
@@ -221,7 +221,7 @@ func (n *DataNode) Set(path []string, val any) (addedNew bool, err error) {
 		}
 		addedNew, err = node.Set(path[1:], val) // set the value in the node
 		return addedNew || !has, err
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		idx, err := strconv.Atoi(path[0]) // convert the path to int
 		if err != nil {
 			return false, err
@@ -276,7 +276,7 @@ func (n *DataNode) Remove(path []string) error {
 			delete(n.Map, path[0])
 		}
 		return err
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		idx, err := strconv.Atoi(path[0]) // convert the path to int
 		if err != nil {
 			return err // the only error is when we expect an index but is not int
@@ -310,12 +310,12 @@ func (n *DataNode) Append(path []string, val *DataLeaf) (idx int, err error) {
 				return -1, ErrWrongPath
 			}
 			// is empty so make a slice to be compatible with append
-			n.Type = NMSliceType
+			n.Type = NMArrayType
 			n.Value = nil
 			n.Slice = []*DataNode{{Type: NMDataType, Value: val}}
 			return 0, nil
 		default: // is a slice so append the leaf as a DataNode
-			n.Type = NMSliceType
+			n.Type = NMArrayType
 			n.Slice = append(n.Slice, &DataNode{Type: NMDataType, Value: val})
 			return len(n.Slice) - 1, nil
 		}
@@ -330,7 +330,7 @@ func (n *DataNode) Append(path []string, val *DataLeaf) (idx int, err error) {
 			n.Map[path[0]] = node
 		}
 		return node.Append(path[1:], val) // append the value in the next node
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		idx, err := strconv.Atoi(path[0]) // convert the path to int
 		if err != nil {
 			return -1, err
@@ -352,6 +352,33 @@ func (n *DataNode) Append(path []string, val *DataLeaf) (idx int, err error) {
 	}
 	// this is possible if the node was created but no value was assigned to it
 	return -1, ErrWrongPath
+}
+
+// AsMapOrValue returns the tree as plain maps, slices, and values.
+func (n *DataNode) AsMapOrValue() any {
+	switch n.Type {
+	case NMDataType:
+		if n.Value == nil {
+			return nil
+		}
+		return n.Value.Data
+	case NMMapType:
+		m := make(map[string]any, len(n.Map))
+		for k, v := range n.Map {
+			m[k] = v.AsMapOrValue()
+		}
+		return m
+	case NMSliceType, NMArrayType:
+		if n.Type == NMSliceType && len(n.Slice) == 1 {
+			return n.Slice[0].AsMapOrValue()
+		}
+		s := make([]any, len(n.Slice))
+		for i, v := range n.Slice {
+			s[i] = v.AsMapOrValue()
+		}
+		return s
+	}
+	return nil
 }
 
 // Compose will string compose the value at de specified path with the given value
@@ -390,7 +417,7 @@ func (n *DataNode) Compose(path []string, val *DataLeaf) (err error) {
 			n.Map[path[0]] = node
 		}
 		return node.Compose(path[1:], val) // compose the value in the next node
-	case NMSliceType:
+	case NMSliceType, NMArrayType:
 		idx, err := strconv.Atoi(path[0]) // convert the path to int
 		if err != nil {
 			return err

@@ -81,7 +81,8 @@ func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val any, err error
 	if err != nil {
 		return
 	}
-	if nmItems, isNMItems := val.(*utils.DataNode); isNMItems && nmItems.Type == utils.NMSliceType { // special handling of NMItems, take the last value out of it
+	if nmItems, isNMItems := val.(*utils.DataNode); isNMItems &&
+		(nmItems.Type == utils.NMSliceType || nmItems.Type == utils.NMArrayType) { // special handling of NMItems, take the last value out of it
 		el := nmItems.Slice[len(nmItems.Slice)-1]
 		if el.Type == utils.NMDataType {
 			val = el.Value.Data

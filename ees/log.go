@@ -20,7 +20,6 @@ package ees
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -53,12 +52,5 @@ func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return mp.Event, nil
 }
 func (vEe *LogEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
-	valMp := make(map[string]any)
-	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
-		path := el.Value
-		nmIt, _ := mp.Field(path)
-		path = path[:len(path)-1] // remove the last index
-		valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
-	}
-	return valMp, nil
+	return mp.AsMap(), nil
 }
