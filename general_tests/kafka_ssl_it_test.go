@@ -282,7 +282,7 @@ func createKafkaTopics(t *testing.T, brokerURL string, cleanup bool, topics ...s
 // Kafka broker has the following configuration:
 
 /*
-/opt/kafka/config/kraft/server.properties
+/opt/kafka/config/server.properties
 ----------------------------------------
 
 listeners=PLAINTEXT://:9092,CONTROLLER://:9093,SSL://:9094

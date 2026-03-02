@@ -69,7 +69,7 @@
   become: true
   template:
     src: server.properties.j2
-    dest: '{{ kafka_dir }}/config/kraft/server.properties'
+    dest: '{{ kafka_dir }}/config/server.properties'
     group: '{{ kafka_group }}'
     owner: '{{ kafka_user }}'
     mode: 0644
@@ -77,7 +77,7 @@
     - Restart Kafka
 
 - name: Check if kraft logs dir has been initialized
-  shell: '{{ kafka_dir }}/bin/kafka-storage.sh info -c {{ kafka_dir }}/config/kraft/server.properties'
+  shell: '{{ kafka_dir }}/bin/kafka-storage.sh info -c {{ kafka_dir }}/config/server.properties'
   register: storage_info
   ignore_errors: true
 
@@ -89,7 +89,18 @@
 
 - name: Init kraft logs dir
   become: true
-  shell: '{{ kafka_dir }}/bin/kafka-storage.sh format -t {{ kafka_cluster_id.stdout }} -c {{ kafka_dir }}/config/kraft/server.properties'
+  shell: '{{ kafka_dir }}/bin/kafka-storage.sh format --standalone -t {{ kafka_cluster_id.stdout }} -c {{ kafka_dir }}/config/server.properties'
+  when: '"is not formatted" in storage_info.stdout'
+
+- name: Set ownership on kraft data directory
+  become: true
+  file:
+    path: '{{ item }}'
+    state: directory
+    recurse: yes
+    owner: '{{ kafka_user }}'
+    group: '{{ kafka_group }}'
+  with_items: "{{ kafka_data_log_dirs.split(',') }}"
   when: '"is not formatted" in storage_info.stdout'
 
 - name: Template kafka systemd service
