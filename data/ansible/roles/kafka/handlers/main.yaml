@@ -1,6 +1,6 @@
 ---
 - name: Restart Kafka
-  become: yes
+  become: true
   systemd:
     name: kafka
     state: restarted
