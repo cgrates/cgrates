@@ -24,6 +24,10 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
 	"path/filepath"
@@ -39,6 +43,7 @@ import (
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/tpes"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var (
@@ -727,5 +732,153 @@ func testExpCleanFiles(t *testing.T) {
 func testExpStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestEEsHTTPJsonMapNestedExport(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMongo, utils.MetaRedis, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	type httpResult struct {
+		body map[string]any
+		err  error
+	}
+	ch := make(chan httpResult, 1)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		var body map[string]any
+		err := json.NewDecoder(r.Body).Decode(&body)
+		ch <- httpResult{body, err}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	content := fmt.Sprintf(`{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nested_json",
+			"type": "*httpJSONMap",
+			"export_path": "%s/",
+			"attempts": 1,
+			"synchronous": true,
+			"fields": [
+				{
+					"tag": "OriginID",
+					"path": "*exp.OriginID",
+					"type": "*variable",
+					"value": "~*req.OriginID"
+				},
+				{
+					"tag": "Account",
+					"path": "*exp.Account",
+					"type": "*variable",
+					"value": "~*req.Account"
+				},
+				{
+					"tag": "Category",
+					"path": "*exp.billing.Category",
+					"type": "*variable",
+					"value": "~*req.Category"
+				},
+				{
+					"tag": "RequestType",
+					"path": "*exp.billing.RequestType",
+					"type": "*variable",
+					"value": "~*req.RequestType"
+				},
+				{
+					"tag": "Usage",
+					"path": "*exp.Usage",
+					"type": "*variable",
+					"value": "~*req.Usage"
+				},
+				{
+					"tag": "Cost",
+					"path": "*exp.Cost",
+					"type": "*variable",
+					"value": "~*req.Cost"
+				},
+				{
+					"tag": "Extra1",
+					"path": "*exp.ExtraInfo",
+					"type": "*group",
+					"value": "~*req.Extra1"
+				},
+				{
+					"tag": "Extra2",
+					"path": "*exp.ExtraInfo",
+					"type": "*group",
+					"value": "~*req.Extra2"
+				},
+				{
+					"tag": "Tag",
+					"path": "*exp.Tag",
+					"type": "*group",
+					"value": "~*req.Tag"
+				}
+			]
+		}
+	]
+}
+
+}`, srv.URL)
+
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		DBCfg:      engine.InternalDBCfg,
+		Encoding:   *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply map[string]map[string]any
+	if err := client.Call(context.Background(), utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testNestedExport",
+			Event: map[string]any{
+				"OriginID":    "cdn_12345",
+				"Account":     "1001",
+				"Category":    "call",
+				"RequestType": "*postpaid",
+				"Usage":       120,
+				"Cost":        1.35,
+				"Extra1":      "route1",
+				"Extra2":      "route2",
+				"Tag":         "premium",
+			},
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case res := <-ch:
+		if res.err != nil {
+			t.Fatalf("failed to decode HTTP body: %v", res.err)
+		}
+		want := map[string]any{
+			"OriginID": "cdn_12345",
+			"Account":  "1001",
+			"billing": map[string]any{
+				"Category":    "call",
+				"RequestType": "*postpaid",
+			},
+			"Usage":     "120",
+			"Cost":      "1.35",
+			"ExtraInfo": []any{"route1", "route2"},
+			"Tag":       []any{"premium"},
+		}
+		if diff := cmp.Diff(want, res.body); diff != "" {
+			t.Errorf("unexpected JSON body (-want +got):\n%s", diff)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for HTTP export")
 	}
 }

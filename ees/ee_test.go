@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -262,3 +263,60 @@ func TestDone(t *testing.T) {
 		t.Error("Expected length of 3")
 	}
 }
+
+func TestEEPrepareOrderMap(t *testing.T) {
+	bP := new(bytePreparing)
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	onm.SetAsSlice(fullPath, []*utils.DataNode{utils.NewLeafNode("value1")})
+	rcv, err := bP.PrepareOrderMap(onm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	valMp := map[string]any{
+		"*req": map[string]any{
+			"*tenant": "value1",
+		},
+	}
+	body, err := json.Marshal(valMp)
+	if !reflect.DeepEqual(rcv, body) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
+	}
+}
+
+func TestExportRequestTenant(t *testing.T) {
+	bP := new(bytePreparing)
+	inData := map[string]utils.DataStorage{
+		utils.MetaVars: utils.MapStorage{
+			utils.MetaTenant: "cgrates.org"},
+	}
+	expNM := utils.NewOrderedNavigableMap()
+	tpFields := []*config.FCTemplate{
+		{
+			Tag:   "Tenant",
+			Path:  utils.MetaExp + utils.NestingSep + utils.Tenant,
+			Type:  utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaVars+utils.NestingSep+utils.MetaTenant, utils.InfieldSep),
+		},
+	}
+	tpFields[0].ComputePath()
+	if err := NewExportRequest(inData, "cgrates.org", nil, map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(nil, tpFields); err != nil {
+		t.Error(err)
+	}
+	rcv, err := bP.PrepareOrderMap(expNM)
+	if err != nil {
+		t.Error(err)
+	}
+	valMp := map[string]any{
+		"Tenant": "cgrates.org",
+	}
+	body, _ := json.Marshal(valMp)
+	if !reflect.DeepEqual(rcv, body) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
+	}
+}
+

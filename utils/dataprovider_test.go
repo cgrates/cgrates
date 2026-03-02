@@ -81,7 +81,7 @@ func TestAppendNavMapVal(t *testing.T) {
 		"Field1": NewLeafNode("1001"),
 		"Field2": NewLeafNode("1003"),
 		"Field3": {Type: NMMapType, Map: map[string]*DataNode{"Field4": NewLeafNode("Val")}},
-		"Field5": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode(101), NewLeafNode(18)}},
+		"Field5": {Type: NMArrayType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode(101), NewLeafNode(18)}},
 	}}
 	if err := onm.Append(&FullPath{Path: "Field5", PathSlice: []string{"Field5"}}, NewLeafNode(18).Value); err != nil {
 		t.Error(err)
