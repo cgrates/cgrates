@@ -32,6 +32,7 @@ const (
 	NMDataType NMType = iota
 	NMMapType
 	NMSliceType
+	NMArrayType
 )
 
 // DataProvider is a data source from multiple formats
