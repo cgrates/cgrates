@@ -102,14 +102,7 @@ func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 }
 
 func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
-	valMp := make(map[string]any)
-	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
-		path := el.Value
-		nmIt, _ := mp.Field(path)
-		path = path[:len(path)-1] // remove the last index
-		valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
-	}
-	body, err := json.Marshal(valMp)
+	body, err := json.Marshal(mp.AsMap())
 	return &HTTPPosterRequest{
 		Header: httpEE.hdr.Clone(),
 		Body:   body,

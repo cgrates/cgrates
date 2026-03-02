@@ -3495,3 +3495,34 @@ func BenchmarkSetFieldsAppendMixed(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkSetFieldsAndExport(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Destination",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "Usage",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+		{Tag: "Route",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+		agReq.CGRReply.AsMapOrValue()
+	}
+}

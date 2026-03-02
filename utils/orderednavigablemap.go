@@ -157,6 +157,12 @@ func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface any, e
 	return onm.nm.FieldAsInterface(fldPath)
 }
 
+// AsMap returns the contents as a nested map[string]any.
+func (onm *OrderedNavigableMap) AsMap() map[string]any {
+	v, _ := onm.nm.AsMapOrValue().(map[string]any)
+	return v
+}
+
 // GetOrder returns the elements order as a slice
 func (onm *OrderedNavigableMap) GetOrder() (order [][]string) {
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {

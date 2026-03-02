@@ -20,7 +20,6 @@ package ees
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -199,20 +198,7 @@ func (e *ElasticEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
 }
 
 func (e *ElasticEE) PrepareOrderMap(onm *utils.OrderedNavigableMap) (any, error) {
-	preparedMap := make(map[string]any)
-	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
-		path := el.Value
-		item, err := onm.Field(path)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> exporter %q: failed to retrieve field at path %q",
-				utils.EEs, e.cfg.ID, path))
-			continue
-		}
-		path = path[:len(path)-1] // remove the last index
-		preparedMap[strings.Join(path, utils.NestingSep)] = item.String()
-	}
-	return preparedMap, nil
+	return onm.AsMap(), nil
 }
 
 func (e *ElasticEE) Close() error {

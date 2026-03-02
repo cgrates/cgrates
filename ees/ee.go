@@ -21,7 +21,6 @@ package ees
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -206,14 +205,7 @@ func (bytePreparing) PrepareMap(mp *utils.CGREvent) (any, error) {
 	return json.Marshal(mp.Event)
 }
 func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
-	valMp := make(map[string]any)
-	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
-		path := el.Value
-		nmIt, _ := mp.Field(path)
-		path = path[:len(path)-1] // remove the last index
-		valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
-	}
-	return json.Marshal(valMp)
+	return json.Marshal(mp.AsMap())
 }
 
 type slicePreparing struct{}
