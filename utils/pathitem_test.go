@@ -53,6 +53,29 @@ func TestStripIdxFromLastPathElm(t *testing.T) {
 	}
 }
 
+func TestStripTrailingIndex(t *testing.T) {
+	tests := []struct {
+		name string
+		in   []string
+		want []string
+	}{
+		{name: "empty", in: nil, want: nil},
+		{name: "scalar", in: []string{"Account"}, want: []string{"Account"}},
+		{name: "trailing index", in: []string{"Account", "0"}, want: []string{"Account"}},
+		{name: "nested with index", in: []string{"billing", "Amount", "2"}, want: []string{"billing", "Amount"}},
+		{name: "no trailing index", in: []string{"billing", "Amount"}, want: []string{"billing", "Amount"}},
+		{name: "negative index stripped", in: []string{"Field", "-1"}, want: []string{"Field"}},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := StripTrailingIndex(tc.in)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("StripTrailingIndex(%v) = %v, want %v", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestNewFullPath(t *testing.T) {
 	expected := &FullPath{
 		PathSlice: []string{"test", "path"},

@@ -1028,10 +1028,10 @@ func TestOrderedNavigableMapSet2(t *testing.T) {
 	}
 
 	nMap := &DataNode{Type: NMMapType, Map: map[string]*DataNode{
-		"Field1": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode("1002")}},
-		"Field":  {Type: NMSliceType, Slice: []*DataNode{NewLeafNode("1001")}},
+		"Field1": NewLeafNode("1002"),
+		"Field":  NewLeafNode("1001"),
 	}}
-	order := [][]string{{"Field1", "0"}, {"Field", "0"}}
+	order := [][]string{{"Field1"}, {"Field"}}
 
 	if !reflect.DeepEqual(nm.nm, nMap) {
 		t.Errorf("Expected %s ,received: %s", ToJSON(nMap), ToJSON(nm.nm))

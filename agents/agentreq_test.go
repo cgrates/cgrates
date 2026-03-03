@@ -181,12 +181,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Errorf("Expecting NM items<%T>", val)
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// case utils.MetaCgreq
@@ -203,12 +199,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.CGRRequest.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// case utils.MetaCgrep
@@ -225,12 +217,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.CGRReply.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// case utils.MetaRep
@@ -247,12 +235,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Reply.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// case utils.MetaDiamreq
@@ -269,12 +253,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.diamreq.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// case utils.MetaRadDAReq
@@ -291,12 +271,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.radDAReq.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	//MetaComposed
@@ -328,12 +304,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"AccountID"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "cgrates.org:1009" {
-		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Value.Data)
+	} else if val != "cgrates.org:1009" {
+		t.Errorf("Expecting 'cgrates.org:1009', received: %v", val)
 	}
 
 	// MetaConstant
@@ -350,12 +322,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "2020" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "2020" {
+		t.Errorf("Expecting 2020, received: %v", val)
 	}
 
 	// Filters
@@ -373,12 +341,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"AccountID"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item ", utils.ToJSON(nm))
-	} else if nm[0].Value.Data != "cgrates.org:1009" {
-		t.Error("Expecting 'cgrates.org:1009', received: ", nm[0].Value.Data)
+	} else if val != "cgrates.org:1009" {
+		t.Errorf("Expecting 'cgrates.org:1009', received: %v", val)
 	}
 
 	input = []*config.FCTemplate{
@@ -418,12 +382,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Name"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	// ErrNotFound
@@ -484,12 +444,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account4"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 
 	input = []*config.FCTemplate{
@@ -505,12 +461,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error(err)
 	} else if val, err := ar.Vars.FieldAsInterface([]string{"Account5"}); err != nil {
 		t.Error(err)
-	} else if nm, ok := val.([]*utils.DataNode); !ok {
-		t.Error("Expecting NM items")
-	} else if len(nm) != 1 {
-		t.Error("Expecting one item")
-	} else if nm[0].Value.Data != "1009" {
-		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	} else if val != "1009" {
+		t.Errorf("Expecting 1009, received: %v", val)
 	}
 }
 
@@ -794,12 +746,9 @@ func TestAgReqEmptyFilter(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{utils.Destination}, &utils.DataLeaf{Data: "1002"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -829,8 +778,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{"TestExpo"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "200"}}})
+	eMp.Set([]string{"TestExpo"}, &utils.DataLeaf{Data: "200"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -867,10 +815,8 @@ func TestAgReqFieldAsNone(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
@@ -910,12 +856,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{utils.Destination}, &utils.DataLeaf{Data: "1002"})
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
@@ -962,16 +905,11 @@ func TestAgReqSetField2(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
-	eMp.Set([]string{"Usage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s"}}})
-	eMp.Set([]string{"CalculatedUsage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{utils.Destination}, &utils.DataLeaf{Data: "1002"})
+	eMp.Set([]string{"Usage"}, &utils.DataLeaf{Data: "30s"})
+	eMp.Set([]string{"CalculatedUsage"}, &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1924,13 +1862,8 @@ func TestAgReqOverwrite(t *testing.T) {
 
 	if rcv, err := agReq.CGRReply.FieldAsInterface([]string{utils.AccountField}); err != nil {
 		t.Error(err)
-	} else if sls, canCast := rcv.([]*utils.DataNode); !canCast {
-		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
-	} else if len(sls) != 1 {
-		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if sls[0].Value.Data != "OverwrittenAccountWithComposed" {
-		t.Errorf("expecting: %+v, \n received: %+v ",
-			"OverwrittenAccountWithComposed", sls[0].Value.Data)
+	} else if rcv != "OverwrittenAccountWithComposed" {
+		t.Errorf("expecting: OverwrittenAccountWithComposed, received: %v", rcv)
 	}
 }
 
@@ -2000,10 +1933,8 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -2030,8 +1961,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{"IP"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x3e5772f4"}}})
+	eMp.Set([]string{"IP"}, &utils.DataLeaf{Data: "0x3e5772f4"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -2058,8 +1988,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{"CustomField"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x947102310159"}}})
+	eMp.Set([]string{"CustomField"}, &utils.DataLeaf{Data: "0x947102310159"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -2446,18 +2375,12 @@ func TestAgReqDynamicPath(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
-	eMp.Set([]string{"Usage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s"}}})
-	eMp.Set([]string{"Route"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{"Route2", "CGR_ROUTE1"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{utils.Destination}, &utils.DataLeaf{Data: "1002"})
+	eMp.Set([]string{"Usage"}, &utils.DataLeaf{Data: "30s"})
+	eMp.Set([]string{"Route"}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{"Route2", "CGR_ROUTE1"}, &utils.DataLeaf{Data: "1002"})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -2498,13 +2421,8 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 
 	if rcv, err := agReq.CGRReply.FieldAsInterface([]string{utils.Cost}); err != nil {
 		t.Error(err)
-	} else if sls, canCast := rcv.([]*utils.DataNode); !canCast {
-		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
-	} else if len(sls) != 1 {
-		t.Errorf("expecting: %+v, \n received: %+v ", 1, len(sls))
-	} else if sls[0].Value.Data != "12.126" {
-		t.Errorf("expecting: %+v, \n received: %+v",
-			"12.126", sls[0].Value.Data)
+	} else if rcv != "12.126" {
+		t.Errorf("expecting: %+v, \n received: %+v", "12.126", rcv)
 	}
 }
 
@@ -2540,12 +2458,9 @@ func BenchmarkAgReqSetField(b *testing.B) {
 		v.ComputePath()
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	eMp.Set([]string{utils.AccountField, "0", "ID"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
-	eMp.Set([]string{utils.AccountField, "1", "ID"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1003"}}})
+	eMp.Set([]string{utils.Tenant}, &utils.DataLeaf{Data: "cgrates.org"})
+	eMp.Set([]string{utils.AccountField, "0", "ID"}, &utils.DataLeaf{Data: "1001"})
+	eMp.Set([]string{utils.AccountField, "1", "ID"}, &utils.DataLeaf{Data: "1003"})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -3338,19 +3253,19 @@ func BenchmarkSetFieldsAndExport(b *testing.B) {
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
 		{Tag: "Account",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
 		{Tag: "Destination",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
 		{Tag: "Usage",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
 		{Tag: "Route",
 			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
 	}
 	for _, v := range tplFlds {
 		v.ComputePath()

@@ -606,13 +606,9 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 	exp := `{
  "Map": {
   "Tenant": {
-   "Slice": [
-    {
-     "Value": {
-      "Data": "cgrates.org"
-     }
-    }
-   ]
+   "Value": {
+    "Data": "cgrates.org"
+   }
   }
  }
 }`
@@ -946,13 +942,9 @@ func TestExportRequestComposeDefaultOK(t *testing.T) {
 	exp := `{
  "Map": {
   "Tenant": {
-   "Slice": [
-    {
-     "Value": {
-      "Data": "cgrates.org"
-     }
-    }
-   ]
+   "Value": {
+    "Data": "cgrates.org"
+   }
   }
  }
 }`

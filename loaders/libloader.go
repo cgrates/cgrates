@@ -64,8 +64,8 @@ func (r *record) FieldAsString(path []string) (str string, err error) {
 }
 
 func TenantIDFromOrderedNavigableMap(data *utils.OrderedNavigableMap) *utils.TenantID {
-	tnt, _ := data.FieldAsString([]string{utils.Tenant, "0"})
-	id, _ := data.FieldAsString([]string{utils.ID, "0"})
+	tnt, _ := data.FieldAsString([]string{utils.Tenant})
+	id, _ := data.FieldAsString([]string{utils.ID})
 	return &utils.TenantID{
 		Tenant: tnt,
 		ID:     id,
@@ -73,7 +73,7 @@ func TenantIDFromOrderedNavigableMap(data *utils.OrderedNavigableMap) *utils.Ten
 }
 
 func RateIDsFromOrderedNavigableMap(data *utils.OrderedNavigableMap) ([]string, error) {
-	val, err := data.FieldAsInterface([]string{utils.RateIDs, "0"})
+	val, err := data.FieldAsInterface([]string{utils.RateIDs})
 	if err != nil {
 		return nil, fmt.Errorf("cannot find RateIDs in map")
 	}

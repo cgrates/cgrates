@@ -30,7 +30,7 @@ func radAppendAttributes(packet *radigo.Packet, nm *utils.OrderedNavigableMap) e
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		cfgItm, _ := nm.Field(path)
-		path = path[:len(path)-1]        // remove the last index
+		path = utils.StripTrailingIndex(path)
 		if path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
 			if err := packet.SetCodeWithName(utils.IfaceAsString(cfgItm.Data)); err != nil {
 				return err
@@ -107,12 +107,11 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (string, error) {
 
 // radauthReq is used to authorize a request based on flags
 func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
-	// try to get UserPassword from Vars as slice of NMItems
 	nmItems, has := aReq.Vars.Map[utils.UserPassword]
 	if !has {
 		return false, utils.ErrNotFound
 	}
-	pass := nmItems.Slice[0].Value.String()
+	pass := nmItems.Value.String()
 	switch {
 	case flags.Has(utils.MetaPAP):
 		userPassAvps := req.AttributesWithName(UserPasswordAVP, utils.EmptyString)
