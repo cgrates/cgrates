@@ -84,6 +84,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint1
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		itm, _ := nm.Field(path)
+		path = utils.StripTrailingIndex(path)
 		switch path[0] { // go for each posible field
 		case utils.DNSId:
 			var vItm int64
@@ -152,8 +153,8 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint1
 			}
 			msg.Rcode = int(vItm)
 		case utils.DNSQuestion:
-			if msg.Question, err = updateDnsQuestions(msg.Question, path[1:len(path)-1], itm.Data, itm.NewBranch); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", path[:len(path)-1], err.Error())
+			if msg.Question, err = updateDnsQuestions(msg.Question, path[1:], itm.Data, itm.NewBranch); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", path, err.Error())
 			}
 		case utils.DNSAnswer:
 			newBranch := itm.NewBranch ||
@@ -163,8 +164,8 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint1
 				msgFields = make(utils.StringSet)      // reset the fields inside since we have a new message
 				msgFields.Add(strings.Join(path, ".")) // detect new branch
 			}
-			if msg.Answer, err = updateDnsAnswer(msg.Answer, qType, qName, path[1:len(path)-1], itm.Data, newBranch); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", path[:len(path)-1], err.Error())
+			if msg.Answer, err = updateDnsAnswer(msg.Answer, qType, qName, path[1:], itm.Data, newBranch); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", path, err.Error())
 			}
 		case utils.DNSNs: //ToDO
 		case utils.DNSExtra: //ToDO
@@ -173,8 +174,8 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint1
 			if opts == nil {
 				opts = msg.SetEdns0(4096, false).IsEdns0()
 			}
-			if opts.Option, err = updateDnsOption(opts.Option, path[1:len(path)-1], itm.Data, itm.NewBranch); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", path[:len(path)-1], err.Error())
+			if opts.Option, err = updateDnsOption(opts.Option, path[1:], itm.Data, itm.NewBranch); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", path, err.Error())
 			}
 		default:
 		}

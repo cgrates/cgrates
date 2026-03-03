@@ -107,7 +107,7 @@ func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (any, error) {
 		if val.AttributeID != utils.EmptyString {
 			continue
 		}
-		path = path[:len(path)-1] // remove the last index
+		path = utils.StripTrailingIndex(path)
 		opath := strings.Join(path, utils.NestingSep)
 		if _, has := mP[opath]; !has {
 			mP[opath] = val.Data // first item which is not an attribute will become the value

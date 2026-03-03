@@ -221,7 +221,7 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 		if val.AttributeID != "" {
 			continue
 		}
-		path = path[:len(path)-1] // remove the last index
+		path = StripTrailingIndex(path)
 		opath := strings.Join(path, NestingSep)
 		if _, has := cgrEv.Event[opath]; !has {
 			cgrEv.Event[opath] = val.Data // first item which is not an attribute will become the value

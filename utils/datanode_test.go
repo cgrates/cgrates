@@ -356,8 +356,10 @@ func TestAppend1(t *testing.T) {
 		Data: "testValue",
 	}
 	dn.Type = NMDataType
-	if _, err := dn.Append(testPath, val1); err == nil || err != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+	if idx, err := dn.Append(testPath, val1); err != nil {
+		t.Errorf("Expected no error but received %v", err)
+	} else if idx != 1 {
+		t.Errorf("Expected idx 1 but received %v", idx)
 	}
 }
 func TestAppend2(t *testing.T) {
@@ -382,7 +384,7 @@ func TestAppend2(t *testing.T) {
 			Type: NMMapType,
 			Map: map[string]*DataNode{
 				testPath[1]: {
-					Type: NMArrayType,
+					Type: NMSliceType,
 					Slice: []*DataNode{{
 						Type:  NMDataType,
 						Value: val1,
@@ -429,7 +431,7 @@ func TestAppend2(t *testing.T) {
 		Type: NMMapType,
 		Map: map[string]*DataNode{
 			testPath[1]: {
-				Type: NMArrayType,
+				Type: NMSliceType,
 				Slice: []*DataNode{{
 					Type:  NMDataType,
 					Value: val1,
@@ -534,11 +536,8 @@ func TestCompose2(t *testing.T) {
 		Type: NMMapType,
 		Map: map[string]*DataNode{
 			testPath[1]: {
-				Type: NMSliceType,
-				Slice: []*DataNode{{
-					Type:  NMDataType,
-					Value: val,
-				}},
+				Type:  NMDataType,
+				Value: val,
 			},
 		},
 	}}
@@ -586,8 +585,8 @@ func TestDataNodeAsMapOrValue(t *testing.T) {
 		Type:  NMSliceType,
 		Slice: []*DataNode{NewLeafNode("*prepaid")},
 	}
-	if v := singleSlice.AsMapOrValue(); v != "*prepaid" {
-		t.Errorf("want %q, got %v", "*prepaid", v)
+	if got, ok := singleSlice.AsMapOrValue().([]any); !ok || !reflect.DeepEqual(got, []any{"*prepaid"}) {
+		t.Errorf("want [*prepaid], got %v", singleSlice.AsMapOrValue())
 	}
 
 	multiSlice := &DataNode{
@@ -627,8 +626,9 @@ func TestDataNodeAsMapOrValue(t *testing.T) {
 	if !ok {
 		t.Fatalf("want nested map, got %T", m["billing"])
 	}
-	if inner["RequestType"] != "*postpaid" {
-		t.Errorf("want %q, got %v", "*postpaid", inner["RequestType"])
+	wantReqType := []any{"*postpaid"}
+	if !reflect.DeepEqual(inner["RequestType"], wantReqType) {
+		t.Errorf("want %v, got %v", wantReqType, inner["RequestType"])
 	}
 
 	unknown := &DataNode{Type: 99}
@@ -637,14 +637,14 @@ func TestDataNodeAsMapOrValue(t *testing.T) {
 	}
 }
 
-func TestDataNodeNMArrayType(t *testing.T) {
+func TestDataNodeAppendPromotesType(t *testing.T) {
 	n := &DataNode{Type: NMMapType, Map: make(map[string]*DataNode)}
 	n.Map["routes"] = &DataNode{}
 	if _, err := n.Map["routes"].Append(nil, &DataLeaf{Data: "route1"}); err != nil {
 		t.Fatal(err)
 	}
-	if n.Map["routes"].Type != NMArrayType {
-		t.Errorf("want NMArrayType, got %v", n.Map["routes"].Type)
+	if n.Map["routes"].Type != NMSliceType {
+		t.Errorf("want NMSliceType, got %v", n.Map["routes"].Type)
 	}
 	result := n.AsMapOrValue()
 	m := result.(map[string]any)
@@ -664,8 +664,9 @@ func TestDataNodeNMArrayType(t *testing.T) {
 	}
 
 	wrapper := &DataNode{Type: NMSliceType, Slice: []*DataNode{NewLeafNode("*rated")}}
-	if v := wrapper.AsMapOrValue(); v != "*rated" {
-		t.Errorf("want unwrapped %q, got %v (%T)", "*rated", v, v)
+	wantSlice := []any{"*rated"}
+	if got, ok := wrapper.AsMapOrValue().([]any); !ok || !reflect.DeepEqual(got, wantSlice) {
+		t.Errorf("want %v, got %v (%T)", wantSlice, wrapper.AsMapOrValue(), wrapper.AsMapOrValue())
 	}
 
 	n.Map["routes"].Set(nil, []*DataNode{NewLeafNode("route3")})
@@ -674,7 +675,8 @@ func TestDataNodeNMArrayType(t *testing.T) {
 	}
 	result = n.AsMapOrValue()
 	m = result.(map[string]any)
-	if m["routes"] != "route3" {
-		t.Errorf("want unwrapped %q after Set, got %v (%T)", "route3", m["routes"], m["routes"])
+	wantSet := []any{"route3"}
+	if !reflect.DeepEqual(m["routes"], wantSet) {
+		t.Errorf("want %v after Set, got %v (%T)", wantSet, m["routes"], m["routes"])
 	}
 }
