@@ -86,7 +86,7 @@ cgrates.org,ATTR_SUBJECT,*string:~*opts.*context:*chargers,;10,;false,,,*req.Sub
 	// })
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("noAttributes", func(t *testing.T) {
 		t.Skip("fails due to comparision of len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields)")

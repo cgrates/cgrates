@@ -162,9 +162,9 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil with *ips + *authorize flags")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
-			t.Fatal("No IP authorization for *default runID with *ips + *authorize flags")
+			t.Fatal("No IP authorization for *primary runID with *ips + *authorize flags")
 		}
 
 		if authorizedIP.Address.String() != "172.16.1.1" {
@@ -203,9 +203,9 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil with *ipsAuthorize flag")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
-			t.Fatal("No IP authorization for *default runID with *ipsAuthorize flag")
+			t.Fatal("No IP authorization for *primary runID with *ipsAuthorize flag")
 		}
 
 		if authorizedIP.Address.String() != "172.16.1.1" {
@@ -244,11 +244,10 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 			t.Fatal("IPsAllocation should not be nil for matching profile")
 		}
 
-		authorizedIP, exists := rply.IPsAllocation[utils.MetaDefault]
+		authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
 		if !exists {
 			t.Fatal("No IP authorization found for matching profile")
 		}
-
 		if authorizedIP.ProfileID != "IPs1" {
 			t.Errorf("ProfileID = %s, want IPs1", authorizedIP.ProfileID)
 		}
