@@ -41,7 +41,7 @@ func NMAsXMLElements(nm *OrderedNavigableMap) (ents []*XMLElement, err error) {
 		if nmItm.NewBranch {
 			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
 		}
-		path = path[:len(path)-1] // remove the last index
+		path = StripTrailingIndex(path)
 		val := nmItm.String()
 		var pathCached bool
 		for i := len(path); i > 0; i-- {

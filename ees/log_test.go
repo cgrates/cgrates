@@ -123,7 +123,7 @@ func TestLogEEPrepareOrderMap(t *testing.T) {
 	mp.Append(fullPath, val)
 	rcv, _ := logEE.PrepareOrderMap(mp)
 	expected := make(map[string]any)
-	expected["*path1"] = "payload"
+	expected["*path1"] = []any{"payload"}
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", mp, rcv)
 	}

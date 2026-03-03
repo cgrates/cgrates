@@ -68,6 +68,18 @@ func GetPathIndex(spath string) (opath string, idx *int) {
 	return opath, &idxVal
 }
 
+// StripTrailingIndex removes the last element from path if it is a
+// numeric index (from array storage). Scalar paths are returned as-is.
+func StripTrailingIndex(path []string) []string {
+	if len(path) == 0 {
+		return path
+	}
+	if _, err := strconv.Atoi(path[len(path)-1]); err == nil {
+		return path[:len(path)-1]
+	}
+	return path
+}
+
 // GetPathIndexString returns the path and index as string if index present
 // path[index]=>path,index
 // path=>path,nil

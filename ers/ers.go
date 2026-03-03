@@ -647,7 +647,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 			for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 				path := el.Value
 				nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)
-				path = path[:len(path)-1] // remove the last index
+				path = utils.StripTrailingIndex(path)
 				record[strings.Join(path, utils.NestingSep)] = nmIt.Data
 			}
 		} else {

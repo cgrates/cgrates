@@ -431,7 +431,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, 
 		if nmIt == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		path = path[:len(path)-1] // remove the last index
+		path = utils.StripTrailingIndex(path)
 		if err = messageSetAVPsWithPath(m,
 			path, nmIt.String(),
 			nmIt.NewBranch, tmz); err != nil {

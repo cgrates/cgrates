@@ -238,7 +238,7 @@ func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) 
 	for el := nM.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := nM.Field(path)
-		path = path[:len(path)-1] // remove the last index
+		path = utils.StripTrailingIndex(path)
 		nmPath = strings.Join(path, utils.NestingSep)
 		val := nmIt.String()
 		msgFields[utils.ConcatenatedKey(nmPath, val)] = val
