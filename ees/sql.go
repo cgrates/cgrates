@@ -188,7 +188,7 @@ func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) 
 	var whereVals []any    // will hold the values replacing "?" used on WHERE part of UPDATE query
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := mp.Field(el.Value)
-		pathWithoutIndex := strings.Join(el.Value[:len(el.Value)-1], utils.NestingSep) // remove the index path.index
+		pathWithoutIndex := strings.Join(utils.StripTrailingIndex(el.Value), utils.NestingSep)
 		if pathWithoutIndex != utils.MetaRow {
 			colNames = append(colNames, pathWithoutIndex)
 		}

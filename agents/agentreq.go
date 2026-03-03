@@ -262,21 +262,21 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 }
 
 // Set implements utils.NMInterface
-func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
+func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) error {
 	switch fullPath.PathSlice[0] {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		_, err = ar.Vars.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-		return
+		_, err := ar.Vars.Set(fullPath.PathSlice[1:], nm)
+		return err
 	case utils.MetaCgreq:
 		return ar.CGRRequest.SetAsSlice(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaCgrep:
-		_, err = ar.CGRReply.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-		return
+		_, err := ar.CGRReply.Set(fullPath.PathSlice[1:], nm)
+		return err
 	case utils.MetaRep:
 		return ar.Reply.SetAsSlice(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
@@ -293,8 +293,8 @@ func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf)
 			Path:      fullPath.Path[14:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaTmp:
-		_, err = ar.tmp.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-		return
+		_, err := ar.tmp.Set(fullPath.PathSlice[1:], nm)
+		return err
 	case utils.MetaOpts:
 		return ar.Opts.Set(fullPath.PathSlice[1:], nm.Data)
 	case utils.MetaUCH:

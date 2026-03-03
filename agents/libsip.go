@@ -37,7 +37,7 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		path = path[:len(path)-1] // remove the last index
+		path = utils.StripTrailingIndex(path)
 		m[strings.Join(path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	return

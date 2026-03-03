@@ -68,7 +68,7 @@ func (httpPost *HTTPPostEE) composeHeader(cgrCfg *config.CGRConfig, filterS *eng
 	for el := exp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := exp.Field(path) //Safe to ignore error, since the path always exists
-		path = path[:len(path)-1]  // remove the last index
+		path = utils.StripTrailingIndex(path)
 		hdr.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
 	return
@@ -110,7 +110,7 @@ func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any,
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := mp.Field(path)
-		path = path[:len(path)-1] // remove the last index
+		path = utils.StripTrailingIndex(path)
 		urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
 	return &HTTPPosterRequest{
