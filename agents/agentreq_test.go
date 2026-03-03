@@ -3102,3 +3102,233 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 		})
 	}
 }
+
+func newBenchAgReq(b *testing.B) *AgentRequest {
+	b.Helper()
+	cfg := config.NewDefaultCGRConfig()
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
+	agReq.CGRRequest.Set(
+		&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}},
+		utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(
+		&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}},
+		utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(
+		&utils.FullPath{Path: utils.Usage, PathSlice: []string{utils.Usage}},
+		utils.NewLeafNode("30s"))
+	agReq.CGRRequest.Set(
+		&utils.FullPath{Path: "Route", PathSlice: []string{"Route"}},
+		utils.NewLeafNode("supplier1"))
+	return agReq
+}
+
+func BenchmarkSetFields(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Destination",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "Usage",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+		{Tag: "Route",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsCrossRef(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Destination",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "VarsTenant",
+			Path: utils.MetaVars + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgrep.Tenant", utils.InfieldSep)},
+		{Tag: "VarsAccount",
+			Path: utils.MetaVars + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgrep.Account", utils.InfieldSep)},
+		{Tag: "VarsDest",
+			Path: utils.MetaVars + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgrep.Destination", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		agReq.Vars = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsMixedDest(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "VarsAccount",
+			Path: utils.MetaVars + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "VarsDest",
+			Path: utils.MetaVars + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "TmpUsage",
+			Path: utils.MetaTmp + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+		{Tag: "TmpRoute",
+			Path: utils.MetaTmp + utils.NestingSep + "Route", Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		agReq.Vars = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		agReq.tmp = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsCompose(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Account",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "AccountSuffix",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
+			Value: utils.NewRSRParsersMustCompile("_suffix", utils.InfieldSep)},
+		{Tag: "Destination",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "DestSuffix",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaComposed,
+			Value: utils.NewRSRParsersMustCompile("_extra", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsAppend2(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Account1",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Account2",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsAppend4(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Account1",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Account2",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "Account3",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+		{Tag: "Account4",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSetFieldsAppendMixed(b *testing.B) {
+	agReq := newBenchAgReq(b)
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Tenant",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+		{Tag: "Usage",
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Usage", utils.InfieldSep)},
+		{Tag: "Route1",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
+		{Tag: "Route2",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
+		{Tag: "Route3",
+			Path: utils.MetaCgrep + utils.NestingSep + "Route", Type: utils.MetaGroup,
+			Value: utils.NewRSRParsersMustCompile("~*cgreq.Route", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	for b.Loop() {
+		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+		if err := agReq.SetFields(tplFlds); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
