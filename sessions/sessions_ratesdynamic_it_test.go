@@ -77,10 +77,18 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		},
 		DBCfg:    dbcfg,
 		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+
 	}
 
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
+
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("dynamicMatch", func(t *testing.T) {
 		var rply V1ProcessEventReply
@@ -105,13 +113,13 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			t.Fatal("RateSCost should not be nil when dynamic filter matches")
 		}
 
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 
 		if cost != 1.0 {
-			t.Errorf("RateSCost[*default] = %g, want 1.0", cost)
+			t.Errorf("RateSCost[*primary] = %g, want 1.0", cost)
 		}
 	})
 

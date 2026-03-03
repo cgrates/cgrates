@@ -76,7 +76,7 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 	// })
 
 	client, _ := ng.Run(t)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	t.Run("noFlags", func(t *testing.T) {
 		var rply V1ProcessEventReply
@@ -123,9 +123,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if rply.RateSCost == nil {
 			t.Fatal("RateSCost should not be nil with *rates flag")
 		}
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 		const wantCost = 1.0
 		if cost != wantCost {
@@ -156,9 +156,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if rply.RateSCost == nil {
 			t.Fatal("RateSCost should not be nil")
 		}
-		cost, exists := rply.RateSCost[utils.MetaDefault]
+		cost, exists := rply.RateSCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *default runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
 		}
 		const wantCost = 2.0
 		if cost != wantCost {
