@@ -436,6 +436,64 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Errorf("Expected error: %s,received:%v", expErr, err)
 	}
 
+	reply = []map[string]any{}
+	if err = anz.V1StringQuery(context.Background(),
+		&QueryArgs{
+			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
+			Limit:         2,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 2 {
+		t.Errorf("Expected 2 hits with Limit=2, received: %v", len(reply))
+	}
+
+	reply = []map[string]any{}
+	if err = anz.V1StringQuery(context.Background(),
+		&QueryArgs{
+			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
+			Limit:         4,
+			Offset:        2,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 2 {
+		t.Errorf("Expected 2 hits with Limit=4 Offset=2, received: %v", len(reply))
+	}
+
+	reply = []map[string]any{}
+	if err = anz.V1StringQuery(context.Background(),
+		&QueryArgs{
+			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
+			Limit:         1,
+			Offset:        1,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Errorf("Expected 1 hit with Limit=1 Offset=1, received: %v", len(reply))
+	}
+
+	reply = []map[string]any{}
+	if err = anz.V1StringQuery(context.Background(),
+		&QueryArgs{
+			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
+			Offset:        2,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 2 {
+		t.Errorf("Expected 2 hits with Offset=2 no Limit, received: %v", len(reply))
+	}
+
+	reply = []map[string]any{}
+	if err = anz.V1StringQuery(context.Background(),
+		&QueryArgs{
+			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
+			Limit:         0,
+			Offset:        0,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 4 {
+		t.Errorf("Expected 4 hits with Limit=0 Offset=0, received: %v", len(reply))
+	}
+
 	if err = anz.db.Close(); err != nil {
 		t.Fatal(err)
 	}

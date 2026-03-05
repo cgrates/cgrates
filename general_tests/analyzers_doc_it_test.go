@@ -153,6 +153,7 @@ func anzStringQuery(t *testing.T, client *birpc.Client, wantRC int, filters ...s
 		&analyzers.QueryArgs{
 			HeaderFilters:  headerFilters,
 			ContentFilters: contentFilters,
+			Limit:          1000,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != wantRC && wantRC != -1 {

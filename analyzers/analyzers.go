@@ -20,7 +20,6 @@ package analyzers
 
 import (
 	"encoding/json"
-	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -138,6 +137,10 @@ func (aS *AnalyzerS) logTrafic(id uint64, method string,
 type QueryArgs struct {
 	// a string based on the query language(https://blevesearch.com/docs/Query-String-Query/) that we send to bleve
 	HeaderFilters string
+	// Limit is the maximum number of results to return (maps to Bleve's Size parameter)
+	Limit int
+	// Offset is the starting position for results, used for pagination (maps to Bleve's From parameter)
+	Offset int
 	// a list of filters that we use to filter the call similar to how we filter the events
 	ContentFilters []string
 }
@@ -150,8 +153,14 @@ func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply 
 	} else {
 		q = bleve.NewQueryStringQuery(args.HeaderFilters)
 	}
-	s := bleve.NewSearchRequestOptions(q, math.MaxInt, 0, false)
+	s := bleve.NewSearchRequest(q)
 	s.Fields = []string{utils.Meta} // return all fields
+	if args.Limit > 0 {
+		s.Size = args.Limit
+	}
+	if args.Offset > 0 {
+		s.From = args.Offset
+	}
 	searchResults, err := aS.db.SearchInContext(ctx, s)
 	if err != nil {
 		return err
