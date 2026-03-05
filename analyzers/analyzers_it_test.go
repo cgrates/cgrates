@@ -57,6 +57,10 @@ var (
 		testAnalyzerSV1Search,
 		testAnalyzerSV1Search2,
 		testAnalyzerSV1SearchWithContentFilters,
+		testAnalyzerSV1SearchWithLimit,
+		testAnalyzerSV1SearchWithOffset,
+		testAnalyzerSV1SearchWithLimitAndOffsetZero,
+		testAnalyzerSV1SearchOffsetWithoutLimit,
 		testAnalyzerSV1BirPCSession,
 		testAnalyzerSv1MultipleQuery,
 		testAnalyzerSKillEngine,
@@ -248,6 +252,97 @@ func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+}
+
+func testAnalyzerSV1SearchWithLimit(t *testing.T) {
+	var resultAll []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+	}, &resultAll); err != nil {
+		t.Fatal(err)
+	}
+	totalCount := len(resultAll)
+	if totalCount < 2 {
+		t.Skipf("Need at least 2 results to test Limit, got %d", totalCount)
+	}
+
+	var result []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+		Limit:         1,
+	}, &result); err != nil {
+		t.Fatal(err)
+	} else if len(result) != 1 {
+		t.Errorf("Expected 1 result with Limit=1, received: %d", len(result))
+	}
+}
+
+func testAnalyzerSV1SearchWithOffset(t *testing.T) {
+	var resultAll []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+	}, &resultAll); err != nil {
+		t.Fatal(err)
+	}
+	totalCount := len(resultAll)
+	if totalCount < 2 {
+		t.Skipf("Need at least 2 results to test Offset, got %d", totalCount)
+	}
+
+	var result []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+		Limit:         totalCount,
+		Offset:        1,
+	}, &result); err != nil {
+		t.Fatal(err)
+	} else if len(result) != totalCount-1 {
+		t.Errorf("Expected %d results with Offset=1, received: %d", totalCount-1, len(result))
+	}
+}
+
+func testAnalyzerSV1SearchWithLimitAndOffsetZero(t *testing.T) {
+	var resultAll []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+	}, &resultAll); err != nil {
+		t.Fatal(err)
+	}
+	totalCount := len(resultAll)
+
+	var result []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+		Limit:         0,
+		Offset:        0,
+	}, &result); err != nil {
+		t.Fatal(err)
+	} else if len(result) != totalCount {
+		t.Errorf("Expected %d results with Limit=0 Offset=0, received: %d", totalCount, len(result))
+	}
+}
+
+func testAnalyzerSV1SearchOffsetWithoutLimit(t *testing.T) {
+	var resultAll []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+	}, &resultAll); err != nil {
+		t.Fatal(err)
+	}
+	totalCount := len(resultAll)
+	if totalCount < 2 {
+		t.Skipf("Need at least 2 results, got %d", totalCount)
+	}
+
+	var result []map[string]any
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json`,
+		Offset:        1,
+	}, &result); err != nil {
+		t.Fatal(err)
+	} else if len(result) != totalCount-1 {
+		t.Errorf("Expected %d results with Offset=1 no Limit, received: %d", totalCount-1, len(result))
 	}
 }
 
