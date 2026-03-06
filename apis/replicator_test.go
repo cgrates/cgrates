@@ -43,8 +43,8 @@ func TestNewReplicatorSv1(t *testing.T) {
 	}
 	rcv := NewReplicatorSv1(dm, v1)
 	exp := &ReplicatorSv1{
-		dm: dm,
-		v1: v1,
+		dm:    dm,
+		admin: v1,
 	}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
@@ -3623,5 +3623,91 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 	errExpect := "nil rpc in argument method:  in: <nil> out"
 	if err := rp.RemoveActionProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
 		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
+func TestReplicatorMethodConstants(t *testing.T) {
+	consts := map[string]string{
+		"Ping":                   utils.ReplicatorSv1Ping,
+		"GetAccount":             utils.ReplicatorSv1GetAccount,
+		"GetStatQueue":           utils.ReplicatorSv1GetStatQueue,
+		"GetFilter":              utils.ReplicatorSv1GetFilter,
+		"GetThreshold":           utils.ReplicatorSv1GetThreshold,
+		"GetThresholdProfile":    utils.ReplicatorSv1GetThresholdProfile,
+		"GetStatQueueProfile":    utils.ReplicatorSv1GetStatQueueProfile,
+		"GetRanking":             utils.ReplicatorSv1GetRanking,
+		"GetRankingProfile":      utils.ReplicatorSv1GetRankingProfile,
+		"GetTrendProfile":        utils.ReplicatorSv1GetTrendProfile,
+		"GetTrend":               utils.ReplicatorSv1GetTrend,
+		"GetResource":            utils.ReplicatorSv1GetResource,
+		"GetResourceProfile":     utils.ReplicatorSv1GetResourceProfile,
+		"GetIPAllocations":       utils.ReplicatorSv1GetIPAllocations,
+		"GetIPProfile":           utils.ReplicatorSv1GetIPProfile,
+		"GetRouteProfile":        utils.ReplicatorSv1GetRouteProfile,
+		"GetAttributeProfile":    utils.ReplicatorSv1GetAttributeProfile,
+		"GetChargerProfile":      utils.ReplicatorSv1GetChargerProfile,
+		"GetRateProfile":         utils.ReplicatorSv1GetRateProfile,
+		"GetActionProfile":       utils.ReplicatorSv1GetActionProfile,
+		"GetItemLoadIDs":         utils.ReplicatorSv1GetItemLoadIDs,
+		"GetIndexes":             utils.ReplicatorSv1GetIndexes,
+		"SetAccount":             utils.ReplicatorSv1SetAccount,
+		"SetThresholdProfile":    utils.ReplicatorSv1SetThresholdProfile,
+		"SetThreshold":           utils.ReplicatorSv1SetThreshold,
+		"SetStatQueue":           utils.ReplicatorSv1SetStatQueue,
+		"SetFilter":              utils.ReplicatorSv1SetFilter,
+		"SetStatQueueProfile":    utils.ReplicatorSv1SetStatQueueProfile,
+		"SetRankingProfile":      utils.ReplicatorSv1SetRankingProfile,
+		"SetRanking":             utils.ReplicatorSv1SetRanking,
+		"SetTrendProfile":        utils.ReplicatorSv1SetTrendProfile,
+		"SetTrend":               utils.ReplicatorSv1SetTrend,
+		"SetResource":            utils.ReplicatorSv1SetResource,
+		"SetResourceProfile":     utils.ReplicatorSv1SetResourceProfile,
+		"SetIPAllocations":       utils.ReplicatorSv1SetIPAllocations,
+		"SetIPProfile":           utils.ReplicatorSv1SetIPProfile,
+		"SetRouteProfile":        utils.ReplicatorSv1SetRouteProfile,
+		"SetAttributeProfile":    utils.ReplicatorSv1SetAttributeProfile,
+		"SetChargerProfile":      utils.ReplicatorSv1SetChargerProfile,
+		"SetRateProfile":         utils.ReplicatorSv1SetRateProfile,
+		"SetActionProfile":       utils.ReplicatorSv1SetActionProfile,
+		"SetLoadIDs":             utils.ReplicatorSv1SetLoadIDs,
+		"SetIndexes":             utils.ReplicatorSv1SetIndexes,
+		"RemoveAccount":          utils.ReplicatorSv1RemoveAccount,
+		"RemoveThreshold":        utils.ReplicatorSv1RemoveThreshold,
+		"RemoveThresholdProfile": utils.ReplicatorSv1RemoveThresholdProfile,
+		"RemoveStatQueue":        utils.ReplicatorSv1RemoveStatQueue,
+		"RemoveStatQueueProfile": utils.ReplicatorSv1RemoveStatQueueProfile,
+		"RemoveRankingProfile":   utils.ReplicatorSv1RemoveRankingProfile,
+		"RemoveRanking":          utils.ReplicatorSv1RemoveRanking,
+		"RemoveTrendProfile":     utils.ReplicatorSv1RemoveTrendProfile,
+		"RemoveTrend":            utils.ReplicatorSv1RemoveTrend,
+		"RemoveFilter":           utils.ReplicatorSv1RemoveFilter,
+		"RemoveResource":         utils.ReplicatorSv1RemoveResource,
+		"RemoveResourceProfile":  utils.ReplicatorSv1RemoveResourceProfile,
+		"RemoveIPAllocations":    utils.ReplicatorSv1RemoveIPAllocations,
+		"RemoveIPProfile":        utils.ReplicatorSv1RemoveIPProfile,
+		"RemoveRouteProfile":     utils.ReplicatorSv1RemoveRouteProfile,
+		"RemoveAttributeProfile": utils.ReplicatorSv1RemoveAttributeProfile,
+		"RemoveChargerProfile":   utils.ReplicatorSv1RemoveChargerProfile,
+		"RemoveRateProfile":      utils.ReplicatorSv1RemoveRateProfile,
+		"RemoveActionProfile":    utils.ReplicatorSv1RemoveActionProfile,
+		"RemoveIndexes":          utils.ReplicatorSv1RemoveIndexes,
+	}
+
+	rType := reflect.TypeFor[*ReplicatorSv1]()
+
+	for name, val := range consts {
+		if _, ok := rType.MethodByName(name); !ok {
+			t.Errorf("constant %s references method %s that does not exist on *ReplicatorSv1", val, name)
+		}
+		if exp := "ReplicatorSv1." + name; val != exp {
+			t.Errorf("constant for %s = %q, want %q", name, val, exp)
+		}
+	}
+
+	for i := range rType.NumMethod() {
+		name := rType.Method(i).Name
+		if _, ok := consts[name]; !ok {
+			t.Errorf("method %s exists on *ReplicatorSv1 but has no constant in test map", name)
+		}
 	}
 }
