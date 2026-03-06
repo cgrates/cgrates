@@ -64,24 +64,20 @@ func NewDecimalFromFloat64(f float64) *Decimal {
 }
 
 // NewDecimalFromUsage is a constructor for Decimal out of unit represents as string
-func NewDecimalFromUsage(u string) (d *Decimal, err error) {
+func NewDecimalFromUsage(u string) (*Decimal, error) {
 	switch {
-	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
-	case strings.HasSuffix(u, NsSuffix), strings.HasSuffix(u, UsSuffix), strings.HasSuffix(u, µSuffix), strings.HasSuffix(u, MsSuffix),
-		strings.HasSuffix(u, SSuffix), strings.HasSuffix(u, MSuffix), strings.HasSuffix(u, HSuffix):
-		var tm time.Duration
-		if tm, err = time.ParseDuration(u); err != nil {
-			return
+	case strings.HasSuffix(u, "s"), strings.HasSuffix(u, "m"), strings.HasSuffix(u, "h"):
+		tm, err := time.ParseDuration(u)
+		if err != nil {
+			return nil, err
 		}
-		d = NewDecimal(int64(tm), 0)
-		return
+		return NewDecimal(int64(tm), 0), nil
 	default:
-		var i int64
-		if i, err = strconv.ParseInt(u, 10, 64); err != nil {
-			return
+		i, err := strconv.ParseInt(u, 10, 64)
+		if err != nil {
+			return nil, err
 		}
-		d = NewDecimal(i, 0)
-		return
+		return NewDecimal(i, 0), nil
 	}
 
 }

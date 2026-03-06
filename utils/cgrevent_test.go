@@ -221,11 +221,11 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", se.Event["Weight"], answ)
 	}
 	answ, err = se.FieldAsFloat64("PddInterval")
-	if err == nil || err.Error() != `strconv.ParseFloat: parsing "1s": invalid syntax` {
-		t.Errorf("Expected %s, received %s", `strconv.ParseFloat: parsing "1s": invalid syntax`, err)
+	if err != nil {
+		t.Error(err)
 	}
-	if answ != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
+	if answ != float64(time.Second) {
+		t.Errorf("Expecting: %+v, received: %+v", float64(time.Second), answ)
 	}
 
 	if _, err := se.FieldAsFloat64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {

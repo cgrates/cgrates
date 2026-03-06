@@ -324,34 +324,53 @@ func TestIfaceAsDuration(t *testing.T) {
 }
 
 func TestIfaceAsFloat64(t *testing.T) {
-	eFloat := 6.0
-	val := any(6.0)
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
+	tests := []struct {
+		name  string
+		input any
+		want  float64
+	}{
+		{"float64", float64(45.67), 45.67},
+		{"float64 negative", float64(-3.14), -3.14},
+		{"float64 zero", float64(0), 0},
+		{"int", int(6), 6},
+		{"int64", int64(6), 6},
+		{"time.Duration", 500 * time.Millisecond, 500000000},
+		{"time.Duration negative", time.Duration(-100), -100},
+		{"string numeric", "45.67", 45.67},
+		{"string integer", "6", 6},
+		{"string duration ns", "100ns", 100},
+		{"string duration ms", "522.452972ms", 522452972},
+		{"string duration s", "1.5s", 1500000000},
+		{"string duration m", "10m", 600000000000},
+		{"string duration h", "2h", 7200000000000},
 	}
-	val = any(6)
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IfaceAsFloat64(tt.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
 	}
-	val = any("6")
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
+
+	errTests := []struct {
+		name  string
+		input any
+	}{
+		{"invalid string", "not a number"},
+		{"invalid duration suffix", "6sss"},
+		{"unsupported type bool", false},
+		{"unsupported type nil", nil},
 	}
-	val = any(int64(6))
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("This is not a float")
-	if _, err := IfaceAsFloat64(val); err == nil {
-		t.Error("expecting error")
+	for _, tt := range errTests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := IfaceAsFloat64(tt.input); err == nil {
+				t.Error("expected error, got nil")
+			}
+		})
 	}
 }
 
@@ -1832,61 +1851,6 @@ func TestIfaceAsBigDefault(t *testing.T) {
 	errExpect := "cannot convert field: [defaultCase] to time.Duration"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
-}
-
-func TestIfaceAsTFloat64(t *testing.T) {
-	eFloat := 6.0
-	val := any(6.0)
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any(6)
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("6")
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any(int64(6))
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("This is not a float")
-	if _, err := IfaceAsTFloat64(val); err == nil {
-		t.Error("expecting error")
-	}
-	val = any(time.Duration(6))
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	eFloat = 6000000.
-	val = any("6ms")
-	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("6sss")
-	experr := `time: unknown unit "sss" in duration "6sss"`
-	if _, err := IfaceAsTFloat64(val); err == nil || err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-	val = false
-	experr = `cannot convert field: false to float64`
-	if _, err := IfaceAsTFloat64(val); err == nil || err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
 

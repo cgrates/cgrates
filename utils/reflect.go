@@ -157,16 +157,12 @@ func IfaceAsBig(itm any) (b *decimal.Big, err error) {
 	case float64: // automatically hitting here also ints
 		return new(decimal.Big).SetFloat64(it), nil
 	case string:
-		if strings.HasSuffix(it, NsSuffix) ||
-			strings.HasSuffix(it, UsSuffix) ||
-			strings.HasSuffix(it, µSuffix) ||
-			strings.HasSuffix(it, MsSuffix) ||
-			strings.HasSuffix(it, SSuffix) ||
-			strings.HasSuffix(it, MSuffix) ||
-			strings.HasSuffix(it, HSuffix) {
+		if strings.HasSuffix(it, "s") ||
+			strings.HasSuffix(it, "m") ||
+			strings.HasSuffix(it, "h") {
 			var tm time.Duration
 			if tm, err = time.ParseDuration(it); err != nil {
-				return
+				return nil, err
 			}
 			return decimal.New(int64(tm), 0), nil
 		}
@@ -283,7 +279,7 @@ func IfaceAsTInt64(itm any) (i int64, err error) {
 	return
 }
 
-func IfaceAsFloat64(itm any) (f float64, err error) {
+func IfaceAsFloat64(itm any) (float64, error) {
 	switch it := itm.(type) {
 	case float64:
 		return it, nil
@@ -294,35 +290,19 @@ func IfaceAsFloat64(itm any) (f float64, err error) {
 	case int64:
 		return float64(it), nil
 	case string:
-		return strconv.ParseFloat(it, 64)
-	default:
-		err = fmt.Errorf("cannot convert field: %+v to float64", it)
-	}
-	return
-}
-func IfaceAsTFloat64(itm any) (f float64, err error) {
-	switch it := itm.(type) {
-	case float64:
-		return it, nil
-	case time.Duration:
-		return float64(it.Nanoseconds()), nil
-	case int:
-		return float64(it), nil
-	case int64:
-		return float64(it), nil
-	case string:
-		if strings.HasSuffix(it, SSuffix) || strings.HasSuffix(it, MSuffix) || strings.HasSuffix(it, HSuffix) {
-			var tm time.Duration
-			if tm, err = time.ParseDuration(it); err != nil {
-				return
+		if strings.HasSuffix(it, "s") ||
+			strings.HasSuffix(it, "m") ||
+			strings.HasSuffix(it, "h") {
+			tm, err := time.ParseDuration(it)
+			if err != nil {
+				return 0, err
 			}
 			return float64(tm), nil
 		}
 		return strconv.ParseFloat(it, 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to float64", it)
+		return 0, fmt.Errorf("cannot convert field: %+v to float64", it)
 	}
-	return
 }
 
 func IfaceAsBool(itm any) (b bool, err error) {
