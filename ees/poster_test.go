@@ -62,8 +62,9 @@ func TestKafkaParseURL(t *testing.T) {
 		},
 	}
 	want := &KafkaEE{
-		cfg:  cfg,
-		reqs: newConcReq(0),
+		cfg:     cfg,
+		reqs:    newConcReq(0),
+		timeout: defaultKafkaTimeout,
 		writer: &kafka.Writer{
 			Addr:        kafka.TCP("127.0.0.1:9092"),
 			Topic:       "cdr_billing",

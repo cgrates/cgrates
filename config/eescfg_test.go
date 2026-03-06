@@ -1630,11 +1630,12 @@ func TestExporterCfg(t *testing.T) {
 func TestLoadFromJSONCfg(t *testing.T) {
 
 	jsonCfg := &EventExporterOptsJson{
-		KafkaTopic:         utils.StringPointer("topic"),
-		KafkaBatchSize:     utils.IntPointer(10),
-		KafkaTLS:           utils.BoolPointer(true),
-		KafkaCAPath:        utils.StringPointer("/path/to/ca"),
-		KafkaSkipTLSVerify: utils.BoolPointer(false),
+		KafkaTopic:           utils.StringPointer("topic"),
+		KafkaBatchSize:       utils.IntPointer(10),
+		KafkaTLS:             utils.BoolPointer(true),
+		KafkaCAPath:          utils.StringPointer("/path/to/ca"),
+		KafkaSkipTLSVerify:   utils.BoolPointer(false),
+		KafkaDeliveryTimeout: utils.StringPointer("30s"),
 	}
 
 	kafkaOpts := &KafkaOpts{}
@@ -1659,16 +1660,20 @@ func TestLoadFromJSONCfg(t *testing.T) {
 	if *kafkaOpts.SkipTLSVerify != false {
 		t.Errorf("Expected KafkaSkipTLSVerify to be false, got %v", *kafkaOpts.SkipTLSVerify)
 	}
+	if *kafkaOpts.DeliveryTimeout != 30*time.Second {
+		t.Errorf("Expected KafkaDeliveryTimeout to be 30s, got %v", *kafkaOpts.DeliveryTimeout)
+	}
 }
 
 func TestKafkaOptsClone(t *testing.T) {
 
 	originalOpts := &KafkaOpts{
-		Topic:         utils.StringPointer("topic"),
-		BatchSize:     utils.IntPointer(10),
-		TLS:           utils.BoolPointer(true),
-		CAPath:        utils.StringPointer("/ca/path"),
-		SkipTLSVerify: utils.BoolPointer(false),
+		Topic:           utils.StringPointer("topic"),
+		BatchSize:       utils.IntPointer(10),
+		TLS:             utils.BoolPointer(true),
+		CAPath:          utils.StringPointer("/ca/path"),
+		SkipTLSVerify:   utils.BoolPointer(false),
+		DeliveryTimeout: utils.DurationPointer(30 * time.Second),
 	}
 
 	clonedOpts := originalOpts.Clone()
@@ -1687,6 +1692,9 @@ func TestKafkaOptsClone(t *testing.T) {
 	}
 	if *clonedOpts.SkipTLSVerify != *originalOpts.SkipTLSVerify {
 		t.Errorf("Expected SkipTLSVerify to be copied, got %v vs %v", *clonedOpts.SkipTLSVerify, *originalOpts.SkipTLSVerify)
+	}
+	if *clonedOpts.DeliveryTimeout != *originalOpts.DeliveryTimeout {
+		t.Errorf("Expected Timeout to be copied, got %v vs %v", *clonedOpts.DeliveryTimeout, *originalOpts.DeliveryTimeout)
 	}
 
 	*originalOpts.CAPath = "modified/ca/path"

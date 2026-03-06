@@ -259,11 +259,12 @@ type RPCOpts struct {
 }
 
 type KafkaOpts struct {
-	Topic         *string
-	BatchSize     *int
-	TLS           *bool
-	CAPath        *string
-	SkipTLSVerify *bool
+	Topic           *string
+	BatchSize       *int
+	DeliveryTimeout *time.Duration
+	TLS             *bool
+	CAPath          *string
+	SkipTLSVerify   *bool
 }
 
 type EventExporterOpts struct {
@@ -395,12 +396,19 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	return
 }
 
-func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
+func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) error {
 	if jsnCfg.KafkaTopic != nil {
 		kafkaOpts.Topic = jsnCfg.KafkaTopic
 	}
 	if jsnCfg.KafkaBatchSize != nil {
 		kafkaOpts.BatchSize = jsnCfg.KafkaBatchSize
+	}
+	if jsnCfg.KafkaDeliveryTimeout != nil {
+		timeout, err := utils.ParseDurationWithNanosecs(*jsnCfg.KafkaDeliveryTimeout)
+		if err != nil {
+			return err
+		}
+		kafkaOpts.DeliveryTimeout = utils.DurationPointer(timeout)
 	}
 	if jsnCfg.KafkaTLS != nil {
 		kafkaOpts.TLS = jsnCfg.KafkaTLS
@@ -411,7 +419,7 @@ func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err 
 	if jsnCfg.KafkaSkipTLSVerify != nil {
 		kafkaOpts.SkipTLSVerify = jsnCfg.KafkaSkipTLSVerify
 	}
-	return
+	return nil
 }
 
 func (sqlOpts *SQLOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
@@ -819,6 +827,10 @@ func (kafkaOpts *KafkaOpts) Clone() *KafkaOpts {
 		cln.BatchSize = new(int)
 		*cln.BatchSize = *kafkaOpts.BatchSize
 	}
+	if kafkaOpts.DeliveryTimeout != nil {
+		cln.DeliveryTimeout = new(time.Duration)
+		*cln.DeliveryTimeout = *kafkaOpts.DeliveryTimeout
+	}
 	if kafkaOpts.TLS != nil {
 		cln.TLS = new(bool)
 		*cln.TLS = *kafkaOpts.TLS
@@ -1218,6 +1230,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 		if kafkaOpts.BatchSize != nil {
 			opts[utils.KafkaBatchSize] = *kafkaOpts.BatchSize
+		}
+		if kafkaOpts.DeliveryTimeout != nil {
+			opts[utils.KafkaDeliveryTimeout] = kafkaOpts.DeliveryTimeout.String()
 		}
 		if kafkaOpts.TLS != nil {
 			opts[utils.KafkaTLS] = *kafkaOpts.TLS

@@ -23,6 +23,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -92,15 +93,23 @@ func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Kafka
 		pstr.writer.BatchSize = *opts.BatchSize
 	}
 
+	pstr.timeout = defaultKafkaTimeout
+	if opts.DeliveryTimeout != nil {
+		pstr.timeout = *opts.DeliveryTimeout
+	}
+
 	return pstr, nil
 }
 
+const defaultKafkaTimeout = 30 * time.Second
+
 // KafkaEE is a kafka poster
 type KafkaEE struct {
-	writer *kafka.Writer
-	cfg    *config.EventExporterCfg
-	em     *utils.ExporterMetrics
-	reqs   *concReq
+	writer  *kafka.Writer
+	cfg     *config.EventExporterCfg
+	em      *utils.ExporterMetrics
+	reqs    *concReq
+	timeout time.Duration
 	bytePreparing
 }
 
@@ -111,7 +120,9 @@ func (k *KafkaEE) Connect() error { return nil }
 func (k *KafkaEE) ExportEvent(content any, key string) (err error) {
 	k.reqs.get()
 	defer k.reqs.done()
-	return k.writer.WriteMessages(context.Background(), kafka.Message{
+	ctx, cancel := context.WithTimeout(context.Background(), k.timeout)
+	defer cancel()
+	return k.writer.WriteMessages(ctx, kafka.Message{
 		Key:   []byte(key),
 		Value: content.([]byte),
 	})
