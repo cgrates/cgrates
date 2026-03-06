@@ -358,6 +358,7 @@ type EventExporterOptsJson struct {
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
 	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
+	KafkaDeliveryTimeout        *string           `json:"kafkaDeliveryTimeout"`
 	KafkaTLS                    *bool             `json:"kafkaTLS"`
 	KafkaCAPath                 *string           `json:"kafkaCAPath"`
 	KafkaSkipTLSVerify          *bool             `json:"kafkaSkipTLSVerify"`

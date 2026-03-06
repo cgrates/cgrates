@@ -3104,13 +3104,14 @@ const (
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond
 
-	KafkaTopic         = "kafkaTopic"
-	KafkaBatchSize     = "kafkaBatchSize"
-	KafkaTLS           = "kafkaTLS"
-	KafkaCAPath        = "kafkaCAPath"
-	KafkaSkipTLSVerify = "kafkaSkipTLSVerify"
-	KafkaGroupID       = "kafkaGroupID"
-	KafkaMaxWait       = "kafkaMaxWait"
+	KafkaTopic           = "kafkaTopic"
+	KafkaBatchSize       = "kafkaBatchSize"
+	KafkaTLS             = "kafkaTLS"
+	KafkaCAPath          = "kafkaCAPath"
+	KafkaSkipTLSVerify   = "kafkaSkipTLSVerify"
+	KafkaDeliveryTimeout = "kafkaDeliveryTimeout"
+	KafkaGroupID         = "kafkaGroupID"
+	KafkaMaxWait         = "kafkaMaxWait"
 
 	// partial
 	PartialOpt = "*partial"
