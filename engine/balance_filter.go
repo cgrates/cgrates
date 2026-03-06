@@ -60,7 +60,7 @@ func NewBalanceFilter(filter map[string]any, defaultTimezone string) (*BalanceFi
 	// 	bf.Type = utils.StringPointer(utils.IfaceAsString(ty))
 	// }
 	if val, has := filter[utils.Value]; has {
-		value, err := utils.IfaceAsTFloat64(val)
+		value, err := utils.IfaceAsFloat64(val)
 		if err != nil {
 			return nil, err
 		}

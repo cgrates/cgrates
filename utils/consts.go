@@ -3284,17 +3284,6 @@ var StringTmplType = StringSet{
 	MetaSIPCID:          struct{}{},
 }
 
-// Time duration suffix
-const (
-	NsSuffix = "ns"
-	UsSuffix = "us"
-	µSuffix  = "µs"
-	MsSuffix = "ms"
-	SSuffix  = "s"
-	MSuffix  = "m"
-	HSuffix  = "h"
-)
-
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
