@@ -2560,3 +2560,30 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
+	cfgJSON := &SessionSJsonCfg{
+		Opts: &SessionsOptsJson{
+			Routes:            []*DynamicInterfaceOpt{{Value: true}},
+			Chargers:          []*DynamicInterfaceOpt{{Value: false}},
+			ResourcesRelease:  []*DynamicInterfaceOpt{{Value: true}},
+			ResourcesAllocate: []*DynamicInterfaceOpt{{Value: false}},
+			IPsRelease:        []*DynamicInterfaceOpt{{Value: true}},
+			IPsAllocate:       []*DynamicInterfaceOpt{{Value: false}},
+		},
+	}
+	jsonCfg := NewDefaultCGRConfig()
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Fatal(err)
+	}
+	opts := jsonCfg.sessionSCfg.Opts
+	if opts.Routes[0].value != true {
+		t.Errorf("Routes.value = %v, want true", opts.Routes[0].value)
+	}
+	if opts.ResourcesRelease[0].value != true {
+		t.Errorf("ResourcesRelease.value = %v, want true", opts.ResourcesRelease[0].value)
+	}
+	if opts.IPsRelease[0].value != true {
+		t.Errorf("IPsRelease.value = %v, want true", opts.IPsRelease[0].value)
+	}
+}
