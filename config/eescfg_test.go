@@ -1255,6 +1255,7 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaDeliveryTimeout:     utils.DurationPointer(30 * time.Second),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1309,6 +1310,7 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaDeliveryTimeout:     utils.StringPointer("30s"),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1390,6 +1392,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
 		KafkaBatchSize:           utils.IntPointer(50),
+		KafkaDeliveryTimeout:     utils.DurationPointer(30 * time.Second),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1446,6 +1449,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
 		KafkaBatchSize:           utils.IntPointer(50),
+		KafkaDeliveryTimeout:     utils.DurationPointer(30 * time.Second),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1510,6 +1514,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
 		KafkaBatchSize:           utils.IntPointer(50),
+		KafkaDeliveryTimeout:     utils.StringPointer("30s"),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1565,6 +1570,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
 		KafkaBatchSize:           utils.IntPointer(50),
+		KafkaDeliveryTimeout:     utils.DurationPointer(30 * time.Second),
 		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1636,6 +1642,7 @@ func TestLoadFromJsonParseErrors(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaDeliveryTimeout:     utils.StringPointer("2s"),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1689,6 +1696,14 @@ func TestLoadFromJsonParseErrors(t *testing.T) {
 
 	/////
 
+	eeSJson.KafkaDeliveryTimeout = utils.StringPointer("2c")
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.KafkaDeliveryTimeout = utils.StringPointer("2s")
+
+	/////
+
 	eeSJson.RPCConnTimeout = utils.StringPointer("2c")
 	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
@@ -1723,6 +1738,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 			PgSSLMode:                utils.StringPointer("sslm"),
 			KafkaTopic:               utils.StringPointer("topic1"),
 			KafkaBatchSize:           utils.IntPointer(50),
+			KafkaDeliveryTimeout:     utils.DurationPointer(30 * time.Second),
 			KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
 			KafkaSkipTLSVerify:       utils.BoolPointer(false),
 			AMQPRoutingKey:           utils.StringPointer("routing_key"),
@@ -1785,6 +1801,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 			"elsWaitForActiveShards":   "wfas",
 			"kafkaTopic":               "topic1",
 			utils.KafkaBatchSize:       50,
+			utils.KafkaDeliveryTimeout: "30s",
 			"kafkaCAPath":              "kafkaCAPath",
 			"kafkaSkipTLSVerify":       false,
 			"keyPath":                  "/path/to/key",
@@ -1864,6 +1881,7 @@ func TestEescfgNewEventExporterCfg(t *testing.T) {
 		PgSSLMode:                   &str,
 		KafkaTopic:                  &str,
 		KafkaBatchSize:              &nm,
+		KafkaDeliveryTimeout:        &tm,
 		KafkaTLS:                    &bl,
 		KafkaCAPath:                 &str,
 		KafkaSkipTLSVerify:          &bl,
@@ -1972,6 +1990,7 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 		PgSSLMode:                   &str,
 		KafkaTopic:                  &str,
 		KafkaBatchSize:              &nm,
+		KafkaDeliveryTimeout:        &tms,
 		KafkaTLS:                    &bl,
 		KafkaCAPath:                 &str,
 		KafkaSkipTLSVerify:          &bl,
@@ -2050,6 +2069,7 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 		PgSSLMode:                   &str,
 		KafkaTopic:                  &str,
 		KafkaBatchSize:              &nm,
+		KafkaDeliveryTimeout:        &tm,
 		KafkaTLS:                    &bl,
 		KafkaCAPath:                 &str,
 		KafkaSkipTLSVerify:          &bl,

@@ -195,6 +195,7 @@ type EventExporterOpts struct {
 	PgSSLMode                *string
 	KafkaTopic               *string
 	KafkaBatchSize           *int
+	KafkaDeliveryTimeout     *time.Duration
 	KafkaTLS                 *bool
 	KafkaCAPath              *string
 	KafkaSkipTLSVerify       *bool
@@ -395,6 +396,13 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.KafkaBatchSize != nil {
 		eeOpts.KafkaBatchSize = jsnCfg.KafkaBatchSize
+	}
+	if jsnCfg.KafkaDeliveryTimeout != nil {
+		var kafkaDeliveryTimeout time.Duration
+		if kafkaDeliveryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.KafkaDeliveryTimeout); err != nil {
+			return
+		}
+		eeOpts.KafkaDeliveryTimeout = utils.DurationPointer(kafkaDeliveryTimeout)
 	}
 	if jsnCfg.KafkaTLS != nil {
 		eeOpts.KafkaTLS = jsnCfg.KafkaTLS
@@ -764,6 +772,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.KafkaBatchSize = new(int)
 		*cln.KafkaBatchSize = *eeOpts.KafkaBatchSize
 	}
+	if eeOpts.KafkaDeliveryTimeout != nil {
+		cln.KafkaDeliveryTimeout = new(time.Duration)
+		*cln.KafkaDeliveryTimeout = *eeOpts.KafkaDeliveryTimeout
+	}
 	if eeOpts.KafkaTLS != nil {
 		cln.KafkaTLS = new(bool)
 		*cln.KafkaTLS = *eeOpts.KafkaTLS
@@ -1104,6 +1116,9 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.KafkaBatchSize != nil {
 		opts[utils.KafkaBatchSize] = *optsEes.KafkaBatchSize
 	}
+	if optsEes.KafkaDeliveryTimeout != nil {
+		opts[utils.KafkaDeliveryTimeout] = optsEes.KafkaDeliveryTimeout.String()
+	}
 	if optsEes.KafkaTLS != nil {
 		opts[utils.KafkaTLS] = *optsEes.KafkaTLS
 	}
@@ -1256,6 +1271,7 @@ type EventExporterOptsJson struct {
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
 	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
+	KafkaDeliveryTimeout        *string           `json:"kafkaDeliveryTimeout"`
 	KafkaTLS                    *bool             `json:"kafkaTLS"`
 	KafkaCAPath                 *string           `json:"kafkaCAPath"`
 	KafkaSkipTLSVerify          *bool             `json:"kafkaSkipTLSVerify"`
@@ -1469,6 +1485,14 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.KafkaBatchSize = nil
+	}
+	if v2.KafkaDeliveryTimeout != nil {
+		if v1.KafkaDeliveryTimeout == nil ||
+			*v1.KafkaDeliveryTimeout != *v2.KafkaDeliveryTimeout {
+			d.KafkaDeliveryTimeout = utils.StringPointer(v2.KafkaDeliveryTimeout.String())
+		}
+	} else {
+		d.KafkaDeliveryTimeout = nil
 	}
 	if v2.KafkaTLS != nil {
 		if v1.KafkaTLS == nil ||
