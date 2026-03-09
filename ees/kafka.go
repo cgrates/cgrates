@@ -23,6 +23,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -30,6 +31,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/segmentio/kafka-go"
 )
+
+const defaultKafkaTimeout = 30 * time.Second
 
 // NewKafkaEE creates a kafka poster
 func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*KafkaEE, error) {
@@ -93,15 +96,21 @@ func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Kafka
 		pstr.writer.BatchSize = *cfg.Opts.KafkaBatchSize
 	}
 
+	pstr.timeout = defaultKafkaTimeout
+	if cfg.Opts.KafkaDeliveryTimeout != nil {
+		pstr.timeout = *cfg.Opts.KafkaDeliveryTimeout
+	}
+
 	return pstr, nil
 }
 
 // KafkaEE is a kafka poster
 type KafkaEE struct {
-	writer *kafka.Writer
-	cfg    *config.EventExporterCfg
-	em     *utils.ExporterMetrics
-	reqs   *concReq
+	writer  *kafka.Writer
+	timeout time.Duration
+	cfg     *config.EventExporterCfg
+	em      *utils.ExporterMetrics
+	reqs    *concReq
 	bytePreparing
 }
 
@@ -112,7 +121,9 @@ func (k *KafkaEE) Connect() error { return nil }
 func (k *KafkaEE) ExportEvent(_ *context.Context, content any, key any) error {
 	k.reqs.get()
 	defer k.reqs.done()
-	return k.writer.WriteMessages(context.TODO(), kafka.Message{
+	ctx, cancel := context.WithTimeout(context.TODO(), k.timeout)
+	defer cancel()
+	return k.writer.WriteMessages(ctx, kafka.Message{
 		Key:   []byte(key.(string)),
 		Value: content.([]byte),
 	})

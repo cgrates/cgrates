@@ -565,7 +565,6 @@ const CGRATES_CFG_JSON = `
 
 				// Kafka
 				// "kafkaTopic": "cgrates",	// the topic from were the events are read
-				// "kafkaBatchSize": 100,	// limit on how many messages will be buffered before being sent
 				// "kafkaGroupID": "cgrates",	// the group that reads the events
 				// "kafkaMaxWait": "1ms",	// the maximum amount of time to wait for new data to come
 				// "kafkaTLS": false,		// if set to true it will try to authenticate the server
@@ -716,6 +715,8 @@ const CGRATES_CFG_JSON = `
 
 				// Kafka
 				// "kafkaTopic": "cgrates",		// the topic from where the events are exported
+				// "kafkaBatchSize": 100,		// limit on how many messages will be buffered before being sent
+				// "kafkaDeliveryTimeout": "30s",	// max time to wait for a message to be delivered
 				// "kafkaTLS": false,			// if set to true it will try to authenticate the server
 				// "kafkaCAPath": "",			// path to certificate authority pem file
 				// "kafkaSkipTLSVerify": false,		// if set to true it will skip certificate verification
