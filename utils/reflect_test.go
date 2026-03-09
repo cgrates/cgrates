@@ -228,34 +228,42 @@ func TestIfaceAsDuration(t *testing.T) {
 }
 
 func TestIfaceAsFloat64(t *testing.T) {
-	eFloat := 6.0
-	val := any(6.0)
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
+	tests := []struct {
+		name    string
+		in      any
+		want    float64
+		wantErr bool
+	}{
+		{name: "float64", in: 6.0, want: 6.0},
+		{name: "int", in: 6, want: 6.0},
+		{name: "int64", in: int64(6), want: 6.0},
+		{name: "duration", in: time.Second, want: float64(time.Second.Nanoseconds())},
+		{name: "string numeric", in: "6", want: 6.0},
+		{name: "string ns", in: "1ns", want: 1},
+		{name: "string ms", in: "1ms", want: float64(time.Millisecond)},
+		{name: "string s", in: "1s", want: float64(time.Second)},
+		{name: "string m", in: "1m", want: float64(time.Minute)},
+		{name: "string h", in: "1h", want: float64(time.Hour)},
+		{name: "bad string", in: "not a float", wantErr: true},
+		{name: "bad duration", in: "1x", wantErr: true},
+		{name: "unsupported type", in: struct{}{}, wantErr: true},
 	}
-	val = any(6)
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("6")
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any(int64(6))
-	if itmConvert, err := IfaceAsFloat64(val); err != nil {
-		t.Error(err)
-	} else if itmConvert != eFloat {
-		t.Errorf("received: %+v", itmConvert)
-	}
-	val = any("This is not a float")
-	if _, err := IfaceAsFloat64(val); err == nil {
-		t.Error("expecting error")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IfaceAsFloat64(tt.in)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
