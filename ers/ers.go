@@ -403,59 +403,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			return err
 		}
 	}
-
-	endTime := time.Now()
-	rawStatIDs := rdrCfg.Flags.ParamValue(utils.MetaERsStats)
-	rawThIDs := rdrCfg.Flags.ParamValue(utils.MetaERsThresholds)
-
-	// Early return if nothing to process.
-	if rawStatIDs == "" && rawThIDs == "" {
-		return nil
-	}
-
-	// Clone is needed to prevent data races if requests are sent
-	// asynchronously.
-	ev := cgrEv.Clone()
-
-	ev.Event[utils.StartTime] = startTime
-	ev.Event[utils.EndTime] = endTime
-	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
-	ev.Event[utils.Source] = utils.ERs
-	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
-
-	if rawStatIDs != "" {
-		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
-		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
-		var reply []string
-		var statsConns []string
-		statsConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
-		if err != nil {
-			return
-		}
-		if err := erS.connMgr.Call(context.TODO(), statsConns,
-			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
-			return fmt.Errorf("failed to process event in %s: %v",
-				utils.StatS, err)
-		}
-		// NOTE: ProfileIDs APIOpts key persists for the ThresholdS request,
-		// although it would be ignored. Might want to delete it.
-	}
-	if rawThIDs != "" {
-		thIDs := strings.Split(rawThIDs, utils.ANDSep)
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
-		var reply []string
-		var thsConns []string
-		thsConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
-		if err != nil {
-			return
-		}
-		if err := erS.connMgr.Call(context.TODO(), thsConns,
-			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
-			return fmt.Errorf("failed to process event in %s: %v",
-				utils.ThresholdS, err)
-		}
-	}
-	return
+	return nil
 }
 
 func (erS *ERService) closeAllRdrs() {
