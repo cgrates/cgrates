@@ -60,10 +60,10 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, %s message: %s",
-				agentName, logPrefix, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
+			fmt.Sprintf("<%s> %s, processorID: <%s>, %s request: %s",
+				agentName, logPrefix, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+			fmt.Sprintf("<%s> %s, processorID: <%s>, CGREvent: %s",
 				agentName, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 
@@ -167,8 +167,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, %s reply: %s",
-				agentName, logPrefix, agentName[:len(agentName)-5], agReq.Reply))
+			fmt.Sprintf("<%s> %s, processorID: <%s>, %s reply: %s",
+				agentName, logPrefix, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil

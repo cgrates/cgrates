@@ -337,10 +337,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, radius message: %s",
+			fmt.Sprintf("<%s> %s, processorID: <%s>, Radius request: %s",
 				utils.RadiusAgent, logPrefix, reqProcessor.ID, agReq.Request.String()))
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+			fmt.Sprintf("<%s> %s, processorID: <%s>, CGREvent: %s",
 				utils.RadiusAgent, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 
@@ -486,8 +486,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, Radius reply: %s",
-				utils.RadiusAgent, logPrefix, agReq.Reply))
+			fmt.Sprintf("<%s> %s, processorID: <%s>, Radius reply: %s",
+				utils.RadiusAgent, logPrefix, reqProcessor.ID, agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil
