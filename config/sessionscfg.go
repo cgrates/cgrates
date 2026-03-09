@@ -190,7 +190,7 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		sesOpts.IPs = append(opts, sesOpts.IPs...)
 	}
 	if jsnCfg.Routes != nil {
-		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Routes)
 		if err != nil {
 			return err
 		}
@@ -274,7 +274,7 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		sesOpts.ResourcesAllocate = append(opts, sesOpts.ResourcesAllocate...)
 	}
 	if jsnCfg.ResourcesRelease != nil {
-		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesRelease)
 		if err != nil {
 			return err
 		}
@@ -302,7 +302,7 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		sesOpts.IPsAllocate = append(opts, sesOpts.IPsAllocate...)
 	}
 	if jsnCfg.IPsRelease != nil {
-		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsRelease)
 		if err != nil {
 			return err
 		}
