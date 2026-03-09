@@ -206,7 +206,7 @@ func TestDiamPrometheus(t *testing.T) {
 			StatQueueProfile: &engine.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_1",
-				FilterIDs:   []string{"*string:~*opts.*eventType:ProcessTime"},
+				FilterIDs:   []string{"*string:~*opts.*eventType:PerformanceReport"},
 				QueueLength: -1,
 				TTL:         5 * time.Second,
 				Metrics: []*engine.MetricWithFilters{
@@ -247,7 +247,7 @@ func TestDiamPrometheus(t *testing.T) {
 			StatQueueProfile: &engine.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_2",
-				FilterIDs:   []string{"*string:~*opts.*eventType:ProcessTime"},
+				FilterIDs:   []string{"*string:~*opts.*eventType:PerformanceReport"},
 				QueueLength: -1,
 				TTL:         10 * time.Second,
 				Metrics: []*engine.MetricWithFilters{
