@@ -54,10 +54,17 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, %s message: %s",
-				agentName, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
+			fmt.Sprintf("<%s> %s, processorID: %s, %s message: %s",
+				agentName, logPrefix, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+				agentName, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 
 	replyState := utils.OK
@@ -65,10 +72,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, %sMessage: %s",
-				agentName, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
+	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
@@ -157,15 +161,14 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		return
 	}
 	endTime := time.Now()
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, %s reply: %s",
-				agentName, agentName[:len(agentName)-5], agReq.Reply))
-	}
-	if reqType == utils.MetaDryRun {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, %s reply: %s",
-				agentName, agentName[:len(agentName)-5], agReq.Reply))
+			fmt.Sprintf("<%s> %s, %s reply: %s",
+				agentName, logPrefix, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil

@@ -331,10 +331,17 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		}
 	}
 
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
-				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> %s, processorID: %s, radius message: %s",
+				utils.RadiusAgent, logPrefix, reqProcessor.ID, agReq.Request.String()))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+				utils.RadiusAgent, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 
 	replyState := utils.OK
@@ -342,10 +349,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
+	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
@@ -476,15 +480,14 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return false, err
 	}
 	endTime := time.Now()
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, Radius reply: %s",
-				utils.RadiusAgent, agReq.Reply))
-	}
-	if reqType == utils.MetaDryRun {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, Radius reply: %s",
-				utils.RadiusAgent, agReq.Reply))
+			fmt.Sprintf("<%s> %s, Radius reply: %s",
+				utils.RadiusAgent, logPrefix, agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil

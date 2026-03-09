@@ -408,19 +408,23 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	}
 
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, SIP message: %s",
-				utils.SIPAgent, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> %s, processorID: %s, SIP message: %s",
+				utils.SIPAgent, logPrefix, reqProcessor.ID, agReq.Request.String()))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+				utils.SIPAgent, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.SIPAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
+	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
@@ -461,15 +465,14 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return false, err
 	}
 	endTime := time.Now()
-	if reqProcessor.Flags.Has(utils.MetaLog) {
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, SIP reply: %s",
-				utils.SIPAgent, agReq.Reply))
-	}
-	if reqType == utils.MetaDryRun {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, SIP reply: %s",
-				utils.SIPAgent, agReq.Reply))
+			fmt.Sprintf("<%s> %s, SIP reply: %s",
+				utils.SIPAgent, logPrefix, agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil
