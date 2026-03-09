@@ -414,10 +414,10 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, SIP message: %s",
+			fmt.Sprintf("<%s> %s, processorID: <%s>, SIP request: %s",
 				utils.SIPAgent, logPrefix, reqProcessor.ID, agReq.Request.String()))
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, processorID: %s, CGREvent: %s",
+			fmt.Sprintf("<%s> %s, processorID: <%s>, CGREvent: %s",
 				utils.SIPAgent, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 	switch reqType {
@@ -471,8 +471,8 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			logPrefix = "DRY_RUN"
 		}
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> %s, SIP reply: %s",
-				utils.SIPAgent, logPrefix, agReq.Reply))
+			fmt.Sprintf("<%s> %s, processorID: <%s>, SIP reply: %s",
+				utils.SIPAgent, logPrefix, reqProcessor.ID, agReq.Reply))
 	}
 	if reqProcessor.Flags.Has(utils.MetaDryRun) {
 		return true, nil
