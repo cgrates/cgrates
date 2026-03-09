@@ -73,26 +73,20 @@ func IfaceAsTime(itm any, timezone string) (t time.Time, err error) {
 	return
 }
 
-func StringAsBig(itm string) (b *decimal.Big, err error) {
+func StringAsBig(itm string) (*decimal.Big, error) {
 	if len(itm) == 0 {
 		return decimal.New(0, 0), nil
 	}
-	if strings.HasSuffix(itm, NsSuffix) ||
-		strings.HasSuffix(itm, UsSuffix) ||
-		strings.HasSuffix(itm, µSuffix) ||
-		strings.HasSuffix(itm, MsSuffix) ||
-		strings.HasSuffix(itm, SSuffix) ||
-		strings.HasSuffix(itm, MSuffix) ||
-		strings.HasSuffix(itm, HSuffix) {
-		var tm time.Duration
-		if tm, err = time.ParseDuration(itm); err != nil {
-			return
+	if strings.HasSuffix(itm, "s") ||
+		strings.HasSuffix(itm, "m") ||
+		strings.HasSuffix(itm, "h") {
+		tm, err := time.ParseDuration(itm)
+		if err != nil {
+			return nil, err
 		}
 		return decimal.New(int64(tm), 0), nil
 	}
 	z, ok := decimal.WithContext(DecimalContext).SetString(itm)
-	// verify ok and check if the value was converted successfuly
-	// and the big is a valid number
 	if !ok || z.IsNaN(0) {
 		return nil, fmt.Errorf("can't convert <%+v> to decimal", itm)
 	}
@@ -239,7 +233,7 @@ func IfaceAsTInt64(itm any) (i int64, err error) {
 	return
 }
 
-func IfaceAsFloat64(itm any) (f float64, err error) {
+func IfaceAsFloat64(itm any) (float64, error) {
 	switch it := itm.(type) {
 	case float64:
 		return it, nil
@@ -250,11 +244,19 @@ func IfaceAsFloat64(itm any) (f float64, err error) {
 	case int64:
 		return float64(it), nil
 	case string:
+		if strings.HasSuffix(it, "s") ||
+			strings.HasSuffix(it, "m") ||
+			strings.HasSuffix(it, "h") {
+			tm, err := time.ParseDuration(it)
+			if err != nil {
+				return 0, err
+			}
+			return float64(tm), nil
+		}
 		return strconv.ParseFloat(it, 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to float64", it)
+		return 0, fmt.Errorf("cannot convert field: %+v to float64", it)
 	}
-	return
 }
 
 func IfaceAsBool(itm any) (b bool, err error) {
