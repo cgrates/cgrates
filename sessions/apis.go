@@ -1043,6 +1043,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s authorizing event: %+v with %s",
 					utils.SessionS, err.Error(), cgrEv, utils.IPs))
+			cchEv[utils.MetaIPs] = false
 		} else {
 			cchEv[utils.MetaIPs] = ipS
 		}
@@ -1067,7 +1068,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 		// Auth the events
 		if auth, errAuth := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
-			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
+			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
 			utils.MetaAuthorize); errAuth != nil {
 			return errAuth
 		} else {
@@ -1129,6 +1130,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				return
 			}
 			maxDur, _ := acntCost.Abstracts.Duration()
+			if apiRply.AccountSUsage == nil {
+				apiRply.AccountSUsage = make(map[string]time.Duration)
+			}
 			apiRply.AccountSUsage[runID] = maxDur
 		}
 
@@ -1153,9 +1157,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
 						utils.SessionS, err.Error(), cgrEv, utils.CDRs))
-			}
-			if apiRply.ThresholdIDs == nil {
-				apiRply.ThresholdIDs = make(map[string][]string)
 			}
 		}
 

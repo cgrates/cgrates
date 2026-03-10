@@ -127,7 +127,7 @@ func TestProcessRequest(t *testing.T) {
 		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ any) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply any) error {
+		utils.SessionSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -155,13 +155,15 @@ func TestProcessRequest(t *testing.T) {
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
 			}
-			prply, can := rply.(*sessions.V1AuthorizeReply)
+			prply, can := rply.(*sessions.V1ProcessEventReply)
 			if !can {
 				t.Errorf("Wrong argument type : %T", rply)
 				return nil
 			}
-			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: utils.NewDecimalFromFloat64(-1),
+			*prply = sessions.V1ProcessEventReply{
+				AccountSUsage: map[string]time.Duration{
+					utils.MetaPrimary: -1,
+				},
 			}
 			return nil
 		},
@@ -458,8 +460,21 @@ func TestProcessRequest(t *testing.T) {
 	}
 	srv, _ := birpc.NewService(da, "", false)
 	da.ctx = context.WithClient(context.Background(), srv)
-
-	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
+	tmpls := []*config.FCTemplate{
+		{Tag: "ResultCode",
+			Type: utils.MetaConstant, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
+			Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
+		{Tag: "GrantedUnits",
+			Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
+			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage[*primary]{*duration_seconds}", utils.InfieldSep),
+			Mandatory: true},
+	}
+	for _, v := range tmpls {
+		v.ComputePath()
+	}
+	clnReq := reqProcessor.Clone()
+	clnReq.ReplyFields = tmpls
+	pr, err := processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -470,17 +485,17 @@ func TestProcessRequest(t *testing.T) {
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
 
-	tmpls := []*config.FCTemplate{
+	tmpls2 := []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaInitiate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
-	for _, v := range tmpls {
+	for _, v := range tmpls2 {
 		v.ComputePath()
 	}
-	clnReq := reqProcessor.Clone()
-	clnReq.RequestFields = append(clnReq.RequestFields, tmpls...)
+	clnReq2 := reqProcessor.Clone()
+	clnReq2.RequestFields = append(clnReq2.RequestFields, tmpls2...)
 	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
@@ -488,7 +503,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
+	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

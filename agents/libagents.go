@@ -70,14 +70,13 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, %sMessage: %s",
 				agentName, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
 	case utils.MetaAuthorize:
-		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
+		rply := new(sessions.V1ProcessEventReply)
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
 		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
@@ -142,9 +141,11 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		var rplyCDRs string
-		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
+		cdrEv := cgrEv.Clone()
+		cdrEv.APIOpts = map[string]any{utils.MetaCDRs: true}
+		var rplyCDRs sessions.V1ProcessEventReply
+		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
+			cdrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 			if replyState == utils.OK {
 				replyState = utils.ErrReplyStateCDRs
