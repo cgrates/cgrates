@@ -53,10 +53,8 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 "logger": { "level": 7 },
 "sessions": {
 	"enabled": true,
-		"conns": {
-			"*resources": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
-		},
-	"opts": {
+	"conns": {
+		"*resources": [{"Values": ["*localhost"]}]
 	}
 },
 "resources": {
@@ -65,14 +63,12 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 },
 "admins": { "enabled": true }
 }`,
-		TpFiles: map[string]string{
-			utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
-cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,false,true,`,
-		},
 		DBCfg:    dbcfg,
 		Encoding: *utils.Encoding,
 		// LogBuffer: new(bytes.Buffer),
 	}
+
+	client, _ := ng.Run(t)
 
 	// t.Cleanup(func() {
 	// 	if ng.LogBuffer != nil {
@@ -80,21 +76,35 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 	// 	}
 	// })
 
-	client, _ := ng.Run(t)
-	time.Sleep(500 * time.Millisecond)
+	var reply string
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+		&utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RES1",
+				FilterIDs:         []string{"*string:~*req.Account:1001"},
+				Weights:           utils.DynamicWeights{{Weight: 10}},
+				UsageTTL:          time.Hour,
+				Limit:             3,
+				AllocationMessage: "ResourceAllocationSuccess",
+				Blocker:           false,
+				Stored:            true,
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetResourceProfile failed: %v", err)
+	}
 
 	t.Run("noFlags", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "noFlags",
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
 		if len(rply.ResourceAllocation) != 0 {
@@ -104,7 +114,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("resourcesOnly", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "resourcesOnly",
@@ -114,9 +124,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
 		if len(rply.ResourceAllocation) != 0 {
@@ -126,7 +134,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("authorizeAndResources", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "authorizeAndResources",
@@ -138,12 +146,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-
 		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
@@ -151,7 +156,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("resourcesAuthorizeFlag", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "resourcesAuthorizeFlag",
@@ -163,12 +168,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-
 		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
@@ -176,7 +178,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("missingUsageID", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "missingUsageID",
@@ -186,20 +188,17 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-
 		if _, exists := rply.ResourceAllocation[utils.MetaPrimary]; !exists {
-			t.Fatalf("expected allocation entry")
+			t.Fatal("expected allocation entry")
 		}
 	})
 
 	t.Run("noMatchingProfile", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "noMatchingProfile",
@@ -210,12 +209,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "9999",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-
 		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "" {
 			t.Fatalf("expected empty allocation msg, got %q", msg)
 		}
@@ -223,7 +219,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("authorizeWithoutResourcesFlag", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "authorizeWithoutResourcesFlag",
@@ -234,12 +230,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-
 		if len(rply.ResourceAllocation) != 0 {
 			t.Fatalf("expected no allocation without resources flag, got %v", rply.ResourceAllocation)
 		}
@@ -248,7 +241,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 	t.Run("multipleResourceAllocations", func(t *testing.T) {
 		for i := 1; i <= 3; i++ {
 			var rply V1ProcessEventReply
-			err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 				&utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "multipleResourceAllocations",
@@ -260,12 +253,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 					Event: map[string]any{
 						utils.AccountField: "1001",
 					},
-				}, &rply)
-
-			if err != nil {
+				}, &rply); err != nil {
 				t.Fatalf("allocation %d failed: %v", i, err)
 			}
-
 			if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 				t.Fatalf("allocation %d: unexpected msg: %q", i, msg)
 			}
@@ -274,7 +264,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("resourcesWithZeroUnits", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "resourcesWithZeroUnits",
@@ -286,12 +276,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-
 		if _, exists := rply.ResourceAllocation[utils.MetaPrimary]; !exists {
 			t.Fatal("expected allocation entry")
 		}
@@ -299,7 +286,7 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 
 	t.Run("resourcesAuthorizeCfgWithAuthorize", func(t *testing.T) {
 		var rply V1ProcessEventReply
-		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "resourcesAuthorizeCfgWithAuthorize",
@@ -311,12 +298,9 @@ cgrates.org,RES1,*string:~*req.Account:1001,;10,1h,3,ResourceAllocationSuccess,f
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-			}, &rply)
-
-		if err != nil {
+			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-
 		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
 			t.Fatalf("unexpected allocation msg: %q", msg)
 		}
