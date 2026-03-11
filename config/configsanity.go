@@ -52,10 +52,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.cdrsCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
-					if info, has := cdrConnEnabledMap[connType]; has {
-						if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-							return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.CDRs)
+				for _, connID := range opt.ConnIDs {
+					if connEn, has := cdrConnEnabledMap[connType]; has {
+						if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+							return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.CDRs)
 						}
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -142,10 +142,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.sessionSCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
-					if info, has := connEnabledMap[connType]; has {
-						if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-							return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.SessionS)
+				for _, connID := range opt.ConnIDs {
+					if connEn, has := connEnabledMap[connType]; has {
+						if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+							return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.SessionS)
 						}
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -179,10 +179,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.fsAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := fsConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.FreeSWITCHAgent)
+					if connEn, has := fsConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.FreeSWITCHAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FreeSWITCHAgent, connID)
@@ -205,10 +205,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.kamAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := kamConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.KamailioAgent)
+					if connEn, has := kamConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.KamailioAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.KamailioAgent, connID)
@@ -231,10 +231,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.asteriskAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := astConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.AsteriskAgent)
+					if connEn, has := astConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.AsteriskAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.AsteriskAgent, connID)
@@ -267,10 +267,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.diameterAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := daConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.DiameterAgent)
+					if connEn, has := daConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.DiameterAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
@@ -365,10 +365,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.radiusAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := raConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.RadiusAgent)
+					if connEn, has := raConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.RadiusAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
@@ -430,10 +430,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.dnsAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := dnsConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.DNSAgent)
+					if connEn, has := dnsConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.DNSAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DNSAgent, connID)
@@ -483,7 +483,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	for _, httpAgentCfg := range cfg.httpAgentCfg {
 		// httpAgent checks
 		for _, opt := range httpAgentCfg.Conns[utils.MetaSessionS] {
-			for _, connID := range opt.Values {
+			for _, connID := range opt.ConnIDs {
 				isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
 				if isInternal && !cfg.sessionSCfg.Enabled {
 					return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.SessionS, httpAgentCfg.ID)
@@ -494,7 +494,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, opt := range httpAgentCfg.Conns[utils.MetaStats] {
-			for _, connID := range opt.Values {
+			for _, connID := range opt.ConnIDs {
 				isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 				if isInternal && !cfg.statsCfg.Enabled {
 					return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.StatS, httpAgentCfg.ID)
@@ -505,7 +505,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, opt := range httpAgentCfg.Conns[utils.MetaThresholds] {
-			for _, connID := range opt.Values {
+			for _, connID := range opt.ConnIDs {
 				isInternal := strings.HasPrefix(connID, utils.MetaInternal)
 				if isInternal && !cfg.thresholdSCfg.Enabled {
 					return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.ThresholdS, httpAgentCfg.ID)
@@ -576,10 +576,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.sipAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-					if info, has := sipConnEnabledMap[connType]; has && isInternal && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.SIPAgent)
+					if connEn, has := sipConnEnabledMap[connType]; has && isInternal && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.SIPAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SIPAgent, connID)
@@ -636,7 +636,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.chargerSCfg.Enabled {
 		for connType, opts := range cfg.chargerSCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					if connType == utils.MetaAttributes && strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 						return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.ChargerS)
 					}
@@ -652,7 +652,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.resourceSCfg.Enabled {
 		for connType, opts := range cfg.resourceSCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					if connType == utils.MetaThresholds && strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 						return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.ResourceS)
 					}
@@ -667,7 +667,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.statsCfg.Enabled {
 		for connType, opts := range cfg.statsCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					if connType == utils.MetaThresholds && strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 						return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.StatS)
 					}
@@ -690,10 +690,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.routeSCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
-					if info, has := rtConnEnabledMap[connType]; has {
-						if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-							return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.RouteS)
+				for _, connID := range opt.ConnIDs {
+					if connEn, has := rtConnEnabledMap[connType]; has {
+						if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+							return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.RouteS)
 						}
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -716,10 +716,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.ersCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
-					if info, has := ersConnEnabledMap[connType]; has {
-						if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-							return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.ERs)
+				for _, connID := range opt.ConnIDs {
+					if connEn, has := ersConnEnabledMap[connType]; has {
+						if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+							return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.ERs)
 						}
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -735,7 +735,15 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			exporterIDs := cfg.eesCfg.exporterIDs()
-			if hasInternalConnOpt(cfg.ersCfg.Conns[utils.MetaEEs]) {
+			var hasInternalConnOpt bool
+			for _, opt := range cfg.ersCfg.Conns[utils.MetaEEs] {
+				for _, connID := range opt.ConnIDs {
+					if strings.HasPrefix(connID, utils.MetaInternal) {
+						hasInternalConnOpt = true
+					}
+				}
+			}
+			if hasInternalConnOpt {
 				for _, eesID := range rdr.EEsIDs {
 					if !slices.Contains(exporterIDs, eesID) {
 						return fmt.Errorf("<%s> exporter with id %s not defined", utils.ERs, eesID)
@@ -908,7 +916,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.eesCfg.Enabled {
 		for connType, opts := range cfg.eesCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
+				for _, connID := range opt.ConnIDs {
 					if connType == utils.MetaAttributes && strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 						return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.EEs)
 					}
@@ -1102,10 +1110,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	for connType, opts := range cfg.admS.Conns {
 		for _, opt := range opts {
-			for _, connID := range opt.Values {
-				if info, has := admConnEnabledMap[connType]; has {
-					if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.AdminS)
+			for _, connID := range opt.ConnIDs {
+				if connEn, has := admConnEnabledMap[connType]; has {
+					if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.AdminS)
 					}
 				}
 				if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -1157,10 +1165,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	for connType, opts := range cfg.filterSCfg.Conns {
 		for _, opt := range opts {
-			for _, connID := range opt.Values {
-				if info, has := fltrConnEnabledMap[connType]; has {
-					if strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.FilterS)
+			for _, connID := range opt.ConnIDs {
+				if connEn, has := fltrConnEnabledMap[connType]; has {
+					if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.FilterS)
 					}
 				}
 				if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -1243,9 +1251,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for connType, opts := range cfg.prometheusAgentCfg.Conns {
 			for _, opt := range opts {
-				for _, connID := range opt.Values {
-					if info, has := promConnEnabledMap[connType]; has && strings.HasPrefix(connID, utils.MetaInternal) && !info.enabled {
-						return fmt.Errorf("<%s> not enabled but requested by <%s> component", info.name, utils.PrometheusAgent)
+				for _, connID := range opt.ConnIDs {
+					if connEn, has := promConnEnabledMap[connType]; has && strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
+						return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.PrometheusAgent)
 					}
 					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
@@ -1262,16 +1270,4 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	return nil
-}
-
-// hasInternalConnOpt checks if any DynamicStringSliceOpt contains a *internal connection ID
-func hasInternalConnOpt(opts []*DynamicStringSliceOpt) bool {
-	for _, opt := range opts {
-		for _, connID := range opt.Values {
-			if strings.HasPrefix(connID, utils.MetaInternal) {
-				return true
-			}
-		}
-	}
-	return false
 }

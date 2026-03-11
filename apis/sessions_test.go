@@ -195,8 +195,8 @@ func TestProcessCDR(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -227,8 +227,8 @@ func TestProcessMessage(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -254,8 +254,8 @@ func TestProcessEvent(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -281,8 +281,8 @@ func TestGetActiveSessions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -307,8 +307,8 @@ func TestGetActiveSessionsCount(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -336,8 +336,8 @@ func TestForceDisconnect(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -362,8 +362,8 @@ func TestGetPassiveSessions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -388,8 +388,8 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -438,8 +438,8 @@ func TestActivateSessions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -461,8 +461,8 @@ func TestDeactivateSessions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -484,8 +484,8 @@ func TestDisconnectPeer(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -511,8 +511,8 @@ func TestSTIRAuthenticate(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -538,8 +538,8 @@ func TestSTIRIdentity(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},
@@ -567,8 +567,8 @@ func TestRegisterInternalBiJSONConn(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{"*internal"}},
+	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
+		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
 		ping: struct{}{},

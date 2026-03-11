@@ -42,7 +42,7 @@
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*ees": [{"Values": ["*internal"]}]
+		"*ees": [{"ConnIDs": ["*internal"]}]
 	},
 	"readers": [
 		{

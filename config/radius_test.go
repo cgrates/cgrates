@@ -38,9 +38,9 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
@@ -74,10 +74,10 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
 		},
 		CoATemplate: utils.MetaCoA,
 		DMRTemplate: utils.MetaDMR,
@@ -183,9 +183,9 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		]
 	},
 	"conns": {
-		"*sessions": [{"Values": ["*birpc_internal", "*conn1", "*conn2"]}],
-		"*stats": [{"Values": ["*internal", "*conn1", "*conn2"]}],
-		"*thresholds": [{"Values": ["*internal", "*conn1", "*conn2"]}]
+		"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}],
+		"*stats": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}],
+		"*thresholds": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}]
 	},
 	"dmr_template": "*dmr",
 	"coa_template": "*coa",
@@ -220,10 +220,10 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
 		utils.ClientDaAddressesCfg: map[string]any{},
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal, "*conn1", "*conn2"}}},
 		},
 		utils.DMRTemplateCfg:      utils.MetaDMR,
 		utils.CoATemplateCfg:      utils.MetaCoA,
@@ -269,8 +269,8 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		utils.ClientDaAddressesCfg: map[string]any{},
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.DMRTemplateCfg:       utils.MetaDMR,
 		utils.CoATemplateCfg:       utils.MetaCoA,
@@ -296,8 +296,8 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
 		},
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -324,7 +324,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].ConnIDs[1] = ""; ban.Conns[utils.MetaSessionS][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
@@ -352,10 +352,10 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{},
 		ClientDictionaries: map[string][]string{},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		RequestProcessors: []*RequestProcessor{},
 	}
@@ -375,10 +375,10 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -403,10 +403,10 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
@@ -451,10 +451,10 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -479,10 +479,10 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string][]string{
 			"radius_dict1": {"radius_val1"},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestProcessors: []*RequestProcessor{
 			{

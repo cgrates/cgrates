@@ -39,7 +39,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -114,7 +114,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -192,7 +192,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -273,8 +273,8 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal,
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal,
 			utils.MetaEEs)}},
 	}
 
@@ -356,7 +356,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -571,7 +571,7 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -640,7 +640,7 @@ func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)

@@ -34,12 +34,12 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Exists_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Notexists_indexed_fields: &[]string{"*req.index1", "*req.index2"},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaResources:  {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaRates:      {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal, "conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaRates:      {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
 		},
 		Default_ratio: utils.IntPointer(10),
 		Nested_fields: utils.BoolPointer(true),
@@ -53,12 +53,12 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		ExistsIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NotExistsIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"}}},
-			utils.MetaResources:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"}}},
-			utils.MetaRates:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "conn1"}}},
-			utils.MetaAccounts:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"}}},
+			utils.MetaResources:  {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"}}},
+			utils.MetaRates:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "conn1"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"}}},
 		},
 		DefaultRatio: 10,
 		NestedFields: true,
@@ -116,7 +116,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.DefaultRatioCfg:           1,
 		utils.OptsCfg: map[string]any{
 			utils.OptsContext:         []*DynamicStringOpt{{value: RoutesContextDftOpt}},
@@ -148,11 +148,11 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"notexists_indexed_fields": ["*req.prefix","*req.indexed"],
 			"nested_fields": true,
 			"conns": {
-				"*attributes": [{"Values": ["*internal:*attributes", "conn1"]}],
-				"*resources": [{"Values": ["*internal:*resources", "conn1"]}],
-				"*stats": [{"Values": ["*internal:*stats", "conn1"]}],
-				"*rates": [{"Values": ["*internal:*rates", "conn1"]}],
-				"*accounts": [{"Values": ["*internal:*accounts", "conn1"]}]
+				"*attributes": [{"ConnIDs": ["*internal:*attributes", "conn1"]}],
+				"*resources": [{"ConnIDs": ["*internal:*resources", "conn1"]}],
+				"*stats": [{"ConnIDs": ["*internal:*stats", "conn1"]}],
+				"*rates": [{"ConnIDs": ["*internal:*rates", "conn1"]}],
+				"*accounts": [{"ConnIDs": ["*internal:*accounts", "conn1"]}]
 			},
 			"default_ratio":2,
 		},
@@ -166,12 +166,12 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed"},
 		utils.NestedFieldsCfg:           true,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaResources:  {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaRates:      {{Values: []string{utils.MetaInternal, "conn1"}}},
-			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal, "conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaRates:      {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.MetaInternal, "conn1"}}},
 		},
 		utils.DefaultRatioCfg: 2,
 		utils.OptsCfg: map[string]any{
@@ -201,10 +201,10 @@ func TestRouteSCfgClone(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		ExistsIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NotExistsIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"}}},
-			utils.MetaResources:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"}}},
+			utils.MetaResources:  {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"}}},
 		},
 		DefaultRatio: 10,
 		NestedFields: true,
@@ -214,13 +214,13 @@ func TestRouteSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaAttributes][0].Values[1] = ""; ban.Conns[utils.MetaAttributes][0].Values[1] != "conn1" {
+	if rcv.Conns[utils.MetaAttributes][0].ConnIDs[1] = ""; ban.Conns[utils.MetaAttributes][0].ConnIDs[1] != "conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaResources][0].Values[1] = ""; ban.Conns[utils.MetaResources][0].Values[1] != "conn1" {
+	if rcv.Conns[utils.MetaResources][0].ConnIDs[1] = ""; ban.Conns[utils.MetaResources][0].ConnIDs[1] != "conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaStats][0].Values[1] = ""; ban.Conns[utils.MetaStats][0].Values[1] != "conn1" {
+	if rcv.Conns[utils.MetaStats][0].ConnIDs[1] = ""; ban.Conns[utils.MetaStats][0].ConnIDs[1] != "conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
@@ -244,12 +244,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaResources:  {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaRates:      {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources:  {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaRates:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*localhost"}}},
 		},
 		DefaultRatio: 2,
 		Opts: &RoutesOpts{
@@ -303,12 +303,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index22"},
 		SuffixIndexedFields: &[]string{"*req.index33"},
 		NestedFields:        true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
-			utils.MetaResources:  {{Values: []string{"*birpc"}}},
-			utils.MetaStats:      {{Values: []string{"*birpc"}}},
-			utils.MetaRates:      {{Values: []string{"*birpc"}}},
-			utils.MetaAccounts:   {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaResources:  {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaRates:      {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*birpc"}}},
 		},
 		DefaultRatio: 3,
 		Opts: &RoutesOpts{
@@ -362,12 +362,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index22"},
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
-			utils.MetaResources:  {{Values: []string{"*birpc"}}},
-			utils.MetaStats:      {{Values: []string{"*birpc"}}},
-			utils.MetaRates:      {{Values: []string{"*birpc"}}},
-			utils.MetaAccounts:   {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaResources:  {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaRates:      {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*birpc"}}},
 		},
 		Default_ratio: utils.IntPointer(3),
 		Opts: &RoutesOptsJson{
@@ -440,10 +440,10 @@ func TestRouteSCloneSection(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaResources:  {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources:  {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 		},
 		DefaultRatio: 2,
 
@@ -488,10 +488,10 @@ func TestRouteSCloneSection(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaResources:  {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources:  {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 		},
 		DefaultRatio: 2,
 		Opts: &RoutesOpts{

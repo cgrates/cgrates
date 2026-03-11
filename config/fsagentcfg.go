@@ -94,7 +94,7 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 // FsAgentCfg the config section that describes the FreeSWITCH Agent
 type FsAgentCfg struct {
 	Enabled                bool
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	SubscribePark          bool
 	CreateCDR              bool
 	ExtraFields            utils.RSRParsers
@@ -220,7 +220,7 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 		EmptyBalanceAnnFile:    fscfg.EmptyBalanceAnnFile,
 		MaxWaitConnection:      fscfg.MaxWaitConnection,
 		ActiveSessionDelimiter: fscfg.ActiveSessionDelimiter,
-		Conns:                  CloneConnsOpt(fscfg.Conns),
+		Conns:                  CloneConnsMap(fscfg.Conns),
 	}
 	if fscfg.EventSocketConns != nil {
 		cln.EventSocketConns = make([]*FsConnCfg, len(fscfg.EventSocketConns))
@@ -239,17 +239,17 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
-	Enabled                *bool                               `json:"enabled"`
-	Conns                  map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	SubscribePark          *bool                               `json:"subscribe_park"`
-	CreateCDR              *bool                               `json:"create_cdr"`
-	ExtraFields            *[]string                           `json:"extra_fields"`
-	LowBalanceAnnFile      *string                             `json:"low_balance_ann_file"`
-	EmptyBalanceContext    *string                             `json:"empty_balance_context"`
-	EmptyBalanceAnnFile    *string                             `json:"empty_balance_ann_file"`
-	MaxWaitConnection      *string                             `json:"max_wait_connection"`
-	ActiveSessionDelimiter *string                             `json:"active_session_delimiter"`
-	EventSocketConns       *[]*FsConnJsonCfg                   `json:"event_socket_conns"`
+	Enabled                *bool                      `json:"enabled"`
+	Conns                  map[string][]*DynamicConns `json:"conns,omitempty"`
+	SubscribePark          *bool                      `json:"subscribe_park"`
+	CreateCDR              *bool                      `json:"create_cdr"`
+	ExtraFields            *[]string                  `json:"extra_fields"`
+	LowBalanceAnnFile      *string                    `json:"low_balance_ann_file"`
+	EmptyBalanceContext    *string                    `json:"empty_balance_context"`
+	EmptyBalanceAnnFile    *string                    `json:"empty_balance_ann_file"`
+	MaxWaitConnection      *string                    `json:"max_wait_connection"`
+	ActiveSessionDelimiter *string                    `json:"active_session_delimiter"`
+	EventSocketConns       *[]*FsConnJsonCfg          `json:"event_socket_conns"`
 	Request_processors     *[]*ReqProcessorJsnCfg
 }
 
@@ -310,7 +310,7 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.SubscribePark != v2.SubscribePark {

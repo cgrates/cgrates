@@ -44,7 +44,7 @@
 "routes": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*localhost"]}]
+		"*attributes": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 

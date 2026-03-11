@@ -33,35 +33,35 @@
 	"cdrs": {
 		"enabled": true,
 		"conns": {
-			"*chargers": [{"Values": ["*localhost"]}]
+			"*chargers": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"attributes": {
 		"enabled": true,
 		"conns": {
-			"*stats": [{"Values": ["*localhost"]}],
-			"*resources": [{"Values": ["*localhost"]}],
-			"*accounts": [{"Values": ["*localhost"]}]
+			"*stats": [{"ConnIDs": ["*localhost"]}],
+			"*resources": [{"ConnIDs": ["*localhost"]}],
+			"*accounts": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"chargers": {
 		"enabled": true,
 		"conns": {
-			"*attributes": [{"Values": ["*localhost"]}]
+			"*attributes": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"resources": {
 		"enabled": true,
 		"store_interval": "-1",
 		"conns": {
-			"*thresholds": [{"Values": ["*localhost"]}]
+			"*thresholds": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"stats": {
 		"enabled": true,
 		"store_interval": "-1",
 		"conns": {
-			"*thresholds": [{"Values": ["*localhost"]}]
+			"*thresholds": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"thresholds": {
@@ -72,9 +72,9 @@
 		"enabled": true,
 		"prefix_indexed_fields": ["*req.Destination"],
 		"conns": {
-			"*stats": [{"Values": ["*localhost"]}],
-			"*resources": [{"Values": ["*localhost"]}],
-			"*rates": [{"Values": ["*localhost"]}]
+			"*stats": [{"ConnIDs": ["*localhost"]}],
+			"*resources": [{"ConnIDs": ["*localhost"]}],
+			"*rates": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"admins": {
@@ -86,7 +86,7 @@
 	"actions": {
 		"enabled": true,
 		"conns": {
-			"*accounts": [{"Values": ["*localhost"]}]
+			"*accounts": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"accounts": {
@@ -94,9 +94,9 @@
 	},
 	"filters": {
 		"conns": {
-			"*stats": [{"Values": ["*localhost"]}],
-			"*resources": [{"Values": ["*localhost"]}],
-			"*accounts": [{"Values": ["*localhost"]}]
+			"*stats": [{"ConnIDs": ["*localhost"]}],
+			"*resources": [{"ConnIDs": ["*localhost"]}],
+			"*accounts": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"loaders": [

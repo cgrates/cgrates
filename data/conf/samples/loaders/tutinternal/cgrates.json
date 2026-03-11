@@ -40,7 +40,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*internal"]}]
+		"*chargers": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -53,7 +53,7 @@
 		"run_delay": "0",									
 		"lockfile_path": ".cgr.lock",					
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/In",
@@ -75,7 +75,7 @@
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/LoaderIn",
@@ -98,7 +98,7 @@
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathWithoutMove",
@@ -121,7 +121,7 @@
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/SubpathLoaderWithMove",
@@ -144,7 +144,7 @@
 		"run_delay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
 		"tp_in_dir": "/tmp/templateLoaderIn",
@@ -166,7 +166,7 @@
 		"run_delay": "-1",										
 		"lockfile_path": ".cgr.lock",						
 		"conns": {
-			"*caches": [{"Values": ["*internal"]}]
+			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": "\t",							
 		"tp_in_dir": "/tmp/customSepLoaderIn",				
@@ -199,7 +199,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 

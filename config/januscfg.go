@@ -35,7 +35,7 @@ type JanusConn struct {
 type JanusAgentCfg struct {
 	Enabled           bool
 	URL               string
-	Conns             map[string][]*DynamicStringSliceOpt
+	Conns             map[string][]*DynamicConns
 	JanusConns        []*JanusConn // connections towards Janus
 	RequestProcessors []*RequestProcessor
 }
@@ -102,7 +102,7 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err erro
 	}
 	for connType, opts := range jsnCfg.Conns {
 		if jaCfg.Conns == nil {
-			jaCfg.Conns = make(map[string][]*DynamicStringSliceOpt)
+			jaCfg.Conns = make(map[string][]*DynamicConns)
 		}
 		jaCfg.Conns[connType] = tagInternalConnsOpt(opts, connType)
 	}
@@ -148,7 +148,7 @@ func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
 		Enabled: jaCfg.Enabled,
 		URL:     jaCfg.URL,
 	}
-	cln.Conns = CloneConnsOpt(jaCfg.Conns)
+	cln.Conns = CloneConnsMap(jaCfg.Conns)
 	if jaCfg.JanusConns != nil {
 		cln.JanusConns = make([]*JanusConn, len(jaCfg.JanusConns))
 		for i, jc := range jaCfg.JanusConns {
@@ -165,11 +165,11 @@ func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
 }
 
 type JanusAgentJsonCfg struct {
-	Enabled            *bool                               `json:"enabled"`
-	Url                *string                             `json:"url"`
-	Conns              map[string][]*DynamicStringSliceOpt `json:"conns"`
-	Janus_conns        *[]*JanusConnJsonCfg                `json:"janus_conns"`
-	Request_processors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	Enabled            *bool                      `json:"enabled"`
+	Url                *string                    `json:"url"`
+	Conns              map[string][]*DynamicConns `json:"conns"`
+	Janus_conns        *[]*JanusConnJsonCfg       `json:"janus_conns"`
+	Request_processors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
 }
 
 type JanusConnJsonCfg struct {
@@ -242,7 +242,7 @@ func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg) *JanusA
 	if v1.URL != v2.URL {
 		d.Url = utils.StringPointer(v2.URL)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)

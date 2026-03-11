@@ -36,10 +36,10 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 			name: "successful load, enabled true with stats and thresholds",
 			jsonCfg: &RankingSJsonCfg{
 				Enabled: utils.BoolPointer(true),
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
-					utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
-					utils.MetaEEs:        {{Values: []string{"ees1", "ees2"}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaStats:      {{ConnIDs: []string{"conn1", "conn2"}}},
+					utils.MetaThresholds: {{ConnIDs: []string{"thresh1", "thresh2"}}},
+					utils.MetaEEs:        {{ConnIDs: []string{"ees1", "ees2"}}},
 				},
 				Scheduled_ids:    map[string][]string{"sched1": {"id1", "id2"}},
 				Store_interval:   utils.StringPointer("1m30s"),
@@ -47,10 +47,10 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 			},
 			expected: RankingSCfg{
 				Enabled: true,
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
-					utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
-					utils.MetaEEs:        {{Values: []string{"ees1", "ees2"}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaStats:      {{ConnIDs: []string{"conn1", "conn2"}}},
+					utils.MetaThresholds: {{ConnIDs: []string{"thresh1", "thresh2"}}},
+					utils.MetaEEs:        {{ConnIDs: []string{"ees1", "ees2"}}},
 				},
 				ScheduledIDs:   map[string][]string{"sched1": {"id1", "id2"}},
 				StoreInterval:  time.Minute + 30*time.Second,
@@ -118,11 +118,11 @@ func TestDiffRankingsJsonCfg(t *testing.T) {
 			name: "enabled diff",
 			v1: &RankingSCfg{
 				Enabled: false,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn1"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn1"}}}},
 			},
 			v2: &RankingSCfg{
 				Enabled: true,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn1"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn1"}}}},
 			},
 			expected: &RankingSJsonCfg{
 				Enabled: utils.BoolPointer(true),
@@ -132,14 +132,14 @@ func TestDiffRankingsJsonCfg(t *testing.T) {
 			name: "conns diff",
 			v1: &RankingSCfg{
 				Enabled: true,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn1"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn1"}}}},
 			},
 			v2: &RankingSCfg{
 				Enabled: true,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn2"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn2"}}}},
 			},
 			expected: &RankingSJsonCfg{
-				Conns: map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn2"}}}},
+				Conns: map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn2"}}}},
 			},
 		},
 		{
@@ -162,11 +162,11 @@ func TestDiffRankingsJsonCfg(t *testing.T) {
 			name: "no diff",
 			v1: &RankingSCfg{
 				Enabled: true,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn1"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn1"}}}},
 			},
 			v2: &RankingSCfg{
 				Enabled: true,
-				Conns:   map[string][]*DynamicStringSliceOpt{utils.MetaStats: {{Values: []string{"conn1"}}}},
+				Conns:   map[string][]*DynamicConns{utils.MetaStats: {{ConnIDs: []string{"conn1"}}}},
 			},
 			expected: &RankingSJsonCfg{},
 		},
@@ -206,10 +206,10 @@ func TestRankingSCfgClone_CloneSection(t *testing.T) {
 			input: &RankingSCfg{
 				Enabled:       true,
 				StoreInterval: 20 * time.Second,
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
-					utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
-					utils.MetaEEs:        {{Values: []string{"ees1", "ees2"}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaStats:      {{ConnIDs: []string{"conn1", "conn2"}}},
+					utils.MetaThresholds: {{ConnIDs: []string{"thresh1", "thresh2"}}},
+					utils.MetaEEs:        {{ConnIDs: []string{"ees1", "ees2"}}},
 				},
 				ScheduledIDs:   map[string][]string{"sched1": {"id1", "id2"}},
 				EEsExporterIDs: []string{"exporter1", "exporter2"},
@@ -217,10 +217,10 @@ func TestRankingSCfgClone_CloneSection(t *testing.T) {
 			expected: &RankingSCfg{
 				Enabled:       true,
 				StoreInterval: 20 * time.Second,
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaStats:      {{Values: []string{"conn1", "conn2"}}},
-					utils.MetaThresholds: {{Values: []string{"thresh1", "thresh2"}}},
-					utils.MetaEEs:        {{Values: []string{"ees1", "ees2"}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaStats:      {{ConnIDs: []string{"conn1", "conn2"}}},
+					utils.MetaThresholds: {{ConnIDs: []string{"thresh1", "thresh2"}}},
+					utils.MetaEEs:        {{ConnIDs: []string{"ees1", "ees2"}}},
 				},
 				ScheduledIDs:   map[string][]string{"sched1": {"id1", "id2"}},
 				EEsExporterIDs: []string{"exporter1", "exporter2"},

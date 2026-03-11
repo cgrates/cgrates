@@ -27,20 +27,20 @@ import (
 func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AdminSJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 	}
 	expected := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
-			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
-			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
-			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
+			utils.MetaActions:    {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -64,8 +64,8 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg: false,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaCaches: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -80,20 +80,20 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
     "admins": {
        "enabled": true,
        "conns": {
-           "*attributes": [{"values": ["*internal:*attributes", "*conn1"]}],
-           "*ees":        [{"values": ["*internal:*ees", "*conn1"]}],
-           "*caches":     [{"values": ["*internal:*caches", "*conn1"]}],
-           "*actions":    [{"values": ["*internal:*actions", "*conn1"]}]
+           "*attributes": [{"ConnIDs": ["*internal:*attributes", "*conn1"]}],
+           "*ees":        [{"ConnIDs": ["*internal:*ees", "*conn1"]}],
+           "*caches":     [{"ConnIDs": ["*internal:*caches", "*conn1"]}],
+           "*actions":    [{"ConnIDs": ["*internal:*actions", "*conn1"]}]
        },
     },
 }`
 	expectedMap := map[string]any{
 		utils.EnabledCfg: true,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaCaches:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaCaches:     {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
@@ -106,27 +106,27 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 func TestApierCfgClone(t *testing.T) {
 	sa := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
-			utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
-			utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
-			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
+			utils.MetaActions:    {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
 		},
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaCaches][0].Values[1] = ""; sa.Conns[utils.MetaCaches][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaCaches][0].ConnIDs[1] = ""; sa.Conns[utils.MetaCaches][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaActions][0].Values[1] = ""; sa.Conns[utils.MetaActions][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaActions][0].ConnIDs[1] = ""; sa.Conns[utils.MetaActions][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaAttributes][0].Values[1] = ""; sa.Conns[utils.MetaAttributes][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAttributes][0].ConnIDs[1] = ""; sa.Conns[utils.MetaAttributes][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaEEs][0].Values[1] = ""; sa.Conns[utils.MetaEEs][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaEEs][0].ConnIDs[1] = ""; sa.Conns[utils.MetaEEs][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
@@ -136,31 +136,31 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 
 	v1 := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
-			utils.MetaActions:    {{Values: []string{"*localhost"}}},
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaActions:    {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 
 	v2 := &AdminSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{"*birpc"}}},
-			utils.MetaActions:    {{Values: []string{"*birpc"}}},
-			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
-			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaActions:    {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*birpc"}}},
 		},
 	}
 
 	expected := &AdminSJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{"*birpc"}}},
-			utils.MetaActions:    {{Values: []string{"*birpc"}}},
-			utils.MetaAttributes: {{Values: []string{"*birpc"}}},
-			utils.MetaEEs:        {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaActions:    {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*birpc"}}},
 		},
 	}
 
@@ -181,21 +181,21 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 func TestAdminSCloneSection(t *testing.T) {
 	admCfg := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
-			utils.MetaActions:    {{Values: []string{"*localhost"}}},
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaActions:    {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 
 	exp := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{"*localhost"}}},
-			utils.MetaActions:    {{Values: []string{"*localhost"}}},
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaActions:    {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 

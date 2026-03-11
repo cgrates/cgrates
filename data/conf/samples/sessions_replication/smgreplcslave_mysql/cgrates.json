@@ -49,7 +49,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -62,28 +62,28 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["rplConn"]
+			"ConnIDs": ["rplConn"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},

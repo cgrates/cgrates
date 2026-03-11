@@ -121,7 +121,7 @@ type SessionSCfg struct {
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
 	MinDurLowBalance    time.Duration
-	Conns               map[string][]*DynamicStringSliceOpt
+	Conns               map[string][]*DynamicConns
 	STIRCfg             *STIRcfg
 	DefaultUsage        map[string]time.Duration
 	Opts                *SessionsOpts
@@ -611,7 +611,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
 		MinDurLowBalance:    scfg.MinDurLowBalance,
-		Conns:               CloneConnsOpt(scfg.Conns),
+		Conns:               CloneConnsMap(scfg.Conns),
 		SessionIndexes:      scfg.SessionIndexes.Clone(),
 		AlterableFields:     scfg.AlterableFields.Clone(),
 		STIRCfg:             scfg.STIRCfg.Clone(),
@@ -761,20 +761,20 @@ type SessionsOptsJson struct {
 
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
-	Enabled             *bool                               `json:"enabled"`
-	ListenBiJSON        *string                             `json:"listen_bijson"`
-	ListenBiGob         *string                             `json:"listen_bigob"`
-	StoreSCosts         *bool                               `json:"store_session_costs"`
-	SessionIndexes      *[]string                           `json:"session_indexes"`
-	ClientProtocol      *float64                            `json:"client_protocol"`
-	ChannelSyncInterval *string                             `json:"channel_sync_interval"`
-	TerminateAttempts   *int                                `json:"terminate_attempts"`
-	AlterableFields     *[]string                           `json:"alterable_fields"`
-	MinDurLowBalance    *string                             `json:"min_dur_low_balance"`
-	Stir                *STIRJsonCfg                        `json:"stir"`
-	DefaultUsage        map[string]string                   `json:"default_usage"`
-	Conns               map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	Opts                *SessionsOptsJson                   `json:"opts"`
+	Enabled             *bool                      `json:"enabled"`
+	ListenBiJSON        *string                    `json:"listen_bijson"`
+	ListenBiGob         *string                    `json:"listen_bigob"`
+	StoreSCosts         *bool                      `json:"store_session_costs"`
+	SessionIndexes      *[]string                  `json:"session_indexes"`
+	ClientProtocol      *float64                   `json:"client_protocol"`
+	ChannelSyncInterval *string                    `json:"channel_sync_interval"`
+	TerminateAttempts   *int                       `json:"terminate_attempts"`
+	AlterableFields     *[]string                  `json:"alterable_fields"`
+	MinDurLowBalance    *string                    `json:"min_dur_low_balance"`
+	Stir                *STIRJsonCfg               `json:"stir"`
+	DefaultUsage        map[string]string          `json:"default_usage"`
+	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
+	Opts                *SessionsOptsJson          `json:"opts"`
 }
 
 func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *SessionsOptsJson {
@@ -941,7 +941,7 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 			d.DefaultUsage[tor] = usage2.String()
 		}
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	d.Opts = diffSessionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)

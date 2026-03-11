@@ -31,7 +31,7 @@
     "enabled": true,
     "conns": {
     	"*sessions": [],
-    	"*ees": [{"Values": ["*localhost"]}]
+    	"*ees": [{"ConnIDs": ["*localhost"]}]
     },
     "readers": [
         {

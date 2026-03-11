@@ -43,7 +43,7 @@ type AttributesOpts struct {
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled                bool
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	IndexedSelects         bool
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -200,7 +200,7 @@ func (alS AttributeSCfg) CloneSection() Section { return alS.Clone() }
 func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	cln = &AttributeSCfg{
 		Enabled:        alS.Enabled,
-		Conns:          CloneConnsOpt(alS.Conns),
+		Conns:          CloneConnsMap(alS.Conns),
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		Opts:           alS.Opts.Clone(),
@@ -233,7 +233,7 @@ type AttributesOptsJson struct {
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled                  *bool
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	Indexed_selects          *bool
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
@@ -270,7 +270,7 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {

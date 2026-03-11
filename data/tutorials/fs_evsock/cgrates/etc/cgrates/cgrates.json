@@ -54,56 +54,56 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*routes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*stats": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*thresholds": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},

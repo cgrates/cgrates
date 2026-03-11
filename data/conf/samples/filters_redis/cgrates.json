@@ -41,15 +41,15 @@
 "rates": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["*localhost"]}]
+		"*thresholds": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 
 "filters": {								
 	"conns": {
-		"*stats": [{"Values": ["*localhost"]}],
-		"*resources": [{"Values": ["*localhost"]}],
-		"*accounts": [{"Values": ["*localhost"]}]
+		"*stats": [{"ConnIDs": ["*localhost"]}],
+		"*resources": [{"ConnIDs": ["*localhost"]}],
+		"*accounts": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 	
@@ -76,7 +76,7 @@
 	"enabled": true,
 	"indexed_selects":false,
 	"conns": {
-		"*actions": [{"Values": ["*localhost"]}]
+		"*actions": [{"ConnIDs": ["*localhost"]}]
 	},
 	"store_interval": "1s"
 },
@@ -96,7 +96,7 @@
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -104,7 +104,7 @@
 "admins": {
 	"enabled": true,
 	"conns": {
-		"*caches": [{"Values": ["*localhost"]}]
+		"*caches": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 

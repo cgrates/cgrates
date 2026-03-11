@@ -5,7 +5,7 @@
 "schedulers": {
 	"enabled": true,
 	"conns": {
-		"*cdrs": [{"Values": ["*internal"]}]
+		"*cdrs": [{"ConnIDs": ["*internal"]}]
 	},
 },
 "apiers": {
@@ -28,28 +28,28 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},
@@ -63,8 +63,8 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}],
-		"*chargers": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}],
+		"*chargers": [{"ConnIDs": ["*internal"]}]
 	},
 	"rals_conns": ["*internal"]
 },
@@ -72,7 +72,7 @@
 	"enabled": true,
 	"listen": "0.0.0.0:3868",
 	"conns": {
-		"*sessions": [{"Values": ["*birpc_internal"]}]
+		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
 	},
 	"request_processors": [{
 		"id": "message",

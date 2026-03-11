@@ -30,7 +30,7 @@ type SIPAgentCfg struct {
 	Enabled             bool
 	Listen              string
 	ListenNet           string // udp or tcp
-	Conns               map[string][]*DynamicStringSliceOpt
+	Conns               map[string][]*DynamicConns
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
 	RequestProcessors   []*RequestProcessor
@@ -103,7 +103,7 @@ func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
 		Enabled:             sa.Enabled,
 		Listen:              sa.Listen,
 		ListenNet:           sa.ListenNet,
-		Conns:               CloneConnsOpt(sa.Conns),
+		Conns:               CloneConnsMap(sa.Conns),
 		Timezone:            sa.Timezone,
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
@@ -118,13 +118,13 @@ func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled             *bool                               `json:"enabled"`
-	Listen              *string                             `json:"listen"`
-	ListenNet           *string                             `json:"listen_net"`
-	Conns               map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	Timezone            *string                             `json:"timezone"`
-	RetransmissionTimer *string                             `json:"retransmission_timer"`
-	RequestProcessors   *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	Enabled             *bool                      `json:"enabled"`
+	Listen              *string                    `json:"listen"`
+	ListenNet           *string                    `json:"listen_net"`
+	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
+	Timezone            *string                    `json:"timezone"`
+	RetransmissionTimer *string                    `json:"retransmission_timer"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg     `json:"request_processors"`
 }
 
 func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonCfg {
@@ -140,7 +140,7 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonC
 	if v1.ListenNet != v2.ListenNet {
 		d.ListenNet = utils.StringPointer(v2.ListenNet)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {

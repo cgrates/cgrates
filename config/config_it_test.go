@@ -147,7 +147,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled:                true,
-		Conns:                  make(map[string][]*DynamicStringSliceOpt),
+		Conns:                  make(map[string][]*DynamicConns),
 		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
@@ -170,9 +170,9 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 	cfg.rldCh = make(chan string, 100)
 	cfg.db = make(CgrJsonCfg)
 	if err := cfg.db.SetSection(context.Background(), AttributeSJSON, &AttributeSJsonCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaStats: {
-				{Values: []string{utils.MetaLocalHost}},
+				{ConnIDs: []string{utils.MetaLocalHost}},
 			},
 		},
 	}); err != nil {
@@ -189,9 +189,9 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaStats: {
-				{Values: []string{utils.MetaLocalHost}},
+				{ConnIDs: []string{utils.MetaLocalHost}},
 			},
 		},
 		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
@@ -252,8 +252,8 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		IndexedSelects:         true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAttributes: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAttributes: {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ChargerSCfg()) {
@@ -273,7 +273,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 	}
 	expAttr := &ThresholdSCfg{
 		Enabled:                true,
-		Conns:                  make(map[string][]*DynamicStringSliceOpt),
+		Conns:                  make(map[string][]*DynamicConns),
 		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
@@ -312,9 +312,9 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		IndexedSelects:         true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{utils.MetaLocalHost}},
+				{ConnIDs: []string{utils.MetaLocalHost}},
 			},
 		},
 		Opts: &StatsOpts{
@@ -348,9 +348,9 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		IndexedSelects:         true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{utils.MetaLocalHost}},
+				{ConnIDs: []string{utils.MetaLocalHost}},
 			},
 		},
 
@@ -379,7 +379,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 	}
 	expAttr := &RouteSCfg{
 		Enabled:                true,
-		Conns:                  make(map[string][]*DynamicStringSliceOpt),
+		Conns:                  make(map[string][]*DynamicConns),
 		StringIndexedFields:    &[]string{"*req.LCRProfile"},
 		PrefixIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
 		SuffixIndexedFields:    &[]string{},
@@ -479,9 +479,9 @@ func testCGRConfigReloadERs(t *testing.T) {
 	}
 	expAttr := &ERsCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.MetaLocalHost}},
+				{ConnIDs: []string{utils.MetaLocalHost}},
 			},
 		},
 		Readers: []*EventReaderCfg{
@@ -571,9 +571,9 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 				Network: "tcp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
 			},
 		},
 		// Timezone          string
@@ -599,8 +599,8 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	}
 	expAttr := &FsAgentCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
 		ExtraFields:            utils.RSRParsers{},
@@ -772,10 +772,8 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"partial_commit_fields": []any{},
 			},
 		},
-		utils.ConnsCfg: map[string]any{
-			utils.MetaSessionS: []any{
-				map[string]any{"FilterIDs": nil, "Tenant": "", "Values": []string{utils.MetaLocalHost}},
-			},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
 	}
 
@@ -820,12 +818,12 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			"sessions": map[string]any{
 				"enabled": true,
 				"conns": map[string]any{
-					"*resources":  []any{map[string]any{"Tenant": "", "Values": []any{"*localhost"}}},
-					"*ips":        []any{map[string]any{"Tenant": "", "Values": []any{"*localhost"}}},
-					"*routes":     []any{map[string]any{"Tenant": "", "Values": []any{"*localhost"}}},
-					"*attributes": []any{map[string]any{"Tenant": "", "Values": []any{"*localhost"}}},
-					"*cdrs":       []any{map[string]any{"Tenant": "", "Values": []any{"*internal"}}},
-					"*chargers":   []any{map[string]any{"Tenant": "", "Values": []any{"*internal"}}},
+					"*resources":  []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
+					"*ips":        []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
+					"*routes":     []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
+					"*attributes": []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
+					"*cdrs":       []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*internal"}}},
+					"*chargers":   []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*internal"}}},
 				},
 				"opts": map[string]any{},
 			},
@@ -853,13 +851,13 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources:  {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaIPs:        {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaRoutes:     {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaAttributes: {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
-			utils.MetaChargers:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
@@ -918,12 +916,12 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-			"*resources": [{"Tenant":"","Values":["*localhost"]}],
-			"*ips": [{"Tenant":"","Values":["*localhost"]}],
-			"*routes": [{"Tenant":"","Values":["*localhost"]}],
-			"*attributes": [{"Tenant":"","Values":["*localhost"]}],
-			"*cdrs": [{"Tenant":"","Values":["*internal"]}],
-			"*chargers": [{"Tenant":"","Values":["*localhost"]}]
+			"*resources": [{"Tenant":"","ConnIDs":["*localhost"]}],
+			"*ips": [{"Tenant":"","ConnIDs":["*localhost"]}],
+			"*routes": [{"Tenant":"","ConnIDs":["*localhost"]}],
+			"*attributes": [{"Tenant":"","ConnIDs":["*localhost"]}],
+			"*cdrs": [{"Tenant":"","ConnIDs":["*internal"]}],
+			"*chargers": [{"Tenant":"","ConnIDs":["*localhost"]}]
 		},
 	"opts": {}
 }
@@ -950,13 +948,13 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources:  {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaIPs:        {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaRoutes:     {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaAttributes: {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
-			utils.MetaChargers:   {{Values: []string{utils.MetaLocalHost}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
@@ -1045,13 +1043,13 @@ func testCGRConfigReloadAll(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources:  {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaRoutes:     {{Values: []string{utils.MetaLocalHost}}},
-			utils.MetaAttributes: {{Values: []string{utils.MetaLocalHost}}},
-			"*rals":              {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, "*rals")}}},
-			utils.MetaCDRs:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
-			utils.MetaChargers:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
+			"*rals":              {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, "*rals")}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
@@ -1347,7 +1345,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"rals": {
 			"enabled": true,
 			"conns": {
-				"*thresholds": [{"Values": ["*internal"]}]
+				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
 			"max_increments":3000000
 		},
@@ -1356,10 +1354,10 @@ func testApisLoadFromPath(t *testing.T) {
 		"schedulers": {
 			"enabled": true,
 			"conns": {
-				"*cdrs": [{"Values": ["*internal"]}]
+				"*cdrs": [{"ConnIDs": ["*internal"]}]
 			},
 			"conns": {
-				"*stats": [{"Values": ["*localhost"]}]
+				"*stats": [{"ConnIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1367,7 +1365,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"cdrs": {
 			"enabled": true,
 			"conns": {
-				"*chargers": [{"Values": ["*internal"]}]
+				"*chargers": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1375,9 +1373,9 @@ func testApisLoadFromPath(t *testing.T) {
 		"attributes": {
 			"enabled": true,
 			"conns": {
-				"*stats": [{"Values": ["*localhost"]}],
-				"*resources": [{"Values": ["*localhost"]}],
-				"*accounts": [{"Values": ["*localhost"]}]
+				"*stats": [{"ConnIDs": ["*localhost"]}],
+				"*resources": [{"ConnIDs": ["*localhost"]}],
+				"*accounts": [{"ConnIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1385,7 +1383,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"chargers": {
 			"enabled": true,
 			"conns": {
-				"*attributes": [{"Values": ["*internal"]}]
+				"*attributes": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1394,7 +1392,7 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"store_interval": "-1",
 			"conns": {
-				"*thresholds": [{"Values": ["*internal"]}]
+				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1403,7 +1401,7 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"store_interval": "-1",
 			"conns": {
-				"*thresholds": [{"Values": ["*internal"]}]
+				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1417,8 +1415,8 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"prefix_indexed_fields":["*req.Destination"],
 			"conns": {
-				"*stats": [{"Values": ["*internal"]}],
-				"*resources": [{"Values": ["*internal"]}]
+				"*stats": [{"ConnIDs": ["*internal"]}],
+				"*resources": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1430,35 +1428,35 @@ func testApisLoadFromPath(t *testing.T) {
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},
@@ -1479,7 +1477,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"actions": {
 			"enabled": true,
 			"conns": {
-				"*accounts": [{"Values": ["*localhost"]}]
+				"*accounts": [{"ConnIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1491,9 +1489,9 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"filters": {
 			"conns": {
-				"*stats": [{"Values": ["*internal"]}],
-				"*resources": [{"Values": ["*internal"]}],
-				"*accounts": [{"Values": ["*internal"]}]
+				"*stats": [{"ConnIDs": ["*internal"]}],
+				"*resources": [{"ConnIDs": ["*internal"]}],
+				"*accounts": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1628,15 +1626,15 @@ func TestReloadCfgInDb(t *testing.T) {
 	cfg.db = db
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaResources: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaAccounts: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		IndexedSelects:         false,
@@ -1661,15 +1659,15 @@ func TestReloadCfgInDb(t *testing.T) {
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "attributes_internal")
 	jsn := &AttributeSJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaResources: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaAccounts: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		Indexed_selects:          utils.BoolPointer(true),
@@ -1690,15 +1688,15 @@ func TestReloadCfgInDb(t *testing.T) {
 	db.SetSection(context.Background(), AttributeSJSON, jsn)
 	expected := &AttributeSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaResources: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaAccounts: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		IndexedSelects:         true,

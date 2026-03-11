@@ -26,7 +26,7 @@ import (
 // AdminSCfg is the configuration of Apier service
 type AdminSCfg struct {
 	Enabled bool
-	Conns   map[string][]*DynamicStringSliceOpt
+	Conns   map[string][]*DynamicConns
 }
 
 // loadApierCfg loads the Apier section of the configuration
@@ -70,14 +70,14 @@ func (aCfg AdminSCfg) CloneSection() Section { return aCfg.Clone() }
 func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
 	cln = &AdminSCfg{
 		Enabled: aCfg.Enabled,
-		Conns:   CloneConnsOpt(aCfg.Conns),
+		Conns:   CloneConnsMap(aCfg.Conns),
 	}
 	return
 }
 
 type AdminSJsonCfg struct {
 	Enabled *bool
-	Conns   map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns   map[string][]*DynamicConns `json:"conns,omitempty"`
 }
 
 func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
@@ -87,7 +87,7 @@ func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	return d

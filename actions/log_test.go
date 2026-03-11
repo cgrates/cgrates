@@ -30,7 +30,7 @@ import (
 
 func TestACExecuteActCDRLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}}
+	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}}
 	cfg.TemplatesCfg()[utils.MetaCdrLog][0].Filters = []string{"invalid_filter_value"}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())

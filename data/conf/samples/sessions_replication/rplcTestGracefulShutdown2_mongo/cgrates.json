@@ -54,14 +54,14 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["rplConn"]
+			"ConnIDs": ["rplConn"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},

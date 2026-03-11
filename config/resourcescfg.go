@@ -42,7 +42,7 @@ type ResourcesOpts struct {
 type ResourceSConfig struct {
 	Enabled                bool
 	IndexedSelects         bool
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	StoreInterval          time.Duration // Dump regularly from cache into dataDB
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -197,7 +197,7 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	cln = &ResourceSConfig{
 		Enabled:        rlcfg.Enabled,
 		IndexedSelects: rlcfg.IndexedSelects,
-		Conns:          CloneConnsOpt(rlcfg.Conns),
+		Conns:          CloneConnsMap(rlcfg.Conns),
 		StoreInterval:  rlcfg.StoreInterval,
 		NestedFields:   rlcfg.NestedFields,
 		Opts:           rlcfg.Opts.Clone(),
@@ -231,7 +231,7 @@ type ResourcesOptsJson struct {
 type ResourceSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	Store_interval           *string
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
@@ -268,7 +268,7 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {

@@ -50,7 +50,7 @@ func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 
 func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -78,7 +78,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -152,7 +152,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -215,7 +215,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -295,7 +295,7 @@ func TestResourceDescendentSorterSortRoutesNoResourceSConns(t *testing.T) {
 
 func TestResourceDescendentSorterSortRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
@@ -325,7 +325,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res1 := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -453,7 +453,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 
 func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -501,7 +501,7 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
+	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
 	res := &utils.Resource{
 		Tenant: "cgrates.org",
