@@ -42,7 +42,7 @@ type StatSCfg struct {
 	IndexedSelects         bool
 	StoreInterval          time.Duration // Dump regularly from cache into dataDB
 	StoreUncompressedLimit int
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
@@ -204,7 +204,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		IndexedSelects:         st.IndexedSelects,
 		StoreInterval:          st.StoreInterval,
 		StoreUncompressedLimit: st.StoreUncompressedLimit,
-		Conns:                  CloneConnsOpt(st.Conns),
+		Conns:                  CloneConnsMap(st.Conns),
 		NestedFields:           st.NestedFields,
 		Opts:                   st.Opts.Clone(),
 	}
@@ -241,7 +241,7 @@ type StatServJsonCfg struct {
 	Indexed_selects          *bool
 	Store_interval           *string
 	Store_uncompressed_limit *int
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
@@ -284,7 +284,7 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	if v1.StoreUncompressedLimit != v2.StoreUncompressedLimit {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {

@@ -94,13 +94,13 @@ func testSharedClientLockLoadConfig(t *testing.T) {
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*localhost"]}]
+		"*attributes": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 "attributes": {

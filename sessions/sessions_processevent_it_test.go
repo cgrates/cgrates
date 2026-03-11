@@ -56,7 +56,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
             "sessions": {
                 "enabled": true,
                 "conns": {
-                    "*routes": [{"Values": ["*localhost"]}]
+                    "*routes": [{"ConnIDs": ["*localhost"]}]
                 }
             },
             "routes": {

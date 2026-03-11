@@ -80,14 +80,14 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 
@@ -190,14 +190,14 @@ func TestHightCostSorterSortRoutesErr(t *testing.T) {
 func TestHightCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 
@@ -287,10 +287,10 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		}}
 
@@ -339,10 +339,10 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 	}
@@ -387,14 +387,14 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 	cc := make(chan birpc.ClientConnector, 1)
@@ -453,14 +453,14 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 	cc := make(chan birpc.ClientConnector, 1)
@@ -510,14 +510,14 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 	acntCost := &utils.EventCharges{
@@ -580,14 +580,14 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 		utils.MetaAccounts: {
-			{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+			{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 		},
 	}
 	acnt := &utils.Account{
@@ -681,10 +681,10 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
-				Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+				ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 			},
 		},
 	}

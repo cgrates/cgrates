@@ -203,7 +203,7 @@ func TestHttpAgentCfg(t *testing.T) {
 		"conns":{
 		"*sessions":[
 			{
-			 "Values":["*internal"]
+			 "ConnIDs":["*internal"]
 			}
 		]
 		},
@@ -221,9 +221,9 @@ func TestHttpAgentCfg(t *testing.T) {
 			URL:            "/conecto",
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,
-			Conns: map[string][]*DynamicStringSliceOpt{
+			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS: {
-					{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
+					{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
 				},
 			},
 			RequestProcessors: nil,
@@ -337,7 +337,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eCdrsCfg := &CdrsCfg{
 		Enabled:       false,
 		SMCostRetries: 5,
-		Conns:         map[string][]*DynamicStringSliceOpt{},
+		Conns:         map[string][]*DynamicConns{},
 		ExtraFields:   utils.RSRParsers{},
 		Opts: &CdrsOpts{
 			Accounts:   []*DynamicBoolOpt{{}},
@@ -363,7 +363,7 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*internal"]}]
+		"*chargers": [{"ConnIDs": ["*internal"]}]
 	},
 },
 }
@@ -375,7 +375,7 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	if !cgrCfg.CdrsCfg().Enabled {
 		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().Enabled)
 	}
-	expected := []*DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}}
+	expected := []*DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().Conns[utils.MetaChargers], expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().Conns[utils.MetaChargers])
 	}
@@ -402,7 +402,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{},
+		Conns: map[string][]*DynamicConns{},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
@@ -532,8 +532,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
 		CreateCDR:              false,
@@ -559,8 +559,8 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 	eKamAgentCfg := &KamAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		CreateCdr: false,
 		EvapiConns: []*KamConnCfg{{
@@ -577,8 +577,8 @@ func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 	eAstAgentCfg := &AsteriskAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
@@ -594,7 +594,7 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{},
+		Conns: map[string][]*DynamicConns{},
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
@@ -605,7 +605,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 	eChargerSCfg := &ChargerSCfg{
 		Enabled:                false,
 		IndexedSelects:         true,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		StringIndexedFields:    nil,
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
@@ -621,7 +621,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:                false,
 		IndexedSelects:         true,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		StoreInterval:          0,
 		StringIndexedFields:    nil,
 		PrefixIndexedFields:    &[]string{},
@@ -645,7 +645,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		Enabled:                false,
 		IndexedSelects:         true,
 		StoreInterval:          0,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		StringIndexedFields:    nil,
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
@@ -672,7 +672,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
@@ -693,7 +693,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		DefaultRatio:           1,
 		Opts: &RoutesOpts{
 			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
@@ -717,8 +717,8 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		Listen:           "127.0.0.1:3868",
 		ListenNet:        utils.TCP,
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		OriginHost:        "CGR-DA",
 		OriginRealm:       "cgrates.org",
@@ -837,8 +837,8 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		ClientDaAddresses:  nil,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
 		},
 		DMRTemplate:       utils.MetaDMR,
 		CoATemplate:       utils.MetaCoA,
@@ -1021,7 +1021,7 @@ func TestLoadFilterSCfgError(t *testing.T) {
 			"conns": "*internal"
 	},
 }`
-	expected := "json: cannot unmarshal string into Go struct field FilterSJsonCfg.conns of type map[string][]*config.DynamicStringSliceOpt"
+	expected := "json: cannot unmarshal string into Go struct field FilterSJsonCfg.conns of type map[string][]*config.DynamicConns"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1540,8 +1540,8 @@ func TestDiameterAgentConfig(t *testing.T) {
 		ListenNet:        "tcp",
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		ConnStatusStatQueueIDs: []string{},
 		ConnStatusThresholdIDs: []string{},
@@ -1575,8 +1575,8 @@ func TestRadiusAgentConfig(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		ClientDaAddresses:  nil,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
 		},
 		DMRTemplate:       utils.MetaDMR,
 		CoATemplate:       utils.MetaCoA,
@@ -1598,8 +1598,8 @@ func TestDNSAgentConfig(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		Timezone:          "",
 		RequestProcessors: nil,
@@ -1614,7 +1614,7 @@ func TestDNSAgentConfig(t *testing.T) {
 func TestAttributeSConfig(t *testing.T) {
 	expected := &AttributeSCfg{
 		Enabled:                false,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		IndexedSelects:         true,
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
@@ -1639,7 +1639,7 @@ func TestChargersConfig(t *testing.T) {
 	expected := &ChargerSCfg{
 		Enabled:                false,
 		IndexedSelects:         true,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
@@ -1658,7 +1658,7 @@ func TestResourceSConfig(t *testing.T) {
 		Enabled:                false,
 		IndexedSelects:         true,
 		StoreInterval:          0,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
@@ -1683,7 +1683,7 @@ func TestStatSConfig(t *testing.T) {
 		IndexedSelects:         true,
 		StoreInterval:          0,
 		StoreUncompressedLimit: 0,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
@@ -1712,7 +1712,7 @@ func TestThresholdSConfig(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		NestedFields:           false,
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
@@ -1734,7 +1734,7 @@ func TestRouteSConfig(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
-		Conns:                  map[string][]*DynamicStringSliceOpt{},
+		Conns:                  map[string][]*DynamicConns{},
 		DefaultRatio:           1,
 		NestedFields:           false,
 		Opts: &RoutesOpts{
@@ -1778,7 +1778,7 @@ func TestSessionSConfig(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{},
+		Conns: map[string][]*DynamicConns{},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
@@ -1830,8 +1830,8 @@ func TestSessionSConfig(t *testing.T) {
 func TestFsAgentConfig(t *testing.T) {
 	expected := &FsAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
 		CreateCDR:              false,
@@ -1861,8 +1861,8 @@ func TestFsAgentConfig(t *testing.T) {
 func TestKamAgentConfig(t *testing.T) {
 	expected := &KamAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		CreateCdr:  false,
 		EvapiConns: []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5, Alias: ""}},
@@ -1878,8 +1878,8 @@ func TestKamAgentConfig(t *testing.T) {
 func TestAsteriskAgentConfig(t *testing.T) {
 	expected := &AsteriskAgentCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{{
@@ -1900,7 +1900,7 @@ func TestAsteriskAgentConfig(t *testing.T) {
 
 func TestFilterSConfig(t *testing.T) {
 	expected := &FilterSCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{},
+		Conns: map[string][]*DynamicConns{},
 	}
 	cgrConfig := NewDefaultCGRConfig()
 	newConfig := cgrConfig.FilterSCfg()
@@ -1973,8 +1973,8 @@ func TestAnalyzerConfig(t *testing.T) {
 func TestApierConfig(t *testing.T) {
 	expected := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1987,7 +1987,7 @@ func TestApierConfig(t *testing.T) {
 func TestERSConfig(t *testing.T) {
 	expected := &ERsCfg{
 		Enabled: false,
-		Conns:   map[string][]*DynamicStringSliceOpt{},
+		Conns:   map[string][]*DynamicConns{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -2031,7 +2031,7 @@ func TestERSConfig(t *testing.T) {
 func TestEEsNoLksConfig(t *testing.T) {
 	expected := &EEsCfg{
 		Enabled: false,
-		Conns:   map[string][]*DynamicStringSliceOpt{},
+		Conns:   map[string][]*DynamicConns{},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit: -1,
@@ -2054,8 +2054,8 @@ func TestEEsNoLksConfig(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaEFs: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}},
 				},
 			},
 		},
@@ -2103,8 +2103,8 @@ func TestSIPAgentConfig(t *testing.T) {
 		Enabled:   false,
 		Listen:    "127.0.0.1:5060",
 		ListenNet: "udp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
 		},
 		Timezone:            "",
 		RetransmissionTimer: 1000000000,
@@ -3439,8 +3439,8 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &AdminSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.admS, aCfg) {
@@ -3570,7 +3570,7 @@ func TestCgrCfgV1GetConfigSectionCoreS(t *testing.T) {
 			utils.CapsCfg:              0,
 			utils.CapsStrategyCfg:      utils.MetaBusy,
 			utils.CapsStatsIntervalCfg: "0",
-			utils.ConnsCfg:             map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:             map[string][]*DynamicConns{},
 			utils.ShutdownTimeoutCfg:   "1s",
 		},
 	}
@@ -3817,7 +3817,7 @@ func TestV1GetConfigFilterS(t *testing.T) {
 	var reply map[string]any
 	expected := map[string]any{
 		FilterSJSON: map[string]any{
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg: map[string][]*DynamicConns{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -3835,7 +3835,7 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.EnabledCfg:          false,
 			utils.ExtraFieldsCfg:      []string{},
 			utils.SessionCostRetires:  5,
-			utils.ConnsCfg:            map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:            map[string][]*DynamicConns{},
 			utils.OnlineCDRExportsCfg: []string(nil),
 			utils.OptsCfg: map[string]any{
 				utils.MetaAccounts:   []*DynamicBoolOpt{{}},
@@ -3886,7 +3886,7 @@ func TestV1GetConfigSessionS(t *testing.T) {
 				utils.MetaData:  "1048576",
 				utils.MetaSMS:   "1",
 			},
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg: map[string][]*DynamicConns{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
 				utils.MetaRates:                     []*DynamicBoolOpt{{}},
@@ -3942,8 +3942,8 @@ func TestV1GetConfigFsAgent(t *testing.T) {
 	expected := map[string]any{
 		FreeSWITCHAgentJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.SubscribeParkCfg:          true,
 			utils.CreateCdrCfg:              false,
@@ -3979,8 +3979,8 @@ func TestV1GetConfigKamailioAgent(t *testing.T) {
 	expected := map[string]any{
 		KamailioAgentJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.CreateCdrCfg: false,
 			utils.TimezoneCfg:  "",
@@ -4007,8 +4007,8 @@ func TestV1GetConfigAsteriskAgent(t *testing.T) {
 	expected := map[string]any{
 		AsteriskAgentJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.CreateCdrCfg: false,
 			utils.AsteriskConnsCfg: []map[string]any{
@@ -4046,8 +4046,8 @@ func TestV1GetConfigDiameterAgent(t *testing.T) {
 			utils.OriginRealmCfg:      "cgrates.org",
 			utils.ProductNameCfg:      "CGRateS",
 			utils.RARTemplateCfg:      "",
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.ConnStatusStatQueueIDsCfg:  []string{},
 			utils.ConnStatusThresholdIDsCfg:  []string{},
@@ -4084,8 +4084,8 @@ func TestV1GetConfigRadiusAgent(t *testing.T) {
 				utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 			},
 			utils.ClientDaAddressesCfg: map[string]any{},
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{utils.MetaInternal}}},
 			},
 			utils.DMRTemplateCfg:       utils.MetaDMR,
 			utils.CoATemplateCfg:       utils.MetaCoA,
@@ -4112,8 +4112,8 @@ func TestV1GetConfigDNSAgent(t *testing.T) {
 					utils.NetworkCfg: "udp",
 				},
 			},
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.TimezoneCfg:          "",
 			utils.RequestProcessorsCfg: []map[string]any{},
@@ -4132,7 +4132,7 @@ func TestV1GetConfigAttribute(t *testing.T) {
 	expected := map[string]any{
 		AttributeSJSON: map[string]any{
 			utils.EnabledCfg:                false,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
@@ -4160,7 +4160,7 @@ func TestV1GetConfigChargers(t *testing.T) {
 	expected := map[string]any{
 		ChargerSJSON: map[string]any{
 			utils.EnabledCfg:                false,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.NestedFieldsCfg:           false,
@@ -4183,7 +4183,7 @@ func TestV1GetConfigResourceS(t *testing.T) {
 		ResourceSJSON: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.StoreIntervalCfg:          utils.EmptyString,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
@@ -4212,7 +4212,7 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.EnabledCfg:                false,
 			utils.StoreIntervalCfg:          utils.EmptyString,
 			utils.StoreUncompressedLimitCfg: 0,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
@@ -4241,7 +4241,7 @@ func TestV1GetConfigThresholds(t *testing.T) {
 		ThresholdSJSON: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.StoreIntervalCfg:          utils.EmptyString,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
@@ -4269,7 +4269,7 @@ func TestV1GetConfigAcounts(t *testing.T) {
 		AccountSJSON: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.IndexedSelectsCfg:         true,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
 			utils.ExistsIndexedFieldsCfg:    []string{},
@@ -4298,7 +4298,7 @@ func TestV1GetConfigRoutes(t *testing.T) {
 		RouteSJSON: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.IndexedSelectsCfg:         true,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
 			utils.ExistsIndexedFieldsCfg:    []string{},
@@ -4435,8 +4435,8 @@ func TestV1GetConfigSectionApierS(t *testing.T) {
 	expected := map[string]any{
 		AdminSJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaCaches: {{Values: []string{utils.MetaInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaCaches: {{ConnIDs: []string{utils.MetaInternal}}},
 			},
 		},
 	}
@@ -4453,7 +4453,7 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 	expected := map[string]any{
 		EEsJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg:   map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:   map[string][]*DynamicConns{},
 			utils.CacheCfg: map[string]any{
 				utils.MetaFileCSV: map[string]any{
 					utils.LimitCfg:     -1,
@@ -4469,8 +4469,8 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 					utils.IDCfg:         utils.MetaDefault,
 					utils.TypeCfg:       utils.MetaNone,
 					utils.ExportPathCfg: "/var/spool/cgrates/ees",
-					utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-						utils.MetaEFs: {{Values: []string{utils.MetaInternal}}},
+					utils.ConnsCfg: map[string][]*DynamicConns{
+						utils.MetaEFs: {{ConnIDs: []string{utils.MetaInternal}}},
 					},
 					utils.OptsCfg:                 map[string]any{},
 					utils.TimezoneCfg:             utils.EmptyString,
@@ -4502,7 +4502,7 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 	expected := map[string]any{
 		ERsJSON: map[string]any{
 			utils.EnabledCfg: false,
-			utils.ConnsCfg:   map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:   map[string][]*DynamicConns{},
 			utils.ReadersCfg: []map[string]any{
 				{
 					utils.FiltersCfg:              []string{},
@@ -4611,8 +4611,8 @@ func TestV1GetConfigSectionSIPAgent(t *testing.T) {
 			utils.EnabledCfg:   false,
 			utils.ListenCfg:    "127.0.0.1:5060",
 			utils.ListenNetCfg: "udp",
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{utils.MetaInternal}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{utils.MetaInternal}}},
 			},
 			utils.TimezoneCfg:            utils.EmptyString,
 			utils.RetransmissionTimerCfg: "1s",
@@ -4972,7 +4972,7 @@ func TestV1GetConfigAsJSONSessionS(t *testing.T) {
 
 func TestV1GetConfigAsJSONFreeSwitchAgent(t *testing.T) {
 	var reply string
-	expected := `{"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true}}`
+	expected := `{"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{FreeSWITCHAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4983,7 +4983,7 @@ func TestV1GetConfigAsJSONFreeSwitchAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONFKamailioAgent(t *testing.T) {
 	var reply string
-	expected := `{"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"timezone":""}}`
+	expected := `{"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"timezone":""}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{KamailioAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4994,7 +4994,7 @@ func TestV1GetConfigAsJSONFKamailioAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONAsteriskAgent(t *testing.T) {
 	var reply string
-	expected := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
+	expected := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AsteriskAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5005,7 +5005,7 @@ func TestV1GetConfigAsJSONAsteriskAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONADiameterAgent(t *testing.T) {
 	var reply string
-	expected := `{"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0}}`
+	expected := `{"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{DiameterAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5016,7 +5016,7 @@ func TestV1GetConfigAsJSONADiameterAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONARadiusAgent(t *testing.T) {
 	var reply string
-	expected := `{"radius_agent":{"client_da_addresses":{},"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"dmr_template":"*dmr","enabled":false,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[],"requests_cache_key":""}}`
+	expected := `{"radius_agent":{"client_da_addresses":{},"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"dmr_template":"*dmr","enabled":false,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[],"requests_cache_key":""}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RadiusAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5027,7 +5027,7 @@ func TestV1GetConfigAsJSONARadiusAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 	var reply string
-	expected := `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"timezone":""}}`
+	expected := `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"timezone":""}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{DNSAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5150,7 +5150,7 @@ func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 
 func TestV1GetConfigAsJSONApierS(t *testing.T) {
 	var reply string
-	expected := `{"admins":{"conns":{"*caches":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"enabled":false}}`
+	expected := `{"admins":{"conns":{"*caches":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AdminSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5161,7 +5161,7 @@ func TestV1GetConfigAsJSONApierS(t *testing.T) {
 
 func TestV1GetConfigAsJSONCfgEES(t *testing.T) {
 	var reply string
-	expected := `{"ees":{"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"conns":{},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"conns":{"*efs":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","metrics_reset_schedule":"","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`
+	expected := `{"ees":{"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"conns":{},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"conns":{"*efs":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","metrics_reset_schedule":"","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{EEsJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5183,7 +5183,7 @@ func TestV1GetConfigAsJSONCfgERS(t *testing.T) {
 
 func TestV1GetConfigAsJSONSIPAgent(t *testing.T) {
 	var reply string
-	expected := `{"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","timezone":""}}`
+	expected := `{"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","timezone":""}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{SIPAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5306,7 +5306,7 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 	args := `{
 		"chargers": {
 	        "enabled": true,
-            "conns": {"*attributes": [{"values": ["*internal:*attributes"]}]}
+            "conns": {"*attributes": [{"ConnIDs": ["*internal:*attributes"]}]}
     }
 }`
 	expected := `<AttributeS> not enabled but requested by <ChargerS> component`
@@ -5334,7 +5334,7 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 	  }
 }`
 	var reply string
-	expected := `{"accounts":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"actions":{"conns":{},"dynaprepaid_actionprofile":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*posterAttempts":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[],"tenants":[]},"admins":{"conns":{"*caches":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"enabled":false},"analyzers":{"cleanup_interval":"1h0m0s","db_path":"/var/spool/cgrates/analyzers","ees_conns":[],"enabled":false,"index_type":"*scorch","opts":{"*exporterIDs":[]},"ttl":"24h0m0s"},"apiban":{"enabled":false,"keys":[]},"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"enabled":false},"attributes":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"caches":{"partitions":{"*account_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*apiban":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2m0s"},"*attribute_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*caps_events":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*cdr_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10m0s"},"*charger_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*closed_sessions":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*diameter_messages":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*event_charges":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*event_ips":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*event_resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_allocations":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*radius_packets":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*ranking_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*replication_hosts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_connections":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_responses":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2s"},"*sentrypeer":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":true,"ttl":"24h0m0s"},"*stat_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*stir":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*threshold_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*uch":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"}},"remote_conns":[],"replication_conns":[]},"cdrs":{"conns":{},"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*ees":[{"FilterIDs":null,"Tenant":""}],"*rates":[{"FilterIDs":null,"Tenant":""}],"*refund":[{"FilterIDs":null,"Tenant":""}],"*rerate":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*store":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}]},"session_cost_retries":5},"chargers":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"config_db":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"internalDBBackupPath":"/var/lib/cgrates/internal_db/backup/configdb","internalDBDumpInterval":"0s","internalDBDumpPath":"/var/lib/cgrates/internal_db/configdb","internalDBFileSizeLimit":1073741824,"internalDBRewriteInterval":"0s","internalDBStartTimeout":"5m0s","mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"}},"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"},"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*busy","conns":{},"shutdown_timeout":"1s"},"db":{"db_conns":{"*default":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"internalDBBackupPath":"/var/lib/cgrates/internal_db/backup/db","internalDBDumpInterval":"1m0s","internalDBDumpPath":"/var/lib/cgrates/internal_db/db","internalDBFileSizeLimit":1073741824,"internalDBRewriteInterval":"1h0m0s","internalDBStartTimeout":"5m0s","mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","mysqlDSNParams":{},"mysqlLocation":"Local","pgSSLMode":"disable","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s","sqlConnMaxLifetime":"0s","sqlLogLevel":3,"sqlMaxIdleConns":10,"sqlMaxOpenConns":100},"prefix_indexed_fields":[],"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_failed_dir":"","replication_filtered":false,"replication_interval":"0s","string_indexed_fields":[]}},"items":{"*account_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*cdrs":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_allocations":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false}}},"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0},"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"timezone":""},"ees":{"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"conns":{},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"conns":{"*efs":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","metrics_reset_schedule":"","opts":{},"synchronous":false,"timezone":"","type":"*none"}]},"efs":{"enabled":false,"failed_posts_dir":"/var/spool/cgrates/failed_posts","failed_posts_static_ttl":true,"failed_posts_ttl":"5s","poster_attempts":3},"ers":{"conns":{},"enabled":false,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"ees_failed_ids":[],"ees_ids":[],"ees_success_ids":[],"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","max_reconnect_interval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime"},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","start_delay":"0","tenant":"","timezone":"","type":"*none"}]},"filters":{"conns":{}},"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true},"general":{"caching_delay":"0","connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","decimal_max_scale":0,"decimal_min_scale":0,"decimal_precision":0,"decimal_rounding_mode":"*toNearestEven","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","locking_timeout":"0","max_parallel_conns":100,"max_reconnect_interval":"0","node_id":"ENGINE1","opts":{"*exporterIDs":[]},"reconnects":-1,"reply_timeout":"2s","rounding_decimals":5,"tpexport_dir":"/var/spool/cgrates/tpe"},"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0s","forceAttemptHttp2":true,"idleConnTimeout":"1m30s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0s","skipTLSVerification":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","pprof_path":"/debug/pprof/","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"},"http_agent":[],"ips":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":null,"opts":{"*allocationID":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"0s","string_indexed_fields":null,"suffix_indexed_fields":[]},"janus_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"enabled":false,"janus_conns":[{"address":"127.0.0.1:8088","admin_address":"localhost:7188","admin_password":"","type":"*ws"}],"request_processors":[],"url":"/janus"},"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"timezone":""},"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"},"loader":{"actions_conns":["*localhost"],"caches_conns":["*localhost"],"data_path":"./","disable_reverse":false,"field_separator":",","gapi_credentials":".gapi/credentials.json","gapi_token":".gapi/token.json","tpid":""},"loaders":[{"action":"*store","cache":{"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*attributes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*chargers":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*ips":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*routes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*stats":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"caches_conns":["*internal"],"data":[{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"new_branch":true,"path":"Rules.Type","tag":"Type","type":"*variable","value":"~*req.2"},{"path":"Rules.Element","tag":"Element","type":"*variable","value":"~*req.3"},{"path":"Rules.Values","tag":"Values","type":"*variable","value":"~*req.4"}],"file_name":"Filters.csv","flags":null,"type":"*filters"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"TenantID","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ProfileID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"new_branch":true,"path":"Attributes.FilterIDs","tag":"AttributeFilterIDs","type":"*variable","value":"~*req.5"},{"path":"Attributes.Blockers","tag":"AttributeBlockers","type":"*variable","value":"~*req.6"},{"path":"Attributes.Path","tag":"Path","type":"*variable","value":"~*req.7"},{"path":"Attributes.Type","tag":"Type","type":"*variable","value":"~*req.8"},{"path":"Attributes.Value","tag":"Value","type":"*variable","value":"~*req.9"}],"file_name":"Attributes.csv","flags":null,"type":"*attributes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"UsageTTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Limit","tag":"Limit","type":"*variable","value":"~*req.5"},{"path":"AllocationMessage","tag":"AllocationMessage","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"}],"file_name":"Resources.csv","flags":null,"type":"*resources"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.5"},{"new_branch":true,"path":"Pools.ID","tag":"PoolID","type":"*variable","value":"~*req.6"},{"path":"Pools.FilterIDs","tag":"PoolFilterIDs","type":"*variable","value":"~*req.7"},{"path":"Pools.Type","tag":"PoolType","type":"*variable","value":"~*req.8"},{"path":"Pools.Range","tag":"PoolRange","type":"*variable","value":"~*req.9"},{"path":"Pools.Strategy","tag":"PoolStrategy","type":"*variable","value":"~*req.10"},{"path":"Pools.Message","tag":"PoolMessage","type":"*variable","value":"~*req.11"},{"path":"Pools.Weights","tag":"PoolWeights","type":"*variable","value":"~*req.12"},{"path":"Pools.Blockers","tag":"PoolBlockers","type":"*variable","value":"~*req.13"}],"file_name":"IPs.csv","flags":null,"type":"*ips"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.5"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"},{"new_branch":true,"path":"Metrics.MetricID","tag":"MetricIDs","type":"*variable","value":"~*req.10"},{"path":"Metrics.FilterIDs","tag":"MetricFilterIDs","type":"*variable","value":"~*req.11"},{"path":"Metrics.Blockers","tag":"MetricBlockers","type":"*variable","value":"~*req.12"}],"file_name":"Stats.csv","flags":null,"type":"*stats"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MaxHits","tag":"MaxHits","type":"*variable","value":"~*req.4"},{"path":"MinHits","tag":"MinHits","type":"*variable","value":"~*req.5"},{"path":"MinSleep","tag":"MinSleep","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"ActionProfileIDs","tag":"ActionProfileIDs","type":"*variable","value":"~*req.8"},{"path":"Async","tag":"Async","type":"*variable","value":"~*req.9"},{"path":"EeIDs","tag":"EeIDs","type":"*variable","value":"~*req.10"}],"file_name":"Thresholds.csv","flags":null,"type":"*thresholds"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatID","tag":"StatID","type":"*variable","value":"~*req.3"},{"path":"Metrics","tag":"Metrics","type":"*variable","value":"~*req.4"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.5"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"CorrelationType","tag":"CorrelationType","type":"*variable","value":"~*req.8"},{"path":"Tolerance","tag":"Tolerance","type":"*variable","value":"~*req.9"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.10"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.11"}],"file_name":"Trends.csv","flags":null,"type":"*trends"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatIDs","tag":"StatIDs","type":"*variable","value":"~*req.3"},{"path":"MetricIDs","tag":"MetricIDs","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.7"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.8"}],"file_name":"Rankings.csv","flags":null,"type":"*rankings"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"new_branch":true,"path":"Routes.ID","tag":"RouteID","type":"*variable","value":"~*req.7"},{"path":"Routes.FilterIDs","tag":"RouteFilterIDs","type":"*variable","value":"~*req.8"},{"path":"Routes.AccountIDs","tag":"RouteAccountIDs","type":"*variable","value":"~*req.9"},{"path":"Routes.RateProfileIDs","tag":"RouteRateProfileIDs","type":"*variable","value":"~*req.10"},{"path":"Routes.ResourceIDs","tag":"RouteResourceIDs","type":"*variable","value":"~*req.11"},{"path":"Routes.StatIDs","tag":"RouteStatIDs","type":"*variable","value":"~*req.12"},{"path":"Routes.Weights","tag":"RouteWeights","type":"*variable","value":"~*req.13"},{"path":"Routes.Blockers","tag":"RouteBlockers","type":"*variable","value":"~*req.14"},{"path":"Routes.RouteParameters","tag":"RouteParameters","type":"*variable","value":"~*req.15"}],"file_name":"Routes.csv","flags":null,"type":"*routes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"RunID","tag":"RunID","type":"*variable","value":"~*req.5"},{"path":"AttributeIDs","tag":"AttributeIDs","type":"*variable","value":"~*req.6"}],"file_name":"Chargers.csv","flags":null,"type":"*chargers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MinCost","tag":"MinCost","type":"*variable","value":"~*req.4"},{"path":"MaxCost","tag":"MaxCost","type":"*variable","value":"~*req.5"},{"path":"MaxCostStrategy","tag":"MaxCostStrategy","type":"*variable","value":"~*req.6"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].FilterIDs","tag":"RateFilterIDs","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].ActivationTimes","tag":"RateActivationTimes","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Weights","tag":"RateWeights","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Blocker","tag":"RateBlocker","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.7:"],"new_branch":true,"path":"Rates[\u003c~*req.7\u003e].IntervalRates.IntervalStart","tag":"RateIntervalStart","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.FixedFee","tag":"RateFixedFee","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.RecurrentFee","tag":"RateRecurrentFee","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Unit","tag":"RateUnit","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Increment","tag":"RateIncrement","type":"*variable","value":"~*req.16"}],"file_name":"Rates.csv","flags":null,"type":"*rate_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.5"},{"path":"Targets[\u003c~*req.6\u003e]","tag":"TargetIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].FilterIDs","tag":"ActionFilterIDs","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].TTL","tag":"ActionTTL","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Type","tag":"ActionType","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Opts","tag":"ActionOpts","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Weights","tag":"ActionWeights","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Blockers","tag":"ActionBlockers","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.8:"],"new_branch":true,"path":"Actions[\u003c~*req.8\u003e].Diktats.ID","tag":"ActionDiktatsID","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.FilterIDs","tag":"ActionDiktatsFilterIDs","type":"*variable","value":"~*req.16"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Opts","tag":"ActionDiktatsOpts","type":"*variable","value":"~*req.17"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Weights","tag":"ActionDiktatsWeights","type":"*variable","value":"~*req.18"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Blockers","tag":"ActionDiktatsBlockers","type":"*variable","value":"~*req.19"}],"file_name":"Actions.csv","flags":null,"type":"*action_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Opts","tag":"Opts","type":"*variable","value":"~*req.5"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].FilterIDs","tag":"BalanceFilterIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Weights","tag":"BalanceWeights","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Blockers","tag":"BalanceBlockers","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Type","tag":"BalanceType","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Units","tag":"BalanceUnits","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].UnitFactors","tag":"BalanceUnitFactors","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Opts","tag":"BalanceOpts","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].CostIncrements","tag":"BalanceCostIncrements","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].AttributeIDs","tag":"BalanceAttributeIDs","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].RateProfileIDs","tag":"BalanceRateProfileIDs","type":"*variable","value":"~*req.16"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.17"}],"file_name":"Accounts.csv","flags":null,"type":"*accounts"}],"enabled":false,"field_separator":",","id":"*default","lockfile_path":".cgr.lck","opts":{"*cache":"","*forceLock":false,"*stopOnError":false,"*withIndex":true},"run_delay":"0","tenant":"","tp_in_dir":"/var/spool/cgrates/loader/in","tp_out_dir":"/var/spool/cgrates/loader/out"}],"logger":{"efs_conns":["*internal"],"level":6,"opts":{"failed_posts_dir":"/var/spool/cgrates/failed_posts","kafka_attempts":1,"kafka_conn":"","kafka_topic":""},"type":"*syslog"},"migrator":{"fromItems":{"*accounts":{"dbConn":"*default"},"*charger_profiles":{"dbConn":"*default"},"*filters":{"dbConn":"*default"},"*load_ids":{"dbConn":"*default"},"*statqueue_profiles":{"dbConn":"*default"},"*versions":{"dbConn":"*default"}},"out_db_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"users_filters":null},"prometheus_agent":{"cache_ids":[],"collect_go_metrics":false,"collect_process_metrics":false,"conns":{},"enabled":false,"path":"/prometheus","stat_queue_ids":[]},"radius_agent":{"client_da_addresses":{},"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"dmr_template":"*dmr","enabled":false,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[],"requests_cache_key":""},"rankings":{"conns":{},"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"store_interval":""},"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*startTime":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000},"registrarc":{"rpc":{"hosts":[],"refresh_interval":"5m0s","registrars_conns":[]}},"resources":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"routes":{"conns":{},"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"rpc_conns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}},"sentrypeer":{"audience":"https://sentrypeer.com/api","client_id":"","client_secret":"","grant_type":"client_credentials","ips_url":"https://sentrypeer.com/api/ip-addresses","numbers_url":"https://sentrypeer.com/api/phone-numbers","token_url":"https://authz.sentrypeer.com/oauth/token"},"sessions":{"alterable_fields":[],"channel_sync_interval":"0","client_protocol":1,"conns":{},"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*accountsForceUsage":[],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*ips":[{"FilterIDs":null,"Tenant":""}],"*ipsAllocate":[{"FilterIDs":null,"Tenant":""}],"*ipsAuthorize":[{"FilterIDs":null,"Tenant":""}],"*ipsRelease":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*originID":[],"*rates":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"session_indexes":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5},"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","Values":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","timezone":""},"stats":{"conns":{},"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[]},"suretax":{"bill_to_number":"","business_unit":"","client_number":"","client_tracking":"~*opts.*originID","customer_number":"~*req.Subject","include_local_cost":false,"orig_number":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatory_code":"03","response_group":"03","response_type":"D4","return_file_code":"0","sales_type_code":"R","tax_exemption_code_list":"","tax_included":"0","tax_situs_rule":"04","term_number":"~*req.Destination","timezone":"UTC","trans_type_code":"010101","unit_type":"00","units":"1","url":"","validation_key":"","zipcode":""},"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*coa":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Filter-Id","tag":"Filter-Id","type":"*variable","value":"~*req.CustomFilter"}],"*dmr":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Reply-Message","tag":"Reply-Message","type":"*variable","value":"~*req.DisconnectCause"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*fsa":[{"path":"*cgreq.ToR","tag":"ToR","type":"*constant","value":"*voice"},{"path":"*cgreq.PDD","tag":"PDD","type":"*composed","value":"~*req.variable_progress_mediamsec;ms"},{"path":"*cgreq.ACD","tag":"ACD","type":"*composed","value":"~*req.variable_cdr_acd;s"},{"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*opts.*originID","tag":"*originID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*cgreq.OriginHost","tag":"OriginHost","type":"*variable","value":"~*req.variable_cgr_originhost"},{"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Source","tag":"Source","type":"*composed","value":"FS_;~*req.Event-Name"},{"filters":["*string:*req.variable_process_cdr:false"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*string:*req.Caller-Dialplan:inline"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*exists:*cgreq.RequestType:"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*prepaid"},{"path":"*cgreq.Tenant","tag":"Tenant","type":"*constant","value":"cgrates.org"},{"path":"*cgreq.Category","tag":"Category","type":"*constant","value":"call"},{"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.Caller-Destination-Number"},{"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.Caller-Channel-Created-Time"},{"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.Caller-Channel-Answered-Time"},{"path":"*cgreq.Usage","tag":"Usage","type":"*composed","value":"~*req.variable_billsec;s"},{"path":"*cgreq.Route","tag":"Route","type":"*variable","value":"~*req.variable_cgr_route"},{"path":"*cgreq.Cost","tag":"Cost","type":"*constant","value":"-1.0"},{"filters":["*notempty:*req.Hangup-Cause:"],"path":"*cgreq.DisconnectCause","tag":"DisconnectCause","type":"*variable","value":"~*req.Hangup-Cause"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]},"thresholds":{"conns":{},"ees_exporter_ids":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4},"tpes":{"enabled":false},"trends":{"conns":{},"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"store_interval":"","store_uncompressed_limit":0}}`
+	expected := `{"accounts":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"actions":{"conns":{},"dynaprepaid_actionprofile":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*posterAttempts":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[],"tenants":[]},"admins":{"conns":{"*caches":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false},"analyzers":{"cleanup_interval":"1h0m0s","db_path":"/var/spool/cgrates/analyzers","ees_conns":[],"enabled":false,"index_type":"*scorch","opts":{"*exporterIDs":[]},"ttl":"24h0m0s"},"apiban":{"enabled":false,"keys":[]},"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false},"attributes":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"caches":{"partitions":{"*account_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*apiban":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2m0s"},"*attribute_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*caps_events":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*cdr_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10m0s"},"*charger_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*closed_sessions":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*diameter_messages":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*event_charges":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*event_ips":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*event_resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_allocations":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ip_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*radius_packets":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*ranking_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*replication_hosts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_connections":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_responses":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2s"},"*sentrypeer":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":true,"ttl":"24h0m0s"},"*stat_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*stir":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*threshold_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*uch":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"}},"remote_conns":[],"replication_conns":[]},"cdrs":{"conns":{},"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*ees":[{"FilterIDs":null,"Tenant":""}],"*rates":[{"FilterIDs":null,"Tenant":""}],"*refund":[{"FilterIDs":null,"Tenant":""}],"*rerate":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*store":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}]},"session_cost_retries":5},"chargers":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"config_db":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"internalDBBackupPath":"/var/lib/cgrates/internal_db/backup/configdb","internalDBDumpInterval":"0s","internalDBDumpPath":"/var/lib/cgrates/internal_db/configdb","internalDBFileSizeLimit":1073741824,"internalDBRewriteInterval":"0s","internalDBStartTimeout":"5m0s","mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"}},"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"},"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*busy","conns":{},"shutdown_timeout":"1s"},"db":{"db_conns":{"*default":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"internalDBBackupPath":"/var/lib/cgrates/internal_db/backup/db","internalDBDumpInterval":"1m0s","internalDBDumpPath":"/var/lib/cgrates/internal_db/db","internalDBFileSizeLimit":1073741824,"internalDBRewriteInterval":"1h0m0s","internalDBStartTimeout":"5m0s","mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","mysqlDSNParams":{},"mysqlLocation":"Local","pgSSLMode":"disable","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s","sqlConnMaxLifetime":"0s","sqlLogLevel":3,"sqlMaxIdleConns":10,"sqlMaxOpenConns":100},"prefix_indexed_fields":[],"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_failed_dir":"","replication_filtered":false,"replication_interval":"0s","string_indexed_fields":[]}},"items":{"*account_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*cdrs":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_allocations":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ip_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"dbConn":"*default","limit":-1,"remote":false,"replicate":false,"static_ttl":false}}},"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0},"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"timezone":""},"ees":{"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"conns":{},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"conns":{"*efs":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","metrics_reset_schedule":"","opts":{},"synchronous":false,"timezone":"","type":"*none"}]},"efs":{"enabled":false,"failed_posts_dir":"/var/spool/cgrates/failed_posts","failed_posts_static_ttl":true,"failed_posts_ttl":"5s","poster_attempts":3},"ers":{"conns":{},"enabled":false,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"ees_failed_ids":[],"ees_ids":[],"ees_success_ids":[],"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","max_reconnect_interval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime"},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","start_delay":"0","tenant":"","timezone":"","type":"*none"}]},"filters":{"conns":{}},"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true},"general":{"caching_delay":"0","connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","decimal_max_scale":0,"decimal_min_scale":0,"decimal_precision":0,"decimal_rounding_mode":"*toNearestEven","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","locking_timeout":"0","max_parallel_conns":100,"max_reconnect_interval":"0","node_id":"ENGINE1","opts":{"*exporterIDs":[]},"reconnects":-1,"reply_timeout":"2s","rounding_decimals":5,"tpexport_dir":"/var/spool/cgrates/tpe"},"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0s","forceAttemptHttp2":true,"idleConnTimeout":"1m30s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0s","skipTLSVerification":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","pprof_path":"/debug/pprof/","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"},"http_agent":[],"ips":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":null,"opts":{"*allocationID":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"0s","string_indexed_fields":null,"suffix_indexed_fields":[]},"janus_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false,"janus_conns":[{"address":"127.0.0.1:8088","admin_address":"localhost:7188","admin_password":"","type":"*ws"}],"request_processors":[],"url":"/janus"},"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"timezone":""},"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"},"loader":{"actions_conns":["*localhost"],"caches_conns":["*localhost"],"data_path":"./","disable_reverse":false,"field_separator":",","gapi_credentials":".gapi/credentials.json","gapi_token":".gapi/token.json","tpid":""},"loaders":[{"action":"*store","cache":{"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*attributes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*chargers":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*ips":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*routes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*stats":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"caches_conns":["*internal"],"data":[{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"new_branch":true,"path":"Rules.Type","tag":"Type","type":"*variable","value":"~*req.2"},{"path":"Rules.Element","tag":"Element","type":"*variable","value":"~*req.3"},{"path":"Rules.Values","tag":"Values","type":"*variable","value":"~*req.4"}],"file_name":"Filters.csv","flags":null,"type":"*filters"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"TenantID","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ProfileID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"new_branch":true,"path":"Attributes.FilterIDs","tag":"AttributeFilterIDs","type":"*variable","value":"~*req.5"},{"path":"Attributes.Blockers","tag":"AttributeBlockers","type":"*variable","value":"~*req.6"},{"path":"Attributes.Path","tag":"Path","type":"*variable","value":"~*req.7"},{"path":"Attributes.Type","tag":"Type","type":"*variable","value":"~*req.8"},{"path":"Attributes.Value","tag":"Value","type":"*variable","value":"~*req.9"}],"file_name":"Attributes.csv","flags":null,"type":"*attributes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"UsageTTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Limit","tag":"Limit","type":"*variable","value":"~*req.5"},{"path":"AllocationMessage","tag":"AllocationMessage","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"}],"file_name":"Resources.csv","flags":null,"type":"*resources"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.5"},{"new_branch":true,"path":"Pools.ID","tag":"PoolID","type":"*variable","value":"~*req.6"},{"path":"Pools.FilterIDs","tag":"PoolFilterIDs","type":"*variable","value":"~*req.7"},{"path":"Pools.Type","tag":"PoolType","type":"*variable","value":"~*req.8"},{"path":"Pools.Range","tag":"PoolRange","type":"*variable","value":"~*req.9"},{"path":"Pools.Strategy","tag":"PoolStrategy","type":"*variable","value":"~*req.10"},{"path":"Pools.Message","tag":"PoolMessage","type":"*variable","value":"~*req.11"},{"path":"Pools.Weights","tag":"PoolWeights","type":"*variable","value":"~*req.12"},{"path":"Pools.Blockers","tag":"PoolBlockers","type":"*variable","value":"~*req.13"}],"file_name":"IPs.csv","flags":null,"type":"*ips"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.5"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"},{"new_branch":true,"path":"Metrics.MetricID","tag":"MetricIDs","type":"*variable","value":"~*req.10"},{"path":"Metrics.FilterIDs","tag":"MetricFilterIDs","type":"*variable","value":"~*req.11"},{"path":"Metrics.Blockers","tag":"MetricBlockers","type":"*variable","value":"~*req.12"}],"file_name":"Stats.csv","flags":null,"type":"*stats"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MaxHits","tag":"MaxHits","type":"*variable","value":"~*req.4"},{"path":"MinHits","tag":"MinHits","type":"*variable","value":"~*req.5"},{"path":"MinSleep","tag":"MinSleep","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"ActionProfileIDs","tag":"ActionProfileIDs","type":"*variable","value":"~*req.8"},{"path":"Async","tag":"Async","type":"*variable","value":"~*req.9"},{"path":"EeIDs","tag":"EeIDs","type":"*variable","value":"~*req.10"}],"file_name":"Thresholds.csv","flags":null,"type":"*thresholds"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatID","tag":"StatID","type":"*variable","value":"~*req.3"},{"path":"Metrics","tag":"Metrics","type":"*variable","value":"~*req.4"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.5"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"CorrelationType","tag":"CorrelationType","type":"*variable","value":"~*req.8"},{"path":"Tolerance","tag":"Tolerance","type":"*variable","value":"~*req.9"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.10"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.11"}],"file_name":"Trends.csv","flags":null,"type":"*trends"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatIDs","tag":"StatIDs","type":"*variable","value":"~*req.3"},{"path":"MetricIDs","tag":"MetricIDs","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.7"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.8"}],"file_name":"Rankings.csv","flags":null,"type":"*rankings"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"new_branch":true,"path":"Routes.ID","tag":"RouteID","type":"*variable","value":"~*req.7"},{"path":"Routes.FilterIDs","tag":"RouteFilterIDs","type":"*variable","value":"~*req.8"},{"path":"Routes.AccountIDs","tag":"RouteAccountIDs","type":"*variable","value":"~*req.9"},{"path":"Routes.RateProfileIDs","tag":"RouteRateProfileIDs","type":"*variable","value":"~*req.10"},{"path":"Routes.ResourceIDs","tag":"RouteResourceIDs","type":"*variable","value":"~*req.11"},{"path":"Routes.StatIDs","tag":"RouteStatIDs","type":"*variable","value":"~*req.12"},{"path":"Routes.Weights","tag":"RouteWeights","type":"*variable","value":"~*req.13"},{"path":"Routes.Blockers","tag":"RouteBlockers","type":"*variable","value":"~*req.14"},{"path":"Routes.RouteParameters","tag":"RouteParameters","type":"*variable","value":"~*req.15"}],"file_name":"Routes.csv","flags":null,"type":"*routes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"RunID","tag":"RunID","type":"*variable","value":"~*req.5"},{"path":"AttributeIDs","tag":"AttributeIDs","type":"*variable","value":"~*req.6"}],"file_name":"Chargers.csv","flags":null,"type":"*chargers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MinCost","tag":"MinCost","type":"*variable","value":"~*req.4"},{"path":"MaxCost","tag":"MaxCost","type":"*variable","value":"~*req.5"},{"path":"MaxCostStrategy","tag":"MaxCostStrategy","type":"*variable","value":"~*req.6"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].FilterIDs","tag":"RateFilterIDs","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].ActivationTimes","tag":"RateActivationTimes","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Weights","tag":"RateWeights","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Blocker","tag":"RateBlocker","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.7:"],"new_branch":true,"path":"Rates[\u003c~*req.7\u003e].IntervalRates.IntervalStart","tag":"RateIntervalStart","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.FixedFee","tag":"RateFixedFee","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.RecurrentFee","tag":"RateRecurrentFee","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Unit","tag":"RateUnit","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Increment","tag":"RateIncrement","type":"*variable","value":"~*req.16"}],"file_name":"Rates.csv","flags":null,"type":"*rate_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.5"},{"path":"Targets[\u003c~*req.6\u003e]","tag":"TargetIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].FilterIDs","tag":"ActionFilterIDs","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].TTL","tag":"ActionTTL","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Type","tag":"ActionType","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Opts","tag":"ActionOpts","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Weights","tag":"ActionWeights","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Blockers","tag":"ActionBlockers","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.8:"],"new_branch":true,"path":"Actions[\u003c~*req.8\u003e].Diktats.ID","tag":"ActionDiktatsID","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.FilterIDs","tag":"ActionDiktatsFilterIDs","type":"*variable","value":"~*req.16"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Opts","tag":"ActionDiktatsOpts","type":"*variable","value":"~*req.17"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Weights","tag":"ActionDiktatsWeights","type":"*variable","value":"~*req.18"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Blockers","tag":"ActionDiktatsBlockers","type":"*variable","value":"~*req.19"}],"file_name":"Actions.csv","flags":null,"type":"*action_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Opts","tag":"Opts","type":"*variable","value":"~*req.5"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].FilterIDs","tag":"BalanceFilterIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Weights","tag":"BalanceWeights","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Blockers","tag":"BalanceBlockers","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Type","tag":"BalanceType","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Units","tag":"BalanceUnits","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].UnitFactors","tag":"BalanceUnitFactors","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Opts","tag":"BalanceOpts","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].CostIncrements","tag":"BalanceCostIncrements","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].AttributeIDs","tag":"BalanceAttributeIDs","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].RateProfileIDs","tag":"BalanceRateProfileIDs","type":"*variable","value":"~*req.16"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.17"}],"file_name":"Accounts.csv","flags":null,"type":"*accounts"}],"enabled":false,"field_separator":",","id":"*default","lockfile_path":".cgr.lck","opts":{"*cache":"","*forceLock":false,"*stopOnError":false,"*withIndex":true},"run_delay":"0","tenant":"","tp_in_dir":"/var/spool/cgrates/loader/in","tp_out_dir":"/var/spool/cgrates/loader/out"}],"logger":{"efs_conns":["*internal"],"level":6,"opts":{"failed_posts_dir":"/var/spool/cgrates/failed_posts","kafka_attempts":1,"kafka_conn":"","kafka_topic":""},"type":"*syslog"},"migrator":{"fromItems":{"*accounts":{"dbConn":"*default"},"*charger_profiles":{"dbConn":"*default"},"*filters":{"dbConn":"*default"},"*load_ids":{"dbConn":"*default"},"*statqueue_profiles":{"dbConn":"*default"},"*versions":{"dbConn":"*default"}},"out_db_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"users_filters":null},"prometheus_agent":{"cache_ids":[],"collect_go_metrics":false,"collect_process_metrics":false,"conns":{},"enabled":false,"path":"/prometheus","stat_queue_ids":[]},"radius_agent":{"client_da_addresses":{},"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"dmr_template":"*dmr","enabled":false,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[],"requests_cache_key":""},"rankings":{"conns":{},"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"store_interval":""},"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*startTime":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000},"registrarc":{"rpc":{"hosts":[],"refresh_interval":"5m0s","registrars_conns":[]}},"resources":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"routes":{"conns":{},"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"rpc_conns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}},"sentrypeer":{"audience":"https://sentrypeer.com/api","client_id":"","client_secret":"","grant_type":"client_credentials","ips_url":"https://sentrypeer.com/api/ip-addresses","numbers_url":"https://sentrypeer.com/api/phone-numbers","token_url":"https://authz.sentrypeer.com/oauth/token"},"sessions":{"alterable_fields":[],"channel_sync_interval":"0","client_protocol":1,"conns":{},"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*accountsForceUsage":[],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*ips":[{"FilterIDs":null,"Tenant":""}],"*ipsAllocate":[{"FilterIDs":null,"Tenant":""}],"*ipsAuthorize":[{"FilterIDs":null,"Tenant":""}],"*ipsRelease":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*originID":[],"*rates":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"session_indexes":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5},"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","timezone":""},"stats":{"conns":{},"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[]},"suretax":{"bill_to_number":"","business_unit":"","client_number":"","client_tracking":"~*opts.*originID","customer_number":"~*req.Subject","include_local_cost":false,"orig_number":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatory_code":"03","response_group":"03","response_type":"D4","return_file_code":"0","sales_type_code":"R","tax_exemption_code_list":"","tax_included":"0","tax_situs_rule":"04","term_number":"~*req.Destination","timezone":"UTC","trans_type_code":"010101","unit_type":"00","units":"1","url":"","validation_key":"","zipcode":""},"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*coa":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Filter-Id","tag":"Filter-Id","type":"*variable","value":"~*req.CustomFilter"}],"*dmr":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Reply-Message","tag":"Reply-Message","type":"*variable","value":"~*req.DisconnectCause"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*fsa":[{"path":"*cgreq.ToR","tag":"ToR","type":"*constant","value":"*voice"},{"path":"*cgreq.PDD","tag":"PDD","type":"*composed","value":"~*req.variable_progress_mediamsec;ms"},{"path":"*cgreq.ACD","tag":"ACD","type":"*composed","value":"~*req.variable_cdr_acd;s"},{"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*opts.*originID","tag":"*originID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*cgreq.OriginHost","tag":"OriginHost","type":"*variable","value":"~*req.variable_cgr_originhost"},{"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Source","tag":"Source","type":"*composed","value":"FS_;~*req.Event-Name"},{"filters":["*string:*req.variable_process_cdr:false"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*string:*req.Caller-Dialplan:inline"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*exists:*cgreq.RequestType:"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*prepaid"},{"path":"*cgreq.Tenant","tag":"Tenant","type":"*constant","value":"cgrates.org"},{"path":"*cgreq.Category","tag":"Category","type":"*constant","value":"call"},{"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.Caller-Destination-Number"},{"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.Caller-Channel-Created-Time"},{"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.Caller-Channel-Answered-Time"},{"path":"*cgreq.Usage","tag":"Usage","type":"*composed","value":"~*req.variable_billsec;s"},{"path":"*cgreq.Route","tag":"Route","type":"*variable","value":"~*req.variable_cgr_route"},{"path":"*cgreq.Cost","tag":"Cost","type":"*constant","value":"-1.0"},{"filters":["*notempty:*req.Hangup-Cause:"],"path":"*cgreq.DisconnectCause","tag":"DisconnectCause","type":"*variable","value":"~*req.Hangup-Cause"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]},"thresholds":{"conns":{},"ees_exporter_ids":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4},"tpes":{"enabled":false},"trends":{"conns":{},"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"store_interval":"","store_uncompressed_limit":0}}`
 
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSON)
 	if err != nil {
@@ -5377,7 +5377,7 @@ func TestV1ReloadConfigFromJSONInvalidSection(t *testing.T) {
 func TestCgrCdfEventReader(t *testing.T) {
 	eCfg := &ERsCfg{
 		Enabled: false,
-		Conns:   map[string][]*DynamicStringSliceOpt{},
+		Conns:   map[string][]*DynamicConns{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -5446,7 +5446,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 func TestCgrCdfEventExporter(t *testing.T) {
 	eCfg := &EEsCfg{
 		Enabled: false,
-		Conns:   map[string][]*DynamicStringSliceOpt{},
+		Conns:   map[string][]*DynamicConns{},
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit: -1,
@@ -5469,7 +5469,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				Conns:          map[string][]*DynamicStringSliceOpt{utils.MetaEFs: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}}},
+				Conns:          map[string][]*DynamicConns{utils.MetaEFs: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)}}}},
 			},
 		},
 	}
@@ -5705,7 +5705,7 @@ func TestCGRConfigClone(t *testing.T) {
 func TestActionSConfig(t *testing.T) {
 	expected := &ActionSCfg{
 		Enabled:                  false,
-		Conns:                    map[string][]*DynamicStringSliceOpt{},
+		Conns:                    map[string][]*DynamicConns{},
 		IndexedSelects:           true,
 		Tenants:                  &[]string{},
 		StringIndexedFields:      nil,
@@ -5733,7 +5733,7 @@ func TestV1GetConfigSectionActionSJSON(t *testing.T) {
 	expected := map[string]any{
 		ActionSJSON: map[string]any{
 			utils.EnabledCfg:                false,
-			utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+			utils.ConnsCfg:                  map[string][]*DynamicConns{},
 			utils.Tenants:                   []string{},
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
@@ -5806,8 +5806,8 @@ func TestStoreCfgInDb(t *testing.T) {
 	cfg.db = db
 	cfg.attributeSCfg.Enabled = true
 
-	cfg.attributeSCfg.Conns = map[string][]*DynamicStringSliceOpt{
-		utils.MetaAccounts: {{Values: []string{"*internal"}}},
+	cfg.attributeSCfg.Conns = map[string][]*DynamicConns{
+		utils.MetaAccounts: {{ConnIDs: []string{"*internal"}}},
 	}
 	args := &SectionWithAPIOpts{
 		Sections: []string{AttributeSJSON},
@@ -5822,8 +5822,8 @@ func TestStoreCfgInDb(t *testing.T) {
 	}
 	if !reflect.DeepEqual(rcv.Enabled, utils.BoolPointer(true)) {
 		t.Errorf("Expected %v \n but received \n %v", utils.BoolPointer(true), rcv.Enabled)
-	} else if !reflect.DeepEqual(rcv.Conns[utils.MetaAccounts], []*DynamicStringSliceOpt{{Values: []string{"*internal"}}}) {
-		t.Errorf("Expected %v \n but received \n %v", []*DynamicStringSliceOpt{{Values: []string{"*internal"}}}, rcv.Conns[utils.MetaAccounts])
+	} else if !reflect.DeepEqual(rcv.Conns[utils.MetaAccounts], []*DynamicConns{{ConnIDs: []string{"*internal"}}}) {
+		t.Errorf("Expected %v \n but received \n %v", []*DynamicConns{{ConnIDs: []string{"*internal"}}}, rcv.Conns[utils.MetaAccounts])
 	}
 }
 
@@ -5836,10 +5836,10 @@ func TestSetCfgInDb(t *testing.T) {
 	cfg.db = db
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources: {{Values: []string{"*internal"}}},
-			utils.MetaStats:     {{Values: []string{"*internal"}}},
-			utils.MetaAccounts:  {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources: {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:     {{ConnIDs: []string{"*internal"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*internal"}}},
 		},
 		IndexedSelects:         true,
 		StringIndexedFields:    &[]string{"field1"},
@@ -5862,10 +5862,10 @@ func TestSetCfgInDb(t *testing.T) {
 		Config: map[string]any{
 			"attributes": &AttributeSJsonCfg{
 				Enabled: utils.BoolPointer(false),
-				Conns: map[string][]*DynamicStringSliceOpt{
-					utils.MetaResources: {{Values: []string{"*localhost"}}},
-					utils.MetaStats:     {{Values: []string{"*localhost"}}},
-					utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+				Conns: map[string][]*DynamicConns{
+					utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+					utils.MetaStats:     {{ConnIDs: []string{"*localhost"}}},
+					utils.MetaAccounts:  {{ConnIDs: []string{"*localhost"}}},
 				},
 				Indexed_selects:          utils.BoolPointer(false),
 				String_indexed_fields:    &[]string{"field2"},
@@ -5886,10 +5886,10 @@ func TestSetCfgInDb(t *testing.T) {
 	}
 	expected := &AttributeSJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources: {{Values: []string{"*localhost"}}},
-			utils.MetaStats:     {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*localhost"}}},
 		},
 		Indexed_selects:          utils.BoolPointer(false),
 		String_indexed_fields:    &[]string{"field2"},
@@ -5932,10 +5932,10 @@ func TestSetNilCfgInDb(t *testing.T) {
 	cfg.db = db
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources: {{Values: []string{"*internal"}}},
-			utils.MetaStats:     {{Values: []string{"*internal"}}},
-			utils.MetaAccounts:  {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources: {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:     {{ConnIDs: []string{"*internal"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*internal"}}},
 		},
 		IndexedSelects:         true,
 		StringIndexedFields:    &[]string{"field1"},
@@ -5988,8 +5988,8 @@ func TestAsteriskAgentLoadFromJSONCfgNil(t *testing.T) {
 func TestAsteriskAgentCloneSection(t *testing.T) {
 	astCfg := AsteriskAgentCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{"*internal"}}},
 		},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
@@ -6006,8 +6006,8 @@ func TestAsteriskAgentCloneSection(t *testing.T) {
 
 	exp := &AsteriskAgentCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{"*internal"}}},
 		},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
@@ -6113,7 +6113,7 @@ func TestConfigDBCloneSection(t *testing.T) {
 func TestFreeSwitchAgentCloneSection(t *testing.T) {
 	fsAgCfg := FsAgentCfg{
 		Enabled:             true,
-		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {{Values: []string{"*json"}}}},
+		Conns:               map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{"*json"}}}},
 		SubscribePark:       true,
 		CreateCDR:           false,
 		ExtraFields:         nil,
@@ -6124,7 +6124,7 @@ func TestFreeSwitchAgentCloneSection(t *testing.T) {
 
 	exp := &FsAgentCfg{
 		Enabled:             true,
-		Conns:               map[string][]*DynamicStringSliceOpt{utils.MetaSessionS: {{Values: []string{"*json"}}}},
+		Conns:               map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{"*json"}}}},
 		SubscribePark:       true,
 		CreateCDR:           false,
 		ExtraFields:         nil,
@@ -6595,11 +6595,11 @@ func TestConfigV1StoreCfgInDBsAdmins(t *testing.T) {
 	cfg.db = db
 
 	cfg.admS.Enabled = true
-	cfg.admS.Conns = map[string][]*DynamicStringSliceOpt{
-		utils.MetaCaches:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
-		utils.MetaActions:    {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
-		utils.MetaAttributes: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
-		utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
+	cfg.admS.Conns = map[string][]*DynamicConns{
+		utils.MetaCaches:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"}}},
+		utils.MetaActions:    {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
+		utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
+		utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"}}},
 	}
 
 	var reply string
@@ -6613,11 +6613,11 @@ func TestConfigV1StoreCfgInDBsAdmins(t *testing.T) {
 
 	expected := &AdminSJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCaches:     {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaActions:    {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaAttributes: {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaEEs:        {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCaches:     {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaActions:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 	}
 

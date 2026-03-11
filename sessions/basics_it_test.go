@@ -77,23 +77,23 @@ func TestSessionBasics(t *testing.T) {
 "sessions": {
     "enabled": true,
 	   "conns": {
-            "*accounts": [{"Tenant":"","FilterIDs":[],"Values":["*internal"]}],
-            "*rates": [{"Tenant":"","FilterIDs":[],"Values":["*internal"]}],
-            "*cdrs": [{"Tenant":"","FilterIDs":[],"Values":["*internal"]}]
+            "*accounts": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}],
+            "*rates": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}],
+            "*cdrs": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}]
         },
     "opts": { }
 },
 "cdrs": {
     "enabled": true,
     "conns": {
-    	"*accounts": [{"Values": ["*internal"]}],
-    	"*rates": [{"Values": ["*internal"]}]
+    	"*accounts": [{"ConnIDs": ["*internal"]}],
+    	"*rates": [{"ConnIDs": ["*internal"]}]
     },
 },
 "accounts": {
     "enabled": true,
 	"conns": {
-		"*rates": [{"Values": ["*internal"]}]
+		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
 },
 "admins": {
@@ -662,7 +662,7 @@ func TestSessionLifecycle(t *testing.T) {
 	"alterable_fields": ["AlterableField"],
 	"terminate_attempts": 1,
 	"conns": {
-		"*chargers": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+		"*chargers": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
 	},
 	"opts": {}
 },

@@ -52,7 +52,7 @@ func TestSessionSv1ProcessEventRates(t *testing.T) {
 "sessions": {
     "enabled": true,
     "conns": {
-    	"*rates": [{"Values": ["*localhost"]}]
+    	"*rates": [{"ConnIDs": ["*localhost"]}]
     },
 },
 "rates": {

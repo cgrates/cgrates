@@ -80,11 +80,11 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 	if enableChargers {
 		chrgConnID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
 		connMgr.AddInternalConn(chrgConnID, utils.MetaChargers, mockCh)
-		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicStringSliceOpt{
+		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
 			{
 				Tenant:    "",
 				FilterIDs: nil,
-				Values:    []string{chrgConnID},
+				ConnIDs:   []string{chrgConnID},
 			},
 		}
 	}

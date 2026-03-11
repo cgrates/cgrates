@@ -3,7 +3,7 @@
         "type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
         "level": 6,               // system level precision for floats
         "conns": {
-        	"*efs": [{"Values": ["*localhost"]}]
+        	"*efs": [{"ConnIDs": ["*localhost"]}]
         },
         "opts": {
             "kafka_conn": "unavailable_conn:9092",    // the connection trough kafka
@@ -31,7 +31,7 @@
     "admins": {
         "enabled": true,
         "conns": {
-        	"*ees": [{"Values": ["*localhost"]}]
+        	"*ees": [{"ConnIDs": ["*localhost"]}]
         },
     }
 }

@@ -70,7 +70,7 @@ func TestDiamPrometheus(t *testing.T) {
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	}
@@ -82,7 +82,7 @@ func TestDiamPrometheus(t *testing.T) {
 "prometheus_agent": {
 	"enabled": true,
 	"conns": {
-		"*stats": [{"Values": ["*localhost"]}]
+		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
 	"stat_queue_ids": ["SQ_1","SQ_2"]
 },
@@ -97,9 +97,9 @@ func TestDiamPrometheus(t *testing.T) {
 "diameter_agent": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"Values": ["*birpc_internal"]}],
-		"*stats": [{"Values": ["*internal"]}],
-		"*thresholds": [{"Values": ["*internal"]}]
+		"*sessions": [{"ConnIDs": ["*birpc_internal"]}],
+		"*stats": [{"ConnIDs": ["*internal"]}],
+		"*thresholds": [{"ConnIDs": ["*internal"]}]
 	},
 	"request_processors": [{
 		"id": "message",

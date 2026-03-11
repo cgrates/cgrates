@@ -2199,7 +2199,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
+	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
@@ -2268,7 +2268,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
+	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
@@ -2372,7 +2372,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
+	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)

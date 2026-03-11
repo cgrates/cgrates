@@ -36,7 +36,7 @@
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 
@@ -113,7 +113,7 @@
 "admins": {
 	"enabled": true,
 	"conns": {
-		"*ees": [{"Values": ["*localhost"]}]
+		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 

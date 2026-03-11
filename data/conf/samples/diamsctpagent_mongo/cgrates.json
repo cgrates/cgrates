@@ -56,7 +56,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -68,28 +68,28 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	]
 			},
@@ -100,7 +100,7 @@
 	"listen_net":"sctp",
 	"listen": "127.0.0.1:3869",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"conns": {
-		"*sessions": [{"Values": ["*birpc_internal"]}]
+		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
 	},
 	"rar_template": "*rar",
 },

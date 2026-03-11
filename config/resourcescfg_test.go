@@ -29,8 +29,8 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 		Store_interval:           utils.StringPointer("2s"),
 		String_indexed_fields:    &[]string{"*req.index1"},
@@ -44,8 +44,8 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:        true,
 		IndexedSelects: true,
 		StoreInterval:  2 * time.Second,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
 		},
 		StringIndexedFields:    &[]string{"*req.index1"},
 		PrefixIndexedFields:    &[]string{"*req.index1"},
@@ -138,7 +138,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.StoreIntervalCfg:          utils.EmptyString,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{},
@@ -163,7 +163,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		"resources": {								
 			"enabled": true,						
 			"store_interval": "7m",					
-			"conns": {"*thresholds": [{"Values": ["*internal", "*conn1"]}]},					
+			"conns": {"*thresholds": [{"ConnIDs": ["*internal", "*conn1"]}]},					
 			"indexed_selects":true,		
             "string_indexed_fields": ["*req.index1"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
@@ -176,8 +176,8 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.StoreIntervalCfg: "7m0s",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 		utils.IndexedSelectsCfg:         true,
 		utils.StringIndexedFieldsCfg:    []string{"*req.index1"},
@@ -204,8 +204,8 @@ func TestResourceSConfigClone(t *testing.T) {
 		Enabled:        true,
 		IndexedSelects: true,
 		StoreInterval:  2 * time.Second,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}}},
 		},
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
@@ -217,7 +217,7 @@ func TestResourceSConfigClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaThresholds][0].Values[1] = ""; ban.Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaThresholds][0].ConnIDs[1] = ""; ban.Conns[utils.MetaThresholds][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
@@ -237,8 +237,8 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 	v1 := &ResourceSConfig{
 		Enabled:        false,
 		IndexedSelects: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		StoreInterval:       1 * time.Second,
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -267,8 +267,8 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 	v2 := &ResourceSConfig{
 		Enabled:        true,
 		IndexedSelects: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{"*birpc"}}},
 		},
 		StoreInterval:       2 * time.Second,
 		StringIndexedFields: &[]string{"*req.index11"},
@@ -297,8 +297,8 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 	expected := &ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{"*birpc"}}},
 		},
 		Store_interval:        utils.StringPointer("2s"),
 		String_indexed_fields: &[]string{"*req.index11"},
@@ -343,8 +343,8 @@ func TestResourcesCloneSection(t *testing.T) {
 	rsrCfg := &ResourceSConfig{
 		Enabled:        false,
 		IndexedSelects: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		StoreInterval:       1 * time.Second,
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -373,8 +373,8 @@ func TestResourcesCloneSection(t *testing.T) {
 	exp := &ResourceSConfig{
 		Enabled:        false,
 		IndexedSelects: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		StoreInterval:       1 * time.Second,
 		StringIndexedFields: &[]string{"*req.index1"},

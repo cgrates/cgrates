@@ -33,15 +33,15 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
 		DictionariesPath: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		CEApplications:   &[]string{"Base"},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 		},
 		OriginHost:         utils.StringPointer("CGR-DA"),
@@ -65,15 +65,15 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		CEApplications:   []string{"Base"},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
 			},
 		},
 
@@ -154,9 +154,9 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
 		"ce_applications": ["Base"],
 		"conns": {
-			"*sessions": [{"Values":["*birpc_internal","*internal","*conn1"]}],
-			"*stats": [{"Values":["*birpc_internal","*internal","*conn1"]}],
-			"*thresholds": [{"Values":["*birpc_internal","*internal","*conn1"]}]
+			"*sessions": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
+			"*stats": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
+			"*thresholds": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}]
 		},
 		"origin_host": "CGR-DA",
 		"origin_realm": "cgrates.org",
@@ -191,10 +191,10 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.OriginRealmCfg:      "cgrates.org",
 		utils.ProductNameCfg:      "CGRateS",
 		utils.RARTemplateCfg:      "",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
-			utils.MetaStats:      {{Values: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
-			utils.MetaThresholds: {{Values: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
 		},
 		utils.ConnStatusStatQueueIDsCfg:  []string{},
 		utils.ConnStatusThresholdIDsCfg:  []string{},
@@ -258,8 +258,8 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.OriginRealmCfg:      "cgrates.org",
 		utils.ProductNameCfg:      "CGRateS",
 		utils.RARTemplateCfg:      "",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{rpcclient.BiRPCInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 		},
 		utils.ConnStatusStatQueueIDsCfg:  []string{},
 		utils.ConnStatusThresholdIDsCfg:  []string{},
@@ -281,9 +281,9 @@ func TestDiameterAgentCfgClone(t *testing.T) {
 		ListenNet:        "tcp",
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
 			},
 		},
 		OriginHost:       "CGR-DA",
@@ -305,7 +305,7 @@ func TestDiameterAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].ConnIDs[1] = ""; ban.Conns[utils.MetaSessionS][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "cgrates" {
@@ -321,15 +321,15 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 		ListenNet:        "tcp",
 		Listen:           "localhost:8080",
 		DictionariesPath: "/path/",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		OriginHost:              "originHost",
@@ -351,15 +351,15 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 		ListenNet:        "udp",
 		Listen:           "localhost:8037",
 		DictionariesPath: "/path/different",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*birpc_internal"}},
+				{ConnIDs: []string{"*birpc_internal"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		CEApplications:          []string{"Base"},
@@ -387,15 +387,15 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 		Listen:           utils.StringPointer("localhost:8037"),
 		DictionariesPath: utils.StringPointer("/path/different"),
 		CEApplications:   utils.SliceStringPointer([]string{"Base"}),
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*birpc_internal"}},
+				{ConnIDs: []string{"*birpc_internal"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		OriginHost:              utils.StringPointer("diffOriginHost"),
@@ -439,9 +439,9 @@ func TestDiameterAgentCloneSection(t *testing.T) {
 		ListenNet:        "tcp",
 		Listen:           "localhost:8080",
 		DictionariesPath: "/path/",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		OriginHost:        "originHost",
@@ -460,9 +460,9 @@ func TestDiameterAgentCloneSection(t *testing.T) {
 		ListenNet:        "tcp",
 		Listen:           "localhost:8080",
 		DictionariesPath: "/path/",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		OriginHost:        "originHost",

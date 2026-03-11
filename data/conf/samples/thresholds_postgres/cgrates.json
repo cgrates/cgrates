@@ -33,7 +33,7 @@
     "actions": {
         "enabled": true,
         "conns": {
-        	"*thresholds": [{"Values": ["*internal"]}]
+        	"*thresholds": [{"ConnIDs": ["*internal"]}]
         },
     },
 
@@ -41,7 +41,7 @@
         "enabled": true,
         "store_interval": "-1",
         "conns": {
-        	"*actions": [{"Values": ["*internal"]}]
+        	"*actions": [{"ConnIDs": ["*internal"]}]
         },
     },
   

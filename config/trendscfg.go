@@ -30,7 +30,7 @@ type TrendSCfg struct {
 	Enabled                bool
 	StoreInterval          time.Duration
 	StoreUncompressedLimit int
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	ScheduledIDs           map[string][]string
 	EEsExporterIDs         []string
 }
@@ -98,7 +98,7 @@ func (t *TrendSCfg) Clone() (cln *TrendSCfg) {
 		Enabled:                t.Enabled,
 		StoreInterval:          t.StoreInterval,
 		StoreUncompressedLimit: t.StoreUncompressedLimit,
-		Conns:                  CloneConnsOpt(t.Conns),
+		Conns:                  CloneConnsMap(t.Conns),
 	}
 	if t.ScheduledIDs != nil {
 		cln.ScheduledIDs = make(map[string][]string)
@@ -116,7 +116,7 @@ type TrendSJsonCfg struct {
 	Enabled                  *bool
 	Store_interval           *string
 	Store_uncompressed_limit *int
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	Scheduled_ids            map[string][]string
 	Ees_exporter_ids         *[]string
 }
@@ -134,7 +134,7 @@ func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
 	if v1.StoreUncompressedLimit != v2.StoreUncompressedLimit {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)

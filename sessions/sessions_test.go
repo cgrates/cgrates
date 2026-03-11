@@ -1923,8 +1923,8 @@ func (c clMock) Call(m string, a any, r any) error {
 }
 func TestInitSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}},
+	cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}},
 	}
 	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- clMock(func(_ string, args any, reply any) error {

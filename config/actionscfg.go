@@ -41,7 +41,7 @@ type ActionsOpts struct {
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled                  bool
-	Conns                    map[string][]*DynamicStringSliceOpt
+	Conns                    map[string][]*DynamicConns
 	Tenants                  *[]string
 	IndexedSelects           bool
 	StringIndexedFields      *[]string
@@ -193,7 +193,7 @@ func (actOpts *ActionsOpts) Clone() *ActionsOpts {
 func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	cln = &ActionSCfg{
 		Enabled:        acS.Enabled,
-		Conns:          CloneConnsOpt(acS.Conns),
+		Conns:          CloneConnsMap(acS.Conns),
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
 		Opts:           acS.Opts.Clone(),
@@ -232,7 +232,7 @@ type ActionsOptsJson struct {
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled                   *bool
-	Conns                     map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                     map[string][]*DynamicConns `json:"conns,omitempty"`
 	Tenants                   *[]string
 	Indexed_selects           *bool
 	String_indexed_fields     *[]string
@@ -268,7 +268,7 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.Tenants != v2.Tenants {

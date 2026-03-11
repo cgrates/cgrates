@@ -23,7 +23,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -41,8 +41,8 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}],
-		"*rates": [{"Values": ["*internal"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}],
+		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -54,35 +54,35 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},
@@ -92,7 +92,7 @@
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"Values": ["*localhost"]}]
+		"*sessions": [{"ConnIDs": ["*localhost"]}]
 	},
 	"readers": [
 		{

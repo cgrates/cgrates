@@ -28,9 +28,9 @@
 "actions": {
     "enabled": true,
     "conns": {
-    	"*thresholds": [{"Values": ["*internal"]}],
-    	"*stats": [{"Values": ["*internal"]}],
-    	"*accounts": [{"Values": ["*internal"]}]
+    	"*thresholds": [{"ConnIDs": ["*internal"]}],
+    	"*stats": [{"ConnIDs": ["*internal"]}],
+    	"*accounts": [{"ConnIDs": ["*internal"]}]
     },
 },
 
@@ -42,7 +42,7 @@
     "enabled": true,
     "store_interval": "-1",
     "conns": {
-    	"*thresholds": [{"Values": ["*internal"]}]
+    	"*thresholds": [{"ConnIDs": ["*internal"]}]
     },
 },
 
@@ -50,7 +50,7 @@
     "enabled": true,
     "store_interval": "-1",
     "conns": {
-    	"*actions": [{"Values": ["*internal"]}]
+    	"*actions": [{"ConnIDs": ["*internal"]}]
     },
 },
 

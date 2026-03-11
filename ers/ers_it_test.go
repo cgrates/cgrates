@@ -445,7 +445,7 @@ func TestERsProcessEvent3(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -472,7 +472,7 @@ func TestERsProcessEvent4(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -499,7 +499,7 @@ func TestERsProcessEvent5(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -526,7 +526,7 @@ func TestERsProcessEvent6(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -552,7 +552,7 @@ func TestERsProcessEvent7(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -578,7 +578,7 @@ func TestERsProcessEvent8(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -605,7 +605,7 @@ func TestERsProcessEvent9(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -632,7 +632,7 @@ func TestERsProcessEvent10(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
@@ -675,7 +675,7 @@ func TestERsProcessEvent11(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
+	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	fltrS := &engine.FilterS{}
 	testMockClient := &testMockClients{
 		calls: map[string]func(ctx *context.Context, args, reply any) error{

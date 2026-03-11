@@ -56,7 +56,7 @@ type CdrsCfg struct {
 	Enabled          bool             // Enable CDR Server service
 	ExtraFields      utils.RSRParsers // Extra fields to store in CDRs
 	SMCostRetries    int
-	Conns            map[string][]*DynamicStringSliceOpt
+	Conns            map[string][]*DynamicConns
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 	Opts             *CdrsOpts
 }
@@ -277,7 +277,7 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 		Enabled:       cdrscfg.Enabled,
 		ExtraFields:   cdrscfg.ExtraFields.Clone(),
 		SMCostRetries: cdrscfg.SMCostRetries,
-		Conns:         CloneConnsOpt(cdrscfg.Conns),
+		Conns:         CloneConnsMap(cdrscfg.Conns),
 		Opts:          cdrscfg.Opts.Clone(),
 	}
 	if cdrscfg.OnlineCDRExports != nil {
@@ -305,7 +305,7 @@ type CdrsJsonCfg struct {
 	Enabled              *bool
 	Extra_fields         *[]string
 	Session_cost_retries *int
-	Conns                map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`
 	Online_cdr_exports   *[]string
 	Opts                 *CdrsOptsJson
 }
@@ -362,7 +362,7 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	if v1.SMCostRetries != v2.SMCostRetries {
 		d.Session_cost_retries = utils.IntPointer(v2.SMCostRetries)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.OnlineCDRExports, v2.OnlineCDRExports) {

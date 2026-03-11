@@ -17,11 +17,11 @@
 	"cdrs": {
 		"enabled": true,
 		"conns": {
-			"*attributes": [{"Values": ["*internal"]}],
-			"*chargers": [{"Values": ["conn1"]}],
-			"*rates": [{"Values": ["conn1"]}],
-			"*stats": [{"Values": ["conn1"]}],
-			"*thresholds": [{"Values": ["conn1"]}]
+			"*attributes": [{"ConnIDs": ["*internal"]}],
+			"*chargers": [{"ConnIDs": ["conn1"]}],
+			"*rates": [{"ConnIDs": ["conn1"]}],
+			"*stats": [{"ConnIDs": ["conn1"]}],
+			"*thresholds": [{"ConnIDs": ["conn1"]}]
 		},
 	},
 
@@ -33,7 +33,7 @@
 		"enabled": true,
 		"store_interval": "1s",
 		"conns": {
-			"*thresholds": [{"Values": ["*internal"]}]
+			"*thresholds": [{"ConnIDs": ["*internal"]}]
 		},
 	},
 
@@ -45,7 +45,7 @@
 	"chargers": {
 		"enabled": true,
 		"conns": {
-			"*attributes": [{"Values": ["*internal"]}]
+			"*attributes": [{"ConnIDs": ["*internal"]}]
 		},
 	},
 

@@ -26,7 +26,7 @@
     "admins": {
         "enabled": true,
         "conns": {
-        	"*ees": [{"Values": ["*localhost"]}]
+        	"*ees": [{"ConnIDs": ["*localhost"]}]
         },
     },
 }

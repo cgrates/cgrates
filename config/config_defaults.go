@@ -86,7 +86,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 	},			
 	"shutdown_timeout": "1s"	// the duration to wait until all services are stopped
@@ -318,34 +318,34 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*trends": [
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// "*rankings": [
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 	}	
 	},
@@ -361,54 +361,54 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*attributes": [		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EventExporter
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [	// connections to RateS
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// "*accounts": [	// connections to AccountS
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},	
@@ -495,27 +495,27 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connection for routing processed and invalid messages through EEs
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// "*thresholds": [	// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},	
@@ -641,7 +641,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},	
@@ -657,7 +657,7 @@ const CGRATES_CFG_JSON = `
 			"concurrent_requests": 0,				// maximum simultaneous requests to process, 0 for unlimited
 			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"conns": {
-					"*efs": [{"Values": ["*internal"]}]	// connID to efs service
+					"*efs": [{"ConnIDs": ["*internal"]}]	// connID to efs service
 					},		
 			"filters": [],						// limit parsing based on the filters
 			"flags": [],						// flags to influence the event processing
@@ -1075,77 +1075,77 @@ const CGRATES_CFG_JSON = `
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*accounts": [		// connections to AccountS
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*rates": [		// connections to RateS
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*routes": [		// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*stats": [		// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*ips": [	// connections to IPs for monitoring ip usage <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*chargers": [	// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*cdrs": [	// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*replication": [	// replicate sessions towards these session services
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ]
 	}
@@ -1155,7 +1155,7 @@ const CGRATES_CFG_JSON = `
 "asterisk_agent": {
 	"enabled": false,			// starts the Asterisk agent: <true|false>
 	"conns": {
-		"*sessions":[{"Values":["*birpc_internal"]}]
+		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},			
 	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[			// instantiate connections to multiple Asterisk servers
@@ -1174,7 +1174,7 @@ const CGRATES_CFG_JSON = `
 "freeswitch_agent": {
 	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
 	"conns": {
-		"*sessions":[{"Values":["*birpc_internal"]}]
+		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},
 	"subscribe_park": true,				// subscribe via fsock to receive park events
 	"create_cdr": false,				// creates CDR out of events and sends them to CDRS component
@@ -1200,7 +1200,7 @@ const CGRATES_CFG_JSON = `
 "kamailio_agent": {
 	"enabled": false,			// starts Kamailio agent: <true|false>
 	"conns": {
-		"*sessions":[{"Values":["*birpc_internal"]}]
+		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"timezone": "",				// timezone of the Kamailio server
@@ -1221,19 +1221,19 @@ const CGRATES_CFG_JSON = `
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 	"conns": {
-		"*sessions":[{"Values":["*birpc_internal"]}]
+		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
 		 // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
 	     // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	},
@@ -1279,19 +1279,19 @@ const CGRATES_CFG_JSON = `
 	},
 	"requests_cache_key": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
 	"conns": {
-		"*sessions":[{"Values":["*internal"]}]
+		"*sessions":[{"ConnIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
 		 // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
 	     // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	},	
@@ -1313,19 +1313,19 @@ const CGRATES_CFG_JSON = `
 		}
 	],
 	"conns": {
-		"*sessions":[{"Values":["*birpc_internal"]}]
+		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
 		 // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
 	     // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	},
@@ -1342,28 +1342,28 @@ const CGRATES_CFG_JSON = `
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*caches": [		// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*cores": [		// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	// "*stats": [	// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
 	// 		"Tenant": "",
 	// 		"FilterIDs": [],
-	// 		"Values": []
+	// 		"ConnIDs": []
 	// 	}
 	// ],
 	},				
@@ -1379,21 +1379,21 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [		// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [		// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},					
@@ -1444,7 +1444,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},			
@@ -1466,7 +1466,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},		
@@ -1547,14 +1547,14 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},		
@@ -1607,14 +1607,14 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EEs to sent threshold events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},				
@@ -1647,21 +1647,21 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>	
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},			
@@ -1678,21 +1678,21 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},		
@@ -1715,35 +1715,35 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [		// connections to RateS
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [	// connections to AccountS
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},		
@@ -2194,26 +2194,26 @@ const CGRATES_CFG_JSON = `
 "admins": {
 	"enabled": false,
 	"conns": {
-		"*caches": [{"Values": ["*internal"]}],
+		"*caches": [{"ConnIDs": ["*internal"]}],
 		// "*actions": [	// connections to ActionS for reloads
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*attributes": [		// connections to AttributeS for CDRExporter
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EEs
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	}
@@ -2282,19 +2282,19 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:5060",	// address where to listen for SIP requests <x.y.z.y:1234>
 	"listen_net": "udp",		// network to listen on <udp|tcp|tcp-tls>
 	"conns": {
-		"*sessions":[{"Values":["*internal"]}]
+		"*sessions":[{"ConnIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
 		 // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
 	     // 		"Tenant": "",
 	     // 		"FilterIDs": [],
-	     // 		"Values": []
+	     // 		"ConnIDs": []
 	     // 	}
 	     // ],
 	},
@@ -2306,7 +2306,7 @@ const CGRATES_CFG_JSON = `
 "janus_agent": {
 	"enabled": false,				// enables the Janus agent: <true|false>
 	"url": "/janus",
-	"conns": {"*sessions": [{"values": ["*internal"]}]},
+	"conns": {"*sessions": [{"ConnIDs": ["*internal"]}]},
 	"janus_conns": [{				// instantiate connections to multiple Janus Servers
 		"address": "127.0.0.1:8088",		// janus API address 
 		"type": "*ws",				// type of the transport to interact via janus API
@@ -2500,42 +2500,42 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [	// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*admins": [		// connections to AdminS for *dynamic actions: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},		
@@ -2582,21 +2582,21 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
-		// 		"Values": ["*internal"]
+		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
 	},			

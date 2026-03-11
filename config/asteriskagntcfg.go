@@ -95,7 +95,7 @@ func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 // AsteriskAgentCfg the config section that describes the Asterisk Agent
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	Conns         map[string][]*DynamicStringSliceOpt
+	Conns         map[string][]*DynamicConns
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -161,7 +161,7 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 	cln = &AsteriskAgentCfg{
 		Enabled:   aCfg.Enabled,
 		CreateCDR: aCfg.CreateCDR,
-		Conns:     CloneConnsOpt(aCfg.Conns),
+		Conns:     CloneConnsMap(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))
@@ -184,7 +184,7 @@ type AstConnJsonCfg struct {
 
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
-	Conns          map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns          map[string][]*DynamicConns `json:"conns,omitempty"`
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
@@ -240,7 +240,7 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.CreateCDR != v2.CreateCDR {

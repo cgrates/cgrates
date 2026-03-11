@@ -318,7 +318,7 @@ func TestInternalDBGetSetSection(t *testing.T) {
 			input: &config.CoreSJsonCfg{
 				Caps:             utils.IntPointer(100),
 				Shutdown_timeout: utils.StringPointer("1s"),
-				Conns:            map[string][]*config.DynamicStringSliceOpt{utils.MetaEEs: {{Values: []string{"conn1", "conn2"}}}},
+				Conns:            map[string][]*config.DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"conn1", "conn2"}}}},
 			},
 			output: &config.CoreSJsonCfg{},
 		},
@@ -351,10 +351,10 @@ func TestInternalDBGetSetSection(t *testing.T) {
 			name:    "FilterSJsonCfg",
 			section: config.FilterSJSON,
 			input: &config.FilterSJsonCfg{
-				Conns: map[string][]*config.DynamicStringSliceOpt{
-					utils.MetaStats:     {{Values: []string{"*internal"}}},
-					utils.MetaResources: {{Values: []string{"*localhost"}}},
-					utils.MetaAccounts:  {{Values: []string{"*internal", "*localhost"}}},
+				Conns: map[string][]*config.DynamicConns{
+					utils.MetaStats:     {{ConnIDs: []string{"*internal"}}},
+					utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+					utils.MetaAccounts:  {{ConnIDs: []string{"*internal", "*localhost"}}},
 				},
 			},
 			output: &config.FilterSJsonCfg{},

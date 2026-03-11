@@ -814,9 +814,9 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{
-			Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+			ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 		},
 	}
 
@@ -991,9 +991,9 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicStringSliceOpt{
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{
-			Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+			ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 		},
 	}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)

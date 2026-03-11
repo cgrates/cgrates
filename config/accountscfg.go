@@ -43,7 +43,7 @@ type AccountsOpts struct {
 // AccountSCfg is the configuration of ActionS
 type AccountSCfg struct {
 	Enabled                bool
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	IndexedSelects         bool
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
@@ -197,7 +197,7 @@ func (acS AccountSCfg) CloneSection() Section { return acS.Clone() }
 func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 	cln = &AccountSCfg{
 		Enabled:        acS.Enabled,
-		Conns:          CloneConnsOpt(acS.Conns),
+		Conns:          CloneConnsMap(acS.Conns),
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
 		MaxIterations:  acS.MaxIterations,
@@ -232,7 +232,7 @@ type AccountsOptsJson struct {
 type AccountSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
@@ -267,7 +267,7 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {

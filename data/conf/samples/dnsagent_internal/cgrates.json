@@ -19,7 +19,7 @@
 "schedulers": {
 	"enabled": true,
 	"conns": {
-		"*cdrs": [{"Values": ["*internal"]}]
+		"*cdrs": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -30,35 +30,35 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*routes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	]
 			},
@@ -98,7 +98,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*rates": [{"Values": ["*internal"]}]
+		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -140,7 +140,7 @@
 		}
 	],
 	"conns": {
-		"*sessions": [{"Values": ["*localhost"]}]
+		"*sessions": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 

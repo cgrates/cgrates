@@ -30,10 +30,10 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:   utils.BoolPointer(true),
 		Listen:    utils.StringPointer("127.0.0.1:5060"),
 		ListenNet: utils.StringPointer("udp"),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		Timezone:            utils.StringPointer("local"),
 		RetransmissionTimer: utils.StringPointer("1"),
@@ -59,10 +59,10 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:   true,
 		Listen:    "127.0.0.1:5060",
 		ListenNet: "udp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
 		},
 		Timezone:            "local",
 		RetransmissionTimer: 1,
@@ -162,9 +162,9 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		"listen": "127.0.0.1:5060",
 		"listen_net": "udp",
 		"conns": {
-			"*sessions": [{"Values": ["*internal:*sessions"]}],
-			"*stats": [{"Values": ["*internal:*stats"]}],
-			"*thresholds": [{"Values": ["*internal:*thresholds"]}]
+			"*sessions": [{"ConnIDs": ["*internal:*sessions"]}],
+			"*stats": [{"ConnIDs": ["*internal:*stats"]}],
+			"*thresholds": [{"ConnIDs": ["*internal:*thresholds"]}]
 		},
 		"timezone": "",
         "retransmission_timer": "2s",
@@ -176,10 +176,10 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:   false,
 		utils.ListenCfg:    "127.0.0.1:5060",
 		utils.ListenNetCfg: "udp",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: "2s",
@@ -199,9 +199,9 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 			"listen": "127.0.0.1:5060",
 			"listen_net": "udp",
 			"conns": {
-				"*sessions": [{"Values": ["*internal"]}],
-				"*stats": [{"Values": ["*internal"]}],
-				"*thresholds": [{"Values": ["*internal"]}]
+				"*sessions": [{"ConnIDs": ["*internal"]}],
+				"*stats": [{"ConnIDs": ["*internal"]}],
+				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
 			"timezone": "UTC",
             "retransmission_timer": "5s",
@@ -234,10 +234,10 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:   false,
 		utils.ListenCfg:    "127.0.0.1:5060",
 		utils.ListenNetCfg: "udp",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.TimezoneCfg:            "UTC",
 		utils.RetransmissionTimerCfg: "5s",
@@ -272,9 +272,9 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		"enabled": true,
 		"listen": "",
 		"conns": {
-			"*sessions": [{"Values": ["*conn1", "*conn2"]}],
-			"*stats": [{"Values": ["*conn1", "*conn2"]}],
-			"*thresholds": [{"Values": ["*conn1", "*conn2"]}]
+			"*sessions": [{"ConnIDs": ["*conn1", "*conn2"]}],
+			"*stats": [{"ConnIDs": ["*conn1", "*conn2"]}],
+			"*thresholds": [{"ConnIDs": ["*conn1", "*conn2"]}]
 		},
 		"request_processors": [
          {
@@ -296,10 +296,10 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		utils.EnabledCfg:   true,
 		utils.ListenCfg:    "",
 		utils.ListenNetCfg: "udp",
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*conn1", "*conn2"}}},
-			utils.MetaStats:      {{Values: []string{"*conn1", "*conn2"}}},
-			utils.MetaThresholds: {{Values: []string{"*conn1", "*conn2"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*conn1", "*conn2"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*conn1", "*conn2"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*conn1", "*conn2"}}},
 		},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: "1s",
@@ -329,9 +329,9 @@ func TestSIPAgentCfgClone(t *testing.T) {
 		Enabled:   true,
 		Listen:    "127.0.0.1:5060",
 		ListenNet: "udp",
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
 			},
 		},
 		Timezone:            "UTC",
@@ -362,7 +362,7 @@ func TestSIPAgentCfgClone(t *testing.T) {
 	if rcv.RequestProcessors[0].ID = ""; sa.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaSessionS][0].Values[0] = ""; sa.Conns[utils.MetaSessionS][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+	if rcv.Conns[utils.MetaSessionS][0].ConnIDs[0] = ""; sa.Conns[utils.MetaSessionS][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
@@ -374,10 +374,10 @@ func TestDiffSIPAgentJsonCfg(t *testing.T) {
 		Enabled:   false,
 		Listen:    "localhost:8080",
 		ListenNet: "tcp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		Timezone:            "UTC",
 		RetransmissionTimer: 1 * time.Second,
@@ -392,10 +392,10 @@ func TestDiffSIPAgentJsonCfg(t *testing.T) {
 		Enabled:   true,
 		Listen:    "localhost:8037",
 		ListenNet: "udp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		Timezone:            "EEST",
 		RetransmissionTimer: 2 * time.Second,
@@ -406,10 +406,10 @@ func TestDiffSIPAgentJsonCfg(t *testing.T) {
 		Enabled:   utils.BoolPointer(true),
 		Listen:    utils.StringPointer("localhost:8037"),
 		ListenNet: utils.StringPointer("udp"),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		Timezone:            utils.StringPointer("EEST"),
 		RetransmissionTimer: utils.StringPointer("2s"),
@@ -436,10 +436,10 @@ func TestSipAgentCloneSection(t *testing.T) {
 		Enabled:   false,
 		Listen:    "localhost:8080",
 		ListenNet: "tcp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		Timezone:            "UTC",
 		RetransmissionTimer: 1 * time.Second,
@@ -454,10 +454,10 @@ func TestSipAgentCloneSection(t *testing.T) {
 		Enabled:   false,
 		Listen:    "localhost:8080",
 		ListenNet: "tcp",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		Timezone:            "UTC",
 		RetransmissionTimer: 1 * time.Second,

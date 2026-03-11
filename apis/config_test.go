@@ -78,7 +78,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 	err = rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			utils.ConnsCfg:             map[string][]*config.DynamicStringSliceOpt{},
+			utils.ConnsCfg:             map[string][]*config.DynamicConns{},
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
@@ -114,7 +114,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 		Tenant: utils.CGRateSorg,
 		Config: map[string]any{
 			"attributes": map[string]any{
-				utils.ConnsCfg:             map[string][]*config.DynamicStringSliceOpt{},
+				utils.ConnsCfg:             map[string][]*config.DynamicConns{},
 				"enabled":                  true,
 				"indexed_selects":          false,
 				"nested_fields":            false,
@@ -142,7 +142,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			utils.ConnsCfg:             map[string][]*config.DynamicStringSliceOpt{},
+			utils.ConnsCfg:             map[string][]*config.DynamicConns{},
 			"enabled":                  false,
 			"indexed_selects":          true,
 			"nested_fields":            false,
@@ -180,7 +180,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	}
 	expectedGetRld := map[string]any{
 		"attributes": map[string]any{
-			utils.ConnsCfg:             map[string][]*config.DynamicStringSliceOpt{},
+			utils.ConnsCfg:             map[string][]*config.DynamicConns{},
 			"enabled":                  false,
 			"indexed_selects":          true,
 			"nested_fields":            false,

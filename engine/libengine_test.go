@@ -367,8 +367,8 @@ func TestDynamicFiltersConns2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
-	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 	}
 
 	mockAccount := &utils.Account{
@@ -421,8 +421,8 @@ func TestDynamicFiltersConns2(t *testing.T) {
 	}
 
 	mockAccount.Balances["Concrete1"].Units = utils.NewDecimal(10, 0)
-	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.MetaLocalHost}, FilterIDs: []string{"*gte:~*accounts.1001.Balances[Concrete1].Units:20"}},
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.MetaLocalHost}, FilterIDs: []string{"*gte:~*accounts.1001.Balances[Concrete1].Units:20"}},
 	}
 
 	got2, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)

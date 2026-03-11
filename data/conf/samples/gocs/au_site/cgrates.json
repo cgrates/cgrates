@@ -77,14 +77,14 @@
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*chargers": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ]
             },
@@ -93,7 +93,7 @@
   "admins": {
     "enabled": true,
     "conns": {
-    	"*caches": [{"Values": ["conn1"]}]
+    	"*caches": [{"ConnIDs": ["conn1"]}]
     },
   }
 }

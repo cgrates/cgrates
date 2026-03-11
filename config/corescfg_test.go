@@ -89,7 +89,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		utils.CapsStrategyCfg:      utils.MetaBusy,
 		utils.CapsStatsIntervalCfg: "0",
 		utils.ShutdownTimeoutCfg:   "0",
-		utils.ConnsCfg:             (map[string][]*DynamicStringSliceOpt)(nil),
+		utils.ConnsCfg:             (map[string][]*DynamicConns)(nil),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -190,25 +190,25 @@ func TestDiffCoreSJsonCfgEEsConnsNotEqual(t *testing.T) {
 	var d *CoreSJsonCfg
 
 	v1 := &CoreSCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaEEs: {
-				{Values: []string{"sltest1", "sltest2"}},
+				{ConnIDs: []string{"sltest1", "sltest2"}},
 			},
 		},
 	}
 
 	v2 := &CoreSCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaEEs: {
-				{Values: []string{"sltest3", "sltest4"}},
+				{ConnIDs: []string{"sltest3", "sltest4"}},
 			},
 		},
 	}
 
 	expected := &CoreSJsonCfg{
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaEEs: {
-				{Values: []string{"sltest3", "sltest4"}},
+				{ConnIDs: []string{"sltest3", "sltest4"}},
 			},
 		},
 	}

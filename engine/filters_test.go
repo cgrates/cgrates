@@ -2652,8 +2652,8 @@ func TestFilterTrends(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().Conns[utils.MetaTrends] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}},
+	cfg.FilterSCfg().Conns[utils.MetaTrends] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}},
 	}
 	initDP := utils.MapStorage{}
 	fS := NewFilterS(cfg, cM, nil)
@@ -2718,8 +2718,8 @@ func TestFilterRanking(t *testing.T) {
 	}
 
 	rankCfg := config.NewDefaultCGRConfig()
-	rankCfg.FilterSCfg().Conns[utils.MetaRankings] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}},
+	rankCfg.FilterSCfg().Conns[utils.MetaRankings] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}},
 	}
 	initDP := utils.MapStorage{}
 	fS := NewFilterS(rankCfg, cM, nil)
