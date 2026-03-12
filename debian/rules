@@ -36,6 +36,10 @@ override_dh_auto_test:
 override_dh_auto_install:
 	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_install -- --no-source
 
+override_dh_installsystemd:
+	dh_installsystemd
+	dh_installsystemd --name=cgrates-backup
+
 execute_after_dh_install:
 	tar -xavf debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz \
 	    -C debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/

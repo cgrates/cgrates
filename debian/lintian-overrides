@@ -16,3 +16,6 @@ spelling-error-in-binary *
 # Unported python2 scripts
 unusual-interpreter /usr/bin/python [usr/share/cgrates/*/migrator/*.py]
 
+# Timer unit, no init.d
+package-supports-alternative-init-but-no-init.d-script [lib/systemd/system/cgrates-backup.service]
+

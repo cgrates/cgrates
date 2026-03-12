@@ -11,3 +11,4 @@ var/spool/cgrates/failed_posts
 var/spool/cgrates/loader/in
 var/spool/cgrates/loader/out
 var/spool/cgrates/tpe
+var/backups/cgrates
