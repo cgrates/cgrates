@@ -1,0 +1,2 @@
+BACKUP_DIR=/var/backups/cgrates
+BACKUP_KEEP=3

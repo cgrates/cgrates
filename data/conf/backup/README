@@ -1,0 +1,11 @@
+Backs up internal DB and spool to /var/backups/cgrates/.
+
+Run manually:
+    sudo -u cgrates /usr/share/cgrates/scripts/cgrates-backup
+
+Run daily via cron:
+    echo '0 2 * * * cgrates /usr/share/cgrates/scripts/cgrates-backup' | sudo tee /etc/cron.d/cgrates-backup
+
+Configuration defaults are in cgrates-backup in this directory.
+Copy to /etc/default/cgrates-backup to override:
+    sudo cp /usr/share/cgrates/conf/backup/cgrates-backup /etc/default/cgrates-backup

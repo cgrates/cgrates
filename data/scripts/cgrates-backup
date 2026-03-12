@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+BACKUP_DIR=/var/backups/cgrates
+BACKUP_KEEP=3
+
+[ -f /etc/default/cgrates-backup ] && . /etc/default/cgrates-backup
+
+trap 'logger -t cgrates-backup "failed (exit=$?)"' EXIT
+
+dest="${BACKUP_DIR}/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$dest"
+
+cp -a /var/lib/cgrates/internal_db/datadb/ "$dest/datadb/"
+cp -a /var/lib/cgrates/internal_db/stordb/ "$dest/stordb/"
+cp -a /var/spool/cgrates/ "$dest/spool/" 2>/dev/null || true
+
+# rotate old backups
+find "$BACKUP_DIR" -maxdepth 1 -mindepth 1 -type d \
+    | sort -r \
+    | tail -n +$((BACKUP_KEEP + 1)) \
+    | while IFS= read -r old; do
+        rm -rf "$old"
+    done
+
+trap - EXIT
+logger -t cgrates-backup "completed: $dest"
