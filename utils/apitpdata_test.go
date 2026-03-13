@@ -204,6 +204,109 @@ func TestNewTiming(t *testing.T) {
 	}
 }
 
+func TestTPRatingPlanClone(t *testing.T) {
+
+	tests := []struct {
+		name          string
+		tprratingPlan *TPRatingPlan
+	}{
+		{
+			name: "Complete TPRRatingPlan",
+			tprratingPlan: &TPRatingPlan{
+				TPid: "tarif_1",
+				ID:   "id_1",
+				RatingPlanBindings: []*TPRatingPlanBinding{
+					{
+						DestinationRatesId: "dest_1",
+						TimingId:           "time_1",
+						Weight:             0.0,
+						timing: &TPTiming{
+							ID:        "Timing_1",
+							Years:     Years{2024, 2025, 2026},
+							Months:    Months{time.February, time.March},
+							MonthDays: MonthDays{1, 2, 3},
+							WeekDays:  WeekDays{time.Monday},
+							StartTime: "00:00:00",
+							EndTime:   "00:50:00",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Empty values TPRRatingPlan",
+			tprratingPlan: &TPRatingPlan{
+				TPid:               "",
+				ID:                 "",
+				RatingPlanBindings: []*TPRatingPlanBinding{},
+			},
+		},
+		{
+			name:          "Nil TPRRatingPlan",
+			tprratingPlan: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tprratingPlan.Clone()
+
+			if !reflect.DeepEqual(result, tt.tprratingPlan) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tprratingPlan)
+			}
+
+			if &result == &tt.tprratingPlan {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+
+}
+
+func TestTPRatingPlanBinding_Clone(t *testing.T) {
+	tests := []struct {
+		name           string
+		tprPlanbinding *TPRatingPlanBinding
+	}{
+		{
+			name: "Comlete Struct",
+			tprPlanbinding: &TPRatingPlanBinding{
+
+				DestinationRatesId: "dest_1",
+				TimingId:           "time_1",
+				Weight:             0.0,
+				timing: &TPTiming{
+					ID:        "Timing_1",
+					Years:     Years{2024, 2025, 2026},
+					Months:    Months{time.February, time.March},
+					MonthDays: MonthDays{1, 2, 3},
+					WeekDays:  WeekDays{time.Monday},
+					StartTime: "00:00:00",
+					EndTime:   "00:50:00",
+				},
+			},
+		},
+		{
+			name:           "Nil TPRatingPlanBinding",
+			tprPlanbinding: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tprPlanbinding.Clone()
+
+			if !reflect.DeepEqual(result, tt.tprPlanbinding) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tprPlanbinding)
+			}
+
+			if &result == &tt.tprPlanbinding {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+
+		})
+	}
+}
+
 func TestTPTimingSetTiming(t *testing.T) {
 	tpTiming := &TPTiming{
 		ID:        "1",
@@ -2142,6 +2245,70 @@ func TestTPDestinationRateClone(t *testing.T) {
 	}
 }
 
+func TestDestinationRateClone(t *testing.T) {
+	tests := []struct {
+		name            string
+		destinationRate *DestinationRate
+	}{
+		{
+			name: "Complete Destination Rate",
+			destinationRate: &DestinationRate{
+
+				DestinationId:    "DST1",
+				RateId:           "RT1",
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          0.60,
+				MaxCostStrategy:  "*disconnect",
+				Rate: &TPRateRALs{
+					TPid: "TP1",
+					ID:   "RT1",
+					RateSlots: []*RateSlot{
+						{
+							ConnectFee:         0.10,
+							Rate:               0.05,
+							RateUnit:           "60s",
+							RateIncrement:      "1s",
+							GroupIntervalStart: "0s",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Empty values for DestinationRate",
+			destinationRate: &DestinationRate{
+				DestinationId:    "",
+				RateId:           "",
+				RoundingMethod:   "",
+				RoundingDecimals: 0,
+				MaxCost:          0.0,
+				MaxCostStrategy:  "",
+				Rate:             nil,
+			},
+		},
+		{
+			name:            "Nil DestinationRate",
+			destinationRate: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.destinationRate.Clone()
+
+			if !reflect.DeepEqual(result, tt.destinationRate) {
+				t.Errorf("Clone() = %v, want %v", result, tt.destinationRate)
+			}
+
+			if &result == &tt.destinationRate {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+
+}
+
 func TestApierTPTimingClone(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -2240,6 +2407,58 @@ func TestApierTPTimingClone(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTPTiming(t *testing.T) {
+
+	tests := []struct {
+		name   string
+		timing *TPTiming
+	}{
+		{
+			name: "Complete TPTiming",
+			timing: &TPTiming{
+				ID:        "Timing_1",
+				Years:     Years{2024, 2025, 2026},
+				Months:    Months{time.February, time.March},
+				MonthDays: MonthDays{1, 2, 3},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "00:00:00",
+				EndTime:   "00:50:00",
+			},
+		},
+		{
+			name:   "Nil timing",
+			timing: nil,
+		},
+		{
+			name: "TPTiming with empty values",
+			timing: &TPTiming{
+				ID:        "",
+				Years:     Years{},
+				Months:    Months{},
+				MonthDays: MonthDays{},
+				WeekDays:  WeekDays{},
+				StartTime: "",
+				EndTime:   "",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.timing.Clone()
+
+			if !reflect.DeepEqual(result, tt.timing) {
+				t.Errorf("Clone() = %v, want %v", result, tt.timing)
+			}
+
+			if &result == &tt.timing {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+
 }
 
 func TestTPActionClone(t *testing.T) {
@@ -2588,6 +2807,540 @@ func TestTPAttributeClone(t *testing.T) {
 						t.Error("Clone's nil FilterIDs changed after setting original to non-nil")
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestRateSlot_Clone(t *testing.T) {
+	tests := []struct {
+		name     string
+		rateslot *RateSlot
+	}{
+		{
+			name: "Complete RateSlot",
+			rateslot: &RateSlot{
+				ConnectFee:            0.1,
+				Rate:                  0.2,
+				RateUnit:              "60s",
+				RateIncrement:         "1s",
+				GroupIntervalStart:    "0s",
+				rateUnitDur:           60 * time.Second,
+				rateIncrementDur:      time.Second,
+				groupIntervalStartDur: 0,
+				tag:                   "first",
+			},
+		},
+		{
+			name:     "Nil RateSlot",
+			rateslot: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rateslot.Clone()
+
+			if !reflect.DeepEqual(result, tt.rateslot) {
+				t.Errorf("Clone() = %v, want %v", result, tt.rateslot)
+			}
+
+			if &result == &tt.rateslot {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPRatingActivation_Clone(t *testing.T) {
+	tests := []struct {
+		name        string
+		tpratingact *TPRatingActivation
+	}{
+		{
+			name: "Complete TPRatingActivation",
+			tpratingact: &TPRatingActivation{
+				ActivationTime:   "2022-01-01T00:00:00Z",
+				RatingPlanId:     "RP_1001",
+				FallbackSubjects: "1002;1003",
+			},
+		},
+		{
+			name:        "Nil TPRatingActivation",
+			tpratingact: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tpratingact.Clone()
+
+			if !reflect.DeepEqual(result, tt.tpratingact) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tpratingact)
+			}
+
+			if &result == &tt.tpratingact {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActions_Clone(t *testing.T) {
+	tests := []struct {
+		name      string
+		tpactions *TPActions
+	}{
+		{
+			name: "Empty Actions value in TPActions",
+			tpactions: &TPActions{
+				TPid:    "tpid_1",
+				ID:      "id_1",
+				Actions: []*TPAction{},
+			},
+		},
+		{
+			name: "Complete TPActions",
+			tpactions: &TPActions{
+				TPid: "tpid_1",
+				ID:   "id_1",
+				Actions: []*TPAction{
+					{
+						Identifier:      "TOPUP",
+						BalanceId:       "balance123",
+						BalanceUuid:     "uuid-456",
+						BalanceType:     "monetary",
+						Units:           "10",
+						ExpiryTime:      "2025-12-31T23:59:59Z",
+						Filters:         "filter1;filter2",
+						TimingTags:      "weekdays;offpeak",
+						DestinationIds:  "DST_EU;DST_US",
+						RatingSubject:   "premium",
+						Categories:      "call;data",
+						SharedGroups:    "group1;group2",
+						BalanceWeight:   "10",
+						ExtraParameters: "param1=value1;param2=value2",
+						BalanceBlocker:  "false",
+						BalanceDisabled: "false",
+						Weight:          20.5,
+					},
+				},
+			},
+		},
+		{
+			name:      "Nil TPActions",
+			tpactions: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tpactions.Clone()
+
+			if !reflect.DeepEqual(result, tt.tpactions) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tpactions)
+			}
+
+			if &result == &tt.tpactions {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPSharedGroups_Clone(t *testing.T) {
+	tests := []struct {
+		name         string
+		sharedgroups *TPSharedGroups
+	}{
+		{
+			name: "Complete TPSharedGroups",
+			sharedgroups: &TPSharedGroups{
+				TPid: "tpid_2",
+				ID:   "id_2",
+				SharedGroups: []*TPSharedGroup{
+					{
+						Account:       "acc_name",
+						Strategy:      "test strategy",
+						RatingSubject: "test rating subject",
+					},
+				},
+			},
+		},
+		{
+			name:         "Nil TPSharedGroups",
+			sharedgroups: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.sharedgroups.Clone()
+
+			if !reflect.DeepEqual(result, tt.sharedgroups) {
+				t.Errorf("Clone() = %v, want %v", result, tt.sharedgroups)
+			}
+
+			if &result == &tt.sharedgroups {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPSharedGroup_Clone(t *testing.T) {
+	tests := []struct {
+		name     string
+		sharedgr *TPSharedGroup
+	}{
+		{
+			name: "Complete TPSharedGroup",
+			sharedgr: &TPSharedGroup{
+				Account:       "acc_name",
+				Strategy:      "test strategy",
+				RatingSubject: "test rating subject",
+			},
+		},
+		{
+			name:     "Nil TPSharedGroup",
+			sharedgr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.sharedgr.Clone()
+
+			if !reflect.DeepEqual(result, tt.sharedgr) {
+				t.Errorf("Clone() = %v, want %v", result, tt.sharedgr)
+			}
+
+			if &result == &tt.sharedgr {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActionPlan_Clone(t *testing.T) {
+	tests := []struct {
+		name       string
+		actionplan *TPActionPlan
+	}{
+		{
+			name: "Complete TPActionPlan",
+			actionplan: &TPActionPlan{
+				TPid: "tpid_1",
+				ID:   "id_1",
+				ActionPlan: []*TPActionTiming{
+					{
+						ActionsId: "action_id_1",
+						TimingId:  "tm_1",
+						Weight:    0.2,
+					},
+				},
+			},
+		},
+		{
+			name:       "Nil TPActionPlan",
+			actionplan: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.actionplan.Clone()
+
+			if !reflect.DeepEqual(result, tt.actionplan) {
+				t.Errorf("Clone() = %v, want %v", result, tt.actionplan)
+			}
+
+			if &result == &tt.actionplan {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActionTiming_Clone(t *testing.T) {
+	tests := []struct {
+		name         string
+		actionTiming *TPActionTiming
+	}{
+		{
+			name: "Complete TPActionTiming",
+			actionTiming: &TPActionTiming{
+				ActionsId: "action_id_1",
+				TimingId:  "tm_1",
+				Weight:    0.2,
+			},
+		},
+		{
+			name:         "Nil TPActionTiming",
+			actionTiming: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.actionTiming.Clone()
+
+			if !reflect.DeepEqual(result, tt.actionTiming) {
+				t.Errorf("Clone() = %v, want %v", result, tt.actionTiming)
+			}
+
+			if &result == &tt.actionTiming {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActionTrigger_Clone(t *testing.T) {
+	tests := []struct {
+		name      string
+		actrigger *TPActionTrigger
+	}{
+		{
+			name: "Complete TPActionTrigger",
+			actrigger: &TPActionTrigger{
+				Id:                    "STANDARD_TRIGGERS",
+				UniqueID:              "1",
+				ThresholdType:         "*min_balance",
+				ThresholdValue:        2.0,
+				Recurrent:             false,
+				MinSleep:              "0",
+				BalanceId:             "b1",
+				BalanceType:           "*monetary",
+				BalanceDestinationIds: "",
+				BalanceWeight:         "0.0",
+				BalanceExpirationDate: "*never",
+				BalanceTimingTags:     "T1",
+				BalanceRatingSubject:  "special1",
+				BalanceCategories:     "call",
+				BalanceSharedGroups:   "SHARED_1",
+				BalanceBlocker:        "false",
+				BalanceDisabled:       "false",
+				ActionsId:             "LOG_WARNING",
+				Weight:                10,
+			},
+		},
+		{
+			name:      "Nil TPActionTrigger",
+			actrigger: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.actrigger.Clone()
+
+			if !reflect.DeepEqual(result, tt.actrigger) {
+				t.Errorf("Clone() = %v, want %v", result, tt.actrigger)
+			}
+
+			if &result == &tt.actrigger {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActionTriggers_Clone(t *testing.T) {
+	tests := []struct {
+		name       string
+		actriggers *TPActionTriggers
+	}{
+		{
+			name: "Complete TPActionTriggers",
+			actriggers: &TPActionTriggers{
+				TPid: "tpid_1",
+				ID:   "id_1",
+				ActionTriggers: []*TPActionTrigger{
+					{
+						Id:                    "STANDARD_TRIGGERS",
+						UniqueID:              "1",
+						ThresholdType:         "*min_balance",
+						ThresholdValue:        2.0,
+						Recurrent:             false,
+						MinSleep:              "0",
+						BalanceId:             "b1",
+						BalanceType:           "*monetary",
+						BalanceDestinationIds: "",
+						BalanceWeight:         "0.0",
+						BalanceExpirationDate: "*never",
+						BalanceTimingTags:     "T1",
+						BalanceRatingSubject:  "special1",
+						BalanceCategories:     "call",
+						BalanceSharedGroups:   "SHARED_1",
+						BalanceBlocker:        "false",
+						BalanceDisabled:       "false",
+						ActionsId:             "LOG_WARNING",
+						Weight:                10,
+					},
+				},
+			},
+		},
+		{
+			name:       "Nil TPActionTriggers",
+			actriggers: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.actriggers.Clone()
+
+			if !reflect.DeepEqual(result, tt.actriggers) {
+				t.Errorf("Clone() = %v, want %v", result, tt.actriggers)
+			}
+
+			if &result == &tt.actriggers {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPAccountActions_Clone(t *testing.T) {
+	tests := []struct {
+		name         string
+		tpaccActions *TPAccountActions
+	}{
+		{
+			name: "Complete TPAccountActions",
+			tpaccActions: &TPAccountActions{
+				TPid:          "TP1",
+				LoadId:        "ID",
+				Tenant:        "cgrates.org",
+				Account:       "1001",
+				ActionPlanId:  "PREPAID_10",
+				AllowNegative: true,
+				Disabled:      false,
+			},
+		},
+		{
+			name:         "Nil TPAccountActions",
+			tpaccActions: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tpaccActions.Clone()
+
+			if !reflect.DeepEqual(result, tt.tpaccActions) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tpaccActions)
+			}
+
+			if &result == &tt.tpaccActions {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPResourceProfile_Clone(t *testing.T) {
+	tests := []struct {
+		name         string
+		tpresProfile *TPResourceProfile
+	}{
+		{
+			name: "Complete TPResourceProfile",
+			tpresProfile: &TPResourceProfile{
+				TPid:         "TP1",
+				ID:           "RP1",
+				Weight:       10.8,
+				FilterIDs:    []string{"FILTR_RES_1"},
+				ThresholdIDs: []string{"TH1"},
+				Stored:       true,
+			},
+		},
+		{
+			name:         "Nil TPResourceProfile",
+			tpresProfile: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tpresProfile.Clone()
+
+			if !reflect.DeepEqual(result, tt.tpresProfile) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tpresProfile)
+			}
+
+			if &result == &tt.tpresProfile {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPActivationInterval_Clone(t *testing.T) {
+	tests := []struct {
+		name               string
+		activationInterval *TPActivationInterval
+	}{
+		{
+			name: "Complete TPActivationInterval",
+			activationInterval: &TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+		},
+		{
+			name:               "Nil TPActivationInterval",
+			activationInterval: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.activationInterval.Clone()
+
+			if !reflect.DeepEqual(result, tt.activationInterval) {
+				t.Errorf("Clone() = %v, want %v", result, tt.activationInterval)
+			}
+
+			if &result == &tt.activationInterval {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTPStatProfile_Clone(t *testing.T) {
+	tests := []struct {
+		name          string
+		tpstatProfile *TPStatProfile
+	}{
+		{
+			name: "Complete TPStatProfile",
+			tpstatProfile: &TPStatProfile{
+				TPid:               "TP1",
+				Tenant:             "cgrates.org",
+				ID:                 "Stats1",
+				FilterIDs:          []string{"FLTR_1"},
+				ActivationInterval: &TPActivationInterval{"2014-07-29T15:00:00Z", ""},
+				QueueLength:        100,
+				TTL:                "1s",
+				Metrics: []*MetricWithFilters{
+					{
+						MetricID: MetaASR,
+					},
+				},
+				ThresholdIDs: []string{"*none"},
+				Weight:       20.0,
+				Stored:       true,
+				MinItems:     1,
+			},
+		},
+		{
+			name:          "Nil TPStatProfile",
+			tpstatProfile: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.tpstatProfile.Clone()
+
+			if !reflect.DeepEqual(result, tt.tpstatProfile) {
+				t.Errorf("Clone() = %v, want %v", result, tt.tpstatProfile)
+			}
+
+			if &result == &tt.tpstatProfile {
+				t.Errorf("Clone returned the same instance, expected a new instance")
 			}
 		})
 	}
