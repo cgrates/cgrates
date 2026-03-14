@@ -2,4 +2,5 @@
 data/conf/cgrates/                  etc/
 data/conf/logging/logrotate.conf => etc/logrotate.d/cgrates
 data/conf/logging/rsyslog.conf   => etc/rsyslog.d/25-cgrates.conf
+data/conf/backup/cgrates-backup  => etc/default/cgrates-backup
 data/*                              usr/share/cgrates/

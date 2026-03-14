@@ -46,6 +46,8 @@ case "$1" in
 		chown cgrates:cgrates /var/spool/cgrates/tpe/
 		chown root:adm /var/log/cgrates
 		chmod 775 /var/log/cgrates
+		chown cgrates:cgrates /var/backups/cgrates
+		chmod 750 /var/backups/cgrates
         ;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)

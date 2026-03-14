@@ -1,0 +1,10 @@
+[Unit]
+Description=CGRateS automatic backup
+ConditionPathIsDirectory=/var/lib/cgrates/internal_db/db
+ConditionPathIsDirectory=/var/lib/cgrates/internal_db/configdb
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/cgrates/scripts/cgrates-backup
+User=cgrates
+Group=cgrates
