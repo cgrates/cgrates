@@ -1006,11 +1006,12 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 // accountsMaxAbstracts will query the AccountS cost for Event
 func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts],
+		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
-		err = errors.New("AccountS is disabled")
+		err = utils.NewErrNotConnected(utils.AccountS)
 		return
 	}
 	var acntCost utils.EventCharges
@@ -1019,6 +1020,25 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 		return
 	}
 	return &acntCost, nil
+}
+
+// accountSDebitEvent will debit the abstracts for the provided event
+func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eEc *utils.EventCharges, err error) {
+	var conns []string
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts],
+		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+		return
+	}
+	if len(conns) == 0 {
+		err = utils.NewErrNotConnected(utils.AccountS)
+		return
+	}
+	var reply utils.EventCharges
+	if err = sS.connMgr.Call(ctx, conns,
+		utils.AccountSv1DebitAbstracts, cgrEv, &reply); err != nil {
+		return
+	}
+	return &reply, nil
 }
 
 // ratesCost will query the RateS cost for Event
