@@ -79,7 +79,7 @@ func TestKafkaER(t *testing.T) {
 "ers": {									
 	"enabled": true,						
 	"conns": {
-		"*sessions": [{"Values": ["*localhost"]}]
+		"*sessions": [{"ConnIDs": ["*localhost"]}]
 	},
 	"readers": [
 		{

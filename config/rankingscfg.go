@@ -27,7 +27,7 @@ import (
 
 type RankingSCfg struct {
 	Enabled        bool
-	Conns          map[string][]*DynamicStringSliceOpt
+	Conns          map[string][]*DynamicConns
 	ScheduledIDs   map[string][]string
 	StoreInterval  time.Duration
 	EEsExporterIDs []string
@@ -51,7 +51,7 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 	if jsnCfg.Conns != nil {
 		tagged := tagConns(jsnCfg.Conns)
 		if rnk.Conns == nil {
-			rnk.Conns = make(map[string][]*DynamicStringSliceOpt)
+			rnk.Conns = make(map[string][]*DynamicConns)
 		}
 		for connType, opts := range tagged {
 			rnk.Conns[connType] = opts
@@ -93,7 +93,7 @@ func (rnk RankingSCfg) CloneSection() Section { return rnk.Clone() }
 func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 	cln = &RankingSCfg{
 		Enabled:       rnk.Enabled,
-		Conns:         CloneConnsOpt(rnk.Conns),
+		Conns:         CloneConnsMap(rnk.Conns),
 		StoreInterval: rnk.StoreInterval,
 	}
 	if rnk.ScheduledIDs != nil {
@@ -110,7 +110,7 @@ func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 
 type RankingSJsonCfg struct {
 	Enabled          *bool
-	Conns            map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns            map[string][]*DynamicConns `json:"conns,omitempty"`
 	Scheduled_ids    map[string][]string
 	Store_interval   *string
 	Ees_exporter_ids *[]string
@@ -123,7 +123,7 @@ func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {

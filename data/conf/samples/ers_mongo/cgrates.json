@@ -44,7 +44,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
@@ -61,8 +61,8 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}],
-		"*rates": [{"Values": ["*internal"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}],
+		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
 	"session_cost_retries": 0
 },
@@ -75,35 +75,35 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*localhost"]
+			"ConnIDs": ["*localhost"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},
@@ -114,7 +114,7 @@
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"Values": ["*internal"]}]
+		"*sessions": [{"ConnIDs": ["*internal"]}]
 	},
 	"partial_cache_ttl": "500ms",
 	"readers": [

@@ -51,7 +51,7 @@
 "schedulers": {
 	"enabled": true,
 	"conns": {
-		"*cdrs": [{"Values": ["conn1"]}]
+		"*cdrs": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -59,10 +59,10 @@
 "rals": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["conn1"]}]
+		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
 	"conns": {
-		"*stats": [{"Values": ["conn1"]}]
+		"*stats": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -71,8 +71,8 @@
 	"enabled": true,
 	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"conns": {
-		"*chargers": [{"Values": ["conn1"]}],
-		"*ees": [{"Values": ["*localhost"]}]
+		"*chargers": [{"ConnIDs": ["conn1"]}],
+		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
 	"online_cdr_exports": [],
 },
@@ -81,7 +81,7 @@
 "ees": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 	"exporters": [
 		{
@@ -123,42 +123,42 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*routes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["*internal"]
+			"ConnIDs": ["*internal"]
 		 }
 	]
 			},
@@ -174,7 +174,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["conn1"]}]
+		"*attributes": [{"ConnIDs": ["conn1"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -183,7 +183,7 @@
 "resources": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["conn1"]}]
+		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -192,7 +192,7 @@
 "stats": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["conn1"]}]
+		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -219,7 +219,7 @@
 
 "filters": {								
 	"conns": {
-		"*accounts": [{"Values": ["*internal"]}]
+		"*accounts": [{"ConnIDs": ["*internal"]}]
 	},
 },
 

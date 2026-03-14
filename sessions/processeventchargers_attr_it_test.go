@@ -52,13 +52,13 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}]
 	}
 },
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*localhost"]}]
+		"*attributes": [{"ConnIDs": ["*localhost"]}]
 	}
 },
 "attributes": {

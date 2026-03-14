@@ -43,7 +43,7 @@
 "schedulers": {
 	"enabled": true,
 	"conns": {
-		"*cdrs": [{"Values": ["*localhost"]}]
+		"*cdrs": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 
@@ -51,10 +51,10 @@
 "rals": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["*localhost"]}]
+		"*thresholds": [{"ConnIDs": ["*localhost"]}]
 	},
 	"conns": {
-		"*stats": [{"Values": ["*localhost"]}]
+		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 
@@ -63,8 +63,8 @@
 	"enabled": true,
 	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"conns": {
-		"*chargers": [{"Values": ["*localhost"]}],
-		"*ees": [{"Values": ["*localhost"]}]
+		"*chargers": [{"ConnIDs": ["*localhost"]}],
+		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
 	"online_cdr_exports": [],
 },
@@ -73,7 +73,7 @@
 "ees": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 	"exporters": [
 		{
@@ -111,12 +111,12 @@
 "sessions": {
 	"enabled": true,
 	"conns":{
-	"*resources": [{"Tenant": "", "Values": ["*localhost"]}],
-	"*routes": [{"Tenant": "", "Values": ["*localhost"]}],
-	"*attributes": [{"Tenant": "", "Values": ["*localhost"]}],
-	"*rals": [{"Tenant": "", "Values": ["*internal"]}],
-	"*cdrs": [{"Tenant": "", "Values": ["*internal"]}],
-	"*chargers": [{"Tenant": "", "Values": ["*internal"]}]
+	"*resources": [{"Tenant": "", "ConnIDs": ["*localhost"]}],
+	"*routes": [{"Tenant": "", "ConnIDs": ["*localhost"]}],
+	"*attributes": [{"Tenant": "", "ConnIDs": ["*localhost"]}],
+	"*rals": [{"Tenant": "", "ConnIDs": ["*internal"]}],
+	"*cdrs": [{"Tenant": "", "ConnIDs": ["*internal"]}],
+	"*chargers": [{"Tenant": "", "ConnIDs": ["*internal"]}]
 			},
 },
 
@@ -130,7 +130,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["*localhost"]}]
+		"*attributes": [{"ConnIDs": ["*localhost"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -139,7 +139,7 @@
 "resources": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["*localhost"]}]
+		"*thresholds": [{"ConnIDs": ["*localhost"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -148,7 +148,7 @@
 "stats": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Values": ["*localhost"]}]
+		"*thresholds": [{"ConnIDs": ["*localhost"]}]
 	},
 	"string_indexed_fields": ["*req.Account"]
 },
@@ -175,7 +175,7 @@
 
 "filters": {								
 	"conns": {
-		"*accounts": [{"Values": ["*internal"]}]
+		"*accounts": [{"ConnIDs": ["*internal"]}]
 	},
 },
 

@@ -47,7 +47,7 @@ var (
 	getDftRemHstCfg = func() *RemoteHost { return new(RemoteHost) }
 
 	getDftEvExpCfg = func() *EventExporterCfg {
-		return &EventExporterCfg{Opts: &EventExporterOpts{}, Conns: make(map[string][]*DynamicStringSliceOpt)}
+		return &EventExporterCfg{Opts: &EventExporterOpts{}, Conns: make(map[string][]*DynamicConns)}
 	}
 	getDftEvRdrCfg  = func() *EventReaderCfg { return &EventReaderCfg{Opts: &EventReaderOpts{}} }
 	getDftDBConnCfg = func() *DBConn { return &DBConn{} }
@@ -127,8 +127,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ClientOpts: &http.Transport{},
 			dialer:     &net.Dialer{},
 		},
-		filterSCfg: &FilterSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		cdrsCfg: &CdrsCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &CdrsOpts{
+		filterSCfg: &FilterSCfg{Conns: make(map[string][]*DynamicConns)},
+		cdrsCfg: &CdrsCfg{Conns: make(map[string][]*DynamicConns), Opts: &CdrsOpts{
 			Accounts:   []*DynamicBoolOpt{{value: CDRsAccountsDftOpt}},
 			Attributes: []*DynamicBoolOpt{{value: CDRsAttributesDftOpt}},
 			Chargers:   []*DynamicBoolOpt{{value: CDRsChargersDftOpt}},
@@ -148,7 +148,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		sessionSCfg: &SessionSCfg{
 			STIRCfg:      new(STIRcfg),
 			DefaultUsage: make(map[string]time.Duration),
-			Conns:        make(map[string][]*DynamicStringSliceOpt),
+			Conns:        make(map[string][]*DynamicConns),
 			Opts: &SessionsOpts{
 				Accounts:               []*DynamicBoolOpt{{value: SessionsAccountsDftOpt}},
 				Rates:                  []*DynamicBoolOpt{{value: SessionsRatesDftOpt}},
@@ -190,26 +190,26 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				AccountsForceUsage:     []*DynamicBoolOpt{},
 			},
 		},
-		fsAgentCfg:       &FsAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		kamAgentCfg:      &KamAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		asteriskAgentCfg: &AsteriskAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		diameterAgentCfg: &DiameterAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
+		fsAgentCfg:       &FsAgentCfg{Conns: make(map[string][]*DynamicConns)},
+		kamAgentCfg:      &KamAgentCfg{Conns: make(map[string][]*DynamicConns)},
+		asteriskAgentCfg: &AsteriskAgentCfg{Conns: make(map[string][]*DynamicConns)},
+		diameterAgentCfg: &DiameterAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		radiusAgentCfg: &RadiusAgentCfg{
-			Conns:              make(map[string][]*DynamicStringSliceOpt),
+			Conns:              make(map[string][]*DynamicConns),
 			ClientDictionaries: make(map[string][]string),
 			ClientSecrets:      make(map[string]string),
 		},
-		dnsAgentCfg:        &DNSAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
+		dnsAgentCfg:        &DNSAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		janusAgentCfg:      new(JanusAgentCfg),
-		prometheusAgentCfg: &PrometheusAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		attributeSCfg: &AttributeSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &AttributesOpts{
+		prometheusAgentCfg: &PrometheusAgentCfg{Conns: make(map[string][]*DynamicConns)},
+		attributeSCfg: &AttributeSCfg{Conns: make(map[string][]*DynamicConns), Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
 			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
 		}},
-		chargerSCfg: &ChargerSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		resourceSCfg: &ResourceSConfig{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &ResourcesOpts{
+		chargerSCfg: &ChargerSCfg{Conns: make(map[string][]*DynamicConns)},
+		resourceSCfg: &ResourceSConfig{Conns: make(map[string][]*DynamicConns), Opts: &ResourcesOpts{
 			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
 			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
 			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
@@ -218,18 +218,18 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			AllocationID: []*DynamicStringOpt{{value: IPsAllocationIDDftOpt}},
 			TTL:          []*DynamicDurationOpt{{value: IPsTTLDftOpt}},
 		}},
-		trendSCfg:   &TrendSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		rankingSCfg: &RankingSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		statsCfg: &StatSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &StatsOpts{
+		trendSCfg:   &TrendSCfg{Conns: make(map[string][]*DynamicConns)},
+		rankingSCfg: &RankingSCfg{Conns: make(map[string][]*DynamicConns)},
+		statsCfg: &StatSCfg{Conns: make(map[string][]*DynamicConns), Opts: &StatsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
 		}},
-		thresholdSCfg: &ThresholdSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &ThresholdsOpts{
+		thresholdSCfg: &ThresholdSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
 		}},
-		routeSCfg: &RouteSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &RoutesOpts{
+		routeSCfg: &RouteSCfg{Conns: make(map[string][]*DynamicConns), Opts: &RoutesOpts{
 			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
 			IgnoreErrors: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
@@ -251,9 +251,9 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		},
 		loaderCfg:    make(LoaderSCfgs, 0),
 		httpAgentCfg: make(HTTPAgentCfgs, 0),
-		admS:         &AdminSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		ersCfg:       &ERsCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		eesCfg:       &EEsCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Cache: make(map[string]*CacheParamCfg)},
+		admS:         &AdminSCfg{Conns: make(map[string][]*DynamicConns)},
+		ersCfg:       &ERsCfg{Conns: make(map[string][]*DynamicConns)},
+		eesCfg:       &EEsCfg{Conns: make(map[string][]*DynamicConns), Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg: &RateSCfg{Opts: &RatesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			StartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
@@ -262,17 +262,17 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		}},
 		efsCfg: new(EFsCfg),
-		actionSCfg: &ActionSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &ActionsOpts{
+		actionSCfg: &ActionSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ActionsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
 			PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
 		}},
-		sipAgentCfg:   &SIPAgentCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
+		sipAgentCfg:   &SIPAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		configSCfg:    new(ConfigSCfg),
 		apiBanCfg:     new(APIBanCfg),
 		sentryPeerCfg: new(SentryPeerCfg),
-		coreSCfg:      &CoreSCfg{Conns: make(map[string][]*DynamicStringSliceOpt)},
-		accountSCfg: &AccountSCfg{Conns: make(map[string][]*DynamicStringSliceOpt), Opts: &AccountsOpts{
+		coreSCfg:      &CoreSCfg{Conns: make(map[string][]*DynamicConns)},
+		accountSCfg: &AccountSCfg{Conns: make(map[string][]*DynamicConns), Opts: &AccountsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			Usage:                []*DynamicDecimalOpt{{value: AccountsUsageDftOpt}},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},

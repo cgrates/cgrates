@@ -34,7 +34,7 @@ type DNSListener struct {
 type DNSAgentCfg struct {
 	Enabled           bool
 	Listeners         []DNSListener
-	Conns             map[string][]*DynamicStringSliceOpt
+	Conns             map[string][]*DynamicConns
 	Timezone          string
 	RequestProcessors []*RequestProcessor
 }
@@ -116,7 +116,7 @@ func (da DNSAgentCfg) Clone() *DNSAgentCfg {
 	clone := &DNSAgentCfg{
 		Enabled:   da.Enabled,
 		Listeners: slices.Clone(da.Listeners),
-		Conns:     CloneConnsOpt(da.Conns),
+		Conns:     CloneConnsMap(da.Conns),
 		Timezone:  da.Timezone,
 	}
 	if da.RequestProcessors != nil {
@@ -135,11 +135,11 @@ type ListenerJsnCfg struct {
 
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
-	Enabled           *bool                               `json:"enabled"`
-	Listeners         *[]*ListenerJsnCfg                  `json:"listeners"`
-	Conns             map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	Timezone          *string                             `json:"timezone"`
-	RequestProcessors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	Enabled           *bool                      `json:"enabled"`
+	Listeners         *[]*ListenerJsnCfg         `json:"listeners"`
+	Conns             map[string][]*DynamicConns `json:"conns,omitempty"`
+	Timezone          *string                    `json:"timezone"`
+	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
 }
 
 func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonCfg {
@@ -184,7 +184,7 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 
 	d.Listeners = diffListeners
 
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {

@@ -33,7 +33,7 @@ type DiameterAgentCfg struct {
 	Listen                  string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath        string
 	CEApplications          []string
-	Conns                   map[string][]*DynamicStringSliceOpt
+	Conns                   map[string][]*DynamicConns
 	OriginHost              string
 	OriginRealm             string
 	VendorID                int
@@ -167,7 +167,7 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		Listen:                  da.Listen,
 		DictionariesPath:        da.DictionariesPath,
 		CEApplications:          slices.Clone(da.CEApplications),
-		Conns:                   CloneConnsOpt(da.Conns),
+		Conns:                   CloneConnsMap(da.Conns),
 		OriginHost:              da.OriginHost,
 		OriginRealm:             da.OriginRealm,
 		VendorID:                da.VendorID,
@@ -195,24 +195,24 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled                 *bool                               `json:"enabled"`
-	Listen                  *string                             `json:"listen"`
-	ListenNet               *string                             `json:"listen_net"`
-	DictionariesPath        *string                             `json:"dictionaries_path"`
-	CEApplications          *[]string                           `json:"ce_applications"`
-	Conns                   map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	OriginHost              *string                             `json:"origin_host"`
-	OriginRealm             *string                             `json:"origin_realm"`
-	VendorID                *int                                `json:"vendor_id"`
-	ProductName             *string                             `json:"product_name"`
-	SyncedConnRequests      *bool                               `json:"synced_conn_requests"`
-	ASRTemplate             *string                             `json:"asr_template"`
-	RARTemplate             *string                             `json:"rar_template"`
-	ForcedDisconnect        *string                             `json:"forced_disconnect"`
-	ConnStatusStatQueueIDs  *[]string                           `json:"conn_status_stat_queue_ids"`
-	ConnStatusThresholdIDs  *[]string                           `json:"conn_status_threshold_ids"`
-	ConnHealthCheckInterval *string                             `json:"conn_health_check_interval"`
-	RequestProcessors       *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	Enabled                 *bool                      `json:"enabled"`
+	Listen                  *string                    `json:"listen"`
+	ListenNet               *string                    `json:"listen_net"`
+	DictionariesPath        *string                    `json:"dictionaries_path"`
+	CEApplications          *[]string                  `json:"ce_applications"`
+	Conns                   map[string][]*DynamicConns `json:"conns,omitempty"`
+	OriginHost              *string                    `json:"origin_host"`
+	OriginRealm             *string                    `json:"origin_realm"`
+	VendorID                *int                       `json:"vendor_id"`
+	ProductName             *string                    `json:"product_name"`
+	SyncedConnRequests      *bool                      `json:"synced_conn_requests"`
+	ASRTemplate             *string                    `json:"asr_template"`
+	RARTemplate             *string                    `json:"rar_template"`
+	ForcedDisconnect        *string                    `json:"forced_disconnect"`
+	ConnStatusStatQueueIDs  *[]string                  `json:"conn_status_stat_queue_ids"`
+	ConnStatusThresholdIDs  *[]string                  `json:"conn_status_threshold_ids"`
+	ConnHealthCheckInterval *string                    `json:"conn_health_check_interval"`
+	RequestProcessors       *[]*ReqProcessorJsnCfg     `json:"request_processors"`
 }
 
 func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg) *DiameterAgentJsonCfg {
@@ -234,7 +234,7 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	if !slices.Equal(v1.CEApplications, v2.CEApplications) {
 		d.CEApplications = utils.SliceStringPointer(v2.CEApplications)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.OriginHost != v2.OriginHost {

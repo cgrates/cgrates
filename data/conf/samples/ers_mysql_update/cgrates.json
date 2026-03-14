@@ -48,7 +48,7 @@
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*ees": [{"Values": ["*localhost"]}]
+		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
 	"readers": [
 		{

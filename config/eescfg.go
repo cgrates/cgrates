@@ -30,7 +30,7 @@ import (
 // EEsCfg the config for Event Exporters
 type EEsCfg struct {
 	Enabled   bool
-	Conns     map[string][]*DynamicStringSliceOpt
+	Conns     map[string][]*DynamicConns
 	Cache     map[string]*CacheParamCfg
 	Exporters []*EventExporterCfg
 }
@@ -111,7 +111,7 @@ func (eeS EEsCfg) CloneSection() Section { return eeS.Clone() }
 func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 	cln = &EEsCfg{
 		Enabled:   eeS.Enabled,
-		Conns:     CloneConnsOpt(eeS.Conns),
+		Conns:     CloneConnsMap(eeS.Conns),
 		Cache:     make(map[string]*CacheParamCfg),
 		Exporters: make([]*EventExporterCfg, len(eeS.Exporters)),
 	}
@@ -251,7 +251,7 @@ type EventExporterCfg struct {
 	Blocker              bool
 	Attempts             int
 	FailedPostsDir       string
-	Conns                map[string][]*DynamicStringSliceOpt
+	Conns                map[string][]*DynamicConns
 	ConcurrentRequests   int
 	MetricsResetSchedule string
 	Fields               []*FCTemplate
@@ -950,7 +950,7 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		contentFields:        make([]*FCTemplate, len(eeC.contentFields)),
 		trailerFields:        make([]*FCTemplate, len(eeC.trailerFields)),
 		Opts:                 eeC.Opts.Clone(),
-		Conns:                CloneConnsOpt(eeC.Conns),
+		Conns:                CloneConnsMap(eeC.Conns),
 		FailedPostsDir:       eeC.FailedPostsDir,
 	}
 
@@ -1314,23 +1314,23 @@ type EventExporterOptsJson struct {
 
 // EventExporterJsonCfg is the configuration of a single EventExporter
 type EventExporterJsonCfg struct {
-	ID                   *string                             `json:"id"`
-	Type                 *string                             `json:"type"`
-	ExportPath           *string                             `json:"export_path"`
-	Opts                 *EventExporterOptsJson              `json:"opts"`
-	Timezone             *string                             `json:"timezone"`
-	Filters              *[]string                           `json:"filters"`
-	Flags                *[]string                           `json:"flags"`
-	AttributeIDs         *[]string                           `json:"attribute_ids"`
-	AttributeContext     *string                             `json:"attribute_context"`
-	Synchronous          *bool                               `json:"synchronous"`
-	Blocker              *bool                               `json:"blocker"`
-	Attempts             *int                                `json:"attempts"`
-	ConcurrentRequests   *int                                `json:"concurrent_requests"`
-	MetricsResetSchedule *string                             `json:"metrics_reset_schedule"`
-	FailedPostsDir       *string                             `json:"failed_posts_dir"`
-	Conns                map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	Fields               *[]*FcTemplateJsonCfg               `json:"fields"`
+	ID                   *string                    `json:"id"`
+	Type                 *string                    `json:"type"`
+	ExportPath           *string                    `json:"export_path"`
+	Opts                 *EventExporterOptsJson     `json:"opts"`
+	Timezone             *string                    `json:"timezone"`
+	Filters              *[]string                  `json:"filters"`
+	Flags                *[]string                  `json:"flags"`
+	AttributeIDs         *[]string                  `json:"attribute_ids"`
+	AttributeContext     *string                    `json:"attribute_context"`
+	Synchronous          *bool                      `json:"synchronous"`
+	Blocker              *bool                      `json:"blocker"`
+	Attempts             *int                       `json:"attempts"`
+	ConcurrentRequests   *int                       `json:"concurrent_requests"`
+	MetricsResetSchedule *string                    `json:"metrics_reset_schedule"`
+	FailedPostsDir       *string                    `json:"failed_posts_dir"`
+	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`
+	Fields               *[]*FcTemplateJsonCfg      `json:"fields"`
 }
 
 func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporterOpts) *EventExporterOptsJson {
@@ -1856,7 +1856,7 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg)
 	if v1.FailedPostsDir != v2.FailedPostsDir {
 		d.FailedPostsDir = utils.StringPointer(v2.FailedPostsDir)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	return d
@@ -1902,7 +1902,7 @@ func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExport
 // EEsJsonCfg contains the configuration of EventExporterService
 type EEsJsonCfg struct {
 	Enabled   *bool
-	Conns     map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns     map[string][]*DynamicConns `json:"conns,omitempty"`
 	Cache     map[string]*CacheParamJsonCfg
 	Exporters *[]*EventExporterJsonCfg
 }
@@ -1914,7 +1914,7 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg) *EEsJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)

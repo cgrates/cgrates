@@ -27,13 +27,13 @@ import (
 
 // PrometheusAgentJsonCfg holds the unparsed prometheus_agent as found in the config file.
 type PrometheusAgentJsonCfg struct {
-	Enabled               *bool                               `json:"enabled"`
-	Path                  *string                             `json:"path"`
-	CollectGoMetrics      *bool                               `json:"collect_go_metrics"`
-	CollectProcessMetrics *bool                               `json:"collect_process_metrics"`
-	Conns                 map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	CacheIDs              *[]string                           `json:"cache_ids"`
-	StatQueueIDs          *[]string                           `json:"stat_queue_ids"`
+	Enabled               *bool                      `json:"enabled"`
+	Path                  *string                    `json:"path"`
+	CollectGoMetrics      *bool                      `json:"collect_go_metrics"`
+	CollectProcessMetrics *bool                      `json:"collect_process_metrics"`
+	Conns                 map[string][]*DynamicConns `json:"conns,omitempty"`
+	CacheIDs              *[]string                  `json:"cache_ids"`
+	StatQueueIDs          *[]string                  `json:"stat_queue_ids"`
 }
 
 // PrometheusAgentCfg represents the configuration of the Prometheus Agent.
@@ -42,7 +42,7 @@ type PrometheusAgentCfg struct {
 	Path                  string
 	CollectGoMetrics      bool
 	CollectProcessMetrics bool
-	Conns                 map[string][]*DynamicStringSliceOpt
+	Conns                 map[string][]*DynamicConns
 	CacheIDs              []string
 	StatQueueIDs          []string
 }
@@ -110,7 +110,7 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		Path:                  c.Path,
 		CollectGoMetrics:      c.CollectGoMetrics,
 		CollectProcessMetrics: c.CollectProcessMetrics,
-		Conns:                 CloneConnsOpt(c.Conns),
+		Conns:                 CloneConnsMap(c.Conns),
 		CacheIDs:              slices.Clone(c.CacheIDs),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}
@@ -132,7 +132,7 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 	if v1.CollectProcessMetrics != v2.CollectProcessMetrics {
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.CacheIDs, v2.CacheIDs) {

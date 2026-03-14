@@ -28,13 +28,13 @@ import (
 func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	jsonCfg := &ActionSJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaEEs:        {{Values: []string{utils.MetaInternal}}},
-			utils.MetaCDRs:       {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaAdminS:     {{Values: []string{utils.MetaInternal}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaEEs:        {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		Indexed_selects:           utils.BoolPointer(false),
 		Tenants:                   &[]string{"itsyscom.com"},
@@ -48,13 +48,13 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	}
 	expected := &ActionSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
-			utils.MetaCDRs:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
-			utils.MetaAccounts:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
-			utils.MetaAdminS:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
 		},
 		IndexedSelects:           false,
 		Tenants:                  &[]string{"itsyscom.com"},
@@ -120,12 +120,12 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 "actions": {
 	"enabled": true,
 	"conns": {
-		"*ees":        [{"values": ["*internal"]}],
-		"*cdrs":       [{"values": ["*internal"]}],
-		"*thresholds": [{"values": ["*internal"]}],
-		"*stats":      [{"values": ["*internal"]}],
-		"*accounts":   [{"values": ["*internal"]}],
-		"*admins":     [{"values": ["*internal"]}]
+		"*ees":        [{"ConnIDs": ["*internal"]}],
+		"*cdrs":       [{"ConnIDs": ["*internal"]}],
+		"*thresholds": [{"ConnIDs": ["*internal"]}],
+		"*stats":      [{"ConnIDs": ["*internal"]}],
+		"*accounts":   [{"ConnIDs": ["*internal"]}],
+		"*admins":     [{"ConnIDs": ["*internal"]}]
 	},
 	"tenants": ["itsyscom.com"],
 	"indexed_selects": false,
@@ -141,13 +141,13 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 
 	eMap := map[string]any{
 		utils.EnabledCfg: true,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaEEs:        {{Values: []string{utils.MetaInternal}}},
-			utils.MetaCDRs:       {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaAccounts:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaAdminS:     {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaEEs:        {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.Tenants:                   []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:         false,
@@ -174,13 +174,13 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 func TestActionSCfgClone(t *testing.T) {
 	ban := &ActionSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaEEs:        {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
-			utils.MetaCDRs:       {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
-			utils.MetaThresholds: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
-			utils.MetaStats:      {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
-			utils.MetaAccounts:   {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
-			utils.MetaAdminS:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
 		},
 		Tenants:                  &[]string{"itsyscom.com"},
 		IndexedSelects:           false,
@@ -207,22 +207,22 @@ func TestActionSCfgClone(t *testing.T) {
 	if (*rcv.SuffixIndexedFields)[0] = utils.EmptyString; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaEEs][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaEEs][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+	if rcv.Conns[utils.MetaEEs][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaEEs][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaCDRs][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaCDRs][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+	if rcv.Conns[utils.MetaCDRs][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaCDRs][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaThresholds][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaThresholds][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+	if rcv.Conns[utils.MetaThresholds][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaThresholds][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaStats][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaStats][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
+	if rcv.Conns[utils.MetaStats][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaStats][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaAccounts][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaAccounts][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
+	if rcv.Conns[utils.MetaAccounts][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaAccounts][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaAdminS][0].Values[0] = utils.EmptyString; ban.Conns[utils.MetaAdminS][0].Values[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS) {
+	if rcv.Conns[utils.MetaAdminS][0].ConnIDs[0] = utils.EmptyString; ban.Conns[utils.MetaAdminS][0].ConnIDs[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.DynaprepaidActionProfile[0] = utils.EmptyString; ban.DynaprepaidActionProfile[0] != "val1" {
@@ -261,13 +261,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 
 	v2 := &ActionSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCDRs:       {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
-			utils.MetaAdminS:     {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCDRs:       {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{"*localhost"}}},
 		},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,
@@ -294,13 +294,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 
 	expected := &ActionSJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCDRs:       {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
-			utils.MetaAdminS:     {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCDRs:       {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{"*localhost"}}},
 		},
 		Tenants:                   &[]string{"cgrates.org"},
 		Indexed_selects:           utils.BoolPointer(true),
@@ -344,13 +344,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 func TestActionSCloneSection(t *testing.T) {
 	actCfg := ActionSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCDRs:       {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
-			utils.MetaAdminS:     {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCDRs:       {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{"*localhost"}}},
 		},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,
@@ -369,13 +369,13 @@ func TestActionSCloneSection(t *testing.T) {
 	}
 	exp := &ActionSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaCDRs:       {{Values: []string{"*localhost"}}},
-			utils.MetaEEs:        {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:   {{Values: []string{"*localhost"}}},
-			utils.MetaAdminS:     {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaCDRs:       {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaEEs:        {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:   {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAdminS:     {{ConnIDs: []string{"*localhost"}}},
 		},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,

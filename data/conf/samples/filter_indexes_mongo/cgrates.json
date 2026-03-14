@@ -40,7 +40,7 @@
 
   "filters": {								
     "conns": {
-    	"*accounts": [{"Values": ["*internal"]}]
+    	"*accounts": [{"ConnIDs": ["*internal"]}]
     },
   },
   

@@ -50,7 +50,7 @@ func TestS3ER(t *testing.T) {
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"conns": {
-		"*sessions": [{"Values": ["*localhost"]}]
+		"*sessions": [{"ConnIDs": ["*localhost"]}]
 	},
 	"readers": [
 		{

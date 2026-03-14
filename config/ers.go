@@ -29,7 +29,7 @@ import (
 // ERsCfg the config for ERs
 type ERsCfg struct {
 	Enabled         bool
-	Conns           map[string][]*DynamicStringSliceOpt
+	Conns           map[string][]*DynamicConns
 	Readers         []*EventReaderCfg
 	PartialCacheTTL time.Duration
 }
@@ -108,7 +108,7 @@ func (c ERsCfg) CloneSection() Section { return c.Clone() }
 func (c ERsCfg) Clone() *ERsCfg {
 	clone := &ERsCfg{
 		Enabled:         c.Enabled,
-		Conns:           CloneConnsOpt(c.Conns),
+		Conns:           CloneConnsMap(c.Conns),
 		Readers:         make([]*EventReaderCfg, len(c.Readers)),
 		PartialCacheTTL: c.PartialCacheTTL,
 	}
@@ -1454,10 +1454,10 @@ func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg)
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled         *bool                               `json:"enabled"`
-	Conns           map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	Readers         *[]*EventReaderJsonCfg              `json:"readers"`
-	PartialCacheTTL *string                             `json:"partial_cache_ttl"`
+	Enabled         *bool                      `json:"enabled"`
+	Conns           map[string][]*DynamicConns `json:"conns,omitempty"`
+	Readers         *[]*EventReaderJsonCfg     `json:"readers"`
+	PartialCacheTTL *string                    `json:"partial_cache_ttl"`
 }
 
 func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
@@ -1467,7 +1467,7 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {

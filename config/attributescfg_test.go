@@ -29,10 +29,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AttributeSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(false),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources: {{Values: []string{"*internal", "*conn1"}}},
-			utils.MetaStats:     {{Values: []string{"*internal", "*conn1"}}},
-			utils.MetaAccounts:  {{Values: []string{"*internal", "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources: {{ConnIDs: []string{"*internal", "*conn1"}}},
+			utils.MetaStats:     {{ConnIDs: []string{"*internal", "*conn1"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*internal", "*conn1"}}},
 		},
 		String_indexed_fields:    &[]string{"*req.index1"},
 		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
@@ -43,10 +43,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaResources: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
-			utils.MetaStats:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
-			utils.MetaAccounts:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
+			utils.MetaStats:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
 		},
 		IndexedSelects:         false,
 		StringIndexedFields:    &[]string{"*req.index1"},
@@ -133,9 +133,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 "attributes": {
 	"enabled": true,
 	"conns": {
-		"*stats":     [{"values": ["*internal"]}],
-		"*resources": [{"values": ["*internal"]}],
-		"*accounts":  [{"values": ["*internal"]}]
+		"*stats":     [{"ConnIDs": ["*internal"]}],
+		"*resources": [{"ConnIDs": ["*internal"]}],
+		"*accounts":  [{"ConnIDs": ["*internal"]}]
 	},
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],
     "string_indexed_fields": ["*req.index1"],
@@ -152,10 +152,10 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg: true,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{utils.MetaInternal}}},
-			utils.MetaResources: {{Values: []string{utils.MetaInternal}}},
-			utils.MetaAccounts:  {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaResources: {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.StringIndexedFieldsCfg:    []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
@@ -203,7 +203,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 }`
 	expectedMap := map[string]any{
 		utils.EnabledCfg:                true,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
@@ -239,7 +239,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 `
 	expectedMap := map[string]any{
 		utils.EnabledCfg:                false,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{},
@@ -263,10 +263,10 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 func TestAttributeSCfgClone(t *testing.T) {
 	ban := &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaAccounts:  {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
-			utils.MetaStats:     {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
-			utils.MetaResources: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaAccounts:  {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
+			utils.MetaStats:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
+			utils.MetaResources: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"}}},
 		},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -279,13 +279,13 @@ func TestAttributeSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaAccounts][0].Values[1] = ""; ban.Conns[utils.MetaAccounts][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaAccounts][0].ConnIDs[1] = ""; ban.Conns[utils.MetaAccounts][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaStats][0].Values[1] = ""; ban.Conns[utils.MetaStats][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaStats][0].ConnIDs[1] = ""; ban.Conns[utils.MetaStats][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaResources][0].Values[1] = ""; ban.Conns[utils.MetaResources][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaResources][0].ConnIDs[1] = ""; ban.Conns[utils.MetaResources][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
@@ -304,10 +304,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 
 	v1 := &AttributeSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{"*localhost"}}},
-			utils.MetaResources: {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*localhost"}}},
 		},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{},
@@ -344,10 +344,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 
 	v2 := &AttributeSCfg{
 		Enabled: true,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{"*birpc"}}},
-			utils.MetaResources: {{Values: []string{"*birpc"}}},
-			utils.MetaAccounts:  {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaResources: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*birpc"}}},
 		},
 		IndexedSelects:      true,
 		StringIndexedFields: &[]string{"*req.Field1"},
@@ -384,10 +384,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 
 	expected := &AttributeSJsonCfg{
 		Enabled: utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{"*birpc"}}},
-			utils.MetaResources: {{Values: []string{"*birpc"}}},
-			utils.MetaAccounts:  {{Values: []string{"*birpc"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaResources: {{ConnIDs: []string{"*birpc"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*birpc"}}},
 		},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: &[]string{"*req.Field1"},
@@ -440,10 +440,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 func TestAttributeSCloneSection(t *testing.T) {
 	attrCfg := &AttributeSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{"*localhost"}}},
-			utils.MetaResources: {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*localhost"}}},
 		},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{},
@@ -462,10 +462,10 @@ func TestAttributeSCloneSection(t *testing.T) {
 
 	exp := &AttributeSCfg{
 		Enabled: false,
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaStats:     {{Values: []string{"*localhost"}}},
-			utils.MetaResources: {{Values: []string{"*localhost"}}},
-			utils.MetaAccounts:  {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaStats:     {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaResources: {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaAccounts:  {{ConnIDs: []string{"*localhost"}}},
 		},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{},

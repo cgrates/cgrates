@@ -59,7 +59,7 @@ type RouteSCfg struct {
 	ExistsIndexedFields    *[]string
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
-	Conns                  map[string][]*DynamicStringSliceOpt
+	Conns                  map[string][]*DynamicConns
 	DefaultRatio           int
 	Opts                   *RoutesOpts
 }
@@ -263,7 +263,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
-		Conns:          CloneConnsOpt(rts.Conns),
+		Conns:          CloneConnsMap(rts.Conns),
 		Opts:           rts.Opts.Clone(),
 	}
 	if rts.StringIndexedFields != nil {
@@ -304,8 +304,8 @@ type RouteSJsonCfg struct {
 	Suffix_indexed_fields    *[]string
 	Exists_indexed_fields    *[]string
 	Notexists_indexed_fields *[]string
-	Nested_fields            *bool                               // applies when indexed fields is not defined
-	Conns                    map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Nested_fields            *bool                      // applies when indexed fields is not defined
+	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	Default_ratio            *int
 	Opts                     *RoutesOptsJson
 }
@@ -359,7 +359,7 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.DefaultRatio != v2.DefaultRatio {

@@ -56,7 +56,7 @@ func TestSessionSv1ProcessEventIPsAuthorize(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-			"*ips": [{"Tenant":"","FilterIDs":[],"Values":["*localhost"]}]
+			"*ips": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
 		},
 	"opts": {
 	}

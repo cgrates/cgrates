@@ -68,7 +68,7 @@
     "id": "*default",
     "enabled": true,
     "conns": {
-    	"*caches": [{"Values": ["engine"]}]
+    	"*caches": [{"ConnIDs": ["engine"]}]
     },
     "tp_in_dir": "/usr/share/cgrates/tariffplans/tutorial/",
     "tp_out_dir": ""
@@ -77,7 +77,7 @@
 "admins": {
     "enabled": true,
 	"conns": {
-		"*caches": [{"Values": ["engine"]}]
+		"*caches": [{"ConnIDs": ["engine"]}]
 	},
 }
 

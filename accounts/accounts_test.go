@@ -1456,7 +1456,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	attrSConn := make(chan birpc.ClientConnector, 1)
 	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, nil, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
-	cfg.AccountSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
+	cfg.AccountSCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	// Set the internal rateS within connMngr
 	rateSConn := make(chan birpc.ClientConnector, 1)
 	rateSrv, _ := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true, func(key string) (newKey string) {
@@ -1464,7 +1464,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	}) // update the name of the functions
 	rateSConn <- rateSrv
 
-	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
@@ -1973,7 +1973,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	attrSConn := make(chan birpc.ClientConnector, 1)
 	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, nil, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
-	cfg.AccountSCfg().Conns[utils.MetaAttributes] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
+	cfg.AccountSCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	// Set the internal rateS within connMngr
 	rateSConn := make(chan birpc.ClientConnector, 1)
 	rateSrv, _ := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true, func(key string) (newKey string) {
@@ -1981,7 +1981,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	}) // update the name of the functions
 	rateSConn <- rateSrv
 
-	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
@@ -2509,7 +2509,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Enabled = true
-	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicStringSliceOpt{{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
+	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 	//cfg.AccountSCfg().IndexedSelects = false
 	cfg.RateSCfg().Enabled = true
 

@@ -36,16 +36,16 @@
 "attributes": {
     "enabled": true,
     "conns": {
-    	"*stats": [{"Values": ["*internal"]}],
-    	"*resources": [{"Values": ["*localhost"]}],
-    	"*accounts": [{"Values": ["*localhost"]}]
+    	"*stats": [{"ConnIDs": ["*internal"]}],
+    	"*resources": [{"ConnIDs": ["*localhost"]}],
+    	"*accounts": [{"ConnIDs": ["*localhost"]}]
     },
 },
 
 "chargers": {
     "enabled": true,
     "conns": {
-    	"*attributes": [{"Values": ["*internal"]}]
+    	"*attributes": [{"ConnIDs": ["*internal"]}]
     },
 },
 
@@ -73,7 +73,7 @@
     "enabled": true,
     "store_interval": "-1",
     "conns": {
-    	"*thresholds": [{"Values": ["*internal"]}]
+    	"*thresholds": [{"ConnIDs": ["*internal"]}]
     },
 },
 
@@ -87,10 +87,10 @@
     "enabled": true,
     "prefix_indexed_fields":["*req.Destination"],
     "conns": {
-    	"*stats": [{"Values": ["*internal"]}],
-    	"*resources": [{"Values": ["*internal"]}],
-    	"*accounts": [{"Values": ["*localhost"]}],
-    	"*rates": [{"Values": ["*internal"]}]
+    	"*stats": [{"ConnIDs": ["*internal"]}],
+    	"*resources": [{"ConnIDs": ["*internal"]}],
+    	"*accounts": [{"ConnIDs": ["*localhost"]}],
+    	"*rates": [{"ConnIDs": ["*internal"]}]
     },
 },
 
@@ -102,42 +102,42 @@
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*resources": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*attributes": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*rates": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*cdrs": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ],
     "*chargers": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*internal"]
+            "ConnIDs": ["*internal"]
          }
     ]
             },
@@ -155,7 +155,7 @@
 "actions": {
     "enabled": true,
     "conns": {
-    	"*accounts": [{"Values": ["*localhost"]}]
+    	"*accounts": [{"ConnIDs": ["*localhost"]}]
     },
 },
 
@@ -166,9 +166,9 @@
 
 "filters": {
     "conns": {
-    	"*stats": [{"Values": ["*internal"]}],
-    	"*resources": [{"Values": ["*internal"]}],
-    	"*accounts": [{"Values": ["*localhost"]}]
+    	"*stats": [{"ConnIDs": ["*internal"]}],
+    	"*resources": [{"ConnIDs": ["*internal"]}],
+    	"*accounts": [{"ConnIDs": ["*localhost"]}]
     },
 }
 

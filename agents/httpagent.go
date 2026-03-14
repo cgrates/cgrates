@@ -30,7 +30,7 @@ import (
 
 // NewHttpAgent will construct a HTTPAgent
 func NewHTTPAgent(connMgr *engine.ConnManager,
-	conns map[string][]*config.DynamicStringSliceOpt,
+	conns map[string][]*config.DynamicConns,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor, caps *engine.Caps) *HTTPAgent {
 	return &HTTPAgent{
@@ -53,7 +53,7 @@ type HTTPAgent struct {
 	reqPayload    string
 	rplyPayload   string
 	reqProcessors []*config.RequestProcessor
-	conns         map[string][]*config.DynamicStringSliceOpt
+	conns         map[string][]*config.DynamicConns
 	caps          *engine.Caps
 }
 

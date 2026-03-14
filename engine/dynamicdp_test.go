@@ -446,8 +446,8 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
+	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
 	}
 	dDP := &DynamicDP{
 		cfg:    cfg,
@@ -478,8 +478,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
+	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 	}
 	dDP := &DynamicDP{
 		cfg:    cfg,
@@ -548,8 +548,8 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
+	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
 	}
 	dDP := &DynamicDP{
 		cfg:    cfg,
@@ -618,8 +618,8 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().Conns[utils.MetaStats] = []*config.DynamicStringSliceOpt{
-		{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}},
+	cfg.FilterSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{
+		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}},
 	}
 	dDP := &DynamicDP{
 		cfg:    cfg,
@@ -707,7 +707,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"sessions": {
 				"conns": {
 					"*attributes": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "Values": ["conn"]},
+						{"FilterIDs": ["*string:~*req.Account:1001"], "ConnIDs": ["conn"]},
 					]
 				}
 			}
@@ -734,12 +734,12 @@ func TestDPFilterSConns(t *testing.T) {
 		cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 			"filters": {
 				"conns": {
-					"*accounts": [{"Values": ["*internal"]}]
+					"*accounts": [{"ConnIDs": ["*internal"]}]
 				}
 			},
 			"chargers": {
 				"conns": {
-					"*attributes": [{"Values": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
+					"*attributes": [{"ConnIDs": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
 				}
 			}
 		}`)
@@ -768,7 +768,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"filters": {
 				"conns": {
 					"*accounts": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "Values": ["*internal"]},
+						{"FilterIDs": ["*string:~*req.Account:1001"], "ConnIDs": ["*internal"]},
 					]
 				}
 			},

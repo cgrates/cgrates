@@ -62,10 +62,10 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.MetaActions: {
 				{
-					Values: []string{"*internal"},
+					ConnIDs: []string{"*internal"},
 				},
 			},
 		},
@@ -92,10 +92,10 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 	rsCfg := &config.ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.MetaThresholds: {
 				{
-					Values: []string{"*birpc"},
+					ConnIDs: []string{"*birpc"},
 				},
 			},
 		},
@@ -193,10 +193,10 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.MetaThresholds: {
 				{
-					Values: []string{"*internal"},
+					ConnIDs: []string{"*internal"},
 				},
 			},
 		},
@@ -223,10 +223,10 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	rsCfg := &config.ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.MetaThresholds: {
 				{
-					Values: []string{"*thresholds"},
+					ConnIDs: []string{"*thresholds"},
 				},
 			},
 		},
@@ -321,10 +321,10 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.Actions: {
 				{
-					Values: []string{"*birpc"},
+					ConnIDs: []string{"*birpc"},
 				},
 			},
 		},
@@ -351,10 +351,10 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 	rsCfg := &config.ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
-		Conns: map[string][]*config.DynamicStringSliceOpt{
+		Conns: map[string][]*config.DynamicConns{
 			utils.MetaThresholds: {
 				{
-					Values: []string{"*birpc"},
+					ConnIDs: []string{"*birpc"},
 				},
 			},
 		},

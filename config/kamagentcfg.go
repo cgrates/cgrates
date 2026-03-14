@@ -77,7 +77,7 @@ func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 // KamAgentCfg is the Kamailio config section
 type KamAgentCfg struct {
 	Enabled    bool
-	Conns      map[string][]*DynamicStringSliceOpt
+	Conns      map[string][]*DynamicConns
 	CreateCdr  bool
 	EvapiConns []*KamConnCfg
 	Timezone   string
@@ -148,7 +148,7 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		Enabled:   ka.Enabled,
 		CreateCdr: ka.CreateCdr,
 		Timezone:  ka.Timezone,
-		Conns:     CloneConnsOpt(ka.Conns),
+		Conns:     CloneConnsMap(ka.Conns),
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
@@ -187,7 +187,7 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 // KamAgentJsonCfg kamailio config section
 type KamAgentJsonCfg struct {
 	Enabled     *bool
-	Conns       map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns       map[string][]*DynamicConns `json:"conns,omitempty"`
 	Create_cdr  *bool
 	Evapi_conns *[]*KamConnJsonCfg
 	Timezone    *string
@@ -215,7 +215,7 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.CreateCdr != v2.CreateCdr {

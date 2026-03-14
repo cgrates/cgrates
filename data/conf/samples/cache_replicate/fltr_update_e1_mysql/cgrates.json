@@ -54,7 +54,7 @@
     "admins": {
         "enabled": true,
         "conns": {
-        	"*caches": [{"Values": ["cache_conn"]}]
+        	"*caches": [{"ConnIDs": ["cache_conn"]}]
         },
     },
     

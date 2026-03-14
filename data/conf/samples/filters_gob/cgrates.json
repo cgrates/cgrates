@@ -46,9 +46,9 @@
 
 "filters": {								
 	"conns": {
-		"*stats": [{"Values": ["conn1"]}],
-		"*resources": [{"Values": ["conn1"]}],
-		"*accounts": [{"Values": ["conn1"]}]
+		"*stats": [{"ConnIDs": ["conn1"]}],
+		"*resources": [{"ConnIDs": ["conn1"]}],
+		"*accounts": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -82,14 +82,14 @@
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
 	"conns": {
-		"*attributes": [{"Values": ["*internal"]}]
+		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 },
 
 "admins": {
 	"enabled": true,
 	"conns": {
-		"*caches": [{"Values": ["conn1"]}]
+		"*caches": [{"ConnIDs": ["conn1"]}]
 	},
 }
 

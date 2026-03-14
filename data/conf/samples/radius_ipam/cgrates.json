@@ -6,21 +6,21 @@
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*localhost"]
+            "ConnIDs": ["*localhost"]
          }
     ],
     "*cdrs": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*localhost"]
+            "ConnIDs": ["*localhost"]
          }
     ],
     "*chargers": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "Values": ["*localhost"]
+            "ConnIDs": ["*localhost"]
          }
     ]
             },
@@ -38,7 +38,7 @@
   "radius_agent": {
     "enabled": true,
     "conns": {
-    	"*sessions": [{"Values": ["*bijson_localhost"]}]
+    	"*sessions": [{"ConnIDs": ["*bijson_localhost"]}]
     },
     "listeners": [
       {

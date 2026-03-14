@@ -25,7 +25,7 @@ import (
 
 // FilterSCfg the filters config section
 type FilterSCfg struct {
-	Conns map[string][]*DynamicStringSliceOpt
+	Conns map[string][]*DynamicConns
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
@@ -44,7 +44,7 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	if jsnCfg.Conns != nil {
 		tagged := tagConns(jsnCfg.Conns)
 		if fSCfg.Conns == nil {
-			fSCfg.Conns = make(map[string][]*DynamicStringSliceOpt)
+			fSCfg.Conns = make(map[string][]*DynamicConns)
 		}
 		for connType, opts := range tagged {
 			fSCfg.Conns[connType] = opts
@@ -67,21 +67,21 @@ func (fSCfg FilterSCfg) CloneSection() Section { return fSCfg.Clone() }
 // Clone returns a deep copy of FilterSCfg
 func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	cln = &FilterSCfg{
-		Conns: CloneConnsOpt(fSCfg.Conns),
+		Conns: CloneConnsMap(fSCfg.Conns),
 	}
 	return
 }
 
 // Filters config
 type FilterSJsonCfg struct {
-	Conns map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns map[string][]*DynamicConns `json:"conns,omitempty"`
 }
 
 func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 	if d == nil {
 		d = new(FilterSJsonCfg)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	return d

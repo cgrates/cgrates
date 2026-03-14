@@ -6,7 +6,7 @@
 		"id": "conecto1",
 		"url": "/conecto",
 		"conns": {
-			"*sessions": [{"Values": ["*localhost"]}]
+			"*sessions": [{"ConnIDs": ["*localhost"]}]
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
@@ -94,7 +94,7 @@
 		"id": "conecto_xml",
 		"url": "/conecto_xml",
 		"conns": {
-			"*sessions": [{"Values": ["*localhost"]}]
+			"*sessions": [{"ConnIDs": ["*localhost"]}]
 		},
 		"request_payload":	"*xml",
 		"reply_payload":	"*xml",
@@ -129,7 +129,7 @@
 		"id": "textplain",
 		"url": "/textplain",
 		"conns": {
-			"*sessions": [{"Values": ["*localhost"]}]
+			"*sessions": [{"ConnIDs": ["*localhost"]}]
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*text_plain",

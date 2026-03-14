@@ -48,8 +48,8 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
-		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
+		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
 
 	metrics := &map[string]*utils.Decimal{
@@ -119,8 +119,8 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
-		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
+		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
 
 	metrics := &map[string]*utils.Decimal{
@@ -201,8 +201,8 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
-		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
+		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
 
 	metrics := &map[string]*utils.Decimal{
@@ -269,8 +269,8 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
-		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
+		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -329,8 +329,8 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Conns = map[string][]*config.DynamicStringSliceOpt{
-		utils.MetaStats: {{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
+		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)

@@ -29,16 +29,16 @@ import (
 
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
-	Enabled            *bool                               `json:"enabled"`
-	Listeners          *[]*RadiusListenerJsonCfg           `json:"listeners"`
-	ClientSecrets      map[string]string                   `json:"client_secrets"`
-	ClientDictionaries map[string][]string                 `json:"client_dictionaries"`
-	ClientDaAddresses  map[string]DAClientOptsJson         `json:"client_da_addresses"`
-	Conns              map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
-	RequestsCacheKey   *string                             `json:"requests_cache_key"`
-	DMRTemplate        *string                             `json:"dmr_template"`
-	CoATemplate        *string                             `json:"coa_template"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	Enabled            *bool                       `json:"enabled"`
+	Listeners          *[]*RadiusListenerJsonCfg   `json:"listeners"`
+	ClientSecrets      map[string]string           `json:"client_secrets"`
+	ClientDictionaries map[string][]string         `json:"client_dictionaries"`
+	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
+	Conns              map[string][]*DynamicConns  `json:"conns,omitempty"`
+	RequestsCacheKey   *string                     `json:"requests_cache_key"`
+	DMRTemplate        *string                     `json:"dmr_template"`
+	CoATemplate        *string                     `json:"coa_template"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"request_processors"`
 }
 
 type RadiusListenerJsonCfg struct {
@@ -61,7 +61,7 @@ type RadiusAgentCfg struct {
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
 	ClientDaAddresses  map[string]DAClientOpts
-	Conns              map[string][]*DynamicStringSliceOpt
+	Conns              map[string][]*DynamicConns
 	RequestsCacheKey   utils.RSRParsers
 	DMRTemplate        string
 	CoATemplate        string
@@ -189,7 +189,7 @@ func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
 		Enabled:          ra.Enabled,
 		Listeners:        slices.Clone(ra.Listeners),
 		ClientSecrets:    maps.Clone(ra.ClientSecrets),
-		Conns:            CloneConnsOpt(ra.Conns),
+		Conns:            CloneConnsMap(ra.Conns),
 		DMRTemplate:      ra.DMRTemplate,
 		CoATemplate:      ra.CoATemplate,
 		RequestsCacheKey: ra.RequestsCacheKey,
@@ -309,7 +309,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 		}
 		d.ClientDaAddresses = clientDaAddresses
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	cacheKey1 := v1.RequestsCacheKey.GetRule()

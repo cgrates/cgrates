@@ -86,7 +86,7 @@ func (hcfgs HTTPAgentCfgs) Clone() *HTTPAgentCfgs {
 type HTTPAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	URL               string
-	Conns             map[string][]*DynamicStringSliceOpt
+	Conns             map[string][]*DynamicConns
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*RequestProcessor
@@ -104,7 +104,7 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	}
 	for connType, opts := range jsnCfg.Conns {
 		if ha.Conns == nil {
-			ha.Conns = make(map[string][]*DynamicStringSliceOpt)
+			ha.Conns = make(map[string][]*DynamicConns)
 		}
 		ha.Conns[connType] = tagInternalConnsOpt(opts, connType)
 	}
@@ -140,7 +140,7 @@ func (ha HTTPAgentCfg) Clone() *HTTPAgentCfg {
 	clone := &HTTPAgentCfg{
 		ID:                ha.ID,
 		URL:               ha.URL,
-		Conns:             CloneConnsOpt(ha.Conns),
+		Conns:             CloneConnsMap(ha.Conns),
 		RequestPayload:    ha.RequestPayload,
 		ReplyPayload:      ha.ReplyPayload,
 		RequestProcessors: make([]*RequestProcessor, len(ha.RequestProcessors)),
@@ -153,12 +153,12 @@ func (ha HTTPAgentCfg) Clone() *HTTPAgentCfg {
 
 // Conecto Agent configuration section
 type HttpAgentJsonCfg struct {
-	ID                *string                             `json:"id"`
-	URL               *string                             `json:"url"`
-	Conns             map[string][]*DynamicStringSliceOpt `json:"conns"`
-	RequestPayload    *string                             `json:"request_payload"`
-	ReplyPayload      *string                             `json:"reply_payload"`
-	RequestProcessors *[]*ReqProcessorJsnCfg              `json:"request_processors"`
+	ID                *string                    `json:"id"`
+	URL               *string                    `json:"url"`
+	Conns             map[string][]*DynamicConns `json:"conns"`
+	RequestPayload    *string                    `json:"request_payload"`
+	ReplyPayload      *string                    `json:"reply_payload"`
+	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
 }
 
 func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJsonCfg {
@@ -177,7 +177,7 @@ func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJ
 	if v1.ReplyPayload != v2.ReplyPayload {
 		d.ReplyPayload = utils.StringPointer(v2.ReplyPayload)
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
@@ -191,7 +191,7 @@ func equalsHTTPAgentCfgs(v1, v2 HTTPAgentCfgs) bool {
 	for i := range v2 {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].URL != v2[i].URL ||
-			!ConnsEqual(v1[i].Conns, v2[i].Conns) ||
+			!ConnsMapEqual(v1[i].Conns, v2[i].Conns) ||
 			v1[i].RequestPayload != v2[i].RequestPayload ||
 			v1[i].ReplyPayload != v2[i].ReplyPayload ||
 			!equalsRequestProcessors(v1[i].RequestProcessors, v2[i].RequestProcessors) {

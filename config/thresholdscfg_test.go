@@ -36,8 +36,8 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"*req.index1"},
 		Notexists_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:            utils.BoolPointer(true),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaActions: {{Values: []string{utils.MetaInternal}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaActions: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		Opts: &ThresholdsOptsJson{},
 	}
@@ -51,9 +51,9 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ExistsIndexedFields:    &[]string{"*req.index1"},
 		NotExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:           true,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaActions: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}},
 			},
 		},
 		Opts: &ThresholdsOpts{
@@ -134,7 +134,7 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
@@ -163,7 +163,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
             "notexists_indexed_fields": [],
 			"nested_fields": true,
 			"conns": {
-				"*actions": [{"Values": ["*internal"]}]
+				"*actions": [{"ConnIDs": ["*internal"]}]
 			},
 		},
 }`
@@ -177,8 +177,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           true,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaActions: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaActions: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
@@ -254,9 +254,9 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index11"},
 		PrefixIndexedFields: &[]string{"req.index22"},
 		SuffixIndexedFields: &[]string{"req.index33"},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaActions: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		NestedFields: true,
@@ -283,9 +283,9 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaActions: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		Nested_fields: utils.BoolPointer(true),

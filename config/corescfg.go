@@ -30,7 +30,7 @@ type CoreSCfg struct {
 	Caps              int
 	CapsStrategy      string
 	CapsStatsInterval time.Duration
-	Conns             map[string][]*DynamicStringSliceOpt
+	Conns             map[string][]*DynamicConns
 	ShutdownTimeout   time.Duration
 }
 
@@ -100,7 +100,7 @@ func (cS CoreSCfg) Clone() (cln *CoreSCfg) {
 		CapsStrategy:      cS.CapsStrategy,
 		CapsStatsInterval: cS.CapsStatsInterval,
 		ShutdownTimeout:   cS.ShutdownTimeout,
-		Conns:             CloneConnsOpt(cS.Conns),
+		Conns:             CloneConnsMap(cS.Conns),
 	}
 	return
 }
@@ -109,7 +109,7 @@ type CoreSJsonCfg struct {
 	Caps                *int
 	Caps_strategy       *string
 	Caps_stats_interval *string
-	Conns               map[string][]*DynamicStringSliceOpt `json:"conns,omitempty"`
+	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Shutdown_timeout    *string
 }
 
@@ -126,7 +126,7 @@ func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 	if v1.CapsStatsInterval != v2.CapsStatsInterval {
 		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
 	}
-	if !ConnsEqual(v1.Conns, v2.Conns) {
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.ShutdownTimeout != v2.ShutdownTimeout {

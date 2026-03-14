@@ -31,9 +31,9 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer("2"),
 		Store_uncompressed_limit: utils.IntPointer(10),
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 		},
 		String_indexed_fields:    &[]string{"*req.string"},
@@ -48,9 +48,9 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		IndexedSelects:         true,
 		StoreInterval:          2,
 		StoreUncompressedLimit: 10,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
 			},
 		},
 		StringIndexedFields:    &[]string{"*req.string"},
@@ -129,7 +129,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:                false,
 		utils.StoreIntervalCfg:          utils.EmptyString,
 		utils.StoreUncompressedLimitCfg: 0,
-		utils.ConnsCfg:                  map[string][]*DynamicStringSliceOpt{},
+		utils.ConnsCfg:                  map[string][]*DynamicConns{},
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{},
@@ -157,7 +157,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			"store_interval": "72h",
 			"store_uncompressed_limit": 1,
 			"conns": {
-				"*thresholds": [{"Values": ["*internal:*thresholds", "*conn1"]}]
+				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"indexed_selects":false,
             "string_indexed_fields": ["*req.string"],
@@ -172,8 +172,8 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          "72h0m0s",
 		utils.StoreUncompressedLimitCfg: 1,
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 		utils.IndexedSelectsCfg:         false,
 		utils.StringIndexedFieldsCfg:    []string{"*req.string"},
@@ -201,9 +201,9 @@ func TestStatSCfgClone(t *testing.T) {
 		IndexedSelects:         true,
 		StoreInterval:          2,
 		StoreUncompressedLimit: 10,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
 			},
 		},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -216,7 +216,7 @@ func TestStatSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaThresholds][0].Values[1] = ""; ban.Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaThresholds][0].ConnIDs[1] = ""; ban.Conns[utils.MetaThresholds][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
@@ -238,9 +238,9 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		IndexedSelects:         false,
 		StoreInterval:          1 * time.Second,
 		StoreUncompressedLimit: 2,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -274,9 +274,9 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		IndexedSelects:         true,
 		StoreInterval:          2 * time.Second,
 		StoreUncompressedLimit: 3,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{"*birpc"}},
+				{ConnIDs: []string{"*birpc"}},
 			},
 		},
 		StringIndexedFields: &[]string{"*req.index11"},
@@ -310,9 +310,9 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer("2s"),
 		Store_uncompressed_limit: utils.IntPointer(3),
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{"*birpc"}},
+				{ConnIDs: []string{"*birpc"}},
 			},
 		},
 		String_indexed_fields: &[]string{"*req.index11"},
@@ -362,9 +362,9 @@ func TestStatSCloneSection(t *testing.T) {
 		IndexedSelects:         false,
 		StoreInterval:          1 * time.Second,
 		StoreUncompressedLimit: 2,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -381,9 +381,9 @@ func TestStatSCloneSection(t *testing.T) {
 		IndexedSelects:         false,
 		StoreInterval:          1 * time.Second,
 		StoreUncompressedLimit: 2,
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		StringIndexedFields: &[]string{"*req.index1"},

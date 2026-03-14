@@ -89,10 +89,10 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		{
 			ID:  "conecto1",
 			URL: "/newConecto",
-			Conns: map[string][]*DynamicStringSliceOpt{
+			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS: {
 					{
-						Values: []string{utils.MetaLocalHost},
+						ConnIDs: []string{utils.MetaLocalHost},
 					},
 				},
 			},
@@ -168,10 +168,10 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		{
 			ID:  "conecto_xml",
 			URL: "/conecto_xml",
-			Conns: map[string][]*DynamicStringSliceOpt{
+			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS: {
 					{
-						Values: []string{utils.MetaLocalHost},
+						ConnIDs: []string{utils.MetaLocalHost},
 					},
 				},
 			},

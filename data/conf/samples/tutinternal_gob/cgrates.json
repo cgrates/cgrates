@@ -47,7 +47,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["conn1"]}]
+		"*chargers": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -60,7 +60,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"Values": ["conn1"]}]
+		"*attributes": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -69,7 +69,7 @@
 	"enabled": true,
 	"store_interval": "-1",
 	"conns": {
-		"*thresholds": [{"Values": ["conn1"]}]
+		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -78,7 +78,7 @@
 	"enabled": true,
 	"store_interval": "-1",
 	"conns": {
-		"*thresholds": [{"Values": ["conn1"]}]
+		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -92,8 +92,8 @@
 	"enabled": true,
 	"prefix_indexed_fields":["*req.Destination"],
 	"conns": {
-		"*stats": [{"Values": ["conn1"]}],
-		"*resources": [{"Values": ["conn1"]}]
+		"*stats": [{"ConnIDs": ["conn1"]}],
+		"*resources": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -105,42 +105,42 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"Values": ["conn1"]
+			"ConnIDs": ["conn1"]
 		 }
 	]
 			},
@@ -154,7 +154,7 @@
 
 "filters": {								
 	"conns": {
-		"*accounts": [{"Values": ["*internal"]}]
+		"*accounts": [{"ConnIDs": ["*internal"]}]
 	},
 },
 

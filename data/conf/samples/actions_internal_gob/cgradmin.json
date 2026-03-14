@@ -42,7 +42,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"Values": ["conn1"]}]
+		"*chargers": [{"ConnIDs": ["conn1"]}]
 	},
 },
 
@@ -120,7 +120,7 @@
 "admins": {
 	"enabled": true,
 	"conns": {
-		"*ees": [{"Values": ["*localhost"]}]
+		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
 },
 

@@ -33,6 +33,12 @@ type DynamicStringSliceOpt struct {
 	Values    []string
 }
 
+type DynamicConns struct {
+	FilterIDs []string
+	Tenant    string
+	ConnIDs   []string
+}
+
 type DynamicStringOpt struct {
 	FilterIDs []string
 	Tenant    string
@@ -105,6 +111,21 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) []*DynamicStringSli
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
 			Values:    slices.Clone(val.Values),
+		}
+	}
+	return cl
+}
+
+func CloneDynamicConns(in []*DynamicConns) []*DynamicConns {
+	if in == nil {
+		return nil
+	}
+	cl := make([]*DynamicConns, len(in))
+	for i, val := range in {
+		cl[i] = &DynamicConns{
+			Tenant:    val.Tenant,
+			FilterIDs: slices.Clone(val.FilterIDs),
+			ConnIDs:   slices.Clone(val.ConnIDs),
 		}
 	}
 	return cl
@@ -265,6 +286,24 @@ func DynamicStringSliceOptEqual(v1, v2 []*DynamicStringSliceOpt) bool {
 			return false
 		}
 		if !slices.Equal(v1[i].Values, v2[i].Values) {
+			return false
+		}
+	}
+	return true
+}
+
+func DynamicConnsEqual(v1, v2 []*DynamicConns) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
+		if v1[i].Tenant != v2[i].Tenant {
+			return false
+		}
+		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
+			return false
+		}
+		if !slices.Equal(v1[i].ConnIDs, v2[i].ConnIDs) {
 			return false
 		}
 	}
@@ -918,20 +957,20 @@ func (dynFlt *DynamicDurationPointerOpt) Value(dP utils.DataProvider) (*time.Dur
 	return dynFlt.value, nil
 }
 
-// CloneConnsOpt deep-copies a connections map.
-func CloneConnsOpt(in map[string][]*DynamicStringSliceOpt) map[string][]*DynamicStringSliceOpt {
+// CloneConnsMap deep-copies a connections map.
+func CloneConnsMap(in map[string][]*DynamicConns) map[string][]*DynamicConns {
 	if in == nil {
 		return nil
 	}
-	cl := make(map[string][]*DynamicStringSliceOpt, len(in))
+	cl := make(map[string][]*DynamicConns, len(in))
 	for k, v := range in {
-		cl[k] = CloneDynamicStringSliceOpt(v)
+		cl[k] = CloneDynamicConns(v)
 	}
 	return cl
 }
 
-// ConnsEqual checks equality of two connections opts maps.
-func ConnsEqual(v1, v2 map[string][]*DynamicStringSliceOpt) bool {
+// ConnsMapEqual checks equality of two connections opts maps.
+func ConnsMapEqual(v1, v2 map[string][]*DynamicConns) bool {
 	if len(v1) != len(v2) {
 		return false
 	}
@@ -940,7 +979,7 @@ func ConnsEqual(v1, v2 map[string][]*DynamicStringSliceOpt) bool {
 		if !has {
 			return false
 		}
-		if !DynamicStringSliceOptEqual(vals1, vals2) {
+		if !DynamicConnsEqual(vals1, vals2) {
 			return false
 		}
 	}

@@ -33,15 +33,15 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{utils.MetaInternal, "*conn1"}},
+				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
 			},
 		},
 		Timezone: utils.StringPointer("UTC"),
@@ -67,15 +67,15 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
 			},
 		},
 		Timezone: "UTC",
@@ -227,9 +227,9 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			}
 		],
 		"conns": {
-			"*sessions": [{"values": ["*internal"]}],
-			"*stats": [{"values": ["*internal"]}],
-			"*thresholds": [{"values": ["*internal"]}]
+			"*sessions": [{"ConnIDs": ["*internal"]}],
+			"*stats": [{"ConnIDs": ["*internal"]}],
+			"*thresholds": [{"ConnIDs": ["*internal"]}]
 		},
 		"timezone": "",
 		"request_processors": [],
@@ -241,10 +241,10 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			utils.AddressCfg: "127.0.0.1:2053",
 			utils.NetworkCfg: "udp",
 		}},
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.MetaInternal}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
 		utils.TimezoneCfg:          "",
 		utils.RequestProcessorsCfg: []map[string]any{},
@@ -267,9 +267,9 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				}
 			],
 			"conns": {
-				"*sessions": [{"values": ["*internal:*sessions", "*conn1"]}],
-				"*stats": [{"values": ["*internal:*stats", "*conn1"]}],
-				"*thresholds": [{"values": ["*internal:*thresholds", "*conn1"]}]
+				"*sessions": [{"ConnIDs": ["*internal:*sessions", "*conn1"]}],
+				"*stats": [{"ConnIDs": ["*internal:*stats", "*conn1"]}],
+				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"timezone": "UTC",
 			"request_processors": [
@@ -304,10 +304,10 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				utils.NetworkCfg: "udp",
 			},
 		},
-		utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaStats:      {{Values: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaThresholds: {{Values: []string{utils.MetaInternal, "*conn1"}}},
+		utils.ConnsCfg: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaStats:      {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 		},
 		utils.TimezoneCfg: "UTC",
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -368,15 +368,15 @@ func TestDNSAgentCfgClone(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
+				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"}},
 			},
 		},
 		Timezone: "UTC",
@@ -397,13 +397,13 @@ func TestDNSAgentCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.Conns[utils.MetaSessionS][0].Values[1] = ""; ban.Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaSessionS][0].ConnIDs[1] = ""; ban.Conns[utils.MetaSessionS][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaStats][0].Values[1] = ""; ban.Conns[utils.MetaStats][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaStats][0].ConnIDs[1] = ""; ban.Conns[utils.MetaStats][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Conns[utils.MetaThresholds][0].Values[1] = ""; ban.Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
+	if rcv.Conns[utils.MetaThresholds][0].ConnIDs[1] = ""; ban.Conns[utils.MetaThresholds][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
@@ -422,15 +422,15 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 				Network: "tcp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		Timezone:          "UTC",
@@ -445,15 +445,15 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		Timezone: "EEST",
@@ -472,15 +472,15 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 			utils.MetaThresholds: {
-				{Values: []string{"*internal"}},
+				{ConnIDs: []string{"*internal"}},
 			},
 		},
 		Timezone: utils.StringPointer("EEST"),
@@ -613,14 +613,14 @@ func TestDnsAgentCloneSection(t *testing.T) {
 				Network: "tcp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}}},
+				{ConnIDs: []string{"*localhost"}}},
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		Timezone:          "UTC",
@@ -635,14 +635,14 @@ func TestDnsAgentCloneSection(t *testing.T) {
 				Network: "tcp",
 			},
 		},
-		Conns: map[string][]*DynamicStringSliceOpt{
+		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 			utils.MetaStats: {
-				{Values: []string{"*localhost"}}},
+				{ConnIDs: []string{"*localhost"}}},
 			utils.MetaThresholds: {
-				{Values: []string{"*localhost"}},
+				{ConnIDs: []string{"*localhost"}},
 			},
 		},
 		Timezone:          "UTC",

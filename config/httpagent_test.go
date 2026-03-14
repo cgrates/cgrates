@@ -31,10 +31,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 		{
 			ID:  utils.StringPointer("RandomID"),
 			URL: utils.StringPointer("/randomURL"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-				utils.MetaStats:      {{Values: []string{"*internal"}}},
-				utils.MetaThresholds: {{Values: []string{"*internal"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 			},
 			ReplyPayload:   utils.StringPointer(utils.MetaXml),
 			RequestPayload: utils.StringPointer(utils.MetaUrl),
@@ -63,10 +63,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 		{
 			ID:  "RandomID",
 			URL: "/randomURL",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
-				utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
-				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*internal:*sessions"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*internal:*stats"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds"}}},
 			},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -101,10 +101,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 		{
 			ID:  utils.StringPointer("conecto1"),
 			URL: utils.StringPointer("/conecto"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.StringPointer(utils.MetaUrl),
 			ReplyPayload:   utils.StringPointer(utils.MetaXml),
@@ -156,10 +156,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 		{
 			ID:  utils.StringPointer("conecto_xml"),
 			URL: utils.StringPointer("/conecto_xml"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.StringPointer("*xml"),
 			ReplyPayload:   utils.StringPointer("*xml"),
@@ -178,10 +178,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 		&HTTPAgentCfg{
 			ID:  "conecto1",
 			URL: "/conecto",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,
@@ -226,10 +226,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 		}, &HTTPAgentCfg{
 			ID:  "conecto_xml",
 			URL: "/conecto_xml",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaStats:      {{Values: []string{utils.MetaLocalHost}}},
-				utils.MetaThresholds: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaStats:      {{ConnIDs: []string{utils.MetaLocalHost}}},
+				utils.MetaThresholds: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.MetaXml,
 			ReplyPayload:   utils.MetaXml,
@@ -256,8 +256,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
 		ID:  utils.StringPointer("conecto1"),
 		URL: utils.StringPointer("/conecto"),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
 		RequestPayload: utils.StringPointer("*url"),
 		ReplyPayload:   utils.StringPointer("*xml"),
@@ -275,8 +275,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := HTTPAgentCfg{
 		ID:  "conecto1",
 		URL: "/conecto",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
@@ -302,8 +302,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 		{
 			ID:  utils.StringPointer("conecto1"),
 			URL: utils.StringPointer("/conecto"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.StringPointer(utils.MetaUrl),
 			ReplyPayload:   utils.StringPointer(utils.MetaXml),
@@ -355,8 +355,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 		{
 			ID:  utils.StringPointer("conecto_xml"),
 			URL: utils.StringPointer("/conecto_xml"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{utils.MetaLocalHost}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{utils.MetaLocalHost}}},
 			},
 			RequestPayload: utils.StringPointer("*xml"),
 			ReplyPayload:   utils.StringPointer("*xml"),
@@ -438,9 +438,9 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		"id": "conecto1",
 		"url": "/conecto",
 		"conns": {
-			"*sessions": [{"values": ["*birpc_internal", "*localhost", "conn1"]}],
-			"*stats": [{"values": ["*birpc_internal", "*localhost", "conn1"]}],
-			"*thresholds": [{"values": ["*birpc_internal", "*localhost", "conn1"]}]
+			"*sessions": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*stats": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*thresholds": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}]
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
@@ -473,10 +473,10 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		{
 			utils.IDCfg:  "conecto1",
 			utils.URLCfg: "/conecto",
-			utils.ConnsCfg: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
-				utils.MetaStats:      {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
-				utils.MetaThresholds: {{Values: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+			utils.ConnsCfg: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+				utils.MetaStats:      {{ConnIDs: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"}}},
 			},
 			utils.RequestPayloadCfg: "*url",
 			utils.ReplyPayloadCfg:   "*xml",
@@ -511,10 +511,10 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 		{
 			ID:  "RandomID",
 			URL: "/randomURL",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions", "*conn1"}}},
-				utils.MetaStats:      {{Values: []string{"*internal:*stats", "*conn1"}}},
-				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds", "*conn1"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*internal:*sessions", "*conn1"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*internal:*stats", "*conn1"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds", "*conn1"}}},
 			},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -539,13 +539,13 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, *rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(*rcv))
 	}
-	if (*rcv)[0].Conns[utils.MetaSessionS][0].Values[1] = ""; ban[0].Conns[utils.MetaSessionS][0].Values[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaSessionS][0].ConnIDs[1] = ""; ban[0].Conns[utils.MetaSessionS][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv)[0].Conns[utils.MetaStats][0].Values[1] = ""; ban[0].Conns[utils.MetaStats][0].Values[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaStats][0].ConnIDs[1] = ""; ban[0].Conns[utils.MetaStats][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv)[0].Conns[utils.MetaThresholds][0].Values[1] = ""; ban[0].Conns[utils.MetaThresholds][0].Values[1] != "*conn1" {
+	if (*rcv)[0].Conns[utils.MetaThresholds][0].ConnIDs[1] = ""; ban[0].Conns[utils.MetaThresholds][0].ConnIDs[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv)[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
@@ -558,10 +558,10 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 		{
 			ID:  "RANDOM_ID",
 			URL: "/url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-				utils.MetaStats:      {{Values: []string{"*localhost"}}},
-				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -591,10 +591,10 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 		{
 			ID:  "RANDOM_ID2",
 			URL: "/url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-				utils.MetaStats:      {{Values: []string{"*localhost"}}},
-				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -641,8 +641,8 @@ func TestGetHttpAgentJsonCfg(t *testing.T) {
 		{
 			ID:  utils.StringPointer("ID_1"),
 			URL: utils.StringPointer("/url"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 			},
 		},
 	}
@@ -650,8 +650,8 @@ func TestGetHttpAgentJsonCfg(t *testing.T) {
 	expected := &HttpAgentJsonCfg{
 		ID:  utils.StringPointer("ID_1"),
 		URL: utils.StringPointer("/url"),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 
@@ -675,8 +675,8 @@ func TestGetHttpAgentCfg(t *testing.T) {
 		{
 			ID:  "ID_1",
 			URL: "/url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 			},
 		},
 	}
@@ -684,8 +684,8 @@ func TestGetHttpAgentCfg(t *testing.T) {
 	expected := &HTTPAgentCfg{
 		ID:  "ID_1",
 		URL: "/url",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
 	}
 
@@ -707,10 +707,10 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	v1 := &HTTPAgentCfg{
 		ID:  "http_agent",
 		URL: "http_url",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*localhost:*sessions"}}},
-			utils.MetaStats:      {{Values: []string{"*localhost"}}},
-			utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost:*sessions"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
 		RequestPayload: "request_payload",
 		ReplyPayload:   "reply_payload",
@@ -724,10 +724,10 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	v2 := &HTTPAgentCfg{
 		ID:  "http_agent2",
 		URL: "http_url2",
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
-			utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal:*sessions"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal:*stats"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds"}}},
 		},
 		RequestPayload:    "request_payload2",
 		ReplyPayload:      "reply_payload2",
@@ -737,10 +737,10 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	expected := &HttpAgentJsonCfg{
 		ID:  utils.StringPointer("http_agent2"),
 		URL: utils.StringPointer("http_url2"),
-		Conns: map[string][]*DynamicStringSliceOpt{
-			utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-			utils.MetaStats:      {{Values: []string{"*internal"}}},
-			utils.MetaThresholds: {{Values: []string{"*internal"}}},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+			utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestPayload:    utils.StringPointer("request_payload2"),
 		ReplyPayload:      utils.StringPointer("reply_payload2"),
@@ -769,10 +769,10 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 		{
 			ID:  "http_agent",
 			URL: "http_url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-				utils.MetaStats:      {{Values: []string{"*localhost"}}},
-				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
 			RequestPayload: "request_payload",
 			ReplyPayload:   "reply_payload",
@@ -788,10 +788,10 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 		{
 			ID:  "http_agent2",
 			URL: "http_url2",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*internal:*sessions"}}},
-				utils.MetaStats:      {{Values: []string{"*internal:*stats"}}},
-				utils.MetaThresholds: {{Values: []string{"*internal:*thresholds"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*internal:*sessions"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*internal:*stats"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds"}}},
 			},
 			RequestPayload:    "request_payload2",
 			ReplyPayload:      "reply_payload2",
@@ -803,10 +803,10 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 		{
 			ID:  utils.StringPointer("http_agent2"),
 			URL: utils.StringPointer("http_url2"),
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*internal"}}},
-				utils.MetaStats:      {{Values: []string{"*internal"}}},
-				utils.MetaThresholds: {{Values: []string{"*internal"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*internal"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*internal"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 			},
 			RequestPayload:    utils.StringPointer("request_payload2"),
 			ReplyPayload:      utils.StringPointer("reply_payload2"),
@@ -853,10 +853,10 @@ func TestHttpAgentCloneSection(t *testing.T) {
 		{
 			ID:  "http_agent",
 			URL: "http_url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-				utils.MetaStats:      {{Values: []string{"*localhost"}}},
-				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
 			RequestPayload: "request_payload",
 			ReplyPayload:   "reply_payload",
@@ -867,10 +867,10 @@ func TestHttpAgentCloneSection(t *testing.T) {
 		{
 			ID:  "http_agent",
 			URL: "http_url",
-			Conns: map[string][]*DynamicStringSliceOpt{
-				utils.MetaSessionS:   {{Values: []string{"*localhost"}}},
-				utils.MetaStats:      {{Values: []string{"*localhost"}}},
-				utils.MetaThresholds: {{Values: []string{"*localhost"}}},
+			Conns: map[string][]*DynamicConns{
+				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
+				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
 			RequestPayload:    "request_payload",
 			ReplyPayload:      "reply_payload",

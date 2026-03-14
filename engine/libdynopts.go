@@ -175,7 +175,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider,
 
 // GetConnIDs resolves dynamic connection IDs.
 // If optNames are provided, *opts in dP are checked first.
-func GetConnIDs(ctx *context.Context, dynConns []*config.DynamicStringSliceOpt,
+func GetConnIDs(ctx *context.Context, dynConns []*config.DynamicConns,
 	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
 	if len(optNames) > 0 {
 		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
@@ -192,18 +192,18 @@ func GetConnIDs(ctx *context.Context, dynConns []*config.DynamicStringSliceOpt,
 			continue
 		}
 		if len(opt.FilterIDs) == 0 {
-			return opt.Values, nil
+			return opt.ConnIDs, nil
 		}
 		if pass, err := fltrS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil {
 			return nil, err
 		} else if pass {
-			return opt.Values, nil
+			return opt.ConnIDs, nil
 		}
 	}
 	return nil, nil
 }
 
-func getConnIDsWithDP(ctx *context.Context, dynConns []*config.DynamicStringSliceOpt,
+func getConnIDsWithDP(ctx *context.Context, dynConns []*config.DynamicConns,
 	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
 	if len(optNames) > 0 {
 		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
@@ -220,12 +220,12 @@ func getConnIDsWithDP(ctx *context.Context, dynConns []*config.DynamicStringSlic
 			continue
 		}
 		if len(opt.FilterIDs) == 0 {
-			return opt.Values, nil
+			return opt.ConnIDs, nil
 		}
 		if pass, err := fltrS.PassWithDP(ctx, tnt, opt.FilterIDs, dP); err != nil {
 			return nil, err
 		} else if pass {
-			return opt.Values, nil
+			return opt.ConnIDs, nil
 		}
 	}
 	return nil, nil
