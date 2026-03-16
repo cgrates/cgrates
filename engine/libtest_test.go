@@ -105,7 +105,7 @@ func TestGetDefaultEmptyCacheStats(t *testing.T) {
 func TestKillEngine(t *testing.T) {
 	err := KillEngine(10)
 	if err == nil {
-		t.Errorf("expected no error, got %v", err)
+		t.Errorf("expected an error, got nil")
 	}
 	err = KillEngine(-1)
 	if err == nil {
