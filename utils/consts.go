@@ -1729,6 +1729,7 @@ const (
 	APIerSv1SetDestination                    = "APIerSv1.SetDestination"
 	APIerSv1GetDataCost                       = "APIerSv1.GetDataCost"
 	APIerSv1ReplayFailedPosts                 = "APIerSv1.ReplayFailedPosts"
+	APIerSv1ReplayFailedReplications          = "APIerSv1.ReplayFailedReplications"
 	APIerSv1RemoveAccount                     = "APIerSv1.RemoveAccount"
 	APIerSv1DebitUsage                        = "APIerSv1.DebitUsage"
 	APIerSv1GetCacheStats                     = "APIerSv1.GetCacheStats"
