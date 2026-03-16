@@ -115,6 +115,11 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 
 // Registers a new BiJsonRpc name
 func (s *Server) BiRPCRegisterName(name string, rcvr any) {
+	s.RLock()
+	defer s.RUnlock()
+	if s.birpcSrv == nil {
+		return
+	}
 	s.birpcSrv.RegisterName(name, rcvr)
 }
 
