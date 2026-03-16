@@ -27,7 +27,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"reflect"
 	"runtime"
@@ -98,6 +97,7 @@ var (
 		testCDRsExpInitDB,
 		testCDRsExpPrepareHTTP,
 		testCDRsExpPrepareAMQP,
+		testCDRsExpPrepareKafka,
 		testCDRsExpStartEngine,
 		testCDRsExpInitRPC,
 		testCDRsExpLoadAddCharger,
@@ -109,6 +109,7 @@ var (
 		testCDRsExpStopEngine,
 		testCDRsExpStopHTTPServer,
 		testCDRsExpCloseAMQP,
+		testCDRsExpCloseKafka,
 	}
 )
 
@@ -206,6 +207,21 @@ func testCDRsExpPrepareAMQP(t *testing.T) {
 	}
 }
 
+func testCDRsExpPrepareKafka(t *testing.T) {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	if err := conn.CreateTopics(kafka.TopicConfig{
+		Topic:             "cgrates_cdrs",
+		NumPartitions:     1,
+		ReplicationFactor: 1,
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testCDRsExpStartEngine(t *testing.T) {
 	runtime.Gosched()
 	if _, err := engine.StopStartEngine(cdrsExpCfgPath, *utils.WaitRater); err != nil {
@@ -237,10 +253,6 @@ func testCDRsExpLoadAddCharger(t *testing.T) {
 }
 
 func testCDRsExpExportEvent(t *testing.T) {
-	// stop RabbitMQ server so we can test reconnects
-	if err := exec.Command("service", "rabbitmq-server", "stop").Run(); err != nil {
-		t.Error(err)
-	}
 	var reply string
 	if err := cdrsExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
@@ -249,16 +261,6 @@ func testCDRsExpExportEvent(t *testing.T) {
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
 		t.Error("Unexpected error: ", err)
 	}
-	// time.Sleep(50 * time.Millisecond)
-	// filesInDir, _ := os.ReadDir(cdrsExpCfg.EEsCfg().Exporters[1].FailedPostsDir)
-	// if len(filesInDir) != 0 {
-	// 	t.Errorf("Should be no files in directory: %s", cdrsExpCfg.EEsCfg().Exporters[1].FailedPostsDir)
-	// }
-	// start RabbitMQ server so we can test reconnects
-	if err := exec.Command("service", "rabbitmq-server", "start").Run(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(2 * time.Second)
 	var err error
 	if cdrsExpAMQPCon, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {
 		t.Fatal(err)
@@ -394,6 +396,15 @@ func testCDRsExpStopHTTPServer(t *testing.T) {
 	if err = cdrsExpHTTPServer.Shutdown(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func testCDRsExpCloseKafka(t *testing.T) {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	_ = conn.DeleteTopics("cgrates_cdrs")
 }
 
 func testCDRsExpCloseAMQP(t *testing.T) {
