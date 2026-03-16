@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -32,12 +33,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	amqp "github.com/rabbitmq/amqp091-go"
 	kafka "github.com/segmentio/kafka-go"
 )
@@ -46,18 +47,14 @@ var (
 	cdrsMasterCfgPath, cdrsSlaveCfgPath string
 	cdrsMasterCfgDIR, cdrsSlaveCfgDIR   string
 	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
-	cdrsMasterRpc                       *rpcclient.RPCClient
+	cdrsMasterRpc                       *birpc.Client
+	cdrsSlaveRpc                        *birpc.Client
 	httpCGRID                           = utils.UUIDSha1Prefix()
 	amqpCGRID                           = utils.UUIDSha1Prefix()
 	failoverContent                     = [][]byte{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
 
 	sTestsCDRsOnExp = []func(t *testing.T){
-		testCDRsOnExpInitConfig,
-		testCDRsOnExpInitCdrDb,
-		testCDRsOnExpStartMasterEngine,
-		testCDRsOnExpStartSlaveEngine,
 		testCDRsOnExpAMQPQueuesCreation,
-		testCDRsOnExpInitMasterRPC,
 		testCDRsOnExpLoadDefaultCharger,
 		testCDRsOnExpDisableOnlineExport,
 		testCDRsOnExpHttpCdrReplication,
@@ -82,60 +79,37 @@ func TestCDRsOnExp(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
+	if out, err := exec.Command("pgrep", "-a", "cgr-engine").Output(); err == nil {
+		t.Fatalf("stale cgr-engine process from a previous test: %s", bytes.TrimSpace(out))
+	}
+
+	cdrsMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsMasterCfgDIR)
+	cdrsSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsSlaveCfgDIR)
+
+	masterNG := engine.TestEngine{
+		ConfigPath: cdrsMasterCfgPath,
+		PreStartHook: func(tb testing.TB, cfg *config.CGRConfig) {
+			if err := os.RemoveAll(cfg.EEsCfg().FailedPosts.Dir); err != nil {
+				tb.Fatal("error removing folder: ", cfg.EEsCfg().FailedPosts.Dir, err)
+			}
+			if err := os.MkdirAll(cfg.EEsCfg().FailedPosts.Dir, 0700); err != nil {
+				tb.Fatal(err)
+			}
+		},
+	}
+	cdrsMasterRpc, cdrsMasterCfg = masterNG.Run(t)
+
+	slaveNG := engine.TestEngine{
+		ConfigPath:     cdrsSlaveCfgPath,
+		PreserveDataDB: true,
+		PreserveStorDB: true,
+	}
+	cdrsSlaveRpc, cdrsSlaveCfg = slaveNG.Run(t)
+
 	for _, stest := range sTestsCDRsOnExp {
 		t.Run(*utils.DBType, stest)
 	}
 }
-
-func testCDRsOnExpInitConfig(t *testing.T) {
-	var err error
-	cdrsMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsMasterCfgDIR)
-	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
-		t.Fatal("Got config error: ", err.Error())
-	}
-	cdrsSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsSlaveCfgDIR)
-	if cdrsSlaveCfg, err = config.NewCGRConfigFromPath(cdrsSlaveCfgPath); err != nil {
-		t.Fatal("Got config error: ", err.Error())
-	}
-}
-
-// InitDb so we can rely on count
-func testCDRsOnExpInitCdrDb(t *testing.T) {
-	if err := engine.InitDataDB(cdrsMasterCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitDataDB(cdrsSlaveCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDb(cdrsSlaveCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.RemoveAll(cdrsMasterCfg.EEsCfg().FailedPosts.Dir); err != nil {
-		t.Fatal("Error removing folder: ", cdrsMasterCfg.EEsCfg().FailedPosts.Dir, err)
-	}
-
-	if err := os.MkdirAll(cdrsMasterCfg.EEsCfg().FailedPosts.Dir, 0700); err != nil {
-		t.Error(err)
-	}
-
-}
-
-func testCDRsOnExpStartMasterEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCDRsOnExpStartSlaveEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Create Queues dor amq
 
 func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -178,16 +152,6 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 	}
 	if err = v.Close(); err != nil {
 		t.Fatal(err)
-	}
-}
-
-// Connect rpc client to rater
-func testCDRsOnExpInitMasterRPC(t *testing.T) {
-	var err error
-	cdrsMasterRpc, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		0, utils.FibDuration, time.Second, 5*time.Second, rpcclient.JSONrpc, nil, false, nil)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
@@ -288,12 +252,6 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
-	cdrsSlaveRpc, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
-		0, utils.FibDuration, time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call(context.Background(), utils.APIerSv2GetCDRs,
 		&utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
@@ -368,11 +326,6 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		t.Error("No message received from RabbitMQ")
 	}
 	conn.Close()
-	// restart RabbitMQ server so we can test reconnects
-	if err := exec.Command("service", "rabbitmq-server", "restart").Run(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(2 * time.Second)
 	testCdr := &engine.CDR{
 		CGRID:       amqpCGRID,
 		ToR:         utils.MetaVoice,
@@ -505,9 +458,6 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 }
 
 func testCDRsOnExpStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		t.Fatal(err)
@@ -526,4 +476,11 @@ func testCDRsOnExpStopEngine(t *testing.T) {
 	if _, err = ch.QueueDelete("queue1", false, false, true); err != nil {
 		t.Fatal(err)
 	}
+
+	kConn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer kConn.Close()
+	_ = kConn.DeleteTopics("cgrates_cdrs")
 }

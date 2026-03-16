@@ -45,6 +45,7 @@
 "ees": {
 	"enabled": true,
 	"failed_posts": {
+	    "dir": "/tmp/cgrates/failed_posts",
 	    "ttl": "1"
 	},
 	"exporters": [
