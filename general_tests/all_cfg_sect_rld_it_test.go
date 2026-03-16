@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -139,9 +138,6 @@ func testSectResetStorDb(t *testing.T) {
 }
 
 func testSectStartEngine(t *testing.T) {
-	if err := os.MkdirAll("/var/spool/cgrates/analyzers", 0755); err != nil {
-		t.Error(err)
-	}
 	if _, err := engine.StopStartEngine(testSectCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -1298,13 +1294,13 @@ func testSectConfigSReloadAnalyzer(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"enabled\":true,\"index_type\":\"*scorch\",\"ttl\":\"24h0m0s\"}}",
+		Config: "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"enabled\":true,\"index_type\":\"*internal\",\"ttl\":\"24h0m0s\"}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"enabled\":true,\"index_type\":\"*scorch\",\"ttl\":\"24h0m0s\"}}"
+	cfgStr := "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"enabled\":true,\"index_type\":\"*internal\",\"ttl\":\"24h0m0s\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1465,9 +1461,6 @@ func testSectConfigSReloadAPIBan(t *testing.T) {
 }
 
 func testSectStopCgrEngine(t *testing.T) {
-	if err := os.RemoveAll("/var/spool/cgrates/analyzers"); err != nil {
-		t.Error(err)
-	}
 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
