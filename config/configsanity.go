@@ -30,6 +30,18 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+func checkAttributeIDPath(field *FCTemplate) error {
+	if field.AttributeID == "" {
+		return nil
+	}
+	prefix, _, _ := strings.Cut(field.Path, utils.NestingSep)
+	if prefix != utils.MetaRep && prefix != utils.MetaExp {
+		return fmt.Errorf("attribute_id is only supported on %s and %s paths, got %s",
+			utils.MetaRep, utils.MetaExp, field.Path)
+	}
+	return nil
+}
+
 // CheckConfigSanity is used in cgr-engine
 func (cfg *CGRConfig) CheckConfigSanity() error {
 	return cfg.checkConfigSanity()
@@ -309,6 +321,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.DiameterAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, val.path, utils.Values)
@@ -329,6 +344,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.DiameterAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DiameterAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
@@ -346,6 +364,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.DiameterAgent, err, field.Tag)
 				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
@@ -405,6 +426,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.RadiusAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.RadiusAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
@@ -420,6 +444,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.RadiusAgent, err, field.Tag)
 				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
@@ -473,6 +500,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.DNSAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DNSAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
@@ -488,6 +518,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.DNSAgent, err, field.Tag)
 				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
@@ -547,6 +580,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.HTTPAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.HTTPAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
@@ -562,6 +598,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.HTTPAgent, err, field.Tag)
 				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
@@ -616,6 +655,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.SIPAgent, err, field.Tag)
+				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
 						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.SIPAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
@@ -631,6 +673,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.SIPAgent, err, field.Tag)
 				}
 				for _, val := range field.Value {
 					if err := utils.IsPathValidForExporters(val.path); err != nil {
@@ -897,6 +942,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Path, utils.Path)
 				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.ERs, err, field.Tag)
+				}
 				if field.Type == utils.MetaVariable ||
 					field.Type == utils.MetaComposed ||
 					field.Type == utils.MetaGroup ||
@@ -925,6 +973,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.ERs, err, field.Tag)
 				}
 				if field.Type == utils.MetaVariable ||
 					field.Type == utils.MetaComposed ||
@@ -1064,6 +1115,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 				if err := utils.IsPathValidForExporters(field.Path); err != nil {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, err, field.Path, utils.Path)
+				}
+				if err := checkAttributeIDPath(field); err != nil {
+					return fmt.Errorf("<%s> %s at %s", utils.EEs, err, field.Tag)
 				}
 				if field.Type == utils.MetaVariable ||
 					field.Type == utils.MetaComposed ||

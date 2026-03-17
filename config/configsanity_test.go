@@ -1996,3 +1996,50 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 		t.Errorf("expected: %s, received: %s", experr, err)
 	}
 }
+
+func TestConfigSanityAttributeIDPath(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.sessionSCfg.Enabled = true
+	cfg.rpcConns["test"] = nil
+
+	cfg.diameterAgentCfg = &DiameterAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"test"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "attrTest",
+				RequestFields: []*FCTemplate{
+					{Tag: "XmlAttr", Path: "*cgreq.SomeField", Type: "*variable",
+						AttributeID: "myattr",
+						Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+				},
+				ReplyFields: []*FCTemplate{},
+			},
+		},
+	}
+
+	expected := "<DiameterAgent> attribute_id is only supported on *rep and *exp paths, got *cgreq.SomeField at XmlAttr"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+
+	// attribute_id on *rep path should pass
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*rep.SomeField"
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = "myattr"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *rep path: %v", err)
+	}
+
+	// attribute_id on *exp path should pass
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*exp.SomeField"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *exp path: %v", err)
+	}
+
+	// no attribute_id should always pass
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*cgreq.SomeField"
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = ""
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error without attribute_id: %v", err)
+	}
+}

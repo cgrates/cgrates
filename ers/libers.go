@@ -97,8 +97,7 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 					utils.ERs, utils.ToJSON(cgrEv), err.Error()))
 			return
 		}
-		if ev := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant,
-			utils.NestingSep, agReq.Opts); ev != nil { // add the modified fields in the event
+		if ev := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, agReq.Opts); ev != nil { // add the modified fields in the event
 			for k, v := range ev.Event {
 				cgrEv.Event[k] = v
 			}
