@@ -54,6 +54,7 @@ var methodFlags = map[string][]string{
 		utils.MetaRoutes,
 		utils.MetaStats,
 		utils.MetaThresholds,
+		utils.MetaAuthorize,
 	},
 	utils.MetaInitiate: {
 		utils.MetaInitiate,
@@ -74,6 +75,7 @@ var methodFlags = map[string][]string{
 		utils.MetaResources,
 		utils.MetaStats,
 		utils.MetaThresholds,
+		utils.MetaCDRs,
 	},
 }
 
@@ -345,6 +347,13 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 			usage.Map[k] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapMaxUsage] = usage
+	}
+	if v1Rply.IPsAllocation != nil {
+		ipAlloc := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+		for k, v := range v1Rply.IPsAllocation {
+			ipAlloc.Map[k] = &utils.DataNode{Type: utils.NMMapType, Map: v.AsNavigableMap()}
+		}
+		cgrReply[utils.AllocatedIPField] = ipAlloc
 	}
 	if v1Rply.ResourceAllocation != nil {
 		res := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}

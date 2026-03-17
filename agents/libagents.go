@@ -145,11 +145,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		cdrEv := cgrEv.Clone()
-		cdrEv.APIOpts = map[string]any{utils.MetaCDRs: true}
 		var rplyCDRs sessions.V1ProcessEventReply
 		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
-			cdrEv, &rplyCDRs); err != nil {
+			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 			if replyState == utils.OK {
 				replyState = utils.ErrReplyStateCDRs

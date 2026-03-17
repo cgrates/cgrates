@@ -961,6 +961,11 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 	if len(conns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.IPs)
 	}
+	originID, _ := cgrEv.OptAsString(utils.MetaOriginID)
+	if originID == "" {
+		originID = utils.UUIDSha1Prefix()
+	}
+	cgrEv.APIOpts[utils.OptsIPsAllocationID] = originID
 	var alcIP utils.AllocatedIP
 	if err = sS.connMgr.Call(ctx, conns,
 		utils.IPsV1AuthorizeIP,
@@ -969,7 +974,7 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 			fmt.Sprintf("<%s> error: %s could not authorize IP for event: %+v",
 				utils.SessionS, err.Error(), cgrEv))
 	}
-	return &alcIP, nil
+	return &alcIP, err
 }
 
 // resourcesAuthorize will authorize the event with the Resources subsystem

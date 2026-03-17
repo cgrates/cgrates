@@ -149,7 +149,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]any{
-					utils.MetaAccounts: true,
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
