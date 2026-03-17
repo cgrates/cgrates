@@ -39,6 +39,14 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	// DataDb
 	*cfgPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	*dataDBType = utils.MetaRedis
