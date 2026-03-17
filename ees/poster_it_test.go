@@ -23,9 +23,7 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
-	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 	"time"
 
@@ -66,13 +64,14 @@ type TestContent struct {
 }
 
 func TestHttpJsonPoster(t *testing.T) {
+	tmpDir := t.TempDir()
 	InitFailedPostCache(time.Millisecond, false)
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
 	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
-		FailedPostsDir: "/tmp",
+		FailedPostsDir: tmpDir,
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
 			Els:   &config.ElsOpts{},
@@ -88,16 +87,8 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, 1, jsn, &config.EventExporterOpts{
-		AMQP:  &config.AMQPOpts{},
-		Els:   &config.ElsOpts{},
-		AWS:   &config.AWSOpts{},
-		NATS:  &config.NATSOpts{},
-		Kafka: &config.KafkaOpts{},
-		RPC:   &config.RPCOpts{},
-	})
-	time.Sleep(100 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/EEs*")
+	time.Sleep(5 * time.Millisecond)
+	fs, err := filepath.Glob(filepath.Join(tmpDir, "EEs*"))
 	if err != nil {
 		t.Fatal(err)
 	} else if len(fs) == 0 {
@@ -113,16 +104,16 @@ func TestHttpJsonPoster(t *testing.T) {
 
 	evBody, cancast := ev.Events[0].(*HTTPPosterRequest)
 	if !cancast {
-		t.Fatal("Can't cast the event")
+		t.Fatalf("expected *HTTPPosterRequest, got %T", ev.Events[0])
 	}
 
 	if string(evBody.Body.([]uint8)) != string(jsn) {
-		t.Errorf("Expecting: %q, received: %q", utils.ToJSON(evBody.Body), utils.ToJSON(ev.Events[0]))
+		t.Errorf("Expecting: %q, received: %q", string(jsn), string(evBody.Body.([]uint8)))
 	}
-	os.Remove(fs[0])
 }
 
 func TestHttpBytesPoster(t *testing.T) {
+	tmpDir := t.TempDir()
 	InitFailedPostCache(time.Millisecond, false)
 	content := []byte(`Test
 		Test2
@@ -130,7 +121,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
-		FailedPostsDir: "/tmp",
+		FailedPostsDir: tmpDir,
 		Opts: &config.EventExporterOpts{
 			AMQP:  &config.AMQPOpts{},
 			Els:   &config.ElsOpts{},
@@ -146,16 +137,8 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, 1, content, &config.EventExporterOpts{
-		AMQP:  &config.AMQPOpts{},
-		Els:   &config.ElsOpts{},
-		AWS:   &config.AWSOpts{},
-		NATS:  &config.NATSOpts{},
-		Kafka: &config.KafkaOpts{},
-		RPC:   &config.RPCOpts{},
-	})
 	time.Sleep(5 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/EEs|*")
+	fs, err := filepath.Glob(filepath.Join(tmpDir, "EEs*"))
 	if err != nil {
 		t.Fatal(err)
 	} else if len(fs) == 0 {
@@ -167,10 +150,13 @@ func TestHttpBytesPoster(t *testing.T) {
 	} else if len(ev.Events) == 0 {
 		t.Fatal("Expected at least one event")
 	}
-	if !reflect.DeepEqual(content, ev.Events[0]) {
-		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
+	evBody, cancast := ev.Events[0].(*HTTPPosterRequest)
+	if !cancast {
+		t.Fatalf("expected *HTTPPosterRequest, got %T", ev.Events[0])
 	}
-	os.Remove(fs[0])
+	if string(evBody.Body.([]uint8)) != string(content) {
+		t.Errorf("Expecting: %q, received: %q", string(content), string(evBody.Body.([]uint8)))
+	}
 }
 
 func TestSQSPoster(t *testing.T) {
