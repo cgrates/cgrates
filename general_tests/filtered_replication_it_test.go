@@ -85,6 +85,9 @@ func TestFilteredReplication(t *testing.T) {
 	}
 	for _, stest := range sTestsFltrRpl {
 		t.Run("TestFilteredReplication_"+fltrRplDB, stest)
+		if t.Failed() {
+			break
+		}
 	}
 }
 

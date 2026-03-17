@@ -36,6 +36,14 @@ import (
 
 // TODO: also test how toggling dispatchers behaves
 func TestServiceToggle(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	cfgJSON := `{
 "data_db": {
 	"db_type": "*internal"
