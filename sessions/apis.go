@@ -891,14 +891,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
-
-			if len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields) {
-				if apiRply.Attributes == nil {
-					apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
-				}
-				apiRply.Attributes[runID] = &attributes.AttrSProcessEventReply{
-					AlteredFields: chrgr.AlteredFields,
-					CGREvent:      chrgr.CGREvent,
+			for _, afPrf := range chrgr.AlteredFields {
+				if len(afPrf.Fields) > len(chargers.ChargerSDefaultAlteredFields) {
+					if apiRply.Attributes == nil {
+						apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
+					}
+					apiRply.Attributes[runID] = &attributes.AttrSProcessEventReply{
+						AlteredFields: chrgr.AlteredFields,
+						CGREvent:      chrgr.CGREvent,
+					}
+					break
 				}
 			}
 		}

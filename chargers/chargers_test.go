@@ -1052,12 +1052,8 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			ChargerSProfile: "1001",
 			AlteredFields: []*attributes.FieldsAltered{
 				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
-				{
 					MatchedProfileID: "attr1",
-					Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, utils.MetaReq + utils.NestingSep + utils.AccountField},
 				},
 			},
 			CGREvent: &utils.CGREvent{
@@ -1386,12 +1382,8 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			ChargerSProfile: "1001",
 			AlteredFields: []*attributes.FieldsAltered{
 				{
-					MatchedProfileID: utils.MetaDefault,
-					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
-				},
-				{
 					MatchedProfileID: "attr2",
-					Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys, utils.MetaReq + utils.NestingSep + utils.AccountField},
 				},
 			},
 			CGREvent: &utils.CGREvent{
