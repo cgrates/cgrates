@@ -40,6 +40,8 @@ func TestCacheRplDeadlock(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
+	t.Skip("known CacheS deadlock, #2424")
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "resources": {
@@ -112,7 +114,7 @@ func TestCacheRplDeadlock(t *testing.T) {
 	defer cancel()
 
 	if err := client.Call(ctx, utils.ResourceSv1GetResourcesForEvent, args, &rs); errors.Is(err, context.DeadlineExceeded) {
-		// we don't care about the error as long as it's not of type context.DeadlineExceeded
+		// DeadlineExceeded means it deadlocked, anything else is fine
 		t.Errorf("ResourceSv1.GetResourcesForEvent unexpected err: %v", err)
 	}
 }

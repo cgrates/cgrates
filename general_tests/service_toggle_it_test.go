@@ -36,6 +36,10 @@ import (
 
 // TODO: also test how toggling dispatchers behaves
 func TestServiceToggle(t *testing.T) {
+	if *utils.DBType != utils.MetaInternal {
+		t.SkipNow()
+	}
+
 	cfgJSON := `{
 "data_db": {
 	"db_type": "*internal"

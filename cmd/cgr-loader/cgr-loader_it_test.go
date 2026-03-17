@@ -39,6 +39,10 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	if *utils.DBType != utils.MetaInternal {
+		t.SkipNow()
+	}
+
 	// DataDb
 	*cfgPath = path.Join(*utils.DataDir, "conf", "samples", "tutmongo")
 	*dataDBType = utils.MetaRedis
