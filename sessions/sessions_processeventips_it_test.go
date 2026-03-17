@@ -283,16 +283,8 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 				},
 			}, &rply)
 
-		if err != nil {
-			t.Fatalf("ProcessEvent failed: %v", err)
-		}
-
-		if len(rply.IPsAllocation) > 0 {
-			authorizedIP, exists := rply.IPsAllocation[utils.MetaPrimary]
-			if exists && authorizedIP.Address.IsValid() {
-				t.Errorf("IPsAllocation should have no valid IP when no profile matches, got IP: %v",
-					authorizedIP.Address)
-			}
+		if err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Fatalf("ProcessEvent expected NOT_FOUND error, got: %v", err)
 		}
 	})
 }

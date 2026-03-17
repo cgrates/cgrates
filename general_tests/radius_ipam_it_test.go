@@ -90,9 +90,9 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 }`, dictDir+"/"),
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
-		// LogBuffer: &bytes.Buffer{},
+		//LogBuffer: &bytes.Buffer{},
 	}
-	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	//t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
 
 	var replySetCharger string

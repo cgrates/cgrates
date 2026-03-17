@@ -906,7 +906,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	//var partiallyExecuted bool // will be	 added to the final answer if true
 	if blkrErr, errBlkr := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
-		cch, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
+		cch, sS.fltrS, sS.cfg.SessionSCfg().Opts.BlockerError,
 		utils.OptsSesBlockerError, utils.MetaBlockerErrorCfg); errBlkr != nil {
 		return errBlkr
 	} else {
