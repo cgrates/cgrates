@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package utils
 
 import (
-	"strings"
 	"time"
 )
 
@@ -197,37 +196,22 @@ func GetRoutePaginatorFromOpts(ev map[string]any) (args Paginator, err error) {
 	return
 }
 
-// NMAsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]any with joined paths
-// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapStorage) (cgrEv *CGREvent) {
+// NMAsCGREvent builds a CGREvent from a navigable map with nested paths.
+func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, opts MapStorage) *CGREvent {
 	if nM == nil {
-		return
+		return nil
 	}
-	el := nM.GetFirstElement()
-	if el == nil {
-		return
+	ev := nM.AsMap()
+	if len(ev) == 0 {
+		return nil
 	}
-	cgrEv = &CGREvent{
+	return &CGREvent{
 		Tenant:  tnt,
 		ID:      UUIDSha1Prefix(),
 		Time:    TimePointer(time.Now()),
-		Event:   make(map[string]any),
+		Event:   ev,
 		APIOpts: opts,
 	}
-	for ; el != nil; el = el.Next() {
-		path := el.Value
-		val, _ := nM.Field(path) // this should never return error cause we get the path from the order
-		if val.AttributeID != "" {
-			continue
-		}
-		path = StripTrailingIndex(path)
-		opath := strings.Join(path, NestingSep)
-		if _, has := cgrEv.Event[opath]; !has {
-			cgrEv.Event[opath] = val.Data // first item which is not an attribute will become the value
-		}
-	}
-	return
 }
 
 // SetCloneable sets if the args should be clonned on internal connections

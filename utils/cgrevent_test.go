@@ -537,15 +537,13 @@ func TestCGREventAsDataProvider(t *testing.T) {
 }
 
 func TestNMAsCGREvent(t *testing.T) {
-	if cgrEv := NMAsCGREvent(nil, "cgrates.org",
-		NestingSep, nil); cgrEv != nil {
-		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(nil), ToJSON(cgrEv.Event))
+	if cgrEv := NMAsCGREvent(nil, "cgrates.org", nil); cgrEv != nil {
+		t.Errorf("expecting nil, received: %+v", ToJSON(cgrEv))
 	}
 
 	nM := NewOrderedNavigableMap()
-	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
-		NestingSep, nil); cgrEv != nil {
-		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(nil), ToJSON(cgrEv.Event))
+	if cgrEv := NMAsCGREvent(nM, "cgrates.org", nil); cgrEv != nil {
+		t.Errorf("expecting nil, received: %+v", ToJSON(cgrEv))
 	}
 
 	path := []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
@@ -558,10 +556,6 @@ func TestNMAsCGREvent(t *testing.T) {
 
 	path = []string{"FirstLevel2", "SecondLevel2", "Field2"}
 	if err := nM.SetAsSlice(&FullPath{Path: strings.Join(path, NestingSep), PathSlice: path}, []*DataNode{
-		{Type: NMDataType, Value: &DataLeaf{
-			Data:        "attrVal1",
-			AttributeID: "attribute1",
-		}},
 		{Type: NMDataType, Value: &DataLeaf{
 			Data: "Value2",
 		}}}); err != nil {
@@ -576,52 +570,32 @@ func TestNMAsCGREvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	path = []string{"FirstLevel2", "Field5"}
-	if err := nM.SetAsSlice(&FullPath{Path: strings.Join(path, NestingSep), PathSlice: path}, []*DataNode{
-		{Type: NMDataType, Value: &DataLeaf{
-			Data: "Value5",
-		}},
-		{Type: NMDataType, Value: &DataLeaf{
-			Data:        "attrVal5",
-			AttributeID: "attribute5",
-		}}}); err != nil {
-		t.Error(err)
-	}
-
-	path = []string{"FirstLevel2", "Field6"}
-	if err := nM.SetAsSlice(&FullPath{Path: strings.Join(path, NestingSep), PathSlice: path}, []*DataNode{
-		{Type: NMDataType, Value: &DataLeaf{
-			Data:      "Value6",
-			NewBranch: true,
-		}},
-		{Type: NMDataType, Value: &DataLeaf{
-			Data:        "attrVal6",
-			AttributeID: "attribute6",
-		}}}); err != nil {
-		t.Error(err)
-	}
-
 	path = []string{"Field4"}
 	if err := nM.SetAsSlice(&FullPath{Path: strings.Join(path, NestingSep), PathSlice: path}, []*DataNode{
 		{Type: NMDataType, Value: &DataLeaf{
 			Data: "Val4",
-		}},
-		{Type: NMDataType, Value: &DataLeaf{
-			Data:        "attrVal2",
-			AttributeID: "attribute2",
 		}}}); err != nil {
 		t.Error(err)
 	}
+
 	eEv := map[string]any{
-		"FirstLevel2.SecondLevel2.Field2":        "Value2",
-		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
-		"FirstLevel2.Field3":                     "Value3",
-		"FirstLevel2.Field5":                     "Value5",
-		"FirstLevel2.Field6":                     "Value6",
-		"Field4":                                 "Val4",
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
+					"Fld1": "Val1",
+				},
+			},
+		},
+		"FirstLevel2": map[string]any{
+			"SecondLevel2": map[string]any{
+				"Field2": "Value2",
+			},
+			"Field3": "Value3",
+		},
+		"Field4": "Val4",
 	}
 	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
-		NestingSep, MapStorage{}); cgrEv.Tenant != "cgrates.org" ||
+		MapStorage{}); cgrEv.Tenant != "cgrates.org" ||
 		cgrEv.Time == nil ||
 		!reflect.DeepEqual(eEv, cgrEv.Event) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(eEv), ToJSON(cgrEv.Event))

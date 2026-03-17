@@ -138,7 +138,7 @@ func (rdr *AMQPER) processMessage(msg []byte) error {
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return err
 	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, agReq.Opts)
 	rdrEv := rdr.eventChan
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvChan

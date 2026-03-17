@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
-	"strings"
 	"sync"
 	"time"
 
@@ -100,20 +99,7 @@ func (e *RPCee) PrepareMap(mp *utils.CGREvent) (any, error) {
 }
 
 func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (any, error) {
-	mP := make(map[string]any)
-	for i := oMp.GetFirstElement(); i != nil; i = i.Next() {
-		path := i.Value
-		val, _ := oMp.Field(path)
-		if val.AttributeID != utils.EmptyString {
-			continue
-		}
-		path = utils.StripTrailingIndex(path)
-		opath := strings.Join(path, utils.NestingSep)
-		if _, has := mP[opath]; !has {
-			mP[opath] = val.Data // first item which is not an attribute will become the value
-		}
-	}
-	return mP, nil
+	return oMp.AsMap(), nil
 }
 
 func (e *RPCee) parseOpts() (err error) {
