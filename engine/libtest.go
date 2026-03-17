@@ -101,6 +101,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
+	go engine.Wait() // so pkill'd engines don't stay defunct
 	cfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
 		return nil, err
@@ -130,6 +131,7 @@ func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int)
 	if err = engine.Start(); err != nil {
 		return nil, err
 	}
+	go engine.Wait() // so pkill'd engines don't stay defunct
 	var cfg *config.CGRConfig
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		return
@@ -576,32 +578,27 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, grace
 				t.Errorf("failed to terminate cgr-engine process (%d): %v",
 					engine.Process.Pid, err)
 			}
-
-			// TODO: check if it's a good idea to wait for the Kill signal
-			// also. Might prevent scenarios where engine from previous test is
-			// still running (even though kill should be almost instant)
 			if err := engine.Wait(); err != nil {
 				t.Errorf("could not wait for cgr-engine process (%d) to shut down: %v",
 					engine.Process.Pid, err)
 			}
-
 			return
 		}
 		if err := engine.Process.Kill(); err != nil {
 			t.Errorf("failed to kill cgr-engine process (%d): %v",
 				engine.Process.Pid, err)
 		}
+		_ = engine.Wait()
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)
-	for i := 0; i < 16; i++ {
+	var dialErr error
+	for range 16 {
 		time.Sleep(backoff())
-		if _, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err == nil {
-			break
+		if _, dialErr = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); dialErr == nil {
+			return
 		}
 	}
-	if err != nil {
-		t.Fatalf("failed to start cgr-engine: %v", err)
-	}
+	t.Fatalf("engine did not open port <%s>: %v", cfg.ListenCfg().RPCJSONListen, dialErr)
 }
 
 func WaitForService(t testing.TB, ctx *context.Context, client *birpc.Client, service string) {
