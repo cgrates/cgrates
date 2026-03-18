@@ -2592,200 +2592,125 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 	}
 
 }
-func TestStoreMatchedResourcesStoreIntervalZero(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = 0
+func TestStoreMatchedResources(t *testing.T) {
+	resPrf := &resourceProfile{ResourceProfile: &utils.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Limit:  10,
+	}}
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	rS := &ResourceS{
-		dm:              dm,
-		cfg:             cfg,
-		storedResources: utils.NewStringSet(nil),
+	newRSWithInterval := func(t *testing.T, interval time.Duration) (*ResourceS, *engine.DataManager) {
+		t.Helper()
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ResourceSCfg().StoreInterval = interval
+		data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		dm := engine.NewDataManager(dbCM, cfg, nil)
+		rS := &ResourceS{dm: dm, cfg: cfg, storedResources: utils.NewStringSet(nil)}
+		return rS, dm
 	}
 
-	dirty := true
-	resources := Resources{
-		{
+	t.Run("store interval zero keeps dirty flag", func(t *testing.T) {
+		rS, _ := newRSWithInterval(t, 0)
+		dirty := true
+		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
 			dirty: &dirty,
-		},
-	}
+		}}
+		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !*res[0].dirty {
+			t.Error("Expected dirty flag to remain true when StoreInterval is 0")
+		}
+	})
 
-	err := rS.storeMatchedResources(context.Background(), resources)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
-
-	if !*resources[0].dirty {
-		t.Error("Expected dirty flag to remain true when StoreInterval is 0")
-	}
-}
-
-func TestStoreMatchedResourcesStoreIntervalPositive(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = 10 * time.Second
-
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	rS := &ResourceS{
-		dm:              dm,
-		cfg:             cfg,
-		storedResources: utils.NewStringSet(nil),
-	}
-
-	dirty := true
-	resources := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES1",
-				Usages: map[string]*utils.ResourceUsage{},
-			},
-			dirty: &dirty,
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES2",
-				Usages: map[string]*utils.ResourceUsage{},
-			},
-			dirty: &dirty,
-		},
-	}
-
-	err := rS.storeMatchedResources(context.Background(), resources)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
-
-	if !*resources[0].dirty {
-		t.Error("Expected dirty flag to be true for RES1")
-	}
-	if !*resources[1].dirty {
-		t.Error("Expected dirty flag to be true for RES2")
-	}
-
-	if !rS.storedResources.Has("cgrates.org:RES1") {
-		t.Error("Expected RES1 to be in storedResources set")
-	}
-	if !rS.storedResources.Has("cgrates.org:RES2") {
-		t.Error("Expected RES2 to be in storedResources set")
-	}
-
-	if rS.storedResources.Size() != 2 {
-		t.Errorf("Expected 2 resources in set, got: %d", rS.storedResources.Size())
-	}
-}
-
-func TestStoreMatchedResourcesStoreIntervalNegative(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = -1
-
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	rS := &ResourceS{
-		dm:              dm,
-		cfg:             cfg,
-		storedResources: utils.NewStringSet(nil),
-	}
-
-	dirty := true
-	resources := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES1",
-				Usages: map[string]*utils.ResourceUsage{},
-			},
-			dirty: &dirty,
-			rPrf: &resourceProfile{
-				ResourceProfile: &utils.ResourceProfile{
+	t.Run("positive interval queues to storedResources", func(t *testing.T) {
+		rS, _ := newRSWithInterval(t, 10*time.Second)
+		dirty := true
+		res := Resources{
+			{
+				Resource: &utils.Resource{
 					Tenant: "cgrates.org",
 					ID:     "RES1",
-					Limit:  10,
+					Usages: map[string]*utils.ResourceUsage{},
 				},
+				dirty: &dirty,
 			},
-		},
-	}
+			{
+				Resource: &utils.Resource{
+					Tenant: "cgrates.org",
+					ID:     "RES2",
+					Usages: map[string]*utils.ResourceUsage{},
+				},
+				dirty: &dirty,
+			},
+		}
+		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !*res[0].dirty || !*res[1].dirty {
+			t.Error("Expected dirty flags to be true")
+		}
+		if !rS.storedResources.Has("cgrates.org:RES1") || !rS.storedResources.Has("cgrates.org:RES2") {
+			t.Error("Expected both resources in storedResources set")
+		}
+		if rS.storedResources.Size() != 2 {
+			t.Errorf("Expected 2 resources in set, got: %d", rS.storedResources.Size())
+		}
+	})
 
-	err := rS.storeMatchedResources(context.Background(), resources)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
+	t.Run("negative interval stores to DB", func(t *testing.T) {
+		rS, dm := newRSWithInterval(t, -1)
+		dirty := true
+		res := Resources{{
+			Resource: &utils.Resource{
+				Tenant: "cgrates.org",
+				ID:     "RES1",
+				Usages: map[string]*utils.ResourceUsage{},
+			},
+			dirty: &dirty,
+			rPrf:  resPrf,
+		}}
+		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		savedRes, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
+		if err != nil {
+			t.Errorf("Expected resource to be stored, got error: %v", err)
+		}
+		if savedRes == nil {
+			t.Error("Expected resource to be stored in database")
+		}
+	})
 
-	savedRes, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
-	if err != nil {
-		t.Errorf("Expected resource to be stored in database, got error: %v", err)
-	}
-	if savedRes == nil {
-		t.Error("Expected resource to be stored in database")
-	}
-}
-
-func TestStoreMatchedResourcesNoDirtyFlag(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = -1
-
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	rS := &ResourceS{
-		dm:              dm,
-		cfg:             cfg,
-		storedResources: utils.NewStringSet(nil),
-	}
-
-	resources := Resources{
-		{
+	t.Run("nil dirty flag skips store", func(t *testing.T) {
+		rS, dm := newRSWithInterval(t, -1)
+		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
 			dirty: nil,
-		},
-	}
+		}}
+		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		_, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
+		if err == nil {
+			t.Error("Expected resource with nil dirty flag not to be stored")
+		}
+	})
 
-	err := rS.storeMatchedResources(context.Background(), resources)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
-
-	_, err = dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
-	if err == nil {
-		t.Error("Expected resource with nil dirty flag not to be stored")
-	}
-}
-
-func TestStoreMatchedResourcesWithUsages(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = -1
-
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	rS := &ResourceS{
-		dm:              dm,
-		cfg:             cfg,
-		storedResources: utils.NewStringSet(nil),
-	}
-
-	dirty := true
-	resources := Resources{
-		{
+	t.Run("stores resource with usages", func(t *testing.T) {
+		rS, dm := newRSWithInterval(t, -1)
+		dirty := true
+		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
@@ -2793,7 +2718,7 @@ func TestStoreMatchedResourcesWithUsages(t *testing.T) {
 					"USAGE1": {
 						Tenant:     "cgrates.org",
 						ID:         "USAGE1",
-						ExpiryTime: time.Now().Add(1 * time.Hour),
+						ExpiryTime: time.Now().Add(time.Hour),
 						Units:      5,
 					},
 					"USAGE2": {
@@ -2806,38 +2731,26 @@ func TestStoreMatchedResourcesWithUsages(t *testing.T) {
 				TTLIdx: []string{"USAGE1", "USAGE2"},
 			},
 			dirty: &dirty,
-			rPrf: &resourceProfile{
-				ResourceProfile: &utils.ResourceProfile{
-					Tenant: "cgrates.org",
-					ID:     "RES1",
-					Limit:  10,
-				},
-			},
-		},
-	}
-
-	err := rS.storeMatchedResources(context.Background(), resources)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
-
-	savedRes, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
-	if err != nil {
-		t.Fatalf("Expected resource to be stored, got error: %v", err)
-	}
-
-	if len(savedRes.Usages) != 2 {
-		t.Errorf("Expected 2 usages, got: %d", len(savedRes.Usages))
-	}
-	if _, exists := savedRes.Usages["USAGE1"]; !exists {
-		t.Error("Expected USAGE1 to be stored")
-	}
-	if _, exists := savedRes.Usages["USAGE2"]; !exists {
-		t.Error("Expected USAGE2 to be stored")
-	}
-
-	if len(savedRes.TTLIdx) != 2 {
-		t.Errorf("Expected 2 TTL indexes, got: %d", len(savedRes.TTLIdx))
-	}
-
+			rPrf:  resPrf,
+		}}
+		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		savedRes, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
+		if err != nil {
+			t.Fatalf("Expected resource to be stored, got error: %v", err)
+		}
+		if len(savedRes.Usages) != 2 {
+			t.Errorf("Expected 2 usages, got: %d", len(savedRes.Usages))
+		}
+		if _, ok := savedRes.Usages["USAGE1"]; !ok {
+			t.Error("Expected USAGE1 to be stored")
+		}
+		if _, ok := savedRes.Usages["USAGE2"]; !ok {
+			t.Error("Expected USAGE2 to be stored")
+		}
+		if len(savedRes.TTLIdx) != 2 {
+			t.Errorf("Expected 2 TTL indexes, got: %d", len(savedRes.TTLIdx))
+		}
+	})
 }
