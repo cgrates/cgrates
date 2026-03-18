@@ -567,7 +567,7 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"asterisk_agent": {
-			"enabled": true,
+			"enabled": false,
 			"sessions_conns": ["*birpc_internal"],
 			"create_cdr": true,
 			"asterisk_conns":[
@@ -580,7 +580,7 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"asterisk_agent\":{\"asterisk_conns\":[{\"address\":\"127.0.0.1:8088\",\"alias\":\"\",\"ari_websocket\":false,\"connect_attempts\":3,\"max_reconnect_interval\":\"0s\",\"password\":\"CGRateS.org\",\"reconnects\":5,\"user\":\"cgrates\"}],\"create_cdr\":true,\"enabled\":true,\"route_profile\":false,\"sessions_conns\":[\"*birpc_internal\"]}}"
+	cfgStr := "{\"asterisk_agent\":{\"asterisk_conns\":[{\"address\":\"127.0.0.1:8088\",\"alias\":\"\",\"ari_websocket\":false,\"connect_attempts\":3,\"max_reconnect_interval\":\"0s\",\"password\":\"CGRateS.org\",\"reconnects\":5,\"user\":\"cgrates\"}],\"create_cdr\":true,\"enabled\":false,\"route_profile\":false,\"sessions_conns\":[\"*birpc_internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1341,7 +1341,7 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"sip_agent": {
-			"enabled": true,
+			"enabled": false,
 			"listen": "127.0.0.1:5060",
 			"listen_net": "udp",
 			"sessions_conns": ["*internal"],
@@ -1377,7 +1377,7 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"sip_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:5060\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":[\"*string:~*req.request_type:OutboundAUTH\",\"*string:~*req.Msisdn:497700056231\"],\"flags\":[\"*dryrun\"],\"id\":\"OutboundAUTHDryRun\",\"reply_fields\":[{\"mandatory\":true,\"path\":\"*rep.response.Allow\",\"tag\":\"Allow\",\"type\":\"*constant\",\"value\":\"1\"},{\"mandatory\":true,\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated1\",\"type\":\"*composed\",\"value\":\"~*req.MCC;/\"},{\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated2\",\"type\":\"*composed\",\"value\":\"Val1\"},{\"blocker\":true,\"path\":\"*rep.response.MaxDuration\",\"tag\":\"MaxDuration\",\"type\":\"*constant\",\"value\":\"1200\"},{\"path\":\"*rep.response.Unused\",\"tag\":\"Unused\",\"type\":\"*constant\",\"value\":\"0\"}],\"request_fields\":[],\"tenant\":\"cgrates.org\",\"timezone\":\"\"}],\"retransmission_timer\":100000000000,\"sessions_conns\":[\"*internal\"],\"stats_conns\":[],\"thresholds_conns\":[],\"timezone\":\"local\"}}"
+	cfgStr := "{\"sip_agent\":{\"enabled\":false,\"listen\":\"127.0.0.1:5060\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":[\"*string:~*req.request_type:OutboundAUTH\",\"*string:~*req.Msisdn:497700056231\"],\"flags\":[\"*dryrun\"],\"id\":\"OutboundAUTHDryRun\",\"reply_fields\":[{\"mandatory\":true,\"path\":\"*rep.response.Allow\",\"tag\":\"Allow\",\"type\":\"*constant\",\"value\":\"1\"},{\"mandatory\":true,\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated1\",\"type\":\"*composed\",\"value\":\"~*req.MCC;/\"},{\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated2\",\"type\":\"*composed\",\"value\":\"Val1\"},{\"blocker\":true,\"path\":\"*rep.response.MaxDuration\",\"tag\":\"MaxDuration\",\"type\":\"*constant\",\"value\":\"1200\"},{\"path\":\"*rep.response.Unused\",\"tag\":\"Unused\",\"type\":\"*constant\",\"value\":\"0\"}],\"request_fields\":[],\"tenant\":\"cgrates.org\",\"timezone\":\"\"}],\"retransmission_timer\":100000000000,\"sessions_conns\":[\"*internal\"],\"stats_conns\":[],\"thresholds_conns\":[],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
