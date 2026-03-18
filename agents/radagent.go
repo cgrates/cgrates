@@ -448,6 +448,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		// }
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow this method
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 	case utils.MetaRadauth:
 		var pass bool
 		if pass, err = radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
