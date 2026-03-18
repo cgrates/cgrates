@@ -523,187 +523,100 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	config.SetCgrConfig(config.NewDefaultCGRConfig())
 }
 
-func TestResourcesV1GetResourceOK(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
+func TestResourcesV1GetResource(t *testing.T) {
+	tests := []struct {
+		name        string
+		storeRes    bool
+		queryTenant string
+		queryID     string
+		wantErr     string
+		wantReply   utils.Resource
+	}{
+		{
+			name:     "OK",
+			storeRes: true,
+			queryID:  "RES1",
+			wantReply: utils.Resource{
 				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
+				ID:     "RES1",
+				TTLIdx: []string{},
+				Usages: map[string]*utils.ResourceUsage{
+					"RU1": {
+						Tenant: "cgrates.org",
+						ID:     "RU1",
+						Units:  10,
+					},
+				},
 			},
 		},
-		TTLIdx: []string{},
-	}
-	err := dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	exp := utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		TTLIdx: []string{},
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
-				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
+		{
+			name:        "NotFound",
+			storeRes:    true,
+			queryTenant: "cgrates.org",
+			queryID:     "RES2",
+			wantErr:     utils.ErrNotFound.Error(),
+		},
+		{
+			name:    "MissingParameters",
+			wantErr: `MANDATORY_IE_MISSING: [ID]`,
 		},
 	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rS, dm := newTestResourceSWithCache(t)
+			if tc.storeRes {
+				rs := &utils.Resource{
+					Tenant: "cgrates.org",
+					ID:     "RES1",
+					Usages: map[string]*utils.ResourceUsage{
+						"RU1": {
+							Tenant: "cgrates.org",
+							ID:     "RU1",
+							Units:  10,
+						},
+					},
+					TTLIdx: []string{},
+				}
+				if err := dm.SetResource(context.Background(), rs); err != nil {
+					t.Fatal(err)
+				}
+			}
 
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "RES1",
-		},
-	}
-	var reply utils.Resource
-	if err := rS.V1GetResource(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(exp), utils.ToJSON(reply))
+			args := &utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{
+					Tenant: tc.queryTenant,
+					ID:     tc.queryID,
+				},
+			}
+			var reply utils.Resource
+			err := rS.V1GetResource(context.Background(), args, &reply)
+			if tc.wantErr != "" {
+				if err == nil || err.Error() != tc.wantErr {
+					t.Errorf("expected: <%+v>, \nreceived: <%+v>", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(reply, tc.wantReply) {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(tc.wantReply), utils.ToJSON(reply))
+			}
+		})
 	}
 }
 
-func TestResourcesV1GetResourceNotFound(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
-				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
-		},
-		TTLIdx: []string{},
-	}
-	err := dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "RES2",
-		},
-	}
-	var reply utils.Resource
-	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-}
-
-func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
-				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
-		},
-		TTLIdx: []string{},
-	}
-	err := dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{},
-	}
-
-	experr := `MANDATORY_IE_MISSING: [ID]`
-	var reply utils.Resource
-	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-}
-
-func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
+func TestResourcesV1GetResourceWithConfig(t *testing.T) {
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Limit:    10,
-		UsageTTL: time.Minute,
-	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-	if err != nil {
-		t.Error(err)
+		Weights:           utils.DynamicWeights{{Weight: 10}},
+		Limit:             10,
+		UsageTTL:          time.Minute,
 	}
 	rs := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -717,467 +630,149 @@ func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 		},
 		TTLIdx: []string{},
 	}
-	err = dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
 
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	exp := utils.ResourceWithConfig{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RES1",
-			Usages: map[string]*utils.ResourceUsage{
-				"RU1": {
-					Tenant: "cgrates.org",
-					ID:     "RU1",
-					Units:  10,
-				},
-			},
-			TTLIdx: []string{},
-		},
-		Config: rsPrf,
+	tests := []struct {
+		name       string
+		profileID  string // store profile with this ID; empty = skip
+		resourceID string // store resource with this ID
+		queryID    string
+		wantErr    string
+	}{
+		{name: "OK", profileID: "RES1", resourceID: "RES1", queryID: "RES1"},
+		{name: "NilProfileNotFound", profileID: "RES2", resourceID: "RES1", queryID: "RES1",
+			wantErr: utils.ErrNotFound.Error()},
+		{name: "ResourceNotFound", resourceID: "RES2", queryID: "RES1",
+			wantErr: utils.ErrNotFound.Error()},
+		{name: "MissingParameters", resourceID: "RES1",
+			wantErr: `MANDATORY_IE_MISSING: [ID]`},
 	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rS, dm := newTestResourceSWithCache(t)
+			if tc.profileID != "" {
+				prf := *rsPrf
+				prf.ID = tc.profileID
+				if err := dm.SetResourceProfile(context.Background(), &prf, true); err != nil {
+					t.Fatal(err)
+				}
+			}
+			res := *rs
+			res.ID = tc.resourceID
+			if err := dm.SetResource(context.Background(), &res); err != nil {
+				t.Fatal(err)
+			}
 
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "RES1",
-		},
-	}
-	var reply utils.ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(exp), utils.ToJSON(reply))
+			args := &utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{ID: tc.queryID},
+			}
+			var reply utils.ResourceWithConfig
+			err := rS.V1GetResourceWithConfig(context.Background(), args, &reply)
+			if tc.wantErr != "" {
+				if err == nil || err.Error() != tc.wantErr {
+					t.Errorf("expected: <%+v>, \nreceived: <%+v>", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			exp := utils.ResourceWithConfig{
+				Resource: &res,
+				Config:   rsPrf,
+			}
+			if !reflect.DeepEqual(reply, exp) {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(exp), utils.ToJSON(reply))
+			}
+		})
 	}
 }
 
-func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &utils.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "RES2",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		ThresholdIDs:      []string{utils.MetaNone},
-		AllocationMessage: "Approved",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
+func TestResourcesV1AuthorizeResources(t *testing.T) {
+	tests := []struct {
+		name      string
+		limit     float64
+		args      *utils.CGREvent
+		wantErr   string
+		wantReply string
+	}{
+		{
+			name:  "OK",
+			limit: 10,
+			args: &utils.CGREvent{
+				ID:    "EventAuthorizeResource",
+				Event: map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.OptsResourcesUsageID:  "RU_Test",
+					utils.OptsResourcesUnits:    5,
+					utils.OptsResourcesUsageTTL: time.Minute,
+				},
 			},
+			wantReply: "Approved",
 		},
-		Limit:    10,
-		UsageTTL: time.Minute,
-	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-	if err != nil {
-		t.Error(err)
-	}
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
+		{
+			name:  "NotAuthorized",
+			limit: 0,
+			args: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
+				ID:     "EventAuthorizeResource",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.OptsResourcesUsageID:  "RU_Test",
+					utils.OptsResourcesUnits:    5,
+					utils.OptsResourcesUsageTTL: time.Minute,
+				},
 			},
+			wantErr: utils.ErrResourceUnauthorized.Error(),
 		},
-		TTLIdx: []string{},
-	}
-	err = dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "RES1",
-		},
-	}
-	var reply utils.ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil ||
-		err != utils.ErrNotFound {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-}
-
-func TestResourcesV1GetResourceWithConfigResourceNotFound(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES2",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
+		{
+			name:  "NoMatch",
+			limit: 10,
+			args: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
-		},
-		TTLIdx: []string{},
-	}
-	err := dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID: "RES1",
-		},
-	}
-	var reply utils.ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-}
-
-func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
-				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
-		},
-		TTLIdx: []string{},
-	}
-	err := dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	experr := `MANDATORY_IE_MISSING: [ID]`
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{},
-	}
-	var reply utils.ResourceWithConfig
-	if err := rS.V1GetResourceWithConfig(context.Background(), args, &reply); err == nil || err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-}
-
-func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
+				ID:     "EventAuthorizeResource",
+				Event:  map[string]any{utils.AccountField: "1002"},
+				APIOpts: map[string]any{
+					utils.OptsResourcesUsageID:  "RU_Test",
+					utils.OptsResourcesUnits:    5,
+					utils.OptsResourcesUsageTTL: time.Minute,
 				},
 			},
-			Limit:    10,
-			UsageTTL: time.Minute,
+			wantErr: utils.ErrNotFound.Error(),
 		},
 	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rS, dm := newTestResourceSWithCache(t)
+			rsPrf := &utils.ResourceProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RES1",
+				FilterIDs:         []string{"*string:~*req.Account:1001"},
+				ThresholdIDs:      []string{utils.MetaNone},
+				AllocationMessage: "Approved",
+				Weights:           utils.DynamicWeights{{Weight: 10}},
+				Limit:             tc.limit,
+				UsageTTL:          time.Minute,
+			}
+			if err := dm.SetResourceProfile(context.Background(), rsPrf, true); err != nil {
+				t.Fatal(err)
+			}
 
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.CGREvent{
-		ID: "EventAuthorizeResource",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID:  "RU_Test",
-			utils.OptsResourcesUnits:    5,
-			utils.OptsResourcesUsageTTL: time.Minute,
-		},
-	}
-	var reply string
-
-	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != "Approved" {
-		t.Errorf("Unexpected reply returned: %q", reply)
-	}
-}
-
-func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Limit:    0,
-			UsageTTL: time.Minute,
-		},
-	}
-
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "EventAuthorizeResource",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID:  "RU_Test",
-			utils.OptsResourcesUnits:    5,
-			utils.OptsResourcesUsageTTL: time.Minute,
-		},
-	}
-	var reply string
-
-	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
-		err != utils.ErrResourceUnauthorized {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnauthorized, err)
-	}
-}
-
-func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Limit:    10,
-			UsageTTL: time.Minute,
-		},
-	}
-
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "EventAuthorizeResource",
-		Event: map[string]any{
-			utils.AccountField: "1002",
-		},
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID:  "RU_Test",
-			utils.OptsResourcesUnits:    5,
-			utils.OptsResourcesUsageTTL: time.Minute,
-		},
-	}
-	var reply string
-
-	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
-		err != utils.ErrNotFound {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-}
-
-func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Limit:    10,
-			UsageTTL: time.Minute,
-		},
-	}
-
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	experr := `MANDATORY_IE_MISSING: [Event]`
-	var reply string
-
-	if err := rS.V1AuthorizeResources(context.Background(), nil, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-}
-
-func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Limit:    10,
-			UsageTTL: time.Minute,
-		},
-	}
-
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	args := &utils.CGREvent{
-		ID: "EventAuthorizeResource",
-		Event: map[string]any{
-			utils.AccountField:          "1001",
-			utils.OptsResourcesUnits:    5,
-			utils.OptsResourcesUsageTTL: time.Minute,
-		},
-	}
-	experr := `MANDATORY_IE_MISSING: [UsageID]`
-	var reply string
-
-	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+			var reply string
+			err := rS.V1AuthorizeResources(context.Background(), tc.args, &reply)
+			if tc.wantErr != "" {
+				if err == nil || err.Error() != tc.wantErr {
+					t.Errorf("expected: <%+v>, \nreceived: <%+v>", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if reply != tc.wantReply {
+				t.Errorf("expected: %q, received: %q", tc.wantReply, reply)
+			}
+		})
 	}
 }
 
@@ -1439,6 +1034,9 @@ func TestResourcesV1MissingParameters(t *testing.T) {
 		name string
 		call callFunc
 	}{
+		{"AuthorizeResources", func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			return rS.V1AuthorizeResources(ctx, ev, reply)
+		}},
 		{"AllocateResources", func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
 			return rS.V1AllocateResources(ctx, ev, reply)
 		}},
