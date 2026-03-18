@@ -215,7 +215,7 @@ func (eeR *ExportRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) 
 	case utils.MetaUCH:
 		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
+		return eeR.inData[utils.MetaOpts].(utils.MapStorage).Append(fullPath.PathSlice[1:], val.Data)
 	default:
 		oNM, has := eeR.ExpData[prfx]
 		if !has {

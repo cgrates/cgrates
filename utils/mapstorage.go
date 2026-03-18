@@ -205,6 +205,42 @@ func (ms MapStorage) Set(fldPath []string, val any) (err error) {
 
 }
 
+// Append appends val to a []any slice at the given path.
+// If the key is missing, it creates []any{val}.
+// If the key holds a []any, it appends to it.
+// If the key holds any other value, it promotes to []any{existing, val}.
+func (ms MapStorage) Append(fldPath []string, val any) error {
+	if len(fldPath) == 0 {
+		return ErrWrongPath
+	}
+	if len(fldPath) == 1 {
+		existing, has := ms[fldPath[0]]
+		if !has {
+			ms[fldPath[0]] = []any{val}
+			return nil
+		}
+		if sl, ok := existing.([]any); ok {
+			ms[fldPath[0]] = append(sl, val)
+			return nil
+		}
+		ms[fldPath[0]] = []any{existing, val}
+		return nil
+	}
+	if _, has := ms[fldPath[0]]; !has {
+		nMap := MapStorage{}
+		ms[fldPath[0]] = nMap
+		return nMap.Append(fldPath[1:], val)
+	}
+	switch dp := ms[fldPath[0]].(type) {
+	case MapStorage:
+		return dp.Append(fldPath[1:], val)
+	case map[string]any:
+		return MapStorage(dp).Append(fldPath[1:], val)
+	default:
+		return ErrWrongPath
+	}
+}
+
 // GetKeys returns all the keys from map
 func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys []string) {
 	if prefix != EmptyString {

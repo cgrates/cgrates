@@ -1025,3 +1025,87 @@ func TestNewSecureMapStorage(t *testing.T) {
 		t.Error("should receive new secure map")
 	}
 }
+
+func TestMapStorageAppend(t *testing.T) {
+	t.Run("empty path", func(t *testing.T) {
+		ms := MapStorage{}
+		if err := ms.Append(nil, "val"); err != ErrWrongPath {
+			t.Errorf("expected ErrWrongPath, got %v", err)
+		}
+	})
+
+	t.Run("missing key", func(t *testing.T) {
+		ms := MapStorage{}
+		if err := ms.Append([]string{"key"}, "val1"); err != nil {
+			t.Fatal(err)
+		}
+		exp := []any{"val1"}
+		if got := ms["key"]; !reflect.DeepEqual(exp, got) {
+			t.Errorf("expected %v, got %v", exp, got)
+		}
+	})
+
+	t.Run("append twice", func(t *testing.T) {
+		ms := MapStorage{}
+		if err := ms.Append([]string{"key"}, "val1"); err != nil {
+			t.Fatal(err)
+		}
+		if err := ms.Append([]string{"key"}, "val2"); err != nil {
+			t.Fatal(err)
+		}
+		exp := []any{"val1", "val2"}
+		if got := ms["key"]; !reflect.DeepEqual(exp, got) {
+			t.Errorf("expected %v, got %v", exp, got)
+		}
+	})
+
+	t.Run("promote scalar", func(t *testing.T) {
+		ms := MapStorage{"key": "existing"}
+		if err := ms.Append([]string{"key"}, "new"); err != nil {
+			t.Fatal(err)
+		}
+		exp := []any{"existing", "new"}
+		if got := ms["key"]; !reflect.DeepEqual(exp, got) {
+			t.Errorf("expected %v, got %v", exp, got)
+		}
+	})
+
+	t.Run("nested path", func(t *testing.T) {
+		ms := MapStorage{}
+		if err := ms.Append([]string{"a", "b"}, "val1"); err != nil {
+			t.Fatal(err)
+		}
+		if err := ms.Append([]string{"a", "b"}, "val2"); err != nil {
+			t.Fatal(err)
+		}
+		inner, ok := ms["a"].(MapStorage)
+		if !ok {
+			t.Fatalf("expected MapStorage at key 'a', got %T", ms["a"])
+		}
+		exp := []any{"val1", "val2"}
+		if got := inner["b"]; !reflect.DeepEqual(exp, got) {
+			t.Errorf("expected %v, got %v", exp, got)
+		}
+	})
+
+	t.Run("nested into map[string]any", func(t *testing.T) {
+		ms := MapStorage{
+			"a": map[string]any{"existing": "data"},
+		}
+		if err := ms.Append([]string{"a", "key"}, "val1"); err != nil {
+			t.Fatal(err)
+		}
+		inner := ms["a"].(map[string]any)
+		exp := []any{"val1"}
+		if got := inner["key"]; !reflect.DeepEqual(exp, got) {
+			t.Errorf("expected %v, got %v", exp, got)
+		}
+	})
+
+	t.Run("wrong path type", func(t *testing.T) {
+		ms := MapStorage{"a": 42}
+		if err := ms.Append([]string{"a", "b"}, "val"); err != ErrWrongPath {
+			t.Errorf("expected ErrWrongPath, got %v", err)
+		}
+	})
+}
