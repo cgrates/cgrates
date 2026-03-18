@@ -491,6 +491,16 @@ func TestExportRequestAppend(t *testing.T) {
 	if err = eeR.Append(fullPath, val); err != nil {
 		t.Error(err)
 	}
+	if err = eeR.Append(fullPath, &utils.DataLeaf{Data: "value2"}); err != nil {
+		t.Error(err)
+	}
+	optsMS := eeR.inData[utils.MetaOpts].(utils.MapStorage)
+	expSlice := []any{"value1", "value2"}
+	if got, err := optsMS.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSlice, got) {
+		t.Errorf("expected %v, got %v", expSlice, got)
+	}
 	fullPath.PathSlice[0] = "default"
 	if err = eeR.Append(fullPath, val); err != nil {
 		t.Error(err)

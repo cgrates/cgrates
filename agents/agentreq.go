@@ -447,7 +447,7 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 		_, err = ar.tmp.Append(fullPath.PathSlice[1:], val)
 		return
 	case utils.MetaOpts:
-		return ar.Opts.Set(fullPath.PathSlice[1:], val.Data)
+		return ar.Opts.Append(fullPath.PathSlice[1:], val.Data)
 	case utils.MetaUCH:
 		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	}

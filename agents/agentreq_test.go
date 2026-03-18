@@ -1922,6 +1922,38 @@ func TestAgReqGroupType(t *testing.T) {
 	}
 }
 
+func TestAgReqGroupOnOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "Field1",
+			Path:  utils.MetaOpts + utils.NestingSep + "Field1",
+			Type:  utils.MetaGroup,
+			Value: config.NewRSRParsersMustCompile("val1", utils.InfieldSep)},
+		{Tag: "Field1",
+			Path:  utils.MetaOpts + utils.NestingSep + "Field1",
+			Type:  utils.MetaGroup,
+			Value: config.NewRSRParsersMustCompile("val2", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Fatal(err)
+	}
+	exp := []any{"val1", "val2"}
+	if got := agReq.Opts["Field1"]; !reflect.DeepEqual(exp, got) {
+		t.Errorf("expected %v, got %v", exp, got)
+	}
+}
+
 func TestAgReqSetFieldsInTmp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
