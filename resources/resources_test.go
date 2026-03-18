@@ -36,6 +36,35 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func newTestResourceS(t *testing.T) (*ResourceS, *engine.DataManager) {
+	t.Helper()
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+	return rS, dm
+}
+
+func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
+	t.Helper()
+	tmp := engine.Cache
+	t.Cleanup(func() { engine.Cache = tmp })
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+	return rS, dm
+}
+
 func TestResourcesRecordUsage(t *testing.T) {
 	testStruct := &resource{
 		Resource: &utils.Resource{
@@ -834,1445 +863,260 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 }
 
+func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resources, []*utils.CGREvent) {
+	t.Helper()
+	rS, dm := newTestResourceS(t)
+	engine.Cache.Clear(nil)
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+
+	dm.SetFilter(context.Background(), &engine.Filter{
+		Tenant: tenant,
+		ID:     "FLTR_RES_1",
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaString, Element: "~*req.Resources", Values: []string{"ResourceProfile1"}},
+			{Type: utils.MetaGreaterOrEqual, Element: "~*req.UsageInterval", Values: []string{time.Second.String()}},
+			{Type: utils.MetaGreaterOrEqual, Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage, Values: []string{time.Second.String()}},
+			{Type: utils.MetaGreaterOrEqual, Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight, Values: []string{"9.0"}},
+		},
+	}, true)
+	dm.SetFilter(context.Background(), &engine.Filter{
+		Tenant: tenant,
+		ID:     "FLTR_RES_2",
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaString, Element: "~*req.Resources", Values: []string{"ResourceProfile2"}},
+			{Type: utils.MetaGreaterOrEqual, Element: "~*req.PddInterval", Values: []string{time.Second.String()}},
+			{Type: utils.MetaGreaterOrEqual, Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage, Values: []string{time.Second.String()}},
+			{Type: utils.MetaGreaterOrEqual, Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight, Values: []string{"15.0"}},
+		},
+	}, true)
+	dm.SetFilter(context.Background(), &engine.Filter{
+		Tenant: tenant,
+		ID:     "FLTR_RES_3",
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaPrefix, Element: "~*req.Resources", Values: []string{"ResourceProfilePrefix"}},
+		},
+	}, true)
+
+	prfs := []*resourceProfile{
+		{ResourceProfile: &utils.ResourceProfile{
+			Tenant:            tenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:*now:2014-07-14T14:25:00Z"},
+			UsageTTL:          10 * time.Second,
+			Limit:             10,
+			AllocationMessage: "AllocationMessage",
+			Weights:           utils.DynamicWeights{{Weight: 20}},
+			ThresholdIDs:      []string{""},
+		}},
+		{ResourceProfile: &utils.ResourceProfile{
+			Tenant:            tenant,
+			ID:                "ResourceProfile2",
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:*now:2014-07-14T14:25:00Z"},
+			UsageTTL:          10 * time.Second,
+			Limit:             10,
+			AllocationMessage: "AllocationMessage",
+			Weights:           utils.DynamicWeights{{Weight: 20}},
+			ThresholdIDs:      []string{""},
+		}},
+		{ResourceProfile: &utils.ResourceProfile{
+			Tenant:            tenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:*now:2014-07-14T14:25:00Z"},
+			UsageTTL:          10 * time.Second,
+			Limit:             10,
+			AllocationMessage: "AllocationMessage",
+			Weights:           utils.DynamicWeights{{Weight: 20}},
+			ThresholdIDs:      []string{""},
+		}},
+	}
+
+	resources := Resources{
+		{
+			Resource: &utils.Resource{
+				Tenant: tenant,
+				ID:     "ResourceProfile1",
+				Usages: map[string]*utils.ResourceUsage{},
+				TTLIdx: []string{},
+			},
+			rPrf: prfs[0],
+		},
+		{
+			Resource: &utils.Resource{
+				Tenant: tenant,
+				ID:     "ResourceProfile2",
+				Usages: map[string]*utils.ResourceUsage{},
+				TTLIdx: []string{},
+			},
+			rPrf: prfs[1],
+		},
+		{
+			Resource: &utils.Resource{
+				Tenant: tenant,
+				ID:     "ResourceProfile3",
+				Usages: map[string]*utils.ResourceUsage{},
+				TTLIdx: []string{},
+			},
+			rPrf: prfs[2],
+		},
+	}
+
+	events := []*utils.CGREvent{
+		{
+			Tenant: tenant,
+			ID:     "event1",
+			Event: map[string]any{
+				"Resources":      "ResourceProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+				utils.Usage:      135 * time.Second,
+				utils.Cost:       123.0,
+			},
+		},
+		{
+			Tenant: tenant,
+			ID:     "event2",
+			Event: map[string]any{
+				"Resources":      "ResourceProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "15.0",
+				utils.Usage:      45 * time.Second,
+			},
+		},
+		{
+			Tenant: tenant,
+			ID:     "event3",
+			Event: map[string]any{
+				"Resources": "ResourceProfilePrefix",
+				utils.Usage: 30 * time.Second,
+			},
+		},
+	}
+
+	for _, prf := range prfs {
+		dm.SetResourceProfile(context.TODO(), prf.ResourceProfile, true)
+	}
+	for _, res := range resources {
+		dm.SetResource(context.TODO(), res.Resource)
+	}
+	return rS, prfs, resources, events
+}
+
 func TestResourceMatchingResourcesForEvent(t *testing.T) {
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
-	timeDurationExample := 10 * time.Second
-	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(context.TODO(), resProfile.ResourceProfile, true)
-	}
-	for _, res := range resourceTest {
-		dmRES.SetResource(context.TODO(), res.Resource)
-	}
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceMatchingResourcesForEvent1", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	}
-
-	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[1].Tenant, resEvs[1],
-		"TestResourceMatchingResourcesForEvent2", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[1].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[1].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[1].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
-	}
-
-	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[2].Tenant, resEvs[2],
-		"TestResourceMatchingResourcesForEvent3", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[2].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[2].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
+	rS, _, resources, events := newTestMatchingSetup(t)
+	ttl := 10 * time.Second
+	for i, ev := range events {
+		mres, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
+			fmt.Sprintf("TestResourceMatchingResourcesForEvent%d", i+1), &ttl)
+		if err != nil {
+			t.Errorf("Event %d error: %+v", i, err)
+			continue
+		}
+		mres.unlock()
+		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
+			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
+		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
+			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
+		} else if !reflect.DeepEqual(resources[i].rPrf, mres[0].rPrf) {
+			t.Errorf("Event %d rPrf: expecting %+v, received %+v", i, resources[i].rPrf, mres[0].rPrf)
+		}
 	}
 }
 
-// UsageTTL 0 in ResourceProfile and give 10s duration
-func TestResourceUsageTTLCase1(t *testing.T) {
-	resprf := []*resourceProfile{
+func TestResourceUsageTTL(t *testing.T) {
+	cases := []struct {
+		name       string
+		profileTTL time.Duration
+		duration   *time.Duration
+		wantTTL    *time.Duration
+	}{
 		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
+			name:       "zero profile TTL with 10s duration",
+			profileTTL: 0,
+			duration:   utils.DurationPointer(10 * time.Second),
+			wantTTL:    utils.DurationPointer(10 * time.Second),
 		},
 		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
+			name:       "zero profile TTL with nil duration",
+			profileTTL: 0,
+			duration:   nil,
+			wantTTL:    utils.DurationPointer(0),
 		},
 		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
+			name:       "zero profile TTL with zero duration",
+			profileTTL: 0,
+			duration:   utils.DurationPointer(0),
+			wantTTL:    nil,
+		},
+		{
+			name:       "nonzero profile TTL with 10s duration",
+			profileTTL: 5,
+			duration:   utils.DurationPointer(10 * time.Second),
+			wantTTL:    utils.DurationPointer(10 * time.Second),
 		},
 	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rS, prfs, _, events := newTestMatchingSetup(t)
+			prfs[0].ResourceProfile.UsageTTL = tc.profileTTL
+			rS.dm.SetResourceProfile(context.TODO(), prfs[0].ResourceProfile, true)
 
-	timeDurationExample := 10 * time.Second
-
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	engine.Cache.Clear(nil)
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf[0].ResourceProfile.UsageTTL = 0
-	resourceTest[0].rPrf = resprf[0]
-	resourceTest[0].ttl = &timeDurationExample
-	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0].ResourceProfile, true); err != nil {
-		t.Error(err)
-	}
-	if err := dmRES.SetResource(context.TODO(), resourceTest[0].Resource); err != nil {
-		t.Error(err)
-	}
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceUsageTTLCase1", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	} else if !reflect.DeepEqual(resourceTest[0].ttl, mres[0].ttl) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ttl, mres[0].ttl)
-	}
-}
-
-// UsageTTL 5s in ResourceProfile and give nil duration
-func TestResourceUsageTTLCase2(t *testing.T) {
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
-
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf[0].ResourceProfile.UsageTTL = 0
-	resourceTest[0].rPrf = resprf[0]
-	resourceTest[0].ttl = &resprf[0].ResourceProfile.UsageTTL
-	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0].ResourceProfile, true); err != nil {
-		t.Error(err)
-	}
-	if err := dmRES.SetResource(context.TODO(), resourceTest[0].Resource); err != nil {
-		t.Error(err)
-	}
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceUsageTTLCase2", nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	} else if !reflect.DeepEqual(resourceTest[0].ttl, mres[0].ttl) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ttl, mres[0].ttl)
-	}
-}
-
-// UsageTTL 5s in ResourceProfile and give 0 duration
-func TestResourceUsageTTLCase3(t *testing.T) {
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
-
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	engine.Cache.Clear(nil)
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf[0].ResourceProfile.UsageTTL = 0
-	resourceTest[0].rPrf = resprf[0]
-	resourceTest[0].ttl = nil
-	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0].ResourceProfile, true); err != nil {
-		t.Error(err)
-	}
-	if err := dmRES.SetResource(context.TODO(), resourceTest[0].Resource); err != nil {
-		t.Error(err)
-	}
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceUsageTTLCase3", utils.DurationPointer(0))
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	} else if !reflect.DeepEqual(resourceTest[0].ttl, mres[0].ttl) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ttl, mres[0].ttl)
-	}
-}
-
-// UsageTTL 5s in ResourceProfile and give 10s duration
-func TestResourceUsageTTLCase4(t *testing.T) {
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
-
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	engine.Cache.Clear(nil)
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	timeDurationExample := 10 * time.Second
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf[0].ResourceProfile.UsageTTL = 5
-	resourceTest[0].rPrf = resprf[0]
-	resourceTest[0].ttl = &timeDurationExample
-	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0].ResourceProfile, true); err != nil {
-		t.Error(err)
-	}
-	if err := dmRES.SetResource(context.TODO(), resourceTest[0].Resource); err != nil {
-		t.Error(err)
-	}
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceUsageTTLCase4", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	} else if !reflect.DeepEqual(resourceTest[0].ttl, mres[0].ttl) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ttl, mres[0].ttl)
+			mres, err := rS.matchingResourcesForEvent(context.TODO(), events[0].Tenant, events[0],
+				"TestResourceUsageTTL_"+tc.name, tc.duration)
+			if err != nil {
+				t.Fatalf("Error: %+v", err)
+			}
+			mres.unlock()
+			if mres[0].Resource.Tenant != prfs[0].ResourceProfile.Tenant {
+				t.Errorf("Tenant: expecting %+v, received %+v", prfs[0].ResourceProfile.Tenant, mres[0].Resource.Tenant)
+			}
+			if mres[0].Resource.ID != prfs[0].ResourceProfile.ID {
+				t.Errorf("ID: expecting %+v, received %+v", prfs[0].ResourceProfile.ID, mres[0].Resource.ID)
+			}
+			if !reflect.DeepEqual(mres[0].rPrf, prfs[0]) {
+				t.Errorf("rPrf: expecting %+v, received %+v", prfs[0], mres[0].rPrf)
+			}
+			if !reflect.DeepEqual(tc.wantTTL, mres[0].ttl) {
+				t.Errorf("TTL: expecting %+v, received %+v", tc.wantTTL, mres[0].ttl)
+			}
+		})
 	}
 }
 
 func TestResourceResIDsMp(t *testing.T) {
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
+	_, _, resources, _ := newTestMatchingSetup(t)
 	expected := utils.StringSet{
 		"ResourceProfile1": struct{}{},
 		"ResourceProfile2": struct{}{},
 		"ResourceProfile3": struct{}{},
 	}
-	if rcv := resourceTest.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
+	if rcv := resources.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
 
 func TestResourceMatchWithIndexFalse(t *testing.T) {
-	var dmRES *engine.DataManager
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(dmRES, cfg,
-		fltrs, nil)
-	engine.Cache.Clear(nil)
-	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes1, true)
-	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{time.Second.String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes2, true)
-	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RES_3",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Resources",
-				Values:  []string{"ResourceProfilePrefix"},
-			},
-		},
-	}
-	dmRES.SetFilter(context.Background(), fltrRes3, true)
-	resprf := []*resourceProfile{
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile1",
-				FilterIDs:         []string{"FLTR_RES_1", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile2", // identifier of this resource
-				FilterIDs:         []string{"FLTR_RES_2", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-		{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:                "ResourceProfile3",
-				FilterIDs:         []string{"FLTR_RES_3", "*ai:*now:2014-07-14T14:25:00Z"},
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{""},
-			},
-		},
-	}
-	resourceTest := Resources{
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile1",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[0],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile2",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[1],
-		},
-		{
-			Resource: &utils.Resource{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "ResourceProfile3",
-				Usages: map[string]*utils.ResourceUsage{},
-				TTLIdx: []string{},
-			},
-			rPrf: resprf[2],
-		},
-	}
-	resEvs := []*utils.CGREvent{
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event1",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-				utils.Usage:      135 * time.Second,
-				utils.Cost:       123.0,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event2",
-			Event: map[string]any{
-				"Resources":      "ResourceProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "15.0",
-				utils.Usage:      45 * time.Second,
-			},
-		},
-		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "event3",
-			Event: map[string]any{
-				"Resources": "ResourceProfilePrefix",
-				utils.Usage: 30 * time.Second,
-			},
-		},
-	}
-	timeDurationExample := 10 * time.Second
-	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(context.TODO(), resProfile.ResourceProfile, true)
-	}
-	for _, res := range resourceTest {
-		dmRES.SetResource(context.TODO(), res.Resource)
-	}
-	resService.cfg.ResourceSCfg().IndexedSelects = false
-	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
-		"TestResourceMatchWithIndexFalse1", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
-	}
-
-	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[1].Tenant, resEvs[1],
-		"TestResourceMatchWithIndexFalse2", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[1].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[1].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[1].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
-	}
-
-	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[2].Tenant, resEvs[2],
-		"TestResourceMatchWithIndexFalse3", &timeDurationExample)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	mres.unlock()
-	if !reflect.DeepEqual(resourceTest[2].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resourceTest[2].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
+	rS, _, resources, events := newTestMatchingSetup(t)
+	rS.cfg.ResourceSCfg().IndexedSelects = false
+	ttl := 10 * time.Second
+	for i, ev := range events {
+		mres, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
+			fmt.Sprintf("TestResourceMatchWithIndexFalse%d", i+1), &ttl)
+		if err != nil {
+			t.Errorf("Event %d error: %+v", i, err)
+			continue
+		}
+		mres.unlock()
+		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
+			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
+		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
+			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
+		} else if !reflect.DeepEqual(resources[i].rPrf, mres[0].rPrf) {
+			t.Errorf("Event %d rPrf: expecting %+v, received %+v", i, resources[i].rPrf, mres[0].rPrf)
+		}
 	}
 }
 
