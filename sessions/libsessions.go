@@ -77,6 +77,9 @@ var methodFlags = map[string][]string{
 		utils.MetaThresholds,
 		utils.MetaCDRs,
 	},
+	utils.MetaCDRs: {
+		utils.MetaCDRs,
+	},
 }
 
 // ApplyFlags sets relevant flags in opts based on request type and processor flags.
