@@ -78,7 +78,8 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 100,
-			}},
+			},
+		},
 		Limit:        2,
 		ThresholdIDs: []string{utils.MetaNone},
 		UsageTTL:     -time.Nanosecond,
@@ -128,21 +129,10 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	} else if reply != exp {
 		t.Errorf("Expected: %q, received: %q", exp, reply)
 	}
-
 }
 
 func TestResourcesV1ResourcesForEventOK(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	rS, dm := newTestResourceSWithCache(t)
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES1",
@@ -152,7 +142,8 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -168,17 +159,12 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			},
 		},
 	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-	if err != nil {
-		t.Error(err)
+	if err := dm.SetResourceProfile(context.Background(), rsPrf, true); err != nil {
+		t.Fatal(err)
 	}
-	err = dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
+	if err := dm.SetResource(context.Background(), rs); err != nil {
+		t.Fatal(err)
 	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
 
 	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
@@ -218,11 +204,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 }
 
 func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	rS, dm := newTestResourceSWithCache(t)
 	rsPrf := &utils.ResourceProfile{
 		Tenant:       "cgrates.org",
 		ID:           "RES1",
@@ -231,7 +213,8 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -246,17 +229,12 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 			},
 		},
 	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-	if err != nil {
-		t.Error(err)
+	if err := dm.SetResourceProfile(context.Background(), rsPrf, true); err != nil {
+		t.Fatal(err)
 	}
-	err = dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
+	if err := dm.SetResource(context.Background(), rs); err != nil {
+		t.Fatal(err)
 	}
-
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
 
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -277,93 +255,72 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 }
 
 func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	rS, dm := newTestResourceSWithCache(t)
+
 	rsPrf := &utils.ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RES1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		ThresholdIDs: []string{utils.MetaNone},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			}},
-		Limit:    10,
-		UsageTTL: time.Minute,
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weights:           utils.DynamicWeights{{Weight: 10}},
+		Limit:             10,
+		UsageTTL:          time.Minute,
 	}
-	rs := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES1",
-		Usages: map[string]*utils.ResourceUsage{
-			"RU1": {
-				Tenant: "cgrates.org",
-				ID:     "RU1",
-				Units:  10,
-			},
-		},
-	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-	if err != nil {
-		t.Error(err)
-	}
-	err = dm.SetResource(context.Background(), rs)
-	if err != nil {
-		t.Error(err)
+	if err := dm.SetResourceProfile(context.Background(), rsPrf, true); err != nil {
+		t.Fatal(err)
 	}
 
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply Resources
-	if err := rS.V1GetResourcesForEvent(context.Background(), nil, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
 
+	// missing UsageID
 	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
+		ID: "EventAuthorizeResource",
 		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID: "RU_TEST2",
+			utils.AccountField:          "1001",
+			utils.OptsResourcesUnits:    5,
+			utils.OptsResourcesUsageTTL: time.Minute,
 		},
 	}
-
-	experr = `MANDATORY_IE_MISSING: [ID]`
+	experr := `MANDATORY_IE_MISSING: [UsageID]`
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
+	// missing Event
 	args = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ResourcesForEventTest",
+		ID: "EventAuthorizeResource",
 		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID: "RU_TEST3",
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    5,
+			utils.OptsResourcesUsageTTL: time.Minute,
 		},
 	}
-
 	experr = `MANDATORY_IE_MISSING: [Event]`
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
+	// missing ID
 	args = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ResourcesForEventTest",
-		Event: map[string]any{
-			utils.AccountField: "1001",
+		Event: map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    5,
+			utils.OptsResourcesUsageTTL: time.Minute,
 		},
 	}
-
-	experr = `MANDATORY_IE_MISSING: [UsageID]`
+	experr = `MANDATORY_IE_MISSING: [ID]`
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	// nil args
+	experr = `MANDATORY_IE_MISSING: [Event]`
+	if err := rS.V1GetResourcesForEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -371,9 +328,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 
 func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
+	t.Cleanup(func() { engine.Cache = tmp })
 
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -395,7 +350,8 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -470,9 +426,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 
 func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
+	t.Cleanup(func() { engine.Cache = tmp })
 
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -493,7 +447,8 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -741,7 +696,8 @@ func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -821,7 +777,8 @@ func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -971,7 +928,8 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1028,7 +986,8 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    0,
 			UsageTTL: time.Minute,
 		},
@@ -1085,7 +1044,8 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1142,7 +1102,8 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1188,7 +1149,8 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1486,15 +1448,7 @@ func TestResourcesV1MissingParameters(t *testing.T) {
 	}
 	for _, m := range methods {
 		t.Run(m.name, func(t *testing.T) {
-			tmp := engine.Cache
-			t.Cleanup(func() { engine.Cache = tmp })
-
-			engine.Cache.Clear(nil)
-			cfg := config.NewDefaultCGRConfig()
-			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-			dm := engine.NewDataManager(dbCM, cfg, nil)
-			engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+			rS, dm := newTestResourceSWithCache(t)
 
 			rsPrf := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
@@ -1510,8 +1464,6 @@ func TestResourcesV1MissingParameters(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			fltrs := engine.NewFilterS(cfg, nil, dm)
-			rS := NewResourceService(dm, cfg, fltrs, nil)
 			var reply string
 
 			// missing UsageID
@@ -1592,7 +1544,8 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1649,7 +1602,8 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    10,
 			UsageTTL: time.Minute,
 		},
@@ -1704,7 +1658,8 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    -1,
 		UsageTTL: time.Minute,
 	}
@@ -1771,7 +1726,8 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    -1,
 		UsageTTL: time.Minute,
 	}
@@ -1853,7 +1809,8 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -1913,7 +1870,8 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: 0,
 	}
@@ -1985,7 +1943,8 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 	}
@@ -2053,7 +2012,8 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
-				}},
+				},
+			},
 			Limit:    -1,
 			UsageTTL: time.Minute,
 		},
@@ -2106,7 +2066,8 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	if _, err := resources.allocateResource(&utils.ResourceUsage{
 		Tenant: "cgrates.org",
 		ID:     "RU_ID",
-		Units:  1}, true); err != nil {
+		Units:  1,
+	}, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2145,7 +2106,8 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		Limit:    10,
 		UsageTTL: time.Minute,
 		Stored:   true,
