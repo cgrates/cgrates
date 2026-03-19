@@ -709,7 +709,7 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"diameter_agent": {
-			"enabled": true,
+			"enabled": false,
 			"listen": "127.0.0.1:3868",
 			"listen_net": "tcp",
 			"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
@@ -743,7 +743,7 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"diameter_agent":{"asr_template":"asr_template","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":true,"forced_disconnect":"*none","listeners":[{"address":"127.0.0.1:3868","network":"tcp"}],"origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"rar_template","request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*birpc_internal"],"stats_conns":[],"synced_conn_requests":false,"thresholds_conns":[],"vendor_id":1}}`
+	cfgStr := `{"diameter_agent":{"asr_template":"asr_template","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listeners":[{"address":"127.0.0.1:3868","network":"tcp"}],"origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"rar_template","request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*birpc_internal"],"stats_conns":[],"synced_conn_requests":false,"thresholds_conns":[],"vendor_id":1}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -761,7 +761,7 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"radius_agent": {
-			"enabled": true,
+			"enabled": false,
 			"listeners":[
 				{
 					"network": "udp",
@@ -799,7 +799,7 @@ func testSectConfigSReloadRadiusAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"radius_agent":{"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","dmr_template":"*dmr","enabled":true,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"requests_cache_key":"","sessions_conns":["*internal"],"stats_conns":[],"thresholds_conns":[]}}`
+	cfgStr := `{"radius_agent":{"client_dictionaries":{"*default":["/usr/share/cgrates/radius/dict/"]},"client_secrets":{"*default":"CGRateS.org"},"coa_template":"*coa","dmr_template":"*dmr","enabled":false,"listeners":[{"acct_address":"127.0.0.1:1813","auth_address":"127.0.0.1:1812","network":"udp"}],"request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"requests_cache_key":"","sessions_conns":["*internal"],"stats_conns":[],"thresholds_conns":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -850,7 +850,7 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"dns_agent": {
-			"enabled": true,
+			"enabled": false,
 			"listeners":[
 				{
 					"address": "127.0.0.1:2053",							
@@ -871,7 +871,7 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listeners\":[{\"address\":\"127.0.0.1:2053\",\"network\":\"udp\"}],\"request_processors\":[{\"filters\":null,\"flags\":null,\"id\":\"random\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"],\"stats_conns\":[],\"thresholds_conns\":[],\"timezone\":\"local\"}}"
+	cfgStr := "{\"dns_agent\":{\"enabled\":false,\"listeners\":[{\"address\":\"127.0.0.1:2053\",\"network\":\"udp\"}],\"request_processors\":[{\"filters\":null,\"flags\":null,\"id\":\"random\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"],\"stats_conns\":[],\"thresholds_conns\":[],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
