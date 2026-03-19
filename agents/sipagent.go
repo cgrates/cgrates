@@ -426,19 +426,18 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
-		rply := new(sessions.V1AuthorizeReply)
+		rply := new(sessions.V1ProcessEventReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
 		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), sa.fltrS)
 		if err != nil {
 			return
 		}
-		err = sa.connMgr.Call(context.TODO(), sessionsConns, utils.SessionSv1AuthorizeEvent,
+		err = sa.connMgr.Call(context.TODO(), sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
 		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)

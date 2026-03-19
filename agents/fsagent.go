@@ -196,9 +196,9 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		return // do not process this request
 	}
 	authArgs.Event[FsConnID] = connIdx // Attach the connection ID
-	var authReply sessions.V1AuthorizeReply
+	var authReply sessions.V1ProcessEventReply
 	sessionsConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), fsa.fltrS)
-	if err := fsa.connMgr.Call(fsa.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := fsa.connMgr.Call(fsa.ctx, sessionsConns, utils.SessionSv1ProcessEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -206,15 +206,15 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 		return
 	}
-	if authReply.Attributes != nil {
-		for fldName := range authReply.Attributes.UniqueAlteredFields() {
+	if attrs, has := authReply.Attributes[utils.MetaPrimary]; has {
+		for fldName := range attrs.UniqueAlteredFields() {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+			if _, has := attrs.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
 			}
 			if _, err := fsa.conns[connIdx].SendApiCmd(
 				fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
-					authReply.Attributes.CGREvent.Event[fldName])); err != nil {
+					attrs.CGREvent.Event[fldName])); err != nil {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 						utils.FreeSWITCHAgent, err.Error(), fldName))
@@ -224,20 +224,25 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			}
 		}
 	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
-		if authReply.MaxUsage == nil ||
-			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
+	if len(authReply.AccountSUsage) != 0 {
+		var maxDur *time.Duration
+		for _, usage := range authReply.AccountSUsage {
+			u := usage
+			if maxDur == nil || u < *maxDur {
+				maxDur = &u
+			}
+		}
+		if *maxDur == 0 {
 			fsa.unparkCall(fsev.GetUUID(), connIdx,
 				fsev.GetCallDestNr(utils.MetaDefault), utils.ErrInsufficientCredit.Error())
 			return
 		}
-		maxDur, _ := authReply.MaxUsage.Duration()
 		fsa.setMaxCallDuration(fsev.GetUUID(), connIdx,
-			maxDur, fsev.GetCallDestNr(utils.MetaDefault))
+			*maxDur, fsev.GetCallDestNr(utils.MetaDefault))
 	}
-	if authReply.ResourceAllocation != nil {
+	if alloc, has := authReply.ResourceAllocation[utils.MetaPrimary]; has {
 		if _, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
-			fsev.GetUUID(), CGRResourceAllocation, *authReply.ResourceAllocation)); err != nil {
+			fsev.GetUUID(), CGRResourceAllocation, alloc)); err != nil {
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.FreeSWITCHAgent, err.Error(), CGRResourceAllocation))
@@ -246,8 +251,8 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			return
 		}
 	}
-	if authReply.RouteProfiles != nil {
-		fsArray := SliceAsFsArray(authReply.RouteProfiles.RoutesWithParams())
+	if rts, has := authReply.RouteProfiles[utils.MetaPrimary]; has {
+		fsArray := SliceAsFsArray(rts.RoutesWithParams())
 		if _, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGRRoutes, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting routes: %s",
@@ -369,8 +374,9 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		delete(cgrEv.Event, FsConnID) // Remove the connection ID
 	}
 	if fsa.cfg.CreateCDR {
-		if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &reply); err != nil {
+		var cdrReply sessions.V1ProcessEventReply
+		if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1ProcessEvent,
+			cgrEv, &cdrReply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

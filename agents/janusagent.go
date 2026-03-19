@@ -134,9 +134,9 @@ func (ja *JanusAgent) authSession(origIP string) (err error) {
 	if err != nil {
 		return
 	}
-	rply := new(sessions.V1AuthorizeReply)
+	rply := new(sessions.V1ProcessEventReply)
 	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1AuthorizeEvent,
+		utils.SessionSv1ProcessEvent,
 		authArgs, rply)
 	return
 }
@@ -210,10 +210,10 @@ func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
 	if err != nil {
 		return
 	}
-	var rply string
+	rply := new(sessions.V1ProcessEventReply)
 	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1ProcessCDR,
-		cgrEv, &rply)
+		utils.SessionSv1ProcessEvent,
+		cgrEv, rply)
 	return
 }
 
