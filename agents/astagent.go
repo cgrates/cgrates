@@ -178,7 +178,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-	//authorize Session
+	// authorize Session
 	authArgs := ev.AsCGREvent()
 	if authArgs == nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -186,30 +186,28 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
-	var authReply sessions.V1AuthorizeReply
-	//
 	sessionConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), sma.fltrS)
 	if err != nil {
 		return
 	}
+	var processReply sessions.V1ProcessEventReply
 	if err := sma.connMgr.Call(sma.ctx, sessionConns,
-		utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+		utils.SessionSv1ProcessEvent, authArgs, &processReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> error: %s authorizing session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-	if authReply.Attributes != nil {
-		for fldName := range authReply.Attributes.UniqueAlteredFields() {
+	if attrs := processReply.Attributes[utils.MetaPrimary]; attrs != nil {
+		for fldName := range attrs.UniqueAlteredFields() {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+			if _, has := attrs.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
 			}
-			fldVal, err := authReply.Attributes.CGREvent.FieldAsString(fldName)
+			fldVal, err := attrs.CGREvent.FieldAsString(fldName)
 			if err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> error <%s> extracting attribute field: <%s>",
+					fmt.Sprintf("<%s> error <%s> extracting attribute field: <%s>",
 						utils.AsteriskAgent, err.Error(), fldName))
 			}
 			if !sma.setChannelVar(ev.ChannelID(), fldName, fldVal) {
@@ -217,29 +215,35 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			}
 		}
 	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
-		if authReply.MaxUsage == nil ||
-			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
+
+	if len(processReply.AccountSUsage) != 0 {
+		var maxDur *time.Duration
+		for _, usage := range processReply.AccountSUsage {
+			u := usage
+			if maxDur == nil || u < *maxDur {
+				maxDur = &u
+			}
+		}
+		if *maxDur == 0 {
 			sma.hangupChannel(ev.ChannelID(), "")
 			return
 		}
-		maxDur, _ := authReply.MaxUsage.Duration()
-		//  Set absolute timeout for non-postpaid calls
+
 		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
 			strconv.Itoa(int(maxDur.Milliseconds()))) {
 			return
 		}
 	}
-	if authReply.ResourceAllocation != nil {
-		if !sma.setChannelVar(ev.ChannelID(),
-			ARICGRResourceAllocation, *authReply.ResourceAllocation) {
+
+	if alloc, has := processReply.ResourceAllocation[utils.MetaPrimary]; has {
+		if !sma.setChannelVar(ev.ChannelID(), ARICGRResourceAllocation, alloc) {
 			return
 		}
 	}
-	if authReply.RouteProfiles != nil {
-		for i, route := range authReply.RouteProfiles.RouteIDs() {
-			if !sma.setChannelVar(ev.ChannelID(),
-				CGRRoute+strconv.Itoa(i+1), route) {
+
+	if rts, has := processReply.RouteProfiles[utils.MetaPrimary]; has {
+		for i, route := range rts.RouteIDs() {
+			if !sma.setChannelVar(ev.ChannelID(), CGRRoute+strconv.Itoa(i+1), route) {
 				return
 			}
 		}
@@ -347,7 +351,10 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		cgrEvDisp.APIOpts = map[string]any{utils.MetaTerminate: true}
 	}
 
-	var reply string
+	var (
+		reply             string
+		processEventReply sessions.V1ProcessEventReply
+	)
 	sessConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], cgrEvDisp.Tenant, cgrEvDisp.AsDataProvider(), sma.fltrS)
 	if err := sma.connMgr.Call(sma.ctx, sessConns,
 		utils.SessionSv1TerminateSession,
@@ -357,8 +364,8 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.connMgr.Call(sma.ctx, sessConns,
-			utils.SessionSv1ProcessCDR,
-			cgrEvDisp, &reply); err != nil {
+			utils.SessionSv1ProcessEvent,
+			cgrEvDisp, &processEventReply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), chID))
 		}
