@@ -878,8 +878,15 @@ func TestLibDiamAVPAsIface(t *testing.T) {
 			diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), // 435 code for Redirect-Server-Address
 		},
 	})
-	if rply, err := diamAVPAsIface(args); err == nil {
-		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	exp = &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")),
+		},
+	}
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
 	}
 
 	args = diam.NewAVP(257, avp.Mbit, 0, datatype.Address("10.170.248.140"))

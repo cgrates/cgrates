@@ -56,6 +56,55 @@
 				<rule avp="Load" required="false"/>
 			</answer>
 		</command>
+
+		<command code="8388636" short="SN" name="Spending-Status-Notification">
+			<!-- ===================== -->
+			<!-- SN-Request -->
+			<!-- ===================== -->
+			<request>
+				<rule avp="Session-Id" required="true" max="1"/>
+				<rule avp="DRMP" required="false" max="1"/>
+				<rule avp="Origin-Host" required="true" max="1"/>
+				<rule avp="Origin-Realm" required="true" max="1"/>
+				<rule avp="Destination-Realm" required="true" max="1"/>
+				<rule avp="Destination-Host" required="true" max="1"/>
+				<rule avp="Auth-Application-Id" required="true" max="1"/>
+				<rule avp="Origin-State-Id" required="false" max="1"/>
+				<rule avp="OC-Supported-Features" required="false" max="1"/>
+				<rule avp="Policy-Counter-Status-Report" required="false"/>
+				<rule avp="SN-Request-Type" required="false" max="1"/>
+				<rule avp="Proxy-Info" required="false"/>
+				<rule avp="Route-Record" required="false"/>
+				<!-- Catch-all AVP -->
+				<rule avp="AVP" required="false"/>
+			</request>
+			<!-- ===================== -->
+			<!-- SN-Answer -->
+			<!-- ===================== -->
+			<answer>
+				<rule avp="Session-Id" required="true" max="1"/>
+				<rule avp="DRMP" required="false" max="1"/>
+				<rule avp="Origin-Host" required="true" max="1"/>
+				<rule avp="Origin-Realm" required="true" max="1"/>
+				<!-- Either Result-Code or Experimental-Result is required -->
+				<rule avp="Result-Code" required="false" max="1"/>
+				<rule avp="Experimental-Result" required="false" max="1"/>
+				<rule avp="Origin-State-Id" required="false" max="1"/>
+				<rule avp="OC-Supported-Features" required="false" max="1"/>
+				<rule avp="OC-OLR" required="false" max="1"/>
+				<rule avp="Error-Message" required="false" max="1"/>
+				<rule avp="Error-Reporting-Host" required="false" max="1"/>
+				<rule avp="Redirect-Host" required="false"/>
+				<rule avp="Redirect-Host-Usage" required="false" max="1"/>
+				<rule avp="Redirect-Max-Cache-Time" required="false" max="1"/>
+				<rule avp="Failed-AVP" required="false" max="1"/>
+				<rule avp="Proxy-Info" required="false"/>
+				<!-- Catch-all AVP -->
+				<rule avp="AVP" required="false"/>
+			</answer>
+		</command>
+
+
 		<avp name="SL-Request-Type" code="2904" vendor-id="10415" must="M" may="P" must-not="-" may-encrypt="-">
 			<data type="Enumerated">
 				<item code="0" name="INITIAL_REQUEST"/>

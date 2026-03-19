@@ -409,7 +409,7 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
 	})
 	sessions := NewSessionS(cfg, dm, connMgr)
-	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, "ClientConnID", 0)
 
 	ss := &Session{
 		CGRID:        "CGRID",
@@ -767,7 +767,7 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 	sessions = NewSessionS(cfg, dm, connMgr)
 
 	sTestMock := &testMockClientConnDiscSess{}
-	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, "ClientConnIdtest", 0)
 
 	if _, err = sessions.debitLoopSession(ss, 0, time.Hour); err != nil {
 		t.Error(err)
@@ -1056,7 +1056,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	sTestMock := &testMockClientConnDiscSess{}
-	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, "ClientConnID", 2.0)
 
 	ss := &Session{
 		CGRID:         "CGRID",
@@ -1388,20 +1388,16 @@ func TestDisconnectSession(t *testing.T) {
 	}
 
 	sTestMock := &testMockClientConn{}
-	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
-	sessions.biJIDs["test"] = &biJClient{
-		conn: sTestMock,
-	}
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, utils.EmptyString, 0)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, "test", 0)
 
 	if err := sessions.disconnectSession(ss, utils.EmptyString); err == nil || err != utils.ErrNoActiveSession {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoActiveSession, err)
 	}
 
 	sTestMock1 := &mockConnWarnDisconnect1{}
-	sessions.RegisterIntBiJConn(sTestMock1, utils.EmptyString)
-	sessions.biJIDs["test"] = &biJClient{
-		conn: sTestMock1,
-	}
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock1, utils.EmptyString, 0)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock1, "test", 0)
 	if err := sessions.disconnectSession(ss, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -1828,7 +1824,7 @@ func TestSyncSessions(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	sTestMock1 := &testMockClientSyncSessions{}
-	sessions.RegisterIntBiJConn(sTestMock1, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock1, utils.EmptyString, 0)
 
 	sessions.aSessions = map[string]*Session{
 		"SESS1": {
