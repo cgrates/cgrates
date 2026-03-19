@@ -152,11 +152,11 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 		return
 	}
 	authArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
-	var authReply sessions.V1AuthorizeReply
-	// take the error after calling SessionSv1.AuthorizeEvent
+	var authReply sessions.V1ProcessEventReply
+	// take the error after calling SessionSv1.ProcessEvent
 	// and send it as parameter to AsKamAuthReply
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), ka.fltrS)
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
+	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
@@ -260,8 +260,9 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		// no return here since we want CDR anyhow
 	}
 	if ka.cfg.CreateCdr || strings.Contains(kev[utils.CGRFlags], utils.MetaCDRs) {
-		if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &reply); err != nil {
+		var processEventReply sessions.V1ProcessEventReply
+		if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent,
+			cgrEv, &processEventReply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
@@ -401,9 +402,9 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns[utils.MetaSessionS], procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), ka.fltrS)
-	var processReply string
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
-	// take the error after calling SessionSv1.ProcessCDR
+	var processReply sessions.V1ProcessEventReply
+	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent, procCDRArgs, &processReply)
+	// take the error after calling SessionSv1.ProcessEvent
 	// and send it as parameter to AsKamProcessCDRReply
 	if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
