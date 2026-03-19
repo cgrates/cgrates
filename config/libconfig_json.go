@@ -421,6 +421,7 @@ type EventExporterJsonCfg struct {
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled                *bool              `json:"enabled"`
+	ApierSConns            *[]string          `json:"apiers_conns"`
 	ChargerSConns          *[]string          `json:"chargers_conns"`
 	RALsConns              *[]string          `json:"rals_conns"`
 	IPsConns               *[]string          `json:"ips_conns"`
@@ -580,6 +581,8 @@ type DiameterAgentJsonCfg struct {
 	SyncedConnRequests      *bool                  `json:"synced_conn_requests"`
 	ASRTemplate             *string                `json:"asr_template"`
 	RARTemplate             *string                `json:"rar_template"`
+	SNRTemplate             *string                `json:"snr_template"`
+	SLRTemplate             *string                `json:"slr_template"`
 	ForcedDisconnect        *string                `json:"forced_disconnect"`
 	StatQueueIDs            *[]string              `json:"conn_status_stat_queue_ids"`
 	ThresholdIDs            *[]string              `json:"conn_status_threshold_ids"`

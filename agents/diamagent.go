@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -61,6 +62,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		raa:     make(map[string]chan *diam.Message),
 		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
+		snrLck:  make(map[string]*sync.RWMutex),
 	}
 	srv, err := birpc.NewServiceWithMethodsRename(da, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
@@ -108,6 +110,7 @@ type DiameterAgent struct {
 	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
 	dpaLck   sync.RWMutex
 	dpa      map[string]chan *diam.Message
+	snrLck   map[string]*sync.RWMutex // used to block sending SNR for the same sy session while not received an answer from it yet
 
 	ctx *context.Context
 }
@@ -272,10 +275,31 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		}
 		defer da.caps.Deallocate()
 	}
-
-	// cache message for ASR
-	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != "" ||
-		da.cgrCfg.DiameterAgentCfg().RARTemplate != "" {
+	if m.Header.CommandCode == 8388636 { // Handle SNA
+		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
+					utils.DiameterAgent, err.Error(), m))
+			return
+		}
+		defer da.snrLck[sessID].Unlock() // unblock other SNR with the same Session-Id
+		avp, err := m.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> app: %d, command %d, failed to find Result-Code, err: %s",
+				utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, err.Error()))
+			return
+		}
+		if avp[0].Data.(datatype.Unsigned32) != 2001 {
+			utils.Logger.Warning(fmt.Sprintf("<%s> app: %d, command %d, returned Result-Code <%v>",
+				utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, avp[0].Data.(datatype.Unsigned32)))
+		}
+		return // no need for further processing
+	}
+	// cache message for ASR, RAR, or SNR
+	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != utils.EmptyString ||
+		da.cgrCfg.DiameterAgentCfg().RARTemplate != utils.EmptyString ||
+		da.cgrCfg.DiameterAgentCfg().SNRTemplate != utils.EmptyString {
 		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
 		if err != nil {
 			utils.Logger.Warning(
@@ -298,19 +322,28 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
+		agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, opts,
+			reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				da.cgrCfg.GeneralCfg().DefaultTimezone), da.filterS, nil)
+		if slices.Contains(reqProcessor.Filters, utils.ConcatenatedKey(utils.MetaString,
+			utils.DynamicDataPrefix+utils.MetaVars+utils.NestingSep+utils.MetaCmd,
+			utils.SLR)) { // check if request process is made for SLR requests by looking for filter: "*string:~*vars.*cmd:SLR"
+			// set default request if no *syPolicyFilters are found in original request
+			if _, have := agReq.Opts[utils.OptsSyPolicyFilters]; !have {
+				if err = agReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().SLRTemplate]); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> cannot process SLR, err: %s",
+							utils.DiameterAgent, err.Error()))
+					continue
+				}
+			}
+		}
 		var lclProcessed bool
 		lclProcessed, err = processRequest(
 			da.ctx,
 			reqProcessor,
-			NewAgentRequest(
-				diamDP, reqVars, cgrRplyNM, rply,
-				opts, reqProcessor.Tenant,
-				da.cgrCfg.GeneralCfg().DefaultTenant,
-				utils.FirstNonEmpty(
-					reqProcessor.Timezone,
-					da.cgrCfg.GeneralCfg().DefaultTimezone,
-				),
-				da.filterS, nil),
+			agReq,
 			utils.DiameterAgent, da.connMgr,
 			da.cgrCfg.DiameterAgentCfg().SessionSConns,
 			da.cgrCfg.DiameterAgentCfg().StatSConns,
@@ -348,6 +381,10 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	writeOnConn(c, a)
+	if a.Header.CommandCode == diam.SessionTermination {
+		sessID, _ := diamDP.FieldAsString([]string{"Session-Id"}) // Session-Id will always be present in sy templates
+		delete(da.snrLck, sessID)                                 // delete SNR locker for the session
+	}
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
@@ -710,4 +747,68 @@ func (da *DiameterAgent) V1GetActiveSessionIDs(*context.Context, string,
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
 func (*DiameterAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
+}
+
+// V1SpendingStatusNotification creates and sends SNR to diameter agent
+func (da *DiameterAgent) V1SpendingStatusNotification(ctx *context.Context, cgrEv []*utils.CGREvent, reply *string) (err error) {
+	if len(cgrEv) == 0 {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, no Event found",
+				utils.DiameterAgent))
+		return utils.ErrMandatoryIeMissing
+	}
+	ssID, has := cgrEv[0].Event[utils.OriginID]
+	if !has {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing OriginID in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv[0].Event)))
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	return da.sendSNR(ssID.(string), reply)
+}
+
+// sendSNR will get the diameter PCRF data from cache and send the Spending Status Notification Request to it based on *snr template
+func (da *DiameterAgent) sendSNR(originID string, reply *string) (err error) {
+	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, originID)
+	if !has {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
+				utils.DiameterAgent, originID))
+		return utils.ErrMandatoryIeMissing
+	}
+	dmd := msg.(*diamMsgData)
+	if notifier, ok := dmd.c.(diam.CloseNotifier); ok {
+		go func() {
+			<-notifier.CloseNotify()
+		}()
+	}
+	aReq := NewAgentRequest(
+		newDADataProvider(dmd.c, dmd.m),
+		dmd.vars, nil, nil, nil, nil,
+		da.cgrCfg.GeneralCfg().DefaultTenant,
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS, nil)
+	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().SNRTemplate]); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot send SNR with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, originID, err.Error()))
+		return utils.ErrServerError
+	}
+	m := diam.NewRequest(8388636, // 8388636 is Spending Status Notification command code
+		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
+		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot send SNR session with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, originID, err.Error()))
+		return utils.ErrServerError
+	}
+	if _, have := da.snrLck[originID]; !have {
+		da.snrLck[originID] = new(sync.RWMutex)
+	}
+	da.snrLck[originID].Lock()
+	if err = writeOnConn(dmd.c, m); err != nil {
+		return utils.ErrServerError
+	}
+	*reply = utils.OK
+	return
 }

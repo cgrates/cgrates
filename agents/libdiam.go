@@ -108,6 +108,8 @@ func diamAVPAsIface(dAVP *diam.AVP) (val any, err error) {
 		return uint32(dAVP.Data.(datatype.Unsigned32)), nil
 	case datatype.Unsigned64Type:
 		return uint64(dAVP.Data.(datatype.Unsigned64)), nil
+	case diam.GroupedAVPType:
+		return dAVP.Data.(*diam.GroupedAVP), nil
 	}
 }
 

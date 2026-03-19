@@ -133,6 +133,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if cfg.sessionSCfg.TerminateAttempts < 1 {
 			return fmt.Errorf("<%s> 'terminate_attempts' should be at least 1", utils.SessionS)
 		}
+		for _, connID := range cfg.sessionSCfg.ApierSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ApierCfg().Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ApierS, utils.SessionS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
+			}
+		}
 		for _, connID := range cfg.sessionSCfg.ChargerSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.chargerSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ChargerS, utils.SessionS)

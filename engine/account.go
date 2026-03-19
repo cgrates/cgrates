@@ -1355,7 +1355,7 @@ func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err err
 // AccountSummary contains compressed information about an Account
 type AccountSummary struct {
 	Tenant           string
-	ID               string
+	ID               string // unfinished , change this to Account
 	BalanceSummaries BalanceSummaries
 	AllowNegative    bool
 	Disabled         bool
