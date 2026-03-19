@@ -105,6 +105,7 @@ func (fs *FsConnCfg) Clone() *FsConnCfg {
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled                bool
+	ApierSConns            []string
 	ChargerSConns          []string
 	RALsConns              []string
 	IPsConns               []string
@@ -141,6 +142,16 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Enabled != nil {
 		scfg.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.ApierSConns != nil {
+		scfg.ApierSConns = make([]string, len(*jsnCfg.ApierSConns))
+		for idx, connID := range *jsnCfg.ApierSConns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.ApierSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				scfg.ApierSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+			}
+		}
 	}
 	if jsnCfg.ChargerSConns != nil {
 		scfg.ChargerSConns = make([]string, len(*jsnCfg.ChargerSConns))
@@ -304,6 +315,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	initialMP = map[string]any{
 		utils.EnabledCfg:                scfg.Enabled,
+		utils.ApierSConnsCfg:            stripInternalConns(scfg.ApierSConns),
 		utils.ChargerSConnsCfg:          stripInternalConns(scfg.ChargerSConns),
 		utils.RALsConnsCfg:              stripInternalConns(scfg.RALsConns),
 		utils.IPsConnsCfg:               stripInternalConns(scfg.IPsConns),
@@ -406,6 +418,11 @@ func (scfg *SessionSCfg) Clone() (cln *SessionSCfg) {
 		*cln.SessionTTLLastUsage = *scfg.SessionTTLLastUsage
 	}
 
+	if scfg.ApierSConns != nil {
+		cln.ApierSConns = make([]string, len(scfg.ApierSConns))
+		copy(cln.ApierSConns, scfg.ApierSConns)
+
+	}
 	if scfg.ChargerSConns != nil {
 		cln.ChargerSConns = make([]string, len(scfg.ChargerSConns))
 		copy(cln.ChargerSConns, scfg.ChargerSConns)
