@@ -45,6 +45,8 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		SyncedConnRequests: utils.BoolPointer(true),
 		ASRTemplate:        utils.StringPointer("randomTemplate"),
 		RARTemplate:        utils.StringPointer("randomTemplate"),
+		SNRTemplate:        utils.StringPointer("randomTemplate"),
+		SLRTemplate:        utils.StringPointer("randomTemplate"),
 		ForcedDisconnect:   utils.StringPointer("forced"),
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
@@ -76,6 +78,8 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		SyncedConnReqs:         true,
 		ASRTemplate:            "randomTemplate",
 		RARTemplate:            "randomTemplate",
+		SNRTemplate:            "randomTemplate",
+		SLRTemplate:            "randomTemplate",
 		ForcedDisconnect:       "forced",
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -173,6 +177,8 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.ASRTemplateCfg:      "",
+		utils.SLRTemplateCfg:      "",
+		utils.SNRTemplateCfg:      "",
 		utils.CeApplicationsCfg:   []string{"Base"},
 		utils.DictionariesPathCfg: "/usr/share/cgrates/diameter/dict/",
 		utils.EnabledCfg:          false,
@@ -248,6 +254,8 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.ASRTemplateCfg:      "",
+		utils.SLRTemplateCfg:      "",
+		utils.SNRTemplateCfg:      "",
 		utils.CeApplicationsCfg:   []string{"Nokia.4"},
 		utils.DictionariesPathCfg: "/usr/share/cgrates/diameter",
 		utils.EnabledCfg:          true,

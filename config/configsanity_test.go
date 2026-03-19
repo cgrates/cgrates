@@ -151,6 +151,19 @@ func TestConfigSanitySessionS(t *testing.T) {
 	}
 	cfg.sessionSCfg.TerminateAttempts = 1
 
+	cfg.sessionSCfg.ApierSConns = []string{utils.MetaInternal}
+	expected = "<ApierS> not enabled but requested by <SessionS> component"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ApierSConns = []string{"test"}
+	expected = "<SessionS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ApierSConns = []string{}
+	cfg.ApierCfg().Enabled = true
+
 	cfg.sessionSCfg.ChargerSConns = []string{utils.MetaInternal}
 	expected = "<ChargerS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

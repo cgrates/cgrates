@@ -785,7 +785,7 @@ func (tS *ThresholdService) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Conte
 // BiRPCv1StoreClientConnID will create a ClientConnID and store it in relation to the threshold profile ID it represents
 func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 	args *utils.DiameterSyIDs, reply *string) error {
-	time.Sleep(50 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
+	time.Sleep(100 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
 	tS.clientConnID[args.ThresholdProfileID] = &utils.DiameterSyIDs{
 		CGRID:        args.CGRID,
 		ClientConnID: tS.sBiRPCClients.BiJClntID(ctx.Client),

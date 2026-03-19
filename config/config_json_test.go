@@ -941,6 +941,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:                utils.BoolPointer(false),
+		ApierSConns:            &[]string{},
 		ChargerSConns:          &[]string{},
 		RALsConns:              &[]string{},
 		CDRsConns:              &[]string{},
@@ -1099,6 +1100,8 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		SyncedConnRequests:      utils.BoolPointer(false),
 		ASRTemplate:             utils.StringPointer(""),
 		RARTemplate:             utils.StringPointer(""),
+		SNRTemplate:             utils.StringPointer(""),
+		SLRTemplate:             utils.StringPointer(""),
 		ForcedDisconnect:        utils.StringPointer(utils.MetaNone),
 		ConnHealthCheckInterval: utils.StringPointer("0"),
 		RequestProcessors:       &[]*ReqProcessorJsnCfg{},
@@ -1866,6 +1869,103 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Type:      utils.StringPointer(utils.MetaVariable),
 				Value:     utils.StringPointer("~*req.CC-Request-Number"),
 				Mandatory: utils.BoolPointer(true)},
+		},
+		utils.MetaSLR: {
+			{
+				Tag:       utils.StringPointer("OriginID"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.OriginID", utils.MetaCgreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Session-Id"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("OriginHost"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.OriginHost", utils.MetaCgreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Origin-Host"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("OriginRealm"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.OriginRealm", utils.MetaCgreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Origin-Realm"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:   utils.StringPointer("Account"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Account", utils.MetaCgreq)),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"),
+			},
+			{
+				Tag:   utils.StringPointer("RequestType"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.RequestType", utils.MetaCgreq)),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer(utils.MetaSy),
+			},
+			{
+				Tag:       utils.StringPointer("BalanceIDPolicyFilter"),
+				Path:      utils.StringPointer("*opts.*syPolicyFilters"),
+				Type:      utils.StringPointer(utils.MetaGroup),
+				Value:     utils.StringPointer("*string:~*asm.BalanceSummaries.*default.ID:balance_data"),
+				Mandatory: utils.BoolPointer(true)},
+		},
+		utils.MetaSNR: {
+			{
+				Tag:       utils.StringPointer("SessionId"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Session-Id", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Session-Id"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("OriginHost"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Host", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Origin-Host"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("OriginRealm"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Origin-Realm", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Origin-Realm"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("DestinationRealm"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Realm", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Destination-Realm"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("DestinationHost"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Destination-Host", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*req.Destination-Host"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:       utils.StringPointer("AuthApplicationId"),
+				Path:      utils.StringPointer(fmt.Sprintf("%s.Auth-Application-Id", utils.MetaDiamreq)),
+				Type:      utils.StringPointer(utils.MetaVariable),
+				Value:     utils.StringPointer("~*vars.*appid"),
+				Mandatory: utils.BoolPointer(true)},
+			{
+				Tag:        utils.StringPointer("Policy-Counter-Identifier"),
+				Path:       utils.StringPointer(fmt.Sprintf("%s.Policy-Counter-Status-Report.Policy-Counter-Identifier", utils.MetaDiamreq)),
+				Type:       utils.StringPointer(utils.MetaGroup),
+				Value:      utils.StringPointer("Monthly"),
+				New_branch: utils.BoolPointer(true)},
+			{
+				Tag:   utils.StringPointer("Policy-Counter-Status"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Policy-Counter-Status-Report.Policy-Counter-Status", utils.MetaDiamreq)),
+				Type:  utils.StringPointer(utils.MetaGroup),
+				Value: utils.StringPointer("512KBPS")},
+			{
+				Tag:   utils.StringPointer("Pending-Policy-Counter-Information-Status"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status", utils.MetaDiamreq)),
+				Type:  utils.StringPointer(utils.MetaGroup),
+				Value: utils.StringPointer("30GB")},
+			{
+				Tag:   utils.StringPointer("Pending-Policy-Counter-Information-Status-Change-Time"),
+				Path:  utils.StringPointer(fmt.Sprintf("%s.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time", utils.MetaDiamreq)),
+				Type:  utils.StringPointer(utils.MetaDateTime),
+				Value: utils.StringPointer("*now")},
 		},
 		utils.MetaASR: {
 			{

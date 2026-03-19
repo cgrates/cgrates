@@ -1,49 +1,60 @@
 {
   "general": {
+    "node_id": "SyWithBackup",
     "log_level": 7
   },
   "schedulers": {
     "enabled": true,
-    "cdrs_conns": ["*localhost"]
+  },
+  "data_db": {
+    "db_type": "redis",
+    "db_port": 6379,
+    "db_name": "10"
+  },
+  "stor_db": {
+    "db_type": "postgres",
+    "db_port": 5432,
+    "db_password": "CGRateS.org"
   },
   "apiers": {
     "enabled": true,
-    "scheduler_conns": ["*localhost"]
+    "scheduler_conns": ["*internal"]
   },
   "filters": {
-    "apiers_conns": ["*localhost"]
+    "apiers_conns": ["*internal"]
   },
-  "attributes": {
-    "enabled": true,
-    "opts": {
-      "*processRuns": 2
+  "thresholds": {
+    "enabled": true
+  },
+
+  "rpc_conns": {
+    "*bijson_localhost_thresholds": {
+      "conns": [
+        {
+          "address": "127.0.0.1:2014",
+          "transport": "*birpc_json"
+        }
+      ]
     }
   },
   "sessions": {
     "enabled": true,
-    "thresholds_conns": ["*bijson_localhost"],
-    "attributes_conns": ["*localhost"],
-    "chargers_conns": ["*localhost"],
-    "rals_conns": ["*localhost"],
-    "cdrs_conns": ["*localhost"]
+    "apiers_conns": ["*internal"],
+    "thresholds_conns": ["*bijson_localhost_thresholds"],
+    "chargers_conns": ["*internal"],
+    "rals_conns": ["*internal"],
+    "backup_interval": "-1"
   },
   "chargers": {
     "enabled": true,
-    "attributes_conns": ["*localhost"],
     "string_indexed_fields": ["*req.Account"]
   },
   "rals": {
     "enabled": true,
+    "thresholds_conns": ["*internal"],
     "max_computed_usage": {
       "*data": "10737418"
     }
-  },
-  "cdrs": {
-    "enabled": true,
-    "attributes_conns": ["*localhost"],
-    "chargers_conns": ["*localhost"],
-    "rals_conns": ["*localhost"],
-    "store_cdrs": false
   },
   "diameter_agent": {
     "enabled": true,
@@ -52,7 +63,8 @@
         "address": "0.0.0.0:3868"
       }
     ],
-    "sessions_conns": ["*bijson_localhost"],
+    "sessions_conns": ["*birpc_internal"],
+    "snr_template": "*snr",
     "request_processors": [
       {
         "id": "data_init",
@@ -167,15 +179,6 @@
             "path": "*rep.Multiple-Services-Credit-Control.Validity-Time",
             "type": "*constant",
             "value": "600"
-          },
-
-          {
-            "tag": "ResultCode",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "path": "*rep.Result-Code",
-            "type": "*constant",
-            "value": "5030",
-            "blocker": true
           }
         ]
       },
@@ -289,15 +292,6 @@
             "path": "*rep.Multiple-Services-Credit-Control.Validity-Time",
             "type": "*constant",
             "value": "600"
-          },
-
-          {
-            "tag": "ResultCode",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "path": "*rep.Result-Code",
-            "type": "*constant",
-            "value": "5030",
-            "blocker": true
           }
         ]
       },
@@ -363,14 +357,10 @@
           }
         ],
         "reply_fields": [
-          { "tag": "CCATemplate", "type": "*template", "value": "*cca" },
           {
-            "tag": "ResultCode",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "path": "*rep.Result-Code",
-            "blocker": true,
-            "type": "*constant",
-            "value": "5030"
+            "tag": "CCATemplate",
+            "type": "*template",
+            "value": "*cca"
           },
           {
             "tag": "ResultCode",
@@ -380,7 +370,6 @@
           }
         ]
       },
-
       {
         "id": "Sy_Initial_SLR",
         "filters": [
@@ -421,8 +410,19 @@
             "tag": "RequestType",
             "path": "*cgreq.RequestType",
             "type": "*constant",
-            "mandatory": true,
             "value": "*sy"
+          },
+          {
+            "tag": "BalanceIDPolicyFilter",
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
+          },
+          {
+            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
           }
         ],
         "reply_fields": [
@@ -442,36 +442,32 @@
             "blocker": true
           },
           {
-            "tag": "ResultCode2",
-            "path": "*rep.Result-Code",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "type": "*constant",
-            "value": "5030",
-            "blocker": true
-          },
-          {
             "tag": "Session-Id",
             "path": "*rep.Session-Id",
             "type": "*variable",
-            "value": "~*req.Session-Id"
+            "value": "~*req.Session-Id",
+            "mandatory": true
           },
           {
             "tag": "Auth-Application-Id",
             "path": "*rep.Auth-Application-Id",
             "type": "*variable",
-            "value": "~*req.Auth-Application-Id"
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
           },
           {
             "tag": "Origin-Host",
             "path": "*rep.Origin-Host",
             "type": "*variable",
-            "value": "~*req.Origin-Host"
+            "value": "~*req.Origin-Host",
+            "mandatory": true
           },
           {
             "tag": "Origin-Realm",
             "path": "*rep.Origin-Realm",
             "type": "*variable",
-            "value": "~*req.Origin-Realm"
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
           },
           {
             "tag": "ResultCode",
@@ -546,19 +542,22 @@
             "tag": "RequestType",
             "path": "*cgreq.RequestType",
             "type": "*constant",
-            "mandatory": true,
             "value": "*sy"
+          },
+          {
+            "tag": "BalanceIDPolicyFilter",
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
+          },
+          {
+            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"
           }
         ],
         "reply_fields": [
-          {
-            "tag": "ResultCode",
-            "path": "*rep.Result-Code",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "type": "*constant",
-            "value": "5030",
-            "blocker": true
-          },
           {
             "tag": "Session-Id",
             "path": "*rep.Session-Id",
@@ -646,19 +645,10 @@
             "tag": "RequestType",
             "path": "*cgreq.RequestType",
             "type": "*constant",
-            "mandatory": true,
             "value": "*sy"
           }
         ],
         "reply_fields": [
-          {
-            "tag": "ResultCode",
-            "path": "*rep.Result-Code",
-            "filters": ["*notempty:~*cgrep.Error:"],
-            "type": "*constant",
-            "value": "5030",
-            "blocker": true
-          },
           {
             "tag": "Session-Id",
             "path": "*rep.Session-Id",
@@ -682,7 +672,7 @@
             "path": "*rep.Result-Code",
             "type": "*constant",
             "value": "2001"
-          },
+          }
         ]
       }
     ]

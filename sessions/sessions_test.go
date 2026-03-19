@@ -86,39 +86,6 @@ func TestIsIndexed(t *testing.T) {
 	}
 }
 
-func TestOnBiJSONConnectDisconnect(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
-
-	//connect BiJSON
-	client := &birpc.Service{}
-	sessions.OnBiJSONConnect(client)
-
-	//we'll change the connection identifier just for testing
-	sessions.biJClnts[client] = "test_conn"
-	sessions.biJIDs = nil
-
-	expected := NewSessionS(cfg, dm, nil)
-	expected.biJClnts[client] = "test_conn"
-	expected.biJIDs = nil
-
-	if !reflect.DeepEqual(sessions, expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, sessions)
-	}
-
-	//Disconnect BiJSON
-	sessions.OnBiJSONDisconnect(client)
-	delete(expected.biJClnts, client)
-	if !reflect.DeepEqual(sessions, expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, sessions)
-	}
-}
-
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
@@ -1989,8 +1956,7 @@ func TestNewSessionS(t *testing.T) {
 	eOut := &SessionS{
 		cgrCfg:         cgrCGF,
 		dm:             nil,
-		biJClnts:       make(map[birpc.ClientConnector]string),
-		biJIDs:         make(map[string]*biJClient),
+		sBiRPCClients:  utils.NewServiceBiRPCClients(),
 		aSessions:      make(map[string]*Session),
 		aSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
 		aSessionsRIdx:  make(map[string][]*riFieldNameVal),
@@ -2636,7 +2602,7 @@ func TestWarnSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	sTestMock := &mockConnWarnDisconnect1{}
-	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock, "ClientConnIdtest", 0)
 
 	if err := sessions.warnSession("ClientConnIdtest", nil); err != nil {
 		t.Error(err)
@@ -2645,7 +2611,7 @@ func TestWarnSession(t *testing.T) {
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest2"
 	sessions = NewSessionS(cfg, dm, nil)
 	sTestMock2 := &mockConnWarnDisconnect2{}
-	sessions.RegisterIntBiJConn(sTestMock2, utils.EmptyString)
+	sessions.sBiRPCClients.RegisterIntBiJConn(sTestMock2, "ClientConnIdtest2", 0)
 	if err := sessions.warnSession("ClientConnIdtest2", nil); err == nil || err != utils.ErrNoActiveSession {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoActiveSession, err)
 	}
@@ -2720,24 +2686,6 @@ func TestInitSession(t *testing.T) {
 	s.SRuns = nil
 	if !reflect.DeepEqual(exp, s) {
 		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
-	}
-}
-
-func TestBiJClntID(t *testing.T) {
-	client := &mockConnWarnDisconnect1{}
-	cfg := config.NewDefaultCGRConfig()
-	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
-	sessions.biJClnts = map[birpc.ClientConnector]string{
-		client: "First_connector",
-	}
-	expected := "First_connector"
-	if rcv := sessions.biJClntID(client); !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 }
 
