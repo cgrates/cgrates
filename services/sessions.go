@@ -82,6 +82,12 @@ func (smg *SessionService) Start() error {
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
 	smg.stopChan = make(chan struct{})
 
+	// Pass internal connection
+	srv, err := engine.NewService(v1.NewSessionSv1(smg.sm))
+	if err != nil {
+		return err
+	}
+	smg.sm.PopulateCtx(context.WithClient(context.TODO(), srv))
 	// Restore previuos sessions backup and start backup looping
 	if smg.cfg.SessionSCfg().BackupInterval != 0 {
 		if err := smg.sm.RestoreAndBackupSessions(smg.stopChan); err != nil {
@@ -91,13 +97,7 @@ func (smg *SessionService) Start() error {
 
 	//start sync session in a separate gorutine
 	go smg.sm.SyncSessions(smg.stopChan)
-	// Pass internal connection
-	srv, err := engine.NewService(v1.NewSessionSv1(smg.sm))
-	if err != nil {
-		return err
-	}
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
-	smg.sm.PopulateCtx(context.WithClient(context.TODO(), srv))
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
 
