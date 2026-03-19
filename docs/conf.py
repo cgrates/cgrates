@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CGRateS'
-copyright = u'2012-2023, ITsysCOM GmbH'
+copyright = u'2012-2026, ITsysCOM GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
