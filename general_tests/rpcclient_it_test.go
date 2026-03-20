@@ -72,6 +72,7 @@ var sTestRPCITLcl = []func(t *testing.T){
 	testRPCITLclBcastStatusBcastNoRals,
 	testRPCITLclBcastStatusRALs2Up,
 	testRPCITLclStatusBcastRALs1Up,
+	testRPCITLclStopCgrEngine,
 }
 
 func TestRPCITLcl(t *testing.T) {
@@ -448,7 +449,7 @@ func TestRPCITRmtStatusFirstFailback(t *testing.T) {
 	}
 }
 
-func TestRPCITStopCgrEngine(t *testing.T) {
+func testRPCITLclStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
