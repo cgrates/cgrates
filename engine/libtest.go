@@ -349,26 +349,124 @@ type TestEngine struct {
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
+	Persist          bool              // keep generated config dir after test (logs its path)
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
 	PreStartHook func(testing.TB, *config.CGRConfig)
 
-	// TODO: add possibility to pass environment vars
+	cmd        *exec.Cmd
+	cfg        *config.CGRConfig
+	logBuf     *bytes.Buffer
+	stopped    bool
+	extraFlags []string
 }
 
-// Run initializes a cgr-engine instance for testing. It calls t.Fatal on any setup failure.
-func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
+// Run sets up and starts a cgr-engine for testing. Engine logs
+// are dumped via t.Log on failure.
+func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
-	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	ng.extraFlags = extraFlags
+	ng.cfg = parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg, ng.Persist)
+	FlushDBs(t, ng.cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
 	if ng.PreStartHook != nil {
-		ng.PreStartHook(t, cfg)
+		ng.PreStartHook(t, ng.cfg)
 	}
-	startEngine(t, cfg, ng.LogBuffer, ng.GracefulShutdown, extraFlags...)
-	client := NewRPCClient(t, cfg.ListenCfg())
+
+	ng.logBuf = new(bytes.Buffer)
+	ng.start(t)
+
+	logBuf := ng.logBuf
+	t.Cleanup(func() {
+		ng.stop(t)
+		if t.Failed() && logBuf.Len() > 0 {
+			t.Log(logBuf.String())
+		}
+	})
+
+	client := NewRPCClient(t, ng.cfg.ListenCfg())
 	LoadCSVs(t, client, ng.TpPath, ng.TpFiles)
-	return client, cfg
+	return client, ng.cfg
+}
+
+// Stop shuts down the engine. No-op if already stopped or never started.
+func (ng *TestEngine) Stop(t testing.TB) {
+	t.Helper()
+	ng.stop(t)
+}
+
+// Start re-starts the engine after a stop. Returns a fresh RPC client.
+// Fatal if Run() was never called.
+func (ng *TestEngine) Start(t testing.TB) *birpc.Client {
+	t.Helper()
+	if ng.cfg == nil {
+		t.Fatal("Start() called before Run()")
+	}
+	ng.start(t)
+	return NewRPCClient(t, ng.cfg.ListenCfg())
+}
+
+func (ng *TestEngine) logWriter() io.Writer {
+	if ng.LogBuffer != nil {
+		return io.MultiWriter(ng.logBuf, ng.LogBuffer)
+	}
+	return ng.logBuf
+}
+
+func (ng *TestEngine) start(t testing.TB) {
+	t.Helper()
+	if ng.cmd != nil && !ng.stopped {
+		ng.stop(t)
+	}
+	binPath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		t.Fatal(err)
+	}
+	flags := []string{"-config_path", ng.cfg.ConfigPath, "-logger", utils.MetaStdLog}
+	flags = append(flags, ng.extraFlags...)
+	ng.cmd = exec.Command(binPath, flags...)
+	w := ng.logWriter()
+	ng.cmd.Stdout = w
+	ng.cmd.Stderr = w
+	if err := ng.cmd.Start(); err != nil {
+		t.Fatalf("cgr-engine command failed: %v", err)
+	}
+	ng.stopped = false
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var dialErr error
+	for range 16 {
+		time.Sleep(backoff())
+		var conn *birpc.Client
+		if conn, dialErr = jsonrpc.Dial(utils.TCP, ng.cfg.ListenCfg().RPCJSONListen); dialErr == nil {
+			conn.Close()
+			return
+		}
+	}
+	t.Fatalf("engine did not open port <%s>: %v", ng.cfg.ListenCfg().RPCJSONListen, dialErr)
+}
+
+func (ng *TestEngine) stop(t testing.TB) {
+	t.Helper()
+	if ng.cmd == nil || ng.stopped {
+		return
+	}
+	ng.stopped = true
+	if ng.GracefulShutdown {
+		if err := ng.cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			t.Errorf("failed to terminate cgr-engine process (%d): %v",
+				ng.cmd.Process.Pid, err)
+		}
+		if err := ng.cmd.Wait(); err != nil {
+			t.Errorf("cgr-engine process (%d) exited with error: %v",
+				ng.cmd.Process.Pid, err)
+		}
+		return
+	}
+	if err := ng.cmd.Process.Kill(); err != nil {
+		t.Errorf("failed to kill cgr-engine process (%d): %v",
+			ng.cmd.Process.Pid, err)
+	}
+	_ = ng.cmd.Wait()
 }
 
 // DBParams contains database connection parameters.
@@ -387,71 +485,62 @@ type DBCfg struct {
 	StorDB *DBParams `json:"stor_db,omitempty"`
 }
 
-// parseCfg initializes and returns a CGRConfig. It handles both static and
-// dynamic configs, including custom DB settings. For dynamic configs, it
-// creates temporary configuration files in a new directory.
-func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.CGRConfig) {
+// parseCfg initializes and returns a CGRConfig. For dynamic configs, it
+// creates configuration files in a temporary directory. If persist is true,
+// the directory is kept after the test and its path is logged.
+func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg, persist bool) *config.CGRConfig {
 	t.Helper()
 	if cfgPath == "" && cfgJSON == "" {
 		t.Fatal("missing config source")
 	}
 
-	// Defer CGRConfig constructor to avoid repetition.
-	// cfg (named return) will be set by the deferred function.
-	// cfgPath is guaranteed non-empty on successful return.
-	defer func() {
-		t.Helper()
-		var err error
-		cfg, err = config.NewCGRConfigFromPath(cfgPath)
+	hasCustomDBConfig := dbCfg.DataDB != nil || dbCfg.StorDB != nil
+	if cfgPath != "" && cfgJSON == "" && !hasCustomDBConfig {
+		cfg, err := config.NewCGRConfigFromPath(cfgPath)
 		if err != nil {
 			t.Fatalf("could not init config from path %s: %v", cfgPath, err)
 		}
-	}()
-
-	hasCustomDBConfig := dbCfg.DataDB != nil || dbCfg.StorDB != nil
-	if cfgPath != "" && cfgJSON == "" && !hasCustomDBConfig {
-		// Config file already exists and is static; no need for
-		// further processing.
-		return
+		return cfg
 	}
 
-	// Reaching this point means the configuration is at least partially dynamic.
-
-	tmp := t.TempDir()
+	var tmp string
+	if persist {
+		var err error
+		tmp, err = os.MkdirTemp("", "cgr-test-*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("config dir: %s", tmp)
+	} else {
+		tmp = t.TempDir()
+	}
 	if cfgPath != "" {
-		// An existing configuration directory is specified. Since
-		// configuration is not completely static, it's better to copy
-		// its contents to the temporary directory instead.
 		if err := os.CopyFS(tmp, os.DirFS(cfgPath)); err != nil {
 			t.Fatal(err)
 		}
 	}
-	cfgPath = tmp
 
 	if hasCustomDBConfig {
-		// Create a new JSON configuration file based on the DBConfigs object.
 		b, err := json.Marshal(dbCfg)
 		if err != nil {
 			t.Fatal(err)
 		}
-		dbFilePath := filepath.Join(cfgPath, "zzz_dynamic_db.json")
-		if err := os.WriteFile(dbFilePath, b, 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(tmp, "zzz_dynamic_db.json"), b, 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	if cfgJSON != "" {
-		// A JSON configuration string has been passed to the object.
-		// It can be standalone or used to overwrite sections from an
-		// existing configuration file. In case it's the latter, ensure
-		// the file is processed towards the end.
-		filePath := filepath.Join(cfgPath, "zzz_dynamic_cgrates.json")
-		if err := os.WriteFile(filePath, []byte(cfgJSON), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(tmp, "zzz_dynamic_cgrates.json"), []byte(cfgJSON), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	return
+	cfg, err := config.NewCGRConfigFromPath(tmp)
+	if err != nil {
+		t.Fatalf("could not init config from path %s: %v", tmp, err)
+	}
+	return cfg
 }
 
 func LoadCSVsWithCGRLoader(t testing.TB, cfgPath, tpPath string, logBuffer io.Writer, csvFiles map[string]string, extraFlags ...string) {
@@ -547,58 +636,6 @@ func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 			t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
 		}
 	}
-}
-
-// startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the
-// provided logBuffer (if any).
-func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, gracefulShutdown bool, extraFlags ...string) {
-	t.Helper()
-	binPath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	flags := []string{"-config_path", cfg.ConfigPath}
-	if logBuffer != nil {
-		flags = append(flags, "-logger", utils.MetaStdLog)
-	}
-	if len(extraFlags) != 0 {
-		flags = append(flags, extraFlags...)
-	}
-	engine := exec.Command(binPath, flags...)
-	if logBuffer != nil {
-		engine.Stdout = logBuffer
-		engine.Stderr = logBuffer
-	}
-	if err := engine.Start(); err != nil {
-		t.Fatalf("cgr-engine command failed: %v", err)
-	}
-	t.Cleanup(func() {
-		if gracefulShutdown {
-			if err := engine.Process.Signal(syscall.SIGTERM); err != nil {
-				t.Errorf("failed to terminate cgr-engine process (%d): %v",
-					engine.Process.Pid, err)
-			}
-			if err := engine.Wait(); err != nil {
-				t.Errorf("could not wait for cgr-engine process (%d) to shut down: %v",
-					engine.Process.Pid, err)
-			}
-			return
-		}
-		if err := engine.Process.Kill(); err != nil {
-			t.Errorf("failed to kill cgr-engine process (%d): %v",
-				engine.Process.Pid, err)
-		}
-		_ = engine.Wait()
-	})
-	backoff := utils.FibDuration(time.Millisecond, 0)
-	var dialErr error
-	for range 16 {
-		time.Sleep(backoff())
-		if _, dialErr = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); dialErr == nil {
-			return
-		}
-	}
-	t.Fatalf("engine did not open port <%s>: %v", cfg.ListenCfg().RPCJSONListen, dialErr)
 }
 
 func WaitForService(t testing.TB, ctx *context.Context, client *birpc.Client, service string) {
