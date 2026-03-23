@@ -64,7 +64,6 @@ type replicator struct {
 	filtered  bool           // whether to replicate only objects coming from remote
 	stop      chan struct{}  // stop replication loop
 	wg        sync.WaitGroup // wait for any pending replications before closing
-	ctx       *context.Context
 }
 
 // newReplicator creates a replication manager that either performs immediate
@@ -186,7 +185,7 @@ func (r *replicator) flush() {
 			}
 		}
 
-		if err := replicate(r.ctx, r.cm, r.conns, r.filtered, data.objType, data.objID,
+		if err := replicate(context.TODO(), r.cm, r.conns, r.filtered, data.objType, data.objID,
 			data.method, data.args); err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<DataManager> failed to replicate %q for object %q: %v",
@@ -201,7 +200,7 @@ func (r *replicator) flush() {
 					Method:   data.method,
 					Args:     data.args,
 				}
-				if err := task.WriteToFile(r.ctx, failedPath); err != nil {
+				if err := task.WriteToFile(context.TODO(), failedPath); err != nil {
 					utils.Logger.Err(fmt.Sprintf(
 						"<DataManager> failed to dump replication task: %v", err))
 				}

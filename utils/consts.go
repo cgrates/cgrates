@@ -1414,6 +1414,7 @@ const (
 // AdminSv1 APIs
 const (
 	//AdminSv1ReplayFailedPosts                 = "AdminSv1.ReplayFailedPosts"
+	AdminSv1ReplayFailedReplications          = "AdminSv1.ReplayFailedReplications"
 	AdminSv1GetRateRatesIndexesHealth         = "AdminSv1.GetRateRatesIndexesHealth"
 	AdminSv1GetChargerProfilesCount           = "AdminSv1.GetChargerProfilesCount"
 	AdminSv1GetAccountsIndexesHealth          = "AdminSv1.GetAccountsIndexesHealth"
