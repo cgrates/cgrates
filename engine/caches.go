@@ -60,6 +60,7 @@ func init() {
 	gob.Register(new(utils.IPAllocationsWithAPIOpts))
 	// Stats
 	gob.Register(new(StatQueue))
+	gob.Register(new(StatQueueWithAPIOpts))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
@@ -67,7 +68,9 @@ func init() {
 	gob.Register(new(utils.TPStatProfile))
 	// RankingS
 	gob.Register(new(utils.Ranking))
+	gob.Register(new(utils.RankingWithAPIOpts))
 	gob.Register(new(utils.RankingProfile))
+	gob.Register(new(utils.RankingProfileWithAPIOpts))
 	gob.Register(new(utils.TPRankingProfile))
 	// RouteS
 	gob.Register(new(utils.RouteProfile))
@@ -75,7 +78,9 @@ func init() {
 	gob.Register(new(utils.TPRouteProfile))
 	// TrendS
 	gob.Register(new(utils.Trend))
+	gob.Register(new(utils.TrendWithAPIOpts))
 	gob.Register(new(utils.TrendProfile))
+	gob.Register(new(utils.TrendProfileWithAPIOpts))
 	gob.Register(new(utils.TPTrendsProfile))
 	// Filters
 	gob.Register(new(Filter))
@@ -93,10 +98,12 @@ func init() {
 	gob.Register(new(utils.ActionProfileWithAPIOpts))
 	// Account
 	gob.Register(new(utils.Account))
+	gob.Register(new(utils.AccountWithAPIOpts))
 	// CDR
 	gob.Register(new(utils.CGREvent))
 	// ChargerS
 	gob.Register(new(utils.ChargerProfile))
+	gob.Register(new(utils.ChargerProfileWithAPIOpts))
 	gob.Register(new(utils.TPChargerProfile))
 	// StatMetrics
 	gob.Register(new(StatASR))
@@ -130,6 +137,9 @@ func init() {
 
 	gob.Register(new(utils.ArgCacheReplicateSet))
 	gob.Register(new(utils.ArgCacheReplicateRemove))
+	gob.Register(new(utils.TenantIDWithAPIOpts))
+	gob.Register(new(utils.SetIndexesArg))
+	gob.Register(new(utils.GetIndexesArg))
 
 	gob.Register(utils.StringSet{})
 }
