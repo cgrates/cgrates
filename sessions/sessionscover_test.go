@@ -1315,6 +1315,10 @@ func TestRoundCost(t *testing.T) {
 		Tenant: "cgrates.org",
 		SRuns: []*SRun{
 			{
+				CD: &engine.CallDescriptor{
+					Tenant:  "cgrates.org",
+					Account: "1001",
+				},
 				EventCost: &engine.EventCost{
 					AccountSummary: &engine.AccountSummary{},
 					Usage:          utils.DurationPointer(30 * time.Second),
