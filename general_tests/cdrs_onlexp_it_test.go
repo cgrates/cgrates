@@ -40,7 +40,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kadm"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 var (
@@ -139,20 +140,15 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 	if err = conn.Close(); err != nil {
 		t.Error(err)
 	}
-	v, err := kafka.Dial("tcp", "localhost:9092")
+	kfkCl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := v.CreateTopics(kafka.TopicConfig{
-		Topic:             "cgrates_cdrs",
-		NumPartitions:     1,
-		ReplicationFactor: 1,
-	}); err != nil {
+	adm := kadm.NewClient(kfkCl)
+	if _, err := adm.CreateTopics(context.Background(), 1, 1, nil, "cgrates_cdrs"); err != nil {
 		t.Fatal(err)
 	}
-	if err = v.Close(); err != nil {
-		t.Fatal(err)
-	}
+	kfkCl.Close()
 }
 
 func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
@@ -437,23 +433,31 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 }
 
 func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   "cgrates_cdrs",
-		GroupID: "tmp",
-		MaxWait: time.Millisecond,
-	})
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers("localhost:9092"),
+		kgo.ConsumeTopics("cgrates_cdrs"),
+		kgo.ConsumerGroup("tmp"),
+		kgo.FetchMaxWait(time.Millisecond),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cl.Close()
 
-	defer reader.Close()
-
-	for i := 0; i < 2; i++ { // no raw CDR
+	received := 0
+	for received < 2 { // no raw CDR
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		if m, err := reader.ReadMessage(ctx); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(failoverContent[0], m.Value) && !reflect.DeepEqual(failoverContent[1], m.Value) { // Checking just the prefix should do since some content is dynamic
-			t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(m.Value))
-		}
+		fetches := cl.PollFetches(ctx)
 		cancel()
+		if errs := fetches.Errors(); len(errs) > 0 {
+			t.Fatal(errs[0].Err)
+		}
+		fetches.EachRecord(func(r *kgo.Record) {
+			if !reflect.DeepEqual(failoverContent[0], r.Value) && !reflect.DeepEqual(failoverContent[1], r.Value) {
+				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(r.Value))
+			}
+			received++
+		})
 	}
 }
 

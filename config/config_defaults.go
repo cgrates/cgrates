@@ -606,7 +606,7 @@ const CGRATES_CFG_JSON = `
 				
 				// Kafka
 				// "kafkaTopic": "cgrates_cdrs",	// the topic from where the events are exported
-				// "kafkaBatchSize": 100,		// limit on how many messages will be buffered before being sent
+				// "kafkaLinger": "10ms",		// how long to wait for more records before sending a batch
 				// "kafkaDeliveryTimeout": "30s",	// max time to wait for a message to be delivered
 				// "kafkaTLS": false,			// if true, it will try to authenticate the server
 				// "kafkaCAPath": "", 			// path to certificate authority pem

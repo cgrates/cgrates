@@ -260,7 +260,7 @@ type RPCOpts struct {
 
 type KafkaOpts struct {
 	Topic           *string
-	BatchSize       *int
+	Linger          *time.Duration
 	DeliveryTimeout *time.Duration
 	TLS             *bool
 	CAPath          *string
@@ -400,8 +400,12 @@ func (kafkaOpts *KafkaOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) error
 	if jsnCfg.KafkaTopic != nil {
 		kafkaOpts.Topic = jsnCfg.KafkaTopic
 	}
-	if jsnCfg.KafkaBatchSize != nil {
-		kafkaOpts.BatchSize = jsnCfg.KafkaBatchSize
+	if jsnCfg.KafkaLinger != nil {
+		linger, err := utils.ParseDurationWithNanosecs(*jsnCfg.KafkaLinger)
+		if err != nil {
+			return err
+		}
+		kafkaOpts.Linger = utils.DurationPointer(linger)
 	}
 	if jsnCfg.KafkaDeliveryTimeout != nil {
 		timeout, err := utils.ParseDurationWithNanosecs(*jsnCfg.KafkaDeliveryTimeout)
@@ -823,9 +827,9 @@ func (kafkaOpts *KafkaOpts) Clone() *KafkaOpts {
 		cln.Topic = new(string)
 		*cln.Topic = *kafkaOpts.Topic
 	}
-	if kafkaOpts.BatchSize != nil {
-		cln.BatchSize = new(int)
-		*cln.BatchSize = *kafkaOpts.BatchSize
+	if kafkaOpts.Linger != nil {
+		cln.Linger = new(time.Duration)
+		*cln.Linger = *kafkaOpts.Linger
 	}
 	if kafkaOpts.DeliveryTimeout != nil {
 		cln.DeliveryTimeout = new(time.Duration)
@@ -1228,8 +1232,8 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		if kafkaOpts.Topic != nil {
 			opts[utils.KafkaTopic] = *kafkaOpts.Topic
 		}
-		if kafkaOpts.BatchSize != nil {
-			opts[utils.KafkaBatchSize] = *kafkaOpts.BatchSize
+		if kafkaOpts.Linger != nil {
+			opts[utils.KafkaLinger] = kafkaOpts.Linger.String()
 		}
 		if kafkaOpts.DeliveryTimeout != nil {
 			opts[utils.KafkaDeliveryTimeout] = kafkaOpts.DeliveryTimeout.String()

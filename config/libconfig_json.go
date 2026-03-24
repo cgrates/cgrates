@@ -357,7 +357,7 @@ type EventExporterOptsJson struct {
 	SQLUpdateIndexedFields      *[]string         `json:"sqlUpdateIndexedFields"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
-	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
+	KafkaLinger                 *string           `json:"kafkaLinger"`
 	KafkaDeliveryTimeout        *string           `json:"kafkaDeliveryTimeout"`
 	KafkaTLS                    *bool             `json:"kafkaTLS"`
 	KafkaCAPath                 *string           `json:"kafkaCAPath"`

@@ -1631,7 +1631,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 
 	jsonCfg := &EventExporterOptsJson{
 		KafkaTopic:           utils.StringPointer("topic"),
-		KafkaBatchSize:       utils.IntPointer(10),
+		KafkaLinger:          utils.StringPointer("5ms"),
 		KafkaTLS:             utils.BoolPointer(true),
 		KafkaCAPath:          utils.StringPointer("/path/to/ca"),
 		KafkaSkipTLSVerify:   utils.BoolPointer(false),
@@ -1648,8 +1648,8 @@ func TestLoadFromJSONCfg(t *testing.T) {
 	if *kafkaOpts.Topic != "topic" {
 		t.Errorf("Expected KafkaTopic to be 'topic', got %s", *kafkaOpts.Topic)
 	}
-	if *kafkaOpts.BatchSize != 10 {
-		t.Errorf("Expected KafkaBatchSize to be 10, got %d", *kafkaOpts.BatchSize)
+	if *kafkaOpts.Linger != 5*time.Millisecond {
+		t.Errorf("Expected KafkaLinger to be 5ms, got %v", *kafkaOpts.Linger)
 	}
 	if *kafkaOpts.TLS != true {
 		t.Errorf("Expected KafkaTLS to be true, got %v", *kafkaOpts.TLS)
@@ -1669,7 +1669,7 @@ func TestKafkaOptsClone(t *testing.T) {
 
 	originalOpts := &KafkaOpts{
 		Topic:           utils.StringPointer("topic"),
-		BatchSize:       utils.IntPointer(10),
+		Linger:          utils.DurationPointer(5 * time.Millisecond),
 		TLS:             utils.BoolPointer(true),
 		CAPath:          utils.StringPointer("/ca/path"),
 		SkipTLSVerify:   utils.BoolPointer(false),
@@ -1681,8 +1681,8 @@ func TestKafkaOptsClone(t *testing.T) {
 	if *clonedOpts.Topic != *originalOpts.Topic {
 		t.Errorf("Expected Topic to be copied, got %s vs %s", *clonedOpts.Topic, *originalOpts.Topic)
 	}
-	if *clonedOpts.BatchSize != *originalOpts.BatchSize {
-		t.Errorf("Expected BatchSize to be copied, got %d vs %d", *clonedOpts.BatchSize, *originalOpts.BatchSize)
+	if *clonedOpts.Linger != *originalOpts.Linger {
+		t.Errorf("Expected Linger to be copied, got %v vs %v", *clonedOpts.Linger, *originalOpts.Linger)
 	}
 	if *clonedOpts.TLS != *originalOpts.TLS {
 		t.Errorf("Expected TLS to be copied, got %v vs %v", *clonedOpts.TLS, *originalOpts.TLS)

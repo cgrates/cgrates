@@ -83,6 +83,9 @@
 			"type": "*kafka_json_map",
 			"export_path": "notAValidURL",
 			"attempts": 1,
+			"opts": {
+				"kafkaDeliveryTimeout": "100ms"
+			},
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
 			],
