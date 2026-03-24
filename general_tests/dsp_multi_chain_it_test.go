@@ -232,7 +232,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "dispatchers": {
 	"enabled": true,
-	"prefix_indexed_fields": ["*req.Account"]
+	"string_indexed_fields": ["*req.Agent"]
 }
 }`
 
@@ -246,7 +246,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 },
 "dispatchers": {
 	"enabled": true,
-	"prefix_indexed_fields": ["*req.Account"]
+	"string_indexed_fields": ["*req.Agent"]
 }
 }`
 
@@ -285,6 +285,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -307,6 +308,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -329,6 +331,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -350,6 +353,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
+					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "filters": ["*notempty:~*req.usage:"]},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha1"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -397,6 +402,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -419,6 +425,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -441,6 +448,7 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage"},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -462,6 +470,8 @@ func TestDispatcherMultiChain(t *testing.T) {
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination"},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant", "value": "*now"},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*constant", "value": "*now"},
+					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "filters": ["*notempty:~*req.usage:"]},
+					{"tag": "Agent", "path": "*cgreq.Agent", "type": "*constant", "value": "ha2"},
 					{"tag": "RouteID", "path": "*opts.*routeID", "type": "*variable", "value": "~*req.account"}
 				],
 				"reply_fields": [
@@ -476,11 +486,14 @@ func TestDispatcherMultiChain(t *testing.T) {
 	// Tariff plan files with dispatcher profiles for both DSP1 and DSP2
 	tpFiles := map[string]string{
 		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
-DR_ANY,*any,RT_ANY,*up,0,0,`,
+DR_ANY,*any,RT_ANY,*up,0,0,
+DR_ROUND,*any,RT_ROUND,*up,0,0,`,
 		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
-RT_ANY,0,1,1s,1s,0s`,
+RT_ANY,0,1,1s,1s,0s
+RT_ROUND,0,1,2s,1s,0s`,
 		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
-RP_ANY,DR_ANY,*any,10`,
+RP_ANY,DR_ANY,*any,10
+RP_ROUND,DR_ROUND,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,
 cgrates.org,call,1002,2014-01-14T00:00:00Z,RP_ANY,
@@ -491,12 +504,13 @@ cgrates.org,call,2001,2014-01-14T00:00:00Z,RP_ANY,
 cgrates.org,call,2002,2014-01-14T00:00:00Z,RP_ANY,
 cgrates.org,call,2003,2014-01-14T00:00:00Z,RP_ANY,
 cgrates.org,call,2004,2014-01-14T00:00:00Z,RP_ANY,
-cgrates.org,call,2005,2014-01-14T00:00:00Z,RP_ANY,`,
+cgrates.org,call,2005,2014-01-14T00:00:00Z,RP_ANY,
+cgrates.org,call,3001,2014-01-14T00:00:00Z,RP_ROUND,`,
 		utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
 cgrates.org,DEFAULT,,,*default,*none,0`,
 		utils.FiltersCsv: `#Tenant,ID,Type,Path,Values,ActivationInterval
-cgrates.org,FLTR_ACNT_10xx,*prefix,~*req.Account,10,
-cgrates.org,FLTR_ACNT_20xx,*prefix,~*req.Account,20,`,
+cgrates.org,FLTR_HA1,*string,~*req.Agent,ha1,
+cgrates.org,FLTR_HA2,*string,~*req.Agent,ha2,`,
 		utils.DispatcherHostsCsv: `#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],MaxReconnectInterval[6],ConnectTimeout[7],ReplyTimeout[8],Tls[9],ClientKey[10],ClientCertificate[11],CaCertificate[12]
 cgrates.org,SM1,127.0.0.1:4012,*json,1,1,,2s,2s,,,,
 cgrates.org,SM2,127.0.0.1:4112,*json,1,1,,2s,2s,,,,
@@ -507,13 +521,13 @@ cgrates.org,RALS2,127.0.0.1:5112,*json,1,1,,2s,2s,,,,
 cgrates.org,RALS3,127.0.0.1:5212,*json,1,1,,2s,2s,,,,
 cgrates.org,RALS4,127.0.0.1:5312,*json,1,1,,2s,2s,,,,`,
 		utils.DispatcherProfilesCsv: `#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
-cgrates.org,DSP1_SM,*sessions,FLTR_ACNT_10xx,,*round_robin,,SM1,,10,false,,10
+cgrates.org,DSP1_SM,*sessions,FLTR_HA1,,*round_robin,,SM1,,10,false,,10
 cgrates.org,DSP1_SM,,,,,,SM2,,10,,,
-cgrates.org,DSP1_RALS,*responder,FLTR_ACNT_10xx,,*round_robin,,RALS1,,10,false,,10
+cgrates.org,DSP1_RALS,*responder,FLTR_HA1,,*round_robin,,RALS1,,10,false,,10
 cgrates.org,DSP1_RALS,,,,,,RALS2,,10,,,
-cgrates.org,DSP2_SM,*sessions,FLTR_ACNT_20xx,,*round_robin,,SM3,,10,false,,10
+cgrates.org,DSP2_SM,*sessions,FLTR_HA2,,*round_robin,,SM3,,10,false,,10
 cgrates.org,DSP2_SM,,,,,,SM4,,10,,,
-cgrates.org,DSP2_RALS,*responder,FLTR_ACNT_20xx,,*round_robin,,RALS3,,10,false,,10
+cgrates.org,DSP2_RALS,*responder,FLTR_HA2,,*round_robin,,RALS3,,10,false,,10
 cgrates.org,DSP2_RALS,,,,,,RALS4,,10,,,`,
 	}
 
@@ -756,4 +770,22 @@ cgrates.org,DSP2_RALS,,,,,,RALS4,,10,,,`,
 	checkBalance(t, "2003", 72)
 	checkBalance(t, "2004", 72)
 	checkBalance(t, "2005", 72)
+
+	// Refund through dispatcher: init 10s, terminate with 7s.
+	setBalance(t, "1001", 100)
+	sessionID := fmt.Sprintf("session_1001_%d", sessionNo.Add(1))
+	sendRequest(t, 2080, "auth", sessionID, "1001", "1099", "10s")
+	sendRequest(t, 2080, "init", sessionID, "1001", "1099", "10s")
+	sendRequest(t, 2080, "terminate", sessionID, "1001", "1099", "7s")
+	checkBalance(t, "1001", 93) // 100 - 10 + 3 = 93
+
+	// Rounding through dispatcher: RT_ROUND is 1 credit per 2s.
+	// 5s costs 2.5, rounds *up to 3. RefundRounding charges the extra 0.5 to
+	// match the rounded cost.
+	setBalance(t, "3001", 100)
+	sessionID = fmt.Sprintf("session_3001_%d", sessionNo.Add(1))
+	sendRequest(t, 2080, "auth", sessionID, "3001", "1099", "5s")
+	sendRequest(t, 2080, "init", sessionID, "3001", "1099", "5s")
+	sendRequest(t, 2080, "terminate", sessionID, "3001", "1099", "")
+	checkBalance(t, "3001", 97) // 100 - 3 = 97
 }
