@@ -368,6 +368,14 @@ func TestStringMapClone(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, received)
 	}
 }
+func TestStringMapCloneNil(t *testing.T) {
+	expected := StringMap{}
+	expected = nil
+	received := expected.Clone()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
 
 func TestStringMapString(t *testing.T) {
 	received := StringMap{"test": true, "test2": true}.String()
@@ -550,6 +558,11 @@ func TestStringMapAsPrefixedString(t *testing.T) {
 				"DEST_1004": false,
 			},
 			expStr: "DEST_1001;!DEST_1004",
+		},
+		{
+			name:   "Nil",
+			input:  nil,
+			expStr: "",
 		},
 	}
 

@@ -78,6 +78,14 @@ func TestConvertDurationFormatDefault(t *testing.T) {
 		t.Errorf("Expecting: <%+q>, received: <%+q>", "00:15:00", rcv)
 	}
 }
+func TestConvertDurationFormatError(t *testing.T) {
+	dcs := &DataConverters{
+		&DurationFormatConverter{Layout: "error"},
+	}
+	if _, err := dcs.ConvertString("error"); err == nil {
+		t.Errorf("Expected error, but didn't get one")
+	}
+}
 
 func TestNewDataConverter(t *testing.T) {
 	a, err := NewDataConverter(MetaDurationSeconds)
@@ -215,6 +223,27 @@ func TestNewDataConverter(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(durFmt, expected) {
 		t.Errorf("Expected %+v received: %+v", expected, durFmt)
+	}
+
+	expectedEmpty := &DurationFormatConverter{Layout: ""}
+	if emptyFmt, err := NewDataConverter(MetaDurationFormat + ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(emptyFmt, expectedEmpty) {
+		t.Errorf("Expected for dataformater %+v received: %+v", expectedEmpty, emptyFmt)
+	}
+
+	convuli, _ := NewULIConverter("/testpath")
+	if uliconv, err := NewDataConverter(Meta3GPPULI + "/testpath"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(uliconv, convuli) {
+		t.Errorf("Expected for uli %+v received: %+v", convuli, uliconv)
+	}
+
+	expec, _ := ConnStatusConverter{}.Convert(MetaConnStatus)
+	if res, err := NewDataConverter(MetaConnStatus); err != nil {
+		t.Error(err)
+	} else if res != nil && expec != 0 {
+		t.Errorf("Expected  for paramas %+v received: %+v", expec, res)
 	}
 
 }

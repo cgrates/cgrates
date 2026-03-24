@@ -72,3 +72,27 @@ func TestGetRpcParams(t *testing.T) {
 		t.Errorf("Expected <%+v>, received <%+v>", testStruct, result.InParam)
 	}
 }
+
+func TestUnregisterRpcParams(t *testing.T) {
+	tests := []struct {
+		name  string
+		param string
+	}{
+		{
+			name:  "Empty name",
+			param: "",
+		},
+		{
+			name:  "Test name",
+			param: "test",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			UnregisterRpcParams(tt.param)
+			if rpcParamsMap == nil {
+				t.Errorf("Error getting the rpc object: %v", rpcParamsMap)
+			}
+		})
+	}
+}

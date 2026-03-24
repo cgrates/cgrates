@@ -19,6 +19,7 @@ package utils
 
 import (
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -462,5 +463,55 @@ func TestRSRFilterPassMatchLessThan(t *testing.T) {
 	result := fltr.Pass("string")
 	if !reflect.DeepEqual(false, result) {
 		t.Errorf("Expected <false> ,received: <%+v>", result)
+	}
+}
+
+func TestRSRFilter_Clone(t *testing.T) {
+	tests := []struct {
+		name    string
+		fltrVal *RSRFilter
+	}{
+		{
+			name: "Complete RSRRFilter",
+			fltrVal: &RSRFilter{
+				filterRule: "^rule1$",
+				fltrRgxp:   &regexp.Regexp{},
+				negative:   false,
+			},
+		},
+		{
+			name: "Nil fltrRgxp RSRRFilter",
+			fltrVal: &RSRFilter{
+				filterRule: "^rule1$",
+				fltrRgxp:   nil,
+				negative:   false,
+			},
+		},
+		{
+			name: "Empty filter rule RSRRFilter",
+			fltrVal: &RSRFilter{
+				filterRule: "",
+				fltrRgxp:   &regexp.Regexp{},
+				negative:   false,
+			},
+		},
+		{
+			name:    "Nil RSRRFilter",
+			fltrVal: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			got := tt.fltrVal.Clone()
+
+			if !reflect.DeepEqual(got, tt.fltrVal) {
+				t.Errorf("Clone() = %v, want %v", got, tt.fltrVal)
+			}
+
+			if got != nil && got == tt.fltrVal {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
 	}
 }
