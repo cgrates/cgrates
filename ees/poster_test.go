@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	kafka "github.com/segmentio/kafka-go"
 )
 
 func TestAMQPeeParseURL(t *testing.T) {
@@ -51,7 +50,7 @@ func TestAMQPeeParseURL(t *testing.T) {
 	}
 }
 
-func TestKafkaParseURL(t *testing.T) {
+func TestNewKafkaEEParsesOpts(t *testing.T) {
 	cfg := &config.EventExporterCfg{
 		ExportPath: "127.0.0.1:9092",
 		Attempts:   10,
@@ -61,22 +60,15 @@ func TestKafkaParseURL(t *testing.T) {
 			},
 		},
 	}
-	want := &KafkaEE{
-		cfg:     cfg,
-		reqs:    newConcReq(0),
-		timeout: defaultKafkaTimeout,
-		writer: &kafka.Writer{
-			Addr:        kafka.TCP("127.0.0.1:9092"),
-			Topic:       "cdr_billing",
-			MaxAttempts: 1,
-			Transport:   &kafka.Transport{},
-		},
-	}
 	got, err := NewKafkaEE(cfg, nil)
 	if err != nil {
 		t.Fatalf("NewKafkaEE() failed unexpectedly: %v", err)
 	}
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("NewKafkaEE() = %+v, want %+v", got, want)
+	defer got.Close()
+	if got.Cfg() != cfg {
+		t.Error("NewKafkaEE() config mismatch")
+	}
+	if got.timeout != defaultKafkaTimeout {
+		t.Errorf("NewKafkaEE() timeout = %v, want %v", got.timeout, defaultKafkaTimeout)
 	}
 }

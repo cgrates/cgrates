@@ -22,20 +22,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
-	"net"
+	"context"
 	"path"
-	"strconv"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
-
-	kafka "github.com/segmentio/kafka-go"
+	birpcctx "github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/twmb/franz-go/pkg/kadm"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 var (
@@ -104,31 +103,14 @@ func testKafkaRPCConn(t *testing.T) {
 }
 
 func testKafkaCreateTopic(t *testing.T) {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	cl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer cl.Close()
 
-	controller, err := conn.Controller()
-	if err != nil {
-		t.Fatal(err)
-	}
-	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer controllerConn.Close()
-
-	topicConfigs := []kafka.TopicConfig{
-		{
-			Topic:             utils.KafkaDefaultTopic,
-			NumPartitions:     1,
-			ReplicationFactor: 1,
-		},
-	}
-
-	err = controllerConn.CreateTopics(topicConfigs...)
+	adm := kadm.NewClient(cl)
+	_, err = adm.CreateTopics(context.Background(), 1, 1, nil, utils.KafkaDefaultTopic)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,65 +142,68 @@ func testKafkaExportEvent(t *testing.T) {
 	}
 
 	var reply map[string]map[string]any
-	if err := kafkaRpc.Call(context.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
+	if err := kafkaRpc.Call(birpcctx.Background(), utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
 }
 
 func testKafkaVerifyExport(t *testing.T) {
-	// make a new reader that consumes from the cgrates topic
-	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{"localhost:9092"},
-		Topic:     utils.KafkaDefaultTopic,
-		Partition: 0,
-		MinBytes:  10e3, // 10KB
-		MaxBytes:  10e6, // 10MB
-	})
-
-	ctx, cancel := context.WithCancel(context.Background())
-	m, err := r.ReadMessage(ctx)
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers("localhost:9092"),
+		kgo.ConsumeTopics(utils.KafkaDefaultTopic),
+	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	rcv := string(m.Value)
-	cancel()
+	defer cl.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	fetches := cl.PollFetches(ctx)
+	if errs := fetches.Errors(); len(errs) > 0 {
+		t.Fatal(errs[0].Err)
+	}
+
+	var rcv string
+	fetches.EachRecord(func(r *kgo.Record) {
+		rcv = string(r.Value)
+	})
 
 	exp := `{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000}`
 
 	if rcv != exp {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
-
-	if err := r.Close(); err != nil {
-		t.Fatal("failed to close reader:", err)
-	}
 }
 
 func testKafkaDeleteTopic(t *testing.T) {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	cl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer cl.Close()
 
-	partitions, err := conn.ReadPartitions("cgrates")
+	adm := kadm.NewClient(cl)
+
+	topics, err := adm.ListTopics(context.Background(), utils.KafkaDefaultTopic)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if len(partitions) != 1 || partitions[0].Topic != "cgrates" {
+	if !topics.Has(utils.KafkaDefaultTopic) {
 		t.Fatal("expected topic named cgrates to exist")
 	}
 
-	if err := conn.DeleteTopics(utils.KafkaDefaultTopic); err != nil {
+	if _, err := adm.DeleteTopics(context.Background(), utils.KafkaDefaultTopic); err != nil {
 		t.Fatal(err)
 	}
 
-	experr := `[3] Unknown Topic Or Partition: the request is for a topic or partition that does not exist on this broker`
-	_, err = conn.ReadPartitions("cgrates")
-	if err == nil || err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	topics, err = adm.ListTopics(context.Background(), utils.KafkaDefaultTopic)
+	if err != nil {
+		t.Fatal(err)
 	}
-
+	if topics.Has(utils.KafkaDefaultTopic) {
+		t.Error("expected topic to be deleted")
+	}
 }

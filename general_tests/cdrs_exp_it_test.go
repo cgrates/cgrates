@@ -41,7 +41,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 var (
@@ -304,29 +304,32 @@ func testCDRsExpAMQP(t *testing.T) {
 }
 
 func testCDRsExpKafka(t *testing.T) {
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   "cgrates_cdrs",
-		GroupID: "tmp",
-		MaxWait: time.Millisecond,
-	})
-
-	defer reader.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	var m kafka.Message
-	var err error
-	if m, err = reader.ReadMessage(ctx); err != nil {
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers("localhost:9092"),
+		kgo.ConsumeTopics("cgrates_cdrs"),
+		kgo.ConsumerGroup("tmp"),
+		kgo.FetchMaxWait(time.Millisecond),
+	)
+	if err != nil {
 		t.Fatal(err)
 	}
-	var rcvCDR map[string]any
-	if err := json.Unmarshal(m.Value, &rcvCDR); err != nil {
-		t.Error(err)
+	defer cl.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	fetches := cl.PollFetches(ctx)
+	if errs := fetches.Errors(); len(errs) > 0 {
+		t.Fatal(errs[0].Err)
 	}
+	var rcvCDR map[string]any
+	fetches.EachRecord(func(r *kgo.Record) {
+		if err := json.Unmarshal(r.Value, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+	})
 	if !reflect.DeepEqual(cdrsExpEvExp, rcvCDR) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(cdrsExpEvExp), utils.ToJSON(rcvCDR))
 	}
-	cancel()
 }
 
 func checkContent(ev *ees.ExportEvents, content []any) error {

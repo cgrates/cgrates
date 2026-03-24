@@ -22,15 +22,12 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	kafka "github.com/segmentio/kafka-go"
 )
 
 func TestKafkaEEConnect(t *testing.T) {
 	kafkaEE := &KafkaEE{
-		writer: nil,
-		cfg:    &config.EventExporterCfg{},
-		em:     &utils.ExporterMetrics{},
-		reqs:   &concReq{},
+		cfg: &config.EventExporterCfg{},
+		em:  &utils.ExporterMetrics{},
 	}
 	err := kafkaEE.Connect()
 	if err != nil {
@@ -57,38 +54,5 @@ func TestKafkaEEGetMetrics(t *testing.T) {
 	result := kafkaEE.GetMetrics()
 	if result != safeMapStorage {
 		t.Errorf("expected %v, got %v", safeMapStorage, result)
-	}
-}
-
-func TestKafkaEEClose(t *testing.T) {
-	writer := &kafka.Writer{
-		Addr:     kafka.TCP("localhost:9092"),
-		Topic:    "test-topic",
-		Balancer: &kafka.LeastBytes{},
-	}
-	kafkaEE := &KafkaEE{
-		writer: writer,
-	}
-	err := kafkaEE.Close()
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-}
-
-func TestKafkaEE_ExportEvent(t *testing.T) {
-	writer := &kafka.Writer{
-		Addr:     kafka.TCP("localhost:9092"),
-		Topic:    "test-topic",
-		Balancer: &kafka.LeastBytes{},
-	}
-	kafkaEE := &KafkaEE{
-		writer: writer,
-		reqs:   &concReq{},
-	}
-	content := []byte("test message")
-	key := "test-key"
-	err := kafkaEE.ExportEvent(content, key)
-	if err == nil {
-		t.Errorf("expected no error, got %v", err)
 	}
 }

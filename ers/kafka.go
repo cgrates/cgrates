@@ -23,8 +23,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"os"
 	"time"
 
@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 // NewKafkaER return a new kafka event reader
@@ -88,59 +88,63 @@ func (rdr *KafkaER) Config() *config.EventReaderCfg {
 }
 
 // Serve will start the gorutines needed to watch the kafka topic
-func (rdr *KafkaER) Serve() (err error) {
-	readerCfg := kafka.ReaderConfig{
-		Brokers: []string{rdr.dialURL},
-		GroupID: rdr.groupID,
-		Topic:   rdr.topic,
-		MaxWait: rdr.maxWait,
+func (rdr *KafkaER) Serve() error {
+	kgoOpts := []kgo.Opt{
+		kgo.SeedBrokers(rdr.dialURL),
+		kgo.ConsumeTopics(rdr.topic),
+	}
+	if rdr.maxWait >= 10*time.Millisecond {
+		kgoOpts = append(kgoOpts, kgo.FetchMaxWait(rdr.maxWait))
+	}
+	if rdr.groupID != "" {
+		kgoOpts = append(kgoOpts, kgo.ConsumerGroup(rdr.groupID))
 	}
 
 	if rdr.tls {
-		var rootCAs *x509.CertPool
-		if rootCAs, err = x509.SystemCertPool(); err != nil {
-			return
+		rootCAs, err := x509.SystemCertPool()
+		if err != nil {
+			return err
 		}
 		if rootCAs == nil {
 			rootCAs = x509.NewCertPool()
 		}
 		if rdr.caPath != "" {
-			var ca []byte
-			if ca, err = os.ReadFile(rdr.caPath); err != nil {
-				return
+			ca, err := os.ReadFile(rdr.caPath)
+			if err != nil {
+				return err
 			}
 			if !rootCAs.AppendCertsFromPEM(ca) {
-				return
+				return errors.New("failed to append certificates from PEM file")
 			}
 		}
-		readerCfg.Dialer = &kafka.Dialer{
-			Timeout:   10 * time.Second,
-			DualStack: true,
-			TLS: &tls.Config{
-				RootCAs:            rootCAs,
-				InsecureSkipVerify: rdr.skipTLSVerify,
-			},
-		}
+		kgoOpts = append(kgoOpts, kgo.DialTLSConfig(&tls.Config{
+			RootCAs:            rootCAs,
+			InsecureSkipVerify: rdr.skipTLSVerify,
+		}))
 	}
 
-	r := kafka.NewReader(readerCfg)
+	cl, err := kgo.NewClient(kgoOpts...)
+	if err != nil {
+		return err
+	}
 
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
-		return
+		cl.Close()
+		return nil
 	}
 
-	go func(r *kafka.Reader) { // use a secondary gorutine because the ReadMessage is blocking function
+	go func() {
 		<-rdr.rdrExit
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
 				utils.ERs, rdr.dialURL))
-		r.Close() // already locked in library
-	}(r)
-	go rdr.readLoop(r) // read until the connection is closed
-	return
+		cl.Close()
+	}()
+	go rdr.readLoop(cl) // read until the client is closed
+	return nil
 }
 
-func (rdr *KafkaER) readLoop(r *kafka.Reader) {
+func (rdr *KafkaER) readLoop(cl *kgo.Client) {
 	if rdr.Config().StartDelay > 0 {
 		select {
 		case <-time.After(rdr.Config().StartDelay):
@@ -149,30 +153,30 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 		}
 	}
 	for {
-		if rdr.Config().ConcurrentReqs != -1 {
-			rdr.cap <- struct{}{} // do not try to read if the limit is reached
-		}
-		msg, err := r.ReadMessage(context.Background())
-		if err != nil {
-			if err == io.EOF {
-				// ignore io.EOF received from closing the connection from our side
-				// this is happening when we stop the reader
+		fetches := cl.PollFetches(context.Background())
+		fetches.EachRecord(func(r *kgo.Record) {
+			if rdr.Config().ConcurrentReqs != -1 {
+				rdr.cap <- struct{}{}
+			}
+			go func() {
+				if err := rdr.processMessage(r.Value); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> processing message %s error: %s",
+							utils.ERs, string(r.Key), err.Error()))
+				}
+				if rdr.Config().ConcurrentReqs != -1 {
+					<-rdr.cap
+				}
+			}()
+		})
+		for _, fe := range fetches.Errors() {
+			if errors.Is(fe.Err, kgo.ErrClientClosed) || errors.Is(fe.Err, context.Canceled) {
 				return
 			}
-			//  send it to the error channel
-			rdr.rdrErr <- err
-			return
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> fetch error on %s/%d: %s",
+					utils.ERs, fe.Topic, fe.Partition, fe.Err))
 		}
-		go func(msg kafka.Message) {
-			if err := rdr.processMessage(msg.Value); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> processing message %s error: %s",
-						utils.ERs, string(msg.Key), err.Error()))
-			}
-			if rdr.Config().ConcurrentReqs != -1 {
-				<-rdr.cap
-			}
-		}(msg)
 	}
 }
 
