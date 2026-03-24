@@ -588,6 +588,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Account:     sr.CD.Account,
 		Destination: sr.CD.Destination,
 		ToR:         utils.FirstNonEmpty(sr.CD.ToR, utils.VOICE),
+		ExtraFields: sr.CD.ExtraFields,
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
@@ -663,11 +664,15 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 		cd := cc.CreateCallDescriptor()
 		cd.CgrID = s.CGRID
 		cd.RunID = runID
+		cd.ExtraFields = sr.CD.ExtraFields
 		cd.Increments = roundIncrements
 		response := new(engine.Account)
 		if err = sS.connMgr.Call(sS.cfg.SessionSCfg().RALsConns, nil,
 			utils.ResponderRefundRounding,
-			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd},
+			&engine.CallDescriptorWithArgDispatcher{
+				CallDescriptor: cd,
+				ArgDispatcher:  s.ArgDispatcher,
+			},
 			response); err != nil {
 			return
 		}
