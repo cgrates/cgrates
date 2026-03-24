@@ -17,7 +17,7 @@ require (
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/blevesearch/bleve/v2 v2.4.2
-	github.com/cgrates/aringo v0.0.0-20260113175100-995e59121190
+	github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201129173550-63ea3d835706

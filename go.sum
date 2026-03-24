@@ -69,8 +69,8 @@ github.com/cenkalti/hub v1.0.2/go.mod h1:8LAFAZcCasb83vfxatMUnZHRoQcffho2ELpHb+k
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/cgrates/aringo v0.0.0-20260113175100-995e59121190 h1:D39APg5AnZ1oD0damJuYwo+CFUY3bl9RF4j7BkniMzY=
-github.com/cgrates/aringo v0.0.0-20260113175100-995e59121190/go.mod h1:3ekcTdjvTk8jqEA/2BufAxQS6E6nHnWke1WQ2XHtjFg=
+github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb h1:pjaGbI9TD/e24XRQZpdgv7ke5lq6OEYKcl7Vb59HTXY=
+github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb/go.mod h1:3ekcTdjvTk8jqEA/2BufAxQS6E6nHnWke1WQ2XHtjFg=
 github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f h1:dCp5BflGB8I8wlhWn4R5g0o4ok2pZRmcYHyzIks9Pbc=
 github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFrewWaar/JkXYiDgO7gRw/R1zWITxEw=
