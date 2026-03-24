@@ -43,6 +43,7 @@ const (
 	ARIStasisStart           = "StasisStart"
 	ARIChannelStateChange    = "ChannelStateChange"
 	ARIChannelDestroyed      = "ChannelDestroyed"
+	ARIRESTResponse          = "RESTResponse"
 	eventType                = "eventType"
 	channelID                = "channelID"
 	channelState             = "channelState"
@@ -76,7 +77,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 
 // ARIConnector abstracts the transport layer (HTTP or WebSocket) for sending ARI commands.
 type ARIConnector interface {
-	Call(method, uri string, queryStr map[string]string, bodyParams map[string]string) (aringo.RESTResponse, error)
+	Call(method, uri string, queryStr map[string]string, body []byte) (aringo.RESTResponse, error)
 }
 
 // AsteriskAgent used to cominicate with asterisk
@@ -113,11 +114,33 @@ func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) 
 	return
 }
 
+func (sma *AsteriskAgent) filterEventTypes() {
+	filterEv := struct {
+		Allowed []map[string]string `json:"allowed"`
+	}{
+		Allowed: []map[string]string{
+			{"type": ARIStasisStart},
+			{"type": ARIChannelStateChange},
+			{"type": ARIChannelDestroyed},
+			{"type": ARIRESTResponse},
+		}}
+	body, err := json.Marshal(filterEv)
+	if err != nil {
+		utils.Logger.Warning(err.Error())
+		return
+	}
+	if _, err := sma.astConn.Call(aringo.HTTP_PUT,
+		fmt.Sprintf("applications/%s/eventFilter", CGRAuthAPP), nil, body); err != nil {
+		utils.Logger.Warning(err.Error())
+	}
+}
+
 // ListenAndServe is called to start the service
 func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	if err = sma.connectAsterisk(stopChan); err != nil {
 		return
 	}
+	sma.filterEventTypes()
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Asterisk at: <%s>",
 		utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address))
 	// make a call asterisk -> sessions_conns to create an active client needed for syncSessions when restoring sessions, since prior clients are lost when engine shuts down
@@ -166,8 +189,8 @@ func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
 	if warnMsg != "" {
 		utils.Logger.Warning(warnMsg)
 	}
-	if _, err := sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("channels/%s", channelID), nil,
-		map[string]string{"reason": "congestion"}); err != nil {
+	if _, err := sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("channels/%s", channelID),
+		map[string]string{"reason": "congestion"}, nil); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed disconnecting channel <%s>, err: %s",
 				utils.AsteriskAgent, channelID, err.Error()))
