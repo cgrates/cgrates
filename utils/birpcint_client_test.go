@@ -19,7 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
+	"net"
 	"testing"
+
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 )
 
 func TestBiRpcNewBiJSONrpcClient(t *testing.T) {
@@ -33,5 +38,67 @@ func TestBiRpcNewBiJSONrpcClient(t *testing.T) {
 
 	if rcv != nil {
 		t.Error(err)
+	}
+}
+
+type mockConnector struct{}
+
+func (c *mockConnector) Call(_ *context.Context, _ string, _, _ any) (err error) {
+	return errors.New("error")
+}
+
+func TestNewBiJSONrpcClient(t *testing.T) {
+
+	lis, err := net.Listen(TCP, "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer lis.Close()
+	adr := lis.Addr().String()
+
+	tests := []struct {
+		name    string
+		addr    string
+		obj     birpc.ClientConnector
+		wantErr bool
+	}{
+		{
+			name:    "True connection",
+			addr:    adr,
+			obj:     new(mockConnector),
+			wantErr: false,
+		},
+		{
+			name:    "Nil obj",
+			addr:    adr,
+			obj:     nil,
+			wantErr: false,
+		},
+		{
+			name:    "Empty addr",
+			addr:    "",
+			obj:     new(mockConnector),
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewBiJSONrpcClient(tt.addr, tt.obj)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("NewBiJSONrpcClient() failed: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("NewBiJSONrpcClient() succeeded unexpectedly")
+			}
+
+			if got == nil {
+				t.Error(err)
+			}
+
+		})
 	}
 }
