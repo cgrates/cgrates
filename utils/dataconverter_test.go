@@ -246,6 +246,12 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected  for paramas %+v received: %+v", expec, res)
 	}
 
+	if gigCon, err := NewDataConverter(MetaGigawords); err != nil {
+		t.Error(err)
+	} else if _, ok := gigCon.(*GigawordsConverter); !ok {
+		t.Errorf("Expected GigawordsConverter received: %T", gigCon)
+	}
+
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -1531,6 +1537,38 @@ func TestStripConverter(t *testing.T) {
 			convertErr:     false,
 		},
 		{
+			name:           "Invalid amount parameter for default",
+			params:         "*strip:0:three",
+			input:          "000TEST",
+			expected:       `strip converter: invalid amount parameter (strconv.Atoi: parsing "three": invalid syntax)`,
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Invalid amount parameter for *char",
+			params:         "*strip:*prefix:*char:abc:three",
+			input:          "abcTEST",
+			expected:       "strip converter: invalid amount parameter (strconv.Atoi: parsing \"three\": invalid syntax)",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Invalid amount parameter for *nil",
+			params:         "*strip:*prefix:*nil:three",
+			input:          "\u0000\u0000TEST",
+			expected:       "strip converter: invalid amount parameter (strconv.Atoi: parsing \"three\": invalid syntax)",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "Invalid amount parameter for *space",
+			params:         "*strip:*prefix:*space:three",
+			input:          "TEST ",
+			expected:       "strip converter: invalid amount parameter (strconv.Atoi: parsing \"three\": invalid syntax)",
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
 			name:           "Strip a prefix longer than the value",
 			params:         "*strip:*prefix:5",
 			input:          "TEST",
@@ -1694,11 +1732,12 @@ func TestURLEncodeConverter(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected string
+		expected any
 	}{
 		{name: "Encode a string with special character", input: "123$123", expected: "123%24123"},
 		{name: "Encode special characters in path,query and fragment", input: "https://www.example.com/search日?data=日本語&path=/a b/c?d=1&e=2&q=hello world&query=@special#日本characters$", expected: "https://www.example.com/search%E6%97%A5?data=%E6%97%A5%E6%9C%AC%E8%AA%9E&e=2&path=%2Fa+b%2Fc%3Fd%3D1&q=hello+world&query=%40special#%E6%97%A5%E6%9C%ACcharacters$"},
 		{name: "Encode a string with multiple special character", input: "foo☺@$'()*,baz;?&=#+!", expected: "foo%E2%98%BA%40%24%27%28%29%2A%2Cbaz%3B"},
+		{name: "Encode a invalid string", input: "tst%$##", expected: nil},
 	}
 	conv, err := NewDataConverter(URLEncConverter)
 	if err != nil {
@@ -1707,12 +1746,14 @@ func TestURLEncodeConverter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rcv, err := conv.Convert(tt.input)
-			if err != nil {
-				t.Error(err)
+
+			expectedErr := `parse "tst%$": invalid URL escape "%$"`
+			if err != nil && err.Error() != expectedErr {
+				t.Errorf("Expected error '%s', but got '%v'", expectedErr, err)
 				return
 			}
 			if tt.expected != rcv {
-				t.Errorf("expected %q,received %q", tt.expected, rcv)
+				t.Errorf("expected: %v,received: %v", tt.expected, rcv)
 			}
 		})
 	}
@@ -1988,6 +2029,8 @@ func TestTimeStringConverter(t *testing.T) {
 		{name: "Convert to UTC+03:00 timezone", input: "2025-05-08T10:07:08Z", params: "*timestring:Europe/Dublin:02/01/2006 15:04:05", expectValue: "08/05/2025 11:07:08"},
 		{name: "Convert string UTC-07:00", input: "2025-03-08T23:50:00-07:00", params: "*timestring:Europe/Paris:15:04:05 02/01/2006", expectValue: "07:50:00 09/03/2025"},
 		{name: "Convert time.Time from Asia/Dubai", input: loadTimelocation("Asia/Dubai", 2025, time.November, 20, 22, 15, 0, 0), params: "*timestring:Australia/Sydney:Jan 2, 2006 at 3:04pm (MST)", expectValue: "Nov 21, 2025 at 5:15am (AEDT)"},
+		{name: "Invalid string input", input: "invalid-time", params: "*timestring:Australia/Sydney:Jan 2, 2006 at 3:04pm (MST)", expectedErr: errors.New("Unsupported time format")},
+		{name: "Unsupported input type", input: 123, params: "*timestring:Australia/Sydney:Jan 2, 2006 at 3:04pm (MST)", expectedErr: errors.New("*localtime converter: unsupported input")},
 	}
 
 	for _, tc := range testCases {
@@ -2011,6 +2054,61 @@ func TestTimeStringConverter(t *testing.T) {
 			}
 			if tc.expectValue != val {
 				t.Errorf("Expected output %s, but got %s", tc.expectValue, val)
+			}
+		})
+	}
+}
+
+func TestNewTimeStringConverterInvalidLocation(t *testing.T) {
+	_, err := NewTimeStringConverter("invalid/loc")
+	expectedErr := "unknown time zone invalid/loc"
+	if err.Error() != expectedErr {
+		t.Errorf("Expecting error %v, but got %v", expectedErr, err)
+	}
+}
+func TestConnStatusConverterConvert(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      any
+		want    any
+		wantErr bool
+	}{
+		{
+			name:    "ConnStatusUp",
+			in:      ConnStatusUp,
+			want:    1,
+			wantErr: false,
+		},
+		{
+			name:    "ConnStatusDown",
+			in:      ConnStatusDown,
+			want:    -1,
+			wantErr: false,
+		},
+		{
+			name:    "ConnStatus unsupported",
+			in:      "unsupported",
+			want:    0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			var c ConnStatusConverter
+			got, gotErr := c.Convert(tt.in)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("Convert() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("Convert() succeeded unexpectedly")
+			}
+
+			if got != tt.want {
+				t.Errorf("Convert() = %v, want %v", got, tt.want)
 			}
 		})
 	}

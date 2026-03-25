@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/cgrates/cron"
 )
 
 func TestExporterMetricsString(t *testing.T) {
@@ -197,6 +199,75 @@ func TestNewExporterMetrics(t *testing.T) {
 			if got.MapStorage == nil {
 				t.Errorf("The map storage should have been created")
 			}
+		})
+	}
+}
+
+func TestExporterMetricsStopCron(t *testing.T) {
+
+	tests := []struct {
+		name            string
+		exporterMetrics *ExporterMetrics
+	}{
+		{
+			name: "",
+			exporterMetrics: &ExporterMetrics{
+				cron: cron.New(),
+			},
+		},
+		{
+			name: "Nil",
+			exporterMetrics: &ExporterMetrics{
+				cron: nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			tt.exporterMetrics.StopCron()
+
+			want := tt.exporterMetrics
+			if tt.exporterMetrics != want {
+				t.Errorf("Got %v, wanted %v", tt.exporterMetrics, want)
+			}
+
+		})
+	}
+}
+
+func TestExporterMetricsIncrementEvents(t *testing.T) {
+
+	tests := []struct {
+		name            string
+		schedule        string
+		timezone        string
+		exporterMetrics *ExporterMetrics
+	}{
+		{
+			name: "",
+			exporterMetrics: &ExporterMetrics{
+				MapStorage: MapStorage{
+					NumberOfEvents: 0,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			tt.exporterMetrics.IncrementEvents()
+			tt.exporterMetrics.IncrementEvents()
+			tt.exporterMetrics.IncrementEvents()
+
+			w := tt.exporterMetrics
+
+			if !reflect.DeepEqual(tt.exporterMetrics, w) {
+				t.Errorf("Got %v, wanted %v", tt.exporterMetrics, w)
+			}
+
 		})
 	}
 }

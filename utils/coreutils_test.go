@@ -457,6 +457,13 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Error("error parsing date: ", expected.Sub(date).Seconds())
 	}
 
+	date, err = ParseTimeDetectLayout("-err", "")
+	expected = time.Now()
+	expErr := `time: invalid duration "err"`
+	if err.Error() != expErr {
+		t.Errorf("Expecting error %v, but got %v", expErr, err)
+	}
+
 	expected = time.Now().AddDate(0, 0, 1)
 	if date, err := ParseTimeDetectLayout("*daily", ""); err != nil {
 		t.Error(err)

@@ -119,6 +119,19 @@ func TestNewErrResourceS(t *testing.T) {
 	}
 }
 
+func TestNewErrIPs(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrIPs(cgrError); rcv.Error() != "IPS_ERROR:shortError" {
+		t.Errorf("Expecting: IPS_ERROR:shortError, received: %+v", rcv)
+	}
+}
+func TestErrInvalidTime(t *testing.T) {
+	cgrError := "errorMessage"
+	if rcv := ErrInvalidTime(cgrError); rcv.Error() != "INVALID_TIME:errorMessage" {
+		t.Errorf("Expecting: INVALID_TIME:errorMessage, received: %+v", rcv)
+	}
+}
+
 func TestNewErrSupplierS(t *testing.T) {
 	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
 	if rcv := NewErrRouteS(cgrError); rcv.Error() != "ROUTES_ERROR:shortError" {

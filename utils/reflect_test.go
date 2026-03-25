@@ -254,6 +254,12 @@ func TestIfaceAsString(t *testing.T) {
 	if rply := IfaceAsString(time.Second); rply != "1s" {
 		t.Errorf("Expected 1s ,received %+v", rply)
 	}
+
+	val = time.Duration(-1)
+	if rply := IfaceAsString(val); rply != "-1" {
+		t.Errorf("Expected -1 ,received %+v", rply)
+	}
+
 	if rply := IfaceAsString(nil); rply != "" {
 		t.Errorf("Expected  ,received %+v", rply)
 	}
