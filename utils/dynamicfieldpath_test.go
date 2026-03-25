@@ -99,6 +99,16 @@ func TestDynamicDataProviderProccesFieldPath(t *testing.T) {
 	}
 }
 
+func TestErrorcase(t *testing.T) {
+	dp := MapStorage{}
+
+	_, err := ProcessFieldPath("<*tenant:~*req.Account:1001>", InfieldSep, dp)
+	if err == nil {
+		t.Errorf("Expected error received nil")
+	}
+
+}
+
 func TestDynamicDataProviderGetFullFieldPath(t *testing.T) {
 	dp := MapStorage{
 		MetaCgrep: MapStorage{
@@ -157,4 +167,156 @@ func TestDynamicDataProviderGetFullFieldPath(t *testing.T) {
 		t.Errorf("Expected: %v,received %q", nil, newpath)
 	}
 
+}
+
+func TestParseParamForDataProvider(t *testing.T) {
+
+	dp := MapStorage{
+
+		MetaCgrep: MapStorage{
+			"Stir": MapStorage{
+				"CHRG_ROUTE1_END": "Identity1",
+				"CHRG_ROUTE2_END": "Identity2",
+				"CHRG_ROUTE3_END": "Identity3",
+				"CHRG_ROUTE4_END": "Identity4",
+			},
+			"Routes": MapStorage{
+				"SortedRoutes": []MapStorage{
+					{"ID": "ROUTE1"},
+					{"ID": "ROUTE2"},
+					{"ID": "ROUTE3"},
+					{"ID": "ROUTE4"},
+				},
+			},
+			"AccountField": "Account",
+			"Account":      "1001",
+			"HalfAccount":  "01",
+			"BestRoute":    0,
+		},
+	}
+
+	tests := []struct {
+		name              string
+		param             string
+		dP                DataProvider
+		onlyEncapsulatead bool
+		want              string
+		wantErr           bool
+	}{
+		{
+			name:              "With parameters",
+			param:             "*string:~*req.+~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "*string:~*req.+~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			wantErr:           false,
+		},
+		{
+			name:              "With param that contains ANDsep",
+			param:             "~*cgrep.AccountField+:10" + ANDSep + "~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "~*cgrep.AccountField+:10" + ANDSep + "~*cgrep.HalfAccount",
+			wantErr:           false,
+		},
+		{
+			name:              "With param that is not valid",
+			param:             "<~*cgrep.AccountField+:10" + ANDSep + "~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "",
+			wantErr:           true,
+		},
+		{
+			name:              "Empty string ",
+			param:             "",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "",
+			wantErr:           false,
+		},
+		{
+			name:              "With MetaDynReq as prefix and onlyEncapsulatead true",
+			param:             MetaDynReq + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: true,
+			want:              "~*req~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			wantErr:           false,
+		},
+		{
+			name:              "With DynamicDataPrefix as prefix and onlyEncapsulatead true",
+			param:             DynamicDataPrefix + MetaOpts + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: true,
+			want:              "~*opts~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			wantErr:           false,
+		},
+		{
+			name:              "With MetaDynReq as prefix and onlyEncapsulatead false",
+			param:             MetaDynReq + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "error",
+			wantErr:           true,
+		},
+		{
+			name:              "With DynamicDataPrefix as prefix and onlyEncapsulatead false",
+			param:             DynamicDataPrefix + MetaOpts + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "error",
+			wantErr:           true,
+		},
+		{
+			name:              "With MetaTenant as prefix and onlyEncapsulatead false",
+			param:             MetaTenant + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "err",
+			wantErr:           true,
+		},
+		{
+			name:              "With MetaTenant as prefix and onlyEncapsulatead true",
+			param:             MetaTenant + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			dP:                dp,
+			onlyEncapsulatead: true,
+			want:              MetaTenant + "~*cgrep.AccountField+:10+~*cgrep.HalfAccount",
+			wantErr:           false,
+		},
+		{
+			name:              "With  PlusChar",
+			param:             "<*string:~*req.+~*cgrep.AccountField" + PlusChar + ":10+~*cgrep.HalfAccount+>",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "*string:~*req.Account:1001",
+			wantErr:           false,
+		},
+		{
+			name:              "error case",
+			param:             "<*string:~*req.+~*cgrep.AccountField+:10+~*cgrep.HalfAccount+",
+			dP:                dp,
+			onlyEncapsulatead: false,
+			want:              "",
+			wantErr:           true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := ParseParamForDataProvider(tt.param, tt.dP, tt.onlyEncapsulatead)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("ParseParamForDataProvider() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("ParseParamForDataProvider() succeeded unexpectedly")
+			}
+
+			if got != tt.want {
+				t.Errorf("ParseParamForDataProvider() = %v, want %v", got, tt.want)
+			}
+		})
+
+	}
 }

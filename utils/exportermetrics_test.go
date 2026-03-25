@@ -200,3 +200,90 @@ func TestNewExporterMetrics(t *testing.T) {
 		})
 	}
 }
+
+func TestExporterMetrics_StopCron(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		schedule string
+		timezone string
+	}{
+		{
+			name:     "Complete data",
+			schedule: "@every 1h",
+			timezone: "Local",
+		},
+		{
+			name:     "Nil case",
+			schedule: "",
+			timezone: "",
+		},
+		{
+			name:     "Nil schedule",
+			schedule: "",
+			timezone: "Local",
+		},
+		{
+			name:     "Nil timezone",
+			schedule: "@every 1h",
+			timezone: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			m, err := NewExporterMetrics(tt.schedule, tt.timezone)
+
+			if err != nil {
+				t.Fatalf("could not construct receiver type: %v", err)
+			}
+
+			m.StopCron()
+
+		})
+	}
+}
+
+func TestExporterMetrics_IncrementEvents(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		schedule string
+		timezone string
+	}{
+		{
+			name:     "test with schedule and timezone",
+			schedule: "@every 1h",
+			timezone: "Local",
+		},
+		{
+			name:     "Nil case",
+			schedule: "",
+			timezone: "",
+		},
+		{
+			name:     "Nil schedule",
+			schedule: "",
+			timezone: "Local",
+		},
+		{
+			name:     "Nil timezone",
+			schedule: "@every 1h",
+			timezone: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			m, err := NewExporterMetrics(tt.schedule, tt.timezone)
+
+			if err != nil {
+				t.Fatalf("could not construct receiver type: %v", err)
+			}
+
+			m.IncrementEvents()
+		})
+	}
+}
