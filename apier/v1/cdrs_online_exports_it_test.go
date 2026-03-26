@@ -23,6 +23,7 @@ package v1
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -44,6 +45,7 @@ var sTestsCDRsOnlineExports = []func(t *testing.T){
 	testCDRsExportsStartEngine,
 	testCDRsExportsRPCConn,
 	testCDRsOnlineExportsClearAndSet,
+	testCDRsOnlineExportsInvalidIDs,
 	testCDRsExportsKillEngine,
 }
 
@@ -167,6 +169,55 @@ func testCDRsOnlineExportsClearAndSet(t *testing.T) {
 	exports = rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
 	if len(exports) != 0 {
 		t.Fatalf("Expected empty online_cdr_exports, received: %+v", exports)
+	}
+}
+
+func testCDRsOnlineExportsInvalidIDs(t *testing.T) {
+	t.Skip("invalid IDs should be not be populated")
+
+	var rpl map[string]any
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+		Section: "cdrs",
+	}, &rpl); err != nil {
+		t.Fatal(err)
+	}
+	initialExports := rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
+	if len(initialExports) != 0 {
+		t.Fatalf("Precondition failed: expected empty online_cdr_exports, got: %+v", initialExports)
+	}
+
+	// invalid IDs are still written into the running config.
+	var reply string
+	err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+		Config: map[string]any{
+			"cdrs": map[string]any{
+				"online_cdr_exports": []string{"test", "fake_ees_id", ""},
+			},
+		},
+	}, &reply)
+
+	if err == nil {
+		t.Fatal("Expected error for invalid exporter IDs, got nil")
+	}
+
+	errMsg := err.Error()
+	for _, invalidID := range []string{"test", "fake_ees_id", ""} {
+		if invalidID == "" {
+			continue
+		}
+		if !strings.Contains(errMsg, invalidID) {
+			t.Errorf("Expected error to mention invalid ID %q, but got: %s", invalidID, errMsg)
+		}
+	}
+
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+		Section: "cdrs",
+	}, &rpl); err != nil {
+		t.Fatal(err)
+	}
+	exports := rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
+	if len(exports) != 0 {
+		t.Fatalf("online_cdr_exports must remain empty after rejected SetConfig, got: %+v", exports)
 	}
 }
 
