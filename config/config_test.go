@@ -433,17 +433,18 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eCdrsCfg := &CdrsCfg{
-		Enabled:         false,
-		StoreCdrs:       true,
-		SMCostRetries:   5,
-		ChargerSConns:   []string{},
-		RaterConns:      []string{},
-		AttributeSConns: []string{},
-		ThresholdSConns: []string{},
-		StatSConns:      []string{},
-		SchedulerConns:  []string{},
-		EEsConns:        []string{},
-		ExtraFields:     RSRParsers{},
+		Enabled:          false,
+		StoreCdrs:        true,
+		SMCostRetries:    5,
+		ChargerSConns:    []string{},
+		RaterConns:       []string{},
+		AttributeSConns:  []string{},
+		ThresholdSConns:  []string{},
+		StatSConns:       []string{},
+		SchedulerConns:   []string{},
+		EEsConns:         []string{},
+		OnlineCDRExports: []string{},
+		ExtraFields:      RSRParsers{},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eCdrsCfg, cgrCfg.cdrsCfg)

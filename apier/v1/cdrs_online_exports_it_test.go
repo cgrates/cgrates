@@ -45,11 +45,11 @@ var sTestsCDRsOnlineExports = []func(t *testing.T){
 	testCDRsExportsStartEngine,
 	testCDRsExportsRPCConn,
 	testCDRsOnlineExportsClearAndSet,
+	testCDRsOnlineExportsOverwrite,
 	testCDRsOnlineExportsInvalidIDs,
 	testCDRsExportsKillEngine,
 }
 
-// ConfigSv1.SetConfig returns OK when clearing online_cdr_exports but the old values remain.
 func TestCDRsOnlineExportsIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaMySQL:
@@ -101,11 +101,9 @@ func testCDRsExportsRPCConn(t *testing.T) {
 	}
 }
 
-// testCDRsOnlineExportsClearAndSet sets online_cdr_exports to a non-empty list
-// then clears it with an empty list and verifies the field is cleared.
 func testCDRsOnlineExportsClearAndSet(t *testing.T) {
-	t.Skip("online_cdr_exports not cleared")
 	var reply string
+
 	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Config: map[string]any{
 			"ees": map[string]any{
@@ -144,11 +142,9 @@ func testCDRsOnlineExportsClearAndSet(t *testing.T) {
 	}
 	exports := rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
 	if len(exports) != 1 || exports[0] != "http_billing_event" {
-		t.Fatalf("Expected [http_billing_event] received: %+v", exports)
+		t.Fatalf("Expected [http_billing_event], received: %+v", exports)
 	}
 
-	// clearing online_cdr_exports with an empty list
-	// SetConfig returns OK but the field is not updated in the running config
 	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Config: map[string]any{
 			"cdrs": map[string]any{
@@ -169,6 +165,61 @@ func testCDRsOnlineExportsClearAndSet(t *testing.T) {
 	exports = rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
 	if len(exports) != 0 {
 		t.Fatalf("Expected empty online_cdr_exports, received: %+v", exports)
+	}
+}
+
+func testCDRsOnlineExportsOverwrite(t *testing.T) {
+	var reply string
+
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+		Config: map[string]any{
+			"ees": map[string]any{
+				"enabled": true,
+				"exporters": []map[string]any{
+					{"id": "exporter_1", "type": utils.MetaNone},
+					{"id": "exporter_2", "type": utils.MetaNone},
+				},
+			},
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expected OK received: %s", reply)
+	}
+
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+		Config: map[string]any{
+			"cdrs": map[string]any{
+				"online_cdr_exports": []string{"exporter_1"},
+			},
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expected OK received: %s", reply)
+	}
+
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+		Config: map[string]any{
+			"cdrs": map[string]any{
+				"online_cdr_exports": []string{"exporter_2"},
+			},
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("Expected OK received: %s", reply)
+	}
+
+	var rpl map[string]any
+	if err := cdrExportsRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+		Section: "cdrs",
+	}, &rpl); err != nil {
+		t.Fatal(err)
+	}
+	exports := rpl["cdrs"].(map[string]any)["online_cdr_exports"].([]any)
+	if len(exports) != 1 || exports[0] != "exporter_2" {
+		t.Fatalf("Expected [exporter_2] only, got: %+v", exports)
 	}
 }
 

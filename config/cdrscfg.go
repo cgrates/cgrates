@@ -112,7 +112,8 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		}
 	}
 	if jsnCdrsCfg.Online_cdr_exports != nil {
-		cdrscfg.OnlineCDRExports = append(cdrscfg.OnlineCDRExports, *jsnCdrsCfg.Online_cdr_exports...)
+		cdrscfg.OnlineCDRExports = make([]string, len(*jsnCdrsCfg.Online_cdr_exports))
+		copy(cdrscfg.OnlineCDRExports, *jsnCdrsCfg.Online_cdr_exports)
 	}
 	if jsnCdrsCfg.Scheduler_conns != nil {
 		cdrscfg.SchedulerConns = make([]string, len(*jsnCdrsCfg.Scheduler_conns))
