@@ -635,6 +635,26 @@ func TestOrderedNavigableMapRemove(t *testing.T) {
 	if err := nm.Remove(&FullPath{PathSlice: []string{"Field1", "0", ""}}); err != ErrWrongPath {
 		t.Error(err)
 	}
+
+	nm.Set(
+		&FullPath{
+			PathSlice: []string{"Field"},
+			Path:      "Field"},
+		NewLeafNode("v1"),
+	)
+	nm.Set(
+		&FullPath{
+			PathSlice: []string{"Field1"},
+			Path:      "Field1"},
+		NewLeafNode("v2"),
+	)
+	if err := nm.Remove(&FullPath{PathSlice: []string{"Field"}, Path: "Field"}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nm.Field([]string{"Field1"}); err != nil {
+		t.Errorf("Field1 should still exist after removing Field, recieved err: %v", err)
+	}
+
 }
 
 /*
@@ -935,6 +955,32 @@ func TestOrderedNavigableMapAppend(t *testing.T) {
 		Path:      "Field1.Field2[0]",
 	}, &DataLeaf{Data: "dataTest"}); err != nil {
 		t.Errorf("Expected no error but received %v", err)
+	}
+
+	onmErr := NewOrderedNavigableMap()
+	onmErr.Set(&FullPath{
+		PathSlice: []string{"Field1"},
+		Path:      "Field1",
+	}, NewLeafNode("dataTest"))
+
+	if err := onm.Append(&FullPath{
+		PathSlice: []string{"Field1"},
+		Path:      "Field1",
+	}, &DataLeaf{Data: "dataTest1"}); err == nil {
+		t.Errorf("Expected error but received %v", err)
+	}
+
+	onmP := NewOrderedNavigableMap()
+	onmP.Set(&FullPath{
+		PathSlice: []string{"Field1"},
+		Path:      "Field1",
+	}, NewLeafNode("dataTest"))
+
+	if err := onmErr.Append(&FullPath{
+		PathSlice: []string{"Field1"},
+		Path:      "Field1",
+	}, &DataLeaf{Data: "dataTest1"}); err != nil {
+		t.Errorf("Expected error but received %v", err)
 	}
 }
 

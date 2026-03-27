@@ -267,3 +267,91 @@ func TestUpdateStructWithIfaceMapErrorDefault(t *testing.T) {
 		t.Errorf("Expected <cannot update unsupported struct field: (0+0i)> ,received: <%+v>", err)
 	}
 }
+func TestFieldByIndexIsEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		input reflect.Value
+		index []int
+		want  bool
+	}{
+		{
+			name:  "empty tenantid",
+			input: reflect.ValueOf(TenantID{Tenant: ""}),
+			index: []int{0},
+			want:  true,
+		},
+		{
+			name:  "with tenantid not empty ",
+			input: reflect.ValueOf(TenantID{Tenant: "tenant"}),
+			index: []int{0},
+			want:  false,
+		},
+		{
+			name: "pointer not empty ",
+			input: reflect.ValueOf(struct {
+				*TenantID
+			}{
+				TenantID: &TenantID{
+					Tenant: "tenant",
+				},
+			},
+			),
+			index: []int{0, 0},
+			want:  false,
+		},
+		{
+			name: "empty pointer  ",
+			input: reflect.ValueOf(struct {
+				*TenantID
+			}{
+				TenantID: &TenantID{
+					Tenant: "",
+				},
+			},
+			),
+			index: []int{0, 0},
+			want:  true,
+		},
+		{
+			name: "nil pointer ",
+			input: reflect.ValueOf(struct {
+				*TenantID
+			}{
+				TenantID: nil,
+			},
+			),
+			index: []int{0, 0},
+			want:  true,
+		},
+		{
+			name: "second struct nil",
+			input: reflect.ValueOf(struct {
+				*TenantID
+				*TenantAccount
+			}{
+				TenantID: &TenantID{
+					Tenant: "tenant",
+				},
+				TenantAccount: nil,
+			},
+			),
+			index: []int{1, 0},
+			want:  true,
+		},
+		{
+			name:  "Nil index",
+			input: reflect.ValueOf(TenantID{Tenant: "tst"}),
+			index: nil,
+			want:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := fieldByIndexIsEmpty(tt.input, tt.index)
+
+			if got != tt.want {
+				t.Errorf("fieldByIndexIsEmpty() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
