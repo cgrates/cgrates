@@ -186,3 +186,36 @@ func TestCdrsCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestCdrsCfgOnlineCDRExports(t *testing.T) {
+	jsonCfg := &CdrsJsonCfg{
+		Online_cdr_exports: &[]string{"http_billing_event"},
+	}
+	jsnCfg := NewDefaultCGRConfig()
+	if err := jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(jsnCfg.cdrsCfg.OnlineCDRExports, []string{"http_billing_event"}) {
+		t.Fatalf("Expected [http_billing_event], got %+v", jsnCfg.cdrsCfg.OnlineCDRExports)
+	}
+
+	jsonCfg2 := &CdrsJsonCfg{
+		Online_cdr_exports: &[]string{"exporter_1", "exporter_2"},
+	}
+	if err := jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg2); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(jsnCfg.cdrsCfg.OnlineCDRExports, []string{"exporter_1", "exporter_2"}) {
+		t.Fatalf("Expected [exporter_1, exporter_2], got %+v", jsnCfg.cdrsCfg.OnlineCDRExports)
+	}
+
+	jsonCfg3 := &CdrsJsonCfg{
+		Online_cdr_exports: &[]string{},
+	}
+	if err := jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg3); err != nil {
+		t.Fatal(err)
+	}
+	if len(jsnCfg.cdrsCfg.OnlineCDRExports) != 0 {
+		t.Fatalf("Expected empty OnlineCDRExports, got %+v", jsnCfg.cdrsCfg.OnlineCDRExports)
+	}
+}

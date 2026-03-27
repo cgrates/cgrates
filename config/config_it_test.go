@@ -453,17 +453,18 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 		t.Fatal(err)
 	}
 	expAttr := &CdrsCfg{
-		Enabled:         true,
-		ExtraFields:     rsr,
-		ChargerSConns:   []string{utils.MetaLocalHost},
-		RaterConns:      []string{},
-		AttributeSConns: []string{},
-		ThresholdSConns: []string{},
-		StatSConns:      []string{},
-		SMCostRetries:   5,
-		StoreCdrs:       true,
-		SchedulerConns:  []string{},
-		EEsConns:        []string{utils.MetaLocalHost},
+		Enabled:          true,
+		ExtraFields:      rsr,
+		ChargerSConns:    []string{utils.MetaLocalHost},
+		RaterConns:       []string{},
+		AttributeSConns:  []string{},
+		ThresholdSConns:  []string{},
+		StatSConns:       []string{},
+		SMCostRetries:    5,
+		StoreCdrs:        true,
+		OnlineCDRExports: []string{},
+		SchedulerConns:   []string{},
+		EEsConns:         []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.CdrsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.CdrsCfg()))
