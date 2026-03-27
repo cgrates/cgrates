@@ -120,11 +120,12 @@ func TestGetReaderFromPathError(t *testing.T) {
 
 func TestGetReaderFromPath(t *testing.T) {
 	tests := []struct {
-		name       string
-		path       string
-		timeout    time.Duration
-		expectErr  bool
-		expectData string
+		name           string
+		path           string
+		timeout        time.Duration
+		expectErr      bool
+		expectData     string
+		expectedString string
 	}{
 		{
 			name:       "Valid file path",
@@ -151,6 +152,13 @@ func TestGetReaderFromPath(t *testing.T) {
 			timeout:   1 * time.Second,
 			expectErr: true,
 		},
+		{
+			name:           "HTTP URL returns error ",
+			path:           "https://123",
+			timeout:        1 * time.Second,
+			expectErr:      true,
+			expectedString: `Get "https://123": dial tcp: lookup 123: no such host"`,
+		},
 	}
 
 	testFileName := "testfile.txt"
@@ -171,15 +179,20 @@ func TestGetReaderFromPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.path == "http://cgrates.com" {
+			switch tt.path {
+			case "http://cgrates.com":
 				tt.path = ts.URL
-			} else if tt.path == "http://cgrates.com/non200" {
+			case "http://cgrates.com/non200":
 				tt.path = ts.URL + "/non200"
 			}
 
 			reader, err := GetReaderFromPath(tt.path, tt.timeout)
 
 			if (err != nil) != tt.expectErr {
+
+				if err.Error() != tt.expectedString {
+					t.Errorf("Wanted <%v> got <%v> ", tt.expectedString, err)
+				}
 				t.Errorf("expected error: %v, got: %v", tt.expectErr, err)
 				return
 			}

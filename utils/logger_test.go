@@ -407,3 +407,17 @@ func TestLoggerWarning(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestNewLoggerWithNoSysLog(t *testing.T) {
+	noSysLog = true
+	lgr, err := Newlogger(MetaSysLog, "tstID")
+	if err != nil {
+		t.Error(err)
+	}
+	if lgr == nil {
+		t.Error("Expecting logger, but got a nil logger")
+	}
+	if _, ok := lgr.(*StdLogger); !ok {
+		t.Errorf("Expected *StdLogger type, recieved %T", lgr)
+	}
+}

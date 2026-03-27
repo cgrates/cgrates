@@ -96,3 +96,13 @@ func TestUnregisterRpcParams(t *testing.T) {
 		})
 	}
 }
+
+func TestRegisterRpcParamsServiceErr(t *testing.T) {
+	in := len(rpcParamsMap)
+	RegisterRpcParams(EmptyString, "")
+
+	if in != len(rpcParamsMap) {
+		t.Errorf("Expected map length %d, but got map with length: %d", in, len(rpcParamsMap))
+	}
+
+}
