@@ -768,6 +768,7 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 				Password:               utils.StringPointer("CGRateS.org"),
 				Max_reconnect_interval: utils.StringPointer(utils.EmptyString),
 				Connect_attempts:       utils.IntPointer(3),
+				Ari_websocket:          utils.BoolPointer(false),
 				Reconnects:             utils.IntPointer(5),
 			},
 		},
