@@ -11,7 +11,7 @@ require (
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/blevesearch/bleve/v2 v2.4.2
-	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
+	github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
@@ -84,6 +84,7 @@ require (
 	github.com/blevesearch/zapx/v16 v16.1.5 // indirect
 	github.com/cenkalti/hub v1.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/couchbase/ghistogram v0.1.0 // indirect
 	github.com/couchbase/moss v0.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect

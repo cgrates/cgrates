@@ -33,6 +33,7 @@ type AsteriskConnCfg struct {
 	Password             string
 	ConnectAttempts      int
 	Reconnects           int
+	AriWebSocket         bool
 	MaxReconnectInterval time.Duration
 }
 
@@ -58,6 +59,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err er
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.Ari_websocket != nil {
+		aConnCfg.AriWebSocket = *jsnCfg.Ari_websocket
+	}
 	if jsnCfg.Max_reconnect_interval != nil {
 		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return
@@ -75,6 +79,7 @@ func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]any {
 		utils.Password:                aConnCfg.Password,
 		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
 		utils.ReconnectsCfg:           aConnCfg.Reconnects,
+		utils.AriWebSocketCfg:         aConnCfg.AriWebSocket,
 		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval.String(),
 	}
 }
@@ -88,6 +93,7 @@ func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 		Password:             aConnCfg.Password,
 		ConnectAttempts:      aConnCfg.ConnectAttempts,
 		Reconnects:           aConnCfg.Reconnects,
+		AriWebSocket:         aConnCfg.AriWebSocket,
 		MaxReconnectInterval: aConnCfg.MaxReconnectInterval,
 	}
 }
@@ -179,6 +185,7 @@ type AstConnJsonCfg struct {
 	Password               *string
 	Connect_attempts       *int
 	Reconnects             *int
+	Ari_websocket          *bool
 	Max_reconnect_interval *string
 }
 
@@ -209,6 +216,9 @@ func diffAstConnJsonCfg(v1, v2 *AsteriskConnCfg) (d *AstConnJsonCfg) {
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
 	}
+	if v1.AriWebSocket != v2.AriWebSocket {
+		d.Ari_websocket = utils.BoolPointer(v2.AriWebSocket)
+	}
 	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
 		d.Max_reconnect_interval = utils.StringPointer(v2.MaxReconnectInterval.String())
 	}
@@ -226,6 +236,7 @@ func equalsAstConnJsonCfg(v1, v2 []*AsteriskConnCfg) bool {
 			v1[i].Password != v2[i].Password ||
 			v1[i].ConnectAttempts != v2[i].ConnectAttempts ||
 			v1[i].Reconnects != v2[i].Reconnects ||
+			v1[i].AriWebSocket != v2[i].AriWebSocket ||
 			v1[i].MaxReconnectInterval != v2[i].MaxReconnectInterval {
 			return false
 		}
