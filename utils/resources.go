@@ -361,11 +361,6 @@ func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ any, err error)
 	}
 }
 
-// ResourceProfileLockKey returns the ID used to lock a resourceProfile with guardian
-func ResourceProfileLockKey(tnt, id string) string {
-	return ConcatenatedKey(CacheResourceProfiles, tnt, id)
-}
-
 // ResourceLockKey returns the ID used to lock a resource with guardian
 func ResourceLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheResources, tnt, id)

@@ -190,8 +190,8 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 					},
 				},
 			},
-			rPrf: &resourceProfile{ResourceProfile: rsPrf},
-			ttl:  utils.DurationPointer(72 * time.Hour),
+			profile: rsPrf,
+			ttl:     utils.DurationPointer(72 * time.Hour),
 		},
 	}
 	var reply Resources
@@ -340,21 +340,19 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
 		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
+	rsPrf := &utils.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
 			},
-			Limit:    10,
-			UsageTTL: time.Minute,
 		},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -368,7 +366,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 		},
 		TTLIdx: []string{},
 	}
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -404,10 +402,10 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 				},
 				TTLIdx: []string{},
 			},
-			rPrf:   rsPrf,
-			dirty:  utils.BoolPointer(false),
-			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(time.Minute),
+			profile:    rsPrf,
+			dirty:      utils.BoolPointer(false),
+			totalUsage: utils.Float64Pointer(10),
+			ttl:        utils.DurationPointer(time.Minute),
 		},
 	}
 	engine.Cache.Set(context.Background(), utils.CacheRPCResponses, cacheKey,
@@ -500,10 +498,8 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 				},
 				TTLIdx: []string{},
 			},
-			ttl: utils.DurationPointer(72 * time.Hour),
-			rPrf: &resourceProfile{
-				ResourceProfile: rsPrf,
-			},
+			ttl:     utils.DurationPointer(72 * time.Hour),
+			profile: rsPrf,
 		},
 	}
 	var reply Resources
@@ -1435,23 +1431,21 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
+	rsPrf := &utils.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		AllocationMessage: "Approved",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
 			},
-			Limit:    -1,
-			UsageTTL: time.Minute,
 		},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
-	rs := &resource{
+	rs := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES1",
@@ -1464,13 +1458,13 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 			},
 			TTLIdx: []string{},
 		},
-		dirty:  utils.BoolPointer(false),
-		tUsage: utils.Float64Pointer(10),
-		ttl:    utils.DurationPointer(time.Minute),
-		rPrf:   rsPrf,
+		dirty:      utils.BoolPointer(false),
+		totalUsage: utils.Float64Pointer(10),
+		ttl:        utils.DurationPointer(time.Minute),
+		profile:    rsPrf,
 	}
 
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
 		t.Error(err)
 	}

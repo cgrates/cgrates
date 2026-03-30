@@ -33,81 +33,20 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// resourceProfile represents the user configuration for the resource
-type resourceProfile struct {
-	ResourceProfile *utils.ResourceProfile
-	lkID            string // holds the reference towards guardian lock key
-
-}
-
-// lock will lock the resourceProfile using guardian and store the lock within r.lkID
-// if lkID is passed as argument, the lock is considered as executed
-func (rp *resourceProfile) lock(lkID string) {
-	if lkID == utils.EmptyString {
-		lkID = guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.ResourceProfileLockKey(rp.ResourceProfile.Tenant, rp.ResourceProfile.ID))
-	}
-	rp.lkID = lkID
-}
-
-// unlock will unlock the resourceProfile and clear rp.lkID
-func (rp *resourceProfile) unlock() {
-	if rp.lkID == utils.EmptyString {
-		return
-	}
-	tmp := rp.lkID
-	rp.lkID = utils.EmptyString
-	guardian.Guardian.UnguardIDs(tmp)
-}
-
-// isLocked returns the locks status of this resourceProfile
-func (rp *resourceProfile) isLocked() bool {
-	return rp.lkID != utils.EmptyString
-}
-
-// resource represents a resource in the system
-// not thread safe, needs locking at process level
-type resource struct {
-	Resource *utils.Resource
-	lkID     string           // ID of the lock used when matching the resource
-	ttl      *time.Duration   // time to leave for this resource, picked up on each Resource initialization out of config
-	tUsage   *float64         // sum of all usages
-	dirty    *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
-	rPrf     *resourceProfile // for ordering purposes
-}
-
-// lock will lock the resource using guardian and store the lock within r.lkID
-// if lkID is passed as argument, the lock is considered as executed
-func (r *resource) lock(lkID string) {
-	if lkID == utils.EmptyString {
-		lkID = guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.ResourceLockKey(r.Resource.Tenant, r.Resource.ID))
-	}
-	r.lkID = lkID
-}
-
-// unlock will unlock the resource and clear r.lkID
-func (r *resource) unlock() {
-	if r.lkID == utils.EmptyString {
-		return
-	}
-	tmp := r.lkID
-	r.lkID = utils.EmptyString
-	guardian.Guardian.UnguardIDs(tmp)
-}
-
-// isLocked returns the locks status of this resource
-func (r *resource) isLocked() bool {
-	return r.lkID != utils.EmptyString
+// matchedResource holds a resource together with state set during matching.
+type matchedResource struct {
+	Resource   *utils.Resource
+	ttl        *time.Duration
+	totalUsage *float64
+	dirty      *bool // the usages were modified, needs save, *bool so we only save if enabled in config
+	profile    *utils.ResourceProfile
 }
 
 // removeExpiredUnits removes units which are expired from the resource
-func (r *resource) removeExpiredUnits() {
+func (r *matchedResource) removeExpiredUnits() {
 	var firstActive int
 	for _, rID := range r.Resource.TTLIdx {
-		if r, has := r.Resource.Usages[rID]; has && r.IsActive(time.Now()) {
+		if ru, has := r.Resource.Usages[rID]; has && ru.IsActive(time.Now()) {
 			break
 		}
 		firstActive++
@@ -121,43 +60,43 @@ func (r *resource) removeExpiredUnits() {
 			continue
 		}
 		delete(r.Resource.Usages, rID)
-		if r.tUsage != nil { //  total usage was not yet calculated so we do not need to update it
-			*r.tUsage -= ru.Units
-			if *r.tUsage < 0 { // something went wrong
+		if r.totalUsage != nil { //  total usage was not yet calculated so we do not need to update it
+			*r.totalUsage -= ru.Units
+			if *r.totalUsage < 0 { // something went wrong
 				utils.Logger.Warning(
-					fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.Resource.ID, *r.tUsage))
-				r.tUsage = nil
+					fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.Resource.ID, *r.totalUsage))
+				r.totalUsage = nil
 			}
 		}
 	}
 	r.Resource.TTLIdx = r.Resource.TTLIdx[firstActive:]
-	r.tUsage = nil
+	r.totalUsage = nil
 }
 
 // recordUsage records a new usage
-func (r *resource) recordUsage(ru *utils.ResourceUsage) (err error) {
+func (r *matchedResource) recordUsage(ru *utils.ResourceUsage) error {
 	if _, hasID := r.Resource.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
 	if r.ttl != nil && *r.ttl != -1 {
 		if *r.ttl == 0 {
-			return // no recording for ttl of 0
+			return nil // no recording for ttl of 0
 		}
 		ru = ru.Clone() // don't influence the initial ru
 		ru.ExpiryTime = time.Now().Add(*r.ttl)
 	}
 	r.Resource.Usages[ru.ID] = ru
-	if r.tUsage != nil {
-		*r.tUsage += ru.Units
+	if r.totalUsage != nil {
+		*r.totalUsage += ru.Units
 	}
 	if !ru.ExpiryTime.IsZero() {
 		r.Resource.TTLIdx = append(r.Resource.TTLIdx, ru.ID)
 	}
-	return
+	return nil
 }
 
 // clearUsage clears the usage for an ID
-func (r *resource) clearUsage(ruID string) (err error) {
+func (r *matchedResource) clearUsage(ruID string) error {
 	ru, hasIt := r.Resource.Usages[ruID]
 	if !hasIt {
 		return fmt.Errorf("cannot find usage record with id: %s", ruID)
@@ -170,29 +109,19 @@ func (r *resource) clearUsage(ruID string) (err error) {
 			}
 		}
 	}
-	if r.tUsage != nil {
-		*r.tUsage -= ru.Units
+	if r.totalUsage != nil {
+		*r.totalUsage -= ru.Units
 	}
 	delete(r.Resource.Usages, ruID)
-	return
+	return nil
 }
 
-// Resources is a collection of Resource objects.
-type Resources []*resource
-
-// unlock will unlock resources part of this slice
-func (rs Resources) unlock() {
-	for _, r := range rs {
-		r.unlock()
-		if r.rPrf != nil {
-			r.rPrf.unlock()
-		}
-	}
-}
+// Resources is a collection of matchedResource objects.
+type Resources []*matchedResource
 
 // resIDsMp returns a map of resource IDs which is used for caching
-func (rs Resources) resIDsMp() (mp utils.StringSet) {
-	mp = make(utils.StringSet)
+func (rs Resources) resIDsMp() utils.StringSet {
+	mp := make(utils.StringSet)
 	for _, r := range rs {
 		mp.Add(r.Resource.ID)
 	}
@@ -200,8 +129,9 @@ func (rs Resources) resIDsMp() (mp utils.StringSet) {
 }
 
 // recordUsage will record the usage in all the resource limits, failing back on errors
-func (rs Resources) recordUsage(ru *utils.ResourceUsage) (err error) {
+func (rs Resources) recordUsage(ru *utils.ResourceUsage) error {
 	var nonReservedIdx int // index of first resource not reserved
+	var err error
 	for _, r := range rs {
 		if err = r.recordUsage(ru); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s>cannot record usage, err: %s", utils.ResourceS, err.Error()))
@@ -216,11 +146,12 @@ func (rs Resources) recordUsage(ru *utils.ResourceUsage) (err error) {
 			} // best effort
 		}
 	}
-	return
+	return err
 }
 
 // clearUsage gives back the units to the pool
-func (rs Resources) clearUsage(ruTntID string) (err error) {
+func (rs Resources) clearUsage(ruTntID string) error {
+	var err error
 	for _, r := range rs {
 		if errClear := r.clearUsage(ruTntID); errClear != nil &&
 			r.ttl != nil && *r.ttl != 0 { // we only consider not found error in case of ttl different than 0
@@ -228,40 +159,34 @@ func (rs Resources) clearUsage(ruTntID string) (err error) {
 			err = errClear
 		}
 	}
-	return
+	return err
 }
 
 // allocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
-func (rs Resources) allocateResource(ru *utils.ResourceUsage, dryRun bool) (alcMessage string, err error) {
+func (rs Resources) allocateResource(ru *utils.ResourceUsage, dryRun bool) (allocMsg string, err error) {
 	if len(rs) == 0 {
 		return "", utils.ErrResourceUnavailable
 	}
-	// Simulate resource usage
 	for _, r := range rs {
 		r.removeExpiredUnits()
 		if _, hasID := r.Resource.Usages[ru.ID]; hasID && !dryRun { // update
-			r.clearUsage(ru.ID) // clearUsage returns error only when ru.ID does not exist in the Usages map
+			_ = r.clearUsage(ru.ID) // can't fail: we just checked hasID
 		}
-		if r.rPrf == nil {
-			err = fmt.Errorf("empty configuration for resourceID: %s", r.Resource.TenantID())
-			return
-		}
-		if alcMessage == utils.EmptyString &&
-			(r.rPrf.ResourceProfile.Limit >= r.Resource.TotalUsage()+ru.Units || r.rPrf.ResourceProfile.Limit == -1) {
-			alcMessage = utils.FirstNonEmpty(r.rPrf.ResourceProfile.AllocationMessage, r.rPrf.ResourceProfile.ID)
+		if allocMsg == "" &&
+			(r.profile.Limit >= r.Resource.TotalUsage()+ru.Units || r.profile.Limit == -1) {
+			allocMsg = utils.FirstNonEmpty(r.profile.AllocationMessage, r.profile.ID)
 		}
 	}
-	if alcMessage == "" {
-		err = utils.ErrResourceUnavailable
-		return
+	if allocMsg == "" {
+		return "", utils.ErrResourceUnavailable
 	}
 	if dryRun {
-		return
+		return allocMsg, nil
 	}
-	rs.recordUsage(ru) // recordUsage returns error only when ru.ID already exists in the Usages map
-	return
+	_ = rs.recordUsage(ru) // can't error: dup check already cleared above
+	return allocMsg, nil
 }
 
 // NewResourceService  returns a new ResourceService
@@ -345,19 +270,20 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
 			continue
 		}
-		r := &resource{
+		r := &matchedResource{
 			Resource: rIf.(*utils.Resource),
-
 			// NOTE: dirty is hardcoded to true, otherwise resources would
 			// never be stored.
 			// Previously, dirty was part of the cached resource.
 			dirty: utils.BoolPointer(true),
 		}
-		r.lock(utils.EmptyString)
+		lkID := guardian.Guardian.GuardIDs("",
+			rS.cfg.GeneralCfg().LockingTimeout,
+			utils.ResourceLockKey(r.Resource.Tenant, r.Resource.ID))
 		if err := rS.storeResource(ctx, r); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
 		}
-		r.unlock()
+		guardian.Guardian.UnguardIDs(lkID)
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -369,34 +295,34 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 }
 
 // StoreResource stores the resource in DB and corrects dirty flag
-func (rS *ResourceS) storeResource(ctx *context.Context, r *resource) (err error) {
+func (rS *ResourceS) storeResource(ctx *context.Context, r *matchedResource) error {
 	if r.dirty == nil || !*r.dirty {
-		return
+		return nil
 	}
-	if err = rS.dm.SetResource(ctx, r.Resource); err != nil {
+	if err := rS.dm.SetResource(ctx, r.Resource); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.Resource.ID, err.Error()))
-		return
+		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
 	if tntID := r.Resource.TenantID(); engine.Cache.HasItem(utils.CacheResources, tntID) { // only cache if previously there
-		if err = engine.Cache.Set(ctx, utils.CacheResources, tntID, r.Resource, nil,
+		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r.Resource, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> failed caching Resource with ID: %s, error: %s",
 					tntID, err.Error()))
-			return
+			return err
 		}
 	}
 	*r.dirty = false
-	return
+	return nil
 }
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
-func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources) (err error) {
+func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources) error {
 	if rS.cfg.ResourceSCfg().StoreInterval == 0 {
-		return
+		return nil
 	}
 	if rS.cfg.ResourceSCfg().StoreInterval > 0 {
 		rS.srMux.Lock()
@@ -409,20 +335,23 @@ func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resource
 				rS.storedResources.Add(r.Resource.TenantID())
 				continue
 			}
-			if err = rS.storeResource(ctx, r); err != nil {
-				return
+			if err := rS.storeResource(ctx, r); err != nil {
+				return err
 			}
 		}
 
 	}
-	return
+	return nil
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) (err error) {
+func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) error {
 	threshConns, err := engine.GetConnIDs(ctx, rS.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, rS.fltrS)
+	if err != nil {
+		return err
+	}
 	if len(threshConns) == 0 {
-		return
+		return nil
 	}
 	if opts == nil {
 		opts = make(map[string]any)
@@ -431,11 +360,11 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 
 	var withErrs bool
 	for _, r := range rs {
-		if len(r.rPrf.ResourceProfile.ThresholdIDs) == 1 &&
-			r.rPrf.ResourceProfile.ThresholdIDs[0] == utils.MetaNone {
+		if len(r.profile.ThresholdIDs) == 1 &&
+			r.profile.ThresholdIDs[0] == utils.MetaNone {
 			continue
 		}
-		opts[utils.OptsThresholdsProfileIDs] = r.rPrf.ResourceProfile.ThresholdIDs
+		opts[utils.OptsThresholdsProfileIDs] = r.profile.ThresholdIDs
 
 		thEv := &utils.CGREvent{
 			Tenant: r.Resource.Tenant,
@@ -450,7 +379,7 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 		var tIDs []string
 		if err := rS.connMgr.Call(ctx, threshConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			(len(r.rPrf.ResourceProfile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
+			(len(r.profile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with %s.",
 					utils.ResourceS, err.Error(), thEv, utils.ThresholdS))
@@ -458,14 +387,22 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 		}
 	}
 	if withErrs {
-		err = utils.ErrPartiallyExecuted
+		return utils.ErrPartiallyExecuted
 	}
-	return
+	return nil
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
-	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
+	evUUID string, usageTTL *time.Duration) (rs Resources, unlock func(), err error) {
+
+	var lockIDs []string
+	unlockAll := func() {
+		for _, lkID := range lockIDs {
+			guardian.Guardian.UnguardIDs(lkID)
+		}
+	}
+
 	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -473,7 +410,7 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 	}
 	if x, ok := engine.Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		if x == nil {
-			return nil, utils.ErrNotFound
+			return nil, nil, utils.ErrNotFound
 		}
 		rIDs = x.(utils.StringSet)
 		defer func() { // make sure we uncache if we find errors
@@ -502,93 +439,97 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 		if err != nil {
 			if err == utils.ErrNotFound {
 				if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
-					return nil, errCh
+					return nil, nil, errCh
 				}
 			}
-			return
+			return nil, nil, err
 		}
 	}
 	rs = make(Resources, 0, len(rIDs))
 	weights := make(map[string]float64) // stores sorting weights by resource ID
 	for resName := range rIDs {
-		lkPrflID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.ResourceProfileLockKey(tnt, resName))
-		var rp *utils.ResourceProfile
-		if rp, err = rS.dm.GetResourceProfile(ctx, tnt, resName,
-			true, true, utils.NonTransactional); err != nil {
-			guardian.Guardian.UnguardIDs(lkPrflID)
+		lkID := guardian.Guardian.GuardIDs("",
+			rS.cfg.GeneralCfg().LockingTimeout,
+			utils.ResourceLockKey(tnt, resName))
+
+		rp, err := rS.dm.GetResourceProfile(ctx, tnt, resName,
+			true, true, utils.NonTransactional)
+		if err != nil {
+			guardian.Guardian.UnguardIDs(lkID)
 			if err == utils.ErrNotFound {
 				continue
 			}
-			rs.unlock()
-			return
+			unlockAll()
+			return nil, nil, err
 		}
-		rPrf := &resourceProfile{
-			ResourceProfile: rp,
+
+		pass, err := rS.fltrS.Pass(ctx, tnt, rp.FilterIDs, evNm)
+		if err != nil {
+			guardian.Guardian.UnguardIDs(lkID)
+			unlockAll()
+			return nil, nil, err
 		}
-		rPrf.lock(lkPrflID)
-		var pass bool
-		if pass, err = rS.fltrS.Pass(ctx, tnt, rPrf.ResourceProfile.FilterIDs,
-			evNm); err != nil {
-			rPrf.unlock()
-			rs.unlock()
-			return nil, err
-		} else if !pass {
-			rPrf.unlock()
+		if !pass {
+			guardian.Guardian.UnguardIDs(lkID)
 			continue
 		}
-		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.ResourceLockKey(rPrf.ResourceProfile.Tenant, rPrf.ResourceProfile.ID))
-		var res *utils.Resource
-		if res, err = rS.dm.GetResource(ctx, rPrf.ResourceProfile.Tenant, rPrf.ResourceProfile.ID, true, true, ""); err != nil {
+
+		res, err := rS.dm.GetResource(ctx, rp.Tenant, rp.ID, true, true, "")
+		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
-			rPrf.unlock()
-			rs.unlock()
-			return nil, err
+			unlockAll()
+			return nil, nil, err
 		}
-		r := &resource{
+
+		weight, err := engine.WeightFromDynamics(ctx, rp.Weights, rS.fltrS, tnt, evNm)
+		if err != nil {
+			guardian.Guardian.UnguardIDs(lkID)
+			unlockAll()
+			return nil, nil, err
+		}
+
+		lockIDs = append(lockIDs, lkID)
+
+		r := &matchedResource{
 			Resource: res,
+			profile:  rp,
 		}
-		r.lock(lkID) // pass the lock into resource so we have it as reference
-		if rPrf.ResourceProfile.Stored && r.dirty == nil {
+		if rp.Stored && r.dirty == nil {
 			r.dirty = utils.BoolPointer(false)
 		}
 		if usageTTL != nil {
 			if *usageTTL != 0 {
 				r.ttl = usageTTL
 			}
-		} else if rPrf.ResourceProfile.UsageTTL >= 0 {
-			r.ttl = utils.DurationPointer(rPrf.ResourceProfile.UsageTTL)
-		}
-		r.rPrf = rPrf
-		weight, err := engine.WeightFromDynamics(ctx, rPrf.ResourceProfile.Weights, rS.fltrS, tnt, evNm)
-		if err != nil {
-			return nil, err
+		} else if rp.UsageTTL >= 0 {
+			r.ttl = utils.DurationPointer(rp.UsageTTL)
 		}
 		weights[r.Resource.ID] = weight
 		rs = append(rs, r)
 	}
 
 	if len(rs) == 0 {
-		return nil, utils.ErrNotFound
+		unlockAll()
+		return nil, nil, utils.ErrNotFound
 	}
 
 	// Sort by weight (higher values first).
-	slices.SortFunc(rs, func(a, b *resource) int {
+	slices.SortFunc(rs, func(a, b *matchedResource) int {
 		return cmp.Compare(weights[b.Resource.ID], weights[a.Resource.ID])
 	})
 
 	for i, r := range rs {
-		if r.rPrf.ResourceProfile.Blocker && i != len(rs)-1 { // blocker will stop processing and we are not at last index
-			Resources(rs[i+1:]).unlock()
+		if r.profile.Blocker && i != len(rs)-1 { // blocker will stop processing and we are not at last index
+			for _, lkID := range lockIDs[i+1:] {
+				guardian.Guardian.UnguardIDs(lkID)
+			}
+			lockIDs = lockIDs[:i+1]
 			rs = rs[:i+1]
 			break
 		}
 	}
-	if err = engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); err != nil {
-		rs.unlock()
+	if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); errCh != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> failed caching event resources: %s", utils.ResourceS, errCh.Error()))
 	}
-	return
+	return rs, unlockAll, nil
 }

@@ -632,18 +632,6 @@ func TestMapStringInterfaceToResource(t *testing.T) {
 	}
 }
 
-func TestResourceProfileLockKey(t *testing.T) {
-	tnt := "cgrates.org"
-	id := "RP1"
-
-	exp := ConcatenatedKey(CacheResourceProfiles, tnt, id)
-	got := ResourceProfileLockKey(tnt, id)
-
-	if exp != got {
-		t.Errorf("ResourceProfileLockKey mismatch\nexp=%v\ngot=%v", exp, got)
-	}
-}
-
 func TestResourceLockKey(t *testing.T) {
 	tnt := "cgrates.org"
 	id := "RES1"
