@@ -560,6 +560,7 @@ type AsteriskConnCfg struct {
 	Password        string
 	ConnectAttempts int
 	Reconnects      int
+	AriWebSocket    bool
 }
 
 func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
@@ -584,6 +585,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.Ari_websocket != nil {
+		aConnCfg.AriWebSocket = *jsnCfg.Ari_websocket
+	}
 	return nil
 }
 
@@ -595,6 +599,7 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
 		utils.Password:           aConnCfg.Password,
 		utils.ConnectAttemptsCfg: aConnCfg.ConnectAttempts,
 		utils.ReconnectsCfg:      aConnCfg.Reconnects,
+		utils.AriWebSocketCfg:    aConnCfg.AriWebSocket,
 	}
 }
 

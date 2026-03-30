@@ -509,7 +509,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		"create_cdr":             false,
 		utils.AlterableFieldsCfg: []string{"field1", "field2"},
 		"asterisk_conns": []map[string]any{
-			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
+			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "ari_websocket": false, "reconnects": 5},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

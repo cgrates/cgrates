@@ -25,8 +25,8 @@ github.com/cenkalti/hub v1.0.2/go.mod h1:8LAFAZcCasb83vfxatMUnZHRoQcffho2ELpHb+k
 github.com/cenkalti/rpc2 v1.0.3 h1:OkMsNP/sP9seN1VRCLqhX1xkVGHPoLwWS6fZR14Ji/k=
 github.com/cenkalti/rpc2 v1.0.3/go.mod h1:2yfU5b86vOr16+iY1jN3MvT6Kxc9Nf8j5iZWwUf7iaw=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
-github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e h1:jbScwE0ebeCBD9CsuCfqMv2oC2KUf+FxEePBxAaF1cQ=
-github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e/go.mod h1:v+wPvWvfle06wQ7WBJZGXvrF+CWA0CrReh+c3PuXaAU=
+github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb h1:pjaGbI9TD/e24XRQZpdgv7ke5lq6OEYKcl7Vb59HTXY=
+github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb/go.mod h1:3ekcTdjvTk8jqEA/2BufAxQS6E6nHnWke1WQ2XHtjFg=
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFrewWaar/JkXYiDgO7gRw/R1zWITxEw=
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5NcAOjdRyX0v76ZFkolu3X70fbs=
@@ -43,6 +43,8 @@ github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e h1:rwvvB0F9WZNmB
 github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e/go.mod h1:WxTEIJvgI4c3eiPWW0WeAhHGd49Oi1Voe9lahotJiNo=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
+github.com/coder/websocket v1.8.14 h1:9L0p0iKiNOibykf283eHkKUHHrpG7f65OE3BhhO7v9g=
+github.com/coder/websocket v1.8.14/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/creack/pty v1.1.23 h1:4M6+isWdcStXEf15G/RbrMPOQj1dZ7HPZCGwE4kOeP0=
 github.com/creack/pty v1.1.23/go.mod h1:08sCNb52WyoAwi2QDyzUCTgcvVFhUzewun7wtTfvcwE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -1619,6 +1619,7 @@ const (
 	DefaultCachingCfg     = "default_caching"
 	ConnectAttemptsCfg    = "connect_attempts"
 	ReconnectsCfg         = "reconnects"
+	AriWebSocketCfg       = "ari_websocket"
 	ConnectTimeoutCfg     = "connect_timeout"
 	ReplyTimeoutCfg       = "reply_timeout"
 	LockingTimeoutCfg     = "locking_timeout"
