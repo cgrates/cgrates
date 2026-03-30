@@ -10,7 +10,7 @@ require (
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/rpc2 v1.0.3
-	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
+	github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf
@@ -46,6 +46,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/antchfx/xpath v1.3.1 // indirect
 	github.com/cenkalti/hub v1.0.2 // indirect
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
