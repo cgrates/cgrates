@@ -66,7 +66,7 @@ func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
 }
 
 func TestResourcesRecordUsage(t *testing.T) {
-	testStruct := &resource{
+	testStruct := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
@@ -86,7 +86,7 @@ func TestResourcesRecordUsage(t *testing.T) {
 		ExpiryTime: time.Date(2016, 1, 14, 0, 0, 0, 0, time.UTC),
 		Units:      1,
 	}
-	expStruct := resource{
+	expStruct := matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
@@ -116,7 +116,7 @@ func TestResourcesRecordUsage(t *testing.T) {
 }
 
 func TestResourcesClearUsage(t *testing.T) {
-	testStruct := &resource{
+	testStruct := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
@@ -136,7 +136,7 @@ func TestResourcesClearUsage(t *testing.T) {
 			},
 		},
 	}
-	expStruct := resource{
+	expStruct := matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
@@ -160,7 +160,7 @@ func TestResourcesClearUsage(t *testing.T) {
 }
 
 func TestResourceRecordUsage(t *testing.T) {
-	var r1 *resource
+	var r1 *matchedResource
 	var ru1 *utils.ResourceUsage
 	var ru2 *utils.ResourceUsage
 	ru1 = &utils.ResourceUsage{
@@ -177,7 +177,7 @@ func TestResourceRecordUsage(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 = &resource{
+	r1 = &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -186,23 +186,21 @@ func TestResourceRecordUsage(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -214,14 +212,14 @@ func TestResourceRecordUsage(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
 }
 
 func TestResourceRemoveExpiredUnits(t *testing.T) {
-	var r1 *resource
+	var r1 *matchedResource
 	var ru1 *utils.ResourceUsage
 	var ru2 *utils.ResourceUsage
 	ru1 = &utils.ResourceUsage{
@@ -238,7 +236,7 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 = &resource{
+	r1 = &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -247,23 +245,21 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -275,14 +271,14 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
-	*r1.tUsage = 2
+	*r1.totalUsage = 2
 
 	r1.removeExpiredUnits()
 
@@ -292,8 +288,8 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 	if len(r1.Resource.TTLIdx) != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.TTLIdx))
 	}
-	if r1.tUsage != nil && *r1.tUsage != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, r1.tUsage)
+	if r1.totalUsage != nil && *r1.totalUsage != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, r1.totalUsage)
 	}
 }
 func TestResourceUsedUnits(t *testing.T) {
@@ -311,7 +307,7 @@ func TestResourceUsedUnits(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 := &resource{
+	r1 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -320,23 +316,21 @@ func TestResourceUsedUnits(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -348,14 +342,14 @@ func TestResourceUsedUnits(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
-	r1.tUsage = nil
+	r1.totalUsage = nil
 	if usedUnits := r1.Resource.TotalUsage(); usedUnits != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, usedUnits)
 	}
@@ -376,7 +370,7 @@ func TestResourceClearUsage(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 := &resource{
+	r1 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -385,23 +379,21 @@ func TestResourceClearUsage(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -413,11 +405,11 @@ func TestResourceClearUsage(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
-	r2 := &resource{
+	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL2",
@@ -426,39 +418,37 @@ func TestResourceClearUsage(t *testing.T) {
 				ru2.ID: ru2,
 			},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				ID:        "RL2",
-				FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 50,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
-				UsageTTL:     time.Millisecond,
-			},
+		profile: &utils.ResourceProfile{
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Millisecond,
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
-	r1.tUsage = nil
+	r1.totalUsage = nil
 	r1.clearUsage(ru1.ID)
 	if len(r1.Resource.Usages) != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.Usages))
 	}
 	if r1.Resource.TotalUsage() != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, r1.tUsage)
+		t.Errorf("Expecting: %+v, received: %+v", 0, r1.totalUsage)
 	}
 	if err := r2.clearUsage(ru2.ID); err != nil {
 		t.Error(err)
 	} else if len(r2.Resource.Usages) != 0 {
 		t.Errorf("Unexpected usages %+v", r2.Resource.Usages)
-	} else if *r2.tUsage != 0 {
-		t.Errorf("Unexpected tUsage %+v", r2.tUsage)
+	} else if *r2.totalUsage != 0 {
+		t.Errorf("Unexpected totalUsage %+v", r2.totalUsage)
 	}
 }
 func TestResourceRecordUsages(t *testing.T) {
@@ -476,7 +466,7 @@ func TestResourceRecordUsages(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 := &resource{
+	r1 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -485,23 +475,21 @@ func TestResourceRecordUsages(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -513,11 +501,11 @@ func TestResourceRecordUsages(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
-	r2 := &resource{
+	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL2",
@@ -526,20 +514,18 @@ func TestResourceRecordUsages(t *testing.T) {
 				ru2.ID: ru2,
 			},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				ID:        "RL2",
-				FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 50,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
-				UsageTTL:     time.Millisecond,
-			},
+		profile: &utils.ResourceProfile{
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Millisecond,
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	rs := Resources{r2, r1}
@@ -549,7 +535,7 @@ func TestResourceRecordUsages(t *testing.T) {
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
-	r1.tUsage = nil
+	r1.totalUsage = nil
 	if err := rs.recordUsage(ru1); err == nil {
 		t.Error("should get duplicated error")
 	}
@@ -569,7 +555,7 @@ func TestResourceAllocateResource(t *testing.T) {
 		Units:      2,
 	}
 
-	r1 := &resource{
+	r1 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
@@ -578,23 +564,21 @@ func TestResourceAllocateResource(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL1",
-				FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 100,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-				UsageTTL:          time.Millisecond,
-				AllocationMessage: "ALLOC",
-			},
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -606,11 +590,11 @@ func TestResourceAllocateResource(t *testing.T) {
 		if _, found := r1.Resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
+		if *r1.totalUsage != 4 {
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.totalUsage)
 		}
 	}
-	r2 := &resource{
+	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL2",
@@ -619,20 +603,18 @@ func TestResourceAllocateResource(t *testing.T) {
 				ru2.ID: ru2,
 			},
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				ID:        "RL2",
-				FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 50,
-					}},
-				Limit:        2,
-				ThresholdIDs: []string{"TEST_ACTIONS"},
-				UsageTTL:     time.Millisecond,
-			},
+		profile: &utils.ResourceProfile{
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Millisecond,
 		},
-		tUsage: utils.Float64Pointer(2),
+		totalUsage: utils.Float64Pointer(2),
 	}
 
 	rs := Resources{r1, r2}
@@ -642,7 +624,7 @@ func TestResourceAllocateResource(t *testing.T) {
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
-	r1.tUsage = nil
+	r1.totalUsage = nil
 	if err := rs.recordUsage(ru1); err == nil {
 		t.Error("should get duplicated error")
 	}
@@ -660,8 +642,8 @@ func TestResourceAllocateResource(t *testing.T) {
 	if _, err := rs.allocateResource(ru2, false); err != utils.ErrResourceUnavailable {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
-	rs[0].rPrf.ResourceProfile.Limit = 1
-	rs[1].rPrf.ResourceProfile.Limit = 4
+	rs[0].profile.Limit = 1
+	rs[1].profile.Limit = 4
 	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
@@ -863,7 +845,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 }
 
-func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resources, []*utils.CGREvent) {
+func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, Resources, []*utils.CGREvent) {
 	t.Helper()
 	rS, dm := newTestResourceS(t)
 	engine.Cache.Clear(nil)
@@ -897,8 +879,8 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 		},
 	}, true)
 
-	prfs := []*resourceProfile{
-		{ResourceProfile: &utils.ResourceProfile{
+	prfs := []*utils.ResourceProfile{
+		{
 			Tenant:            tenant,
 			ID:                "ResourceProfile1",
 			FilterIDs:         []string{"FLTR_RES_1", "*ai:*now:2014-07-14T14:25:00Z"},
@@ -907,8 +889,8 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 			AllocationMessage: "AllocationMessage",
 			Weights:           utils.DynamicWeights{{Weight: 20}},
 			ThresholdIDs:      []string{""},
-		}},
-		{ResourceProfile: &utils.ResourceProfile{
+		},
+		{
 			Tenant:            tenant,
 			ID:                "ResourceProfile2",
 			FilterIDs:         []string{"FLTR_RES_2", "*ai:*now:2014-07-14T14:25:00Z"},
@@ -917,8 +899,8 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 			AllocationMessage: "AllocationMessage",
 			Weights:           utils.DynamicWeights{{Weight: 20}},
 			ThresholdIDs:      []string{""},
-		}},
-		{ResourceProfile: &utils.ResourceProfile{
+		},
+		{
 			Tenant:            tenant,
 			ID:                "ResourceProfile3",
 			FilterIDs:         []string{"FLTR_RES_3", "*ai:*now:2014-07-14T14:25:00Z"},
@@ -927,7 +909,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 			AllocationMessage: "AllocationMessage",
 			Weights:           utils.DynamicWeights{{Weight: 20}},
 			ThresholdIDs:      []string{""},
-		}},
+		},
 	}
 
 	resources := Resources{
@@ -938,7 +920,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 				Usages: map[string]*utils.ResourceUsage{},
 				TTLIdx: []string{},
 			},
-			rPrf: prfs[0],
+			profile: prfs[0],
 		},
 		{
 			Resource: &utils.Resource{
@@ -947,7 +929,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 				Usages: map[string]*utils.ResourceUsage{},
 				TTLIdx: []string{},
 			},
-			rPrf: prfs[1],
+			profile: prfs[1],
 		},
 		{
 			Resource: &utils.Resource{
@@ -956,7 +938,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 				Usages: map[string]*utils.ResourceUsage{},
 				TTLIdx: []string{},
 			},
-			rPrf: prfs[2],
+			profile: prfs[2],
 		},
 	}
 
@@ -997,7 +979,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*resourceProfile, Resourc
 	}
 
 	for _, prf := range prfs {
-		dm.SetResourceProfile(context.TODO(), prf.ResourceProfile, true)
+		dm.SetResourceProfile(context.TODO(), prf, true)
 	}
 	for _, res := range resources {
 		dm.SetResource(context.TODO(), res.Resource)
@@ -1009,19 +991,19 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	rS, _, resources, events := newTestMatchingSetup(t)
 	ttl := 10 * time.Second
 	for i, ev := range events {
-		mres, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
+		mres, unlock, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
 			fmt.Sprintf("TestResourceMatchingResourcesForEvent%d", i+1), &ttl)
 		if err != nil {
 			t.Errorf("Event %d error: %+v", i, err)
 			continue
 		}
-		mres.unlock()
+		unlock()
 		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
 			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
 		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
 			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
-		} else if !reflect.DeepEqual(resources[i].rPrf, mres[0].rPrf) {
-			t.Errorf("Event %d rPrf: expecting %+v, received %+v", i, resources[i].rPrf, mres[0].rPrf)
+		} else if !reflect.DeepEqual(resources[i].profile, mres[0].profile) {
+			t.Errorf("Event %d profile: expecting %+v, received %+v", i, resources[i].profile, mres[0].profile)
 		}
 	}
 }
@@ -1061,23 +1043,23 @@ func TestResourceUsageTTL(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			rS, prfs, _, events := newTestMatchingSetup(t)
-			prfs[0].ResourceProfile.UsageTTL = tc.profileTTL
-			rS.dm.SetResourceProfile(context.TODO(), prfs[0].ResourceProfile, true)
+			prfs[0].UsageTTL = tc.profileTTL
+			rS.dm.SetResourceProfile(context.TODO(), prfs[0], true)
 
-			mres, err := rS.matchingResourcesForEvent(context.TODO(), events[0].Tenant, events[0],
+			mres, unlock, err := rS.matchingResourcesForEvent(context.TODO(), events[0].Tenant, events[0],
 				"TestResourceUsageTTL_"+tc.name, tc.duration)
 			if err != nil {
 				t.Fatalf("Error: %+v", err)
 			}
-			mres.unlock()
-			if mres[0].Resource.Tenant != prfs[0].ResourceProfile.Tenant {
-				t.Errorf("Tenant: expecting %+v, received %+v", prfs[0].ResourceProfile.Tenant, mres[0].Resource.Tenant)
+			unlock()
+			if mres[0].Resource.Tenant != prfs[0].Tenant {
+				t.Errorf("Tenant: expecting %+v, received %+v", prfs[0].Tenant, mres[0].Resource.Tenant)
 			}
-			if mres[0].Resource.ID != prfs[0].ResourceProfile.ID {
-				t.Errorf("ID: expecting %+v, received %+v", prfs[0].ResourceProfile.ID, mres[0].Resource.ID)
+			if mres[0].Resource.ID != prfs[0].ID {
+				t.Errorf("ID: expecting %+v, received %+v", prfs[0].ID, mres[0].Resource.ID)
 			}
-			if !reflect.DeepEqual(mres[0].rPrf, prfs[0]) {
-				t.Errorf("rPrf: expecting %+v, received %+v", prfs[0], mres[0].rPrf)
+			if !reflect.DeepEqual(mres[0].profile, prfs[0]) {
+				t.Errorf("profile: expecting %+v, received %+v", prfs[0], mres[0].profile)
 			}
 			if !reflect.DeepEqual(tc.wantTTL, mres[0].ttl) {
 				t.Errorf("TTL: expecting %+v, received %+v", tc.wantTTL, mres[0].ttl)
@@ -1103,19 +1085,19 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	rS.cfg.ResourceSCfg().IndexedSelects = false
 	ttl := 10 * time.Second
 	for i, ev := range events {
-		mres, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
+		mres, unlock, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
 			fmt.Sprintf("TestResourceMatchWithIndexFalse%d", i+1), &ttl)
 		if err != nil {
 			t.Errorf("Event %d error: %+v", i, err)
 			continue
 		}
-		mres.unlock()
+		unlock()
 		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
 			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
 		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
 			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
-		} else if !reflect.DeepEqual(resources[i].rPrf, mres[0].rPrf) {
-			t.Errorf("Event %d rPrf: expecting %+v, received %+v", i, resources[i].rPrf, mres[0].rPrf)
+		} else if !reflect.DeepEqual(resources[i].profile, mres[0].profile) {
+			t.Errorf("Event %d profile: expecting %+v, received %+v", i, resources[i].profile, mres[0].profile)
 		}
 	}
 }
@@ -1171,7 +1153,7 @@ func TestResourceCaching(t *testing.T) {
 	resources := Resources{
 		{
 			Resource: res,
-			rPrf:     &resourceProfile{ResourceProfile: resProf},
+			profile:  resProf,
 		},
 	}
 	if err := engine.Cache.Set(context.TODO(), utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
@@ -1186,18 +1168,18 @@ func TestResourceCaching(t *testing.T) {
 			"Destination": "3002"},
 	}
 
-	mres, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
+	mres, unlock, err := rS.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
 		"TestResourceCaching", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	mres.unlock()
+	unlock()
 	if !reflect.DeepEqual(resources[0].Resource.Tenant, mres[0].Resource.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].Resource.Tenant, mres[0].Resource.Tenant)
 	} else if !reflect.DeepEqual(resources[0].Resource.ID, mres[0].Resource.ID) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].Resource.ID, mres[0].Resource.ID)
-	} else if !reflect.DeepEqual(resources[0].rPrf, mres[0].rPrf) {
-		t.Errorf("Expecting: %+v, received: %+v", resources[0].rPrf, mres[0].rPrf)
+	} else if !reflect.DeepEqual(resources[0].profile, mres[0].profile) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].profile, mres[0].profile)
 	} else if !reflect.DeepEqual(resources[0].ttl, mres[0].ttl) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].ttl, mres[0].ttl)
 	}
@@ -1211,7 +1193,7 @@ func TestResourcesRemoveExpiredUnitsResetTotalUsage(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			TTLIdx: []string{"ResGroup1", "ResGroup2", "ResGroup3"},
 			Usages: map[string]*utils.ResourceUsage{
@@ -1227,10 +1209,10 @@ func TestResourcesRemoveExpiredUnitsResetTotalUsage(t *testing.T) {
 				},
 			},
 		},
-		tUsage: utils.Float64Pointer(10),
+		totalUsage: utils.Float64Pointer(10),
 	}
 
-	exp := &resource{
+	exp := &matchedResource{
 		Resource: &utils.Resource{
 			TTLIdx: []string{"ResGroup3"},
 			Usages: map[string]*utils.ResourceUsage{
@@ -1281,7 +1263,7 @@ func TestResourcesAvailable(t *testing.T) {
 }
 
 func TestResourcesRecordUsageZeroTTL(t *testing.T) {
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
@@ -1304,7 +1286,7 @@ func TestResourcesRecordUsageZeroTTL(t *testing.T) {
 }
 
 func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
@@ -1321,7 +1303,7 @@ func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
 		ID:     "RU_2",
 	}
 
-	exp := &resource{
+	exp := &matchedResource{
 		Resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
@@ -1532,45 +1514,6 @@ func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
 	}
 }
 
-func TestResourcesAllocateResourceEmptyConfiguration(t *testing.T) {
-	rs := Resources{
-		{
-			Resource: &utils.Resource{
-				Usages: map[string]*utils.ResourceUsage{
-					"RU_1": {
-						Tenant: "cgrates.org",
-						ID:     "RU_1",
-					},
-					"RU_2": {
-						Tenant: "cgrates.org",
-						ID:     "RU_2",
-					},
-				},
-				TTLIdx: []string{"RU_1", "RU_2"},
-				Tenant: "cgrates.org",
-				ID:     "Res_1",
-			},
-			ttl: utils.DurationPointer(1 * time.Second),
-		},
-	}
-
-	ru := &utils.ResourceUsage{
-		Tenant: "cgrates.org",
-		ID:     "RU_2",
-	}
-
-	experr := fmt.Sprintf("empty configuration for resourceID: %s", rs[0].Resource.TenantID())
-	rcv, err := rs.allocateResource(ru, false)
-
-	if err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-
-	if rcv != "" {
-		t.Errorf("\nexpected empty string, got %s", rcv)
-	}
-}
-
 func TestResourcesAllocateResourceDryRun(t *testing.T) {
 	rs := Resources{
 		{
@@ -1590,11 +1533,9 @@ func TestResourcesAllocateResourceDryRun(t *testing.T) {
 				TTLIdx: []string{"RU_1", "RU_2"},
 			},
 			ttl: utils.DurationPointer(1 * time.Second),
-			rPrf: &resourceProfile{
-				ResourceProfile: &utils.ResourceProfile{
-					Tenant: "cgrates.org",
-					ID:     "ResGroup1",
-				},
+			profile: &utils.ResourceProfile{
+				Tenant: "cgrates.org",
+				ID:     "ResGroup1",
 			},
 		},
 	}
@@ -1626,7 +1567,9 @@ func TestResourcesStoreResources(t *testing.T) {
 
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
+	cfg := config.NewDefaultCGRConfig()
 	rS := &ResourceS{
+		cfg: cfg,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -1643,6 +1586,7 @@ func TestResourcesStoreResources(t *testing.T) {
 	explog := fmt.Sprintf("CGRateS <> [WARNING] <%s> failed saving Resource with ID: %s, error: %s\n",
 		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
 	exp := &ResourceS{
+		cfg: cfg,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -1662,7 +1606,7 @@ func TestResourcesStoreResources(t *testing.T) {
 
 func TestResourcesStoreResourceNotDirty(t *testing.T) {
 	rS := &ResourceS{}
-	r := &resource{
+	r := &matchedResource{
 		dirty: utils.BoolPointer(false),
 	}
 
@@ -1683,7 +1627,7 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 	rS := &ResourceS{
 		dm: engine.NewDataManager(dbCM, cfg, nil),
 	}
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{},
 		dirty:    utils.BoolPointer(true),
 	}
@@ -1727,7 +1671,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	rS := NewResourceService(dm, cfg, nil, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES1",
@@ -1761,12 +1705,10 @@ func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 					"": {},
 				},
 			},
-			rPrf: &resourceProfile{
-				ResourceProfile: &utils.ResourceProfile{
-					Tenant:            "cgrates.org",
-					ID:                "RP_1",
-					AllocationMessage: "allocation msg",
-				},
+			profile: &utils.ResourceProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RP_1",
+				AllocationMessage: "allocation msg",
 			},
 		},
 	}
@@ -1789,7 +1731,7 @@ func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	rS := &ResourceS{
 		cfg: cfg,
 	}
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
@@ -1845,17 +1787,15 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		connMgr: engine.NewConnManager(cfg),
 	}
 	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:       "cgrates.org",
-				ID:           "RP_1",
-				ThresholdIDs: []string{"THD_1"},
-			},
+		profile: &utils.ResourceProfile{
+			Tenant:       "cgrates.org",
+			ID:           "RP_1",
+			ThresholdIDs: []string{"THD_1"},
 		},
 	}
 
@@ -1913,17 +1853,15 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 		connMgr: engine.NewConnManager(cfg),
 	}
 	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:       "cgrates.org",
-				ID:           "RP_1",
-				ThresholdIDs: []string{"THD_1"},
-			},
+		profile: &utils.ResourceProfile{
+			Tenant:       "cgrates.org",
+			ID:           "RP_1",
+			ThresholdIDs: []string{"THD_1"},
 		},
 	}
 
@@ -1945,15 +1883,13 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	rS := &ResourceS{
 		cfg: cfg,
 	}
-	r := &resource{
+	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
-		rPrf: &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				ThresholdIDs: []string{utils.MetaNone},
-			},
+		profile: &utils.ResourceProfile{
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	opts := map[string]any{}
@@ -1978,7 +1914,7 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 		fltrs, nil)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInCache", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
@@ -1998,7 +1934,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 		fltrs, nil)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringSet{"Res2": {}}, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
@@ -2018,51 +1954,32 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
-	prfs := make([]*resourceProfile, 0)
+	prfs := make([]*utils.ResourceProfile, 0)
 	ids := utils.StringSet{}
 	for i := range 10 {
-		rPrf := &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            "cgrates.org",
-				ID:                fmt.Sprintf("RES%d", i),
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{utils.MetaNone},
-			},
+		rPrf := &utils.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		}
-		dm.SetResourceProfile(context.Background(), rPrf.ResourceProfile, true)
+		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ResourceProfile.ID)
+		ids.Add(rPrf.ID)
 	}
 	dm.RemoveResource(context.Background(), "cgrates.org", "RES1")
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks", ids, nil, true, utils.NonTransactional)
-	rs, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
-	for _, rPrf := range prfs {
-		if rPrf.isLocked() {
-			t.Fatalf("Expected profile to not be locked %q", rPrf.ResourceProfile.ID)
-		}
-		if rPrf.ResourceProfile.ID == "RES1" {
-			continue
-		}
-		for _, r := range rs {
-			if r.Resource.ID != rPrf.ResourceProfile.ID {
-				continue
-			}
-			if r.isLocked() {
-				t.Fatalf("Expected resource to not be locked %q", rPrf.ResourceProfile.ID)
-			}
-		}
-	}
-
 }
 
 func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
@@ -2078,32 +1995,12 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
-	prfs := make([]*resourceProfile, 0)
+	prfs := make([]*utils.ResourceProfile, 0)
 	ids := utils.StringSet{}
 	for i := range 10 {
-		rPrf := &resourceProfile{
-			ResourceProfile: &utils.ResourceProfile{
-				Tenant:            "cgrates.org",
-				ID:                fmt.Sprintf("RES%d", i),
-				UsageTTL:          10 * time.Second,
-				Limit:             10.00,
-				AllocationMessage: "AllocationMessage",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20.00,
-					}},
-				ThresholdIDs: []string{utils.MetaNone},
-			},
-		}
-		dm.SetResourceProfile(context.Background(), rPrf.ResourceProfile, true)
-		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ResourceProfile.ID)
-	}
-	rPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
+		rPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
-			ID:                "RES20",
-			FilterIDs:         []string{"FLTR_RES_201"},
+			ID:                fmt.Sprintf("RES%d", i),
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2112,36 +2009,36 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 					Weight: 20.00,
 				}},
 			ThresholdIDs: []string{utils.MetaNone},
-		},
+		}
+		dm.SetResourceProfile(context.Background(), rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
 	}
-	err := db.SetResourceProfileDrv(context.Background(), rPrf.ResourceProfile)
+	rPrf := &utils.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES20",
+		FilterIDs:         []string{"FLTR_RES_201"},
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.00,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	err := db.SetResourceProfileDrv(context.Background(), rPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
 	prfs = append(prfs, rPrf)
-	ids.Add(rPrf.ResourceProfile.ID)
+	ids.Add(rPrf.ID)
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
-	rs, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
-	expErr := utils.ErrPrefixNotFound(rPrf.ResourceProfile.FilterIDs[0])
+	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
-	}
-	for _, rPrf := range prfs {
-		if rPrf.isLocked() {
-			t.Fatalf("Expected profile to not be locked %q", rPrf.ResourceProfile.ID)
-		}
-		if rPrf.ResourceProfile.ID == "RES20" {
-			continue
-		}
-		for _, r := range rs {
-			if r.Resource.ID != rPrf.ResourceProfile.ID {
-				continue
-			}
-			if r.isLocked() {
-				t.Fatalf("Expected resource to not be locked %q", rPrf.ResourceProfile.ID)
-			}
-		}
 	}
 }
 
@@ -2190,95 +2087,10 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 		ids.Add(fmt.Sprintf("RES%d", i))
 	}
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks3", ids, nil, true, utils.NonTransactional)
-	mres, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks3", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Error: %+v", err)
-	}
-	for _, r := range mres {
-		if r.rPrf.isLocked() {
-			t.Fatalf("Expected profile to not be locked %q", r.rPrf.ResourceProfile.ID)
-		}
-	}
-
-}
-
-func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
-	rp := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			Limit:             10,
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				}},
-			ThresholdIDs: []string{utils.MetaNone},
-		},
-	}
-
-	//lock profile with empty lkID parameter
-	rp.lock(utils.EmptyString)
-
-	if !rp.isLocked() {
-		t.Fatal("expected profile to be locked")
-	} else if rp.lkID == utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be non-empty")
-	}
-
-	//unlock previously locked profile
-	rp.unlock()
-
-	if rp.isLocked() {
-		t.Fatal("expected profile to be unlocked")
-	} else if rp.lkID != utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be empty")
-	}
-
-	//unlock an already unlocked profile - nothing happens
-	rp.unlock()
-
-	if rp.isLocked() {
-		t.Fatal("expected profile to be unlocked")
-	} else if rp.lkID != utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be empty")
-	}
-}
-
-func TestResourcesLockUnlockResources(t *testing.T) {
-	rs := &resource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RES1",
-		},
-	}
-
-	//lock resource with empty lkID parameter
-	rs.lock(utils.EmptyString)
-
-	if !rs.isLocked() {
-		t.Fatal("expected resource to be locked")
-	} else if rs.lkID == utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be non-empty")
-	}
-
-	//unlock previously locked resource
-	rs.unlock()
-
-	if rs.isLocked() {
-		t.Fatal("expected resource to be unlocked")
-	} else if rs.lkID != utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be empty")
-	}
-
-	//unlock an already unlocked resource - nothing happens
-	rs.unlock()
-
-	if rs.isLocked() {
-		t.Fatal("expected resource to be unlocked")
-	} else if rs.lkID != utils.EmptyString {
-		t.Fatal("expected struct field \"lkID\" to be empty")
 	}
 }
 
@@ -2462,10 +2274,12 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
-		utils.DurationPointer(10*time.Second)); err == nil || err.Error() != utils.ErrDisconnected.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
-	} else if rcv != nil {
+	rcv, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
+		utils.DurationPointer(10*time.Second))
+	if err == nil || err.Error() != utils.ErrDisconnected.Error() {
+		t.Fatalf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
+	}
+	if rcv != nil {
 		t.Errorf("expected nil, received: <%+v>", rcv)
 	}
 }
@@ -2491,24 +2305,22 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	rsPrf := &resourceProfile{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES1",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			ThresholdIDs:      []string{utils.MetaNone},
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				}},
-			Limit:    10,
-			UsageTTL: time.Minute,
-			Stored:   true,
-		},
+	rsPrf := &utils.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
+		Stored:   true,
 	}
 
-	err := dm.SetResourceProfile(context.Background(), rsPrf.ResourceProfile, true)
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2522,26 +2334,25 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	exp := &resource{
+	exp := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES1",
 			Usages: make(map[string]*utils.ResourceUsage),
 		},
-		ttl:   utils.DurationPointer(10 * time.Second),
-		dirty: utils.BoolPointer(false),
-		rPrf:  rsPrf,
+		ttl:     utils.DurationPointer(10 * time.Second),
+		dirty:   utils.BoolPointer(false),
+		profile: rsPrf,
 	}
 
-	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
-		utils.DurationPointer(10*time.Second)); err == nil || err.Error() != utils.ErrDisconnected.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
-	} else if !reflect.DeepEqual(rcv[0], exp) {
+	rcv, unlock, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
+		utils.DurationPointer(10*time.Second))
+	if err != nil {
+		t.Fatalf("expected no error, received: %+v", err)
+	}
+	defer unlock()
+	if !reflect.DeepEqual(rcv[0], exp) {
 		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv[0])
-	} else if rcv[0].isLocked() {
-		t.Error("expected resource to be unlocked")
-	} else if rcv[0].lkID != utils.EmptyString {
-		t.Error("expected struct field \"lkID\" to be empty")
 	}
 }
 
@@ -2585,7 +2396,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 	}
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
-	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocksBlocker", utils.DurationPointer(10*time.Second))
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -2593,11 +2404,11 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 
 }
 func TestStoreMatchedResources(t *testing.T) {
-	resPrf := &resourceProfile{ResourceProfile: &utils.ResourceProfile{
+	resPrf := &utils.ResourceProfile{
 		Tenant: "cgrates.org",
 		ID:     "RES1",
 		Limit:  10,
-	}}
+	}
 
 	newRSWithInterval := func(t *testing.T, interval time.Duration) (*ResourceS, *engine.DataManager) {
 		t.Helper()
@@ -2673,8 +2484,8 @@ func TestStoreMatchedResources(t *testing.T) {
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
-			dirty: &dirty,
-			rPrf:  resPrf,
+			dirty:   &dirty,
+			profile: resPrf,
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -2730,8 +2541,8 @@ func TestStoreMatchedResources(t *testing.T) {
 				},
 				TTLIdx: []string{"USAGE1", "USAGE2"},
 			},
-			dirty: &dirty,
-			rPrf:  resPrf,
+			dirty:   &dirty,
+			profile: resPrf,
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
 			t.Fatalf("unexpected error: %v", err)
