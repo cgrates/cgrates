@@ -388,7 +388,6 @@ const (
 	MetaStats                = "*stats"
 	MetaTrends               = "*trends"
 	MetaRankings             = "*rankings"
-	MetaCore                 = "*core"
 	MetaCores                = "*cores"
 	MetaServiceManager       = "*servicemanager"
 	MetaChargers             = "*chargers"
