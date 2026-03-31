@@ -187,7 +187,7 @@ var serviceMethods = map[string]internalRoute{
 	},
 	utils.CoreS: {
 		receiver:     utils.CoreSv1,
-		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore),
+		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCores),
 	},
 	utils.EEs: {
 		receiver:     utils.EeSv1,
