@@ -3,8 +3,8 @@ name: Build & Unit Tests
 permissions: {}
 
 on:
-  # push:
-  #   branches: [v0.10]
+  push:
+    branches: [v0.10]
   pull_request:
     branches: [v0.10]
   workflow_dispatch:
