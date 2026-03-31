@@ -92,7 +92,7 @@ func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) (err error) {
 	}
 	if jsnCfg.Chargers != nil {
 		var chargers []*DynamicBoolOpt
-		chargers, err = IfaceToBoolDynamicOpts(jsnCfg.Attributes)
+		chargers, err = IfaceToBoolDynamicOpts(jsnCfg.Chargers)
 		if err != nil {
 			return
 		}
