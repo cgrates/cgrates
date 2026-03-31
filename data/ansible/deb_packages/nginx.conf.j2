@@ -1,6 +1,7 @@
 {{ ansible_managed | comment }}
 server {
   listen 80;
+  autoindex_localtime on;
   server_name apt.cgrates.org;
 
   access_log /var/log/nginx/packages-error.log;

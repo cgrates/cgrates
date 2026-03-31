@@ -3,15 +3,22 @@
   hosts: all
   tasks:
     - name: Install freeswitch
-      import_role:
+      ansible.builtin.import_role:
         name: ../../roles/freeswitch
     - name: Install Go
-      import_role:
+      ansible.builtin.import_role:
         name: ../../roles/go
 
     - name: Install and config CGRateS
-      import_role:
+      ansible.builtin.import_role:
         name: ../../roles/cgrates
+      vars:
+        cgrates_dbs:
+          - mysql
+        cgrates_dependencies:
+          - git
+          - redis-server
+          - mariadb-server
 
     - name: Unzip FreeSWITCH config
       become: yes
@@ -40,5 +47,7 @@
         remote_src: yes
 
     - name: Configure PJSUA
-      import_role:
+      ansible.builtin.import_role:
         name: ../../roles/pjsua
+      vars:
+        pjsua_version: '2.9'
