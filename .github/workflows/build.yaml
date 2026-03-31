@@ -7,6 +7,7 @@ on:
   #   branches: [v0.10]
   pull_request:
     branches: [v0.10]
+  workflow_dispatch:
 
 jobs:
   # check-if-duplicate-action:
