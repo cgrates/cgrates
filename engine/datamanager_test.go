@@ -4076,8 +4076,22 @@ func TestCacheDataFromDB(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.ResourcesPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
 		t.Error(err)
 	}
-	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{"*resources:*string:~*req.RequestType:*rated"}, false); err != nil {
+	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{"cgrates.org:*string:~*req.RequestType:*rated"}, false); err != nil {
 		t.Error(err)
+	}
+	if err := dm.SetIndexes(utils.CacheResourceFilterIndexes, "cgrates.org",
+		map[string]utils.StringSet{
+			"*exists:*req.Account": {"RES_GRP1": {}},
+		}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{"cgrates.org:*exists:*req.Account"}, false); err != nil {
+		t.Error(err)
+	}
+	if val, exists := Cache.Get(utils.CacheResourceFilterIndexes, "cgrates.org:*exists:*req.Account"); !exists {
+		t.Error("exists index not cached after CacheDataFromDB")
+	} else if ids, ok := val.(utils.StringSet); !ok || !ids.Has("RES_GRP1") {
+		t.Errorf("expected RES_GRP1 in cached index, got %v", val)
 	}
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
