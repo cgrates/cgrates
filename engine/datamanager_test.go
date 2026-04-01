@@ -3048,8 +3048,8 @@ func TestDMCacheDataFromDBAttributeFilterIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3067,8 +3067,8 @@ func TestDMCacheDataFromDBResourceFilterIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3086,8 +3086,8 @@ func TestDMCacheDataFromDBStatFilterIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.StatFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.StatFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3105,8 +3105,8 @@ func TestDMCacheDataFromDBThresholdFilterIndexesErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3124,8 +3124,8 @@ func TestDMCacheDataFromDBRouteFilterIndexesErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.RouteFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RouteFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3143,8 +3143,8 @@ func TestDMCacheDataFromDBChargerFilterIndexesErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3162,8 +3162,8 @@ func TestDMCacheDataFromDBRateProfilesFilterIndexPrfxErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilesFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilesFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3181,8 +3181,8 @@ func TestDMCacheDataFromDBRateFilterIndexPrfxErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.RateFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -3200,8 +3200,8 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -4678,8 +4678,8 @@ func TestDMCacheDataFromDBAccountFilterIndexPrfxErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if err := dm.CacheDataFromDB(context.Background(), utils.AccountFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.AccountFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }

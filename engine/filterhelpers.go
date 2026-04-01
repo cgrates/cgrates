@@ -93,10 +93,18 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 				case utils.MetaSuffix:
 					fldVals = utils.SplitSuffix(fldVal)
-				case utils.MetaExists:
-					fldVals = []string{utils.MetaAny} // for *exists, we will use *any value
-				case utils.MetaNotExists:
-					fldVals = []string{utils.MetaNone} // for *notexists, we will use *none
+				case utils.MetaExists, utils.MetaNotExists:
+					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName)
+					var dbIndexes map[string]utils.StringSet
+					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, key, utils.NonTransactional, true, true); err != nil {
+						if err == utils.ErrNotFound {
+							err = nil
+							continue
+						}
+						return
+					}
+					itemIDs = utils.JoinStringSet(itemIDs, dbIndexes[key])
+					continue
 				}
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB

@@ -333,7 +333,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST"}
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			Tenant:   utils.CGRateSorg,
@@ -362,7 +362,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.*originID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
-		"*notexists:*opts.*rates:*none:TEST_ATTRIBUTES_IT_TEST"}
+		"*notexists:*opts.*rates:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
@@ -440,7 +440,7 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST"}
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
@@ -494,7 +494,7 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST"}
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
@@ -569,7 +569,7 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST"}
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
@@ -661,7 +661,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST",
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST",
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
@@ -715,7 +715,7 @@ func testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles(t *testing.T) {
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
-		"*exists:*req.NumberOfEvents:*any:TEST_ATTRIBUTES_IT_TEST",
+		"*exists:*req.NumberOfEvents:TEST_ATTRIBUTES_IT_TEST",
 	}
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -849,7 +849,7 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.Destinations:+0775:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.Destinations:+442:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -875,7 +875,7 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.*originID:IOPJKLBNM:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES",
-		"*notexists:*opts.*rates:*none:ACCOUNT_FILTER_INDEXES"}
+		"*notexists:*opts.*rates:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -964,7 +964,7 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -1020,7 +1020,7 @@ func testV1FIdxAccountComputeIndexes(t *testing.T) {
 		"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts}, &replyIdx); err != nil {
 		t.Error(err)
@@ -1118,8 +1118,8 @@ func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES3",
 		"*prefix:*req.Destinations:+0775:ACCOUNT_FILTER_INDEXES3",
 		"*prefix:*req.Destinations:+442:ACCOUNT_FILTER_INDEXES3",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES3"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES",
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts}, &replyIdx); err != nil {
 		t.Error(err)
@@ -1178,7 +1178,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.Destinations:+0775:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.Destinations:+442:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -1222,8 +1222,8 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES3",
 		"*prefix:*req.Destinations:+0775:ACCOUNT_FILTER_INDEXES3",
 		"*prefix:*req.Destinations:+442:ACCOUNT_FILTER_INDEXES3",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES",
-		"*exists:*req.NumberOfEvents:*any:ACCOUNT_FILTER_INDEXES3"}
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES",
+		"*exists:*req.NumberOfEvents:ACCOUNT_FILTER_INDEXES3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -1347,7 +1347,7 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:REM_ACC",
 		"*prefix:*req.Destinations:+0775:REM_ACC",
 		"*prefix:*req.Destinations:+442:REM_ACC",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC"}
+		"*exists:*req.NumberOfEvents:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1373,7 +1373,7 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:REM_ACC",
 		"*string:*opts.*originID:IOPJKLBNM:REM_ACC",
 		"*string:*opts.Subsystems:*attributes:REM_ACC",
-		"*notexists:*opts.*rates:*none:REM_ACC"}
+		"*notexists:*opts.*rates:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1467,7 +1467,7 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:REM_ACC",
 		"*prefix:*req.AnswerTime:12:REM_ACC",
 		"*prefix:*req.AnswerTime:33:REM_ACC",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC"}
+		"*exists:*req.NumberOfEvents:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1522,7 +1522,7 @@ func testV1FIdxActionProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:REM_ACC",
 		"*prefix:*req.AnswerTime:12:REM_ACC",
 		"*prefix:*req.AnswerTime:33:REM_ACC",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC"}
+		"*exists:*req.NumberOfEvents:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err != nil {
 		t.Error(err)
@@ -1633,8 +1633,8 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:SET_BAL",
 		"*prefix:*req.Destinations:+0775:SET_BAL",
 		"*prefix:*req.Destinations:+442:SET_BAL",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC",
-		"*exists:*req.NumberOfEvents:*any:SET_BAL"}
+		"*exists:*req.NumberOfEvents:REM_ACC",
+		"*exists:*req.NumberOfEvents:SET_BAL"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err != nil {
 		t.Error(err)
@@ -1694,7 +1694,7 @@ func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:REM_ACC",
 		"*prefix:*req.Destinations:+0775:REM_ACC",
 		"*prefix:*req.Destinations:+442:REM_ACC",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC"}
+		"*exists:*req.NumberOfEvents:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1738,8 +1738,8 @@ func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:SET_BAL",
 		"*prefix:*req.Destinations:+0775:SET_BAL",
 		"*prefix:*req.Destinations:+442:SET_BAL",
-		"*exists:*req.NumberOfEvents:*any:SET_BAL",
-		"*exists:*req.NumberOfEvents:*any:REM_ACC"}
+		"*exists:*req.NumberOfEvents:SET_BAL",
+		"*exists:*req.NumberOfEvents:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1842,7 +1842,7 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:1001_Charger",
 		"*prefix:*req.Destinations:+0775:1001_Charger",
 		"*prefix:*req.Destinations:+442:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger"}
+		"*exists:*req.NumberOfEvents:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -1868,7 +1868,7 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:1001_Charger",
 		"*string:*opts.*originID:IOPJKLBNM:1001_Charger",
 		"*string:*opts.Subsystems:*attributes:1001_Charger",
-		"*notexists:*opts.*rates:*none:1001_Charger"}
+		"*notexists:*opts.*rates:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -1942,7 +1942,7 @@ func testV1FIdxSetChargerProfileMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:1001_Charger",
 		"*prefix:*req.AnswerTime:12:1001_Charger",
 		"*prefix:*req.AnswerTime:33:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger"}
+		"*exists:*req.NumberOfEvents:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -1998,7 +1998,7 @@ func testV1FIdxChargerProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:1001_Charger",
 		"*prefix:*req.AnswerTime:12:1001_Charger",
 		"*prefix:*req.AnswerTime:33:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger"}
+		"*exists:*req.NumberOfEvents:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers}, &replyIdx); err != nil {
 		t.Error(err)
@@ -2076,8 +2076,8 @@ func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:1001_Charger_3",
 		"*prefix:*req.Destinations:+0775:1001_Charger_3",
 		"*prefix:*req.Destinations:+442:1001_Charger_3",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger_3"}
+		"*exists:*req.NumberOfEvents:1001_Charger",
+		"*exists:*req.NumberOfEvents:1001_Charger_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers}, &replyIdx); err != nil {
 		t.Error(err)
@@ -2137,7 +2137,7 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:1001_Charger",
 		"*prefix:*req.Destinations:+0775:1001_Charger",
 		"*prefix:*req.Destinations:+442:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger"}
+		"*exists:*req.NumberOfEvents:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -2181,8 +2181,8 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:1001_Charger_3",
 		"*prefix:*req.Destinations:+0775:1001_Charger_3",
 		"*prefix:*req.Destinations:+442:1001_Charger_3",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger",
-		"*exists:*req.NumberOfEvents:*any:1001_Charger_3"}
+		"*exists:*req.NumberOfEvents:1001_Charger",
+		"*exists:*req.NumberOfEvents:1001_Charger_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -2293,7 +2293,7 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RATE_1",
 		"*prefix:*req.Destinations:+0775:RATE_1",
 		"*prefix:*req.Destinations:+442:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_1"}
+		"*exists:*req.NumberOfEvents:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2319,7 +2319,7 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:RATE_1",
 		"*string:*opts.*originID:IOPJKLBNM:RATE_1",
 		"*string:*opts.Subsystems:*attributes:RATE_1",
-		"*notexists:*opts.*rates:*none:RATE_1"}
+		"*notexists:*opts.*rates:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2400,7 +2400,7 @@ func testV1FIdxSetRateProfileMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:RATE_1",
 		"*prefix:*req.AnswerTime:12:RATE_1",
 		"*prefix:*req.AnswerTime:33:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_1"}
+		"*exists:*req.NumberOfEvents:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2456,7 +2456,7 @@ func testV1FIdxRateSProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:RATE_1",
 		"*prefix:*req.AnswerTime:12:RATE_1",
 		"*prefix:*req.AnswerTime:33:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_1"}
+		"*exists:*req.NumberOfEvents:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles}, &replyIdx); err != nil {
 		t.Error(err)
@@ -2553,8 +2553,8 @@ func testV1FIdxRateSProfileMoreProfilesForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RATE_3",
 		"*prefix:*req.Destinations:+0775:RATE_3",
 		"*prefix:*req.Destinations:+442:RATE_3",
-		"*exists:*req.NumberOfEvents:*any:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_3"}
+		"*exists:*req.NumberOfEvents:RATE_1",
+		"*exists:*req.NumberOfEvents:RATE_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles}, &replyIdx); err != nil {
 		t.Error(err)
@@ -2614,7 +2614,7 @@ func testV1FIdxRateSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RATE_1",
 		"*prefix:*req.Destinations:+0775:RATE_1",
 		"*prefix:*req.Destinations:+442:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_1"}
+		"*exists:*req.NumberOfEvents:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2657,8 +2657,8 @@ func testV1FIdxRateSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RATE_3",
 		"*prefix:*req.Destinations:+0775:RATE_3",
 		"*prefix:*req.Destinations:+442:RATE_3",
-		"*exists:*req.NumberOfEvents:*any:RATE_1",
-		"*exists:*req.NumberOfEvents:*any:RATE_3"}
+		"*exists:*req.NumberOfEvents:RATE_1",
+		"*exists:*req.NumberOfEvents:RATE_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2781,7 +2781,7 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS",
 		"*prefix:*req.Destinations:+0775:RT_ALWAYS",
 		"*prefix:*req.Destinations:+442:RT_ALWAYS",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"},
@@ -2809,7 +2809,7 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 		"*string:*req.RequestType:*prepaid:RT_ALWAYS",
 		"*string:*req.RequestType:*postpaid:RT_CHRISTMAS",
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS",
-		"*notexists:*opts.*rates:*none:RT_ALWAYS"}
+		"*notexists:*opts.*rates:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"}, &replyIdx); err != nil {
@@ -2902,7 +2902,7 @@ func testV1FIdxSetRatePofileRatesMoreFltrsMoreIndexing(t *testing.T) {
 		"*prefix:*req.AnswerTime:12:RT_CHRISTMAS",
 		"*prefix:*req.AnswerTime:33:RT_CHRISTMAS",
 		"*string:*req.Usage:123s:RT_ALWAYS",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"},
@@ -2961,7 +2961,7 @@ func testV1FIdxRateProfileRatesComputeIndexes(t *testing.T) {
 		"*prefix:*req.AnswerTime:12:RT_CHRISTMAS",
 		"*prefix:*req.AnswerTime:33:RT_CHRISTMAS",
 		"*string:*req.Usage:123s:RT_ALWAYS",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"}, &replyIdx); err != nil {
@@ -3083,8 +3083,8 @@ func testV1FIdxRateProfileRatesMoreRatesForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RT_GOLDEN_HOUR",
 		"*prefix:*req.Destinations:+0775:RT_GOLDEN_HOUR",
 		"*prefix:*req.Destinations:+442:RT_GOLDEN_HOUR",
-		"*exists:*req.NumberOfEvents:*any:RT_GOLDEN_HOUR",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_GOLDEN_HOUR",
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"}, &replyIdx); err != nil {
@@ -3110,7 +3110,7 @@ func testV1FIdxRateProfileRatesMoreRatesForFilters(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS_2",
 		"*prefix:*req.Destinations:+0775:RT_ALWAYS_2",
 		"*prefix:*req.Destinations:+442:RT_ALWAYS_2",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS_2"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS_2"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_2"}, &replyIdx); err != nil {
@@ -3193,8 +3193,8 @@ func testV1FIdxRateProfileRatesRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RT_GOLDEN_HOUR",
 		"*prefix:*req.Destinations:+0775:RT_GOLDEN_HOUR",
 		"*prefix:*req.Destinations:+442:RT_GOLDEN_HOUR",
-		"*exists:*req.NumberOfEvents:*any:RT_GOLDEN_HOUR",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_GOLDEN_HOUR",
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"}, &replyIdx); err != nil {
@@ -3227,7 +3227,7 @@ func testV1FIdxRateProfileRatesRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS_2",
 		"*prefix:*req.Destinations:+0775:RT_ALWAYS_2",
 		"*prefix:*req.Destinations:+442:RT_ALWAYS_2",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS_2"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS_2"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_2"}, &replyIdx); err != nil {
@@ -3269,7 +3269,7 @@ func testV1FIdxRateProfileRatesRemoveRateProfileRatesNoIndexes(t *testing.T) {
 		"*string:*req.Usage:123s:RT_WEEKEND",
 		"*prefix:*req.AnswerTime:12:RT_WEEKEND",
 		"*prefix:*req.AnswerTime:33:RT_WEEKEND",
-		"*exists:*req.NumberOfEvents:*any:RT_ALWAYS"}
+		"*exists:*req.NumberOfEvents:RT_ALWAYS"}
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
@@ -3385,7 +3385,7 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RESOURCE1",
 		"*prefix:*req.Destinations:+0775:RESOURCE1",
 		"*prefix:*req.Destinations:+442:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1"}
+		"*exists:*req.NumberOfEvents:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
 		&replyIdx); err != nil {
@@ -3411,7 +3411,7 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:RESOURCE1",
 		"*string:*opts.*originID:IOPJKLBNM:RESOURCE1",
 		"*string:*opts.Subsystems:*attributes:RESOURCE1",
-		"*notexists:*opts.*rates:*none:RESOURCE1"}
+		"*notexists:*opts.*rates:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
 		&replyIdx); err != nil {
@@ -3485,7 +3485,7 @@ func testV1FIdxSetResourceSMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:RESOURCE1",
 		"*prefix:*req.AnswerTime:12:RESOURCE1",
 		"*prefix:*req.AnswerTime:33:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1"}
+		"*exists:*req.NumberOfEvents:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
 		&replyIdx); err != nil {
@@ -3541,7 +3541,7 @@ func testV1FIdxResourceSProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:RESOURCE1",
 		"*prefix:*req.AnswerTime:12:RESOURCE1",
 		"*prefix:*req.AnswerTime:33:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1"}
+		"*exists:*req.NumberOfEvents:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources}, &replyIdx); err != nil {
 		t.Error(err)
@@ -3619,8 +3619,8 @@ func testV1FIdxResourceSMoreProfilesForFltrs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RESOURCE3",
 		"*prefix:*req.Destinations:+0775:RESOURCE3",
 		"*prefix:*req.Destinations:+442:RESOURCE3",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE3"}
+		"*exists:*req.NumberOfEvents:RESOURCE1",
+		"*exists:*req.NumberOfEvents:RESOURCE3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources}, &replyIdx); err != nil {
 		t.Error(err)
@@ -3679,7 +3679,7 @@ func testV1FIdxResourceSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RESOURCE1",
 		"*prefix:*req.Destinations:+0775:RESOURCE1",
 		"*prefix:*req.Destinations:+442:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1"}
+		"*exists:*req.NumberOfEvents:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
 		&replyIdx); err != nil {
@@ -3722,8 +3722,8 @@ func testV1FIdxResourceSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:RESOURCE3",
 		"*prefix:*req.Destinations:+0775:RESOURCE3",
 		"*prefix:*req.Destinations:+442:RESOURCE3",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE1",
-		"*exists:*req.NumberOfEvents:*any:RESOURCE3"}
+		"*exists:*req.NumberOfEvents:RESOURCE1",
+		"*exists:*req.NumberOfEvents:RESOURCE3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources}, &replyIdx); err != nil {
 		t.Error(err)
@@ -3846,7 +3846,7 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ROUTE_1",
 		"*prefix:*req.Destinations:+0775:ROUTE_1",
 		"*prefix:*req.Destinations:+442:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1"}
+		"*exists:*req.NumberOfEvents:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
 		&replyIdx); err != nil {
@@ -3872,7 +3872,7 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:ROUTE_1",
 		"*string:*opts.*originID:IOPJKLBNM:ROUTE_1",
 		"*string:*opts.Subsystems:*attributes:ROUTE_1",
-		"*notexists:*opts.*rates:*none:ROUTE_1"}
+		"*notexists:*opts.*rates:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
 		&replyIdx); err != nil {
@@ -3963,7 +3963,7 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:ROUTE_1",
 		"*prefix:*req.AnswerTime:12:ROUTE_1",
 		"*prefix:*req.AnswerTime:33:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1"}
+		"*exists:*req.NumberOfEvents:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
 		&replyIdx); err != nil {
@@ -4018,7 +4018,7 @@ func testV1FIdxRouteSProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:ROUTE_1",
 		"*prefix:*req.AnswerTime:12:ROUTE_1",
 		"*prefix:*req.AnswerTime:33:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1"}
+		"*exists:*req.NumberOfEvents:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4118,8 +4118,8 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ROUTE_3",
 		"*prefix:*req.Destinations:+0775:ROUTE_3",
 		"*prefix:*req.Destinations:+442:ROUTE_3",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_3"}
+		"*exists:*req.NumberOfEvents:ROUTE_1",
+		"*exists:*req.NumberOfEvents:ROUTE_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4179,7 +4179,7 @@ func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ROUTE_1",
 		"*prefix:*req.Destinations:+0775:ROUTE_1",
 		"*prefix:*req.Destinations:+442:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1"}
+		"*exists:*req.NumberOfEvents:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
 		&replyIdx); err != nil {
@@ -4222,8 +4222,8 @@ func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:ROUTE_3",
 		"*prefix:*req.Destinations:+0775:ROUTE_3",
 		"*prefix:*req.Destinations:+442:ROUTE_3",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_1",
-		"*exists:*req.NumberOfEvents:*any:ROUTE_3"}
+		"*exists:*req.NumberOfEvents:ROUTE_1",
+		"*exists:*req.NumberOfEvents:ROUTE_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4337,7 +4337,7 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:Stat_1",
 		"*prefix:*req.Destinations:+0775:Stat_1",
 		"*prefix:*req.Destinations:+442:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_1"}
+		"*exists:*req.NumberOfEvents:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
 		&replyIdx); err != nil {
@@ -4362,7 +4362,7 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:Stat_1",
 		"*string:*opts.*originID:IOPJKLBNM:Stat_1",
 		"*string:*opts.Subsystems:*attributes:Stat_1",
-		"*notexists:*opts.*rates:*none:Stat_1"}
+		"*notexists:*opts.*rates:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
 		&replyIdx); err != nil {
@@ -4445,7 +4445,7 @@ func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:Stat_1",
 		"*prefix:*req.AnswerTime:12:Stat_1",
 		"*prefix:*req.AnswerTime:33:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_1"}
+		"*exists:*req.NumberOfEvents:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
 		&replyIdx); err != nil {
@@ -4500,7 +4500,7 @@ func testV1FIdxStatSProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:Stat_1",
 		"*prefix:*req.AnswerTime:12:Stat_1",
 		"*prefix:*req.AnswerTime:33:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_1"}
+		"*exists:*req.NumberOfEvents:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4587,8 +4587,8 @@ func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:Stat_3",
 		"*prefix:*req.Destinations:+0775:Stat_3",
 		"*prefix:*req.Destinations:+442:Stat_3",
-		"*exists:*req.NumberOfEvents:*any:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_3"}
+		"*exists:*req.NumberOfEvents:Stat_1",
+		"*exists:*req.NumberOfEvents:Stat_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4648,7 +4648,7 @@ func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:Stat_1",
 		"*prefix:*req.Destinations:+0775:Stat_1",
 		"*prefix:*req.Destinations:+442:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_1"}
+		"*exists:*req.NumberOfEvents:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
 		&replyIdx); err != nil {
@@ -4691,8 +4691,8 @@ func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:Stat_3",
 		"*prefix:*req.Destinations:+0775:Stat_3",
 		"*prefix:*req.Destinations:+442:Stat_3",
-		"*exists:*req.NumberOfEvents:*any:Stat_1",
-		"*exists:*req.NumberOfEvents:*any:Stat_3"}
+		"*exists:*req.NumberOfEvents:Stat_1",
+		"*exists:*req.NumberOfEvents:Stat_3"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
 		t.Error(err)
@@ -4797,7 +4797,7 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
 		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
 		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
 		&replyIdx); err != nil {
@@ -4823,7 +4823,7 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:THD_ACNT_1001",
 		"*string:*opts.*originID:IOPJKLBNM:THD_ACNT_1001",
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
-		"*notexists:*opts.*rates:*none:THD_ACNT_1001"}
+		"*notexists:*opts.*rates:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
 		&replyIdx); err != nil {
@@ -4897,7 +4897,7 @@ func testV1FIdxSetThresholdSMoreFltrsMoreIndexing(t *testing.T) {
 		"*string:*req.Account:1001:THD_ACNT_1001",
 		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
 		"*prefix:*req.AnswerTime:33:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
 		&replyIdx); err != nil {
@@ -4952,7 +4952,7 @@ func testV1FIdxThresholdSProfileComputeIndexes(t *testing.T) {
 		"*string:*req.Account:1001:THD_ACNT_1001",
 		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
 		"*prefix:*req.AnswerTime:33:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
 		t.Error(err)
@@ -5035,8 +5035,8 @@ func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1003",
 		"*prefix:*req.Destinations:+0775:THD_ACNT_1003",
 		"*prefix:*req.Destinations:+442:THD_ACNT_1003",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1003"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001",
+		"*exists:*req.NumberOfEvents:THD_ACNT_1003"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
 		t.Error(err)
@@ -5090,7 +5090,7 @@ func testV1FIdxTThresholdSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
 		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
 		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
 		&replyIdx); err != nil {
@@ -5133,8 +5133,8 @@ func testV1FIdxTThresholdSRemoveComputedIndexesIDs(t *testing.T) {
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1003",
 		"*prefix:*req.Destinations:+0775:THD_ACNT_1003",
 		"*prefix:*req.Destinations:+442:THD_ACNT_1003",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1001",
-		"*exists:*req.NumberOfEvents:*any:THD_ACNT_1003"}
+		"*exists:*req.NumberOfEvents:THD_ACNT_1001",
+		"*exists:*req.NumberOfEvents:THD_ACNT_1003"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
 		t.Error(err)
