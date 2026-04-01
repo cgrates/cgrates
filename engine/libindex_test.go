@@ -34,25 +34,74 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestSplitFilterIndexes(t *testing.T) {
-	tntGrpIdxKey := "tntCtx:*prefix:~*accounts:1001"
-	tntGrp, idxKey, err := splitFilterIndex(tntGrpIdxKey)
-	if err != nil {
-		t.Error(err)
+func TestSplitFilterIndex(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		tntGrp  string
+		idxKey  string
+		wantErr bool
+	}{
+		{
+			name:   "string",
+			input:  "cgrates.org:*string:*req.Account:1001",
+			tntGrp: "cgrates.org",
+			idxKey: "*string:*req.Account:1001",
+		},
+		{
+			name:   "exists",
+			input:  "cgrates.org:*exists:*req.Account",
+			tntGrp: "cgrates.org",
+			idxKey: "*exists:*req.Account",
+		},
+		{
+			name:   "notexists",
+			input:  "cgrates.org:*notexists:*req.Account",
+			tntGrp: "cgrates.org",
+			idxKey: "*notexists:*req.Account",
+		},
+		{
+			name:   "tenant with group",
+			input:  "cgrates.org:grp:*string:*req.X:val",
+			tntGrp: "cgrates.org:grp",
+			idxKey: "*string:*req.X:val",
+		},
+		{
+			name:   "none",
+			input:  "cgrates.org:*none:*any:*any",
+			tntGrp: "cgrates.org",
+			idxKey: "*none:*any:*any",
+		},
+		{
+			name:    "too few parts",
+			input:   "tntCtx:*prefix",
+			wantErr: true,
+		},
+		{
+			name:    "no filter type",
+			input:   "tntCtx:badtype:field",
+			wantErr: true,
+		},
 	}
-	expTntGrp := "tntCtx"
-	expIdxKey := "*prefix:~*accounts:1001"
-	if expTntGrp != tntGrp && expIdxKey != idxKey {
-		t.Errorf("Expected %v and %v\n but received %v and %v", expTntGrp, expIdxKey, tntGrp, idxKey)
-	}
-}
-
-func TestSplitFilterIndexesWrongFormat(t *testing.T) {
-	tntGrpIdxKey := "tntCtx:*prefix:~*accounts"
-	_, _, err := splitFilterIndex(tntGrpIdxKey)
-	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
-	if errExp != err.Error() {
-		t.Errorf("Expected %v\n but received %v", errExp, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tntGrp, idxKey, err := splitFilterIndex(tt.input)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got tntGrp=%q idxKey=%q", tntGrp, idxKey)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tntGrp != tt.tntGrp {
+				t.Errorf("tntGrp = %q, want %q", tntGrp, tt.tntGrp)
+			}
+			if idxKey != tt.idxKey {
+				t.Errorf("idxKey = %q, want %q", idxKey, tt.idxKey)
+			}
+		})
 	}
 }
 
@@ -526,10 +575,10 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 	}
 
 	expindx := map[string]utils.StringSet{
-		"*exists:*req.Cost:*any":     {"ThP1": {}},
+		"*exists:*req.Cost":          {"ThP1": {}},
 		"*exists:*req.Cost:unRegVal": {"ThP1": {}},
 		"*exists::*req.Cost":         {"ThP1": {}},
-		"*notexists:*req.Cost:*none": {"ThP1": {}},
+		"*notexists:*req.Cost":       {"ThP1": {}},
 	}
 
 	getindx, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
@@ -597,7 +646,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*exists:*req.Cost:unRegVal": {"ThP1": {}},
 		"*exists::*req.Cost":         {"ThP1": {}},
-		"*notexists:*req.Cost:*none": {"ThP1": {}},
+		"*notexists:*req.Cost":       {"ThP1": {}},
 	}
 	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
 	if err != nil {
@@ -3361,11 +3410,11 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 	}
 
 	wantIndexes := map[string]utils.StringSet{
-		"*exists:*req.Field1:*any": {
+		"*exists:*req.Field1": {
 			"ATTR_1": {},
 			"ATTR_3": {},
 		},
-		"*exists:*req.Field2:*any": {
+		"*exists:*req.Field2": {
 			"ATTR_2": {},
 			"ATTR_3": {},
 		},
@@ -3550,11 +3599,11 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*suffix:~*req.Field1:1",
 			},
 			want: map[string]utils.StringSet{
-				"*exists:*req.Field1:*any": {
+				"*exists:*req.Field1": {
 					"ATTR_1": {},
 					"ATTR_3": {},
 				},
-				"*exists:*req.Field2:*any": {
+				"*exists:*req.Field2": {
 					"ATTR_2": {},
 					"ATTR_3": {},
 				},
@@ -3597,11 +3646,11 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*notstring:~*req.Field2:val1",
 			},
 			want: map[string]utils.StringSet{
-				"*exists:*req.Field1:*any": {
+				"*exists:*req.Field1": {
 					"ATTR_1": {},
 					"ATTR_3": {},
 				},
-				"*exists:*req.Field2:*any": {
+				"*exists:*req.Field2": {
 					"ATTR_2": {},
 					"ATTR_3": {},
 				},
@@ -3646,11 +3695,11 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*string:~*req.Field5:val5",
 			},
 			want: map[string]utils.StringSet{
-				"*exists:*req.Field1:*any": {
+				"*exists:*req.Field1": {
 					"ATTR_1": {},
 					"ATTR_3": {},
 				},
-				"*exists:*req.Field2:*any": {
+				"*exists:*req.Field2": {
 					"ATTR_2": {},
 					"ATTR_3": {},
 				},

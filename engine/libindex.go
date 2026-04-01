@@ -118,10 +118,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 			// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
 			if len(flt.Values) == 0 {
 				var rcvIndx map[string]utils.StringSet
-				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaAny)
-				if flt.Type == utils.MetaNotExists {
-					idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaNone)
-				}
+				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
 					idxKey, transactionID, true, false); err != nil {
@@ -274,15 +271,18 @@ func updatedIndexes(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 
 // splitFilterIndex splits the cache key so it can be used to recache the indexes
 func splitFilterIndex(tntGrpIdxKey string) (tntGrp, idxKey string, err error) {
-	splt := utils.SplitConcatenatedKey(tntGrpIdxKey) // tntCtx:filterType:fieldName:fieldVal
-	lsplt := len(splt)
-	if lsplt < 4 {
-		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntGrpIdxKey)
-		return
+	splt := utils.SplitConcatenatedKey(tntGrpIdxKey)
+	if len(splt) < 3 {
+		return "", "", fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntGrpIdxKey)
 	}
-	tntGrp = utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
-	idxKey = utils.ConcatenatedKey(splt[lsplt-3:]...)
-	return
+	for i := 1; i < len(splt); i++ {
+		if FilterIndexTypes.Has(splt[i]) || splt[i] == utils.MetaNone {
+			tntGrp = utils.ConcatenatedKey(splt[:i]...)
+			idxKey = utils.ConcatenatedKey(splt[i:]...)
+			return tntGrp, idxKey, nil
+		}
+	}
+	return "", "", fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntGrpIdxKey)
 }
 
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
@@ -432,13 +432,10 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-		// tthis case is specially for *exists/*notexists filter types
 		if len(flt.Values) == 0 {
 			switch flt.Type {
-			case utils.MetaExists:
-				newRules.Add(utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaAny)) // asume it is *exists type
-			case utils.MetaNotExists:
-				newRules.Add(utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaNone)) // asume it is *notexists type
+			case utils.MetaExists, utils.MetaNotExists:
+				newRules.Add(utils.ConcatenatedKey(flt.Type, flt.Element[1:]))
 			}
 		}
 		for _, fldVal := range flt.Values {
@@ -466,14 +463,11 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-		// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
 		if len(flt.Values) == 0 {
 			var idxKey string
 			switch flt.Type {
-			case utils.MetaExists:
-				idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaAny) // asume it is *exists type
-			case utils.MetaNotExists:
-				idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.MetaNone) // asume it is *notexists type
+			case utils.MetaExists, utils.MetaNotExists:
+				idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:])
 			}
 			if !newRules.Has(idxKey) {
 				removeRules.Add(idxKey)
