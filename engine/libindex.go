@@ -401,15 +401,18 @@ func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 
 // splitFilterIndex splits the cache key so it can be used to recache the indexes
 func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
-	splt := utils.SplitConcatenatedKey(tntCtxIdxKey) // tntCtx:filterType:fieldName:fieldVal
-	lsplt := len(splt)
-	if lsplt < 4 {
-		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntCtxIdxKey)
-		return
+	splt := utils.SplitConcatenatedKey(tntCtxIdxKey)
+	if len(splt) < 3 {
+		return "", "", fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntCtxIdxKey)
 	}
-	tntCtx = utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
-	idxKey = utils.ConcatenatedKey(splt[lsplt-3:]...)
-	return
+	for i := 1; i < len(splt); i++ {
+		if FilterIndexTypes.Has(splt[i]) || splt[i] == utils.MetaNone {
+			tntCtx = utils.ConcatenatedKey(splt[:i]...)
+			idxKey = utils.ConcatenatedKey(splt[i:]...)
+			return tntCtx, idxKey, nil
+		}
+	}
+	return "", "", fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntCtxIdxKey)
 }
 
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
