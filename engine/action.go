@@ -1386,16 +1386,14 @@ func resetAccountCDR(ub *Account, action *Action, _ Actions, fltrS *FilterS, _ a
 		if bsum == nil {
 			continue
 		}
-		if err := ub.setBalanceAction(&Action{
-			Balance: &BalanceFilter{
-				Uuid:     &bsum.UUID,
-				ID:       &bsum.ID,
-				Type:     &bsum.Type,
-				Value:    &utils.ValueFormula{Static: bsum.Value},
-				Weight:   &bsum.Weight,
-				Disabled: &bsum.Disabled,
-				Factors:  &bsum.Factors,
-			},
+		if err := ub.restoreFromBalanceSummary(&BalanceFilter{
+			Uuid:     &bsum.UUID,
+			ID:       &bsum.ID,
+			Type:     &bsum.Type,
+			Value:    &utils.ValueFormula{Static: bsum.Value},
+			Weight:   &bsum.Weight,
+			Disabled: &bsum.Disabled,
+			Factors:  &bsum.Factors,
 		}, fltrS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Error %s setting balance %s for account: %s", utils.Actions, err, bsum.UUID, account))
 		}
