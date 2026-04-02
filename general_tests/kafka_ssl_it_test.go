@@ -226,30 +226,60 @@ func TestKafkaSSL(t *testing.T) {
 	})
 }
 
-func createKafkaTopics(t *testing.T, brokerURL string, cleanup bool, topics ...string) {
-	t.Helper()
+func createKafkaTopics(tb testing.TB, brokerURL string, cleanup bool, topics ...string) {
+	tb.Helper()
 	cl, err := kgo.NewClient(kgo.SeedBrokers(brokerURL))
 	if err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
-	t.Cleanup(func() { cl.Close() })
+	tb.Cleanup(func() { cl.Close() })
 
 	adm := kadm.NewClient(cl)
 	_, err = adm.CreateTopics(context.Background(), 1, 1, nil, topics...)
 	if err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 
 	if cleanup {
-		t.Cleanup(func() {
+		tb.Cleanup(func() {
 			if _, err := adm.DeleteTopics(context.Background(), topics...); err != nil {
-				t.Log(err)
+				tb.Log(err)
 			}
 		})
 	}
 }
 
-// Kafka broker has the following configuration:
+// Setup: generate certs (script below), then start the broker:
+//
+//	podman compose up -d kafka-ssl
+//	go test -tags=kafka ./general_tests/ -run TestKafkaSSL -dbtype "*internal" -v
+
+/*
+Compose service (kafka-ssl):
+
+kafka-ssl:
+  image: docker.io/apache/kafka:4.2.0
+  ports:
+    - "9092:9092"
+    - "9094:9094"
+  environment:
+    KAFKA_NODE_ID: 1
+    KAFKA_PROCESS_ROLES: broker,controller
+    KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,SSL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,SSL://localhost:9094
+    KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+    KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,CONTROLLER:PLAINTEXT
+    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    CLUSTER_ID: cgrates-dev-cluster-02
+    KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.jks
+    KAFKA_SSL_KEYSTORE_CREDENTIALS: keystore_creds
+    KAFKA_SSL_KEY_CREDENTIALS: key_creds
+    KAFKA_SSL_CLIENT_AUTH: none
+  volumes:
+    - /tmp/ssl/kafka:/etc/kafka/secrets:ro,z
+
+Broker configuration:
 
 /*
 /opt/kafka/config/server.properties
