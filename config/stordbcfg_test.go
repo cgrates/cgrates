@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
@@ -108,6 +109,38 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RplConns), utils.ToJSON(jsonCfg.storDbCfg.RplConns))
 	} else if !reflect.DeepEqual(expected.RmtConns, jsonCfg.storDbCfg.RmtConns) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
+	}
+
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			InternalDBStartTimeout: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			InternalDBDumpInterval: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			InternalDBRewriteInterval: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			InternalDBFileSizeLimit: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			SQLConnMaxLifetime: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Opts: &DBOptsJson{
+			MongoQueryTimeout: utils.StringPointer("test"),
+		}}); err == nil {
+		t.Error(err)
 	}
 
 }
@@ -226,7 +259,12 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 				"mongoQueryTimeout":"10s",
 				"mongoConnScheme": "mongodb+srv",
 				"pgSSLMode":"disable",		
-				"mysqlLocation": "UTC",			
+				"mysqlLocation": "UTC",		
+				"pgSSLCert":"test",
+				"pgSSLKey":"test",
+				"pgSSLPassword":"testpass",
+				"pgSSLCertMode":"test",
+				"pgSSLRootCert":"test",
 			},
 			"items":{
 				"session_costs": {}, 
@@ -263,6 +301,11 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.PgSSLModeCfg:                 "disable",
 			utils.MysqlLocation:                "UTC",
 			utils.PgSchema:                     "",
+			utils.PgSSLCertCfg:                 "test",
+			utils.PgSSLKeyCfg:                  "test",
+			utils.PgSSLPasswordCfg:             "testpass",
+			utils.PgSSLCertModeCfg:             "test",
+			utils.PgSSLRootCertCfg:             "test",
 		},
 		utils.ItemsCfg: map[string]any{
 			utils.SessionCostsTBL: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false},
@@ -345,4 +388,47 @@ func TestStorDbCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
+}
+
+func TestStorDBOptsToTransCacheOpts(t *testing.T) {
+
+	tests := []struct {
+		name        string
+		storeDBOpts *StorDBOpts
+		want        *ltcache.TransCacheOpts
+	}{
+		{
+			name: "Complete storeDBOpts",
+			storeDBOpts: &StorDBOpts{
+				InternalDBDumpPath:        "/testPath",
+				InternalDBBackupPath:      "/test",
+				InternalDBStartTimeout:    10 * time.Second,
+				InternalDBDumpInterval:    20 * time.Second,
+				InternalDBRewriteInterval: 30 * time.Second,
+				InternalDBFileSizeLimit:   1024,
+			},
+			want: &ltcache.TransCacheOpts{
+				DumpPath:        "/testPath",
+				BackupPath:      "/test",
+				StartTimeout:    10 * time.Second,
+				DumpInterval:    20 * time.Second,
+				RewriteInterval: 30 * time.Second,
+				FileSizeLimit:   1024,
+			},
+		},
+		{
+			name:        "Nil storeDBOpts",
+			storeDBOpts: nil,
+			want:        nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.storeDBOpts.ToTransCacheOpts()
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ToTransCacheOpts() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

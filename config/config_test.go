@@ -5431,3 +5431,22 @@ func TestLoadConfigFromFolder(t *testing.T) {
 		t.Errorf("Expected no error, but got: %v", err)
 	}
 }
+
+func TestPrometheusAgentCfg(t *testing.T) {
+	want := &PrometheusAgentCfg{
+		Enabled:               false,
+		Path:                  "/tmp/test",
+		CollectGoMetrics:      false,
+		CollectProcessMetrics: false,
+		CacheSConns:           []string{},
+		CacheIDs:              []string{},
+		CoreSConns:            []string{},
+		ApierSConns:           []string{},
+		StatSConns:            []string{},
+		StatQueueIDs:          []string{},
+	}
+	got := cgrCfg.PrometheusAgentCfg()
+	if reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", got, want)
+	}
+}

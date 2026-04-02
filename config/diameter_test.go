@@ -105,6 +105,13 @@ func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 	if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+
+	cfgJSON2 := &DiameterAgentJsonCfg{
+		ConnHealthCheckInterval: utils.StringPointer("errduration"),
+	}
+	if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON2, jsonCfg.generalCfg.RSRSep); err == nil {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
 }
 
 func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
