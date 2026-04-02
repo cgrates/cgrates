@@ -106,6 +106,61 @@ func (acc *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Durati
 	return
 }
 
+// restoreFromBalanceSummary restores a balance from a BalanceSummary
+func (acc *Account) restoreFromBalanceSummary(bf *BalanceFilter, fltrS *FilterS) error {
+	if acc.BalanceMap == nil {
+		acc.BalanceMap = make(map[string]Balances)
+	}
+	var balance *Balance
+	var found bool
+	// check UUID if matches first
+	if bf.Uuid != nil && *bf.Uuid != "" {
+		for balanceType := range acc.BalanceMap {
+			for _, b := range acc.BalanceMap[balanceType] {
+				if b.Uuid == *bf.Uuid && !b.IsExpiredAt(time.Now()) {
+					balance = b
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	// fallback to ID match
+	if !found && bf.ID != nil && *bf.ID != "" {
+		for balanceType := range acc.BalanceMap {
+			if bf.Type != nil && *bf.Type != "" && balanceType != *bf.Type {
+				continue
+			}
+			for _, b := range acc.BalanceMap[balanceType] {
+				if b.ID == *bf.ID && !b.IsExpiredAt(time.Now()) {
+					balance = b
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	// create new balance if notfound
+	if !found {
+		if bf.Type == nil {
+			return errors.New("missing balance type")
+		}
+		balance = &Balance{}
+		balance.Uuid = utils.GenUUID()
+		acc.BalanceMap[*bf.Type] = append(acc.BalanceMap[*bf.Type], balance)
+	}
+	bf.ModifyBalance(balance)
+	acc.InitCounters()
+	acc.ExecuteActionTriggers(nil, fltrS)
+	return nil
+}
+
 // sets all the fields of the balance
 func (acc *Account) setBalanceAction(a *Action, fltrS *FilterS) error {
 	if a == nil {
