@@ -1277,7 +1277,7 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1326,7 +1326,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1375,7 +1375,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1416,7 +1416,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1454,7 +1454,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1513,7 +1513,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1566,7 +1566,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1611,7 +1611,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {

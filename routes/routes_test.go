@@ -258,7 +258,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 }
 
 func TestRoutesSortedForEvent(t *testing.T) {
-
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {

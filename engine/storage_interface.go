@@ -54,10 +54,10 @@ type DataDB interface {
 	RemoveIPAllocationsDrv(*context.Context, string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error)
+	RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error)
 	GetStatQueueProfileDrv(ctx *context.Context, tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error)

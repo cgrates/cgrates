@@ -201,7 +201,7 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
@@ -239,7 +239,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
@@ -351,7 +351,7 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 	}
@@ -385,7 +385,7 @@ func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
 		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
@@ -630,7 +630,7 @@ func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1196,7 +1196,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 			}, nil
 		},
 		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -3758,7 +3758,7 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		RemoveIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error {
+		RemoveIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -3794,16 +3794,16 @@ func TestDMRemoveIndexesReplicate(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err := dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.EmptyString, utils.NonTransactional)
+	_, err := dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if err := dm.RemoveIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.EmptyString); err != nil {
+	if err := dm.RemoveIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org"); err != nil {
 		t.Errorf("Expected error <%v>, received error <%v>", nil, err)
 	}
 
-	_, err = dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.EmptyString, utils.NonTransactional)
+	_, err = dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -3860,7 +3860,7 @@ func TestDMSetIndexesReplicate(t *testing.T) {
 	if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, indexes, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expected error <%v>, received error <%v>", nil, err)
 	}
-	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.NonTransactional, true, false); err != nil {
+	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.NonTransactional, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -3902,7 +3902,7 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 	indexes2 := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return indexes2, utils.ErrNotFound
 		},
 
@@ -3911,7 +3911,7 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 		},
 	}
 
-	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, "idxKey", utils.NonTransactional, false, true); err != utils.ErrNotFound {
+	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.NonTransactional, false, true, "idxKey"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
 	}
 
@@ -3949,7 +3949,7 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
-	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, "idxKey", utils.NonTransactional, false, true); err != utils.ErrNotImplemented {
+	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.NonTransactional, false, true, "idxKey"); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
@@ -3993,7 +3993,7 @@ func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.NonTransactional, false, true); err != utils.ErrNotImplemented {
+	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.NonTransactional, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 

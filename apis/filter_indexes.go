@@ -83,7 +83,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 	case utils.MetaAttributes:
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
-	if err = adms.dm.RemoveIndexes(ctx, arg.ItemType, tntCtx, utils.EmptyString); err != nil {
+	if err = adms.dm.RemoveIndexes(ctx, arg.ItemType, tntCtx); err != nil {
 		return
 	}
 	//generate a loadID for CacheFilterIndexes and store it in database
@@ -140,7 +140,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
 	if indexes, err = adms.dm.GetIndexes(ctx,
-		arg.ItemType, tntCtx, utils.EmptyString, utils.EmptyString, true, true); err != nil {
+		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {
 		return
 	}
 	if arg.FilterType != utils.EmptyString {

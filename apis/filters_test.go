@@ -331,7 +331,7 @@ func TestFiltersSetFiltersError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -376,7 +376,7 @@ func TestFiltersSetFiltersSetFilterError(t *testing.T) {
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotFound
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -440,7 +440,7 @@ func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 				},
 			}, utils.ErrNotFound
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -503,7 +503,7 @@ func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
@@ -569,7 +569,7 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
@@ -1176,7 +1176,7 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
@@ -1224,7 +1224,7 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {

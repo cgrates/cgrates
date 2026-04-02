@@ -485,7 +485,7 @@ func (dbM *dataDBMockError) SetActionProfileDrv(*context.Context, *utils.ActionP
 	return utils.ErrNoDatabaseConn
 }
 
-func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	return nil, nil
 }
 

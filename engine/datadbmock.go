@@ -29,7 +29,7 @@ type DataDBMock struct {
 	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
 	GetRateProfileRatesDrvF    func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
 	GetKeysForPrefixF          func(*context.Context, string, string) ([]string, error)
-	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error)
 	SetAttributeProfileDrvF    func(ctx *context.Context, attr *utils.AttributeProfile) error
@@ -81,7 +81,7 @@ type DataDBMock struct {
 	SetThresholdDrvF           func(*context.Context, *Threshold) error
 	SetStatQueueDrvF           func(*context.Context, *StoredStatQueue, *StatQueue) error
 	HasDataDrvF                func(ctx *context.Context, category, subject, tenant string) (bool, error)
-	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error
+	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error
 	GetStatQueueDrvF           func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
 }
 
@@ -219,9 +219,9 @@ func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dbM.GetIndexesDrvF != nil {
-		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, idxKey, transactionID)
+		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, transactionID, idxKeys...)
 	}
 	return nil, utils.ErrNotImplemented
 }
@@ -234,7 +234,7 @@ func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx st
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
+func (dbM *DataDBMock) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	return utils.ErrNotImplemented
 }
 

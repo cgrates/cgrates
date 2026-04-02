@@ -361,7 +361,7 @@ func (r *ReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesA
 	if err != nil {
 		return err
 	}
-	indx, err := dataDB.GetIndexesDrv(ctx, args.IdxItmType, args.TntCtx, args.IdxKey, utils.NonTransactional)
+	indx, err := dataDB.GetIndexesDrv(ctx, args.IdxItmType, args.TntCtx, utils.NonTransactional, args.IdxKeys...)
 	if err != nil {
 		return err
 	}
@@ -1205,16 +1205,18 @@ func (r *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndex
 	if err != nil {
 		return err
 	}
-	if err := dataDB.RemoveIndexesDrv(ctx, args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
+	if err := dataDB.RemoveIndexesDrv(ctx, args.IdxItmType, args.TntCtx, args.IdxKeys...); err != nil {
 		return err
 	}
 	if r.admin.cfg.GeneralCfg().CachingDelay != 0 {
 		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveIndexes> Delaying cache call for %v", r.admin.cfg.GeneralCfg().CachingDelay))
 		time.Sleep(r.admin.cfg.GeneralCfg().CachingDelay)
 	}
-	if err := r.admin.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), "", nil, args.APIOpts); err != nil {
-		return err
+	for _, idxKey := range args.IdxKeys {
+		if err := r.admin.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
+			args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, idxKey), "", nil, args.APIOpts); err != nil {
+			return err
+		}
 	}
 	*reply = utils.OK
 	return nil

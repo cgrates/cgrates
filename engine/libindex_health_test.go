@@ -303,7 +303,7 @@ func TestGetFilterAsIndexSetGetIHFltrIdxFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -331,7 +331,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache1Err(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -353,7 +353,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache2Err(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -446,7 +446,7 @@ func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -605,7 +605,7 @@ func TestGetRevFltrIdxHealthFromReverseGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -663,7 +663,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -737,7 +737,7 @@ func TestGetFltrIdxHealthForRateRatesGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
