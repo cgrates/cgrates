@@ -96,7 +96,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				case utils.MetaExists, utils.MetaNotExists:
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName)
 					var dbIndexes map[string]utils.StringSet
-					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, key, utils.NonTransactional, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, utils.NonTransactional, true, true, key); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue
@@ -109,7 +109,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, key, utils.NonTransactional, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, utils.NonTransactional, true, true, key); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue

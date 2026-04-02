@@ -23,8 +23,10 @@ package general_tests
 import (
 	"flag"
 	"fmt"
+	"path"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -45,12 +47,12 @@ func TestFilterIndexUpdates(t *testing.T) {
 	"db_conns": {
 		"*default": {
 			"db_type": "*internal",
-			"db_port": 0
+			"db_port": 0,
+			"opts": {
+				"internalDBDumpInterval": "0s",
+				"internalDBRewriteInterval": "0s"
+			}
 		}
-	},
-	"opts": {
-		"internalDBDumpInterval": "0s",
-		"internalDBRewriteInterval": "0s"
 	}
 }
 }`
@@ -60,7 +62,9 @@ func TestFilterIndexUpdates(t *testing.T) {
 	"db_conns": {
 		"*default": {
 			"db_type": "*redis",
-			"db_port": 6379
+			"db_host": "127.0.0.1",
+			"db_port": 6379,
+			"db_name": "10"
 		}
 	}
 }
@@ -71,7 +75,40 @@ func TestFilterIndexUpdates(t *testing.T) {
 	"db_conns": {
 		"*default": {
 			"db_type": "*mongo",
-			"db_port": 27017
+			"db_host": "127.0.0.1",
+			"db_port": 27017,
+			"db_name": "10",
+			"db_user": "cgrates"
+		}
+	}
+}
+}`
+	case utils.MetaMySQL:
+		cfgJSON = `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*mysql",
+			"db_host": "127.0.0.1",
+			"db_port": 3306,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
+		}
+	}
+}
+}`
+	case utils.MetaPostgres:
+		cfgJSON = `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*postgres",
+			"db_host": "127.0.0.1",
+			"db_port": 5432,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
 		}
 	}
 }
@@ -91,7 +128,11 @@ func TestFilterIndexUpdates(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer dbConn.Close()
-	if err := dbConn.Flush(""); err != nil {
+	flushPath := ""
+	if dbConnCfg.Type == utils.MetaMySQL || dbConnCfg.Type == utils.MetaPostgres {
+		flushPath = path.Join(cfg.DataFolderPath, "storage", strings.Trim(dbConnCfg.Type, "*"))
+	}
+	if err := dbConn.Flush(flushPath); err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbConn}, cfg.DbCfg())
@@ -110,7 +151,7 @@ func TestFilterIndexUpdates(t *testing.T) {
 
 		indexes, err := dm.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes, "cgrates.org",
-			"", utils.NonTransactional, true, false)
+			utils.NonTransactional, true, false)
 		if err != nil {
 			if len(want) == 0 && err == utils.ErrNotFound {
 				return
@@ -351,12 +392,12 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	"db_conns": {
 		"*default": {
 			"db_type": "*internal",
-			"db_port": 0
+			"db_port": 0,
+			"opts": {
+				"internalDBDumpInterval": "0s",
+				"internalDBRewriteInterval": "0s"
+			}
 		}
-	},
-	"opts": {
-		"internalDBDumpInterval": "0s",
-		"internalDBRewriteInterval": "0s"
 	}
 }
 }`
@@ -366,7 +407,9 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	"db_conns": {
 		"*default": {
 			"db_type": "*redis",
-			"db_port": 6379
+			"db_host": "127.0.0.1",
+			"db_port": 6379,
+			"db_name": "10"
 		}
 	}
 }
@@ -377,7 +420,40 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	"db_conns": {
 		"*default": {
 			"db_type": "*mongo",
-			"db_port": 27017
+			"db_host": "127.0.0.1",
+			"db_port": 27017,
+			"db_name": "10",
+			"db_user": "cgrates"
+		}
+	}
+}
+}`
+	case utils.MetaMySQL:
+		cfgJSON = `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*mysql",
+			"db_host": "127.0.0.1",
+			"db_port": 3306,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
+		}
+	}
+}
+}`
+	case utils.MetaPostgres:
+		cfgJSON = `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*postgres",
+			"db_host": "127.0.0.1",
+			"db_port": 5432,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
 		}
 	}
 }
@@ -397,7 +473,11 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 		b.Fatal(err)
 	}
 	defer dbConn.Close()
-	if err := dbConn.Flush(""); err != nil {
+	flushPath := ""
+	if dbConnCfg.Type == utils.MetaMySQL || dbConnCfg.Type == utils.MetaPostgres {
+		flushPath = path.Join(cfg.DataFolderPath, "storage", strings.Trim(dbConnCfg.Type, "*"))
+	}
+	if err := dbConn.Flush(flushPath); err != nil {
 		b.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbConn}, cfg.DbCfg())

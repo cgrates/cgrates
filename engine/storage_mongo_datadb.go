@@ -1467,7 +1467,7 @@ func (ms *MongoStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 // GetIndexesDrv retrieves Indexes from DB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 // id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
-func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (map[string]utils.StringSet, error) {
+func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (map[string]utils.StringSet, error) {
 	type result struct {
 		Key   string
 		Value []string
@@ -1478,8 +1478,12 @@ func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 	}
 	dbKey := originKey
 	var q bson.M
-	if len(idxKey) != 0 {
-		q = bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey)}
+	if len(idxKeys) != 0 {
+		composedKeys := make([]string, len(idxKeys))
+		for i, idxKey := range idxKeys {
+			composedKeys[i] = utils.ConcatenatedKey(dbKey, idxKey)
+		}
+		q = bson.M{"key": bson.M{"$in": composedKeys}}
 	} else {
 		for _, character := range []string{".", "*"} {
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
@@ -1581,11 +1585,16 @@ func (ms *MongoStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 }
 
 // RemoveIndexesDrv removes the indexes
-func (ms *MongoStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) error {
-	if len(idxKey) != 0 {
+func (ms *MongoStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
+	if len(idxKeys) != 0 {
+		dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+		composedKeys := make([]string, len(idxKeys))
+		for i, idxKey := range idxKeys {
+			composedKeys[i] = utils.ConcatenatedKey(dbKey, idxKey)
+		}
 		return ms.query(ctx, func(sctx mongo.SessionContext) error {
-			dr, err := ms.getCol(ColIndx).DeleteOne(sctx,
-				bson.M{"key": utils.ConcatenatedKey(utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)})
+			dr, err := ms.getCol(ColIndx).DeleteMany(sctx,
+				bson.M{"key": bson.M{"$in": composedKeys}})
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}

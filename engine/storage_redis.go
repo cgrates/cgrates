@@ -986,26 +986,34 @@ func (rs *RedisStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 }
 
 // GetIndexesDrv retrieves Indexes from DB
-func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	if transactionID != utils.NonTransactional {
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if len(idxKey) == 0 {
+	if len(idxKeys) == 0 {
 		if err = rs.Cmd(&mp, redisHGETALL, dbKey); err != nil {
 			return
 		} else if len(mp) == 0 {
 			return nil, utils.ErrNotFound
 		}
 	} else {
+		args := make([]string, 0, 1+len(idxKeys))
+		args = append(args, dbKey)
+		args = append(args, idxKeys...)
 		var itmMpStrLst []string
-		if err = rs.Cmd(&itmMpStrLst, redisHMGET, dbKey, idxKey); err != nil {
+		if err = rs.Cmd(&itmMpStrLst, redisHMGET, args...); err != nil {
 			return
-		} else if itmMpStrLst[0] == utils.EmptyString {
+		}
+		for i, val := range itmMpStrLst {
+			if val != utils.EmptyString {
+				mp[idxKeys[i]] = val
+			}
+		}
+		if len(mp) == 0 {
 			return nil, utils.ErrNotFound
 		}
-		mp[idxKey] = itmMpStrLst[0]
 	}
 	indexes = make(map[string]utils.StringSet)
 	for k, v := range mp {
@@ -1065,11 +1073,15 @@ func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 	return
 }
 
-func (rs *RedisStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
-	if idxKey == utils.EmptyString {
-		return rs.Cmd(nil, redisDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx)
+func (rs *RedisStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+	hashKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	if len(idxKeys) == 0 {
+		return rs.Cmd(nil, redisDEL, hashKey)
 	}
-	return rs.Cmd(nil, redisHDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
+	args := make([]string, 0, 1+len(idxKeys))
+	args = append(args, hashKey)
+	args = append(args, idxKeys...)
+	return rs.Cmd(nil, redisHDEL, args...)
 }
 
 func (rs *RedisStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {

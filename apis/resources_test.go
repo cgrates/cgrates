@@ -321,7 +321,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		RemoveResourceDrvF: func(ctx *context.Context, tnt, id string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, nil
 		},
 	}

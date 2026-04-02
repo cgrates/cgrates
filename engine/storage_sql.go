@@ -1634,7 +1634,7 @@ func (sqls *SQLStorage) getAllIndexKeys(tenant, typePrefix string) ([]string, er
 
 // GetIndexesDrv retrieves Indexes from DB
 // tenants, item types, keys and values are stored in seperate columns
-func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	originItemType := utils.CacheInstanceToPrefix[idxItmType]
 	itemType := originItemType
 	if transactionID != utils.EmptyString {
@@ -1643,8 +1643,8 @@ func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 	var indexesFound []*IndexMdl
 	if err := sqls.db.Transaction(func(tx *gorm.DB) error {
 		tx = tx.Where(&IndexMdl{Tenant: tntCtx, Type: itemType})
-		if len(idxKey) != 0 {
-			tx = tx.Where(&IndexMdl{Key: idxKey})
+		if len(idxKeys) != 0 {
+			tx = tx.Where(map[string]any{"key": idxKeys})
 		}
 		return tx.Find(&indexesFound).Error
 	}); err != nil {
@@ -1721,10 +1721,11 @@ func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 }
 
 // RemoveIndexesDrv removes the indexes
-func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
-	if len(idxKey) != 0 {
+func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+	if len(idxKeys) != 0 {
 		return sqls.db.Transaction(func(tx *gorm.DB) error {
-			return tx.Where(&IndexMdl{Tenant: tntCtx, Type: idxItmType, Key: idxKey}).
+			return tx.Where(&IndexMdl{Tenant: tntCtx, Type: idxItmType}).
+				Where(map[string]any{"key": idxKeys}).
 				Delete(&IndexMdl{}).Error
 		})
 	}

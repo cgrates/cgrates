@@ -262,7 +262,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		},
 	}
 	rcvIndexes, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -288,7 +288,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	// if err != nil {
 	// 	t.Error(err)
 	// } else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -319,7 +319,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		},
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -353,7 +353,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		},
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -387,7 +387,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		},
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -398,7 +398,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -450,7 +450,7 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 		},
 	}
 	rcvIndexes, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	// if err != nil {
 	// 	t.Error(err)
 	// } else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -481,7 +481,7 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 		},
 	}
 	rcvIndexes, err = dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, attrPrf.Tenant,
-		utils.EmptyString, utils.NonTransactional, false, false)
+		utils.NonTransactional, false, false)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIndexes, expIndexes) {
@@ -581,7 +581,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 		"*notexists:*req.Cost":       {"ThP1": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -648,7 +648,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 		"*exists::*req.Cost":         {"ThP1": {}},
 		"*notexists:*req.Cost":       {"ThP1": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -670,7 +670,7 @@ func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -750,7 +750,7 @@ func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
 	}
@@ -831,7 +831,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
 					"ATTR_TEST": {},
@@ -890,7 +890,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
 					"ATTR_TEST": {},
@@ -998,7 +998,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 		},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -1032,7 +1032,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 			"StatQueueProfile3": {},
 		},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -1054,7 +1054,7 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1109,7 +1109,7 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1205,7 +1205,7 @@ func TestUpdateFilterIndexResourceIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"RL1": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -1237,7 +1237,7 @@ func TestUpdateFilterIndexResourceIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"RL1": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -1259,7 +1259,7 @@ func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1314,7 +1314,7 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1419,7 +1419,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"ID": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -1451,7 +1451,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"ID": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -1473,7 +1473,7 @@ func TestUpdateFilterIndexRouteErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1528,7 +1528,7 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1623,7 +1623,7 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"CPP_3": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -1655,7 +1655,7 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"CPP_3": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -1677,7 +1677,7 @@ func TestUpdateFilterIndexChargerErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1732,7 +1732,7 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1839,7 +1839,7 @@ func TestUpdateFilterIndexAccountsIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"1004": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -1871,7 +1871,7 @@ func TestUpdateFilterIndexAccountsIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"1004": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -1893,7 +1893,7 @@ func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
 					"ATTR_TEST": {},
@@ -1948,7 +1948,7 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2003,7 +2003,7 @@ func TestUpdateFilterIndexAttributeErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2058,7 +2058,7 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2166,7 +2166,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"ID": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -2198,7 +2198,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"ID": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -2220,7 +2220,7 @@ func TestUpdateFilterActionProfilesIndexErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2275,7 +2275,7 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2383,7 +2383,7 @@ func TestUpdateFilterIndexRateProfilesIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"ID": {}},
 	}
 
-	getindx, err := dm.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -2415,7 +2415,7 @@ func TestUpdateFilterIndexRateProfilesIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"ID": {}},
 	}
-	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, utils.EmptyString, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -2437,7 +2437,7 @@ func TestUpdateFilterRateProfilesIndexErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2492,7 +2492,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
 					"ATTR_TEST": {},
@@ -2541,7 +2541,7 @@ func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return make(map[string]utils.StringSet), utils.ErrNotImplemented
 		},
 	}
@@ -2707,7 +2707,7 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -2730,7 +2730,7 @@ func TestNewFilterIndexGetIdxErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -2972,7 +2972,7 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return nil },
@@ -3098,7 +3098,7 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateFilterIndexes: {
 					"CUSTOM_RATE2:RP2": {},
@@ -3327,7 +3327,7 @@ func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
 				tntCtx, test.keys, test.itemIDs); err != nil {
 				t.Fatalf("removeFilterIndexesForFilter() returned unexpected error: %v", err)
 			}
-			got, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, tntCtx, "", "", true, false)
+			got, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, tntCtx, "", true, false)
 			switch len(test.want) {
 			case 0:
 				if !errors.Is(err, utils.ErrNotFound) {
@@ -3442,7 +3442,7 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 			"ATTR_2": {},
 		},
 	}
-	gotIndexes, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", "", "", false, false)
+	gotIndexes, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", "", false, false)
 	if err != nil {
 		t.Fatal(err)
 	}

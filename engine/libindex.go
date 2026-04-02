@@ -50,8 +50,8 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx map[string]utils.StringSet
 		if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-			idxKey, transactionID,
-			true, false); err != nil {
+			transactionID,
+			true, false, idxKey); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -103,7 +103,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 				var rcvIndx map[string]utils.StringSet
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-					idxKey, transactionID, true, false); err != nil {
+					transactionID, true, false, idxKey); err != nil {
 					if err != utils.ErrNotFound {
 						return
 					}
@@ -121,7 +121,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-					idxKey, transactionID, true, false); err != nil {
+					transactionID, true, false, idxKey); err != nil {
 					if err != utils.ErrNotFound {
 						return
 					}
@@ -352,7 +352,7 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
-			idxItmType, utils.NonTransactional, true, false); err != nil {
+			utils.NonTransactional, true, false, idxItmType); err != nil {
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
 				return
@@ -389,7 +389,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
-			idxItmType, utils.NonTransactional, true, false); err != nil {
+			utils.NonTransactional, true, false, idxItmType); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
 				return
@@ -517,7 +517,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
 	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
-		utils.EmptyString, utils.NonTransactional, true, false); err != nil {
+		utils.NonTransactional, true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -774,7 +774,7 @@ func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmT
 
 	for _, idxKey := range removeIndexKeys {
 		fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,
-			idxKey, utils.NonTransactional, true, false)
+			utils.NonTransactional, true, false, idxKey)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return err
