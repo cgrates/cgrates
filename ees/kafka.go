@@ -47,6 +47,8 @@ func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Kafka
 	kgoOpts := []kgo.Opt{
 		kgo.SeedBrokers(cfg.ExportPath),
 		kgo.DefaultProduceTopic(topic),
+		kgo.DisableIdempotentWrite(),
+		kgo.RecordRetries(0),
 	}
 
 	if opts.Linger != nil {
