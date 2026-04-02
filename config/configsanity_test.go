@@ -551,6 +551,17 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.thresholdSCfg.Enabled = true
 
+	cfg.templates = FcTemplates{
+		utils.MetaEEs: {
+			{Tag: "XmlAttr", Path: "*req.filed", Type: "*variable",
+				AttributeID: "myattr",
+				Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+		},
+	}
+	expected = "<DiameterAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttr"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
 }
 
 func TestConfigSanityRadiusAgent(t *testing.T) {
@@ -703,6 +714,54 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.thresholdSCfg.Enabled = true
+	cfg.rpcConns["test"] = nil
+	cfg.radiusAgentCfg = &RadiusAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"test"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "attrTest",
+				RequestFields: []*FCTemplate{
+					{Tag: "XmlAttr", Path: "*req.filed", Type: "*variable",
+						AttributeID: "myattr",
+						Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+				},
+				ReplyFields: []*FCTemplate{},
+			},
+		},
+	}
+	expected = "<RadiusAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttr"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*rep.filed"
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = "myattr"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *rep path: %v", err)
+	}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*exp.filed"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *exp path: %v", err)
+	}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*cgreq.filed"
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = ""
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error without attribute_id: %v", err)
+	}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.filed", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<RadiusAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
+
 }
 
 func TestConfigSanityDNSAgent(t *testing.T) {
@@ -837,6 +896,55 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.thresholdSCfg.Enabled = true
+	cfg.rpcConns["test"] = nil
+	cfg.dnsAgentCfg = &DNSAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"test"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "attrTest",
+				RequestFields: []*FCTemplate{
+					{Tag: "XmlAttr", Path: "*req.filed", Type: "*variable",
+						AttributeID: "myattr",
+						Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+				},
+				ReplyFields: []*FCTemplate{},
+			},
+		},
+	}
+
+	expected = "<DNSAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttr"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*rep.filed"
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = "myattr"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *rep path: %v", err)
+	}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*exp.filed"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *exp path: %v", err)
+	}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*cgreq.filed"
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = ""
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error without attribute_id: %v", err)
+	}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.filed", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<DNSAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
+
 }
 
 func TestConfigSanityHTTPAgent1(t *testing.T) {
@@ -993,6 +1101,25 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.thresholdSCfg.Enabled = true
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.filed", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<HTTPAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.filed", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<HTTPAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
 }
 func TestConfigSanitySipAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
@@ -1145,6 +1272,55 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.thresholdSCfg.Enabled = true
+
+	cfg.rpcConns["test"] = nil
+	cfg.sipAgentCfg = &SIPAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"test"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "attrTest",
+				RequestFields: []*FCTemplate{
+					{Tag: "XmlAttr", Path: "*req.filed", Type: "*variable",
+						AttributeID: "myattr",
+						Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+				},
+				ReplyFields: []*FCTemplate{},
+			},
+		},
+	}
+
+	expected = "<SIPAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttr"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*rep.filed"
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = "myattr"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *rep path: %v", err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*exp.filed"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for *exp path: %v", err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*cgreq.filed"
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = ""
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error without attribute_id: %v", err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.filed", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<SIPAgent> attribute_id is only supported on *rep and *exp paths, got *req.filed at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
+	}
 }
 
 func TestConfigSanityAttributesCfg(t *testing.T) {
@@ -1478,6 +1654,17 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Filters = nil
 
+	cfg.ersCfg.Readers[0].CacheDumpFields = []*FCTemplate{
+		{Tag: "AttrTest", Path: "*req.Field", Type: "*variable", AttributeID: "myattr",
+			Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+	}
+
+	expected = "<ERs> attribute_id is only supported on *rep and *exp paths, got *req.Field at AttrTest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+	cfg.ersCfg.Readers[0].CacheDumpFields = nil
+
 	//Fields
 	cfg.ersCfg.Readers[0].Fields[0].Path = "~Field1..Field2[0]"
 	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Path"
@@ -1517,6 +1704,17 @@ func TestConfigSanityEventReader(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
+	cfg.ersCfg.Readers[0].Fields = []*FCTemplate{
+		{Tag: "AttrTest", Path: "*req.Field", Type: "*variable", AttributeID: "myattr",
+			Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+	}
+
+	expected = "<ERs> attribute_id is only supported on *rep and *exp paths, got *req.Field at AttrTest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
+	}
+	cfg.ersCfg.Readers[0].Fields = nil
 
 	cfg.eesCfg = &EEsCfg{
 		Enabled: true,
@@ -1694,6 +1892,15 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	expected = "<EEs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at exporters"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.eesCfg.Exporters[0].Fields = []*FCTemplate{
+		{Tag: "AttrTest", Path: "*req.Field", Type: "*variable", AttributeID: "myattr",
+			Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+	}
+	expected = "<EEs> attribute_id is only supported on *rep and *exp paths, got *req.Field at AttrTest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: %q, received: %q", expected, err)
 	}
 
 	cfg.eesCfg.Exporters[0].Type = utils.MetaElastic
@@ -2533,7 +2740,7 @@ func TestConfigSanityAttributeIDPath(t *testing.T) {
 			{
 				ID: "attrTest",
 				RequestFields: []*FCTemplate{
-					{Tag: "XmlAttr", Path: "*cgreq.SomeField", Type: "*variable",
+					{Tag: "XmlAttr", Path: "*req.SomeField", Type: "*variable",
 						AttributeID: "myattr",
 						Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
 				},
@@ -2542,7 +2749,7 @@ func TestConfigSanityAttributeIDPath(t *testing.T) {
 		},
 	}
 
-	expected := "<DiameterAgent> attribute_id is only supported on *rep and *exp paths, got *cgreq.SomeField at XmlAttr"
+	expected := "<DiameterAgent> attribute_id is only supported on *rep and *exp paths, got *req.SomeField at XmlAttr"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("expected: %q, received: %q", expected, err)
 	}
@@ -2565,6 +2772,16 @@ func TestConfigSanityAttributeIDPath(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].AttributeID = ""
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Errorf("unexpected error without attribute_id: %v", err)
+	}
+
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{
+		{Tag: "XmlAttrtest", Path: "*req.SomeField", Type: "*variable",
+			AttributeID: "myattr",
+			Value:       NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep)},
+	}
+	expected = "<DiameterAgent> attribute_id is only supported on *rep and *exp paths, got *req.SomeField at XmlAttrtest"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Execting %+q recieved %+q", expected, err)
 	}
 }
 func TestConfigSanityThresholdS(t *testing.T) {

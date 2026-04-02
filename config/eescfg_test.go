@@ -52,6 +52,21 @@ func TestEESClone(t *testing.T) {
 			"elsRouting":"test4",
 			"elsTimeout":"1m",
 			"elsWaitForActiveShards":"test6",
+			"elsCAPath":"test",
+			"elsDiscoverNodesOnStart":true,
+			"elsCloud": false,
+			"elsAPIKey":"test",
+			"elsCertificateFingerprint":"test",
+			"elsServiceToken":"test",
+			"elsUsername":"test",
+			"elsPassword":"test",
+			"elsEnableDebugLogger":false,
+			"elsLogger":"test",
+			"elsCompressRequestBody":false,
+			"elsCompressRequestBodyLevel":1,
+			"elsMaxRetries":2,
+			"elsDisableRetry":false,
+			"elsRetryOnStatus":[1,2],
 			"sqlMaxIdleConns":4,
 			"sqlMaxOpenConns":6,
 			"sqlConnMaxLifetime":"1m",
@@ -307,13 +322,28 @@ func TestEESClone(t *testing.T) {
 						MaxOpenConns:        utils.IntPointer(6),
 					},
 					Els: &ElsOpts{
-						Index:               utils.StringPointer("test"),
-						Refresh:             utils.StringPointer("true"),
-						OpType:              utils.StringPointer("test2"),
-						Pipeline:            utils.StringPointer("test3"),
-						Routing:             utils.StringPointer("test4"),
-						Timeout:             utils.DurationPointer(1 * time.Minute),
-						WaitForActiveShards: utils.StringPointer("test6"),
+						Index:                    utils.StringPointer("test"),
+						Refresh:                  utils.StringPointer("true"),
+						OpType:                   utils.StringPointer("test2"),
+						Pipeline:                 utils.StringPointer("test3"),
+						Routing:                  utils.StringPointer("test4"),
+						Timeout:                  utils.DurationPointer(1 * time.Minute),
+						WaitForActiveShards:      utils.StringPointer("test6"),
+						CAPath:                   utils.StringPointer("test"),
+						DiscoverNodesOnStart:     utils.BoolPointer(true),
+						Cloud:                    utils.BoolPointer(false),
+						APIKey:                   utils.StringPointer("test"),
+						CertificateFingerprint:   utils.StringPointer("test"),
+						ServiceToken:             utils.StringPointer("test"),
+						Username:                 utils.StringPointer("test"),
+						Password:                 utils.StringPointer("test"),
+						EnableDebugLogger:        utils.BoolPointer(false),
+						Logger:                   utils.StringPointer("test"),
+						CompressRequestBody:      utils.BoolPointer(false),
+						CompressRequestBodyLevel: utils.IntPointer(1),
+						MaxRetries:               utils.IntPointer(2),
+						DisableRetry:             utils.BoolPointer(false),
+						RetryOnStatus:            &[]int{1, 2},
 					},
 					Kafka: &KafkaOpts{
 						Topic: utils.StringPointer("kafka"),
@@ -1085,11 +1115,30 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
                     "elsIndex": "test",
                     "elsRefresh": "true",
                     "kafkaTopic": "test",
+					"kafkaLinger":"10ms",
+					"kafkaDeliveryTimeout":"1m",
+					"kafkaSkipTLSVerify": false,
+					"kafkaTLS": true,
+					"kafkaCAPath": "/testpath",
                     "elsOpType": "test2",
                     "elsPipeline": "test3",
                     "elsRouting": "test4",
                     "elsTimeout": "1m",
                     "elsWaitForActiveShards": "test6",
+					"elsCAPath":"test",
+					"elsDiscoverNodesOnStart":false,
+					"elsAPIKey":"test",
+					"elsCertificateFingerprint":"test",
+					"elsServiceToken":"test",
+					"elsUsername":"test",
+					"elsPassword":"test",
+					"elsEnableDebugLogger":false,
+					"elsLogger":"test",
+					"elsCompressRequestBody":false,
+					"elsCompressRequestBodyLevel":1,
+					"elsMaxRetries":2,
+					"elsDisableRetry":false,
+					"elsCloud": false,
                     "sqlMaxIdleConns": 4,
                     "sqlMaxOpenConns": 6,
                     "sqlConnMaxLifetime": "1m",
@@ -1244,14 +1293,34 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.TypeCfg:       "*file_csv",
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]any{
-					utils.KafkaTopic:                "test",
-					utils.ElsIndex:                  "test",
-					utils.ElsRefresh:                "true",
-					utils.ElsOpType:                 "test2",
-					utils.ElsPipeline:               "test3",
-					utils.ElsRouting:                "test4",
-					utils.ElsTimeout:                "1m0s",
-					utils.ElsWaitForActiveShards:    "test6",
+					utils.KafkaTopic:                  "test",
+					utils.KafkaDeliveryTimeout:        "1m0s",
+					utils.KafkaTLS:                    true,
+					utils.KafkaCAPath:                 "/testpath",
+					utils.KafkaSkipTLSVerify:          false,
+					utils.KafkaLinger:                 "10ms",
+					utils.ElsIndex:                    "test",
+					utils.ElsRefresh:                  "true",
+					utils.ElsOpType:                   "test2",
+					utils.ElsPipeline:                 "test3",
+					utils.ElsRouting:                  "test4",
+					utils.ElsTimeout:                  "1m0s",
+					utils.ElsWaitForActiveShards:      "test6",
+					utils.ElsCAPath:                   "test",
+					utils.ElsDiscoverNodesOnStart:     false,
+					utils.ElsCloud:                    false,
+					utils.ElsAPIKey:                   "test",
+					utils.ElsCertificateFingerprint:   "test",
+					utils.ElsServiceToken:             "test",
+					utils.ElsUsername:                 "test",
+					utils.ElsPassword:                 "test",
+					utils.ElsEnableDebugLogger:        false,
+					utils.ElsLogger:                   "test",
+					utils.ElsCompressRequestBody:      false,
+					utils.ElsCompressRequestBodyLevel: 1,
+					utils.ElsMaxRetries:               2,
+					utils.ElsDisableRetry:             false,
+					//utils.ElsRetryOnStatus:            &[]int{1, 2},
 					utils.SQLMaxIdleConnsCfg:        4,
 					utils.SQLMaxOpenConns:           6,
 					utils.SQLConnMaxLifetime:        "1m0s",
@@ -1700,5 +1769,95 @@ func TestKafkaOptsClone(t *testing.T) {
 	*originalOpts.CAPath = "modified/ca/path"
 	if *clonedOpts.CAPath == *originalOpts.CAPath {
 		t.Errorf("Expected cloned CAPath to be separate, got %s", *clonedOpts.CAPath)
+	}
+}
+
+func TestFailedPostsCfgClone(t *testing.T) {
+
+	tests := []struct {
+		name  string
+		fpCfg *FailedPostsCfg
+	}{
+		{
+			name: "Complete FailedPostsCfg",
+			fpCfg: &FailedPostsCfg{
+				Dir:       "/tmp/test",
+				TTL:       3 * time.Second,
+				StaticTTL: false,
+			},
+		},
+		{
+			name:  "Nil FailedPostsCfg",
+			fpCfg: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.fpCfg.Clone()
+
+			if !reflect.DeepEqual(result, tt.fpCfg) {
+				t.Errorf("Clone() = %v, want %v", result, tt.fpCfg)
+			}
+
+			if result != nil && result == tt.fpCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestFailedPostsCfgloadFromJSONCfg(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		jc      *FailedPostsJsonCfg
+		wantErr bool
+	}{
+		{
+			name:    "Nil case",
+			jc:      nil,
+			wantErr: false,
+		},
+		{
+			name: "FailedPostsJsonCfg with data",
+			jc: &FailedPostsJsonCfg{
+				Dir:       utils.StringPointer("/tmp/test"),
+				TTL:       utils.StringPointer("1m0s"),
+				StaticTTL: utils.BoolPointer(false),
+			},
+			wantErr: false,
+		},
+		{
+			name: "Error case",
+			jc: &FailedPostsJsonCfg{
+				Dir:       utils.StringPointer("/tmp/test"),
+				TTL:       utils.StringPointer("err"),
+				StaticTTL: utils.BoolPointer(false),
+			},
+			wantErr: true,
+		},
+		{
+			name: "StaticTTL nil",
+			jc: &FailedPostsJsonCfg{
+				Dir:       utils.StringPointer("/tmp/test"),
+				TTL:       utils.StringPointer("1m0s"),
+				StaticTTL: nil,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			var fpc FailedPostsCfg
+			err := fpc.loadFromJSONCfg(tt.jc)
+
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("loadFromJSONCfg() failed: %v", err)
+				}
+				return
+			}
+		})
 	}
 }
