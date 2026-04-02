@@ -106,18 +106,24 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 					itemIDs = utils.JoinStringSet(itemIDs, dbIndexes[key])
 					continue
 				}
+				idxKeys := make([]string, 0, len(fldVals))
 				for _, val := range fldVals {
-					var dbIndexes map[string]utils.StringSet // list of items matched in DB
-					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, utils.NonTransactional, true, true, key); err != nil {
-						if err == utils.ErrNotFound {
-							err = nil
-							continue
-						}
-						return
+					idxKeys = append(idxKeys,
+						utils.ConcatenatedKey(filterIndexTypes[i], fldName, val))
+				}
+				var dbIndexes map[string]utils.StringSet
+				if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, utils.NonTransactional, true, true, idxKeys...); err != nil {
+					if err == utils.ErrNotFound {
+						err = nil
+						continue
 					}
-					dbItemIDs = dbIndexes[key]
-					break // we got at least one answer back, longest prefix wins
+					return
+				}
+				for _, key := range idxKeys {
+					if ids, ok := dbIndexes[key]; ok {
+						dbItemIDs = ids
+						break // longest prefix wins
+					}
 				}
 				itemIDs = utils.JoinStringSet(itemIDs, dbItemIDs)
 			}

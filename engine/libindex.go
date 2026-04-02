@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -64,8 +65,8 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 		}
 		return
 	}
-	// in case of more filters we parse each filter rule and only for supported index types
-	// we try to get them from Cache/DataDB or if not found in this location we create them here
+	// Collect all index keys from all filter rules.
+	var idxKeys []string
 	for _, fltrID := range filterIDs {
 		var fltr *Filter
 		if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
@@ -100,39 +101,32 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 					// do not index not dynamic filters
 					continue
 				}
-				var rcvIndx map[string]utils.StringSet
-				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-					transactionID, true, false, idxKey); err != nil {
-					if err != utils.ErrNotFound {
-						return
-					}
-					err = nil
-					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-					continue
-				}
-				for idxKey, idx := range rcvIndx { // parse the received indexes
-					indexes[idxKey] = idx
-				}
+				idxKeys = append(idxKeys, idxKey)
 			}
-			// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
+			// *exists and *notexists have no values; key is just type and element.
 			if len(flt.Values) == 0 {
-				var rcvIndx map[string]utils.StringSet
-				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
-				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-					transactionID, true, false, idxKey); err != nil {
-					if err != utils.ErrNotFound {
-						return
-					}
-					err = nil
-					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-					continue
-				}
-				for idxKey, idx := range rcvIndx { // parse the received indexes
-					indexes[idxKey] = idx
-				}
+				idxKeys = append(idxKeys, utils.ConcatenatedKey(flt.Type, flt.Element[1:]))
 			}
+		}
+	}
+	if len(idxKeys) == 0 {
+		return
+	}
+
+	rcvIndx, err := dm.GetIndexes(ctx, idxItmType, tntGrp,
+		transactionID, true, false, idxKeys...)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		err = nil
+	}
+
+	maps.Copy(indexes, rcvIndx)
+	// Create empty sets for any requested keys that weren't returned.
+	for _, idxKey := range idxKeys {
+		if _, has := indexes[idxKey]; !has {
+			indexes[idxKey] = make(utils.StringSet)
 		}
 	}
 	return
@@ -772,24 +766,25 @@ func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmT
 		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 
-	for _, idxKey := range removeIndexKeys {
-		fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,
-			utils.NonTransactional, true, false, idxKey)
-		if err != nil {
-			if err != utils.ErrNotFound {
-				return err
-			}
-			continue
-		}
-		for itemID := range itemIDs {
-			fltrIdx[idxKey].Remove(itemID)
-		}
-		if err := dm.SetIndexes(ctx, idxItmType, tnt, fltrIdx, true,
-			utils.NonTransactional); err != nil {
+	fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,
+		utils.NonTransactional, true, false, removeIndexKeys...)
+	if err != nil {
+		if err != utils.ErrNotFound {
 			return err
 		}
+		return nil
 	}
-	return nil
+
+	for itemID := range itemIDs {
+		for _, idxKey := range removeIndexKeys {
+			if s, ok := fltrIdx[idxKey]; ok {
+				s.Remove(itemID)
+			}
+		}
+	}
+
+	return dm.SetIndexes(ctx, idxItmType, tnt, fltrIdx, true,
+		utils.NonTransactional)
 }
 
 // IsDynamicDPPath check dynamic path with ~*stats, ~*resources, ~*accounts, ~*libphonenumber, ~*asm to not be indexed
