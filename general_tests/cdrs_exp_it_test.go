@@ -41,6 +41,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
@@ -208,16 +209,13 @@ func testCDRsExpPrepareAMQP(t *testing.T) {
 }
 
 func testCDRsExpPrepareKafka(t *testing.T) {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	cl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
-	if err := conn.CreateTopics(kafka.TopicConfig{
-		Topic:             "cgrates_cdrs",
-		NumPartitions:     1,
-		ReplicationFactor: 1,
-	}); err != nil {
+	defer cl.Close()
+	adm := kadm.NewClient(cl)
+	if _, err := adm.CreateTopics(context.Background(), 1, 1, nil, "cgrates_cdrs"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -308,7 +306,7 @@ func testCDRsExpKafka(t *testing.T) {
 		kgo.SeedBrokers("localhost:9092"),
 		kgo.ConsumeTopics("cgrates_cdrs"),
 		kgo.ConsumerGroup("tmp"),
-		kgo.FetchMaxWait(time.Millisecond),
+		kgo.FetchMaxWait(10*time.Millisecond),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -402,12 +400,13 @@ func testCDRsExpStopHTTPServer(t *testing.T) {
 }
 
 func testCDRsExpCloseKafka(t *testing.T) {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	cl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
-	_ = conn.DeleteTopics("cgrates_cdrs")
+	defer cl.Close()
+	adm := kadm.NewClient(cl)
+	_, _ = adm.DeleteTopics(context.Background(), "cgrates_cdrs")
 }
 
 func testCDRsExpCloseAMQP(t *testing.T) {

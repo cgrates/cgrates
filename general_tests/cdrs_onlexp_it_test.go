@@ -437,7 +437,7 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 		kgo.SeedBrokers("localhost:9092"),
 		kgo.ConsumeTopics("cgrates_cdrs"),
 		kgo.ConsumerGroup("tmp"),
-		kgo.FetchMaxWait(time.Millisecond),
+		kgo.FetchMaxWait(10*time.Millisecond),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -481,10 +481,11 @@ func testCDRsOnExpStopEngine(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	kConn, err := kafka.Dial("tcp", "localhost:9092")
+	kCl, err := kgo.NewClient(kgo.SeedBrokers("localhost:9092"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer kConn.Close()
-	_ = kConn.DeleteTopics("cgrates_cdrs")
+	defer kCl.Close()
+	adm := kadm.NewClient(kCl)
+	_, _ = adm.DeleteTopics(context.Background(), "cgrates_cdrs")
 }
