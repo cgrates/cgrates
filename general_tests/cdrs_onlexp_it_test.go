@@ -87,16 +87,15 @@ func TestCDRsOnExp(t *testing.T) {
 	cdrsMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsMasterCfgDIR)
 	cdrsSlaveCfgPath = path.Join(*utils.DataDir, "conf", "samples", cdrsSlaveCfgDIR)
 
+	failedDir := t.TempDir()
 	masterNG := engine.TestEngine{
 		ConfigPath: cdrsMasterCfgPath,
-		PreStartHook: func(tb testing.TB, cfg *config.CGRConfig) {
-			if err := os.RemoveAll(cfg.EEsCfg().FailedPosts.Dir); err != nil {
-				tb.Fatal("error removing folder: ", cfg.EEsCfg().FailedPosts.Dir, err)
+		ConfigJSON: fmt.Sprintf(`{
+			"ees": {
+				"failed_posts": {"dir": "%s"},
+				"exporters": [{"id": "http_test_file", "failed_posts_dir": "%s"}]
 			}
-			if err := os.MkdirAll(cfg.EEsCfg().FailedPosts.Dir, 0700); err != nil {
-				tb.Fatal(err)
-			}
-		},
+		}`, failedDir, failedDir),
 	}
 	cdrsMasterRpc, cdrsMasterCfg = masterNG.Run(t)
 
