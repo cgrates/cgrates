@@ -1064,6 +1064,7 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 				Reconnects:             utils.IntPointer(5),
 				Max_reconnect_interval: utils.StringPointer(utils.EmptyString),
 				Ari_websocket:          utils.BoolPointer(false),
+				Subscribe_all:          utils.BoolPointer(false),
 			},
 		},
 	}

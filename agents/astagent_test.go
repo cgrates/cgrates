@@ -190,3 +190,57 @@ func TestHandleChannelDestroyedCases(t *testing.T) {
 	}
 
 }
+
+func TestHandleChannelDestroyedSubscribeAll(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	internalChan := make(chan birpc.ClientConnector, 1)
+	cM := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalChan,
+	})
+	sma, err := NewAsteriskAgent(cfg, 0, cM, new(engine.Caps))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bLegAriEv := map[string]any{
+		"type": ARIChannelDestroyed,
+		"channel": map[string]any{
+			"id":   "1775567134.8",
+			"name": "PJSIP/1002",
+			"channelvars": map[string]any{
+				utils.CGRReqType: "",
+			},
+		},
+	}
+	bLegEv := NewSMAsteriskEvent(bLegAriEv, "127.0.0.1", utils.EmptyString)
+	sma.handleChannelDestroyed(bLegEv)
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	t.Cleanup(func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	})
+
+	buf := &bytes.Buffer{}
+	log.SetOutput(buf)
+
+	aLegAriEv := map[string]any{
+		"type": ARIChannelDestroyed,
+		"channel": map[string]any{
+			"id":   "1775567133.7",
+			"name": "PJSIP/1001",
+			"channelvars": map[string]any{
+				utils.CGRReqType: "*rated",
+				utils.CGRFlags:   "*accounts+*attributes+*resources+*stats+*routes+*thresholds",
+				"CDR(answer)":    "2026-04-07 15:05:36",
+				"CDR(billsec)":   "2",
+			},
+		},
+	}
+	aLegEv := NewSMAsteriskEvent(aLegAriEv, "127.0.0.1", utils.EmptyString)
+	sma.handleChannelDestroyed(aLegEv)
+	if !strings.Contains(buf.String(), "attempting to terminate session") {
+		t.Errorf("expected channel event to be processed, got: %s", buf)
+	}
+}

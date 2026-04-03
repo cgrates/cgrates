@@ -98,15 +98,18 @@ func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) 
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
 	sma.astEvChan = make(chan map[string]any)
 	sma.astErrChan = make(chan error)
+	ariURL := fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
+		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP)
+	if connCfg.SubscribeAll {
+		ariURL += "&subscribeAll=true"
+	}
 	if connCfg.AriWebSocket {
-		sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
-			connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
+		sma.astConn, err = aringo.NewARInGO(ariURL, "http://cgrates.org",
 			connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version),
 			sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects,
 			connCfg.MaxReconnectInterval, utils.FibDuration)
 	} else {
-		sma.astConn, err = aringo.NewARInGOV1(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
-			connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
+		sma.astConn, err = aringo.NewARInGOV1(ariURL, "http://cgrates.org",
 			connCfg.User, connCfg.Password, connCfg.Address, fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version),
 			sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects,
 			connCfg.MaxReconnectInterval, utils.FibDuration)
@@ -208,13 +211,14 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		defer sma.caps.Deallocate()
 	}
 	// Subscribe for channel updates even after we leave Stasis
-	if _, err := sma.astConn.Call(aringo.HTTP_POST,
-		fmt.Sprintf("applications/%s/subscription", CGRAuthAPP), map[string]string{"eventSource": fmt.Sprintf("channel:%s", ev.ChannelID())}, nil); err != nil {
-		// Since we got error, disconnect channel
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> error: %s subscribing for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		return
+	if !sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].SubscribeAll {
+		if _, err := sma.astConn.Call(aringo.HTTP_POST,
+			fmt.Sprintf("applications/%s/subscription", CGRAuthAPP), map[string]string{"eventSource": fmt.Sprintf("channel:%s", ev.ChannelID())}, nil); err != nil {
+			sma.hangupChannel(ev.ChannelID(),
+				fmt.Sprintf("<%s> error: %s subscribing for channelID: %s",
+					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+			return
+		}
 	}
 	//authorize Session
 	authArgs := ev.V1AuthorizeArgs()

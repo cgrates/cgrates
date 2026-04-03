@@ -724,6 +724,7 @@ const CGRATES_CFG_JSON = `
 			"connect_attempts": 3,
 			"reconnects": 5,
 			"ari_websocket": false,
+			"subscribe_all": false,
 			"max_reconnect_interval": ""
 		}
 	]

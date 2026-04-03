@@ -68,7 +68,7 @@
 	"asterisk_conns":[							
 		{"address": "127.0.0.1:8088", "user": "cgrates",
 		 "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10,
-		 "ari_websocket": false
+		 "ari_websocket": false, "subscribe_all": false
 		}
 	],
 	"sessions_conns": ["*birpc_internal"],

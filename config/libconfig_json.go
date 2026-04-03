@@ -509,6 +509,7 @@ type AstConnJsonCfg struct {
 	Connect_attempts       *int
 	Reconnects             *int
 	Ari_websocket          *bool
+	Subscribe_all          *bool
 	Max_reconnect_interval *string
 }
 

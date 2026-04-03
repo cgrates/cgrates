@@ -2356,6 +2356,7 @@ const (
 	ConnectAttemptsCfg      = "connect_attempts"
 	ReconnectsCfg           = "reconnects"
 	AriWebSocketCfg         = "ari_websocket"
+	SubscribeAllCfg         = "subscribe_all"
 	MaxReconnectIntervalCfg = "max_reconnect_interval"
 	ConnectTimeoutCfg       = "connect_timeout"
 	ReplyTimeoutCfg         = "reply_timeout"
