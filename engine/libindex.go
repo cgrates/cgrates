@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -41,95 +40,74 @@ var (
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
 // is used to update the mentioned index
-func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID, transactionID string, filterIDs []string, newFlt *Filter) (indexes map[string]utils.StringSet, err error) {
+func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID, transactionID string, filterIDs []string, newFlt *Filter) (map[string]utils.StringSet, error) {
 	tntGrp := tnt
-	if grp != utils.EmptyString {
+	if grp != "" {
 		tntGrp = utils.ConcatenatedKey(tnt, grp)
 	}
-	indexes = make(map[string]utils.StringSet)
-	if len(filterIDs) == 0 { // in case of None
-		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
-		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
-			transactionID,
-			true, false, idxKey); err != nil {
-			if err != utils.ErrNotFound {
-				return
-			}
-			err = nil
-			indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-			return
-		}
-		for idxKey, idx := range rcvIndx { // parse the received indexes
-			indexes[idxKey] = idx
-		}
-		return
-	}
-	// Collect all index keys from all filter rules.
+
 	var idxKeys []string
-	for _, fltrID := range filterIDs {
-		var fltr *Filter
-		if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
-			fltr = newFlt
-		} else if fltr, err = dm.GetFilter(ctx, tnt, fltrID,
-			true, false, utils.NonTransactional); err != nil {
-			if err == utils.ErrNotFound {
-				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
-					fltrID, idxItmType, itemID)
+	if len(filterIDs) == 0 {
+		idxKeys = []string{utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)}
+	} else {
+		for _, fltrID := range filterIDs {
+			var fltr *Filter
+			if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
+				fltr = newFlt
+			} else {
+				var err error
+				if fltr, err = dm.GetFilter(ctx, tnt, fltrID, true, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
+							fltrID, idxItmType, itemID)
+					}
+					return nil, err
+				}
 			}
-			return
-		}
-		for _, flt := range fltr.Rules {
-			if !FilterIndexTypes.Has(flt.Type) ||
-				IsDynamicDPPath(flt.Element) {
-				continue
-			}
-			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-			for _, fldVal := range flt.Values {
-				if IsDynamicDPPath(fldVal) {
+			for _, flt := range fltr.Rules {
+				if !FilterIndexTypes.Has(flt.Type) || IsDynamicDPPath(flt.Element) {
 					continue
 				}
-				var idxKey string
-				if isDyn {
-					if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
+				elemIsDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+				for _, val := range flt.Values {
+					if IsDynamicDPPath(val) {
 						continue
 					}
-					idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal)
-				} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
-					idxKey = utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element)
-				} else {
-					// do not index not dynamic filters
-					continue
+					valIsDyn := strings.HasPrefix(val, utils.DynamicDataPrefix)
+					if elemIsDyn == valIsDyn {
+						continue
+					}
+					if elemIsDyn {
+						idxKeys = append(idxKeys, utils.ConcatenatedKey(flt.Type, flt.Element[1:], val))
+					} else {
+						idxKeys = append(idxKeys, utils.ConcatenatedKey(flt.Type, val[1:], flt.Element))
+					}
 				}
-				idxKeys = append(idxKeys, idxKey)
-			}
-			// *exists and *notexists have no values; key is just type and element.
-			if len(flt.Values) == 0 {
-				idxKeys = append(idxKeys, utils.ConcatenatedKey(flt.Type, flt.Element[1:]))
+				if len(flt.Values) == 0 {
+					idxKeys = append(idxKeys, utils.ConcatenatedKey(flt.Type, flt.Element[1:]))
+				}
 			}
 		}
 	}
+
 	if len(idxKeys) == 0 {
-		return
+		return map[string]utils.StringSet{}, nil
 	}
 
-	rcvIndx, err := dm.GetIndexes(ctx, idxItmType, tntGrp,
+	indexes, err := dm.GetIndexes(ctx, idxItmType, tntGrp,
 		transactionID, true, false, idxKeys...)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		err = nil
+	if err != nil && err != utils.ErrNotFound {
+		return nil, err
 	}
-
-	maps.Copy(indexes, rcvIndx)
-	// Create empty sets for any requested keys that weren't returned.
-	for _, idxKey := range idxKeys {
-		if _, has := indexes[idxKey]; !has {
-			indexes[idxKey] = make(utils.StringSet)
+	if indexes == nil {
+		indexes = make(map[string]utils.StringSet, len(idxKeys))
+	}
+	for _, key := range idxKeys {
+		if _, has := indexes[key]; !has {
+			indexes[key] = make(utils.StringSet)
 		}
 	}
-	return
+	return indexes, nil
 }
 
 // addItemToFilterIndex will add the itemID to the existing/created index and set it in the DataDB
