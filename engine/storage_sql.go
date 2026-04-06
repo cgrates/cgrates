@@ -1722,15 +1722,16 @@ func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 
 // RemoveIndexesDrv removes the indexes
 func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+	itemType := utils.CacheInstanceToPrefix[idxItmType]
 	if len(idxKeys) != 0 {
 		return sqls.db.Transaction(func(tx *gorm.DB) error {
-			return tx.Where(&IndexMdl{Tenant: tntCtx, Type: idxItmType}).
+			return tx.Where(&IndexMdl{Tenant: tntCtx, Type: itemType}).
 				Where(map[string]any{"key": idxKeys}).
 				Delete(&IndexMdl{}).Error
 		})
 	}
 	return sqls.db.Transaction(func(tx *gorm.DB) error {
-		return tx.Where(&IndexMdl{Tenant: tntCtx, Type: idxItmType}).
+		return tx.Where(&IndexMdl{Tenant: tntCtx, Type: itemType}).
 			Delete(&IndexMdl{}).Error
 	})
 }
