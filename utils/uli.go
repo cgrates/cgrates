@@ -195,7 +195,7 @@ func decodePLMN(data []byte) (mcc, mnc string) {
 	} else {
 		mnc = fmt.Sprintf("%d%d%d", mnc1, mnc2, mnc3)
 	}
-	return
+	return mcc, mnc
 }
 
 func decodeCGI(data []byte) *CGI {

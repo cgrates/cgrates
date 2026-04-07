@@ -587,7 +587,7 @@ func TestNetworkName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := networkName(tt.mcc, tt.mnc)
 
-			expErr := `unknown MCC-MNC: ` + tt.mcc + "-" + tt.mcc
+			expErr := `unknown MCC-MNC: ` + tt.mcc + "-" + tt.mnc
 
 			if err != nil && err.Error() != expErr {
 				t.Errorf("Expected error: %v, but got %v", expErr, err)

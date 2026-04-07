@@ -148,7 +148,7 @@ func TestDiamULI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Binary ULI from Wireshark capture: TAI+ECGI, MCC=547, MNC=05, TAC=1, ECI=257
+	// Binary ULI: TAI+ECGI, MCC=262, MNC=01, TAC=1, ECI=257
 	uliBytes, err := hex.DecodeString("8262f210000162f21000000101")
 	if err != nil {
 		t.Fatal(err)
