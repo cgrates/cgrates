@@ -1604,19 +1604,6 @@ func TestResourcesStoreResources(t *testing.T) {
 	}
 }
 
-func TestResourcesStoreResourceNotDirty(t *testing.T) {
-	rS := &ResourceS{}
-	r := &matchedResource{
-		dirty: utils.BoolPointer(false),
-	}
-
-	err := rS.storeResource(context.TODO(), r)
-
-	if err != nil {
-		t.Errorf("\nexpected nil, received %+v", err)
-	}
-}
-
 func TestResourcesStoreResourceOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1627,19 +1614,10 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 	rS := &ResourceS{
 		dm: engine.NewDataManager(dbCM, cfg, nil),
 	}
-	r := &matchedResource{
-		Resource: &utils.Resource{},
-		dirty:    utils.BoolPointer(true),
-	}
+	r := &utils.Resource{}
 
-	err = rS.storeResource(context.TODO(), r)
-
-	if err != nil {
+	if err = rS.storeResource(context.TODO(), r); err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
-	}
-
-	if *r.dirty != false {
-		t.Errorf("\nexpected false, received %+v", *r.dirty)
 	}
 }
 
@@ -1671,24 +1649,17 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	rS := NewResourceService(dm, cfg, nil, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
-	r := &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RES1",
-		},
-		dirty: utils.BoolPointer(true),
+	r := &utils.Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
 	}
-	engine.Cache.Set(context.Background(), utils.CacheResources, r.Resource.TenantID(), r, nil, true, "")
+	engine.Cache.Set(context.Background(), utils.CacheResources, r.TenantID(), r, nil, true, "")
 
 	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: DISCONNECTED
 `
 	if err := rS.storeResource(context.Background(), r); err == nil ||
 		err.Error() != rpcclient.ErrDisconnected.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", rpcclient.ErrDisconnected, err)
-	}
-
-	if *r.dirty != true {
-		t.Errorf("\nexpected true, received %+v", *r.dirty)
 	}
 
 	rcvlog := buf.String()
@@ -2341,7 +2312,6 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 			Usages: make(map[string]*utils.ResourceUsage),
 		},
 		ttl:     utils.DurationPointer(10 * time.Second),
-		dirty:   utils.BoolPointer(false),
 		profile: rsPrf,
 	}
 
@@ -2408,6 +2378,7 @@ func TestStoreMatchedResources(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RES1",
 		Limit:  10,
+		Stored: true,
 	}
 
 	newRSWithInterval := func(t *testing.T, interval time.Duration) (*ResourceS, *engine.DataManager) {
@@ -2421,28 +2392,23 @@ func TestStoreMatchedResources(t *testing.T) {
 		return rS, dm
 	}
 
-	t.Run("store interval zero keeps dirty flag", func(t *testing.T) {
+	t.Run("store interval zero is a no-op", func(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 0)
-		dirty := true
 		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
-			dirty: &dirty,
+			profile: resPrf,
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
 			t.Fatalf("unexpected error: %v", err)
-		}
-		if !*res[0].dirty {
-			t.Error("Expected dirty flag to remain true when StoreInterval is 0")
 		}
 	})
 
 	t.Run("positive interval queues to storedResources", func(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 10*time.Second)
-		dirty := true
 		res := Resources{
 			{
 				Resource: &utils.Resource{
@@ -2450,7 +2416,7 @@ func TestStoreMatchedResources(t *testing.T) {
 					ID:     "RES1",
 					Usages: map[string]*utils.ResourceUsage{},
 				},
-				dirty: &dirty,
+				profile: resPrf,
 			},
 			{
 				Resource: &utils.Resource{
@@ -2458,14 +2424,11 @@ func TestStoreMatchedResources(t *testing.T) {
 					ID:     "RES2",
 					Usages: map[string]*utils.ResourceUsage{},
 				},
-				dirty: &dirty,
+				profile: resPrf,
 			},
 		}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
 			t.Fatalf("unexpected error: %v", err)
-		}
-		if !*res[0].dirty || !*res[1].dirty {
-			t.Error("Expected dirty flags to be true")
 		}
 		if !rS.storedResources.Has("cgrates.org:RES1") || !rS.storedResources.Has("cgrates.org:RES2") {
 			t.Error("Expected both resources in storedResources set")
@@ -2477,14 +2440,12 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("negative interval stores to DB", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
-		dirty := true
 		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
-			dirty:   &dirty,
 			profile: resPrf,
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
@@ -2499,7 +2460,7 @@ func TestStoreMatchedResources(t *testing.T) {
 		}
 	})
 
-	t.Run("nil dirty flag skips store", func(t *testing.T) {
+	t.Run("Stored false skips store", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
 		res := Resources{{
 			Resource: &utils.Resource{
@@ -2507,20 +2468,19 @@ func TestStoreMatchedResources(t *testing.T) {
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
 			},
-			dirty: nil,
+			profile: &utils.ResourceProfile{Stored: false},
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		_, err := dm.GetResource(context.Background(), "cgrates.org", "RES1", false, false, "")
 		if err == nil {
-			t.Error("Expected resource with nil dirty flag not to be stored")
+			t.Error("Expected resource with Stored=false not to be stored")
 		}
 	})
 
 	t.Run("stores resource with usages", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
-		dirty := true
 		res := Resources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
@@ -2541,7 +2501,6 @@ func TestStoreMatchedResources(t *testing.T) {
 				},
 				TTLIdx: []string{"USAGE1", "USAGE2"},
 			},
-			dirty:   &dirty,
 			profile: resPrf,
 		}}
 		if err := rS.storeMatchedResources(context.Background(), res); err != nil {
