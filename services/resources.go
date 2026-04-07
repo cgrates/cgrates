@@ -73,7 +73,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 
 	reS.mu.Lock()
 	defer reS.mu.Unlock()
-	reS.reS = resources.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
+	reS.reS = resources.NewResourceService(reS.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)

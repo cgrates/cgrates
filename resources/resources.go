@@ -188,63 +188,63 @@ func (rs Resources) allocateResource(ru *utils.ResourceUsage, dryRun bool) (allo
 	return allocMsg, nil
 }
 
-// NewResourceService  returns a new ResourceService
-func NewResourceService(dm *engine.DataManager, cgrcfg *config.CGRConfig,
-	filterS *engine.FilterS, connMgr *engine.ConnManager) *ResourceS {
-	return &ResourceS{dm: dm,
+// NewResourceService returns a new ResourceService
+func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
+	filters *engine.FilterS, cm *engine.ConnManager) *ResourceS {
+	return &ResourceS{
+		cfg:             cfg,
+		dm:              dm,
+		filters:         filters,
+		cm:              cm,
 		storedResources: make(utils.StringSet),
-		cfg:             cgrcfg,
-		fltrS:           filterS,
 		loopStopped:     make(chan struct{}),
 		stopBackup:      make(chan struct{}),
-		connMgr:         connMgr,
 	}
-
 }
 
 // ResourceS is the service handling resources
 type ResourceS struct {
-	dm              *engine.DataManager // So we can load the data in cache and index it
-	fltrS           *engine.FilterS
+	cfg             *config.CGRConfig
+	dm              *engine.DataManager
+	filters         *engine.FilterS
+	cm              *engine.ConnManager
 	storedResources utils.StringSet // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
-	cfg             *config.CGRConfig
-	stopBackup      chan struct{} // control storing process
+	stopBackup      chan struct{}   // control storing process
 	loopStopped     chan struct{}
-	connMgr         *engine.ConnManager
 }
 
 // Reload stops the backupLoop and restarts it
-func (rS *ResourceS) Reload(ctx *context.Context) {
-	close(rS.stopBackup)
-	<-rS.loopStopped // wait until the loop is done
-	rS.stopBackup = make(chan struct{})
-	go rS.runBackup(ctx)
+func (s *ResourceS) Reload(ctx *context.Context) {
+	close(s.stopBackup)
+	<-s.loopStopped // wait until the loop is done
+	s.stopBackup = make(chan struct{})
+	go s.runBackup(ctx)
 }
 
 // StartLoop starts the gorutine with the backup loop
-func (rS *ResourceS) StartLoop(ctx *context.Context) {
-	go rS.runBackup(ctx)
+func (s *ResourceS) StartLoop(ctx *context.Context) {
+	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (rS *ResourceS) Shutdown(ctx *context.Context) {
-	close(rS.stopBackup)
-	rS.storeResources(ctx)
+func (s *ResourceS) Shutdown(ctx *context.Context) {
+	close(s.stopBackup)
+	s.storeResources(ctx)
 }
 
 // backup will regularly store resources changed to dataDB
-func (rS *ResourceS) runBackup(ctx *context.Context) {
-	storeInterval := rS.cfg.ResourceSCfg().StoreInterval
+func (s *ResourceS) runBackup(ctx *context.Context) {
+	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
-		rS.loopStopped <- struct{}{}
+		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
-		rS.storeResources(ctx)
+		s.storeResources(ctx)
 		select {
-		case <-rS.stopBackup:
-			rS.loopStopped <- struct{}{}
+		case <-s.stopBackup:
+			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
@@ -252,15 +252,15 @@ func (rS *ResourceS) runBackup(ctx *context.Context) {
 }
 
 // storeResources represents one task of complete backup
-func (rS *ResourceS) storeResources(ctx *context.Context) {
+func (s *ResourceS) storeResources(ctx *context.Context) {
 	var failedRIDs []string
 	for { // don't stop until we store all pending resources
-		rS.srMux.Lock()
-		rID := rS.storedResources.GetOne()
+		s.srMux.Lock()
+		rID := s.storedResources.GetOne()
 		if rID != "" {
-			rS.storedResources.Remove(rID)
+			s.storedResources.Remove(rID)
 		}
-		rS.srMux.Unlock()
+		s.srMux.Unlock()
 		if rID == "" {
 			break // no more keys, backup completed
 		}
@@ -271,9 +271,9 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 		}
 		r := rIf.(*utils.Resource)
 		lkID := guardian.Guardian.GuardIDs("",
-			rS.cfg.GeneralCfg().LockingTimeout,
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ResourceLockKey(r.Tenant, r.ID))
-		if err := rS.storeResource(ctx, r); err != nil {
+		if err := s.storeResource(ctx, r); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
 		}
 		guardian.Guardian.UnguardIDs(lkID)
@@ -281,15 +281,15 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedRIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		rS.srMux.Lock()
-		rS.storedResources.AddSlice(failedRIDs)
-		rS.srMux.Unlock()
+		s.srMux.Lock()
+		s.storedResources.AddSlice(failedRIDs)
+		s.srMux.Unlock()
 	}
 }
 
 // storeResource stores the resource in DB and updates cache.
-func (rS *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
-	if err := rS.dm.SetResource(ctx, r); err != nil {
+func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
+	if err := s.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
@@ -309,23 +309,23 @@ func (rS *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) erro
 }
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
-func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources) error {
-	if rS.cfg.ResourceSCfg().StoreInterval == 0 {
+func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources) error {
+	if s.cfg.ResourceSCfg().StoreInterval == 0 {
 		return nil
 	}
-	if rS.cfg.ResourceSCfg().StoreInterval > 0 {
-		rS.srMux.Lock()
-		defer rS.srMux.Unlock()
+	if s.cfg.ResourceSCfg().StoreInterval > 0 {
+		s.srMux.Lock()
+		defer s.srMux.Unlock()
 	}
 	for _, r := range mtcRLs {
 		if !r.profile.Stored {
 			continue
 		}
-		if rS.cfg.ResourceSCfg().StoreInterval > 0 {
-			rS.storedResources.Add(r.Resource.TenantID())
+		if s.cfg.ResourceSCfg().StoreInterval > 0 {
+			s.storedResources.Add(r.Resource.TenantID())
 			continue
 		}
-		if err := rS.storeResource(ctx, r.Resource); err != nil {
+		if err := s.storeResource(ctx, r.Resource); err != nil {
 			return err
 		}
 	}
@@ -333,8 +333,8 @@ func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resource
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) error {
-	threshConns, err := engine.GetConnIDs(ctx, rS.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, rS.fltrS)
+func (s *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) error {
+	threshConns, err := engine.GetConnIDs(ctx, s.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, s.filters)
 	if err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 			APIOpts: opts,
 		}
 		var tIDs []string
-		if err := rS.connMgr.Call(ctx, threshConns,
+		if err := s.cm.Call(ctx, threshConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(r.profile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -381,7 +381,7 @@ func (rS *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts 
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
+func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, unlock func(), err error) {
 
 	var lockIDs []string
@@ -415,14 +415,14 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 
 	} else { // select the resourceIDs out of dataDB
 		rIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
-			rS.cfg.ResourceSCfg().StringIndexedFields,
-			rS.cfg.ResourceSCfg().PrefixIndexedFields,
-			rS.cfg.ResourceSCfg().SuffixIndexedFields,
-			rS.cfg.ResourceSCfg().ExistsIndexedFields,
-			rS.cfg.ResourceSCfg().NotExistsIndexedFields,
-			rS.dm, utils.CacheResourceFilterIndexes, tnt,
-			rS.cfg.ResourceSCfg().IndexedSelects,
-			rS.cfg.ResourceSCfg().NestedFields,
+			s.cfg.ResourceSCfg().StringIndexedFields,
+			s.cfg.ResourceSCfg().PrefixIndexedFields,
+			s.cfg.ResourceSCfg().SuffixIndexedFields,
+			s.cfg.ResourceSCfg().ExistsIndexedFields,
+			s.cfg.ResourceSCfg().NotExistsIndexedFields,
+			s.dm, utils.CacheResourceFilterIndexes, tnt,
+			s.cfg.ResourceSCfg().IndexedSelects,
+			s.cfg.ResourceSCfg().NestedFields,
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -437,10 +437,10 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 	weights := make(map[string]float64) // stores sorting weights by resource ID
 	for resName := range rIDs {
 		lkID := guardian.Guardian.GuardIDs("",
-			rS.cfg.GeneralCfg().LockingTimeout,
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ResourceLockKey(tnt, resName))
 
-		rp, err := rS.dm.GetResourceProfile(ctx, tnt, resName,
+		rp, err := s.dm.GetResourceProfile(ctx, tnt, resName,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
@@ -451,7 +451,7 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 			return nil, nil, err
 		}
 
-		pass, err := rS.fltrS.Pass(ctx, tnt, rp.FilterIDs, evNm)
+		pass, err := s.filters.Pass(ctx, tnt, rp.FilterIDs, evNm)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			unlockAll()
@@ -462,14 +462,14 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 			continue
 		}
 
-		res, err := rS.dm.GetResource(ctx, rp.Tenant, rp.ID, true, true, "")
+		res, err := s.dm.GetResource(ctx, rp.Tenant, rp.ID, true, true, "")
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			unlockAll()
 			return nil, nil, err
 		}
 
-		weight, err := engine.WeightFromDynamics(ctx, rp.Weights, rS.fltrS, tnt, evNm)
+		weight, err := engine.WeightFromDynamics(ctx, rp.Weights, s.filters, tnt, evNm)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			unlockAll()

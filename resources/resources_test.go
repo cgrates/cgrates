@@ -46,7 +46,7 @@ func newTestResourceS(t *testing.T) (*ResourceS, *engine.DataManager) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
+	rS := NewResourceService(cfg, dm, fltrs, nil)
 	return rS, dm
 }
 
@@ -61,7 +61,7 @@ func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg, fltrs, nil)
+	rS := NewResourceService(cfg, dm, fltrs, nil)
 	return rS, dm
 }
 
@@ -1119,7 +1119,7 @@ func TestResourceCaching(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg,
+	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 
 	resProf := &utils.ResourceProfile{
@@ -1647,7 +1647,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
-	rS := NewResourceService(dm, cfg, nil, nil)
+	rS := NewResourceService(cfg, dm, nil, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	r := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -1754,10 +1754,10 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceS{
-		cfg:     cfg,
-		connMgr: engine.NewConnManager(cfg),
+		cfg: cfg,
+		cm:  engine.NewConnManager(cfg),
 	}
-	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
+	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -1820,10 +1820,10 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceS{
-		cfg:     cfg,
-		connMgr: engine.NewConnManager(cfg),
+		cfg: cfg,
+		cm:  engine.NewConnManager(cfg),
 	}
-	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
+	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -1881,7 +1881,7 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	rS := NewResourceService(dmRES, cfg,
+	rS := NewResourceService(cfg, dmRES,
 		fltrs, nil)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
@@ -1901,7 +1901,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	rS := NewResourceService(dmRES, cfg,
+	rS := NewResourceService(cfg, dmRES,
 		fltrs, nil)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringSet{"Res2": {}}, nil, true, utils.NonTransactional)
@@ -1921,7 +1921,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg,
+	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
@@ -1962,7 +1962,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg,
+	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
@@ -2050,7 +2050,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg,
+	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 
 	ids := utils.StringSet{}
@@ -2198,7 +2198,7 @@ func TestResourcesStartLoop(t *testing.T) {
 // 		t.Fatal(err)
 // 	}
 
-// 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+// 	rS := NewResourceService(cfg, dm, fltrs, connMgr)
 // 	ev := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
 // 		ID:     "TestMatchingResourcesForEvent",
@@ -2235,7 +2235,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+	rS := NewResourceService(cfg, dm, fltrs, connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
@@ -2296,7 +2296,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+	rS := NewResourceService(cfg, dm, fltrs, connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
@@ -2339,7 +2339,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(dm, cfg,
+	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 
 	ids := utils.StringSet{}
