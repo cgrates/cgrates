@@ -38,7 +38,6 @@ type matchedResource struct {
 	Resource   *utils.Resource
 	ttl        *time.Duration
 	totalUsage *float64
-	dirty      *bool // the usages were modified, needs save, *bool so we only save if enabled in config
 	profile    *utils.ResourceProfile
 }
 
@@ -255,7 +254,7 @@ func (rS *ResourceS) runBackup(ctx *context.Context) {
 // storeResources represents one task of complete backup
 func (rS *ResourceS) storeResources(ctx *context.Context) {
 	var failedRIDs []string
-	for { // don't stop until we store all dirty resources
+	for { // don't stop until we store all pending resources
 		rS.srMux.Lock()
 		rID := rS.storedResources.GetOne()
 		if rID != "" {
@@ -270,16 +269,10 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
 			continue
 		}
-		r := &matchedResource{
-			Resource: rIf.(*utils.Resource),
-			// NOTE: dirty is hardcoded to true, otherwise resources would
-			// never be stored.
-			// Previously, dirty was part of the cached resource.
-			dirty: utils.BoolPointer(true),
-		}
+		r := rIf.(*utils.Resource)
 		lkID := guardian.Guardian.GuardIDs("",
 			rS.cfg.GeneralCfg().LockingTimeout,
-			utils.ResourceLockKey(r.Resource.Tenant, r.Resource.ID))
+			utils.ResourceLockKey(r.Tenant, r.ID))
 		if err := rS.storeResource(ctx, r); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
 		}
@@ -294,20 +287,17 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 	}
 }
 
-// StoreResource stores the resource in DB and corrects dirty flag
-func (rS *ResourceS) storeResource(ctx *context.Context, r *matchedResource) error {
-	if r.dirty == nil || !*r.dirty {
-		return nil
-	}
-	if err := rS.dm.SetResource(ctx, r.Resource); err != nil {
+// storeResource stores the resource in DB and updates cache.
+func (rS *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
+	if err := rS.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
-				r.Resource.ID, err.Error()))
+				r.ID, err.Error()))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := r.Resource.TenantID(); engine.Cache.HasItem(utils.CacheResources, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r.Resource, nil,
+	if tntID := r.TenantID(); engine.Cache.HasItem(utils.CacheResources, tntID) { // only cache if previously there
+		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> failed caching Resource with ID: %s, error: %s",
@@ -315,7 +305,6 @@ func (rS *ResourceS) storeResource(ctx *context.Context, r *matchedResource) err
 			return err
 		}
 	}
-	*r.dirty = false
 	return nil
 }
 
@@ -329,17 +318,16 @@ func (rS *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resource
 		defer rS.srMux.Unlock()
 	}
 	for _, r := range mtcRLs {
-		if r.dirty != nil {
-			*r.dirty = true // mark it to be saved
-			if rS.cfg.ResourceSCfg().StoreInterval > 0 {
-				rS.storedResources.Add(r.Resource.TenantID())
-				continue
-			}
-			if err := rS.storeResource(ctx, r); err != nil {
-				return err
-			}
+		if !r.profile.Stored {
+			continue
 		}
-
+		if rS.cfg.ResourceSCfg().StoreInterval > 0 {
+			rS.storedResources.Add(r.Resource.TenantID())
+			continue
+		}
+		if err := rS.storeResource(ctx, r.Resource); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -493,9 +481,6 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 		r := &matchedResource{
 			Resource: res,
 			profile:  rp,
-		}
-		if rp.Stored && r.dirty == nil {
-			r.dirty = utils.BoolPointer(false)
 		}
 		if usageTTL != nil {
 			if *usageTTL != 0 {
