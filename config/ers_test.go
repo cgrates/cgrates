@@ -41,7 +41,9 @@ func TestERSClone(t *testing.T) {
 			"flags": ["*dryrun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
-			"opts": {},
+			"opts": {
+				"xmlRootPath": "A.B"
+			},
 			"tenant": "~*req.Destination1",											
 			"timezone": "",										
 			"filters": ["randomFiletrs"],										
@@ -166,6 +168,7 @@ func TestERSClone(t *testing.T) {
 					AWS:                &AWSROpts{},
 					SQL:                &SQLROpts{},
 					Kafka:              &KafkaROpts{},
+					XMLRootPath:        utils.StringPointer("A.B"),
 					PartialOrderField:  utils.StringPointer("~*req.AnswerTime"),
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
 					NATS: &NATSROpts{
@@ -1463,6 +1466,9 @@ func TestEventReaderOptsCfg(t *testing.T) {
 		AMQPRoutingKey:           utils.StringPointer("key1"),
 		KafkaTopic:               utils.StringPointer("kafka"),
 		KafkaMaxWait:             utils.StringPointer("1m"),
+		KafkaTLS:                 utils.BoolPointer(false),
+		KafkaCAPath:              utils.StringPointer("path"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(true),
 		SQLDBName:                utils.StringPointer("dbname"),
 		SQLTableName:             utils.StringPointer("tablename"),
 		SQLBatchSize:             utils.IntPointer(-1),

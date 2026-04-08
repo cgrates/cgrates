@@ -43,6 +43,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
+		Caching_delay:        utils.StringPointer("5s"),
 	}
 
 	expected := &GeneralCfg{
@@ -66,6 +67,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
+		CachingDelay:     5 * time.Second,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -104,6 +106,14 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	jsonCfg = NewDefaultCGRConfig()
 	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %v", expected, err)
+	}
+
+	cfgJSON3 := &GeneralJsonCfg{
+		Caching_delay: utils.StringPointer("1ss"),
+	}
+	jsonCfg = NewDefaultCGRConfig()
+	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 

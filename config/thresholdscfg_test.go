@@ -145,6 +145,7 @@ func TestThresholdSCfgClone(t *testing.T) {
 		Enabled:             true,
 		IndexedSelects:      true,
 		StoreInterval:       2,
+		EEsExporterIDs:      []string{"idTest"},
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
@@ -194,6 +195,11 @@ func TestThresholdSCfgLoadFromJSONCfgSessionsConns(t *testing.T) {
 				Sessions_conns: []string{"conn1", utils.MetaInternal},
 			},
 			expectedOutput: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		},
+		{
+			name:           "Nil Sessions_conns",
+			input:          nil,
+			expectedOutput: nil,
 		},
 	}
 	for _, tt := range tests {
@@ -283,13 +289,14 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 				Opts:                &ThresholdsOpts{},
 			},
 			expectedOutput: map[string]any{
-				"EnabledCfg":        true,
-				"IndexedSelectsCfg": 10,
-				"NestedFieldsCfg":   "nested",
-				"StoreIntervalCfg":  "EmptyString",
-				"OptsCfg": map[string]any{
-					"MetaProfileIDs":              nil,
-					"MetaProfileIgnoreFiltersCfg": nil,
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              nil,
+					utils.MetaProfileIgnoreFiltersCfg: false,
 				},
 			},
 		},
@@ -300,7 +307,7 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 				IndexedSelects:      true,
 				StoreInterval:       0,
 				NestedFields:        true,
-				SessionSConns:       []string{"conn1", "conn2", "MetaInternal"},
+				SessionSConns:       []string{"conn1", "conn2", utils.MetaInternal},
 				ApierSConns:         nil,
 				StringIndexedFields: nil,
 				PrefixIndexedFields: nil,
@@ -308,15 +315,70 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 				Opts:                &ThresholdsOpts{},
 			},
 			expectedOutput: map[string]any{
-				"EnabledCfg":        true,
-				"IndexedSelectsCfg": 10,
-				"NestedFieldsCfg":   "nested",
-				"StoreIntervalCfg":  "EmptyString",
-				"OptsCfg": map[string]any{
-					"ProfileIDs":              nil,
-					"ProfileIgnoreFiltersCfg": nil,
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              nil,
+					utils.MetaProfileIgnoreFiltersCfg: false,
 				},
-				"SessionSConnsCfg": []string{"conn1", "conn2", "MetaInternal"},
+				utils.SessionSConnsCfg: []string{"conn1", "conn2", utils.MetaInternal},
+			},
+		},
+		{
+			name: "SessionSConns has MetaInternal and MetaSessionS",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              nil,
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.SessionSConnsCfg: []string{utils.MetaInternal},
+			},
+		},
+		{
+			name: "SessionSConns with conn and meta-s",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              nil,
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.SessionSConnsCfg: []string{"conn1", utils.MetaInternal},
 			},
 		},
 	}
@@ -324,13 +386,213 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			output := tt.cfg.AsMapInterface()
 
-			if reflect.DeepEqual(output, tt.expectedOutput) {
-				t.Errorf("Expected %v, got %v", tt.expectedOutput, output)
+			if !reflect.DeepEqual(utils.ToJSON(output), utils.ToJSON(tt.expectedOutput)) {
+				t.Errorf("Expected %#v \n, received %#v", tt.expectedOutput, output)
 			}
 		})
 	}
 }
 
+func TestThresholdSCfgLoadFromJSONCfgEesConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            *ThresholdSJsonCfg
+		expectedOutput []string
+	}{
+		{
+			name: "Nil Ees_conn",
+			cfg: &ThresholdSJsonCfg{
+				Ees_conns: nil,
+			},
+			expectedOutput: nil,
+		},
+		{
+			name: "Ees_conn with MetaInternal and MetaEEs",
+			cfg: &ThresholdSJsonCfg{
+				Ees_conns: utils.SliceStringPointer([]string{utils.MetaInternal, utils.MetaEEs}),
+			},
+			expectedOutput: []string{utils.MetaInternal, utils.MetaEEs},
+		},
+		{
+			name: "Ees_conn empty",
+			cfg: &ThresholdSJsonCfg{
+				Ees_conns: utils.SliceStringPointer([]string{}),
+			},
+			expectedOutput: []string{},
+		},
+		{
+			name: "Ees_conns with values",
+			cfg: &ThresholdSJsonCfg{
+				Ees_conns: utils.SliceStringPointer([]string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}),
+			},
+			expectedOutput: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg ThresholdSCfg
+			err := cfg.loadFromJSONCfg(tt.cfg)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if len(cfg.EEsConns) != len(tt.expectedOutput) {
+				t.Fatalf("Expected %v, got %v", tt.expectedOutput, cfg.EEsConns)
+			}
+		})
+	}
+}
+
+func TestThresholdSCfgAsMapInterfaceEEsConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            ThresholdSCfg
+		expectedOutput map[string]any
+	}{
+		{
+			name: "EEsConns is Empty",
+			cfg: ThresholdSCfg{
+				EEsConns:       []string{},
+				Enabled:        true,
+				IndexedSelects: true,
+				StoreInterval:  0,
+				NestedFields:   true,
+				SessionSConns:  nil,
+				Opts:           &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.EEsConnsCfg: []string{},
+			},
+		},
+		{
+			name: "EEsConns is Nil",
+			cfg: ThresholdSCfg{
+				EEsConns:       nil,
+				Enabled:        true,
+				IndexedSelects: true,
+				StoreInterval:  0,
+				NestedFields:   true,
+				SessionSConns:  nil,
+				Opts:           &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+			},
+		},
+		{
+			name: "EEsConns has values",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{"conn1", "conn2"},
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+				EEsConns:            []string{"conn1", "conn2"},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.SessionSConnsCfg: []string{"conn1", "conn2"},
+				utils.EEsConnsCfg:      []string{"conn1", "conn2"},
+			},
+		},
+		{
+			name: "EEsConns has MetaInternal and MetaSessionS",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+				EEsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.SessionSConnsCfg: []string{utils.MetaInternal},
+				utils.EEsConnsCfg:      []string{utils.MetaInternal},
+			},
+		},
+		{
+			name: "EEsConns has values and MetaInternal",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+				EEsConns:            []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.SessionSConnsCfg: []string{"conn1", utils.MetaInternal},
+				utils.EEsConnsCfg:      []string{"conn1", utils.MetaInternal},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := tt.cfg.AsMapInterface()
+
+			if !reflect.DeepEqual(utils.ToJSON(output), utils.ToJSON(tt.expectedOutput)) {
+				t.Errorf("Expected %#v \n, received %#v", tt.expectedOutput, output)
+			}
+		})
+	}
+}
 func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -352,14 +614,42 @@ func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
 				Opts:                &ThresholdsOpts{},
 			},
 			expectedOutput: map[string]any{
-				"EnabledCfg":        true,
-				"IndexedSelectsCfg": 10,
-				"NestedFieldsCfg":   "nested",
-				"StoreIntervalCfg":  "EmptyString",
-				"OptsCfg": map[string]any{
-					"MetaProfileIDs":              nil,
-					"MetaProfileIgnoreFiltersCfg": nil,
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
 				},
+			},
+		},
+		{
+			name: "ApierSConns is Empty",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       nil,
+				ApierSConns:         []string{},
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.ApierSConnsCfg: []string{},
 			},
 		},
 		{
@@ -369,7 +659,7 @@ func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
 				IndexedSelects:      true,
 				StoreInterval:       0,
 				NestedFields:        true,
-				ApierSConns:         []string{"conn1", "conn2", "MetaInternal"},
+				ApierSConns:         []string{"conn1", "conn2", utils.MetaInternal},
 				SessionSConns:       nil,
 				StringIndexedFields: nil,
 				PrefixIndexedFields: nil,
@@ -377,15 +667,70 @@ func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
 				Opts:                &ThresholdsOpts{},
 			},
 			expectedOutput: map[string]any{
-				"EnabledCfg":        true,
-				"IndexedSelectsCfg": 10,
-				"NestedFieldsCfg":   "nested",
-				"StoreIntervalCfg":  "EmptyString",
-				"OptsCfg": map[string]any{
-					"ProfileIDs":              nil,
-					"ProfileIgnoreFiltersCfg": nil,
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
 				},
-				"ApierSConnsCfg": []string{"conn1", "conn2", "MetaInternal"},
+				utils.ApierSConnsCfg: []string{"conn1", "conn2", utils.MetaInternal},
+			},
+		},
+		{
+			name: "ApierSConns has conn1 and meta-s",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       nil,
+				ApierSConns:         []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)},
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.ApierSConnsCfg: []string{"conn1", utils.MetaInternal},
+			},
+		},
+		{
+			name: "ApierSConns has MetaInternal and MetaApier",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       nil,
+				ApierSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)},
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.EEsExporterIDsCfg: []string{},
+				utils.IndexedSelectsCfg: true,
+				utils.NestedFieldsCfg:   true,
+				utils.StoreIntervalCfg:  "",
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string(nil),
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+				utils.ApierSConnsCfg: []string{utils.MetaInternal},
 			},
 		},
 	}
@@ -393,8 +738,8 @@ func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			output := tt.cfg.AsMapInterface()
 
-			if reflect.DeepEqual(output, tt.expectedOutput) {
-				t.Errorf("Expected %v, got %v", tt.expectedOutput, output)
+			if !reflect.DeepEqual(utils.ToJSON(output), utils.ToJSON(tt.expectedOutput)) {
+				t.Errorf("Expected %#v \n, received %#v", tt.expectedOutput, output)
 			}
 		})
 	}

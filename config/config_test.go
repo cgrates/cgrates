@@ -1341,6 +1341,101 @@ func TestLoadDNSAgentCfgError(t *testing.T) {
 	}
 }
 
+func TestLoadPrometheusAgentCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"prometheus_agent": {
+				 "stats_conns": [1],
+			},
+		}`
+	expected := "json: cannot unmarshal number into Go struct field PrometheusAgentJsonCfg.stats_conns of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadPrometheusAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected \n%+v\n, \nreceived \n%+v", expected, err)
+	}
+}
+
+func TestLoadRankingSCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"rankings": {
+				 "stats_conns": [1],
+			},
+		}`
+	expected := "json: cannot unmarshal number into Go struct field RankingsJsonCfg.Stats_conns of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadRankingSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected \n%+v\n, \nreceived \n%+v", expected, err)
+	}
+}
+func TestLoadTrendSCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"trends": {
+				 "stats_conns": [1],
+			},
+		}`
+	expected := "json: cannot unmarshal number into Go struct field TrendsJsonCfg.Stats_conns of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadTrendSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected \n%+v\n, \nreceived \n%+v", expected, err)
+	}
+}
+func TestLoadJanusAgentCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"janus_agent": {
+					"janus_conns": [{			
+						"type": 1,					
+					}],
+			},
+
+		}`
+	expected := "json: cannot unmarshal number into Go struct field JanusConnJsonCfg.janus_conns.type of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadJanusAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoadIPsCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"ips": {
+				"opts": {
+					"*allocationID": 2,
+					"*ttl":2,
+				}
+			},
+
+		}`
+	expected := "json: cannot unmarshal number into Go struct field IPsOptsJson.opts.*allocationID of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadIPsCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+func TestLoadSentryPeerCgrCfgError(t *testing.T) {
+	cfgJSONStr := `{
+			"sentrypeer": {
+				"client_id":1,
+			},
+
+		}`
+	expected := "json: cannot unmarshal number into Go struct field SentryPeerJsonCfg.client_id of type string"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadSentryPeerCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestLoadHttpAgentCfgError(t *testing.T) {
 	cfgJSONStr := `{
 "http_agent": [
@@ -3292,6 +3387,82 @@ func TestV1GetConfigDNSAgent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigPrometheusAgentJSON(t *testing.T) {
+	var reply map[string]any
+
+	expected := map[string]any{
+		PrometheusAgentJSON: map[string]any{
+			utils.EnabledCfg:               false,
+			utils.PathCfg:                  "/prometheus",
+			utils.CollectGoMetricsCfg:      false,
+			utils.CollectProcessMetricsCfg: false,
+			utils.CacheSConnsCfg:           []string{},
+			utils.CacheIDsCfg:              []string{},
+			utils.CoreSConnsCfg:            []string{},
+			utils.ApierSConnsCfg:           []string{},
+			utils.StatSConnsCfg:            []string{},
+			utils.StatQueueIDsCfg:          []string{},
+		},
+	}
+
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: PrometheusAgentJSON}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSentryPeerCfgJson(t *testing.T) {
+	var reply map[string]any
+
+	expected := map[string]any{
+		SentryPeerCfgJson: map[string]any{
+			"TokenURL":     "https://authz.sentrypeer.com/oauth/token",
+			"ClientSecret": "",
+			"ClientID":     "",
+			"IpUrl":        "https://sentrypeer.com/api/ip-addresses",
+			"NumberUrl":    "https://sentrypeer.com/api/phone-numbers",
+			"Audience":     "https://sentrypeer.com/api",
+			"GrantType":    "client_credentials",
+		},
+	}
+
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: SentryPeerCfgJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigIPsJson(t *testing.T) {
+	var reply map[string]any
+	var str *[]string
+	expected := map[string]any{
+		IPsJSON: map[string]any{
+			utils.EnabledCfg:             false,
+			utils.StoreIntervalCfg:       "0s",
+			utils.IndexedSelectsCfg:      true,
+			utils.PrefixIndexedFieldsCfg: utils.SliceStringPointer([]string{}),
+			utils.StringIndexedFieldsCfg: str,
+			utils.SuffixIndexedFieldsCfg: utils.SliceStringPointer([]string{}),
+			utils.ExistsIndexedFieldsCfg: utils.SliceStringPointer([]string{}),
+			utils.NestedFieldsCfg:        false,
+			utils.OptsCfg: map[string]any{
+				utils.MetaAllocationID: "",
+				utils.MetaTTLCfg:       259200000000000,
+			},
+		},
+	}
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Section: IPsJSON}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(reply), utils.ToJSON(expected)) {
+		t.Errorf("Expected %#v \n, received %#v", expected, reply)
 	}
 }
 
@@ -5324,6 +5495,27 @@ func TestV1GetConfigAsJSONJanusAgentJson(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
 	}
 }
+func TestV1GetConfigAsJSONPrometheusAgentJSON(t *testing.T) {
+	var reply string
+	expected := `{"prometheus_agent":{"apiers_conns":[],"cache_ids":[],"caches_conns":[],"collect_go_metrics":false,"collect_process_metrics":false,"cores_conns":[],"enabled":false,"path":"/prometheus","stat_queue_ids":[],"stats_conns":[]}}`
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: PrometheusAgentJSON}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func TestV1GetConfigAsJSONIPsJSON(t *testing.T) {
+	var reply string
+	expected := `{"ips":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*allocationID":"","*ttl":259200000000000},"prefix_indexed_fields":[],"store_interval":"0s","string_indexed_fields":null,"suffix_indexed_fields":[]}}`
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: IPsJSON}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
 
 func TestV1GetConfigAsJsonTrendS_JSON(t *testing.T) {
 	var reply string
@@ -5447,6 +5639,29 @@ func TestPrometheusAgentCfg(t *testing.T) {
 		StatQueueIDs:          []string{},
 	}
 	got := cgrCfg.PrometheusAgentCfg()
+	if reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", got, want)
+	}
+}
+
+func TestIPsCfg(t *testing.T) {
+	want := &IPsCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		ExistsIndexedFields: &[]string{"*req.index1"},
+		Opts: &IPsOpts{
+			AllocationID: "testid",
+			TTL:          utils.DurationPointer(1 * time.Millisecond),
+		},
+
+		NestedFields: false,
+	}
+
+	got := cgrCfg.IPsCfg()
 	if reflect.DeepEqual(got, want) {
 		t.Errorf("received: %+v, expecting: %+v", got, want)
 	}

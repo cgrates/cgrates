@@ -179,6 +179,20 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 	}
 }
 
+func TestRPCConnsloadFromJsonCfgRemoteHostNil(t *testing.T) {
+
+	dfltRemoteHost = nil
+	res := NewDfltRemoteHost()
+	if res == nil {
+		t.Errorf("Expected new dfltRemoteHost, got: %v", res)
+	}
+
+	exp := new(RemoteHost)
+	if !reflect.DeepEqual(exp, res) {
+		t.Errorf("Got %v, wanted %v", res, exp)
+	}
+}
+
 func TestRPCConnsAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"rpc_conns": {
