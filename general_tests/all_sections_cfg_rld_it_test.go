@@ -86,19 +86,16 @@ func TestSectChange(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		testSectCfgDir = "tutinternal"
-	case utils.MetaRedis:
-		testSectCfgDir = "tutredis"
-	case utils.MetaMySQL:
-		testSectCfgDir = "tutmysql"
-	case utils.MetaMongo:
-		testSectCfgDir = "tutmongo"
-	case utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaRedis, utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatal("unsupported dbtype value")
 	}
 	for _, testSectest := range testSectTests {
 		t.Run(testSectCfgDir, testSectest)
+		if t.Failed() {
+			break
+		}
 	}
 }
 
@@ -527,13 +524,13 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":true,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`,
+		Config: `{"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":true,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`
+	cfgStr := `{"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -571,13 +568,13 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"dns_agent":{"enabled":true,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""}}`,
+		Config: `{"dns_agent":{"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"dns_agent":{"enabled":true,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""}}`
+	cfgStr := `{"dns_agent":{"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -943,13 +940,13 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"sip_agent":{"enabled":true,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""}}`,
+		Config: `{"sip_agent":{"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"sip_agent":{"enabled":true,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""}}`
+	cfgStr := `{"sip_agent":{"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
