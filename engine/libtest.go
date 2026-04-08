@@ -102,6 +102,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
+	go engine.Wait() // so pkill'd engines don't stay defunct
 	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		return nil, err
@@ -150,6 +151,7 @@ func StartEngineFromString(cfgJSON string, waitEngine int, t testing.TB) (*exec.
 	if err := engine.Start(); err != nil {
 		return nil, fmt.Errorf("cgr-engine command failed: %v", err)
 	}
+	go engine.Wait() // so pkill'd engines don't stay defunct
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
 	return engine, nil
 }
@@ -556,6 +558,7 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, grace
 			if err := engine.Process.Kill(); err != nil {
 				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
 			}
+			_ = engine.Wait() // avoid defunct process
 		}
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)
