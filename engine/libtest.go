@@ -151,7 +151,7 @@ func StartEngineFromString(cfgJSON string, waitEngine int, t testing.TB) (*exec.
 	if err := engine.Start(); err != nil {
 		return nil, fmt.Errorf("cgr-engine command failed: %v", err)
 	}
-	go engine.Wait() // so pkill'd engines don't stay defunct
+	go engine.Wait()                                         // so pkill'd engines don't stay defunct
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
 	return engine, nil
 }
@@ -348,35 +348,53 @@ type TestEngine struct {
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
+	Persist          bool              // keep generated config dir after test (logs its path)
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
 	PreStartHook func(testing.TB, *config.CGRConfig)
 
-	// TODO: add possibility to pass environment vars
+	cmd        *exec.Cmd
+	cfg        *config.CGRConfig
+	logBuf     *bytes.Buffer
+	stopped    bool
+	extraFlags []string
 }
 
-// Run initializes a cgr-engine instance for testing. It calls t.Fatal on any setup failure.
-func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
+// Run sets up and starts a cgr-engine for testing. Engine logs
+// are dumped via t.Log on failure.
+func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
-	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	FlushDBs(t, cfg, !ng.PreserveDataDB)
+	ng.extraFlags = extraFlags
+	ng.cfg = parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg, ng.Persist)
+	FlushDBs(t, ng.cfg, !ng.PreserveDataDB)
 	if ng.TpPath != "" || len(ng.TpFiles) != 0 {
 		if ng.TpPath == "" {
 			ng.TpPath = t.TempDir()
 		}
-		setupLoader(t, ng.TpPath, cfg.ConfigPath)
+		setupLoader(t, ng.TpPath, ng.cfg.ConfigPath)
 	}
 	if ng.PreStartHook != nil {
-		ng.PreStartHook(t, cfg)
+		ng.PreStartHook(t, ng.cfg)
 	}
-	startEngine(t, cfg, ng.LogBuffer, ng.GracefulShutdown, extraFlags...)
-	client := NewRPCClient(t, cfg.ListenCfg(), ng.Encoding)
+
+	ng.logBuf = new(bytes.Buffer)
+	ng.start(t)
+
+	logBuf := ng.logBuf
+	t.Cleanup(func() {
+		ng.stop(t)
+		if t.Failed() && logBuf.Len() > 0 {
+			t.Log(logBuf.String())
+		}
+	})
+
+	client := NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
 	if ng.TpPath == "" {
-		ng.TpPath = cfg.LoaderCfg()[0].TpInDir
+		ng.TpPath = ng.cfg.LoaderCfg()[0].TpInDir
 	}
 	// cfg gets edited in files but not in variable, get the cfg variable from files
-	newCfg, err := config.NewCGRConfigFromPath(context.Background(), cfg.ConfigPath)
+	newCfg, err := config.NewCGRConfigFromPath(context.Background(), ng.cfg.ConfigPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -385,6 +403,86 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	}
 	loadCSVs(t, ng.TpPath, ng.TpFiles)
 	return client, newCfg
+}
+
+// Stop shuts down the engine. No-op if already stopped or never started.
+func (ng *TestEngine) Stop(t testing.TB) {
+	t.Helper()
+	ng.stop(t)
+}
+
+// Start re-starts the engine after a stop. Returns a fresh RPC client.
+// Fatal if Run() was never called.
+func (ng *TestEngine) Start(t testing.TB) *birpc.Client {
+	t.Helper()
+	if ng.cfg == nil {
+		t.Fatal("Start() called before Run()")
+	}
+	ng.start(t)
+	return NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
+}
+
+func (ng *TestEngine) logWriter() io.Writer {
+	if ng.LogBuffer != nil {
+		return io.MultiWriter(ng.logBuf, ng.LogBuffer)
+	}
+	return ng.logBuf
+}
+
+func (ng *TestEngine) start(t testing.TB) {
+	t.Helper()
+	if ng.cmd != nil && !ng.stopped {
+		ng.stop(t)
+	}
+	binPath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		t.Fatal(err)
+	}
+	flags := []string{"-config_path", ng.cfg.ConfigPath, "-logger", utils.MetaStdLog}
+	flags = append(flags, ng.extraFlags...)
+	ng.cmd = exec.Command(binPath, flags...)
+	w := ng.logWriter()
+	ng.cmd.Stdout = w
+	ng.cmd.Stderr = w
+	if err := ng.cmd.Start(); err != nil {
+		t.Fatalf("cgr-engine command failed: %v", err)
+	}
+	ng.stopped = false
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var dialErr error
+	for range 16 {
+		time.Sleep(backoff())
+		var conn *birpc.Client
+		if conn, dialErr = jsonrpc.Dial(utils.TCP, ng.cfg.ListenCfg().RPCJSONListen); dialErr == nil {
+			conn.Close()
+			return
+		}
+	}
+	t.Fatalf("engine did not open port <%s>: %v", ng.cfg.ListenCfg().RPCJSONListen, dialErr)
+}
+
+func (ng *TestEngine) stop(t testing.TB) {
+	t.Helper()
+	if ng.cmd == nil || ng.stopped {
+		return
+	}
+	ng.stopped = true
+	if ng.GracefulShutdown {
+		if err := ng.cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			t.Errorf("failed to terminate cgr-engine process (%d): %v",
+				ng.cmd.Process.Pid, err)
+		}
+		if err := ng.cmd.Wait(); err != nil {
+			t.Errorf("cgr-engine process (%d) exited with error: %v",
+				ng.cmd.Process.Pid, err)
+		}
+		return
+	}
+	if err := ng.cmd.Process.Kill(); err != nil {
+		t.Errorf("failed to kill cgr-engine process (%d): %v",
+			ng.cmd.Process.Pid, err)
+	}
+	_ = ng.cmd.Wait()
 }
 
 // DBConnOpts contains opts of database
@@ -422,7 +520,10 @@ type DBCfg struct {
 	DB *DBParams `json:"db,omitempty"`
 }
 
-func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) *config.CGRConfig {
+// parseCfg initializes and returns a CGRConfig. For dynamic configs, it
+// creates configuration files in a temporary directory. If persist is true,
+// the directory is kept after the test and its path is logged.
+func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg, persist bool) *config.CGRConfig {
 	t.Helper()
 	if cfgPath == "" && cfgJSON == "" {
 		t.Fatal("missing config source")
@@ -436,7 +537,17 @@ func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) *config.CGRCon
 		return cfg
 	}
 
-	tmp := t.TempDir()
+	var tmp string
+	if persist {
+		var err error
+		tmp, err = os.MkdirTemp("", "cgr-test-*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("config dir: %s", tmp)
+	} else {
+		tmp = t.TempDir()
+	}
 	if cfgPath != "" {
 		if err := os.CopyFS(tmp, os.DirFS(cfgPath)); err != nil {
 			t.Fatal(err)
@@ -520,56 +631,6 @@ func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB bool) {
 			t.Fatalf("failed to flush DataDB err: %v", err)
 		}
 	}
-}
-
-// startEngine starts the CGR engine process with the provided configuration
-// and flags. It writes engine logs to the provided logBuffer (if any).
-func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, gracefulShutdown bool, extraFlags ...string) {
-	t.Helper()
-	binPath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal(err)
-	}
-	flags := []string{"-config_path", cfg.ConfigPath}
-	if logBuffer != nil {
-		flags = append(flags, "-logger", utils.MetaStdLog)
-	}
-	if len(extraFlags) != 0 {
-		flags = append(flags, extraFlags...)
-	}
-	engine := exec.Command(binPath, flags...)
-	if logBuffer != nil {
-		engine.Stdout = logBuffer
-		engine.Stderr = logBuffer
-	}
-	if err := engine.Start(); err != nil {
-		t.Fatalf("cgr-engine command failed: %v", err)
-	}
-	t.Cleanup(func() {
-		if gracefulShutdown {
-			if err := engine.Process.Signal(syscall.SIGTERM); err != nil {
-				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
-			}
-			if err := engine.Wait(); err != nil {
-				t.Errorf("cgr-engine process failed to exit cleanly: %v", err)
-				t.Log("Logs: \n", logBuffer)
-			}
-		} else {
-			if err := engine.Process.Kill(); err != nil {
-				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
-			}
-			_ = engine.Wait() // avoid defunct process
-		}
-	})
-	backoff := utils.FibDuration(time.Millisecond, 0)
-	var dialErr error
-	for range 16 {
-		time.Sleep(backoff())
-		if _, dialErr = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); dialErr == nil {
-			return
-		}
-	}
-	t.Fatalf("engine did not open port <%s>: %v", cfg.ListenCfg().RPCJSONListen, dialErr)
 }
 
 // serviceReceivers maps service names to their RPC receiver names.
