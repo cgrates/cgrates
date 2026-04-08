@@ -55,8 +55,8 @@ var (
 			testSessionsVoiceSessionTTLWithRelocate,
 			testSessionsVoiceRelocateWithOriginIDPrefix,
 
+			testSessionsVoiceStopCgrEngine,
 		*/
-		testSessionsVoiceStopCgrEngine,
 	}
 )
 
