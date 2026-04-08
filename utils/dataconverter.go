@@ -146,6 +146,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return ConnStatusConverter{}, nil
 	case strings.HasPrefix(params, MetaGigawords):
 		return new(GigawordsConverter), nil
+	case strings.HasPrefix(params, Meta3GPPULI):
+		return NewULIConverter(params)
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -855,4 +857,37 @@ func (c ConnStatusConverter) Convert(in any) (any, error) {
 		return -1, nil
 	}
 	return 0, fmt.Errorf("unsupported connection status: %q", status)
+}
+
+// ULIConverter decodes 3GPP-User-Location-Info and extracts fields by path.
+type ULIConverter struct {
+	path string
+}
+
+// NewULIConverter creates a ULI converter. The path after the colon specifies
+// which field to extract (e.g. "*3gpp_uli:TAI.MCC"). Empty path returns the
+// full ULI object.
+func NewULIConverter(params string) (*ULIConverter, error) {
+	_, path, _ := strings.Cut(params, InInFieldSep)
+	return &ULIConverter{path: path}, nil
+}
+
+// Convert implements DataConverter interface.
+// Input must be raw bytes (as delivered by Diameter OctetString AVPs).
+func (c *ULIConverter) Convert(in any) (any, error) {
+	raw := IfaceAsString(in)
+	if raw == "" {
+		return nil, errors.New("empty ULI input")
+	}
+
+	uli, err := DecodeULI([]byte(raw))
+	if err != nil {
+		return nil, err
+	}
+
+	if c.path == "" {
+		return uli, nil
+	}
+
+	return uli.GetField(c.path)
 }
