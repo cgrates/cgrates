@@ -49,8 +49,8 @@ var (
 			testSessionsItTerminatePassive,
 			testSessionsItEventCostCompressing,
 
+			testSessionsItStopCgrEngine,
 		*/
-		testSessionsItStopCgrEngine,
 	}
 )
 
