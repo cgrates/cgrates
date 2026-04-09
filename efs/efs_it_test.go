@@ -21,8 +21,6 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package efs
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"os"
 	"os/exec"
@@ -60,33 +58,6 @@ var (
 		testEfsSKillEngine,
 	}
 )
-
-func TestDecodeExportEvents(t *testing.T) {
-	dirPath := "/var/spool/cgrates/failed_posts"
-	filesInDir, err := os.ReadDir(dirPath)
-	if err != nil {
-		t.Error(err)
-	}
-	for _, file := range filesInDir {
-		content, err := os.ReadFile(path.Join(dirPath, file.Name()))
-		if err != nil {
-			t.Error(err)
-		}
-		dec := gob.NewDecoder(bytes.NewBuffer(content))
-		gob.Register(new(utils.CGREvent))
-		singleEvent := new(FailedExportersLog)
-		if err := dec.Decode(&singleEvent); err != nil {
-			t.Error(err)
-		} else {
-			strContent, err := utils.ToUnescapedJSON(singleEvent)
-			if err != nil {
-				t.Error(err)
-			}
-			fmt.Printf("singleEvent: %v \n", string(strContent))
-		}
-	}
-
-}
 
 func TestEfS(t *testing.T) {
 	switch *utils.DBType {
