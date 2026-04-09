@@ -237,15 +237,22 @@ func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	rdrErr := make(chan error, 1)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, rdrErr, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	rdr.Config().RunDelay = time.Duration(-1)
-	expected := "no such file or directory"
-	err = rdr.Serve()
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	if err = rdr.Serve(); err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	select {
+	case err = <-rdrErr:
+		if err == nil || err.Error() != "no such file or directory" {
+			t.Errorf("\nExpected <no such file or directory>, \nReceived <%+v>", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Error("timed out waiting for error from Serve goroutine")
 	}
 }
 
