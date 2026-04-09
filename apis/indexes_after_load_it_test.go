@@ -129,12 +129,12 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaRateProfiles,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
+		}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
 		sort.Strings(reply)
-		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+		if !reflect.DeepEqual(expected, reply) {
 			t.Errorf("Expected %+v \n, received %+v", expected, reply)
 		}
 	}
@@ -147,12 +147,12 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaChargers,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
+		}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
 		sort.Strings(reply)
-		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+		if !reflect.DeepEqual(expected, reply) {
 			t.Errorf("Expected %+v, received %+v", expected, reply)
 		}
 	}
@@ -165,12 +165,12 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaAttributes,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
+		}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
 		sort.Strings(reply)
-		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+		if !reflect.DeepEqual(expected, reply) {
 			t.Errorf("Expected %+v, received %+v", expected, reply)
 		}
 	}
