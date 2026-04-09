@@ -109,17 +109,15 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
 			}
 		}
+		var invalidExporterIDs []string
 		for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
-			has := false
-			for _, ee := range cfg.eesCfg.Exporters {
-				if ee.ID == expID {
-					has = true
-					break
-				}
+			if cfg.eesCfg.ExporterCfg(expID) == nil {
+				invalidExporterIDs = append(invalidExporterIDs, expID)
 			}
-			if !has {
-				return fmt.Errorf("<%s> cannot find exporter with ID: <%s>", utils.CDRs, expID)
-			}
+		}
+		if len(invalidExporterIDs) > 0 {
+			return fmt.Errorf("<%s> cannot find exporters with IDs: <%s>",
+				utils.CDRs, strings.Join(invalidExporterIDs, ", "))
 		}
 		for _, connID := range cfg.cdrsCfg.EEsConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.eesCfg.Enabled {
