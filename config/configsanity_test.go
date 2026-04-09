@@ -133,7 +133,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.ThresholdSConns = []string{}
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"*default", "stringy"}
-	expected = "<CDRs> cannot find exporter with ID: <stringy>"
+	expected = "<CDRs> cannot find exporters with IDs: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -2537,7 +2537,7 @@ func TestCheckConfigSanity(t *testing.T) {
 	}
 	cfg.statsCfg.Enabled = true
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	expected = "<CDRs> cannot find exporter with ID: <stringy>"
+	expected = "<CDRs> cannot find exporters with IDs: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -2885,5 +2885,39 @@ func TestConfigSanityPrometheusAgent(t *testing.T) {
 	expected = "<PrometheusAgent> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
+func TestConfigSanityCDRsOnlineCDRExportss(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.cdrsCfg.Enabled = true
+	cfg.cdrsCfg.OnlineCDRExports = []string{"invalid_id"}
+
+	expected := "<CDRs> cannot find exporters with IDs: <invalid_id>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expecting %+q received %+q", expected, err)
+	}
+
+	cfg.eesCfg.Exporters = []*EventExporterCfg{
+		{ID: "http_billing_event"},
+	}
+	cfg.cdrsCfg.OnlineCDRExports = []string{"http_billing_event", "test", "fake_ees_id", ""}
+
+	expected = `<CDRs> cannot find exporters with IDs: <test, fake_ees_id, >`
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expecting %+q received %+q", expected, err)
+	}
+
+	cfg.cdrsCfg.OnlineCDRExports = []string{"http_billing_event"}
+
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("unexpected error for valid exporter ID: %v", err)
+	}
+
+	cfg.cdrsCfg.OnlineCDRExports = []string{""}
+
+	expected = "<CDRs> cannot find exporters with IDs: <>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expecting %+q received %+q", expected, err)
 	}
 }

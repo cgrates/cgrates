@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,6 +58,7 @@ var (
 		testConfigSSetConfigFromJSONCoreS,
 		testConfigSReloadConfigCoreSDryRun,
 		testConfigSReloadConfigCoreS,
+		testConfigSSetConfigInvalidExporters,
 		testConfigSKillEngine,
 		testConfigSStartEngineCAPSAllocated,
 		testConfigSCAPSPeak,
@@ -583,6 +585,183 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("Expected %q , received: %q", cfgStr, rpl)
 	}
+}
+
+func testConfigSSetConfigInvalidExporters(t *testing.T) {
+	if *utils.Encoding == utils.MetaGOB {
+		t.SkipNow()
+	}
+	var reply string
+	if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+		Config: map[string]any{
+			"ees": map[string]any{
+				"enabled": true,
+				"exporters": []any{map[string]any{
+					"id":   "test_exporter_valid",
+					"type": utils.MetaNone,
+				}},
+			},
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+
+	t.Run("invalid exporter ID is rejected and config remains unchanged", func(t *testing.T) {
+		var rpl map[string]any
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		originalExports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+
+		err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"fake_id"},
+				},
+			},
+		}, &reply)
+		if err == nil {
+			t.Error("Expected error for invalid exporter ID, got nil")
+		}
+
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		currentExports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+		if len(currentExports) != len(originalExports) {
+			t.Errorf("Config err, expected %+v, got %+v", originalExports, currentExports)
+		}
+	})
+
+	t.Run("all invalid IDs reported at once", func(t *testing.T) {
+		err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"test_exporter_valid", "fake_id_1", "fake_id_2"},
+				},
+			},
+		}, &reply)
+		if err == nil {
+			t.Fatal("Expected error for invalid exporter IDs, got nil")
+		}
+		errMsg := err.Error()
+		for _, id := range []string{"fake_id_1", "fake_id_2"} {
+			if !strings.Contains(errMsg, id) {
+				t.Errorf("Expected error to mention %q, got: %s", id, errMsg)
+			}
+		}
+	})
+
+	t.Run("empty string ID reported", func(t *testing.T) {
+		err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"test_exporter_valid", ""},
+				},
+			},
+		}, &reply)
+		if err == nil {
+			t.Fatal("Expected error for empty string ID, got nil")
+		}
+	})
+
+	t.Run("valid invalid and empty exporter IDs leaves config unchanged", func(t *testing.T) {
+		var rpl map[string]any
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		originalExports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+
+		err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"test_exporter_valid", "fake_id", ""},
+				},
+			},
+		}, &reply)
+		if err == nil {
+			t.Fatal("Expected error for invalid exporter IDs, got nil")
+		}
+
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		currentExports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+		if len(currentExports) != len(originalExports) {
+			t.Errorf("Config err, expected %+v, got %+v", originalExports, currentExports)
+		}
+	})
+
+	t.Run("valid SetConfig after failed config", func(t *testing.T) {
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"test_exporter_valid"},
+				},
+			},
+		}, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Errorf("Expected OK received: %s", reply)
+		}
+
+		var rpl map[string]any
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		exports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+		if len(exports) != 1 || exports[0] != "test_exporter_valid" {
+			t.Errorf("Expected [test_exporter_valid], received: %+v", exports)
+		}
+	})
+
+	t.Run("DryRun does not apply valid config", func(t *testing.T) {
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{},
+				},
+			},
+		}, &reply); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1SetConfig, &config.SetConfigArgs{
+			Config: map[string]any{
+				"cdrs": map[string]any{
+					"online_cdr_exports": []string{"test_exporter_valid"},
+				},
+			},
+			DryRun: true,
+		}, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Errorf("Expected OK for DryRun, received: %s", reply)
+		}
+
+		var rpl map[string]any
+		if err := configRPC.Call(context.Background(), utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
+			Section: config.CDRS_JSN,
+		}, &rpl); err != nil {
+			t.Fatal(err)
+		}
+		exports := rpl[config.CDRS_JSN].(map[string]any)["online_cdr_exports"].([]any)
+		if len(exports) != 0 {
+			t.Errorf("DryRun applied changes, expected empty, got: %+v", exports)
+		}
+	})
 }
 
 func testConfigSStartEngineCAPSAllocated(t *testing.T) {

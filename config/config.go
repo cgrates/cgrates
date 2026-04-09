@@ -1807,27 +1807,24 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 	if b, err = json.Marshal(args.Config); err != nil {
 		return
 	}
-	cfgV := cfg
-	if args.DryRun {
-		cfgV = cfg.Clone()
-	}
-
+	cfgV := cfg.Clone()
 	cfgV.reloadDPCache(sections...)
 	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
 		return
 	}
-
-	//  lock all sections
+	// lock all sections
 	cfgV.rLockSections()
-
 	err = cfgV.checkConfigSanity()
-
 	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
 		return
 	}
 	if !args.DryRun {
-		cfgV.reloadSections(sections...)
+		cfg.reloadDPCache(sections...)
+		if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
+			return
+		}
+		cfg.reloadSections(sections...)
 	}
 	*reply = utils.OK
 	return
