@@ -227,6 +227,30 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJson, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr); err == nil {
 		t.Error(err)
 	}
+
+	cfgJSON2 := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Start_delay: utils.StringPointer("1ss"),
+			},
+		},
+	}
+	expectedErr := `time: unknown unit "ss" in duration "1ss"`
+	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON2, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %v, recieved %v", expectedErr, err)
+	}
+
+	cfgJSON3 := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Max_reconnect_interval: utils.StringPointer("1ss"),
+			},
+		},
+	}
+	expectedErr = `time: unknown unit "ss" in duration "1ss"`
+	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON3, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %v, recieved %v", expectedErr, err)
+	}
 }
 
 func TestEventReaderloadFromJsonCase3(t *testing.T) {
@@ -811,6 +835,53 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 	}
 }
 
+func TestERsLoadFromJsonCase5(t *testing.T) {
+
+	cfgJSON := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Partial_commit_fields: &[]*FcTemplateJsonCfg{
+					{
+						Type:  utils.StringPointer(utils.MetaTemplate),
+						Value: utils.StringPointer("templ"),
+					},
+				},
+			},
+		},
+	}
+
+	msgTemplates := map[string][]*FCTemplate{
+		"templ": {
+			{
+				Tag: utils.CGRID, Path: "*exp.CGRID", Type: utils.MetaVariable, Layout: time.RFC3339,
+			},
+		},
+	}
+
+	jsonCfg := NewDefaultCGRConfig()
+	if err := jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr); err != nil {
+		t.Error(err)
+	}
+
+	cfgJSONErr := &ERsJsonCfg{
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Partial_commit_fields: &[]*FcTemplateJsonCfg{
+					{
+						Type: utils.StringPointer(utils.MetaTemplate),
+					},
+				},
+			},
+		},
+	}
+
+	expected := "no template with id: <>"
+	if err := jsonCfg.ersCfg.loadFromJSONCfg(cfgJSONErr, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v, recieved %v", expected, err)
+	}
+
+}
+
 func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
 		Readers: &[]*EventReaderJsonCfg{
@@ -1287,6 +1358,63 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.InfieldSep); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
+}
+
+func TestEventReaderCfgAsMapInterfaceCase3(t *testing.T) {
+	er := &EventReaderCfg{
+		EEsIDs:        []string{"ees1"},
+		EEsSuccessIDs: []string{"eesTest"},
+		EEsFailedIDs:  []string{"eesFail"},
+		PartialCommitFields: []*FCTemplate{
+			{
+				Tag: "tag1", Path: "path1", Type: utils.MetaVariable, Layout: time.RFC3339,
+			},
+		},
+
+		Opts: &EventReaderOpts{
+			CSV:  &CSVROpts{},
+			AMQP: &AMQPROpts{},
+			AWS:  &AWSROpts{},
+			NATS: &NATSROpts{},
+			SQL: &SQLROpts{
+				BatchSize:           utils.IntPointer(10),
+				DeleteIndexedFields: utils.SliceStringPointer([]string{"id"}),
+			},
+			Kafka: &KafkaROpts{
+				TLS:           utils.BoolPointer(true),
+				CAPath:        utils.StringPointer("path"),
+				SkipTLSVerify: utils.BoolPointer(false),
+			},
+		},
+	}
+	rcv := er.AsMapInterface(utils.InInFieldSep)
+
+	opts := rcv[utils.OptsCfg].(map[string]any)
+	if opts[utils.KafkaTLS] != true {
+		t.Errorf("Expected KafkaTLS = true")
+	}
+	if opts[utils.KafkaCAPath] != "path" {
+		t.Errorf("Expected KafkaCAPath = path")
+	}
+	if opts[utils.KafkaSkipTLSVerify] != false {
+		t.Errorf("Expected KafkaSkipTLSVerify = false")
+	}
+	if opts[utils.SQLBatchSize] != 10 {
+		t.Errorf("Expected SQLBatchSize = 10")
+	}
+	if rcv[utils.EEsIDsCfg] == nil {
+		t.Errorf("Expected EEsIDsCfg to be set")
+	}
+	if rcv[utils.EEsSuccessIDsCfg] == nil {
+		t.Errorf("Expected EEsSuccessIDsCfg to be set")
+	}
+	if rcv[utils.EEsFailedIDsCfg] == nil {
+		t.Errorf("Expected EEsFailedIDsCfg to be set")
+	}
+	if rcv[utils.PartialCommitFieldsCfg] == nil {
+		t.Errorf("Expected PartialCommitFieldsCfg to be set")
+	}
+
 }
 
 func TestERsloadFromJsonCfg(t *testing.T) {
