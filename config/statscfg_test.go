@@ -163,6 +163,7 @@ func TestStatSCfgClone(t *testing.T) {
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
 		},
+		EEsExporterIDs: []string{"exporterID"},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

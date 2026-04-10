@@ -174,6 +174,13 @@ func TestStoreDbCfgloadFromJsonCfgCase4(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(clonedStoreDb), utils.ToJSON(jsonCfg.storDbCfg))
 	}
 }
+func TestStoreDbCfgloadFromJsonCfgCase5(t *testing.T) {
+	dbOpts := &StorDBOpts{}
+	dbOpts.loadFromJSONCfg(nil)
+	if dbOpts.SQLMaxOpenConns != 0 {
+		t.Errorf("Expected 0, but got: %v", dbOpts.SQLMaxOpenConns)
+	}
+}
 
 func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	var dbcfg StorDbCfg
