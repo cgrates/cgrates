@@ -935,3 +935,193 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventCDRs(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbcfg = engine.RedisDBCfg
+	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {
+	"level": 7
+},
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*cdrs":    [{"ConnIDs": ["*localhost"]}],
+		"*chargers":[{"ConnIDs": ["*localhost"]}]
+	}
+},
+"cdrs": {
+	"enabled": true,
+	"conns": {
+		"*default": [{"ConnIDs": ["*localhost"]}]
+	}
+},
+"chargers": {
+	"enabled": true
+},
+"admins": {
+	"enabled": true
+}
+}`,
+		DBCfg:    dbcfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights: utils.DynamicWeights{
+					{Weight: 0},
+				},
+				Blockers: utils.DynamicBlockers{
+					{Blocker: false},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	t.Run("noFlags", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant:  "cgrates.org",
+				ID:      "noCDRsFlag",
+				APIOpts: map[string]any{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2024-01-10T10:00:00Z",
+					utils.AnswerTime:   "2024-01-10T10:00:01Z",
+					utils.Usage:        "60s",
+					utils.OriginID:     "noCDRsFlag_orig",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed without *cdrs flag: %v", err)
+		}
+
+		var cdrs []*utils.CDR
+		experr := "retrieving CDRs failed: NOT_FOUND"
+		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
+			&utils.CDRFilters{
+				Tenant:    "cgrates.org",
+				ID:        "checkNoCDR",
+				FilterIDs: []string{"*string:~*req.OriginID:noCDRsFlag_orig"},
+			}, &cdrs); err == nil || err.Error() != experr {
+			t.Errorf("expected err <%v>, received <%v>", experr, err)
+		}
+	})
+
+	t.Run("withCDRsFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "withCDRsFlag",
+				APIOpts: map[string]any{
+					utils.MetaCDRs: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2024-01-10T10:00:00Z",
+					utils.AnswerTime:   "2024-01-10T10:00:01Z",
+					utils.Usage:        "60s",
+					utils.OriginID:     "withCDRsFlag_orig",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *cdrs flag failed: %v", err)
+		}
+
+		var cdrs []*utils.CDR
+		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
+			&utils.CDRFilters{
+				Tenant:    "cgrates.org",
+				ID:        "getCDRwithFlag",
+				FilterIDs: []string{"*string:~*req.OriginID:withCDRsFlag_orig"},
+			}, &cdrs); err != nil {
+			t.Fatalf("AdminSv1GetCDRs failed after *cdrs flag: %v", err)
+		}
+		if len(cdrs) == 0 {
+			t.Fatal("expected at least 1 CDR stored, got 0")
+		}
+		if cdrs[0].Event[utils.OriginID] != "withCDRsFlag_orig" {
+			t.Errorf("CDR OriginID = %v, want withCDRsFlag_orig", cdrs[0].Event[utils.OriginID])
+		}
+	})
+
+	t.Run("withCDRsFlagBlockerError", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cdrBlocker",
+				APIOpts: map[string]any{
+					utils.MetaCDRs:            true,
+					utils.OptsSesBlockerError: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2024-01-10T11:00:00Z",
+					utils.AnswerTime:   "2024-01-10T11:00:01Z",
+					utils.Usage:        "30s",
+					utils.OriginID:     "withCDRsFlag_orig",
+				},
+			}, &rply)
+
+		if err == nil {
+			t.Error("expected an error with OptsSesBlockerError=true on duplicate CDR, got nil")
+		}
+	})
+
+	t.Run("withCDRsFlagNonBlockerError", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cdrNonBlocker",
+				APIOpts: map[string]any{
+					utils.MetaCDRs:            true,
+					utils.OptsSesBlockerError: false,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2024-01-10T11:00:00Z",
+					utils.AnswerTime:   "2024-01-10T11:00:01Z",
+					utils.Usage:        "30s",
+					utils.OriginID:     "withCDRsFlag_orig",
+				},
+			}, &rply)
+
+		if err == nil {
+			t.Error("expected PARTIALLY_EXECUTED, got nil")
+		} else if err.Error() != utils.ErrPartiallyExecuted.Error() {
+			t.Errorf("expected PARTIALLY_EXECUTED, got: %v", err)
+		}
+	})
+
+}
