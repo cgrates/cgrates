@@ -1015,11 +1015,13 @@ func TestKamEventAsMapStringInterfaceUsageKey(t *testing.T) {
 		"Key":   "value",
 	}
 	expected := map[string]any{
-		"Usage": "123s",
-		"Key":   "value",
+		"Key":         "value",
+		"RequestType": "*rated",
+		"Source":      "KamailioAgent",
+		"Usage":       "123s",
 	}
 	result := kev.AsMapStringInterface()
-	if reflect.DeepEqual(result, expected) {
+	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("expected %v, got %v", expected, result)
 	}
 }

@@ -331,10 +331,11 @@ func TestGetSessionsBackup(t *testing.T) {
 func TestRegisterActionFunc(t *testing.T) {
 	action := "testAction"
 	actionFuncMap = make(map[string]actionTypeFunc)
-	RegisterActionFunc(action, actionFuncMap[action])
+	var actionFunc actionTypeFunc
+	RegisterActionFunc(action, actionFunc)
 	if registeredFunc, exists := actionFuncMap[action]; !exists {
 		t.Errorf("Function for action %s was not registered", action)
-	} else if reflect.DeepEqual(registeredFunc, actionFuncMap) {
-		t.Errorf("Registered function does not match the expected function")
+	} else if registeredFunc != nil {
+		t.Errorf("Expected nil function")
 	}
 }

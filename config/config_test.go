@@ -5465,23 +5465,33 @@ func TestCgrCfgJSONDefaultTrendSCfg(t *testing.T) {
 		Enabled:         false,
 		StatSConns:      []string{},
 		ThresholdSConns: []string{},
+		EEsConns:        []string{},
+		ScheduledIDs:    map[string][]string{},
 	}
 	got := cgrCfg.TrendSCfg()
-	if reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("received: %+v, expecting: %+v", got, want)
 	}
 }
 
 func TestCgrCfgJSONDefaultJanusAgentCfg(t *testing.T) {
 	want := &JanusAgentCfg{
-		Enabled:           false,
-		SessionSConns:     []string{},
-		JanusConns:        []*JanusConn{},
-		RequestProcessors: []*RequestProcessor{},
+		Enabled:       false,
+		SessionSConns: []string{"*internal:*sessions"},
+		URL:           "/janus",
+		JanusConns: []*JanusConn{
+			{
+				Address:       "127.0.0.1:8088",
+				AdminAddress:  "localhost:7188",
+				AdminPassword: "",
+				Type:          "*ws",
+			},
+		},
+		RequestProcessors: nil,
 	}
 	got := cgrCfg.JanusAgentCfg()
-	if reflect.DeepEqual(got, want) {
-		t.Errorf("received: %+v, expecting: %+v", got, want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(got), utils.ToJSON(want))
 	}
 }
 
@@ -5628,7 +5638,7 @@ func TestLoadConfigFromFolder(t *testing.T) {
 func TestPrometheusAgentCfg(t *testing.T) {
 	want := &PrometheusAgentCfg{
 		Enabled:               false,
-		Path:                  "/tmp/test",
+		Path:                  "/prometheus",
 		CollectGoMetrics:      false,
 		CollectProcessMetrics: false,
 		CacheSConns:           []string{},
@@ -5639,30 +5649,28 @@ func TestPrometheusAgentCfg(t *testing.T) {
 		StatQueueIDs:          []string{},
 	}
 	got := cgrCfg.PrometheusAgentCfg()
-	if reflect.DeepEqual(got, want) {
-		t.Errorf("received: %+v, expecting: %+v", got, want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(got), utils.ToJSON(want))
 	}
 }
 
 func TestIPsCfg(t *testing.T) {
 	want := &IPsCfg{
 		Enabled:             false,
-		IndexedSelects:      false,
-		StoreInterval:       1 * time.Second,
-		StringIndexedFields: &[]string{"*req.index1"},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		ExistsIndexedFields: &[]string{"*req.index1"},
+		IndexedSelects:      true,
+		StoreInterval:       time.Duration(0),
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		Opts: &IPsOpts{
-			AllocationID: "testid",
-			TTL:          utils.DurationPointer(1 * time.Millisecond),
+			AllocationID: "",
+			TTL:          utils.DurationPointer(72 * time.Hour),
 		},
-
 		NestedFields: false,
 	}
-
 	got := cgrCfg.IPsCfg()
-	if reflect.DeepEqual(got, want) {
-		t.Errorf("received: %+v, expecting: %+v", got, want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(got), utils.ToJSON(want))
 	}
 }

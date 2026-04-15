@@ -62,9 +62,9 @@ func TestApStoreRestoreBlank(t *testing.T) {
 	ap := &RatingPlan{Id: "test"}
 	ap.AddRateInterval("NAT", i)
 	result, _ := json.Marshal(ap)
-	ap1 := RatingPlan{}
+	ap1 := &RatingPlan{}
 	json.Unmarshal(result, &ap1)
-	if reflect.DeepEqual(ap, ap1) {
+	if !reflect.DeepEqual(ap, ap1) {
 		t.Errorf("Expected %v was %v", ap, ap1)
 	}
 }

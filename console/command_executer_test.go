@@ -269,8 +269,8 @@ func TestGetStringValueInterface(t *testing.T) {
 func TestGetFormatedSliceResultCase2(t *testing.T) {
 	dflt := utils.StringSet{}
 	rply := GetFormatedSliceResult(true, dflt)
-	expected := true
-	if reflect.DeepEqual(expected, rply) {
+	expected := "true"
+	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, rply)
 	}
 }

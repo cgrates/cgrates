@@ -534,7 +534,7 @@ func TestBalanceFilterModifyBalance(t *testing.T) {
 		Blocker: true}
 
 	bf.ModifyBalance(b)
-	if reflect.DeepEqual(b, exp) {
+	if !reflect.DeepEqual(utils.ToJSON(b), utils.ToJSON(exp)) {
 		t.Errorf("expected %v ,received %v", utils.ToJSON(exp), utils.ToJSON(b))
 	}
 

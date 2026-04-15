@@ -24,122 +24,196 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
-	cfgJSON := &ThresholdSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		Store_interval:        utils.StringPointer("2"),
-		String_indexed_fields: &[]string{"*req.prefix"},
-		Prefix_indexed_fields: &[]string{"*req.index1"},
-		Suffix_indexed_fields: &[]string{"*req.index1"},
-		ExistsIndexedFields:   &[]string{"*req.index1"},
-		Nested_fields:         utils.BoolPointer(true),
-		Opts: &ThresholdsOptsJson{
-			ProfileIDs:           &[]string{},
-			ProfileIgnoreFilters: utils.BoolPointer(false),
+func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
+	tests := []struct {
+		name     string
+		cfgJSON  *ThresholdSJsonCfg
+		expected *ThresholdSCfg
+		wantErr  string
+	}{
+		{
+			name: "With values",
+			cfgJSON: &ThresholdSJsonCfg{
+				Enabled:               utils.BoolPointer(true),
+				Indexed_selects:       utils.BoolPointer(true),
+				Store_interval:        utils.StringPointer("2"),
+				String_indexed_fields: &[]string{"*req.prefix"},
+				Prefix_indexed_fields: &[]string{"*req.index1"},
+				Suffix_indexed_fields: &[]string{"*req.index1"},
+				ExistsIndexedFields:   &[]string{"*req.index1"},
+				Nested_fields:         utils.BoolPointer(true),
+				Opts: &ThresholdsOptsJson{
+					ProfileIDs:           &[]string{},
+					ProfileIgnoreFilters: utils.BoolPointer(false),
+				},
+			},
+			expected: &ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       2,
+				StringIndexedFields: &[]string{"*req.prefix"},
+				PrefixIndexedFields: &[]string{"*req.index1"},
+				SuffixIndexedFields: &[]string{"*req.index1"},
+				ExistsIndexedFields: &[]string{"*req.index1"},
+				EEsConns:            []string{},
+				NestedFields:        true,
+				Opts: &ThresholdsOpts{
+					ProfileIDs:           []string{},
+					ProfileIgnoreFilters: false,
+				},
+			},
+		},
+		{
+			name: "Store_interval invalid value",
+			cfgJSON: &ThresholdSJsonCfg{
+				Enabled:               utils.BoolPointer(true),
+				Indexed_selects:       utils.BoolPointer(true),
+				Store_interval:        utils.StringPointer("2ss"),
+				String_indexed_fields: &[]string{"*req.prefix"},
+				Prefix_indexed_fields: &[]string{"*req.index1"},
+				Suffix_indexed_fields: &[]string{"*req.index1"},
+				ExistsIndexedFields:   &[]string{"*req.index1"},
+				Nested_fields:         utils.BoolPointer(true),
+				Opts: &ThresholdsOptsJson{
+					ProfileIDs:           &[]string{},
+					ProfileIgnoreFilters: utils.BoolPointer(false),
+				},
+			},
+			expected: &ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: &[]string{},
+				SuffixIndexedFields: &[]string{},
+				ExistsIndexedFields: &[]string{},
+				EEsConns:            []string{},
+				NestedFields:        false,
+				Opts: &ThresholdsOpts{
+					ProfileIDs:           []string{},
+					ProfileIgnoreFilters: false,
+				},
+			},
+			wantErr: `time: unknown unit "ss" in duration "2ss"`,
 		},
 	}
-	expected := &ThresholdSCfg{
-		Enabled:             true,
-		IndexedSelects:      true,
-		StoreInterval:       2,
-		StringIndexedFields: &[]string{"*req.prefix"},
-		PrefixIndexedFields: &[]string{"*req.index1"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		ExistsIndexedFields: &[]string{"*req.index1"},
-		EEsConns:            []string{},
-		NestedFields:        true,
-		Opts: &ThresholdsOpts{
-			ProfileIDs:           []string{},
-			ProfileIgnoreFilters: false,
-		},
-	}
-	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, jsonCfg.thresholdSCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.thresholdSCfg))
-	}
-	var optsCfg *ThresholdsOpts
-	var jsonOpt *ThresholdsOptsJson
-	optsCfg.loadFromJSONCfg(jsonOpt)
-	if reflect.DeepEqual(nil, optsCfg) {
-		t.Error("expected nil")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonCfg := NewDefaultCGRConfig()
+			if err := jsonCfg.thresholdSCfg.loadFromJSONCfg(tt.cfgJSON); err != nil && tt.wantErr != err.Error() {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tt.expected, jsonCfg.thresholdSCfg) {
+				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(tt.expected), utils.ToJSON(jsonCfg.thresholdSCfg))
+			}
+		})
 	}
 }
 
-func TestThresholdSCfgloadFromJsonCfgCase2(t *testing.T) {
-	cfgJSON := &ThresholdSJsonCfg{
-		Store_interval: utils.StringPointer("1ss"),
+func TestThresholdsOptsLoadFromJSONCfg(t *testing.T) {
+	tests := []struct {
+		name     string
+		optsJSON *ThresholdsOptsJson
+	}{
+		{
+			name:     "Nil case",
+			optsJSON: nil,
+		},
+		{
+			name:     "Empty",
+			optsJSON: &ThresholdsOptsJson{},
+		},
+		{
+			name: "With Values",
+			optsJSON: &ThresholdsOptsJson{
+				ProfileIDs:           &[]string{},
+				ProfileIgnoreFilters: utils.BoolPointer(false),
+			},
+		},
 	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			want := tt.optsJSON
+			jsnCfg := NewDefaultCGRConfig()
+			jsnCfg.thresholdSCfg.Opts.loadFromJSONCfg(tt.optsJSON)
+
+			if !reflect.DeepEqual(want, tt.optsJSON) {
+				t.Errorf("Expected no changes, wanted %v but got %v", want, tt.optsJSON)
+			}
+		})
 	}
 }
 
-func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
-	cfgJSONStr := `{
-		"thresholds": {},		
-}`
-	eMap := map[string]any{
-		utils.EnabledCfg:             false,
-		utils.StoreIntervalCfg:       "",
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.ExistsIndexedFieldsCfg: []string{},
-		utils.EEsExporterIDsCfg:      []string{},
-		utils.EEsConnsCfg:            []string{},
-		utils.NestedFieldsCfg:        false,
-		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:              []string{},
-			utils.MetaProfileIgnoreFiltersCfg: false,
+func TestThresholdSCfgAsMapInterface(t *testing.T) {
+	tests := []struct {
+		name       string
+		cfgJSONStr string
+		eMap       map[string]any
+	}{
+		{
+			name: "Empty",
+			cfgJSONStr: `{
+				"thresholds": {},
+			}`,
+			eMap: map[string]any{
+				utils.EnabledCfg:             false,
+				utils.StoreIntervalCfg:       "",
+				utils.IndexedSelectsCfg:      true,
+				utils.PrefixIndexedFieldsCfg: []string{},
+				utils.SuffixIndexedFieldsCfg: []string{},
+				utils.ExistsIndexedFieldsCfg: []string{},
+				utils.EEsExporterIDsCfg:      []string{},
+				utils.EEsConnsCfg:            []string{},
+				utils.NestedFieldsCfg:        false,
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string{},
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+			},
+		},
+		{
+			name: "With values",
+			cfgJSONStr: `{
+				"thresholds": {								
+					"enabled": true,						
+					"store_interval": "96h",					
+					"indexed_selects": false,	
+					"string_indexed_fields": ["*req.string"],
+					"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
+					"suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],		
+					"exists_indexed_fields": ["*req.exists_indexed_field"],		
+					"nested_fields": true,					
+				},		
+			}`,
+			eMap: map[string]any{
+				utils.EnabledCfg:             true,
+				utils.StoreIntervalCfg:       "96h0m0s",
+				utils.IndexedSelectsCfg:      false,
+				utils.StringIndexedFieldsCfg: []string{"*req.string"},
+				utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
+				utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
+				utils.ExistsIndexedFieldsCfg: []string{"*req.exists_indexed_field"},
+				utils.NestedFieldsCfg:        true,
+				utils.EEsExporterIDsCfg:      []string{},
+				utils.EEsConnsCfg:            []string{},
+				utils.OptsCfg: map[string]any{
+					utils.MetaProfileIDs:              []string{},
+					utils.MetaProfileIgnoreFiltersCfg: false,
+				},
+			},
 		},
 	}
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expextec %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(tt.cfgJSONStr); err != nil {
+				t.Error(err)
+			} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, tt.eMap) {
+				t.Errorf("Expextec %+v \n, recevied %+v", utils.ToJSON(tt.eMap), utils.ToJSON(rcv))
+			}
+		})
 	}
 }
 
-func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
-	cfgJSONStr := `{
-		"thresholds": {								
-			"enabled": true,						
-			"store_interval": "96h",					
-			"indexed_selects": false,	
-            "string_indexed_fields": ["*req.string"],
-			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
-            "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],		
-            "exists_indexed_fields": ["*req.exists_indexed_field"],		
-			"nested_fields": true,					
-		},		
-}`
-	eMap := map[string]any{
-		utils.EnabledCfg:             true,
-		utils.StoreIntervalCfg:       "96h0m0s",
-		utils.IndexedSelectsCfg:      false,
-		utils.StringIndexedFieldsCfg: []string{"*req.string"},
-		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
-		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
-		utils.ExistsIndexedFieldsCfg: []string{"*req.exists_indexed_field"},
-		utils.NestedFieldsCfg:        true,
-		utils.EEsExporterIDsCfg:      []string{},
-		utils.EEsConnsCfg:            []string{},
-		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:              []string{},
-			utils.MetaProfileIgnoreFiltersCfg: false,
-		},
-	}
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expextec %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
-	}
-}
 func TestThresholdSCfgClone(t *testing.T) {
 	ban := &ThresholdSCfg{
 		Enabled:             true,

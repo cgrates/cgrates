@@ -2548,7 +2548,6 @@ func TestSortedRoutesRouteIDs(t *testing.T) {
 }
 
 func TestSortedRoutesRoutesWithParams(t *testing.T) {
-	const InInFieldSep = "|"
 	sRoutes := &SortedRoutes{
 		ProfileID: "profile1",
 		Sorting:   "cost",
@@ -2560,11 +2559,11 @@ func TestSortedRoutesRoutesWithParams(t *testing.T) {
 	}
 	routesWithParams := sRoutes.RoutesWithParams()
 	expectedRoutes := []string{
-		"route1" + InInFieldSep + "params1",
+		"route1" + utils.InInFieldSep + "params1",
 		"route2",
-		"route3" + InInFieldSep + "params3",
+		"route3" + utils.InInFieldSep + "params3",
 	}
-	if reflect.DeepEqual(routesWithParams, expectedRoutes) {
+	if !reflect.DeepEqual(routesWithParams, expectedRoutes) {
 		t.Errorf("Expected %v, but got %v", expectedRoutes, routesWithParams)
 	}
 }
