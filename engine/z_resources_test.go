@@ -110,11 +110,12 @@ func TestResourceUsageClone(t *testing.T) {
 
 func TestResourceTenantID(t *testing.T) {
 	testStruct := Resource{
+		ID:     "id1",
 		Tenant: "test_tenant",
 	}
 	result := testStruct.TenantID()
-	if reflect.DeepEqual(testStruct.Tenant, result) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", testStruct.Tenant, result)
+	if !reflect.DeepEqual(testStruct.Tenant+utils.InInFieldSep+testStruct.ID, result) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", testStruct.Tenant+utils.InInFieldSep+testStruct.ID, result)
 	}
 }
 
@@ -138,7 +139,7 @@ func TestResourceTotalUsage1(t *testing.T) {
 		},
 	}
 	result := testStruct.TotalUsage()
-	if reflect.DeepEqual(3, result) {
+	if !reflect.DeepEqual(3.0, result) {
 		t.Errorf("\nExpecting <3>,\n Received <%+v>", result)
 	}
 }
@@ -162,9 +163,10 @@ func TestResourceTotalUsage2(t *testing.T) {
 			},
 		},
 	}
+	exp := 3.0
 	result := testStruct.TotalUsage()
-	if reflect.DeepEqual(3, result) {
-		t.Errorf("\nExpecting <3>,\n Received <%+v>", result)
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", exp, result)
 	}
 }
 
@@ -187,7 +189,7 @@ func TestResourcesRecordUsage(t *testing.T) {
 		ExpiryTime: time.Date(2016, 1, 14, 0, 0, 0, 0, time.UTC),
 		Units:      1,
 	}
-	expStruct := Resource{
+	expStruct := &Resource{
 		Tenant: "test_tenant",
 		ID:     "test_id",
 		Usages: map[string]*ResourceUsage{
@@ -204,12 +206,13 @@ func TestResourcesRecordUsage(t *testing.T) {
 				Units:      1,
 			},
 		},
+		TTLIdx: []string{"test_id3"},
 	}
 	err := testStruct.recordUsage(recordStruct)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	if reflect.DeepEqual(testStruct, expStruct) {
+	if !reflect.DeepEqual(testStruct, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expStruct, testStruct)
 	}
 }
@@ -233,7 +236,7 @@ func TestResourcesClearUsage(t *testing.T) {
 			},
 		},
 	}
-	expStruct := Resource{
+	expStruct := &Resource{
 		Tenant: "test_tenant",
 		ID:     "test_id",
 		Usages: map[string]*ResourceUsage{
@@ -249,7 +252,7 @@ func TestResourcesClearUsage(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	if reflect.DeepEqual(testStruct, expStruct) {
+	if !reflect.DeepEqual(testStruct, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expStruct, testStruct)
 	}
 }

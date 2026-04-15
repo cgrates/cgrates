@@ -407,8 +407,8 @@ func TestLibRegistrarcRegister(t *testing.T) {
 		Response:         nil,
 	}
 	result, err := register(req)
-	expected := &json.RawMessage{}
-	if reflect.DeepEqual(result, expected) {
+	expected := &json.RawMessage{48}
+	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
 	}
 	if err == nil || err.Error() != "EOF" {

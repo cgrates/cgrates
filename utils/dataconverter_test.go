@@ -262,10 +262,10 @@ func TestNewDataConverterMustCompile(t *testing.T) {
 }
 
 func TestNewDurationSecondsConverter(t *testing.T) {
-	eOut := DurationSecondsConverter{}
+	eOut := &DurationSecondsConverter{}
 	if rcv, err := NewDurationSecondsConverter("test"); err != nil {
 		t.Error(err)
-	} else if reflect.DeepEqual(rcv, eOut) {
+	} else if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expected %+v received: %+v", eOut, rcv)
 	}
 }
