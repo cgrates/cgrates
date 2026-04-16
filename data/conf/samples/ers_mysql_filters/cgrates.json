@@ -35,10 +35,9 @@
 			"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"opts": {
 				"sqlDBName":"cgrates2",
-				"sqlTableName":"cdrs",
-				"sqlBatchSize": 20,
+				"sqlTableName":"cdrs"
 			},
-			"start_delay": "500ms", // wait for db to be populated before starting reader
+			"start_delay": "100ms",
 			"flags": ["*dryRun"],
 			"tenant": "cgrates.org",
 			"filters": [
