@@ -902,3 +902,87 @@ func TestERSSQLFilterUnquote(t *testing.T) {
 	}
 }
 
+// TestERSSQLFilterMetaEmpty checks that *empty and *exists match JSON
+// fields with empty string values (broken on MariaDB 10.11.14, MDEV-37428).
+func TestERSSQLFilterMetaEmpty(t *testing.T) {
+	cdrWithEmpty := &utils.CDR{
+		Tenant: "cgrates.org",
+		Opts: map[string]any{
+			utils.MetaRunID: utils.MetaDefault,
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			"EmptyField":       "",
+		},
+	}
+	cdrWithoutEmpty := &utils.CDR{
+		Tenant: "cgrates.org",
+		Opts: map[string]any{
+			utils.MetaRunID: utils.MetaDefault,
+		},
+		Event: map[string]any{
+			utils.AccountField: "1002",
+			"EmptyField":       "not_empty",
+		},
+	}
+	_ = openTestDB(t, cdrWithEmpty, cdrWithoutEmpty)
+
+	jsonCfg := `{
+"general": {
+  "reply_timeout": "10s",
+  "default_timezone": "UTC"
+},
+"admins": {
+  "enabled": true
+},
+"sessions": {
+  "enabled": true
+},
+"ers": {
+  "enabled": true,
+  "readers": [
+    {
+      "id": "mysql",
+      "type": "*sql",
+      "run_delay": "1m",
+      "start_delay": "100ms",
+      "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "opts": {
+        "sqlDBName": "cgrates2",
+        "sqlTableName": "cdrs",
+        "sqlBatchSize": 10
+      },
+      "tenant": "cgrates.org",
+      "filters": [
+        "*empty:~*req.event.EmptyField:",
+        "*exists:~*req.event.EmptyField:",
+        "*string:~*vars.*readerID:mysql"
+      ],
+      "flags": ["*dryRun"],
+      "fields": [
+        {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.event.Account", "mandatory": true}
+      ]
+    }
+  ]
+}
+}`
+
+	buf := &bytes.Buffer{}
+	ng := engine.TestEngine{
+		ConfigJSON:       jsonCfg,
+		DBCfg:            getDBCfg(t),
+		Encoding:         *utils.Encoding,
+		LogBuffer:        buf,
+		GracefulShutdown: true,
+	}
+	ng.Run(t)
+
+	waitForERsLog(t, buf, ersDryRunMySQL, 2*time.Second)
+	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
+		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
+	}
+	ev := parseCGREvent(t, buf)
+	if got := ev.Event["Account"]; got != "1001" {
+		t.Errorf("expected Account=1001, got %v", got)
+	}
+}
