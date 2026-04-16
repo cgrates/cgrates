@@ -74,7 +74,7 @@ func NewBalanceFilter(filter map[string]any, defaultTimezone string) (*BalanceFi
 		bf.ExpirationDate = utils.TimePointer(expTime)
 	}
 	if weight, has := filter[utils.Weight]; has {
-		value, err := utils.IfaceAsFloat64(weight)
+		value, err := utils.BalanceWeightAsFloat64(utils.IfaceAsString(weight))
 		if err != nil {
 			return nil, err
 		}

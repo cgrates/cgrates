@@ -475,7 +475,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-				u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+				u, err := utils.BalanceWeightAsFloat64(tpact.BalanceWeight)
 				if err != nil {
 					return err
 				}
@@ -949,7 +949,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-						u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+						u, err := utils.BalanceWeightAsFloat64(tpact.BalanceWeight)
 						if err != nil {
 							return err
 						}
