@@ -1127,8 +1127,8 @@ func (fltr *FilterRule) ElementItems() []string {
 
 // Creates mysql conditions used in WHERE statement out of filters
 func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
-	var firstItem string   // Excluding ~*req, hold the first item of an element, left empty if no more than 1 item in element. e.g. "cost_details" out of ~*req.cost_details.Charges[0].RatingID or "" out of ~*req.answer_time
-	var restOfItems string // Excluding ~*req, hold the rest of the items past the first one. If only 1 item in all element, holds that item. e.g. "Charges[0].RatingID" out of ~*req.cost_details.Charges[0].RatingID or "answer_time" out of ~*req.answer_time
+	var firstItem string
+	var restOfItems string
 	not := strings.HasPrefix(fltr.Type, utils.MetaNot)
 	elementItems := fltr.ElementItems()[1:] // exclude first item: ~*req
 	for i := range elementItems {           // encapsulate with "" strings starting with *
@@ -1143,60 +1143,41 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 		restOfItems = elementItems[0]
 	}
 
-	// here are for the filters that their values are empty: *exists, *notexists, *empty, *notempty..
+	jsonExpr := restOfItems // plain column when no JSON nesting
+	if firstItem != "" {
+		jsonExpr = fmt.Sprintf("JSON_VALUE(%s, '$.%s')", firstItem, restOfItems)
+		if strings.HasPrefix(restOfItems, `"*`) {
+			jsonExpr = fmt.Sprintf("JSON_UNQUOTE(%s)", jsonExpr)
+		}
+	}
+
 	if len(fltr.Values) == 0 {
+		// MariaDB MDEV-37428: JSON_VALUE returns NULL for empty string
+		// properties in 10.11.14 (Ubuntu 24.04 / Debian 12). Use
+		// JSON_EXTRACT instead which returns "" correctly. Fixed in
+		// 10.11.15, 11.4.9, 11.8.4, 12.1.2.
+		expr := restOfItems
+		if firstItem != "" {
+			expr = fmt.Sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s, '$.%s'))", firstItem, restOfItems)
+		}
 		switch fltr.Type {
 		case utils.MetaExists, utils.MetaNotExists:
-			if not { // not existing means Column IS NULL
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
-					return
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				return
+			if not {
+				conditions = append(conditions, fmt.Sprintf("%s IS NULL", expr))
+				return conditions
 			}
-			// existing means Column IS NOT NULL
-			if firstItem == utils.EmptyString {
-				conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
-				return
-			}
-			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems)
-			if strings.HasPrefix(restOfItems, `"*`) {
-				queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-			}
-			conditions = append(conditions, queryPart)
+			conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", expr))
 		case utils.MetaEmpty, utils.MetaNotEmpty:
 			if not {
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s != ''", restOfItems))
-					return
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') != ''", firstItem, restOfItems)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				return
+				conditions = append(conditions, fmt.Sprintf("%s != ''", expr))
+				return conditions
 			}
-			if firstItem == utils.EmptyString {
-				conditions = append(conditions, fmt.Sprintf("%s = ''", restOfItems))
-				return
-			}
-			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') = ''", firstItem, restOfItems)
-			if strings.HasPrefix(restOfItems, `"*`) {
-				queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-			}
-			conditions = append(conditions, queryPart)
+			conditions = append(conditions, fmt.Sprintf("%s = ''", expr))
 		}
-		return
+		return conditions
 	}
-	// here are for the filters that can have more than one value: *string, *prefix, *suffix ..
 	for _, value := range fltr.Values {
-		switch value { // in case we have boolean values, it should be queried over 1 or 0
+		switch value { // MySQL uses 1/0 for booleans.
 		case "true":
 			value = "1"
 		case "false":
@@ -1206,139 +1187,42 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 		switch fltr.Type {
 		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
 			if not {
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s != '%s'", restOfItems, value))
-					continue
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') != '%s'",
-					firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				continue
-			}
-			if firstItem == utils.EmptyString {
-				singleCond = fmt.Sprintf("%s = '%s'", restOfItems, value)
+				singleCond = fmt.Sprintf("%s != '%s'", jsonExpr, value)
 			} else {
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') = '%s'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				singleCond = queryPart
+				singleCond = fmt.Sprintf("%s = '%s'", jsonExpr, value)
 			}
 		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
 			parsedValAny := utils.StringToInterface(value)
 			switch fltr.Type {
 			case utils.MetaGreaterOrEqual:
-				if firstItem == utils.EmptyString {
-					singleCond = fmt.Sprintf("%s >= '%v'", restOfItems, parsedValAny)
-				} else {
-					queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') >= '%v'", firstItem, restOfItems, parsedValAny)
-					if strings.HasPrefix(restOfItems, `"*`) {
-						queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-					}
-					singleCond = queryPart
-				}
+				singleCond = fmt.Sprintf("%s >= '%v'", jsonExpr, parsedValAny)
 			case utils.MetaGreaterThan:
-				if firstItem == utils.EmptyString {
-					singleCond = fmt.Sprintf("%s > '%v'", restOfItems, parsedValAny)
-				} else {
-					queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') > '%v'", firstItem, restOfItems, parsedValAny)
-					if strings.HasPrefix(restOfItems, `"*`) {
-						queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-					}
-					singleCond = queryPart
-				}
+				singleCond = fmt.Sprintf("%s > '%v'", jsonExpr, parsedValAny)
 			case utils.MetaLessOrEqual:
-				if firstItem == utils.EmptyString {
-					singleCond = fmt.Sprintf("%s <= '%v'", restOfItems, parsedValAny)
-				} else {
-					queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') <= '%v'", firstItem, restOfItems, parsedValAny)
-					if strings.HasPrefix(restOfItems, `"*`) {
-						queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-					}
-					singleCond = queryPart
-				}
+				singleCond = fmt.Sprintf("%s <= '%v'", jsonExpr, parsedValAny)
 			case utils.MetaLessThan:
-				if firstItem == utils.EmptyString {
-					singleCond = fmt.Sprintf("%s < '%v'", restOfItems, parsedValAny)
-				} else {
-					queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') < '%v'", firstItem, restOfItems, parsedValAny)
-					if strings.HasPrefix(restOfItems, `"*`) {
-						queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-					}
-					singleCond = queryPart
-				}
+				singleCond = fmt.Sprintf("%s < '%v'", jsonExpr, parsedValAny)
 			}
 		case utils.MetaPrefix, utils.MetaNotPrefix:
 			if not {
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s NOT LIKE '%s%%'", restOfItems, value))
-					continue
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT LIKE '%s%%'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				continue
-			}
-			if firstItem == utils.EmptyString {
-				singleCond = fmt.Sprintf("%s LIKE '%s%%'", restOfItems, value)
+				singleCond = fmt.Sprintf("%s NOT LIKE '%s%%'", jsonExpr, value)
 			} else {
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') LIKE '%s%%'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				singleCond = queryPart
+				singleCond = fmt.Sprintf("%s LIKE '%s%%'", jsonExpr, value)
 			}
 		case utils.MetaSuffix, utils.MetaNotSuffix:
 			if not {
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s NOT LIKE '%%%s'", restOfItems, value))
-					continue
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT LIKE '%%%s'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				continue
-			}
-			if firstItem == utils.EmptyString {
-				singleCond = fmt.Sprintf("%s LIKE '%%%s'", restOfItems, value)
+				singleCond = fmt.Sprintf("%s NOT LIKE '%%%s'", jsonExpr, value)
 			} else {
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') LIKE '%%%s'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				singleCond = queryPart
+				singleCond = fmt.Sprintf("%s LIKE '%%%s'", jsonExpr, value)
 			}
 		case utils.MetaRegex, utils.MetaNotRegex:
 			if not {
-				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s NOT REGEXP '%s'", restOfItems, value))
-					continue
-				}
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT REGEXP '%s'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				conditions = append(conditions, queryPart)
-				continue
-			}
-			if firstItem == utils.EmptyString {
-				singleCond = fmt.Sprintf("%s REGEXP '%s'", restOfItems, value)
+				singleCond = fmt.Sprintf("%s NOT REGEXP '%s'", jsonExpr, value)
 			} else {
-				queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') REGEXP '%s'", firstItem, restOfItems, value)
-				if strings.HasPrefix(restOfItems, `"*`) {
-					queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
-				}
-				singleCond = queryPart
+				singleCond = fmt.Sprintf("%s REGEXP '%s'", jsonExpr, value)
 			}
 		}
 		conditions = append(conditions, singleCond)
 	}
-	return
+	return conditions
 }
