@@ -1183,10 +1183,10 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 				return
 			}
 			if firstItem == utils.EmptyString {
-				conditions = append(conditions, fmt.Sprintf("%s == ''", restOfItems))
+				conditions = append(conditions, fmt.Sprintf("%s = ''", restOfItems))
 				return
 			}
-			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') == ''", firstItem, restOfItems)
+			queryPart := fmt.Sprintf("JSON_VALUE(%s, '$.%s') = ''", firstItem, restOfItems)
 			if strings.HasPrefix(restOfItems, `"*`) {
 				queryPart = fmt.Sprintf("JSON_UNQUOTE(%s)", queryPart)
 			}
