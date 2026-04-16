@@ -2504,3 +2504,68 @@ func TestTprLoadRatingPlansFiltered(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
+	tests := []struct {
+		name      string
+		balWeight string
+		err       string
+	}{
+		{name: "*time_asc", balWeight: utils.MetaTimeAsc},
+		{name: "*time_desc", balWeight: utils.MetaTimeDesc},
+		{name: "number", balWeight: "15.5"},
+		{name: "invalid value", balWeight: "randomstr", err: "invalid syntax"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			db, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tpr, err := NewTpReader(db, db, "TP1", "", nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actions := &utils.TPActions{
+				TPid: "TP1",
+				ID:   "ACT_TOPUP",
+				Actions: []*utils.TPAction{
+					{
+						Identifier:    utils.MetaTopUpReset,
+						BalanceId:     "Bal1",
+						BalanceType:   utils.MetaMonetary,
+						Units:         "10",
+						ExpiryTime:    utils.MetaUnlimited,
+						BalanceWeight: tt.balWeight,
+						Weight:        10,
+					},
+				},
+			}
+			if err := db.SetTPActions([]*utils.TPActions{actions}); err != nil {
+				t.Fatal(err)
+			}
+
+			err = tpr.LoadActions()
+			if tt.err != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.err) {
+					t.Errorf("expected error containing %q, got %v", tt.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			acts := tpr.actions["ACT_TOPUP"]
+			if len(acts) != 1 {
+				t.Fatalf("expected 1 action, got %d", len(acts))
+			}
+			a := acts[0]
+			if a.Balance.Weight == nil || *a.Balance.Weight == 0 {
+				t.Errorf("expected a weight for %q, got %v", tt.balWeight, *a.Balance.Weight)
+			}
+		})
+	}
+}

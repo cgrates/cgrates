@@ -308,7 +308,7 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 
 		var weight *float64
 		if apiAct.BalanceWeight != "" {
-			x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64)
+			x, err := utils.BalanceWeightAsFloat64(apiAct.BalanceWeight)
 			if err != nil {
 				return err
 			}

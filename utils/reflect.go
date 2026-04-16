@@ -305,6 +305,20 @@ func IfaceAsFloat64(itm any) (float64, error) {
 	}
 }
 
+// BalanceWeightAsFloat64 converts a Weight string to float64.
+// It supports predefined strings to generate a value:
+//   - *time_desc: unix time until 2050
+//   - *time_asc: current unix time
+func BalanceWeightAsFloat64(s string) (float64, error) {
+	switch s {
+	case MetaTimeDesc:
+		return float64(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC).Unix() - time.Now().Unix()), nil
+	case MetaTimeAsc:
+		return float64(time.Now().Unix()), nil
+	}
+	return strconv.ParseFloat(s, 64)
+}
+
 func IfaceAsBool(itm any) (b bool, err error) {
 	switch v := itm.(type) {
 	case bool:

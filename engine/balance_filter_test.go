@@ -539,7 +539,6 @@ func TestBalanceFilterModifyBalance(t *testing.T) {
 	}
 
 }
-
 func TestBalanceFilterSetValue(t *testing.T) {
 	t.Run("when Value is nil", func(t *testing.T) {
 		bp := &BalanceFilter{}

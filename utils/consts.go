@@ -845,6 +845,8 @@ const (
 	MetaExport              = "*export"
 	MetaExporterID          = "*exporterID"
 	MetaTimeNow             = "*time_now"
+	MetaTimeDesc            = "*time_desc"
+	MetaTimeAsc             = "*time_asc"
 	MetaFirstEventATime     = "*first_event_atime"
 	MetaLastEventATime      = "*last_event_atime"
 	MetaEventNumber         = "*event_number"
