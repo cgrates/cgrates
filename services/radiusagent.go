@@ -31,29 +31,27 @@ import (
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig) *RadiusAgent {
 	return &RadiusAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	stopChan  chan struct{}
-	rad       *agents.RadiusAgent
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	stopChan chan struct{}
+	rad      *agents.RadiusAgent
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, rad.cfg.GeneralCfg().ConnectTimeout)
+		rad.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -82,13 +80,13 @@ func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown *utils.Sy
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (rad *RadiusAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	rad.Shutdown(registry)
 	return rad.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (rad *RadiusAgent) Shutdown(_ *servmanager.Registry) error {
 	if rad.rad == nil {
 		return nil
 	}
@@ -108,9 +106,4 @@ func (rad *RadiusAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (rad *RadiusAgent) ShouldRun() bool {
 	return rad.cfg.RadiusAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
-	return rad.stateDeps.StateChan(stateID)
 }

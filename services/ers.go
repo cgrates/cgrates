@@ -32,32 +32,30 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig) *EventReaderService {
 	return &EventReaderService{
-		rldChan:   make(chan struct{}, 1),
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		rldChan: make(chan struct{}, 1),
+		cfg:     cfg,
 	}
 }
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	ers       *ers.ERService
-	rldChan   chan struct{}
-	stopChan  chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	ers      *ers.ERService
+	rldChan  chan struct{}
+	stopChan chan struct{}
 }
 
 // Start should handle the sercive start
-func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, erS.cfg.GeneralCfg().ConnectTimeout)
+		erS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -94,7 +92,7 @@ func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldC
 }
 
 // Reload handles the change of config
-func (erS *EventReaderService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (erS *EventReaderService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	erS.mu.RLock()
 	erS.rldChan <- struct{}{}
 	erS.mu.RUnlock()
@@ -102,7 +100,7 @@ func (erS *EventReaderService) Reload(_ *utils.SyncedChan, _ *servmanager.Servic
 }
 
 // Shutdown stops the service
-func (erS *EventReaderService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (erS *EventReaderService) Shutdown(registry *servmanager.Registry) (err error) {
 	erS.mu.Lock()
 	defer erS.mu.Unlock()
 	close(erS.stopChan)
@@ -120,9 +118,4 @@ func (erS *EventReaderService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (erS *EventReaderService) ShouldRun() bool {
 	return erS.cfg.ERsCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
-	return erS.stateDeps.StateChan(stateID)
 }

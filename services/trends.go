@@ -32,21 +32,19 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig) *TrendService {
 	return &TrendService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 type TrendService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	trs       *trends.TrendS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	trs *trends.TrendS
 }
 
 // Start should handle the sercive start
-func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -54,7 +52,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, trs.cfg.GeneralCfg().ConnectTimeout)
+		trs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -87,7 +85,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 }
 
 // Reload handles the change of config
-func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	trs.mu.Lock()
 	trs.trs.Reload(context.TODO())
 	trs.mu.Unlock()
@@ -95,7 +93,7 @@ func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 }
 
 // Shutdown stops the service
-func (trs *TrendService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (trs *TrendService) Shutdown(registry *servmanager.Registry) (err error) {
 	trs.mu.Lock()
 	defer trs.mu.Unlock()
 	trs.trs.StopTrendS()
@@ -113,9 +111,4 @@ func (trs *TrendService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (trs *TrendService) ShouldRun() bool {
 	return trs.cfg.TrendSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (trs *TrendService) StateChan(stateID string) chan struct{} {
-	return trs.stateDeps.StateChan(stateID)
 }

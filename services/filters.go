@@ -30,28 +30,26 @@ import (
 // NewFilterService instantiates a new FilterService.
 func NewFilterService(cfg *config.CGRConfig) *FilterService {
 	return &FilterService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // FilterService implements Service interface.
 type FilterService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	fltrS     *engine.FilterS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu    sync.RWMutex
+	cfg   *config.CGRConfig
+	fltrS *engine.FilterS
 }
 
 // Start handles the service start.
-func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.CacheS,
 			utils.DB,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -70,12 +68,12 @@ func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 }
 
 // Reload handles the config changes.
-func (s *FilterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *FilterService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *FilterService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *FilterService) Shutdown(_ *servmanager.Registry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.fltrS = nil
@@ -90,11 +88,6 @@ func (s *FilterService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *FilterService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *FilterService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }
 
 // FilterS returns the FilterS object.

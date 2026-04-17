@@ -32,33 +32,31 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
 	return &CoreService{
-		shdWg:     shdWg,
-		cfg:       cfg,
-		fileCPU:   fileCPU,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		shdWg:   shdWg,
+		cfg:     cfg,
+		fileCPU: fileCPU,
 	}
 }
 
 // CoreService implements Service interface
 type CoreService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	cS        *cores.CoreS
-	fileCPU   *os.File
-	stopChan  chan struct{}
-	shdWg     *sync.WaitGroup
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	cS       *cores.CoreS
+	fileCPU  *os.File
+	stopChan chan struct{}
+	shdWg    *sync.WaitGroup
 }
 
 // Start should handle the service start
-func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CapS,
 			utils.CommonListenerS,
 			utils.ConnManager,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -82,12 +80,12 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Se
 }
 
 // Reload handles the change of config
-func (s *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service
-func (s *CoreService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *CoreService) Shutdown(registry *servmanager.Registry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cS.Shutdown()
@@ -108,11 +106,6 @@ func (s *CoreService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (s *CoreService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *CoreService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }
 
 // CoreS returns the CoreS object.

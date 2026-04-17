@@ -32,24 +32,22 @@ import (
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig) *KamailioAgent {
 	return &KamailioAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
-	cfg       *config.CGRConfig
-	kam       *agents.KamailioAgent
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg *config.CGRConfig
+	kam *agents.KamailioAgent
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{utils.ConnManager, utils.CapS, utils.FilterS},
-		registry, kam.cfg.GeneralCfg().ConnectTimeout)
+		kam.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -68,7 +66,7 @@ func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, registry *servmanage
 }
 
 // Reload handles the change of config
-func (kam *KamailioAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (kam *KamailioAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	if err = kam.kam.Shutdown(); err != nil {
@@ -92,7 +90,7 @@ func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown *utils.Synce
 }
 
 // Shutdown stops the service
-func (kam *KamailioAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (kam *KamailioAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	err = kam.kam.Shutdown()
@@ -108,9 +106,4 @@ func (kam *KamailioAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (kam *KamailioAgent) ShouldRun() bool {
 	return kam.cfg.KamAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (kam *KamailioAgent) StateChan(stateID string) chan struct{} {
-	return kam.stateDeps.StateChan(stateID)
 }

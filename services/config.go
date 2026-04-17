@@ -28,25 +28,23 @@ import (
 // NewConfigService instantiates a new ConfigService.
 func NewConfigService(cfg *config.CGRConfig) *ConfigService {
 	return &ConfigService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // ConfigService implements Service interface.
 type ConfigService struct {
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg *config.CGRConfig
 }
 
 // Start handles the service start.
-func (s *ConfigService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *ConfigService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -62,12 +60,12 @@ func (s *ConfigService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 }
 
 // Reload handles the config changes.
-func (s *ConfigService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *ConfigService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *ConfigService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *ConfigService) Shutdown(registry *servmanager.Registry) error {
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.ConfigSv1)
 	return nil
@@ -80,9 +78,4 @@ func (s *ConfigService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *ConfigService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *ConfigService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

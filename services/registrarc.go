@@ -30,27 +30,25 @@ import (
 // NewRegistrarCService returns the Dispatcher Service
 func NewRegistrarCService(cfg *config.CGRConfig) *RegistrarCService {
 	return &RegistrarCService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	dspS      *registrarc.RegistrarCService
-	stopChan  chan struct{}
-	rldChan   chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	dspS     *registrarc.RegistrarCService
+	stopChan chan struct{}
+	rldChan  chan struct{}
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	dspS.mu.Lock()
 	defer dspS.mu.Unlock()
 
-	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, dspS.cfg.GeneralCfg().ConnectTimeout)
+	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP, dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -63,13 +61,13 @@ func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Shutdown(_ *servmanager.Registry) (err error) {
 	dspS.mu.Lock()
 	defer dspS.mu.Unlock()
 	close(dspS.stopChan)
@@ -86,9 +84,4 @@ func (dspS *RegistrarCService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (dspS *RegistrarCService) ShouldRun() bool {
 	return len(dspS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0
-}
-
-// StateChan returns signaling channel of specific state
-func (dspS *RegistrarCService) StateChan(stateID string) chan struct{} {
-	return dspS.stateDeps.StateChan(stateID)
 }

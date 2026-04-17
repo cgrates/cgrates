@@ -32,25 +32,23 @@ import (
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig) *ActionService {
 	return &ActionService{
-		cfg:       cfg,
-		rldChan:   make(chan struct{}, 1),
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg:     cfg,
+		rldChan: make(chan struct{}, 1),
 	}
 }
 
 // ActionService implements Service interface
 type ActionService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	acts      *actions.ActionS
-	rldChan   chan struct{}
-	stopChan  chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	acts     *actions.ActionS
+	rldChan  chan struct{}
+	stopChan chan struct{}
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -58,7 +56,7 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, acts.cfg.GeneralCfg().ConnectTimeout)
+		acts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -89,13 +87,13 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (acts *ActionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (acts *ActionService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (acts *ActionService) Shutdown(registry *servmanager.Registry) (err error) {
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	close(acts.stopChan)
@@ -114,9 +112,4 @@ func (acts *ActionService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (acts *ActionService) ShouldRun() bool {
 	return acts.cfg.ActionSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (acts *ActionService) StateChan(stateID string) chan struct{} {
-	return acts.stateDeps.StateChan(stateID)
 }

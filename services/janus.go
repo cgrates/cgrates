@@ -32,8 +32,7 @@ import (
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig) *JanusAgent {
 	return &JanusAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
@@ -46,20 +45,18 @@ type JanusAgent struct {
 	// we can realy stop the JanusAgent so keep a flag
 	// if we registerd the jandlers
 	started bool
-
-	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should jandle the sercive start
-func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (ja *JanusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, ja.cfg.GeneralCfg().ConnectTimeout)
+		ja.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -94,12 +91,12 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 }
 
 // Reload jandles the change of config
-func (ja *JanusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (ja *JanusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return // no reload
 }
 
 // Shutdown stops the service
-func (ja *JanusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (ja *JanusAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	ja.mu.Lock()
 	err = ja.jA.Shutdown()
 	ja.started = false
@@ -115,9 +112,4 @@ func (ja *JanusAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ja *JanusAgent) ShouldRun() bool {
 	return ja.cfg.JanusAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (ja *JanusAgent) StateChan(stateID string) chan struct{} {
-	return ja.stateDeps.StateChan(stateID)
 }

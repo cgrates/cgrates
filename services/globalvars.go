@@ -27,19 +27,17 @@ import (
 // NewGlobalVarS .
 func NewGlobalVarS(cfg *config.CGRConfig) *GlobalVarS {
 	return &GlobalVarS{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg *config.CGRConfig
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	utils.RoutesDefaultRatio = gv.cfg.RouteSCfg().DefaultRatio
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -49,7 +47,7 @@ func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry)
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (gv *GlobalVarS) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	utils.RoutesDefaultRatio = gv.cfg.RouteSCfg().DefaultRatio
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -59,7 +57,7 @@ func (gv *GlobalVarS) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry
 }
 
 // Shutdown stops the service
-func (gv *GlobalVarS) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (gv *GlobalVarS) Shutdown(_ *servmanager.Registry) error {
 	return nil
 }
 
@@ -71,9 +69,4 @@ func (gv *GlobalVarS) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (gv *GlobalVarS) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (gv *GlobalVarS) StateChan(stateID string) chan struct{} {
-	return gv.stateDeps.StateChan(stateID)
 }

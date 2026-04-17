@@ -31,22 +31,20 @@ import (
 // NewCommonListenerService instantiates a new CommonListenerService.
 func NewCommonListenerService(cfg *config.CGRConfig) *CommonListenerService {
 	return &CommonListenerService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // CommonListenerService implements Service interface.
 type CommonListenerService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	cls       *commonlisteners.CommonListenerS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	cls *commonlisteners.CommonListenerS
 }
 
 // Start handles the service start.
-func (s *CommonListenerService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	cs, err := WaitForServiceState(utils.StateServiceUP, utils.CapS, registry,
+func (s *CommonListenerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	cs, err := registry.WaitForService(shutdown, utils.CapS, utils.StateServiceUP,
 		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
@@ -64,12 +62,12 @@ func (s *CommonListenerService) Start(_ *utils.SyncedChan, registry *servmanager
 }
 
 // Reload handles the config changes.
-func (s *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *CommonListenerService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *CommonListenerService) Shutdown(registry *servmanager.Registry) error {
 	deps := []string{
 		utils.AccountS,
 		utils.ActionS,
@@ -101,10 +99,10 @@ func (s *CommonListenerService) Shutdown(registry *servmanager.ServiceRegistry) 
 		utils.TrendS,
 	}
 	for _, svcID := range deps {
-		if servmanager.State(registry.Lookup(svcID)) != utils.StateServiceUP {
+		if registry.State(svcID) != utils.StateServiceUP {
 			continue
 		}
-		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, s.cfg.GeneralCfg().ConnectTimeout)
+		_, err := registry.WaitForService(nil, svcID, utils.StateServiceDOWN, s.cfg.GeneralCfg().ConnectTimeout)
 		if err != nil {
 			return err
 		}
@@ -123,11 +121,6 @@ func (s *CommonListenerService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *CommonListenerService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *CommonListenerService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }
 
 // CLS returns the CommonListenerS object.

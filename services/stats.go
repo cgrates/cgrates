@@ -31,22 +31,20 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig) *StatService {
 	return &StatService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // StatService implements Service interface
 type StatService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	sts       *engine.StatS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	sts *engine.StatS
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -54,7 +52,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, sts.cfg.GeneralCfg().ConnectTimeout)
+		sts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -84,7 +82,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	sts.mu.Lock()
 	sts.sts.Reload(context.TODO())
 	sts.mu.Unlock()
@@ -92,7 +90,7 @@ func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 }
 
 // Shutdown stops the service
-func (sts *StatService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (sts *StatService) Shutdown(registry *servmanager.Registry) (err error) {
 	sts.mu.Lock()
 	defer sts.mu.Unlock()
 	sts.sts.Shutdown(context.TODO())
@@ -110,9 +108,4 @@ func (sts *StatService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (sts *StatService) ShouldRun() bool {
 	return sts.cfg.StatSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (sts *StatService) StateChan(stateID string) chan struct{} {
-	return sts.stateDeps.StateChan(stateID)
 }

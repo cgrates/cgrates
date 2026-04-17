@@ -31,22 +31,20 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig) *RouteService {
 	return &RouteService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // RouteService implements Service interface
 type RouteService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	routeS    *routes.RouteS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu     sync.RWMutex
+	cfg    *config.CGRConfig
+	routeS *routes.RouteS
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -54,7 +52,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, routeS.cfg.GeneralCfg().ConnectTimeout)
+		routeS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -82,12 +80,12 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 }
 
 // Reload handles the change of config
-func (routeS *RouteService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (routeS *RouteService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (routeS *RouteService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (routeS *RouteService) Shutdown(registry *servmanager.Registry) (err error) {
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()
 	routeS.routeS = nil
@@ -104,9 +102,4 @@ func (routeS *RouteService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (routeS *RouteService) ShouldRun() bool {
 	return routeS.cfg.RouteSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (routeS *RouteService) StateChan(stateID string) chan struct{} {
-	return routeS.stateDeps.StateChan(stateID)
 }

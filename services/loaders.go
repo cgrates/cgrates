@@ -36,7 +36,6 @@ func NewLoaderService(cfg *config.CGRConfig, preloadIDs []string) *LoaderService
 		cfg:        cfg,
 		stopChan:   make(chan struct{}),
 		preloadIDs: preloadIDs,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -47,19 +46,18 @@ type LoaderService struct {
 	ldrs       *loaders.LoaderS
 	preloadIDs []string
 	stopChan   chan struct{}
-	stateDeps  *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -102,14 +100,14 @@ func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 }
 
 // Reload handles the change of config
-func (s *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *LoaderService) Reload(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -127,7 +125,7 @@ func (s *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.Servic
 }
 
 // Shutdown stops the service
-func (s *LoaderService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *LoaderService) Shutdown(registry *servmanager.Registry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	close(s.stopChan)
@@ -144,9 +142,4 @@ func (s *LoaderService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (s *LoaderService) ShouldRun() bool {
 	return s.cfg.LoaderCfg().Enabled()
-}
-
-// StateChan returns signaling channel of specific state
-func (s *LoaderService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

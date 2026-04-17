@@ -31,22 +31,20 @@ import (
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig) *ThresholdService {
 	return &ThresholdService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	thrs      *engine.ThresholdS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	thrs *engine.ThresholdS
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -54,7 +52,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, thrs.cfg.GeneralCfg().ConnectTimeout)
+		thrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -84,7 +82,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	thrs.mu.Lock()
 	thrs.thrs.Reload(context.TODO())
 	thrs.mu.Unlock()
@@ -92,7 +90,7 @@ func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Service
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (thrs *ThresholdService) Shutdown(registry *servmanager.Registry) error {
 	thrs.mu.Lock()
 	defer thrs.mu.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
@@ -110,9 +108,4 @@ func (thrs *ThresholdService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (thrs *ThresholdService) ShouldRun() bool {
 	return thrs.cfg.ThresholdSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
-	return thrs.stateDeps.StateChan(stateID)
 }

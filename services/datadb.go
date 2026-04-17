@@ -33,7 +33,6 @@ func NewDataDBService(cfg *config.CGRConfig, setVersions bool) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -44,12 +43,11 @@ type DataDBService struct {
 	oldDBCfg    *config.DbCfg
 	dm          *engine.DataManager
 	setVersions bool
-	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, db.cfg.GeneralCfg().ConnectTimeout)
+func (db *DataDBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP, db.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -93,7 +91,7 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.needsConnectionReload() {
@@ -136,7 +134,7 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (db *DataDBService) Shutdown(registry *servmanager.Registry) error {
 	deps := []string{
 		utils.ResourceS,
 		utils.IPs,
@@ -146,10 +144,10 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 		utils.ThresholdS,
 	}
 	for _, svcID := range deps {
-		if servmanager.State(registry.Lookup(svcID)) != utils.StateServiceUP {
+		if registry.State(svcID) != utils.StateServiceUP {
 			continue
 		}
-		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, db.cfg.GeneralCfg().ConnectTimeout)
+		_, err := registry.WaitForService(nil, svcID, utils.StateServiceDOWN, db.cfg.GeneralCfg().ConnectTimeout)
 		if err != nil {
 			return err
 		}
@@ -231,9 +229,4 @@ func (db *DataDBService) needsConnectionReload() bool {
 // DataManager returns the DataManager object.
 func (db *DataDBService) DataManager() *engine.DataManager {
 	return db.dm
-}
-
-// StateChan returns signaling channel of specific state
-func (db *DataDBService) StateChan(stateID string) chan struct{} {
-	return db.stateDeps.StateChan(stateID)
 }

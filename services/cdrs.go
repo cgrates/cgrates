@@ -32,29 +32,27 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig) *CDRService {
 	return &CDRService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // CDRService implements Service interface
 type CDRService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	cdrS      *cdrs.CDRServer
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	cdrS *cdrs.CDRServer
 }
 
 // Start should handle the sercive start
-func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, cs.cfg.GeneralCfg().ConnectTimeout)
+		cs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -78,12 +76,12 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 }
 
 // Reload handles the change of config
-func (cs *CDRService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (cs *CDRService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (cs *CDRService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (cs *CDRService) Shutdown(registry *servmanager.Registry) (err error) {
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 	cs.cdrS = nil
@@ -100,9 +98,4 @@ func (cs *CDRService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (cs *CDRService) ShouldRun() bool {
 	return cs.cfg.CdrsCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (cs *CDRService) StateChan(stateID string) chan struct{} {
-	return cs.stateDeps.StateChan(stateID)
 }

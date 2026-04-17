@@ -30,27 +30,25 @@ import (
 // NewPrometheusAgent returns the Prometheus Agent
 func NewPrometheusAgent(cfg *config.CGRConfig) *PrometheusAgent {
 	return &PrometheusAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // PrometheusAgent implements the Service interface.
 type PrometheusAgent struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
 }
 
 // Start handles the service start.
-func (s *PrometheusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *PrometheusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -67,12 +65,12 @@ func (s *PrometheusAgent) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 }
 
 // Reload handles configuration changes.
-func (s *PrometheusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (s *PrometheusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service.
-func (s *PrometheusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (s *PrometheusAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	return
 }
 
@@ -84,9 +82,4 @@ func (s *PrometheusAgent) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *PrometheusAgent) ShouldRun() bool {
 	return s.cfg.PrometheusAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (s *PrometheusAgent) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

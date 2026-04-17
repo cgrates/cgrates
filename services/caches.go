@@ -30,30 +30,28 @@ import (
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig) *CacheService {
 	return &CacheService{
-		cfg:       cfg,
-		cacheCh:   make(chan *engine.CacheS, 1),
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg:     cfg,
+		cacheCh: make(chan *engine.CacheS, 1),
 	}
 }
 
 // CacheService implements Agent interface
 type CacheService struct {
-	mu        sync.Mutex
-	cfg       *config.CGRConfig
-	cacheCh   chan *engine.CacheS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu      sync.Mutex
+	cfg     *config.CGRConfig
+	cacheCh chan *engine.CacheS
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.DB,
 			utils.ConnManager,
 			utils.CoreS,
 		},
-		registry, cS.cfg.GeneralCfg().ConnectTimeout)
+		cS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -80,12 +78,12 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (cS *CacheService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
+func (cS *CacheService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (_ error) {
 	return
 }
 
 // Shutdown stops the service
-func (cS *CacheService) Shutdown(registry *servmanager.ServiceRegistry) (_ error) {
+func (cS *CacheService) Shutdown(registry *servmanager.Registry) (_ error) {
 	cS.mu.Lock()
 	cS.mu.Unlock()
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
@@ -124,9 +122,4 @@ func (cS *CacheService) WaitToPrecache(shutdown *utils.SyncedChan, cacheIDs ...s
 		}
 	}
 	return
-}
-
-// StateChan returns signaling channel of specific state
-func (cS *CacheService) StateChan(stateID string) chan struct{} {
-	return cS.stateDeps.StateChan(stateID)
 }

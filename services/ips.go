@@ -32,22 +32,20 @@ import (
 // NewIPService returns the IP Service
 func NewIPService(cfg *config.CGRConfig) *IPService {
 	return &IPService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // IPService implements Service interface
 type IPService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	ips       *ips.IPService
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	ips *ips.IPService
 }
 
 // Start handles the service start.
-func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -55,7 +53,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -85,7 +83,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 }
 
 // Reload handles configuration changes.
-func (s *IPService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *IPService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	s.mu.Lock()
 	s.ips.Reload(context.TODO())
 	s.mu.Unlock()
@@ -93,7 +91,7 @@ func (s *IPService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) 
 }
 
 // Shutdown stops the service.
-func (s *IPService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *IPService) Shutdown(registry *servmanager.Registry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.ips.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
@@ -111,9 +109,4 @@ func (s *IPService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *IPService) ShouldRun() bool {
 	return s.cfg.IPsCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (s *IPService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

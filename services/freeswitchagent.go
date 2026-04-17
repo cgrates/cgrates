@@ -31,28 +31,26 @@ import (
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig) *FreeswitchAgent {
 	return &FreeswitchAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
-	cfg       *config.CGRConfig
-	fS        *agents.FSsessions
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg *config.CGRConfig
+	fS  *agents.FSsessions
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, fS.cfg.GeneralCfg().ConnectTimeout)
+		fS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -72,7 +70,7 @@ func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanag
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (fS *FreeswitchAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
@@ -92,7 +90,7 @@ func (fS *FreeswitchAgent) connect(shutdown *utils.SyncedChan) {
 }
 
 // Shutdown stops the service
-func (fS *FreeswitchAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (fS *FreeswitchAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	err = fS.fS.Shutdown()
@@ -108,9 +106,4 @@ func (fS *FreeswitchAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (fS *FreeswitchAgent) ShouldRun() bool {
 	return fS.cfg.FsAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (fS *FreeswitchAgent) StateChan(stateID string) chan struct{} {
-	return fS.stateDeps.StateChan(stateID)
 }

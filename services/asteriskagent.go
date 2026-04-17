@@ -31,29 +31,27 @@ import (
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig) *AsteriskAgent {
 	return &AsteriskAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	stopChan  chan struct{}
-	smas      []*agents.AsteriskAgent
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	stopChan chan struct{}
+	smas     []*agents.AsteriskAgent
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (ast *AsteriskAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.CapS,
 			utils.FilterS,
 		},
-		registry, ast.cfg.GeneralCfg().ConnectTimeout)
+		ast.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -80,13 +78,13 @@ func (ast *AsteriskAgent) Start(shutdown *utils.SyncedChan, registry *servmanage
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (ast *AsteriskAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	ast.shutdown()
 	return ast.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (ast *AsteriskAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (ast *AsteriskAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	ast.shutdown()
 	return
 }
@@ -107,9 +105,4 @@ func (ast *AsteriskAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ast *AsteriskAgent) ShouldRun() bool {
 	return ast.cfg.AsteriskAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
-	return ast.stateDeps.StateChan(stateID)
 }

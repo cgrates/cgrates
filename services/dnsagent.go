@@ -30,8 +30,7 @@ import (
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig) *DNSAgent {
 	return &DNSAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
@@ -43,19 +42,17 @@ type DNSAgent struct {
 	stopChan chan struct{}
 
 	dns *agents.DNSAgent
-
-	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, dns.cfg.GeneralCfg().ConnectTimeout)
+		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -76,14 +73,14 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, dns.cfg.GeneralCfg().ConnectTimeout)
+		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -121,7 +118,7 @@ func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown *utils.Sync
 }
 
 // Shutdown stops the service
-func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (dns *DNSAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	if dns.dns == nil {
 		return
 	}
@@ -140,9 +137,4 @@ func (dns *DNSAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (dns *DNSAgent) ShouldRun() bool {
 	return dns.cfg.DNSAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (dns *DNSAgent) StateChan(stateID string) chan struct{} {
-	return dns.stateDeps.StateChan(stateID)
 }

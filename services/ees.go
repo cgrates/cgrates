@@ -31,28 +31,26 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig) *EventExporterService {
 	return &EventExporterService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	eeS       *ees.EeS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	eeS *ees.EeS
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 		},
-		registry, es.cfg.GeneralCfg().ConnectTimeout)
+		es.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -76,7 +74,7 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
@@ -84,7 +82,7 @@ func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.Servi
 }
 
 // Shutdown stops the service
-func (es *EventExporterService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (es *EventExporterService) Shutdown(registry *servmanager.Registry) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
@@ -102,9 +100,4 @@ func (es *EventExporterService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (es *EventExporterService) ShouldRun() (should bool) {
 	return es.cfg.EEsCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (es *EventExporterService) StateChan(stateID string) chan struct{} {
-	return es.stateDeps.StateChan(stateID)
 }
