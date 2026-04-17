@@ -31,21 +31,6 @@ import (
 )
 
 func TestSessionSv1ProcessEventRates(t *testing.T) {
-	var dbcfg engine.DBCfg
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		dbcfg = engine.InternalDBCfg
-	case utils.MetaRedis:
-		dbcfg = engine.RedisDBCfg
-	case utils.MetaMySQL:
-		dbcfg = engine.MySQLDBCfg
-	case utils.MetaMongo:
-		dbcfg = engine.MongoDBCfg
-	case utils.MetaPostgres:
-		dbcfg = engine.PostgresDBCfg
-	default:
-		t.Fatal("unsupported dbtype value")
-	}
 
 	ng := engine.TestEngine{
 		ConfigJSON: `{
@@ -66,7 +51,7 @@ func TestSessionSv1ProcessEventRates(t *testing.T) {
 			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
 cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * *",;10,false,0s,0,1,1m,1m`,
 		},
-		DBCfg:    dbcfg,
+		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
 		// LogBuffer: new(bytes.Buffer),
 	}
