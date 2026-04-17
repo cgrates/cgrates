@@ -30,21 +30,6 @@ import (
 )
 
 func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
-	var dbcfg engine.DBCfg
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		dbcfg = engine.InternalDBCfg
-	case utils.MetaRedis:
-		dbcfg = engine.RedisDBCfg
-	case utils.MetaMySQL:
-		dbcfg = engine.MySQLDBCfg
-	case utils.MetaMongo:
-		dbcfg = engine.MongoDBCfg
-	case utils.MetaPostgres:
-		dbcfg = engine.PostgresDBCfg
-	default:
-		t.Fatal("unsupported dbtype value")
-	}
 
 	ng := engine.TestEngine{
 		ConfigJSON: `{
@@ -68,11 +53,18 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 	"enabled": true
 }
 }`,
-		DBCfg:    dbcfg,
+		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
 	}
 
 	client, _ := ng.Run(t)
+
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
 
 	var reply string
 
