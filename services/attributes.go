@@ -31,21 +31,19 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig) *AttributeService {
 	return &AttributeService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // AttributeService implements Service interface
 type AttributeService struct {
-	mu        sync.Mutex
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -53,7 +51,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, attrS.cfg.GeneralCfg().ConnectTimeout)
+		attrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -81,12 +79,12 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (attrS *AttributeService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (attrS *AttributeService) Shutdown(registry *servmanager.Registry) (err error) {
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
@@ -102,9 +100,4 @@ func (attrS *AttributeService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (attrS *AttributeService) ShouldRun() bool {
 	return attrS.cfg.AttributeSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
-	return attrS.stateDeps.StateChan(stateID)
 }

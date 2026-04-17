@@ -32,25 +32,23 @@ import (
 // NewConnManagerService instantiates a new ConnManagerService.
 func NewConnManagerService(cfg *config.CGRConfig) *ConnManagerService {
 	return &ConnManagerService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // ConnManagerService implements Service interface.
 type ConnManagerService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	connMgr   *engine.ConnManager
-	anz       *AnalyzerService
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu      sync.RWMutex
+	cfg     *config.CGRConfig
+	connMgr *engine.ConnManager
+	anz     *AnalyzerService
 }
 
 // Start handles the service start.
-func (s *ConnManagerService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+func (s *ConnManagerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	s.anz = registry.Lookup(utils.AnalyzerS).(*AnalyzerService)
 	if s.anz.ShouldRun() { // wait for AnalyzerS only if it should run
-		if _, err := WaitForServiceState(utils.StateServiceUP, utils.AnalyzerS, registry,
+		if _, err := registry.WaitForService(shutdown, utils.AnalyzerS, utils.StateServiceUP,
 			s.cfg.GeneralCfg().ConnectTimeout); err != nil {
 			return err
 		}
@@ -60,13 +58,13 @@ func (s *ConnManagerService) Start(_ *utils.SyncedChan, registry *servmanager.Se
 }
 
 // Reload handles the config changes.
-func (s *ConnManagerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *ConnManagerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	s.connMgr.Reload()
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *ConnManagerService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *ConnManagerService) Shutdown(_ *servmanager.Registry) error {
 	s.connMgr = nil
 	return nil
 }
@@ -79,11 +77,6 @@ func (s *ConnManagerService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *ConnManagerService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *ConnManagerService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }
 
 // ConnManager returns the ConnManager object.

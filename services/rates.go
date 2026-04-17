@@ -31,25 +31,23 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig) *RateService {
 	return &RateService{
-		cfg:       cfg,
-		rldChan:   make(chan struct{}),
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg:     cfg,
+		rldChan: make(chan struct{}),
 	}
 }
 
 // RateService is the service structure for RateS
 type RateService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	rateS     *rates.RateS
-	rldChan   chan struct{}
-	stopChan  chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	rateS    *rates.RateS
+	rldChan  chan struct{}
+	stopChan chan struct{}
 }
 
 // Start should handle the service start
-func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -57,7 +55,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, rs.cfg.GeneralCfg().ConnectTimeout)
+		rs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -91,13 +89,13 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 }
 
 // Reload handles the change of config
-func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
+func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
 
 // Shutdown stops the service
-func (rs *RateService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (rs *RateService) Shutdown(registry *servmanager.Registry) (err error) {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
 	close(rs.stopChan)
@@ -105,11 +103,6 @@ func (rs *RateService) Shutdown(registry *servmanager.ServiceRegistry) (err erro
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.RateSv1)
 	return
-}
-
-// StateChan returns signaling channel of specific state
-func (rs *RateService) StateChan(stateID string) chan struct{} {
-	return rs.stateDeps.StateChan(stateID)
 }
 
 // ServiceName returns the service name

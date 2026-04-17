@@ -199,8 +199,7 @@ func runCGREngine(fs []string) (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
-	// ServiceIndexer will share service references to all services
-	registry := servmanager.NewServiceRegistry()
+	registry := servmanager.NewRegistry()
 	coreS := services.NewCoreService(cfg, cpuPrfF, shdWg)
 
 	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
@@ -279,7 +278,7 @@ func runCGREngine(fs []string) (err error) {
 	}()
 
 	srvManager.StartServices(shutdown)
-	initServiceManagerV1(cfg, srvManager, registry)
+	initServiceManagerV1(cfg, srvManager, registry, shutdown)
 
 	// Serve rpc connections
 	startRPC(cfg, registry, shutdown)
@@ -387,13 +386,12 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 
 // initServiceManagerV1 registers the ServiceManager methods.
 func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
-	registry *servmanager.ServiceRegistry) {
-	srvDeps, err := services.WaitForServicesToReachState(utils.StateServiceUP,
+	registry *servmanager.Registry, shutdown *utils.SyncedChan) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
-		},
-		registry, cfg.GeneralCfg().ConnectTimeout)
+		}, cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -405,7 +403,7 @@ func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceMan
 }
 
 // startRPC initializes and starts the RPC server.
-func startRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
+func startRPC(cfg *config.CGRConfig, registry *servmanager.Registry, shutdown *utils.SyncedChan) {
 	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
 	cl.StartServer(cfg, shutdown)
 }

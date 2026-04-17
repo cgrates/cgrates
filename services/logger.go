@@ -31,19 +31,17 @@ func NewLoggerService(cfg *config.CGRConfig, loggerType string) *LoggerService {
 	return &LoggerService{
 		cfg:        cfg,
 		loggerType: loggerType,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // LoggerService implements Service interface.
 type LoggerService struct {
 	cfg        *config.CGRConfig
-	stateDeps  *StateDependencies // channel subscriptions for state changes
 	loggerType string
 }
 
 // Start handles the service start.
-func (s *LoggerService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+func (s *LoggerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	if s.loggerType != utils.MetaKafkaLog {
 		return nil
 	}
@@ -51,7 +49,7 @@ func (s *LoggerService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	// logger, we log to *stdout until initiated. We should also consider
 	// removing ErrLoggerChanged error cases if they turn out to be redundant
 	// (see engine/kafka_logger.go).
-	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry,
+	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP,
 		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
@@ -62,12 +60,12 @@ func (s *LoggerService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 }
 
 // Reload handles the config changes.
-func (s *LoggerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *LoggerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *LoggerService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *LoggerService) Shutdown(_ *servmanager.Registry) error {
 	return nil
 }
 
@@ -79,9 +77,4 @@ func (s *LoggerService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *LoggerService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *LoggerService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

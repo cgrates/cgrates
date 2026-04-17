@@ -30,8 +30,7 @@ import (
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig) *HTTPAgent {
 	return &HTTPAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
@@ -43,20 +42,18 @@ type HTTPAgent struct {
 	// we can realy stop the HTTPAgent so keep a flag
 	// if we registerd the handlers
 	started bool
-
-	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (ha *HTTPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, ha.cfg.GeneralCfg().ConnectTimeout)
+		ha.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -79,12 +76,12 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 }
 
 // Reload handles the change of config
-func (ha *HTTPAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (ha *HTTPAgent) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return // no reload
 }
 
 // Shutdown stops the service
-func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (ha *HTTPAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	ha.mu.Lock()
 	ha.started = false
 	ha.mu.Unlock()
@@ -99,9 +96,4 @@ func (ha *HTTPAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ha *HTTPAgent) ShouldRun() bool {
 	return len(ha.cfg.HTTPAgentCfg()) != 0
-}
-
-// StateChan returns signaling channel of specific state
-func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
-	return ha.stateDeps.StateChan(stateID)
 }

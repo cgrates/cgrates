@@ -31,8 +31,7 @@ import (
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig) *SIPAgent {
 	return &SIPAgent{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
@@ -42,18 +41,17 @@ type SIPAgent struct {
 	cfg       *config.CGRConfig
 	sip       *agents.SIPAgent
 	oldListen string
-	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
 			utils.CapS,
 		},
-		registry, sip.cfg.GeneralCfg().ConnectTimeout)
+		sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -80,7 +78,7 @@ func (sip *SIPAgent) listenAndServe(shutdown *utils.SyncedChan) {
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (sip *SIPAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
@@ -94,7 +92,7 @@ func (sip *SIPAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (sip *SIPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (sip *SIPAgent) Shutdown(_ *servmanager.Registry) (err error) {
 	sip.mu.Lock()
 	defer sip.mu.Unlock()
 	sip.sip.Shutdown()
@@ -110,9 +108,4 @@ func (sip *SIPAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (sip *SIPAgent) ShouldRun() bool {
 	return sip.cfg.SIPAgentCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
-	return sip.stateDeps.StateChan(stateID)
 }

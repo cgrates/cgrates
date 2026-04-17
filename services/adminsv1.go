@@ -31,31 +31,29 @@ import (
 // NewAdminSv1Service returns the AdminSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 	return &AdminSv1Service{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	api       *apis.AdminSv1
-	stopChan  chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	api      *apis.AdminSv1
+	stopChan chan struct{}
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (s *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -84,12 +82,12 @@ func (s *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 }
 
 // Reload handles the change of config
-func (s *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (s *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (s *AdminSv1Service) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (s *AdminSv1Service) Shutdown(registry *servmanager.Registry) (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	// close(s.stopChan)
@@ -107,9 +105,4 @@ func (s *AdminSv1Service) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (s *AdminSv1Service) ShouldRun() bool {
 	return s.cfg.AdminSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (s *AdminSv1Service) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

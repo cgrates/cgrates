@@ -28,24 +28,22 @@ import (
 // NewGuardianService instantiates a new GuardianService.
 func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 	return &GuardianService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // GuardianService implements Service interface.
 type GuardianService struct {
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg *config.CGRConfig
 }
 
 // Start handles the service start.
-func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	_, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *GuardianService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	_, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.LoggerS,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -64,12 +62,12 @@ func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 }
 
 // Reload handles the config changes.
-func (s *GuardianService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *GuardianService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *GuardianService) Shutdown(registry *servmanager.ServiceRegistry) error {
+func (s *GuardianService) Shutdown(registry *servmanager.Registry) error {
 	return nil
 }
 
@@ -81,9 +79,4 @@ func (s *GuardianService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *GuardianService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *GuardianService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

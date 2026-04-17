@@ -36,10 +36,6 @@ import (
 func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 	anz := &AnalyzerService{
 		cfg: cfg,
-		stateDeps: NewStateDependencies([]string{
-			utils.StateServiceUP,
-			utils.StateServiceDOWN,
-		}),
 	}
 	return anz
 }
@@ -50,13 +46,11 @@ type AnalyzerService struct {
 	cfg        *config.CGRConfig
 	anz        *analyzers.AnalyzerS
 	cancelFunc context.CancelFunc
-	stateDeps  *StateDependencies // channel subscriptions for state changes
-
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	cls, err := WaitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
+func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	cls, err := registry.WaitForService(shutdown, utils.CommonListenerS, utils.StateServiceUP,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -77,12 +71,12 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 		}
 	}(anz.anz)
 	cl.SetAnalyzer(anz.anz)
-	go anz.start(registry, cl)
+	go anz.start(shutdown, registry, cl)
 	return
 }
 
-func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry, cl *commonlisteners.CommonListenerS) {
-	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+func (anz *AnalyzerService) start(shutdown *utils.SyncedChan, registry *servmanager.Registry, cl *commonlisteners.CommonListenerS) {
+	fs, err := registry.WaitForService(shutdown, utils.FilterS, utils.StateServiceUP,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -99,12 +93,12 @@ func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry, cl *com
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (anz *AnalyzerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (anz *AnalyzerService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (anz *AnalyzerService) Shutdown(registry *servmanager.Registry) (err error) {
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	anz.mu.Lock()
 	anz.cancelFunc()
@@ -137,9 +131,4 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
-}
-
-// StateChan returns signaling channel of specific state
-func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
-	return anz.stateDeps.StateChan(stateID)
 }

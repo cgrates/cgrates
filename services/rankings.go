@@ -33,21 +33,19 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig) *RankingService {
 	return &RankingService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 type RankingService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	ran       *rankings.RankingS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	ran *rankings.RankingS
 }
 
 // Start should handle the sercive start
-func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -55,7 +53,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, ran.cfg.GeneralCfg().ConnectTimeout)
+		ran.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -88,7 +86,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 }
 
 // Reload handles the change of config
-func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	ran.mu.Lock()
 	ran.ran.Reload(context.TODO())
 	ran.mu.Unlock()
@@ -96,7 +94,7 @@ func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceReg
 }
 
 // Shutdown stops the service
-func (ran *RankingService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (ran *RankingService) Shutdown(registry *servmanager.Registry) (err error) {
 	ran.mu.Lock()
 	defer ran.mu.Unlock()
 	ran.ran.StopRankingS()
@@ -114,9 +112,4 @@ func (ran *RankingService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ran *RankingService) ShouldRun() bool {
 	return ran.cfg.RankingSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (ran *RankingService) StateChan(stateID string) chan struct{} {
-	return ran.stateDeps.StateChan(stateID)
 }

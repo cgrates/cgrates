@@ -31,22 +31,20 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 	return &ChargerService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // ChargerService implements Service interface
 type ChargerService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	chrS      *chargers.ChargerS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	chrS *chargers.ChargerS
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -54,7 +52,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, chrS.cfg.GeneralCfg().ConnectTimeout)
+		chrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -82,12 +80,12 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (chrS *ChargerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (chrS *ChargerService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (chrS *ChargerService) Shutdown(registry *servmanager.Registry) (err error) {
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()
 	chrS.chrS = nil
@@ -104,9 +102,4 @@ func (chrS *ChargerService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (chrS *ChargerService) ShouldRun() bool {
 	return chrS.cfg.ChargerSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (chrS *ChargerService) StateChan(stateID string) chan struct{} {
-	return chrS.stateDeps.StateChan(stateID)
 }

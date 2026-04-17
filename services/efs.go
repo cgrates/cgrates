@@ -31,30 +31,28 @@ import (
 
 // ExportFailoverService is the service structure for ExportFailover
 type ExportFailoverService struct {
-	mu        sync.Mutex
-	efS       *efs.EfS
-	srv       *birpc.Service
-	stopChan  chan struct{}
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.Mutex
+	efS      *efs.EfS
+	srv      *birpc.Service
+	stopChan chan struct{}
+	cfg      *config.CGRConfig
 }
 
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig) *ExportFailoverService {
 	return &ExportFailoverService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // Start should handle the service start
-func (s *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (s *ExportFailoverService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 		},
-		registry, s.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -74,12 +72,12 @@ func (s *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager
 }
 
 // Reload handles the change of config
-func (s *ExportFailoverService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (s *ExportFailoverService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (s *ExportFailoverService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (s *ExportFailoverService) Shutdown(registry *servmanager.Registry) (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.srv = nil
@@ -99,9 +97,4 @@ func (s *ExportFailoverService) ShouldRun() bool {
 // ServiceName returns the service name
 func (s *ExportFailoverService) ServiceName() string {
 	return utils.EFs
-}
-
-// StateChan returns signaling channel of specific state
-func (s *ExportFailoverService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }

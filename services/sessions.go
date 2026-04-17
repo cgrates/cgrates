@@ -34,8 +34,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig) *SessionService {
 	return &SessionService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
@@ -46,19 +45,18 @@ type SessionService struct {
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
 	cfg          *config.CGRConfig
-	stateDeps    *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, smg.cfg.GeneralCfg().ConnectTimeout)
+		smg.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -108,12 +106,12 @@ func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (smg *SessionService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (smg *SessionService) Shutdown(registry *servmanager.Registry) (err error) {
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 	close(smg.stopChan)
@@ -139,9 +137,4 @@ func (smg *SessionService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (smg *SessionService) ShouldRun() bool {
 	return smg.cfg.SessionSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (smg *SessionService) StateChan(stateID string) chan struct{} {
-	return smg.stateDeps.StateChan(stateID)
 }

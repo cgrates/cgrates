@@ -31,30 +31,28 @@ import (
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig) *TPeService {
 	return &TPeService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // TypeService implements Service interface
 type TPeService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	tpes      *tpes.TPeS
-	srv       *birpc.Service
-	stopChan  chan struct{}
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	tpes     *tpes.TPeS
+	srv      *birpc.Service
+	stopChan chan struct{}
 }
 
 // Start should handle the service start
-func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (ts *TPeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.DB,
 		},
-		registry, ts.cfg.GeneralCfg().ConnectTimeout)
+		ts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -73,12 +71,12 @@ func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 }
 
 // Reload handles the change of config
-func (ts *TPeService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (ts *TPeService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (ts *TPeService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (ts *TPeService) Shutdown(registry *servmanager.Registry) (err error) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 	ts.srv = nil
@@ -96,9 +94,4 @@ func (ts *TPeService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ts *TPeService) ShouldRun() bool {
 	return ts.cfg.TpeSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (ts *TPeService) StateChan(stateID string) chan struct{} {
-	return ts.stateDeps.StateChan(stateID)
 }

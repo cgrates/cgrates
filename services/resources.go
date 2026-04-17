@@ -32,22 +32,20 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig) *ResourceService {
 	return &ResourceService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // ResourceService implements Service interface
 type ResourceService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	reS       *resources.ResourceS
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	reS *resources.ResourceS
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
@@ -55,7 +53,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.FilterS,
 			utils.DB,
 		},
-		registry, reS.cfg.GeneralCfg().ConnectTimeout)
+		reS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -85,7 +83,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	reS.mu.Lock()
 	reS.reS.Reload(context.TODO())
 	reS.mu.Unlock()
@@ -93,7 +91,7 @@ func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (reS *ResourceService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+func (reS *ResourceService) Shutdown(registry *servmanager.Registry) (err error) {
 	reS.mu.Lock()
 	defer reS.mu.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
@@ -111,9 +109,4 @@ func (reS *ResourceService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (reS *ResourceService) ShouldRun() bool {
 	return reS.cfg.ResourceSCfg().Enabled
-}
-
-// StateChan returns signaling channel of specific state
-func (reS *ResourceService) StateChan(stateID string) chan struct{} {
-	return reS.stateDeps.StateChan(stateID)
 }

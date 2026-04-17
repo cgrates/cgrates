@@ -28,31 +28,29 @@ import (
 // NewCapService instantiates a new CapService.
 func NewCapService(cfg *config.CGRConfig) *CapService {
 	return &CapService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
 	}
 }
 
 // CapService implements Service interface.
 type CapService struct {
-	cfg       *config.CGRConfig
-	caps      *engine.Caps
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	cfg  *config.CGRConfig
+	caps *engine.Caps
 }
 
 // Start handles the service start.
-func (s *CapService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+func (s *CapService) Start(_ *utils.SyncedChan, registry *servmanager.Registry) error {
 	s.caps = engine.NewCaps(s.cfg.CoreSCfg().Caps, s.cfg.CoreSCfg().CapsStrategy)
 	return nil
 }
 
 // Reload handles the config changes.
-func (s *CapService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *CapService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *CapService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *CapService) Shutdown(_ *servmanager.Registry) error {
 	return nil
 }
 
@@ -64,11 +62,6 @@ func (s *CapService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *CapService) ShouldRun() bool {
 	return true
-}
-
-// StateChan returns signaling channel of specific state
-func (s *CapService) StateChan(stateID string) chan struct{} {
-	return s.stateDeps.StateChan(stateID)
 }
 
 // Caps returns the Caps object.
