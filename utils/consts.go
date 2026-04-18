@@ -626,6 +626,7 @@ const (
 	RateProfileID            = "RateProfileID"
 	AccountingID             = "AccountingID"
 	MetaSessionS             = "*sessions"
+	MetaSession              = "*session"
 	MetaDefault              = "*default"
 	MetaPrimary              = "*primary"
 	Error                    = "Error"

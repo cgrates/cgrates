@@ -19,6 +19,7 @@ package sessions
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -98,7 +100,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		return // Nothing to do
 	}
 	if attrS {
-		rplyAttr, err := sS.processAttributes(ctx, args)
+		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			authReply.Attributes = rplyAttr
@@ -115,7 +118,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
+		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			utils.MetaSessionS, args); err != nil {
 			return
 		}
 		for _, chrgr := range chrgrs {
@@ -335,7 +340,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return
 	}
 	if attrS {
-		rplyAttr, err := sS.processAttributes(ctx, args)
+		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = rplyAttr
@@ -353,7 +359,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
+		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			utils.MetaSessionS, args); err != nil {
 			return
 		}
 		for _, chrgr := range chrgrs {
@@ -543,7 +551,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	}
 
 	if attrS {
-		rplyAttr, err := sS.processAttributes(ctx, args)
+		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = rplyAttr
@@ -862,15 +871,36 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaAttributes] = attrS
 	}
 	if cch[utils.MetaAttributes].(bool) {
-		apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
-		if rplyAttr, errProc := sS.processAttributes(ctx, apiArgs); errProc != nil {
+		if rplyAttr, errProc := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, apiArgs); errProc != nil {
 			if errProc.Error() != utils.ErrNotFound.Error() {
 				return utils.NewErrAttributeS(errProc)
 			}
-		} else {
+		} else if len(rplyAttr.AlteredFields) != 0 { // at least one change was performed
 			*apiArgs = *rplyAttr.CGREvent
+			if apiRply.Attributes == nil {
+				apiRply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
+			}
 			apiRply.Attributes[utils.MetaPrimary] = rplyAttr
 		}
+	}
+
+	// extracting *session here allows us to know if the event should be attached to a session so we do not fork later
+	if sesBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.Session,
+		utils.MetaSession); errBool != nil {
+		return errBool
+	} else {
+		cch[utils.MetaSession] = sesBool
+	}
+
+	// extracting *terminate informs if the event should be attached to a session so we do not fork later
+	if terminateBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.Terminate,
+		utils.MetaTerminate); errBool != nil {
+		return errBool
+	} else {
+		cch[utils.MetaTerminate] = terminateBool
 	}
 
 	// ChargerS will multiply/alter the event before any auth/accounting/cdr taking place
@@ -881,13 +911,15 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	} else {
 		cch[utils.MetaChargers] = chrgS
 	}
-	if cch[utils.MetaChargers].(bool) {
-		//delete(cgrEvs, utils.MetaPrimary) // Original Event is not longer processed
+	// Apply ChargerS, but only if not a session
+	if cch[utils.MetaChargers].(bool) &&
+		!slices.Contains([]bool{cch[utils.MetaSession].(bool), cch[utils.MetaTerminate].(bool)}, true) {
 		var chrgrs []*chargers.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, apiArgs); err != nil {
+		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			utils.MetaSessionS, apiArgs); err != nil {
 			return
 		}
-
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
@@ -918,35 +950,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// same processing for each event
 	for runID, cgrEv := range cgrEvs {
 		cchEv := make(map[string]any)
-
-		// RateS Enabled
-		if rtS, errRTs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
-			sS.fltrS, sS.cfg.SessionSCfg().Opts.Rates,
-			utils.MetaRates); errRTs != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
-				return errRTs
-			}
-			withErrors = true
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, errRTs.Error(), cgrEv, utils.RateS))
-		} else if rtS {
-			var rtsCost *utils.Decimal
-			if rtsCost, err = sS.ratesCost(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
-					return
-				}
-				withErrors = true
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
-						utils.SessionS, err.Error(), cgrEv, utils.RateS))
-			}
-			if apiRply.RateSCost == nil {
-				apiRply.RateSCost = make(map[string]float64)
-			}
-			costFlt, _ := rtsCost.Float64()
-			apiRply.RateSCost[runID] = costFlt
-		}
 
 		// RouteS Enabled
 		if rous, errRous := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
@@ -1046,6 +1049,37 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cchEv[utils.MetaIPs] = false
 		} else {
 			cchEv[utils.MetaIPs] = ipS
+		}
+
+		// RateS Enabled
+		if rtS, errRTs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Rates,
+			utils.MetaRates); errRTs != nil {
+			if cch[utils.OptsSesBlockerError].(bool) {
+				return errRTs
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errRTs.Error(), cgrEv, utils.RateS))
+		} else if rtS {
+			var rtsCost *utils.RateProfileCost
+			if rtsCost, err = rates.RateScCostForEvent(ctx, sS.fltrS,
+				sS.cfg.SessionSCfg().Conns[utils.MetaRates], sS.connMgr,
+				utils.MetaSessionS, cgrEv); err != nil {
+				if cch[utils.OptsSesBlockerError].(bool) {
+					return
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.RateS))
+			}
+			if apiRply.RateSCost == nil {
+				apiRply.RateSCost = make(map[string]float64)
+			}
+			costFlt, _ := rtsCost.Cost.Float64()
+			apiRply.RateSCost[runID] = costFlt
 		}
 
 		// AccountS Enabled

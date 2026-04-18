@@ -25,6 +25,9 @@ import (
 
 	"github.com/ericlagergren/decimal"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -291,6 +294,25 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 		if iRtUsageSIdx.Cmp(totalUsage) >= 0 { // charged enough for the usage
 			break
 		}
+	}
+	return
+}
+
+// RateScCostForEvent is a wrapper to unify processing from the client side from multiple subsystems
+func RateScCostForEvent(ctx *context.Context, fltrS *engine.FilterS,
+	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
+	cgrEv *utils.CGREvent) (rtsCost *utils.RateProfileCost, err error) {
+	var rateConns []string
+	rateConns, err = engine.GetConnIDs(ctx, connsCfg, cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS)
+	if err != nil {
+		return
+	}
+	if len(rateConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.RateS)
+	}
+	if err = connMgr.Call(ctx, rateConns,
+		utils.RateSv1CostForEvent, cgrEv, rtsCost); err != nil {
+		return
 	}
 	return
 }

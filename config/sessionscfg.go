@@ -107,6 +107,7 @@ type SessionsOpts struct {
 	AccountsInitialize     []*DynamicBoolOpt
 	AccountsUpdate         []*DynamicBoolOpt
 	AccountsTerminate      []*DynamicBoolOpt
+	Session                []*DynamicBoolOpt
 }
 
 // SessionSCfg is the config section for SessionS

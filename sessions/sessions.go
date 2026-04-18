@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -915,7 +914,9 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	}
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, cgrEv); err != nil {
+		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			utils.MetaSessionS, cgrEv); err != nil {
 			return
 		}
 		s.SRuns = make([]*SRun, len(chrgrs))
@@ -924,31 +925,6 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		}
 	}
 
-	return
-}
-
-// processChargerS processes the event with chargers and caches the response based on the requestID
-func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent) (chrgrs []*chargers.ChrgSProcessEventReply, err error) {
-	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaChargers], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
-		return
-	}
-	if len(conns) == 0 {
-		err = errors.New("ChargerS is disabled")
-		return
-	}
-	if x, ok := engine.Cache.Get(utils.CacheEventCharges, cgrEv.ID); ok && x != nil {
-		return x.([]*chargers.ChrgSProcessEventReply), nil
-	}
-	if err = sS.connMgr.Call(ctx, conns,
-		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
-		err = utils.NewErrChargerS(err)
-	}
-
-	if errCh := engine.Cache.Set(ctx, utils.CacheEventCharges, cgrEv.ID, chrgrs, nil,
-		true, utils.NonTransactional); errCh != nil {
-		return nil, errCh
-	}
 	return
 }
 
@@ -1044,25 +1020,6 @@ func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREve
 		return
 	}
 	return &reply, nil
-}
-
-// ratesCost will query the RateS cost for Event
-func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (cost *utils.Decimal, err error) {
-	var rateConns []string
-	rateConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaRates], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS)
-	if err != nil {
-		return
-	}
-	if len(rateConns) == 0 {
-		err = errors.New("RateS is disabled")
-		return
-	}
-	var rtsCost utils.RateProfileCost
-	if err = sS.connMgr.Call(ctx, rateConns,
-		utils.RateSv1CostForEvent, cgrEv, &rtsCost); err != nil {
-		return
-	}
-	return rtsCost.Cost, nil
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
@@ -1689,6 +1646,11 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 	return
 }
 
+// hasSession will prove if a session with sID exists in either active, passive or closed cached sessions
+func (sS *SessionS) hasSession(ctx *context.Context, sID string) bool {
+	return false
+}
+
 func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	var cdrsConns []string
 	if cdrsConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaCDRs], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
@@ -1791,27 +1753,6 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 		cgrEv, &routesReply); err != nil {
 		return routesReply, utils.NewErrRouteS(err)
 	}
-	return
-}
-
-// processAttributes will receive the event and send it to AttributeS to be processed
-func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv *attributes.AttrSProcessEventReply, err error) {
-	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
-		return
-	}
-	if len(conns) == 0 {
-		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
-	}
-	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(engine.MapEvent)
-	}
-	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaSessionS
-	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
-		utils.MetaSessionS)
-	err = sS.connMgr.Call(ctx, conns, utils.AttributeSv1ProcessEvent,
-		cgrEv, &rplyEv)
 	return
 }
 
