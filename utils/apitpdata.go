@@ -314,6 +314,7 @@ type TPThresholdProfile struct {
 	Weights          string // Weight to sort the thresholds
 	ActionProfileIDs []string
 	EeIDs            []string
+	AttributeIDs     []string
 	Async            bool
 }
 
@@ -851,4 +852,44 @@ type ScheduledRanking struct {
 	RankingID string
 	Next      time.Time
 	Previous  time.Time
+}
+
+type FieldsAltered struct {
+	MatchedProfileID string
+	Fields           []string
+}
+
+// UniqueAlteredFields returns all altered fields without duplicates
+func (flds *AttrSProcessEventReply) UniqueAlteredFields() (unFlds StringSet) {
+	unFlds = make(StringSet)
+	for _, altered := range flds.AlteredFields {
+		unFlds.AddSlice(altered.Fields)
+	}
+	return
+}
+
+// AttrSProcessEventReply reply used for process event
+type AttrSProcessEventReply struct {
+	AlteredFields []*FieldsAltered
+	CGREvent      *CGREvent
+	Blocker       bool `json:"-"` // internally used to stop further processRuns
+}
+
+// Digest returns serialized version of alteredFields in AttrSProcessEventReply
+// format fldName1:fldVal1,fldName2:fldVal2
+func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
+	for idx, altered := range attrReply.AlteredFields {
+		for idxFlds, fldName := range altered.Fields {
+			fldName = strings.TrimPrefix(fldName, MetaReq+NestingSep)
+			if _, has := attrReply.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			if idx != 0 || idxFlds != 0 {
+				rplyDigest += FieldsSep
+			}
+			fldStrVal, _ := attrReply.CGREvent.FieldAsString(fldName)
+			rplyDigest += fldName + InInFieldSep + fldStrVal
+		}
+	}
+	return
 }

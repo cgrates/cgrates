@@ -201,6 +201,6 @@ func (atrS *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (atrS *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *attributes.AttrSProcessEventReply) (err error) {
+func (atrS *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *utils.AttrSProcessEventReply) (err error) {
 	return atrS.atrs.V1ProcessEvent(ctx, args, attrEvntRpl)
 }

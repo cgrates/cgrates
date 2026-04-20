@@ -120,8 +120,8 @@ func TestThresholdEES(t *testing.T) {
 		TpFiles: map[string]string{
 			utils.ActionsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
 cgrates.org,*log,,,,,,,,,,,,,`,
-			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10]
-cgrates.org,Threshold1,*string:~*opts.*account:1001;*string:~*req.RequestType:*prepaid,;20,1,0,1s,false,*log,true,exporter1`,
+			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10],AttributeIDs[11]
+cgrates.org,Threshold1,*string:~*opts.*account:1001;*string:~*req.RequestType:*prepaid,;20,1,0,1s,false,*log,true,exporter1,`,
 		},
 		LogBuffer: bytes.NewBuffer(nil),
 	}

@@ -1074,10 +1074,10 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*resetThreshold", "", "", "", "", "", "", "", ""},
 		},
 		utils.ThresholdsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
-			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true", ""},
-			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false", ""},
-			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false", ""},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs", "AttributeIDs"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true", "", ""},
+			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false", "", ""},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false", "", ""},
 		},
 	}
 	// we do this copy of the value one xpected because there are some values in a slice that are hard to concatenate as sorted
@@ -1208,11 +1208,11 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*setBalance", "", "", "", "SetBalMonetary10", "", "*balancePath:MONETARY;*balanceValue:10", "", ""},
 		},
 		utils.ThresholdsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
-			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true", ""},
-			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false", ""},
-			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false", ""},
-			{"cgrates.org", "THD_2", "*string:~*req.Account:1001", ";20", "7", "0", "", "false", "actPrfID", "true", ""},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs", "AttributeIDs"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true", "", ""},
+			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false", "", ""},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false", "", ""},
+			{"cgrates.org", "THD_2", "*string:~*req.Account:1001", ";20", "7", "0", "", "false", "actPrfID", "true", "", ""},
 		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]

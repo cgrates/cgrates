@@ -1618,6 +1618,13 @@ const CGRATES_CFG_JSON = `
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
+		// "*attributes": [		// connections to AttributeS to sent threshold events, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"ConnIDs": ["*internal"]
+		// 	}
+		// ],
 	},				
 	"ees_exporter_ids": [],			// list of EventExporter profiles to use for real-time threshold exports
 	"opts":{

@@ -146,8 +146,8 @@ func TestReplicateMultipleDB(t *testing.T) {
 		utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
 cgrates.org,ATTR_ACNT_1001,*string:~*opts.*context:*sessions,;10,;false,,,*req.OfficeGroup,*constant,Marketing
 `,
-		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10]
-cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,;10,-1,0,0,false,TOPUP_MONETARY_10,false,`,
+		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10],AttributeIDs[11]
+cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,;10,-1,0,0,false,TOPUP_MONETARY_10,false,,`,
 	}
 	ng := engine.TestEngine{
 		ConfigJSON: cfg1,

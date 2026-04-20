@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -176,9 +175,9 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		APIOpts: kamEv.GetOptions(),
 	}
 	authRply = &sessions.V1ProcessEventReply{
-		Attributes: map[string]*attributes.AttrSProcessEventReply{
+		Attributes: map[string]*utils.AttrSProcessEventReply{
 			utils.MetaPrimary: {
-				AlteredFields: []*attributes.FieldsAltered{
+				AlteredFields: []*utils.FieldsAltered{
 					{
 						MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
 						Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
@@ -251,8 +250,8 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		APIOpts: kamEv.GetOptions(),
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{
-		Attributes: &attributes.AttrSProcessEventReply{
-			AlteredFields: []*attributes.FieldsAltered{
+		Attributes: &utils.AttrSProcessEventReply{
+			AlteredFields: []*utils.FieldsAltered{
 				{
 					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
 					Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},

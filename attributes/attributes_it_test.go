@@ -774,7 +774,7 @@ func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
 }
 
 func testAttributeSGetAttributeForEventMissingEvent(t *testing.T) {
-	var rplyEv AttrSProcessEventReply
+	var rplyEv utils.AttrSProcessEventReply
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		nil, &rplyEv); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -1101,8 +1101,8 @@ func testAttributeProcessEvent(t *testing.T) {
 			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
-	expEvReply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	expEvReply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
 				Fields:           []string{"*tenant", utils.AccountField},
@@ -1120,7 +1120,7 @@ func testAttributeProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	evRply := &AttrSProcessEventReply{}
+	evRply := &utils.AttrSProcessEventReply{}
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		args, &evRply); err != nil {
 		t.Error(err)
@@ -1175,8 +1175,8 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_Search_and_replace",
 				Fields:           []string{"*req.Category"},
@@ -1194,7 +1194,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 			},
 		},
 	}
-	var rplyEv *AttrSProcessEventReply
+	var rplyEv *utils.AttrSProcessEventReply
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
 		t.Error(err)
@@ -1291,8 +1291,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{"*req.Field1"},
@@ -1321,7 +1321,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 
-	var rplyEv AttrSProcessEventReply
+	var rplyEv utils.AttrSProcessEventReply
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
@@ -1420,8 +1420,8 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{"*req.Field1"},
@@ -1456,7 +1456,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 
-	var rplyEv AttrSProcessEventReply
+	var rplyEv utils.AttrSProcessEventReply
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
@@ -1809,8 +1809,8 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expEvReply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	expEvReply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
 				Fields:           []string{"*opts.*rates", "*req.Account"},
@@ -1828,7 +1828,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 			},
 		},
 	}
-	evRply := &AttrSProcessEventReply{}
+	evRply := &utils.AttrSProcessEventReply{}
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		args, &evRply); err != nil {
 		t.Error(err)
@@ -1853,8 +1853,8 @@ func testAttributeSetAttributeProfileWithAttrBlockers2(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expEvReply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	expEvReply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
 				Fields:           []string{"*req.Account"},
@@ -1872,7 +1872,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers2(t *testing.T) {
 			APIOpts: map[string]any{},
 		},
 	}
-	evRply := &AttrSProcessEventReply{}
+	evRply := &utils.AttrSProcessEventReply{}
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		args, &evRply); err != nil {
 		t.Error(err)
@@ -1899,8 +1899,8 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	expEvReply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	expEvReply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER_TRUE",
 				Fields:           []string{"*opts.*chargers", "*req.RequestType", "*req.ToR"},
@@ -1926,7 +1926,7 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 			},
 		},
 	}
-	evRply := &AttrSProcessEventReply{}
+	evRply := &utils.AttrSProcessEventReply{}
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		args, &evRply); err != nil {
 		t.Error(err)
@@ -1970,8 +1970,8 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expEvReply := &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	expEvReply := &utils.AttrSProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
 				Fields:           []string{"*opts.*rates", "*req.Account"},
@@ -1990,7 +1990,7 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 			},
 		},
 	}
-	evRply := &AttrSProcessEventReply{}
+	evRply := &utils.AttrSProcessEventReply{}
 	if err := attrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		args, &evRply); err != nil {
 		t.Error(err)
@@ -2437,8 +2437,8 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 				"Elem2":      "4",
 			},
 		}
-		expected := AttrSProcessEventReply{
-			AlteredFields: []*FieldsAltered{
+		expected := utils.AttrSProcessEventReply{
+			AlteredFields: []*utils.FieldsAltered{
 				{
 					MatchedProfileID: "cgrates.org:ATTR_API",
 					Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
@@ -2461,7 +2461,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 			},
 		}
 
-		var reply AttrSProcessEventReply
+		var reply utils.AttrSProcessEventReply
 		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 			ev, &reply); err != nil {
 			t.Error(err)
@@ -2475,7 +2475,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 		}
 
 		ev.Event["AttrSource"] = "csv"
-		expected.AlteredFields = []*FieldsAltered{
+		expected.AlteredFields = []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_ARITH",
 				Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
@@ -2492,7 +2492,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 			"MultiplyBetweenVariables": "12",
 		}
 
-		reply = AttrSProcessEventReply{}
+		reply = utils.AttrSProcessEventReply{}
 		if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 			ev, &reply); err != nil {
 			t.Error(err)
