@@ -339,12 +339,12 @@ cgrates.org,TestStats3,*string:~*req.Account:1003,;20,;true,100,1s,2,true,Th1;Th
 
 	// Create and populate Thresholds.csv
 	if err := writeFile(utils.ThresholdsCsv, `
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,TH1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,ACT_PRF1,true
-cgrates.org,TH1,,,,,,,,
-cgrates.org,TH2,,,,,,,,
-cgrates.org,TH2,*string:~*req.Account:1002,,,,,true,,true
-cgrates.org,TH2,,;5,10,8,1s,true,ACT_PRF2,true
+#Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],AttributeIDs[8],ActionProfileIDs[9],Async[10],EeIDs[11]
+cgrates.org,TH1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,,ACT_PRF1,true,
+cgrates.org,TH1,,,,,,,,,,
+cgrates.org,TH2,,,,,,,,,,
+cgrates.org,TH2,*string:~*req.Account:1002,,,,,true,,,true,
+cgrates.org,TH2,,;5,10,8,1s,true,,ACT_PRF2,true,
 `); err != nil {
 		t.Fatal(err)
 	}

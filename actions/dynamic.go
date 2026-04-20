@@ -126,7 +126,7 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
-		if len(params) != 12 {
+		if len(params) != 13 {
 			return fmt.Errorf("invalid number of parameters <%d> expected 12", len(params))
 		}
 		// parse dynamic parameters
@@ -192,26 +192,30 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 				return err
 			}
 		}
-		// populate Threshold's ActionProfileIDs
+		// populate Threshold's AttributeIDs
 		if params[8] != utils.EmptyString {
-			args.ActionProfileIDs = strings.Split(params[8], utils.ANDSep)
+			args.AttributeIDs = strings.Split(params[8], utils.ANDSep)
+		}
+		// populate Threshold's ActionProfileIDs
+		if params[9] != utils.EmptyString {
+			args.ActionProfileIDs = strings.Split(params[9], utils.ANDSep)
 		}
 		// populate Threshold's Async bool
 		if params[9] != utils.EmptyString {
-			args.Async, err = strconv.ParseBool(params[9])
+			args.Async, err = strconv.ParseBool(params[10])
 			if err != nil {
 				return err
 			}
 		}
 		// populate Threshold's EeIDs
 		if params[10] != utils.EmptyString {
-			args.EeIDs = strings.Split(params[10], utils.ANDSep)
+			args.EeIDs = strings.Split(params[11], utils.ANDSep)
 			utils.Logger.Crit(args.EeIDs[0])
 
 		}
 		// populate Threshold's APIOpts
 		if params[11] != utils.EmptyString {
-			if err := parseParamStringToMap(params[11], args.APIOpts); err != nil {
+			if err := parseParamStringToMap(params[12], args.APIOpts); err != nil {
 				return err
 			}
 		}

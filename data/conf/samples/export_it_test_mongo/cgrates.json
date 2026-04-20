@@ -308,8 +308,10 @@
 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~*req.5"},
 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
-					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.8"},
-					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.9"},
+					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.8"},
+					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.9"},
+					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.10"},
+					{"tag": "EeIDs", "path": "EeIDs", "type": "*variable", "value": "~*req.11"},
 				],
 			},
 			{

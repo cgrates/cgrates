@@ -48,6 +48,7 @@ type ThresholdProfile struct {
 	MinSleep         time.Duration
 	Blocker          bool                 // blocker flag to stop processing on filters matched
 	Weights          utils.DynamicWeights // Weight to sort the thresholds
+	AttributeIDs     []string
 	ActionProfileIDs []string
 	Async            bool
 	EeIDs            []string
@@ -84,6 +85,10 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 		clone.EeIDs = make([]string, len(tp.EeIDs))
 		copy(clone.EeIDs, tp.EeIDs)
 	}
+	if tp.AttributeIDs != nil {
+		clone.AttributeIDs = make([]string, len(tp.AttributeIDs))
+		copy(clone.AttributeIDs, tp.AttributeIDs)
+	}
 	return clone
 }
 
@@ -107,6 +112,7 @@ type ThresholdConfig struct {
 	ActionProfileIDs []string
 	Async            bool
 	EeIDs            []string
+	AttributeIDs     []string
 }
 
 // thresholdProfileLockKey returns the ID used to lock a ThresholdProfile with guardian
@@ -516,11 +522,21 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 				args.APIOpts = make(map[string]any)
 			}
 			args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
-			var reply string
 			evNm := utils.MapStorage{
 				utils.MetaReq:  args.Event,
 				utils.MetaOpts: args.APIOpts,
 			}
+			if len(t.tPrfl.AttributeIDs) != 0 && !slices.Contains(t.tPrfl.AttributeIDs, utils.MetaNone) {
+				var rplyAttrS *utils.AttrSProcessEventReply
+				if rplyAttrS, err = tS.processAttributeS(ctx, tnt, t, args); err != nil {
+					withErrors = true
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed processing event with Attributes: %s, error: %s", t.TenantID(), err.Error()))
+				}
+				if rplyAttrS != nil && len(rplyAttrS.AlteredFields) != 0 {
+					args = rplyAttrS.CGREvent
+				}
+			}
+			var reply string
 			actionConns, err := GetConnIDs(ctx, tS.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, tS.fltrS)
 			if err != nil {
 				withErrors = true
@@ -564,6 +580,27 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 		err = utils.ErrPartiallyExecuted
 	}
 	return
+}
+
+// processAttributeS will process the event with AttributeS
+func (tS *ThresholdS) processAttributeS(ctx *context.Context, tnt string, th *Threshold, cgrEv *utils.CGREvent) (rplyEv *utils.AttrSProcessEventReply, err error) {
+	var attrConns []string
+	attrConns, err = GetConnIDs(ctx, tS.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), tS.fltrS)
+	if err != nil {
+		return
+	}
+	cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = []string{th.tPrfl.ID}
+	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = th.tPrfl.AttributeIDs
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaThresholds)
+	var rplyAttr utils.AttrSProcessEventReply
+	if err = tS.connMgr.Call(ctx, attrConns, utils.AttributeSv1ProcessEvent, cgrEv, &rplyAttr); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+	}
+	return &rplyAttr, nil
 }
 
 func (t *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *Threshold, tnt string, dP utils.DataProvider) error {
@@ -798,6 +835,10 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) (err error) {
 		var valA []string
 		valA, err = utils.IfaceAsStringSlice(val)
 		tp.EeIDs = append(tp.EeIDs, valA...)
+	case utils.AttributeIDs:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.AttributeIDs = append(tp.AttributeIDs, valA...)
 	case utils.Async:
 		tp.Async, err = utils.IfaceAsBool(val)
 	}
@@ -815,6 +856,7 @@ func (tp *ThresholdProfile) Merge(v2 any) {
 	tp.FilterIDs = append(tp.FilterIDs, vi.FilterIDs...)
 	tp.ActionProfileIDs = append(tp.ActionProfileIDs, vi.ActionProfileIDs...)
 	tp.EeIDs = append(tp.EeIDs, vi.EeIDs...)
+	tp.AttributeIDs = append(tp.AttributeIDs, vi.AttributeIDs...)
 	if vi.Blocker {
 		tp.Blocker = vi.Blocker
 	}
@@ -887,6 +929,8 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ any, err error
 		return tp.Async, nil
 	case utils.EeIDs:
 		return tp.EeIDs, nil
+	case utils.AttributeIDs:
+		return tp.AttributeIDs, nil
 	}
 }
 
@@ -907,6 +951,7 @@ func (tp *ThresholdProfile) AsMapStringInterface() map[string]any {
 		utils.ActionProfileIDs: tp.ActionProfileIDs,
 		utils.Async:            tp.Async,
 		utils.EeIDs:            tp.EeIDs,
+		utils.AttributeIDs:     tp.AttributeIDs,
 	}
 }
 
@@ -945,5 +990,6 @@ func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, 
 		tp.Async = v
 	}
 	tp.EeIDs = utils.InterfaceToStringSlice(m[utils.EeIDs])
+	tp.AttributeIDs = utils.InterfaceToStringSlice(m[utils.AttributeIDs])
 	return tp, nil
 }

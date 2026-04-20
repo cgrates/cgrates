@@ -668,6 +668,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		FilterIDs:        tps.FilterIDs,
 		ActionProfileIDs: []string{"WARN3"},
 		EeIDs:            []string{},
+		AttributeIDs:     []string{},
 	}
 	var err error
 	eTPs.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(tps.Weights), utils.InfieldSep, utils.ANDSep)
@@ -695,6 +696,7 @@ func TestThresholdProfileToAPI(t *testing.T) {
 		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 		EeIDs:            []string{},
+		AttributeIDs:     []string{},
 	}
 
 	thPrf := &ThresholdProfile{
@@ -3115,7 +3117,7 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.ActionProfileIDs, utils.Async, utils.EeIDs}
+		utils.Blocker, utils.AttributeIDs, utils.ActionProfileIDs, utils.Async, utils.EeIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -3615,6 +3617,7 @@ func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
 		FilterIDs:        []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		ActionProfileIDs: []string{"test_action_id"},
 		EeIDs:            []string{},
+		AttributeIDs:     []string{},
 	}
 	result := ThresholdProfileToAPI(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
@@ -5302,10 +5305,10 @@ func TestCsvDumpForThresholdModels(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	expRecord := []string{"cgrates.org", "TH_1", "FilterID1", ";20", "12", "10", "1s", "false", "WARN3", "false", ""}
+	expRecord := []string{"cgrates.org", "TH_1", "FilterID1", ";20", "12", "10", "1s", "false", "", "WARN3", "false", ""}
 	for i, model := range rcv {
 		if i == 1 {
-			expRecord = []string{"cgrates.org", "TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "", "0", "0", "", "false", "", "false", ""}
+			expRecord = []string{"cgrates.org", "TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "", "0", "0", "", "false", "", "", "false", ""}
 		}
 		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
 			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))

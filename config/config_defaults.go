@@ -1639,6 +1639,13 @@ const CGRATES_CFG_JSON = `
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
+		// "*attributes": [		// connections to AttributeS to sent threshold events, empty to disable: <""|*internal|$rpc_conns_id>
+		// 	{
+		// 		"Tenant": "",
+		// 		"FilterIDs": [],
+		// 		"ConnIDs": ["*internal"]
+		// 	}
+		// ],
 	},				
 	"ees_exporter_ids": [],			// list of EventExporter profiles to use for real-time threshold exports
 	"opts":{
@@ -1959,9 +1966,10 @@ const CGRATES_CFG_JSON = `
 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~*req.5"},
 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
-					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.8"},
-					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.9"} , 
-					{"tag": "EeIDs", "path": "EeIDs", "type": "*variable", "value": "~*req.10"}
+					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.8"},
+					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.9"},
+					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.10"} , 
+					{"tag": "EeIDs", "path": "EeIDs", "type": "*variable", "value": "~*req.11"}
 				]
 			},
 			{

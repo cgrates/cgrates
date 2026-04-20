@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -446,7 +445,7 @@ func attrProcessEvents(t *testing.T, client *birpc.Client) {
 		},
 	}
 	expectedReply := `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_1001","Fields":["*req.RequestType"]}],"CGREvent":{"Tenant":"cgrates.org","ID":"call1001to1002","Event":{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000},"APIOpts":{}}}`
-	var rplyEv attributes.AttrSProcessEventReply
+	var rplyEv utils.AttrSProcessEventReply
 	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1001to1002, &rplyEv); err != nil {
 		t.Error(err)
