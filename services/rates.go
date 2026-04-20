@@ -31,18 +31,15 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig) *RateService {
 	return &RateService{
-		cfg:     cfg,
-		rldChan: make(chan struct{}),
+		cfg: cfg,
 	}
 }
 
 // RateService is the service structure for RateS
 type RateService struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	rateS    *rates.RateS
-	rldChan  chan struct{}
-	stopChan chan struct{}
+	mu    sync.RWMutex
+	cfg   *config.CGRConfig
+	rateS *rates.RateS
 }
 
 // Start should handle the service start
@@ -75,9 +72,6 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.R
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
 	rs.mu.Unlock()
 
-	rs.stopChan = make(chan struct{})
-	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
-
 	srv, err := engine.NewServiceWithPing(rs.rateS, utils.RateSv1, utils.V1Prfx)
 	if err != nil {
 		return err
@@ -89,16 +83,14 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.R
 }
 
 // Reload handles the change of config
-func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (_ error) {
-	rs.rldChan <- struct{}{}
-	return
+func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	return nil
 }
 
 // Shutdown stops the service
 func (rs *RateService) Shutdown(registry *servmanager.Registry) (err error) {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	close(rs.stopChan)
 	rs.rateS = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.RateSv1)

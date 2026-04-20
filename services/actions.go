@@ -31,19 +31,14 @@ import (
 
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig) *ActionService {
-	return &ActionService{
-		cfg:     cfg,
-		rldChan: make(chan struct{}, 1),
-	}
+	return &ActionService{cfg: cfg}
 }
 
 // ActionService implements Service interface
 type ActionService struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	acts     *actions.ActionS
-	rldChan  chan struct{}
-	stopChan chan struct{}
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	acts *actions.ActionS
 }
 
 // Start should handle the service start
@@ -74,8 +69,6 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, fs, dbs, cms.ConnManager())
-	acts.stopChan = make(chan struct{})
-	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
 	if err != nil {
 		return
@@ -87,16 +80,14 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
-	acts.rldChan <- struct{}{}
-	return // for the moment nothing to reload
+func (acts *ActionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	return nil
 }
 
 // Shutdown stops the service
 func (acts *ActionService) Shutdown(registry *servmanager.Registry) (err error) {
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
-	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()

@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -1279,24 +1278,6 @@ dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 	}
 }
 */
-
-func TestAccountsListenAndServe(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	aS := &AccountS{
-		cfg: cfg,
-	}
-	stopChan := make(chan struct{})
-	cfgRld := make(chan struct{}, 1)
-	go aS.ListenAndServe(stopChan, cfgRld)
-	cfgRld <- struct{}{}
-	select {
-	case <-cfgRld:
-	case <-time.After(1 * time.Second):
-		t.Error("Expected configuration reload signal to be processed")
-	}
-	close(stopChan)
-	time.Sleep(100 * time.Millisecond)
-}
 
 func TestAbstractBalanceId(t *testing.T) {
 	balance := &utils.Balance{

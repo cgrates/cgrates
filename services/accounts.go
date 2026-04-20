@@ -31,19 +31,14 @@ import (
 
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig) *AccountService {
-	return &AccountService{
-		cfg:     cfg,
-		rldChan: make(chan struct{}, 1),
-	}
+	return &AccountService{cfg: cfg}
 }
 
 // AccountService implements Service interface
 type AccountService struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	acts     *accounts.AccountS
-	rldChan  chan struct{}
-	stopChan chan struct{}
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	acts *accounts.AccountS
 }
 
 // Start should handle the service start
@@ -74,8 +69,6 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
-	acts.stopChan = make(chan struct{})
-	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.AccountSv1, utils.V1Prfx)
 	if err != nil {
 		return err
@@ -86,16 +79,14 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 }
 
 // Reload handles the change of config
-func (acts *AccountService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
-	acts.rldChan <- struct{}{}
-	return // for the moment nothing to reload
+func (acts *AccountService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	return nil
 }
 
 // Shutdown stops the service
 func (acts *AccountService) Shutdown(registry *servmanager.Registry) (err error) {
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
-	close(acts.stopChan)
 	acts.acts = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.AccountSv1)

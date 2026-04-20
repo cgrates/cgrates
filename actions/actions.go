@@ -55,18 +55,6 @@ type ActionS struct {
 	crnLk   *sync.RWMutex
 }
 
-// ListenAndServe keeps the service alive
-func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	for {
-		select {
-		case <-stopChan:
-			return
-		case rld := <-cfgRld: // configuration was reloaded
-			cfgRld <- rld
-		}
-	}
-}
-
 // Shutdown is called to shutdown the service
 func (aS *ActionS) Shutdown() {
 	aS.crnLk.RLock()

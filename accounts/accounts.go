@@ -44,18 +44,6 @@ type AccountS struct {
 	dm      *engine.DataManager
 }
 
-// ListenAndServe keeps the service alive
-func (aS *AccountS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	for {
-		select {
-		case <-stopChan:
-			return
-		case rld := <-cfgRld: // configuration was reloaded
-			cfgRld <- rld
-		}
-	}
-}
-
 // matchingAccountsForEvent returns the matched Accounts for the given event
 // if lked option is passed, each Account will be also locked
 //
