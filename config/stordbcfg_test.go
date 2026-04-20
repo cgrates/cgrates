@@ -141,6 +141,15 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			MongoQueryTimeout: utils.StringPointer("test"),
 		}}); err == nil {
 		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Items: &map[string]*ItemOptJson{
+			utils.MetaDestinations: {
+				Ttl: utils.StringPointer("1ss"),
+			},
+		},
+	}); err == nil {
+		expErr := `unknown unit "ss" in duration "1ss"`
+		t.Errorf("Expected %v, recieved %v", expErr, err)
 	}
 
 }

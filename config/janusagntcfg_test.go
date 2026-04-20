@@ -41,6 +41,7 @@ func TestJanusAgentLoadFromJSONCfg(t *testing.T) {
 		name     string
 		jsonCFG  *JanusAgentJsonCfg
 		expected *JanusAgentCfg
+		wantErr  string
 	}{
 		{
 			name: "Complete JanusAgentJsonCfg",
@@ -177,13 +178,53 @@ func TestJanusAgentLoadFromJSONCfg(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "RequestProcessor with invalid field value",
+			jsonCFG: &JanusAgentJsonCfg{
+				Enabled:        utils.BoolPointer(false),
+				Sessions_conns: utils.SliceStringPointer([]string{"*internal:*sessions"}),
+				Url:            utils.StringPointer("/janus"),
+				Janus_conns: &[]*JanusConnJsonCfg{
+					{
+						Address:       utils.StringPointer("127.0.0.1:8088"),
+						AdminAddress:  utils.StringPointer("localhost:7188"),
+						AdminPassword: utils.StringPointer(""),
+						Type:          utils.StringPointer("*ws"),
+					},
+				},
+				RequestProcessors: &[]*ReqProcessorJsnCfg{
+					{
+						Filters:  utils.SliceStringPointer([]string{}),
+						Flags:    utils.SliceStringPointer([]string(nil)),
+						ID:       utils.StringPointer("cgrates"),
+						Timezone: utils.StringPointer("Local"),
+						Tenant:   utils.StringPointer("a{*"),
+					},
+				},
+			},
+			expected: &JanusAgentCfg{
+				Enabled:       false,
+				URL:           "/janus",
+				SessionSConns: []string{"*internal:*sessions"},
+				JanusConns: []*JanusConn{
+					{
+						Address:       "127.0.0.1:8088",
+						AdminAddress:  "localhost:7188",
+						AdminPassword: "",
+						Type:          "*ws",
+					},
+				},
+				RequestProcessors: nil,
+			},
+			wantErr: "invalid converter terminator in rule: <a{*>",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			jsnCfg := NewDefaultCGRConfig()
 
-			if err := jsnCfg.janusAgentCfg.loadFromJSONCfg(tt.jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
+			if err := jsnCfg.janusAgentCfg.loadFromJSONCfg(tt.jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil && err.Error() != tt.wantErr {
 				t.Error(err)
 			} else if !reflect.DeepEqual(tt.expected, jsnCfg.janusAgentCfg) {
 				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(tt.expected), utils.ToJSON(jsnCfg.janusAgentCfg))

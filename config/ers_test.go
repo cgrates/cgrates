@@ -251,6 +251,15 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON3, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %v, recieved %v", expectedErr, err)
 	}
+	er := &EventReaderCfg{
+		StartDelay: 2 * time.Second,
+		Opts:       &EventReaderOpts{},
+	}
+	rcv := er.AsMapInterface(utils.InInFieldSep)
+	if rcv[utils.StartDelayCfg] != "2s" {
+		t.Errorf("Expected StartDelay = 2s, got %v", rcv[utils.StartDelayCfg])
+	}
+
 }
 
 func TestEventReaderloadFromJsonCase3(t *testing.T) {

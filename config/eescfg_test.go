@@ -584,6 +584,14 @@ func TestEventExporterOptsloadFromJsonCfg(t *testing.T) {
 		KafkaDeliveryTimeout: utils.StringPointer("test"),
 	}); err == nil {
 		t.Error(err)
+	} else if err := eventExporter.Opts.loadFromJSONCfg(&EventExporterOptsJson{
+		ElsTimeout: utils.StringPointer("test"),
+	}); err == nil {
+		t.Error(err)
+	} else if err := eventExporter.Opts.loadFromJSONCfg(&EventExporterOptsJson{
+		SQLConnMaxLifetime: utils.StringPointer("test"),
+	}); err == nil {
+		t.Error(err)
 	}
 
 }
