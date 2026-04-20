@@ -45,18 +45,6 @@ type RateS struct {
 	dm    *engine.DataManager
 }
 
-// ListenAndServe keeps the service alive
-func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	for {
-		select {
-		case <-stopChan:
-			return
-		case rld := <-cfgRld: // configuration was reloaded
-			cfgRld <- rld
-		}
-	}
-}
-
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
 func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rpIDs []string, args *utils.CGREvent,
 	ignoreFilters bool, ignoredRPIDs utils.StringSet) (matchedProfile *utils.RateProfile, err error) {
