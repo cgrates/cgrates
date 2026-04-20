@@ -274,7 +274,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;&20;1;1;1s;true;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;&20;1;1;1s;true;;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
 					},
 				},
 			},
@@ -310,7 +310,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;&20;1;1;1s;true;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;&20;1;1;1s;true;;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
 					},
 				},
 			},
@@ -342,7 +342,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;;;;;;;;;;",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;;;;;;;;;;;",
 					},
 				},
 			},
@@ -377,7 +377,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1005;*string:~*req.Account:1005;;invalid;1;1s;true;ACT_LOG_WARNING;true;eeID5;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1005;*string:~*req.Account:1005;;invalid;1;1s;true;;ACT_LOG_WARNING;true;eeID5;key:value",
 					},
 				},
 			},
@@ -392,7 +392,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1006;*string:~*req.Account:1006;&20;1;1;invalid;true;ACT_LOG_WARNING;true;eeID6;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1006;*string:~*req.Account:1006;&20;1;1;invalid;true;;ACT_LOG_WARNING;true;eeID6;key:value",
 					},
 				},
 			},
@@ -407,7 +407,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1010;;w1&w2&w3;1;1;1s;true;ACT_LOG_WARNING;true;eeID10;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1010;;w1&w2&w3;1;1;1s;true;;ACT_LOG_WARNING;true;eeID10;key:value",
 					},
 				},
 			},
@@ -422,7 +422,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1011;;w1&invalid;1;1;1s;true;ACT_LOG_WARNING;true;eeID11;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1011;;w1&invalid;1;1;1s;true;;ACT_LOG_WARNING;true;eeID11;key:value",
 					},
 				},
 			},
@@ -437,7 +437,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1012;;;;1;1;1s;true;ACT_LOG_WARNING;true;eeID12;keyvalue",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1012;;;;1;1;1s;true;;ACT_LOG_WARNING;true;eeID12;keyvalue",
 					},
 				},
 			},
@@ -452,7 +452,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1014;*string:~*req.Account:1014;;1;1;1s;notbool;ACT_LOG_WARNING;true;eeID14;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1014;*string:~*req.Account:1014;;1;1;1s;notbool;;ACT_LOG_WARNING;true;eeID14;key:value",
 					},
 				},
 			},

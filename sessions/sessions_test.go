@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
@@ -33,8 +32,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var attrs = &attributes.AttrSProcessEventReply{
-	AlteredFields: []*attributes.FieldsAltered{
+var attrs = &utils.AttrSProcessEventReply{
+	AlteredFields: []*utils.FieldsAltered{
 		{
 			MatchedProfileID: "ATTR_ACNT_1001",
 			Fields:           []string{"*req.OfficeGroup"},
@@ -1178,7 +1177,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//attributes check
-	v1per.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
+	v1per.Attributes = make(map[string]*utils.AttrSProcessEventReply)
 	v1per.Attributes[utils.MetaRaw] = attrs
 	expected[utils.CapAttributes] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaRaw: {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}}}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {

@@ -278,7 +278,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002",
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -290,7 +290,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002NotFoundFilter",
 								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_2_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_2_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -301,7 +301,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocker",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_3_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_3_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -317,7 +317,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocked",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_4_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_4_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1890,7 +1890,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002",
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1902,7 +1902,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002NotFoundFilter",
 								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1913,7 +1913,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocker",
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1929,7 +1929,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocked",
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{

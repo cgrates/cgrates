@@ -29,7 +29,7 @@ import (
 // AttributeCProcessEvent is a wrapper to unify processing from the client side from multiple subsystems
 func AttributeScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
 	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
-	cgrEv *utils.CGREvent) (reply *AttrSProcessEventReply, err error) {
+	cgrEv *utils.CGREvent) (reply *utils.AttrSProcessEventReply, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, connsCfg,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS); err != nil {
@@ -44,7 +44,7 @@ func AttributeScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		subsys)
-	reply = &AttrSProcessEventReply{}
+	reply = &utils.AttrSProcessEventReply{}
 	err = connMgr.Call(ctx, conns, utils.AttributeSv1ProcessEvent,
 		cgrEv, reply)
 	return

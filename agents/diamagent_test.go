@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -203,8 +202,8 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1InitSessionReply{
-				Attributes: &attributes.AttrSProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
+				Attributes: &utils.AttrSProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
@@ -270,8 +269,8 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1UpdateSessionReply{
-				Attributes: &attributes.AttrSProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
+				Attributes: &utils.AttrSProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
@@ -410,8 +409,8 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1ProcessMessageReply{
-				Attributes: &attributes.AttrSProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
+				Attributes: &utils.AttrSProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},

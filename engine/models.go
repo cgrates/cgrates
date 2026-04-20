@@ -146,10 +146,12 @@ type ThresholdMdl struct {
 	MinHits          int    `index:"5" re:".*"`
 	MinSleep         string `index:"6" re:".*"`
 	Blocker          bool   `index:"7" re:".*"`
-	ActionProfileIDs string `index:"8" re:".*"`
-	Async            bool   `index:"9" re:".*"`
-	EeIDs            string `index:"10"  re:".*"`
-	CreatedAt        time.Time
+	AttributeIDs     string `index:"8"   re:".*"`
+	ActionProfileIDs string `index:"9" re:".*"`
+	Async            bool   `index:"10" re:".*"`
+	EeIDs            string `index:"11"  re:".*"`
+
+	CreatedAt time.Time
 }
 
 func (ThresholdMdl) TableName() string {

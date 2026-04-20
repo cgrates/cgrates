@@ -787,12 +787,12 @@ dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*attributes.AttrSProcessEventReply)
+				rplCast, canCast := reply.(*utils.AttrSProcessEventReply)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
 				}
-				customEv := &attributes.AttrSProcessEventReply{
+				customEv := &utils.AttrSProcessEventReply{
 					MatchedProfiles: nil,
 					AlteredFields:   []string{"CustomField2"},
 					CGREvent: &utils.CGREvent{

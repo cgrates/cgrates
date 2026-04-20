@@ -28,7 +28,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -51,12 +50,12 @@ func TestAttrSProcessEvent(t *testing.T) {
 	testMock := &testMockEvent{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
-				rplyEv := &attributes.AttrSProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{{
+				rplyEv := &utils.AttrSProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{"testcase"},
 					}},
 				}
-				*reply.(*attributes.AttrSProcessEventReply) = *rplyEv
+				*reply.(*utils.AttrSProcessEventReply) = *rplyEv
 				return nil
 			},
 		},
