@@ -173,6 +173,28 @@ func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 	}
 }
 
+func TestLoadFromJsonCfgStaleChanMaxExtraUsageError(t *testing.T) {
+	cfgJSON := &SessionSJsonCfg{
+		StaleChanMaxExtraUsage: utils.StringPointer("1ss"),
+	}
+	expected := `time: unknown unit "ss" in duration "1ss"`
+	jsonCfg := NewDefaultCGRConfig()
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoadFromJsonCfgBackupIntervalError(t *testing.T) {
+	cfgJSON := &SessionSJsonCfg{
+		BackupInterval: utils.StringPointer("test"),
+	}
+	expected := `time: invalid duration "test"`
+	jsonCfg := NewDefaultCGRConfig()
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil && err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		ChannelSyncInterval: utils.StringPointer("1ss"),
@@ -421,6 +443,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"privatekey_path": "",
 			},
 			"scheduler_conns": ["*internal:*scheduler", "*conn1"],
+			"backup_interval": "2s",
 		},
 	}`
 	eMap := map[string]any{
@@ -445,7 +468,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.StaleChanMaxExtraUsageCfg: "0",
 		utils.TerminateAttemptsCfg:      10,
 		utils.AlterableFieldsCfg:        []string{},
-		utils.BackupIntervalCfg:         "0",
+		utils.BackupIntervalCfg:         "2s",
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
@@ -570,6 +593,24 @@ func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestFsAgentCfgloadFromJsonCfgCase4(t *testing.T) {
+	jsonCfg := NewDefaultCGRConfig()
+	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
+		EventSocketConns: &[]*FsConnJsonCfg{
+			{
+				Address:      utils.StringPointer("1.2.3.4:8021"),
+				Password:     utils.StringPointer("ClueCon"),
+				Reconnects:   utils.IntPointer(3),
+				ReplyTimeout: utils.StringPointer("1ss"),
+				Alias:        utils.StringPointer("123"),
+			},
+		},
+	}
+	if err := jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err != nil {
+		t.Errorf("Received %+v", err)
 	}
 }
 

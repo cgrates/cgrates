@@ -178,6 +178,70 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 }
 
+func TestLoadFromJsonCfgInvalidRequestsCacheKey(t *testing.T) {
+	cfgJSON := &RadiusAgentJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Listeners: &[]*RadiListenerJsnCfg{
+			{
+				Network:      utils.StringPointer(utils.UDP),
+				Auth_Address: utils.StringPointer("127.0.0.1:1812"),
+				Acct_Address: utils.StringPointer("127.0.0.1:1813"),
+			},
+		},
+		ClientSecrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
+		SessionSConns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		RequestsCacheKey:   utils.StringPointer("`abc"),
+		RequestProcessors:  nil,
+		ClientDaAddresses: map[string]DAClientOptsJson{
+			"fsfdsz": {
+				Transport: utils.StringPointer("http"),
+				Host:      utils.StringPointer("localhost"),
+				Port:      utils.IntPointer(6768),
+				Flags:     []string{"*sessions", "*routes"},
+			},
+		},
+	}
+	expected := &RadiusAgentCfg{
+		Enabled: true,
+		Listeners: []RadiusListener{
+			{
+				Network:  utils.UDP,
+				AuthAddr: "127.0.0.1:1812",
+				AcctAddr: "127.0.0.1:1813",
+			},
+		},
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
+		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:         []string{},
+		RequestsCacheKey:   nil,
+		ThresholdSConns:    []string{},
+		DMRTemplate:        "*dmr",
+		CoATemplate:        "*coa",
+		ClientDaAddresses: map[string]DAClientOpts{
+			"fsfdsz": {
+				Transport: "http",
+				Host:      "localhost",
+				Port:      6768,
+				Flags: utils.FlagsWithParams{
+					utils.MetaSessionS: utils.FlagParams{},
+					utils.MetaRoutes:   utils.FlagParams{},
+				},
+			},
+		},
+		RequestProcessors: nil,
+	}
+	expectedError := `failed to initialize RSRParsers based requests_cache_key value: Unclosed unspilit syntax`
+
+	cfg := NewDefaultCGRConfig()
+	if err := cfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil && err.Error() != expectedError {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg)) {
+		t.Errorf("Expected %#+v \n, received %#+v", utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg))
+	}
+}
+
 func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"radius_agent": {
@@ -193,6 +257,14 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 				"/usr/share/cgrates/",
 			],			
 	     },
+		 "client_da_addresses": { 				
+		"nasIdentifier": { 				
+		 	"transport": "udp", 			
+		 	"host": "", 				
+		 	"port": 3799, 				
+		 	"flags": [""], 			
+		 }
+	},
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 	     "stats_conns": ["*internal", "*conn1","*conn2"],
 	     "thresholds_conns": ["*internal", "*conn1","*conn2"],
@@ -228,6 +300,14 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ClientDictionariesCfg: map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
+		utils.ClientDaAddressesCfg: map[string]any{
+			"nasIdentifier": map[string]any{
+				utils.TransportCfg: utils.StringPointer("udp"),
+				utils.HostCfg:      utils.StringPointer(""),
+				utils.PortCfg:      utils.IntPointer(3799),
+				utils.FlagsCfg:     *utils.SliceStringPointer([]string{""}),
+			},
+		},
 		utils.SessionSConnsCfg:    []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.StatSConnsCfg:       []string{rpcclient.InternalRPC, "*conn1", "*conn2"},
 		utils.ThresholdSConnsCfg:  []string{rpcclient.InternalRPC, "*conn1", "*conn2"},
@@ -250,7 +330,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(utils.ToJSON(rcv), utils.ToJSON(eMap)) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -301,6 +381,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		},
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
+		ClientDaAddresses:  map[string]DAClientOpts{"allowed.address": {}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		RequestProcessors: []*RequestProcessor{
 			{
