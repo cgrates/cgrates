@@ -1045,7 +1045,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s authorizing event: %+v with %s",
-					utils.SessionS, err.Error(), cgrEv, utils.IPs))
+					utils.SessionS, errIPs.Error(), cgrEv, utils.IPs))
 			cchEv[utils.MetaIPs] = false
 		} else {
 			cchEv[utils.MetaIPs] = ipS
