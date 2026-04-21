@@ -1035,4 +1035,29 @@ cgrates.org,DSP2_RALS,,,,,,RALS4,,10,,,`,
 	if cdrs[0].Cost < 0 {
 		t.Errorf("CDR rating failed: cost=%v, extraInfo=%q", cdrs[0].Cost, cdrs[0].ExtraInfo)
 	}
+
+	// Rerate through dispatcher: 1001 Usage=3s against stored CostDetails (Usage=5s).
+	setBalance(t, "1001", 100)
+	reCDR := cdrs[0].Clone()
+	reCDR.CGRID = utils.UUIDSha1Prefix()
+	reCDR.OriginID = "cdr_rerate"
+	reCDR.Usage = 3 * time.Second
+	if err := clientShared.Call(utils.CDRsV1ProcessCDR,
+		&engine.CDRWithArgDispatcher{CDR: reCDR}, &reply); err != nil {
+		t.Fatalf("rerate ProcessCDR failed: %v", err)
+	}
+	var rerated []*engine.CDR
+	if err := clientShared.Call(utils.CDRsV1GetCDRs,
+		&utils.RPCCDRsFilterWithArgDispatcher{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{OriginIDs: []string{"cdr_rerate"}},
+		}, &rerated); err != nil {
+		t.Fatalf("GetCDRs failed: %v", err)
+	}
+	if len(rerated) == 0 {
+		t.Fatal("rerate CDR not stored")
+	}
+	if rerated[0].Cost < 0 {
+		t.Errorf("rerate refund through dispatcher failed: cost=%v, extraInfo=%q",
+			rerated[0].Cost, rerated[0].ExtraInfo)
+	}
 }
