@@ -139,6 +139,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			utils.MetaActions:    {utils.ActionS, cfg.actionSCfg.Enabled},
 			utils.MetaRates:      {utils.RateS, cfg.rateSCfg.Enabled},
 			utils.MetaAccounts:   {utils.AccountS, cfg.accountSCfg.Enabled},
+			utils.MetaEEs:        {utils.EEs, cfg.eesCfg.Enabled},
 		}
 		for connType, opts := range cfg.sessionSCfg.Conns {
 			for _, opt := range opts {

@@ -1679,6 +1679,9 @@ func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 		accountSCfg: &AccountSCfg{
 			Enabled: false,
 		},
+		eesCfg: &EEsCfg{
+			Enabled: false,
+		},
 		sessionSCfg: &SessionSCfg{
 			Enabled:           true,
 			TerminateAttempts: 1,

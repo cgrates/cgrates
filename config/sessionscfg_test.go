@@ -185,6 +185,8 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			TTLUsage:           []*DynamicDurationPointerOpt{},
 			OriginID:           []*DynamicStringOpt{},
 			AccountsForceUsage: []*DynamicBoolOpt{},
+			EEs:                []*DynamicBoolOpt{},
+			EEsIDs:             []*DynamicStringOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -409,6 +411,8 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			ForceUsage:             []*DynamicBoolOpt{},
 			OriginID:               []*DynamicStringOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
+			EEs:                    []*DynamicBoolOpt{},
+			EEsIDs:                 []*DynamicStringOpt{},
 			TTLLastUsage: []*DynamicDurationPointerOpt{
 				{
 					value: utils.DurationPointer(1),
@@ -567,6 +571,8 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
 			utils.MetaOriginID:                  []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage:        []*DynamicBoolOpt{},
+			utils.MetaEEs:                       []*DynamicBoolOpt{},
+			utils.MetaEEsIDs:                    []*DynamicStringOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -711,6 +717,8 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaForceUsageCfg:      []*DynamicBoolOpt{},
 			utils.MetaOriginID:           []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage: []*DynamicBoolOpt{},
+			utils.MetaEEs:                []*DynamicBoolOpt{},
+			utils.MetaEEsIDs:             []*DynamicStringOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
