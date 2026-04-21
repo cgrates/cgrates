@@ -1035,7 +1035,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	// DataDB sanity checks
+	// db sanity checks
 	hasOneInternalDB := false // used to reutrn error in case more then 1 internaldb is found
 	for _, dbcfg := range cfg.dbCfg.DBConns {
 		if dbcfg.Type == utils.MetaInternal {

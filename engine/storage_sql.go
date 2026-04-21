@@ -1736,7 +1736,7 @@ func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCt
 	})
 }
 
-// DataDB method not implemented yet
+// DataDB not implemented yet
 func (sqls *SQLStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -1766,8 +1766,8 @@ func (sqls *SQLStorage) BackupConfigDB(backupFolderPath string, zip bool) (err e
 	return utils.ErrNotImplemented
 }
 
-// BackupDataDB used only for InternalDB
-func (sqls *SQLStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+// BackupDB used only for InternalDB
+func (sqls *SQLStorage) BackupDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
 
@@ -1777,16 +1777,26 @@ func (sqls *SQLStorage) DumpConfigDB() (err error) {
 }
 
 // Will dump everything inside DB to a file, only for InternalDB
-func (sqls *SQLStorage) DumpDataDB() (err error) {
+func (sqls *SQLStorage) DumpDB() (err error) {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of DataDB,  only for InternalDB
-func (sqls *SQLStorage) RewriteDataDB() (err error) {
+// Only intended for InternalDB
+func (sqls *SQLStorage) RewriteDB() (err error) {
 	return utils.ErrNotImplemented
 }
 
 // Only intended for InternalDB
 func (sqls *SQLStorage) RewriteConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RestoreDB used only for InternalDB
+func (sqls *SQLStorage) RestoreDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotDB used only for InternalDB
+func (sqls *SQLStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }

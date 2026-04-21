@@ -225,7 +225,7 @@ func (s *ResourceS) Shutdown(ctx *context.Context) {
 	s.storeResources(ctx)
 }
 
-// backup will regularly store resources changed to dataDB
+// backup will regularly store resources changed to DB
 func (s *ResourceS) runBackup(ctx *context.Context) {
 	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {

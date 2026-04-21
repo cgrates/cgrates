@@ -43,7 +43,7 @@ type ResourceSConfig struct {
 	Enabled                bool
 	IndexedSelects         bool
 	Conns                  map[string][]*DynamicConns
-	StoreInterval          time.Duration // Dump regularly from cache into dataDB
+	StoreInterval          time.Duration // Dump regularly from cache into DB
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string

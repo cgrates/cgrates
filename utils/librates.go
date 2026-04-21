@@ -1126,8 +1126,8 @@ func InterfaceToIntervalRates(v any) (intervalRates []*IntervalRate, err error) 
 	return
 }
 
-// AsDataDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
-func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]any, err error) {
+// AsDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
+func (rp *RateProfile) AsDBMap(ms Marshaler) (mp map[string]any, err error) {
 	mp = map[string]any{
 		MaxCostStrategy: rp.MaxCostStrategy,
 	}
@@ -1206,8 +1206,8 @@ func MapStringInterfaceToRateProfile(m map[string]any) (*RateProfile, error) {
 	return rp, nil
 }
 
-// NewRateProfileFromMapDataDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
-func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]any, ms Marshaler) (rp *RateProfile, err error) {
+// NewRateProfileFromMapDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
+func NewRateProfileFromMapDBMap(tnt, id string, mapRP map[string]any, ms Marshaler) (rp *RateProfile, err error) {
 	rp = &RateProfile{
 		ID:              id,
 		Tenant:          tnt,

@@ -110,7 +110,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 	return indexes, nil
 }
 
-// addItemToFilterIndex will add the itemID to the existing/created index and set it in the DataDB
+// addItemToFilterIndex will add the itemID to the existing/created index and set it in the DB
 func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
 	tntGrp := tnt
 	if grp != utils.EmptyString {
@@ -141,7 +141,7 @@ func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt
 	return dm.SetIndexes(ctx, idxItmType, tntGrp, indexes, true, utils.NonTransactional)
 }
 
-// removeItemFromFilterIndex will remove the itemID from the existing/created index and set it in the DataDB
+// removeItemFromFilterIndex will remove the itemID from the existing/created index and set it in the DB
 func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
 	tntGrp := tnt
 	if grp != utils.EmptyString {
@@ -265,12 +265,12 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		Cache.Clear([]string{idxItmType})
-		dataDB, _, err := dm.dbConns.GetConn(idxItmType)
+		db, _, err := dm.dbConns.GetConn(idxItmType)
 		if err != nil {
 			return nil, err
 		}
 		var ids []string
-		if ids, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType], utils.EmptyString); err != nil {
+		if ids, err = db.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType], utils.EmptyString); err != nil {
 			return nil, err
 		}
 		for _, id := range ids {

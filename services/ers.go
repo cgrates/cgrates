@@ -62,7 +62,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	erS.mu.Lock()
 	defer erS.mu.Unlock()

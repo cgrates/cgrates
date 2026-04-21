@@ -52,12 +52,12 @@ func (adms *AdminS) V1GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	}
 	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaChargerProfiles)
+	db, _, err := adms.dm.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -105,12 +105,12 @@ func (admS *AdminS) V1GetChargerProfilesCount(ctx *context.Context, args *utils.
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
-	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaChargerProfiles)
+	db, _, err := admS.dm.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
