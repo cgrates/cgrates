@@ -121,7 +121,10 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of ChargerSCfg
-func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
+func (cS *ChargerSCfg) Clone() (cln *ChargerSCfg) {
+	if cS == nil {
+		return nil
+	}
 	cln = &ChargerSCfg{
 		Enabled:        cS.Enabled,
 		IndexedSelects: cS.IndexedSelects,

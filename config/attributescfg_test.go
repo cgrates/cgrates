@@ -280,4 +280,10 @@ func TestAttributeSCfgClone(t *testing.T) {
 	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }

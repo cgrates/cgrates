@@ -116,4 +116,11 @@ func TestAnalyzerSCfgClone(t *testing.T) {
 	if rcv.DBPath = ""; cS.DBPath != "/var/spool/cgrates/analyzers" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	cS = nil
+	rcv = cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
+
 }

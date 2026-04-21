@@ -131,7 +131,10 @@ func (dps *DispatcherSCfg) AsMapInterface() (mp map[string]any) {
 }
 
 // Clone returns a deep copy of DispatcherSCfg
-func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
+func (dps *DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
+	if dps == nil {
+		return nil
+	}
 	cln = &DispatcherSCfg{
 		Enabled:        dps.Enabled,
 		IndexedSelects: dps.IndexedSelects,

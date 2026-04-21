@@ -192,7 +192,10 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of GeneralCfg
-func (gencfg GeneralCfg) Clone() *GeneralCfg {
+func (gencfg *GeneralCfg) Clone() *GeneralCfg {
+	if gencfg == nil {
+		return nil
+	}
 	return &GeneralCfg{
 		NodeID:               gencfg.NodeID,
 		Logger:               gencfg.Logger,

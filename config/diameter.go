@@ -218,7 +218,10 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) map[string]any {
 }
 
 // Clone returns a deep copy of DiameterAgentCfg
-func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
+func (da *DiameterAgentCfg) Clone() *DiameterAgentCfg {
+	if da == nil {
+		return nil
+	}
 	clone := &DiameterAgentCfg{
 		Enabled:                 da.Enabled,
 		Listeners:               slices.Clone(da.Listeners),

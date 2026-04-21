@@ -71,7 +71,10 @@ func (alS *AnalyzerSCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of AnalyzerSCfg
-func (alS AnalyzerSCfg) Clone() *AnalyzerSCfg {
+func (alS *AnalyzerSCfg) Clone() *AnalyzerSCfg {
+	if alS == nil {
+		return nil
+	}
 	return &AnalyzerSCfg{
 		Enabled:         alS.Enabled,
 		DBPath:          alS.DBPath,

@@ -116,4 +116,10 @@ func TestApierCfgClone(t *testing.T) {
 	if rcv.EEsConns[1] = ""; sa.EEsConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	sa = nil
+	rcv = sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
 }

@@ -1916,3 +1916,98 @@ func TestFailedPostsCfgloadFromJSONCfg(t *testing.T) {
 		})
 	}
 }
+
+func TestEventExporterCfgClone(t *testing.T) {
+	tests := []struct {
+		name  string
+		eeCfg *EventExporterCfg
+	}{
+		{
+			name: "Complete EventExporterCfg",
+			eeCfg: &EventExporterCfg{
+				ID:            utils.MetaDefault,
+				Type:          utils.MetaNone,
+				ExportPath:    "/var/spool/cgrates/ees",
+				Attempts:      1,
+				Timezone:      utils.EmptyString,
+				Filters:       []string{"randomFiletrs"},
+				AttributeSIDs: []string{"randomID"},
+				Flags:         utils.FlagsWithParams{},
+				contentFields: []*FCTemplate{},
+				Fields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*exp.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Layout: time.RFC3339,
+					},
+				},
+				headerFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*hdr.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Layout: time.RFC3339,
+					},
+				},
+				trailerFields: []*FCTemplate{
+					{
+						Tag:    utils.CGRID,
+						Path:   "*trl.CGRID",
+						Type:   utils.MetaVariable,
+						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Layout: time.RFC3339,
+					},
+				},
+				Opts: &EventExporterOpts{
+					Els:   &ElsOpts{},
+					Kafka: &KafkaOpts{},
+					AMQP:  &AMQPOpts{},
+					SQL:   &SQLOpts{},
+					AWS:   &AWSOpts{},
+					NATS:  &NATSOpts{},
+					RPC:   &RPCOpts{},
+				},
+				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+			},
+		},
+		{
+			name: "Nil Opts",
+			eeCfg: &EventExporterCfg{
+				ID:             utils.MetaDefault,
+				Type:           utils.MetaNone,
+				ExportPath:     "/var/spool/cgrates/ees",
+				Attempts:       1,
+				Timezone:       utils.EmptyString,
+				Filters:        []string{},
+				AttributeSIDs:  []string{},
+				Flags:          utils.FlagsWithParams{},
+				contentFields:  []*FCTemplate{},
+				Fields:         []*FCTemplate{},
+				headerFields:   []*FCTemplate{},
+				trailerFields:  []*FCTemplate{},
+				Opts:           nil,
+				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+			},
+		},
+		{
+			name:  "Nil Case",
+			eeCfg: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.eeCfg.Clone()
+
+			if !reflect.DeepEqual(result, tt.eeCfg) {
+				t.Errorf("Clone() = %v, want %v", result, tt.eeCfg)
+			}
+
+			if result != nil && result == tt.eeCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}

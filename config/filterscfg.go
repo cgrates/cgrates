@@ -143,7 +143,10 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of FilterSCfg
-func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
+func (fSCfg *FilterSCfg) Clone() (cln *FilterSCfg) {
+	if fSCfg == nil {
+		return nil
+	}
 	cln = new(FilterSCfg)
 	if fSCfg.StatSConns != nil {
 		cln.StatSConns = make([]string, len(fSCfg.StatSConns))

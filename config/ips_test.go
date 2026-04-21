@@ -299,6 +299,23 @@ func TestIPsCfgClone(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Nil opts",
+			ipsCfg: &IPsCfg{
+				Enabled:             false,
+				IndexedSelects:      true,
+				StoreInterval:       1 * time.Millisecond,
+				StringIndexedFields: utils.SliceStringPointer([]string{"*req.index1"}),
+				PrefixIndexedFields: utils.SliceStringPointer([]string{"*req.index1", "*req.index2"}),
+				SuffixIndexedFields: utils.SliceStringPointer([]string{"*req.index1"}), ExistsIndexedFields: utils.SliceStringPointer([]string{"*req.index1"}),
+				NestedFields: false,
+				Opts:         nil,
+			},
+		},
+		{
+			name:   "Nil case",
+			ipsCfg: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -333,6 +350,10 @@ func TestIPsOptsClone(t *testing.T) {
 				AllocationID: "testID",
 				TTL:          nil,
 			},
+		},
+		{
+			name:    "Nil case",
+			ipsOpts: nil,
 		},
 	}
 	for _, tt := range tests {

@@ -73,7 +73,10 @@ func (cS *CoreSCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of CoreSCfg
-func (cS CoreSCfg) Clone() *CoreSCfg {
+func (cS *CoreSCfg) Clone() *CoreSCfg {
+	if cS == nil {
+		return nil
+	}
 	return &CoreSCfg{
 		Caps:              cS.Caps,
 		CapsStrategy:      cS.CapsStrategy,

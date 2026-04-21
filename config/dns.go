@@ -143,7 +143,10 @@ func (da *DNSAgentCfg) AsMapInterface(sep string) map[string]any {
 }
 
 // Clone returns a deep copy of DNSAgentCfg
-func (da DNSAgentCfg) Clone() *DNSAgentCfg {
+func (da *DNSAgentCfg) Clone() *DNSAgentCfg {
+	if da == nil {
+		return nil
+	}
 	clone := &DNSAgentCfg{
 		Enabled:         da.Enabled,
 		Listeners:       slices.Clone(da.Listeners),
@@ -236,7 +239,10 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 }
 
 // Clone returns a deep copy of APIBanCfg
-func (rp RequestProcessor) Clone() (cln *RequestProcessor) {
+func (rp *RequestProcessor) Clone() (cln *RequestProcessor) {
+	if rp == nil {
+		return nil
+	}
 	cln = &RequestProcessor{
 		ID:       rp.ID,
 		Tenant:   rp.Tenant.Clone(),

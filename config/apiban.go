@@ -44,7 +44,10 @@ func (ban *APIBanCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of APIBanCfg
-func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
+func (ban *APIBanCfg) Clone() (cln *APIBanCfg) {
+	if ban == nil {
+		return nil
+	}
 	cln = &APIBanCfg{
 		Keys: make([]string, len(ban.Keys)),
 	}

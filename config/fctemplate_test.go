@@ -359,6 +359,12 @@ func TestFCTemplateClone(t *testing.T) {
 	if !reflect.DeepEqual(cloned, initialSmpl) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
 	}
+
+	smpl = nil
+	cloned = smpl.Clone()
+	if !reflect.DeepEqual(cloned, smpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
+	}
 }
 
 func TestFCTemplateAsMapInterface(t *testing.T) {

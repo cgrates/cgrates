@@ -1051,6 +1051,9 @@ func (rpcOpts *RPCOpts) Clone() *RPCOpts {
 	return cln
 }
 func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
+	if eeOpts == nil {
+		return nil
+	}
 	cln := &EventExporterOpts{}
 	if eeOpts.CSVFieldSeparator != nil {
 		cln.CSVFieldSeparator = new(string)
@@ -1081,7 +1084,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 }
 
 // Clone returns a deep copy of EventExporterCfg
-func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
+func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
+	if eeC == nil {
+		return nil
+	}
 	cln = &EventExporterCfg{
 		ID:                   eeC.ID,
 		Type:                 eeC.Type,
