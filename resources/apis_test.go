@@ -1285,7 +1285,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesV1ReleaseResources(t *testing.T) {
@@ -1501,7 +1501,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesStoreResourceError(t *testing.T) {

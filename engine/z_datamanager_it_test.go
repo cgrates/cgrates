@@ -76,7 +76,7 @@ func TestDMitinitDB(t *testing.T) {
 }
 
 func testDMitDataFlush(t *testing.T) {
-	if err := dm2.dbConns.dataDBs[utils.MetaDefault].Flush(utils.EmptyString); err != nil {
+	if err := dm2.dbConns.dbs[utils.MetaDefault].Flush(utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)

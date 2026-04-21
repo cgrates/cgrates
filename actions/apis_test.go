@@ -173,7 +173,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 		t.Errorf("ResetThreshold hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsResetSQ(t *testing.T) {
@@ -260,7 +260,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 		t.Errorf("ResetStatQueue hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
@@ -345,7 +345,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 		t.Errorf("SetBalance hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -429,7 +429,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 		t.Errorf("AddBalance hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsLog(t *testing.T) {
@@ -492,7 +492,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsLogCDRs(t *testing.T) {
@@ -576,7 +576,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 		t.Errorf("CDRLog hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsExecuteActionsRemBalance(t *testing.T) {
@@ -661,5 +661,5 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 		t.Errorf("RemoveBalance hasn't been executed")
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

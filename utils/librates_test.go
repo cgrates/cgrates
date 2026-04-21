@@ -2436,14 +2436,14 @@ func TestAsDataDBMap(t *testing.T) {
 
 	exp := "{\"FilterIDs\":\"fltr1;fltr2\",\"MaxCost\":\"10\",\"MaxCostStrategy\":\"strategy\",\"MinCost\":\"10\",\"Rates:rat1\":\"{\\\"ID\\\":\\\"rat1\\\",\\\"FilterIDs\\\":null,\\\"ActivationTimes\\\":\\\"\\\",\\\"Weights\\\":null,\\\"Blocker\\\":false,\\\"IntervalRates\\\":null}\",\"Rates:rat2\":\"{\\\"ID\\\":\\\"rat2\\\",\\\"FilterIDs\\\":null,\\\"ActivationTimes\\\":\\\"\\\",\\\"Weights\\\":null,\\\"Blocker\\\":false,\\\"IntervalRates\\\":null}\",\"Weights\":\";10\"}"
 
-	if rcv, err := rp.AsDataDBMap(JSONMarshaler{}); err != nil {
+	if rcv, err := rp.AsDBMap(JSONMarshaler{}); err != nil {
 		t.Error(err)
 
 	} else if !reflect.DeepEqual(exp, ToJSON(rcv)) {
 		t.Errorf("Expected <%v %T>, \nReceived <%v %T>", exp, exp, ToJSON(rcv), ToJSON(rcv))
 	}
 
-	if _, err := rp.AsDataDBMap(ms); err == nil || err != ErrNotImplemented {
+	if _, err := rp.AsDBMap(ms); err == nil || err != ErrNotImplemented {
 		t.Errorf("Expected <%v>, Received <%v>", ErrNotImplemented, err)
 	}
 }
@@ -2456,7 +2456,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		"MaxCost":    "10",
 		"Rates:rat1": "{\"ID\":\"rat1\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}",
 	}
-	if rcv, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err != nil {
+	if rcv, err := NewRateProfileFromMapDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err != nil {
 		t.Error(rcv, err)
 	}
 
@@ -2465,7 +2465,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		"Weights":   "wrong",
 	}
 	expErr := "invalid DynamicWeight format for string <wrong>"
-	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+	if _, err := NewRateProfileFromMapDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 	mapRP = map[string]any{
@@ -2473,7 +2473,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		"MinCost":   "wrong",
 	}
 	expErr = "can't convert <wrong> to decimal"
-	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+	if _, err := NewRateProfileFromMapDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 	mapRP = map[string]any{
@@ -2481,7 +2481,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		"MaxCost":   "wrong",
 	}
 	expErr = "can't convert <wrong> to decimal"
-	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+	if _, err := NewRateProfileFromMapDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 	mapRP = map[string]any{
@@ -2489,7 +2489,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		"Rates:rat1": "{\"ID\":\"rat1\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Rates:rat2\":\"{\"ID\":\"rat2\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Weights\":\";10\"}",
 	}
 	expErr = "invalid character '\"' after top-level value"
-	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+	if _, err := NewRateProfileFromMapDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 }
