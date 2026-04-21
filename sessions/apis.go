@@ -1074,12 +1074,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
 						utils.SessionS, err.Error(), cgrEv, utils.RateS))
+			} else {
+				if apiRply.RateSCost == nil {
+					apiRply.RateSCost = make(map[string]float64)
+				}
+				costFlt, _ := rtsCost.Cost.Float64()
+				apiRply.RateSCost[runID] = costFlt
 			}
-			if apiRply.RateSCost == nil {
-				apiRply.RateSCost = make(map[string]float64)
-			}
-			costFlt, _ := rtsCost.Cost.Float64()
-			apiRply.RateSCost[runID] = costFlt
 		}
 
 		// AccountS Enabled
