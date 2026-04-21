@@ -44,6 +44,7 @@ func AttributeScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		subsys)
+	reply = &AttrSProcessEventReply{}
 	err = connMgr.Call(ctx, conns, utils.AttributeSv1ProcessEvent,
 		cgrEv, reply)
 	return
