@@ -130,7 +130,10 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]any) {
 }
 
 // Clone returns a deep copy of ApierCfg
-func (aCfg ApierCfg) Clone() (cln *ApierCfg) {
+func (aCfg *ApierCfg) Clone() (cln *ApierCfg) {
+	if aCfg == nil {
+		return nil
+	}
 	cln = &ApierCfg{
 		Enabled: aCfg.Enabled,
 	}

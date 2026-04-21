@@ -127,4 +127,10 @@ func TestCoreSCfgClone(t *testing.T) {
 	if rcv.Caps = 1; cS.Caps != 0 {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	cS = nil
+	rcv = cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
 }

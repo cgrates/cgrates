@@ -161,7 +161,10 @@ func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*
 }
 
 // Clone returns a deep copy of FCTemplate
-func (fc FCTemplate) Clone() (cln *FCTemplate) {
+func (fc *FCTemplate) Clone() (cln *FCTemplate) {
+	if fc == nil {
+		return nil
+	}
 	cln = &FCTemplate{
 		Tag:             fc.Tag,
 		Type:            fc.Type,

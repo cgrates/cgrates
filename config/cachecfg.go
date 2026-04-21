@@ -78,7 +78,10 @@ func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of CacheParamCfg
-func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
+func (cParam *CacheParamCfg) Clone() (cln *CacheParamCfg) {
+	if cParam == nil {
+		return nil
+	}
 	return &CacheParamCfg{
 		Limit:     cParam.Limit,
 		TTL:       cParam.TTL,
@@ -164,7 +167,10 @@ func (cCfg *CacheCfg) AsMapInterface() (mp map[string]any) {
 }
 
 // Clone returns a deep copy of CacheCfg
-func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
+func (cCfg *CacheCfg) Clone() (cln *CacheCfg) {
+	if cCfg == nil {
+		return nil
+	}
 	cln = &CacheCfg{
 		Partitions: make(map[string]*CacheParamCfg),
 	}

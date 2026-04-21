@@ -229,6 +229,12 @@ func TestCacheCfgClone(t *testing.T) {
 	if rcv.ReplicationConns[0] = ""; cs.ReplicationConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	cs = nil
+	rcv = cs.Clone()
+	if !reflect.DeepEqual(cs, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cs), utils.ToJSON(rcv))
+	}
 }
 
 func TestCacheCfgloadFromJSONCfg(t *testing.T) {
@@ -281,5 +287,41 @@ func TestCacheCfgloadFromJSONCfg(t *testing.T) {
 
 	if !reflect.DeepEqual(cCfg, exp) {
 		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(cCfg))
+	}
+}
+
+func TestCacheParamCfgClone(t *testing.T) {
+	tests := []struct {
+		name          string
+		cacheParamCfg *CacheParamCfg
+	}{
+		{
+			name: "Complete CacheParamCfg",
+			cacheParamCfg: &CacheParamCfg{
+				Limit:     5,
+				TTL:       time.Second,
+				StaticTTL: true,
+				Precache:  true,
+				Remote:    false,
+				Replicate: false,
+			},
+		},
+		{
+			name:          "Nil CacheParamCfg",
+			cacheParamCfg: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.cacheParamCfg.Clone()
+
+			if !reflect.DeepEqual(result, tt.cacheParamCfg) {
+				t.Errorf("Clone() = %v, want %v", result, tt.cacheParamCfg)
+			}
+
+			if result != nil && result == tt.cacheParamCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
 	}
 }

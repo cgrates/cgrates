@@ -329,6 +329,12 @@ func TestRequestProcessorClone(t *testing.T) {
 	if rp.ReplyFields[0].Tag != "" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	rp = nil
+	rcv = rp.Clone()
+	if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(rp), utils.ToJSON(rcv))
+	}
 }
 
 func TestDNSAgentCfgClone(t *testing.T) {
@@ -366,5 +372,11 @@ func TestDNSAgentCfgClone(t *testing.T) {
 	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
 }

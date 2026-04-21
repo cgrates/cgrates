@@ -106,7 +106,10 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 }
 
 // Clone returns a deep copy of PrometheusAgentCfg.
-func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
+func (c *PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
+	if c == nil {
+		return nil
+	}
 	return &PrometheusAgentCfg{
 		Enabled:               c.Enabled,
 		Path:                  c.Path,

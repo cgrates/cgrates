@@ -251,6 +251,12 @@ func TestGeneralCfgClone(t *testing.T) {
 	if rcv.NodeID = ""; ban.NodeID != "randomID" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }
 
 func TestCachingDelay(t *testing.T) {

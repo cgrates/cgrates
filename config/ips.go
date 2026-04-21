@@ -83,7 +83,10 @@ func (c *IPsCfg) loadFromJSONCfg(jc *IPsJsonCfg) error {
 }
 
 // Clone returns a deep copy of IPsCfg.
-func (c IPsCfg) Clone() *IPsCfg {
+func (c *IPsCfg) Clone() *IPsCfg {
+	if c == nil {
+		return nil
+	}
 	clone := &IPsCfg{
 		Enabled:        c.Enabled,
 		IndexedSelects: c.IndexedSelects,
@@ -149,6 +152,9 @@ func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 
 // Clone returns a deep copy of IPsOpts.
 func (o *IPsOpts) Clone() *IPsOpts {
+	if o == nil {
+		return nil
+	}
 	cln := &IPsOpts{
 		AllocationID: o.AllocationID,
 	}

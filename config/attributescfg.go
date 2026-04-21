@@ -226,7 +226,10 @@ func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
 }
 
 // Clone returns a deep copy of AttributeSCfg
-func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
+func (alS *AttributeSCfg) Clone() (cln *AttributeSCfg) {
+	if alS == nil {
+		return nil
+	}
 	cln = &AttributeSCfg{
 		Enabled:        alS.Enabled,
 		IndexedSelects: alS.IndexedSelects,

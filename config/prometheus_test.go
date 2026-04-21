@@ -74,6 +74,10 @@ func TestPrometheusAgentCfgClone(t *testing.T) {
 				StatQueueIDs:          nil,
 			},
 		},
+		{
+			name:               "Nil case",
+			prometheusAgentCfg: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
