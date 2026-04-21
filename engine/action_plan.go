@@ -228,7 +228,7 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 
 // Execute will execute all actions in an action plan
 // Reports on success/fail via channel if != nil
-func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error) {
+func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdSyConn *thresholdSyConn) (err error) {
 	at.ResetStartTimeCache()
 	acts, err := at.getActions()
 	if err != nil {
@@ -285,7 +285,11 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 					break
 				}
 				sharedData.idx = i // set the current action index in shared data
-				if err := actionFunction(acc, act, acts, fltrS, at.ExtraData, sharedData,
+				extraData := at.ExtraData
+				if act.ActionType == utils.MetaSyPublish { // cgrEvent is not needed in ExtraData for *sy_publish
+					extraData = thresholdSyConn
+				}
+				if err := actionFunction(acc, act, acts, fltrS, extraData, sharedData,
 					newActionConnCfg(originService, act.ActionType, config.CgrConfig())); err != nil {
 					utils.Logger.Err(
 						fmt.Sprintf("Error executing action %s: %v!",

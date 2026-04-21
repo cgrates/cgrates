@@ -230,6 +230,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicTrend] = dynamicTrend
 	actionFuncMap[utils.MetaDynamicResource] = dynamicResource
 	actionFuncMap[utils.MetaDynamicActionTrigger] = dynamicActionTrigger
+	actionFuncMap[utils.MetaSyPublish] = syPublish
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -3071,4 +3072,26 @@ func dynamicActionTrigger(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 	// create the ActionTrigger based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionTrigger, at, &reply)
+}
+
+// holds the threshold client and syConnIDs
+type thresholdSyConn struct {
+	syConnIDs       *utils.SyConnIDs
+	thresholdClient *utils.BiJClient
+}
+
+// syPublish is used for diameter Sy sessions, to send SNR from thresholds to sessions to diameter agent
+func syPublish(ub *Account, _ *Action, _ Actions, _ *FilterS, extraData any, _ SharedActionsData, _ ActionConnCfg) (err error) {
+	thresholdSyConn, canCast := extraData.(*thresholdSyConn)
+	if !canCast {
+		return fmt.Errorf("Couldn't cast <extraData> of type <%T> to <thresholdSyConn>", extraData)
+	}
+	var rply string
+	if err = thresholdSyConn.thresholdClient.Conn().Call(context.TODO(), utils.SessionSv1ThresholdNotify,
+		thresholdSyConn.syConnIDs.CGRID, &rply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<ThresholdS> Call to SessionSv1.ThresholdNotify failed with error <%s>", err))
+	}
+	return
 }

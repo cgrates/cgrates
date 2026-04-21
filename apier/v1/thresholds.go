@@ -68,11 +68,11 @@ func (tSv1 *ThresholdSv1) RegisterInternalBiJSONConn(ctx *context.Context, args 
 }
 
 // BiRPCv1StoreClientConnID will create a ClientConnID and store it in relation to the threshold profile ID it represents
-func (tSv1 *ThresholdSv1) StoreClientConnID(ctx *context.Context, args *utils.DiameterSyIDs, rply *string) (err error) {
+func (tSv1 *ThresholdSv1) StoreClientConnID(ctx *context.Context, args *utils.SyConnIDs, rply *string) (err error) {
 	return tSv1.tS.BiRPCv1StoreClientConnID(ctx, args, rply)
 }
 
-// BiRPCv1RemoveClientConnID will remove the args ClientConnID from the list of clientConnIDs on the ThresholdService
+// BiRPCv1RemoveClientConnID will remove the args ClientConnID from the list of SyConnIds on the ThresholdService
 func (tSv1 *ThresholdSv1) RemoveClientConnID(ctx *context.Context, args string, rply *string) (err error) {
 	return tSv1.tS.BiRPCv1RemoveClientConnID(ctx, args, rply)
 }

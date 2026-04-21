@@ -761,3 +761,8 @@ func daRequestAddress(remoteAddr string, dynAuthAddresses map[string]config.DACl
 func (*RadiusAgent) V1WarnDisconnect(_ *context.Context, _ map[string]any, _ *string) error {
 	return utils.ErrNotImplemented
 }
+
+// V1SpendingStatusNotification is used to implement the sessions.BiRPClient interface
+func (*RadiusAgent) V1SpendingStatusNotification(*context.Context, *utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}
