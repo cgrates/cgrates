@@ -31,6 +31,7 @@ const (
 	SessionsRatesDftOpt                  = false
 	SessionsAttributesDftOpt             = false
 	SessionsCDRsDftOpt                   = false
+	SessionsEEsDftOpt                    = false
 	SessionsChargersDftOpt               = false
 	SessionsResourcesDftOpt              = false
 	SessionsIPsDftOpt                    = false
@@ -108,6 +109,8 @@ type SessionsOpts struct {
 	AccountsUpdate         []*DynamicBoolOpt
 	AccountsTerminate      []*DynamicBoolOpt
 	Session                []*DynamicBoolOpt
+	EEs                    []*DynamicBoolOpt
+	EEsIDs                 []*DynamicStringOpt
 }
 
 // SessionSCfg is the config section for SessionS
@@ -407,6 +410,20 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.AccountsForceUsage = append(opts, sesOpts.AccountsForceUsage...)
 	}
+	if jsnCfg.EEs != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.EEs)
+		if err != nil {
+			return err
+		}
+		sesOpts.EEs = append(opts, sesOpts.EEs...)
+	}
+	if jsnCfg.EEsIDs != nil {
+		opts, err := InterfaceToDynamicStringOpts(jsnCfg.EEsIDs)
+		if err != nil {
+			return err
+		}
+		sesOpts.EEsIDs = append(opts, sesOpts.EEsIDs...)
+	}
 	return nil
 }
 
@@ -530,6 +547,8 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
 		utils.MetaOriginID:                  scfg.Opts.OriginID,
 		utils.MetaAccountsForceUsage:        scfg.Opts.AccountsForceUsage,
+		utils.MetaEEs:                       scfg.Opts.EEs,
+		utils.MetaEEsIDs:                    scfg.Opts.EEsIDs,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -599,6 +618,8 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		TTLUsage:               CloneDynamicDurationPointerOpt(o.TTLUsage),
 		OriginID:               CloneDynamicStringOpt(o.OriginID),
 		AccountsForceUsage:     CloneDynamicBoolOpt(o.AccountsForceUsage),
+		EEs:                    CloneDynamicBoolOpt(o.EEs),
+		EEsIDs:                 CloneDynamicStringOpt(o.EEsIDs),
 	}
 }
 
@@ -758,6 +779,8 @@ type SessionsOptsJson struct {
 	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
 	OriginID               []*DynamicInterfaceOpt `json:"*originID"`
 	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
+	EEs                    []*DynamicInterfaceOpt `json:"*ees"`
+	EEsIDs                 []*DynamicInterfaceOpt `json:"*eesIDs"`
 }
 
 // SessionSJsonCfg config section
@@ -895,6 +918,12 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.AccountsForceUsage, v2.AccountsForceUsage) {
 		d.AccountsForceUsage = BoolToIfaceDynamicOpts(v2.AccountsForceUsage)
+	}
+	if !DynamicBoolOptEqual(v1.EEs, v2.EEs) {
+		d.EEs = BoolToIfaceDynamicOpts(v2.EEs)
+	}
+	if !DynamicStringOptEqual(v1.EEsIDs, v2.EEsIDs) {
+		d.EEsIDs = DynamicStringToInterfaceOpts(v2.EEsIDs)
 	}
 	return d
 }

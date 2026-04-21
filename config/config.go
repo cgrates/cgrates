@@ -188,6 +188,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				TTLUsage:               []*DynamicDurationPointerOpt{},
 				OriginID:               []*DynamicStringOpt{},
 				AccountsForceUsage:     []*DynamicBoolOpt{},
+				EEs:                    []*DynamicBoolOpt{},
+				EEsIDs:                 []*DynamicStringOpt{},
 			},
 		},
 		fsAgentCfg:       &FsAgentCfg{Conns: make(map[string][]*DynamicConns)},

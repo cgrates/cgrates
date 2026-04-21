@@ -1068,7 +1068,21 @@ const CGRATES_CFG_JSON = `
 		// 		"FilterIDs": [],
 		// 		"Value": ""
 		// 	}
-		// ]
+		// ],
+		// "*ees": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": ""
+		// 	}
+		// ],
+		// "*eesIDs": [
+        // 	{
+        // 		"Tenant": "*any",
+        // 		"FilterIDs": [],
+        // 		"Value": ""
+        // 	}
+        // ],
 	},
 	"conns": {
 	// "*attributes": [		// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
@@ -1147,7 +1161,14 @@ const CGRATES_CFG_JSON = `
 	// 		"FilterIDs": [],
 	// 		"ConnIDs": []
 	// 	}
-	// ]
+	// ],
+	// "*ees": [	// connections to EEs for exporting session events <""|*internal|$rpc_conns_id>
+    // 	{
+    // 		"Tenant": "",
+    // 		"FilterIDs": [],
+    // 		"ConnIDs": []
+    // 	}
+    // ],
 	}
 },
 
