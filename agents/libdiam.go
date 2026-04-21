@@ -37,6 +37,10 @@ import (
 	"github.com/cgrates/go-diameter/diam/dict"
 )
 
+const (
+	SSN = 8388636 // Spending Status Notification Command Code
+)
+
 func loadDictionaries(dictsDir, componentID string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {

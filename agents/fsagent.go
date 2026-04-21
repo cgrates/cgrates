@@ -573,3 +573,8 @@ func (*FSsessions) V1AlterSession(*context.Context, utils.CGREvent, *string) err
 func (*FSsessions) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
+
+// V1SpendingStatusNotification is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1SpendingStatusNotification(*context.Context, *utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}
