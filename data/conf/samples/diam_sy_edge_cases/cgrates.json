@@ -106,12 +106,6 @@
             "value": "*sy"
           },
           {
-            "tag": "BalanceIDPolicyFilter",
-            "path": "*opts.*syPolicyFilters",
-            "type": "*group",
-            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
-          },
-          {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
             "path": "*opts.*syPolicyFilters",
             "type": "*group",
@@ -119,14 +113,15 @@
           }
         ],
         "reply_fields": [
-          {
-            "tag": "ResultCodeErrAccountNotFound", // error if Account doesntExist
-            "path": "*rep.Result-Code",
-            "filters": ["*string:~*cgrep.Error:ACCOUNT_NOT_FOUND"],
-            "type": "*constant",
-            "value": "5030", // DIAMETER_USER_UNKNOWN
-            "blocker": true
-          },
+          // unfinished , maybe its not necessary to comply with standards for account checking on SLR step
+          // {
+          //   "tag": "ResultCodeErrAccountNotFound", // error if Account doesntExist
+          //   "path": "*rep.Result-Code",
+          //   "filters": ["*string:~*cgrep.Error:ACCOUNT_NOT_FOUND"],
+          //   "type": "*constant",
+          //   "value": "5030", // DIAMETER_USER_UNKNOWN
+          //   "blocker": true
+          // },
           {
             "tag": "FailedAVP", // error if session exists
             "path": "*rep.Failed-AVP.SL-Request-Type",
@@ -244,12 +239,6 @@
             "path": "*cgreq.RequestType",
             "type": "*constant",
             "value": "*sy"
-          },
-          {
-            "tag": "BalanceIDPolicyFilter",
-            "path": "*opts.*syPolicyFilters",
-            "type": "*group",
-            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
           },
           {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
