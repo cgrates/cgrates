@@ -301,18 +301,18 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 // RateScCostForEvent is a wrapper to unify processing from the client side from multiple subsystems
 func RateScCostForEvent(ctx *context.Context, fltrS *engine.FilterS,
 	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
-	cgrEv *utils.CGREvent) (rtsCost *utils.RateProfileCost, err error) {
-	var rateConns []string
-	rateConns, err = engine.GetConnIDs(ctx, connsCfg, cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS)
+	cgrEv *utils.CGREvent) (*utils.RateProfileCost, error) {
+	rateConns, err := engine.GetConnIDs(ctx, connsCfg, cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS)
 	if err != nil {
-		return
+		return nil, err
 	}
 	if len(rateConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
-	if err = connMgr.Call(ctx, rateConns,
-		utils.RateSv1CostForEvent, cgrEv, rtsCost); err != nil {
-		return
+	var rtsCost utils.RateProfileCost
+	if err := connMgr.Call(ctx, rateConns,
+		utils.RateSv1CostForEvent, cgrEv, &rtsCost); err != nil {
+		return nil, err
 	}
-	return
+	return &rtsCost, nil
 }
