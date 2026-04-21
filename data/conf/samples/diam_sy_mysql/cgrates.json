@@ -407,12 +407,6 @@
             "value": "*sy"
           },
           {
-            "tag": "BalanceIDPolicyFilter",
-            "path": "*opts.*syPolicyFilters",
-            "type": "*group",
-            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
-          },
-          {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
             "path": "*opts.*syPolicyFilters",
             "type": "*group",
@@ -537,12 +531,6 @@
             "path": "*cgreq.RequestType",
             "type": "*constant",
             "value": "*sy"
-          },
-          {
-            "tag": "BalanceIDPolicyFilter",
-            "path": "*opts.*syPolicyFilters",
-            "type": "*group",
-            "value": "*string:~*asm.BalanceSummaries.balance_data.ID:balance_data"
           },
           {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
