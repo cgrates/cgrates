@@ -180,7 +180,8 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 					cdrClone.Usage = smCost.Usage
 				} else if smCost.Usage != cdr.Usage {
 					if _, err = cdrS.refundEventCost(smCost.CostDetails,
-						cdrClone.RequestType, cdrClone.ToR); err != nil {
+						cdrClone.RequestType, cdrClone.ToR,
+						cdrClone.ExtraFields, cdr.ArgDispatcher); err != nil {
 						return nil, err
 					}
 					cdrClone.CostDetails = nil
@@ -214,7 +215,8 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 			return []*CDR{cdr.CDR}, nil
 		}
 		if _, err = cdrS.refundEventCost(cdr.CostDetails,
-			cdr.RequestType, cdr.ToR); err != nil {
+			cdr.RequestType, cdr.ToR,
+			cdr.ExtraFields, cdr.ArgDispatcher); err != nil {
 			return nil, err
 		}
 		cdr.CostDetails = nil
@@ -256,6 +258,7 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 		TimeEnd:         timeStart.Add(cdr.Usage),
 		DurationIndex:   cdr.Usage,
 		PerformRounding: true,
+		ExtraFields:     cdr.ExtraFields,
 	}
 	if reqTypes.Has(cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
@@ -288,7 +291,8 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 }
 
 // refundEventCost will refund the EventCost using RefundIncrements
-func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd bool, err error) {
+func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string,
+	extraFields map[string]string, argDisp *utils.ArgDispatcher) (rfnd bool, err error) {
 	if len(cdrS.cgrCfg.CdrsCfg().RaterConns) == 0 {
 		return false, utils.NewErrNotConnected(utils.RALService)
 	}
@@ -299,10 +303,14 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd
 	if cd == nil || len(cd.Increments) == 0 {
 		return
 	}
+	cd.ExtraFields = extraFields
 	var acnt Account
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 		utils.ResponderRefundIncrements,
-		&CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &acnt); err != nil {
+		&CallDescriptorWithArgDispatcher{
+			CallDescriptor: cd,
+			ArgDispatcher:  argDisp,
+		}, &acnt); err != nil {
 		return
 	}
 	return true, nil
@@ -562,9 +570,10 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher, arg
 		}
 	}
 	if args.refund {
-		for _, cdr := range cdrs {
+		for i, cdr := range cdrs {
 			if rfnd, errRfd := cdrS.refundEventCost(cdr.CostDetails,
-				cdr.RequestType, cdr.ToR); errRfd != nil {
+				cdr.RequestType, cdr.ToR,
+				cdr.ExtraFields, cgrEvs[i].ArgDispatcher); errRfd != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
 						utils.CDRs, errRfd.Error(), cdr))
@@ -594,9 +603,10 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher, arg
 	}
 	if args.store {
 		refundCDRCosts := func() { // will be used to refund all CDRs on errors
-			for _, cdr := range cdrs { // refund what we have charged since duplicates are not allowed
+			for i, cdr := range cdrs { // refund what we have charged since duplicates are not allowed
 				if _, errRfd := cdrS.refundEventCost(cdr.CostDetails,
-					cdr.RequestType, cdr.ToR); errRfd != nil {
+					cdr.RequestType, cdr.ToR,
+					cdr.ExtraFields, cgrEvs[i].ArgDispatcher); errRfd != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
 							utils.CDRs, errRfd.Error(), cdr))

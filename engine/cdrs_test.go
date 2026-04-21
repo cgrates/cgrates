@@ -672,7 +672,7 @@ func TestCRDSRefundEventCost(t *testing.T) {
 			},
 		}}
 
-	if _, err := cdrS.refundEventCost(ec, "*prepaid", "*monetary"); err != nil {
+	if _, err := cdrS.refundEventCost(ec, "*prepaid", "*monetary", nil, nil); err != nil {
 		t.Error(err)
 	}
 }
