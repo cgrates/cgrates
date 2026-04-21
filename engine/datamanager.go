@@ -3619,7 +3619,12 @@ func (dm *DataManager) SnapshotDB(backupFolderPath string, zip bool) error {
 	for _, db := range dm.DBConns().dbs {
 		if db.GetStorageType() == utils.MetaInternal {
 			if backupFolderPath == utils.EmptyString {
-
+				for _, dbcfgs := range dm.cfg.DbCfg().DBConns {
+					if dbcfgs.Type == utils.MetaInternal {
+						backupFolderPath = dbcfgs.Opts.InternalDBBackupPath
+						break
+					}
+				}
 			}
 			if err := db.SnapshotDB(backupFolderPath, zip); err != nil && err != utils.ErrNotImplemented {
 				return err

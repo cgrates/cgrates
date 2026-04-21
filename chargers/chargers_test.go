@@ -1078,7 +1078,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 
@@ -1165,7 +1165,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			exp[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs], rcv[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs])
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 }
@@ -1234,7 +1234,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 }
@@ -1310,7 +1310,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 }
@@ -1420,7 +1420,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 }
@@ -1477,7 +1477,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dm.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 }

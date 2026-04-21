@@ -695,7 +695,7 @@ func TestCacheScacheDataFromDBErrGetItemLoadIDs(t *testing.T) {
 		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 			return nil, utils.ErrNotImplemented
 		},

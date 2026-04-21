@@ -131,14 +131,14 @@ func TestFilterIndexerIT(t *testing.T) {
 }
 
 func testITFlush(t *testing.T) {
-	if err := dataManager.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dataManager.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)
 }
 
 func testITIsDBEmpty(t *testing.T) {
-	test, err := dataManager.DataDB()[utils.MetaDefault].IsDBEmpty()
+	test, err := dataManager.DB()[utils.MetaDefault].IsDBEmpty()
 	if err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -1802,7 +1802,7 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		t.Error(err)
 	}
 	//verify if old key was deleted
-	if _, err := dataManager.DataDB()[utils.MetaDefault].GetIndexesDrv(context.Background(),
+	if _, err := dataManager.DB()[utils.MetaDefault].GetIndexesDrv(context.Background(),
 		"tmp_"+utils.CacheResourceFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", transID), utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
