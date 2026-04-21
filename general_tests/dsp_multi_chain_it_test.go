@@ -65,13 +65,18 @@ func TestDispatcherMultiChain(t *testing.T) {
 	"db_user": "cgrates",
 	"db_password": "CGRateS.org"
 },
+"rpc_conns": {
+	"conn_dsp1": {
+		"conns": [{"address": "127.0.0.1:3012", "transport": "*json"}]
+	}
+},
 "chargers": {
 	"enabled": true
 },
 "cdrs": {
 	"enabled": true,
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"]
+	"rals_conns": ["conn_dsp1"]
 },
 "rals": {
 	"enabled": true
@@ -992,4 +997,42 @@ cgrates.org,DSP2_RALS,,,,,,RALS4,,10,,,`,
 	sendRequest(t, 2080, "init", sessionID, "3001", "1099", "5s")
 	sendRequest(t, 2080, "terminate", sessionID, "3001", "1099", "")
 	checkBalance(t, "3001", 97) // 100 - 3 = 97
+
+	// CDR rating through dispatcher: 5s CDR for 1001 with Agent:ha1.
+	setBalance(t, "1001", 100)
+	var reply string
+	if err := clientShared.Call(utils.CDRsV1ProcessCDR,
+		&engine.CDRWithArgDispatcher{
+			CDR: &engine.CDR{
+				CGRID:       utils.UUIDSha1Prefix(),
+				RunID:       utils.MetaDefault,
+				OriginID:    "cdr_through_dsp",
+				ToR:         utils.VOICE,
+				RequestType: utils.META_PREPAID,
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1099",
+				SetupTime:   time.Now(),
+				AnswerTime:  time.Now(),
+				Usage:       5 * time.Second,
+				ExtraFields: map[string]string{"Agent": "ha1"},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("ProcessCDR failed: %v", err)
+	}
+	var cdrs []*engine.CDR
+	if err := clientShared.Call(utils.CDRsV1GetCDRs,
+		&utils.RPCCDRsFilterWithArgDispatcher{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{OriginIDs: []string{"cdr_through_dsp"}},
+		}, &cdrs); err != nil {
+		t.Fatalf("GetCDRs failed: %v", err)
+	}
+	if len(cdrs) == 0 {
+		t.Fatal("CDR not stored")
+	}
+	if cdrs[0].Cost < 0 {
+		t.Errorf("CDR rating failed: cost=%v, extraInfo=%q", cdrs[0].Cost, cdrs[0].ExtraInfo)
+	}
 }
