@@ -388,6 +388,7 @@ func AccountScDebitAbstracts(ctx *context.Context, fltrS *engine.FilterS,
 		err = utils.NewErrNotConnected(utils.AccountS)
 		return
 	}
+	dbt = &utils.EventCharges{}
 	if err = connMgr.Call(ctx, conns,
 		utils.AccountSv1DebitAbstracts, cgrEv, dbt); err != nil {
 		return
