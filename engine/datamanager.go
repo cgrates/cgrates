@@ -86,7 +86,7 @@ var (
 // NewDataManager returns a new DataManager
 func NewDataManager(dbConns *DBConnManager, cfg *config.CGRConfig, connMgr *ConnManager) *DataManager {
 	ms, _ := utils.NewMarshaler(cfg.GeneralCfg().DBDataEncoding)
-	dbConns.dataDBCfg = cfg.DbCfg()
+	dbConns.dbCfg = cfg.DbCfg()
 	dbConns.replicators = make(map[string]*replicator)
 	for key, dbConnCfg := range cfg.DbCfg().DBConns {
 		dbConns.replicators[key] = newReplicator(dbConnCfg, connMgr)
@@ -99,20 +99,20 @@ func NewDataManager(dbConns *DBConnManager, cfg *config.CGRConfig, connMgr *Conn
 	}
 }
 
-// DBConnManager is the storage manager for all CGRateS DataDBs
+// DBConnManager is the storage manager for all CGRateS DBs
 // transparently manages data retrieval, further serialization and caching
 type DBConnManager struct {
-	sync.RWMutex                   // used for locking when using the dataDBs map, important for config reloading
-	dataDBs      map[string]DataDB // Holds all DataDBs connected with CGRateS
+	sync.RWMutex                   // used for locking when using the DBs map, important for config reloading
+	dbs          map[string]DataDB // Holds all DBs connected with CGRateS
 	replicators  map[string]*replicator
-	dataDBCfg    *config.DbCfg // Hold the data_db config
+	dbCfg        *config.DbCfg // Hold the data_db config
 }
 
 // NewDBConnManager returns a new DBConnManager
-func NewDBConnManager(dataDBs map[string]DataDB, dataDBCfg *config.DbCfg) *DBConnManager {
+func NewDBConnManager(dbs map[string]DataDB, dbCfg *config.DbCfg) *DBConnManager {
 	return &DBConnManager{
-		dataDBs:   dataDBs,
-		dataDBCfg: dataDBCfg,
+		dbs:   dbs,
+		dbCfg: dbCfg,
 	}
 }
 
@@ -122,15 +122,15 @@ func (dbConns *DBConnManager) GetConn(itemID string) (db DataDB, dbConnCfg *conf
 	dbConns.RLock()
 	defer dbConns.RUnlock()
 	var ok bool
-	dbConnID, ok := dbConns.dataDBCfg.Items[itemID]
+	dbConnID, ok := dbConns.dbCfg.Items[itemID]
 	if !ok {
 		return nil, nil, fmt.Errorf("couldn't find item with ID: <%v>", itemID)
 	}
-	if db, ok = dbConns.dataDBs[dbConnID.DBConn]; !ok {
+	if db, ok = dbConns.dbs[dbConnID.DBConn]; !ok {
 		// return *default db if DBConn is not found
-		return dbConns.dataDBs[utils.MetaDefault], dbConns.dataDBCfg.DBConns[dbConnID.DBConn], nil
+		return dbConns.dbs[utils.MetaDefault], dbConns.dbCfg.DBConns[dbConnID.DBConn], nil
 	}
-	dbConnCfg = dbConns.dataDBCfg.DBConns[dbConnID.DBConn]
+	dbConnCfg = dbConns.dbCfg.DBConns[dbConnID.DBConn]
 	return
 }
 
@@ -144,12 +144,12 @@ func (dbConns *DBConnManager) GetReplicator(dbConnID string) *replicator {
 	return rpl
 }
 
-// AddDataDBDriver adds a new DataDBDriver to DBConnManager
-func (dbConns *DBConnManager) AddDataDBDriver(dbID string, d DataDBDriver) {
-	if dbConns.dataDBs == nil {
-		dbConns.dataDBs = make(map[string]DataDB)
+// AddDBDriver adds a new DBDriver to DBConnManager
+func (dbConns *DBConnManager) AddDBDriver(dbID string, d DBDriver) {
+	if dbConns.dbs == nil {
+		dbConns.dbs = make(map[string]DataDB)
 	}
-	dbConns.dataDBs[dbID] = d
+	dbConns.dbs[dbID] = d
 }
 
 // DataManager is the data storage manager for CGRateS
@@ -169,24 +169,24 @@ func (dm *DataManager) DBConns() *DBConnManager {
 	return nil
 }
 
-// DataDB exports access to dataDB
-func (dm *DataManager) DataDB() map[string]DataDB {
+// DB exports access to DBs
+func (dm *DataManager) DB() map[string]DataDB {
 	if dm != nil {
-		return dm.dbConns.dataDBs
+		return dm.dbConns.dbs
 	}
 	return nil
 }
 
 func (dm *DataManager) Close() {
-	for dataDBKey := range dm.DataDB() {
-		dm.DataDB()[dataDBKey].Close()
-		dm.dbConns.replicators[dataDBKey].close()
+	for dbKey := range dm.DB() {
+		dm.DB()[dbKey].Close()
+		dm.dbConns.replicators[dbKey].close()
 	}
 
 }
 
-// Will return the DataDB based on where the item with the prefix is stored
-func (dbConns *DBConnManager) getDataDBForPrefix(prefix string) (dataDB DataDB, err error) {
+// Will return the DB based on where the item with the prefix is stored
+func (dbConns *DBConnManager) getDBForPrefix(prefix string) (dataDB DataDB, err error) {
 	var itemID string
 	switch prefix {
 	case utils.ResourceProfilesPrefix:
@@ -280,14 +280,14 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
-			dataDB, err := dm.dbConns.getDataDBForPrefix(prfx)
+			db, err := dm.dbConns.getDBForPrefix(prfx)
 			if err != nil {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
 					fmt.Sprintf("DataManager error <%s> for prefix <%s>", err.Error(), prfx))
 			}
-			if ids, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
+			if ids, err = db.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
@@ -488,15 +488,15 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 		if fltr, err = NewFilterFromInline(tenant, id); err != nil {
 			return
 		}
-	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+	} else if dm == nil { // in case we want the filter from DB but the connection to DB a optional (e.g. SessionS)
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {
-		dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
+		db, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
 		if err != nil {
 			return nil, err
 		}
-		fltr, err = dataDB.GetFilterDrv(ctx, tenant, id)
+		fltr, err = db.GetFilterDrv(ctx, tenant, id)
 		if err != nil {
 			if itm := dm.cfg.DbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
 				if err = dm.connMgr.Call(ctx, dbCfg.RmtConns, utils.ReplicatorSv1GetFilter,
@@ -506,7 +506,7 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 							utils.FirstNonEmpty(dbCfg.RmtConnID,
 								dm.cfg.GeneralCfg().NodeID)),
 					}, &fltr); err == nil {
-					err = dataDB.SetFilterDrv(ctx, fltr)
+					err = db.SetFilterDrv(ctx, fltr)
 				}
 			}
 			if err != nil {
@@ -542,11 +542,11 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetFilterDrv(ctx, fltr); err != nil {
+	if err = db.SetFilterDrv(ctx, fltr); err != nil {
 		return
 	}
 	if withIndex {
@@ -591,11 +591,11 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 				tntCtx, utils.ToJSON(rcvIndx))
 		}
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveFilterDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveFilterDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldFlt == nil {
@@ -629,11 +629,11 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
 	if err != nil {
 		return nil, err
 	}
-	th, err = dataDB.GetThresholdDrv(ctx, tenant, id)
+	th, err = db.GetThresholdDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaThresholds]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -643,7 +643,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &th); err == nil {
-				err = dataDB.SetThresholdDrv(ctx, th)
+				err = db.SetThresholdDrv(ctx, th)
 			}
 		}
 		if err != nil {
@@ -670,11 +670,11 @@ func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold) (err er
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetThresholdDrv(ctx, th); err != nil {
+	if err = db.SetThresholdDrv(ctx, th); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaThresholds]; itm.Replicate {
@@ -694,11 +694,11 @@ func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id string) 
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveThresholdDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveThresholdDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaThresholds]; itm.Replicate {
@@ -729,11 +729,11 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return nil, err
 	}
-	th, err = dataDB.GetThresholdProfileDrv(ctx, tenant, id)
+	th, err = db.GetThresholdProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaThresholdProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -744,7 +744,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &th); err == nil {
-				err = dataDB.SetThresholdProfileDrv(ctx, th)
+				err = db.SetThresholdProfileDrv(ctx, th)
 			}
 		}
 		if err != nil {
@@ -783,11 +783,11 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetThresholdProfileDrv(ctx, th); err != nil {
+	if err = db.SetThresholdProfileDrv(ctx, th); err != nil {
 		return err
 	}
 	if withIndex {
@@ -841,11 +841,11 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id s
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemThresholdProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemThresholdProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldTh == nil {
@@ -873,7 +873,7 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id s
 	return dm.RemoveThreshold(ctx, tenant, id) // remove the threshold
 }
 
-// GetStatQueue retrieves a StatQueue from dataDB
+// GetStatQueue retrieves a StatQueue from db
 // handles caching and deserialization of metrics
 func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
@@ -890,11 +890,11 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return nil, err
 	}
-	sq, err = dataDB.GetStatQueueDrv(ctx, tenant, id)
+	sq, err = db.GetStatQueueDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns, utils.ReplicatorSv1GetStatQueue,
@@ -905,13 +905,13 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &sq); err == nil {
 				var ssq *StoredStatQueue
-				if dataDB.GetStorageType() != utils.MetaInternal {
+				if db.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
 					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
 						return nil, err
 					}
 				}
-				err = dataDB.SetStatQueueDrv(ctx, ssq, sq)
+				err = db.SetStatQueueDrv(ctx, ssq, sq)
 			}
 		}
 		if err != nil {
@@ -934,23 +934,23 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 	return
 }
 
-// SetStatQueue converts to StoredStatQueue and stores the result in dataDB
+// SetStatQueue converts to StoredStatQueue and stores the result in db
 func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err
 	}
 	var ssq *StoredStatQueue
-	if dataDB.GetStorageType() != utils.MetaInternal {
+	if db.GetStorageType() != utils.MetaInternal {
 		// in case of internal we don't marshal
 		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
 			return
 		}
 	}
-	if err = dataDB.SetStatQueueDrv(ctx, ssq, sq); err != nil {
+	if err = db.SetStatQueueDrv(ctx, ssq, sq); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
@@ -971,11 +971,11 @@ func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string) 
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemStatQueueDrv(ctx, tenant, id); err != nil {
+	if err = db.RemStatQueueDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
@@ -1006,11 +1006,11 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return nil, err
 	}
-	sqp, err = dataDB.GetStatQueueProfileDrv(ctx, tenant, id)
+	sqp, err = db.GetStatQueueProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueueProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -1021,7 +1021,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &sqp); err == nil {
-				err = dataDB.SetStatQueueProfileDrv(ctx, sqp)
+				err = db.SetStatQueueProfileDrv(ctx, sqp)
 			}
 		}
 		if err != nil {
@@ -1060,11 +1060,11 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetStatQueueProfileDrv(ctx, sqp); err != nil {
+	if err = db.SetStatQueueProfileDrv(ctx, sqp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1152,11 +1152,11 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id s
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemStatQueueProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemStatQueueProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldSts == nil {
@@ -1184,7 +1184,7 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id s
 	return dm.RemoveStatQueue(ctx, tenant, id)
 }
 
-// GetTrend retrieves a Trend from dataDB
+// GetTrend retrieves a Trend from db
 func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (tr *utils.Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
@@ -1201,11 +1201,11 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
 	if err != nil {
 		return nil, err
 	}
-	if tr, err = dataDB.GetTrendDrv(ctx, tenant, id); err != nil {
+	if tr, err = db.GetTrendDrv(ctx, tenant, id); err != nil {
 		if err != utils.ErrNotFound { // database error
 			return
 		}
@@ -1222,7 +1222,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 				if err != utils.ErrNotFound { // RPC error
 					return
 				}
-			} else if err = dataDB.SetTrendDrv(ctx, tr); err != nil {
+			} else if err = db.SetTrendDrv(ctx, tr); err != nil {
 				return
 			}
 		}
@@ -1250,21 +1250,21 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 	return
 }
 
-// SetTrend stores Trend in dataDB
+// SetTrend stores Trend in db
 func (dm *DataManager) SetTrend(ctx *context.Context, tr *utils.Trend) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
 	if err != nil {
 		return err
 	}
-	if dataDB.GetStorageType() != utils.MetaInternal {
+	if db.GetStorageType() != utils.MetaInternal {
 		if tr, err = tr.Compress(dm.ms, dm.cfg.TrendSCfg().StoreUncompressedLimit); err != nil {
 			return
 		}
 	}
-	if err = dataDB.SetTrendDrv(ctx, tr); err != nil {
+	if err = db.SetTrendDrv(ctx, tr); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaTrends]; itm.Replicate {
@@ -1287,11 +1287,11 @@ func (dm *DataManager) RemoveTrend(ctx *context.Context, tenant, id string) (err
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrends)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveTrendDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveTrendDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaTrends]; itm.Replicate {
@@ -1322,11 +1322,11 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return nil, err
 	}
-	trp, err = dataDB.GetTrendProfileDrv(ctx, tenant, id)
+	trp, err = db.GetTrendProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaTrendProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -1337,7 +1337,7 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &trp); err == nil {
-				err = dataDB.SetTrendProfileDrv(ctx, trp)
+				err = db.SetTrendProfileDrv(ctx, trp)
 			}
 		}
 		if err != nil {
@@ -1363,12 +1363,12 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string) (tps map[string][]string, err error) {
 	prfx := utils.TrendProfilePrefix
 	var keys []string
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
+	db, _, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return nil, err
 	}
 	if len(tenants) == 0 {
-		keys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
+		keys, err = db.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1376,7 +1376,7 @@ func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
+			tntkeys, err = db.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}
@@ -1405,11 +1405,11 @@ func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *utils.TrendPro
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetTrendProfileDrv(ctx, trp); err != nil {
+	if err = db.SetTrendProfileDrv(ctx, trp); err != nil {
 		return err
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaTrendProfiles]; itm.Replicate {
@@ -1440,11 +1440,11 @@ func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id strin
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemTrendProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemTrendProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldTrs == nil {
@@ -1477,11 +1477,11 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return nil, err
 	}
-	rgp, err = dataDB.GetRankingProfileDrv(ctx, tenant, id)
+	rgp, err = db.GetRankingProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaRankingProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), dbCfg.RmtConns,
@@ -1492,7 +1492,7 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rgp); err == nil {
-				err = dataDB.SetRankingProfileDrv(ctx, rgp)
+				err = db.SetRankingProfileDrv(ctx, rgp)
 			}
 		}
 		if err != nil {
@@ -1518,12 +1518,12 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []string) (rns map[string][]string, err error) {
 	prfx := utils.RankingProfilePrefix
 	var keys []string
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
+	db, _, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return nil, err
 	}
 	if len(tenants) == 0 {
-		keys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
+		keys, err = db.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 		if err != nil {
 			return
 		}
@@ -1531,7 +1531,7 @@ func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []stri
 		for _, tenant := range tenants {
 			var tntkeys []string
 			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-			tntkeys, err = dataDB.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
+			tntkeys, err = db.GetKeysForPrefix(ctx, tntPrfx, utils.EmptyString)
 			if err != nil {
 				return
 			}
@@ -1559,11 +1559,11 @@ func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *utils.Rankin
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetRankingProfileDrv(ctx, rnp); err != nil {
+	if err = db.SetRankingProfileDrv(ctx, rnp); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
@@ -1593,11 +1593,11 @@ func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id str
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemRankingProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemRankingProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldSgs == nil {
@@ -1629,11 +1629,11 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
 	if err != nil {
 		return nil, err
 	}
-	if rn, err = dataDB.GetRankingDrv(ctx, tenant, id); err != nil {
+	if rn, err = db.GetRankingDrv(ctx, tenant, id); err != nil {
 		if err != utils.ErrNotFound { // database error
 			return
 		}
@@ -1646,7 +1646,7 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rn); err == nil {
-				err = dataDB.SetRankingDrv(ctx, rn)
+				err = db.SetRankingDrv(ctx, rn)
 			}
 		}
 		if err != nil {
@@ -1667,16 +1667,16 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 	return
 }
 
-// SetRanking stores Ranking in dataDB
+// SetRanking stores Ranking in db
 func (dm *DataManager) SetRanking(ctx *context.Context, rn *utils.Ranking) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetRankingDrv(ctx, rn); err != nil {
+	if err = db.SetRankingDrv(ctx, rn); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRankings]; itm.Replicate {
@@ -1699,11 +1699,11 @@ func (dm *DataManager) RemoveRanking(ctx *context.Context, tenant, id string) (e
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRankings)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveRankingDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveRankingDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRankings]; itm.Replicate {
@@ -1734,11 +1734,11 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
 	if err != nil {
 		return nil, err
 	}
-	rs, err = dataDB.GetResourceDrv(ctx, tenant, id)
+	rs, err = db.GetResourceDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaResources]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -1749,7 +1749,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rs); err == nil {
-				err = dataDB.SetResourceDrv(ctx, rs)
+				err = db.SetResourceDrv(ctx, rs)
 			}
 		}
 		if err != nil {
@@ -1777,11 +1777,11 @@ func (dm *DataManager) SetResource(ctx *context.Context, rs *utils.Resource) (er
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetResourceDrv(ctx, rs); err != nil {
+	if err = db.SetResourceDrv(ctx, rs); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaResources]; itm.Replicate {
@@ -1801,11 +1801,11 @@ func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id string) (
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResources)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveResourceDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveResourceDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaResources]; itm.Replicate {
@@ -1836,11 +1836,11 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return nil, err
 	}
-	rp, err = dataDB.GetResourceProfileDrv(ctx, tenant, id)
+	rp, err = db.GetResourceProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaResourceProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -1850,7 +1850,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rp); err == nil {
-				err = dataDB.SetResourceProfileDrv(ctx, rp)
+				err = db.SetResourceProfileDrv(ctx, rp)
 			}
 		}
 		if err != nil {
@@ -1889,11 +1889,11 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.Resour
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetResourceProfileDrv(ctx, rp); err != nil {
+	if err = db.SetResourceProfileDrv(ctx, rp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1947,11 +1947,11 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id st
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveResourceProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveResourceProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRes == nil {
@@ -1998,11 +1998,11 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
 	if err != nil {
 		return nil, err
 	}
-	ip, err = dataDB.GetIPAllocationsDrv(ctx, tenant, id)
+	ip, err = db.GetIPAllocationsDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaIPAllocations]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -2013,7 +2013,7 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &ip); err == nil {
-				err = dataDB.SetIPAllocationsDrv(ctx, ip)
+				err = db.SetIPAllocationsDrv(ctx, ip)
 			}
 		}
 		if err != nil {
@@ -2044,11 +2044,11 @@ func (dm *DataManager) SetIPAllocations(ctx *context.Context, ip *utils.IPAlloca
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetIPAllocationsDrv(ctx, ip); err != nil {
+	if err = db.SetIPAllocationsDrv(ctx, ip); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaIPAllocations]; itm.Replicate {
@@ -2068,11 +2068,11 @@ func (dm *DataManager) RemoveIPAllocations(ctx *context.Context, tenant, id stri
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPAllocations)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveIPAllocationsDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveIPAllocationsDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaIPAllocations]; itm.Replicate {
@@ -2103,11 +2103,11 @@ func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cac
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return nil, err
 	}
-	ipp, err = dataDB.GetIPProfileDrv(ctx, tenant, id)
+	ipp, err = db.GetIPProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaIPProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -2117,7 +2117,7 @@ func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cac
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &ipp); err == nil {
-				err = dataDB.SetIPProfileDrv(ctx, ipp)
+				err = db.SetIPProfileDrv(ctx, ipp)
 			}
 		}
 		if err != nil {
@@ -2156,11 +2156,11 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetIPProfileDrv(ctx, ipp); err != nil {
+	if err = db.SetIPProfileDrv(ctx, ipp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2214,11 +2214,11 @@ func (dm *DataManager) RemoveIPProfile(ctx *context.Context, tenant, id string, 
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveIPProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveIPProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldIPP == nil {
@@ -2251,8 +2251,8 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	for _, dataDB := range dm.DataDB() {
-		if has, err = dataDB.HasDataDrv(context.TODO(), category, subject, tenant); has {
+	for _, db := range dm.DB() {
+		if has, err = db.HasDataDrv(context.TODO(), category, subject, tenant); has {
 			return
 		}
 	}
@@ -2274,11 +2274,11 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return nil, err
 	}
-	rpp, err = dataDB.GetRouteProfileDrv(ctx, tenant, id)
+	rpp, err = db.GetRouteProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns, utils.ReplicatorSv1GetRouteProfile,
@@ -2288,7 +2288,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rpp); err == nil {
-				err = dataDB.SetRouteProfileDrv(ctx, rpp)
+				err = db.SetRouteProfileDrv(ctx, rpp)
 			}
 		}
 		if err != nil {
@@ -2331,11 +2331,11 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *utils.RoutePro
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetRouteProfileDrv(ctx, rpp); err != nil {
+	if err = db.SetRouteProfileDrv(ctx, rpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2370,11 +2370,11 @@ func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id strin
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveRouteProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveRouteProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -2421,11 +2421,11 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {
-		dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
+		db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
 		if err != nil {
 			return nil, err
 		}
-		if attrPrfl, err = dataDB.GetAttributeProfileDrv(ctx, tenant, id); err != nil {
+		if attrPrfl, err = db.GetAttributeProfileDrv(ctx, tenant, id); err != nil {
 			if itm := dm.cfg.DbCfg().Items[utils.MetaAttributeProfiles]; err == utils.ErrNotFound && itm.Remote {
 				if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
 					utils.ReplicatorSv1GetAttributeProfile,
@@ -2435,7 +2435,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 							utils.FirstNonEmpty(dbCfg.RmtConnID,
 								dm.cfg.GeneralCfg().NodeID)),
 					}, &attrPrfl); err == nil {
-					err = dataDB.SetAttributeProfileDrv(ctx, attrPrfl)
+					err = db.SetAttributeProfileDrv(ctx, attrPrfl)
 				}
 			}
 			if err != nil {
@@ -2490,11 +2490,11 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *utils.Attri
 			attribute.Type = utils.MetaConstant
 		}
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetAttributeProfileDrv(ctx, ap); err != nil {
+	if err = db.SetAttributeProfileDrv(ctx, ap); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2528,11 +2528,11 @@ func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id s
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveAttributeProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveAttributeProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldAttr == nil {
@@ -2575,11 +2575,11 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return nil, err
 	}
-	cpp, err = dataDB.GetChargerProfileDrv(ctx, tenant, id)
+	cpp, err = db.GetChargerProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaChargerProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -2590,7 +2590,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &cpp); err == nil {
-				err = dataDB.SetChargerProfileDrv(ctx, cpp)
+				err = db.SetChargerProfileDrv(ctx, cpp)
 			}
 		}
 		if err != nil {
@@ -2629,11 +2629,11 @@ func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *utils.Charge
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetChargerProfileDrv(ctx, cpp); err != nil {
+	if err = db.SetChargerProfileDrv(ctx, cpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2667,11 +2667,11 @@ func (dm *DataManager) RemoveChargerProfile(ctx *context.Context, tenant, id str
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveChargerProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveChargerProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldCpp == nil {
@@ -2705,11 +2705,11 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaLoadIDs)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaLoadIDs)
 	if err != nil {
 		return nil, err
 	}
-	loadIDs, err = dataDB.GetItemLoadIDsDrv(ctx, itemIDPrefix)
+	loadIDs, err = db.GetItemLoadIDsDrv(ctx, itemIDPrefix)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaLoadIDs]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -2721,7 +2721,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &loadIDs); err == nil {
-				err = dataDB.SetLoadIDsDrv(ctx, loadIDs)
+				err = db.SetLoadIDsDrv(ctx, loadIDs)
 			}
 		}
 		if err != nil {
@@ -2754,11 +2754,11 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaLoadIDs)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaLoadIDs)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetLoadIDsDrv(ctx, loadIDs); err != nil {
+	if err = db.SetLoadIDsDrv(ctx, loadIDs); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaLoadIDs]; itm.Replicate {
@@ -2794,11 +2794,11 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return nil, err
 	}
-	rpp, err = dataDB.GetRateProfileDrv(ctx, tenant, id)
+	rpp, err = db.GetRateProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaRateProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -2810,7 +2810,7 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &rpp); err == nil {
 				rpp.Sort()
-				err = dataDB.SetRateProfileDrv(ctx, rpp, false)
+				err = db.SetRateProfileDrv(ctx, rpp, false)
 			}
 		}
 		if err != nil {
@@ -2841,11 +2841,11 @@ func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.Arg
 	if dm == nil {
 		return nil, nil, utils.ErrNoDatabaseConn
 	}
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
+	db, _, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return
 	}
-	return dataDB.GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix, needIDs)
+	return db.GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix, needIDs)
 }
 
 func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, optOverwrite, withIndex bool) (err error) {
@@ -2901,11 +2901,11 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 		}
 	}
 	// if not overwriting, we will add the rates in case the profile is already in database, also the fields of the profile are changed too in case of the same tenantID
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetRateProfileDrv(ctx, rpp, optOverwrite); err != nil {
+	if err = db.SetRateProfileDrv(ctx, rpp, optOverwrite); err != nil {
 		return err
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
@@ -2930,11 +2930,11 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	if err != nil && err != utils.ErrNotFound {
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveRateProfileDrv(ctx, tenant, id, nil); err != nil {
+	if err = db.RemoveRateProfileDrv(ctx, tenant, id, nil); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -3010,11 +3010,11 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 			delete(oldRpp.Rates, rateID)
 		}
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveRateProfileDrv(ctx, tenant, id, rateIDs); err != nil {
+	if err = db.RemoveRateProfileDrv(ctx, tenant, id, rateIDs); err != nil {
 		return
 	}
 
@@ -3046,11 +3046,11 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return nil, err
 	}
-	ap, err = dataDB.GetActionProfileDrv(ctx, tenant, id)
+	ap, err = db.GetActionProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaActionProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -3061,7 +3061,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &ap); err == nil {
-				err = dataDB.SetActionProfileDrv(ctx, ap)
+				err = db.SetActionProfileDrv(ctx, ap)
 			}
 		}
 		if err != nil {
@@ -3100,11 +3100,11 @@ func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *utils.ActionPr
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetActionProfileDrv(ctx, ap); err != nil {
+	if err = db.SetActionProfileDrv(ctx, ap); err != nil {
 		return err
 	}
 	if withIndex {
@@ -3138,11 +3138,11 @@ func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id stri
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveActionProfileDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveActionProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldAct == nil {
@@ -3170,22 +3170,22 @@ func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-// ReconnectAll reconnects all dataDBs when the config was changed. d implements all the new dataDB conns taken from the new config
+// ReconnectAll reconnects all dbs when the config was changed. d implements all the new db conns taken from the new config
 func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 	dm.dbConns.Lock()
 	defer dm.dbConns.Unlock()
-	d := make(map[string]DataDBDriver)
+	d := make(map[string]DBDriver)
 	r := make(map[string]*replicator)
 	for dbKey, dbConnCfg := range cfg.DbCfg().DBConns {
 		if dbConnCfg.Type == utils.MetaInternal {
 			// close internalDB before creating a new one
-			if datadb, ok := dm.DBConns().dataDBs[dbKey]; !ok {
-				return fmt.Errorf("couldnt find DataDB with dbConnID: <%s>", dbKey)
+			if db, ok := dm.DBConns().dbs[dbKey]; !ok {
+				return fmt.Errorf("couldnt find DB with dbConnID: <%s>", dbKey)
 			} else {
-				datadb.Close()
+				db.Close()
 			}
 		}
-		d[dbKey], err = NewDataDBConn(dbConnCfg.Type,
+		d[dbKey], err = NewDBConn(dbConnCfg.Type,
 			dbConnCfg.Host, dbConnCfg.Port, dbConnCfg.Name, dbConnCfg.User,
 			dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
 			dbConnCfg.StringIndexedFields, dbConnCfg.PrefixIndexedFields,
@@ -3194,18 +3194,18 @@ func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 		if err != nil {
 			return
 		}
-		for dataDBKey := range dm.dbConns.dataDBs { // close old DataManager conns
+		for dbKey := range dm.dbConns.dbs { // close old DataManager conns
 			if dbConnCfg.Type != utils.MetaInternal { // old internalDB is already closed
-				dm.dbConns.dataDBs[dataDBKey].Close() // close all connections
+				dm.dbConns.dbs[dbKey].Close() // close all connections
 			}
-			delete(dm.dbConns.dataDBs, dataDBKey) // remove old keys so they dont get left over
+			delete(dm.dbConns.dbs, dbKey) // remove old keys so they dont get left over
 		}
 		for repl := range dm.dbConns.replicators {
 			dm.dbConns.replicators[repl].close()
 			delete(dm.dbConns.replicators, repl)
 		}
-		for driverKey := range d { // put all the newly crated DataDBDrivers in DataManager Conns
-			dm.dbConns.dataDBs[driverKey] = d[driverKey]
+		for driverKey := range d { // put all the newly crated dbDrivers in DataManager Conns
+			dm.dbConns.dbs[driverKey] = d[driverKey]
 		}
 		for replKey := range r {
 			dm.dbConns.replicators[replKey] = r[replKey]
@@ -3243,11 +3243,11 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 		}
 		indexes = nil
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(idxItmType)
+	db, dbCfg, err := dm.dbConns.GetConn(idxItmType)
 	if err != nil {
 		return nil, err
 	}
-	if indexes, err = dataDB.GetIndexesDrv(ctx, idxItmType, tntCtx, transactionID, idxKeys...); err != nil {
+	if indexes, err = db.GetIndexesDrv(ctx, idxItmType, tntCtx, transactionID, idxKeys...); err != nil {
 		if itm := dm.cfg.DbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
 				utils.ReplicatorSv1GetIndexes,
@@ -3260,7 +3260,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &indexes); err == nil {
-				err = dataDB.SetIndexesDrv(ctx, idxItmType, tntCtx, indexes, true, utils.NonTransactional)
+				err = db.SetIndexesDrv(ctx, idxItmType, tntCtx, indexes, true, utils.NonTransactional)
 			}
 		}
 		if err != nil {
@@ -3293,11 +3293,11 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(idxItmType)
+	db, dbCfg, err := dm.dbConns.GetConn(idxItmType)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetIndexesDrv(ctx, idxItmType, tntCtx,
+	if err = db.SetIndexesDrv(ctx, idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
 		return
 	}
@@ -3321,11 +3321,11 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx st
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(idxItmType)
+	db, dbCfg, err := dm.dbConns.GetConn(idxItmType)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKeys...); err != nil {
+	if err = db.RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKeys...); err != nil {
 		return
 	}
 	if itm := dm.cfg.DbCfg().Items[idxItmType]; itm.Replicate {
@@ -3386,7 +3386,7 @@ func GetAPIBan(ctx *context.Context, ip string, apiKeys []string, single, cacheR
 // checkFilters returns the id of the first Filter that is not valid
 // it should be called after the dm nil check
 func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []string) (err error) {
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
 	}
@@ -3402,7 +3402,7 @@ func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []s
 		} else if x, has := Cache.Get(utils.CacheFilters, // because the method HasDataDrv doesn't use cache
 			utils.ConcatenatedKey(tenant, id)); has && x == nil { // check to see if filter is already in cache
 			return fmt.Errorf("broken reference to filter: <%s>", id)
-		} else if has, err := dataDB.HasDataDrv(ctx, utils.FilterPrefix, // check in local DB if we have the filter
+		} else if has, err := db.HasDataDrv(ctx, utils.FilterPrefix, // check in local DB if we have the filter
 			id, tenant); err != nil || !has {
 			// in case we can not find it localy try to find it in the remote DB
 			if itm := dm.cfg.DbCfg().Items[utils.MetaFilters]; err == utils.ErrNotFound && itm.Remote {
@@ -3430,11 +3430,11 @@ func (dm *DataManager) GetAccount(ctx *context.Context, tenant, id string) (ap *
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
 	if err != nil {
 		return nil, err
 	}
-	ap, err = dataDB.GetAccountDrv(ctx, tenant, id)
+	ap, err = db.GetAccountDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := dm.cfg.DbCfg().Items[utils.MetaAccounts]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, dbCfg.RmtConns,
@@ -3445,7 +3445,7 @@ func (dm *DataManager) GetAccount(ctx *context.Context, tenant, id string) (ap *
 						utils.FirstNonEmpty(dbCfg.RmtConnID,
 							dm.cfg.GeneralCfg().NodeID)),
 				}, &ap); err == nil {
-				err = dataDB.SetAccountDrv(ctx, ap)
+				err = db.SetAccountDrv(ctx, ap)
 			}
 		}
 		if err != nil {
@@ -3470,11 +3470,11 @@ func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withI
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.SetAccountDrv(ctx, ap); err != nil {
+	if err = db.SetAccountDrv(ctx, ap); err != nil {
 		return err
 	}
 	if withIndex {
@@ -3508,11 +3508,11 @@ func (dm *DataManager) RemoveAccount(ctx *context.Context, tenant, id string, wi
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	dataDB, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
+	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
 	}
-	if err = dataDB.RemoveAccountDrv(ctx, tenant, id); err != nil {
+	if err = db.RemoveAccountDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -3540,31 +3540,91 @@ func (dm *DataManager) RemoveAccount(ctx *context.Context, tenant, id string, wi
 	return
 }
 
-// DumpDataDB will dump all of datadb from memory to a file. Only available for internal DBs
-func (dm *DataManager) DumpDataDB() error {
-	for _, db := range dm.DBConns().dataDBs {
-		if err := db.DumpDataDB(); err != nil && err != utils.ErrNotImplemented {
-			return err
+// DumpDB will dump all of offline internal DB from memory to a file. Only available for internal DB
+func (dm *DataManager) DumpDB() error {
+	for _, db := range dm.DBConns().dbs {
+		if db.GetStorageType() == utils.MetaInternal {
+			if err := db.DumpDB(); err != nil && err != utils.ErrNotImplemented {
+				return err
+			}
+			break
 		}
 	}
 	return nil
 }
 
-// Will rewrite every dump file of DataDB. Only available for internal DBs
-func (dm *DataManager) RewriteDataDB() error {
-	for _, db := range dm.DBConns().dataDBs {
-		if err := db.RewriteDataDB(); err != nil && err != utils.ErrNotImplemented {
-			return err
+// Will rewrite every dump file of offline internal DB. Only available for offline internal DB
+func (dm *DataManager) RewriteDB() error {
+	for _, db := range dm.DBConns().dbs {
+		if db.GetStorageType() == utils.MetaInternal {
+			if err := db.RewriteDB(); err != nil && err != utils.ErrNotImplemented {
+				return err
+			}
+			break
 		}
 	}
 	return nil
 }
 
-// BackupDataDB will momentarely stop any dumping and rewriting in dataDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead. Only available for internal DBs
-func (dm *DataManager) BackupDataDB(backupFolderPath string, zip bool) error {
-	for _, db := range dm.DBConns().dataDBs {
-		if err := db.BackupDataDB(backupFolderPath, zip); err != nil && err != utils.ErrNotImplemented {
-			return err
+// BackupDB will momentarely stop any dumping and rewriting in offline internal DB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead. Only available for internal DBs
+func (dm *DataManager) BackupDB(backupFolderPath string, zip bool) error {
+	for _, db := range dm.DBConns().dbs {
+		if db.GetStorageType() == utils.MetaInternal {
+			if backupFolderPath == utils.EmptyString {
+				for _, dbcfgs := range dm.cfg.DbCfg().DBConns {
+					if dbcfgs.Type == utils.MetaInternal {
+						backupFolderPath = dbcfgs.Opts.InternalDBBackupPath
+						break
+					}
+				}
+			}
+			if err := db.BackupDB(backupFolderPath, zip); err != nil && err != utils.ErrNotImplemented {
+				return err
+			}
+			break
+		}
+	}
+	return nil
+}
+
+// RestoreDB is used only for offline internal DB. It attempts to restore the internal DB from
+// the latest backup in the specified backupPath. If backupPath is not specified, it will be
+// taken from the default's backup path.
+// Any data that was dumped from internal DB will be cleared before restoring from backup
+func (dm *DataManager) RestoreDB(backupFolderPath string) error {
+	for _, db := range dm.DBConns().dbs {
+		if db.GetStorageType() == utils.MetaInternal {
+			if backupFolderPath == utils.EmptyString {
+				for _, dbcfgs := range dm.cfg.DbCfg().DBConns {
+					if dbcfgs.Type == utils.MetaInternal {
+						backupFolderPath = dbcfgs.Opts.InternalDBBackupPath
+						break
+					}
+				}
+			}
+			if err := db.RestoreDB(backupFolderPath); err != nil {
+				return err
+			}
+			break
+		}
+	}
+	return nil
+}
+
+// SnapshotDB will take the BackupFolderPath (or default backup path if empty) to backup the
+// live dump folder taking zip as parameter to zip the backup or not, after which it cleares
+// the live dump folder and creates new dump files out of the live internal DB data. Only
+// intended for offline internal DB
+func (dm *DataManager) SnapshotDB(backupFolderPath string, zip bool) error {
+	for _, db := range dm.DBConns().dbs {
+		if db.GetStorageType() == utils.MetaInternal {
+			if backupFolderPath == utils.EmptyString {
+
+			}
+			if err := db.SnapshotDB(backupFolderPath, zip); err != nil && err != utils.ErrNotImplemented {
+				return err
+			}
+			break
 		}
 	}
 	return nil
@@ -3574,31 +3634,31 @@ func (dm *DataManager) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowUp
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
+	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
 	if err != nil {
 		return err
 	}
-	return dataDB.SetCDR(ctx, cdr, allowUpdate)
+	return db.SetCDR(ctx, cdr, allowUpdate)
 }
 
 func (dm *DataManager) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) ([]*utils.CDR, error) {
 	if dm == nil {
 		return nil, utils.ErrNoDatabaseConn
 	}
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
+	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
 	if err != nil {
 		return nil, err
 	}
-	return dataDB.GetCDRs(ctx, qryFltr, opts)
+	return db.GetCDRs(ctx, qryFltr, opts)
 }
 
 func (dm *DataManager) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	dataDB, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
+	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
 	if err != nil {
 		return err
 	}
-	return dataDB.RemoveCDRs(ctx, qryFltr)
+	return db.RemoveCDRs(ctx, qryFltr)
 }

@@ -73,6 +73,21 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 	}, nil
 }
 
+// Restore attempts to restore the internal DB from the latest backup in the specified backupPath.
+// If backupPath is not specified, it will be taken from the default's backup path.
+// Any data that was dumped from internal DB will be cleared before restoring from backup
+func (iDB *InternalDB) RestoreDB(backupPath string) error {
+	return iDB.db.Restore(backupPath)
+}
+
+// SnapshotDB will take the BackupFolderPath (or default backup path if empty) to backup the
+// live dump folder taking zip as parameter to zip the backup or not, after which it cleares
+// the live dump folder and creates new dump files out of the live internal DB data. Only
+// intended for offline internal DB
+func (iDB *InternalDB) SnapshotDB(backupFolderPath string, zip bool) error {
+	return iDB.db.Snapshot(backupFolderPath, zip)
+}
+
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
 func (iDB *InternalDB) SetStringIndexedFields(stringIndexedFields []string) {
 	iDB.indexedFieldsMutex.Lock()
@@ -192,7 +207,7 @@ func (iDB *InternalDB) GetStorageType() string {
 
 // IsDBEmpty returns true if the cache is empty
 func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
-	for cacheInstance := range utils.DataDBPartitions {
+	for cacheInstance := range utils.DBPartitions {
 		if len(iDB.db.GetItemIDs(cacheInstance, utils.EmptyString)) != 0 {
 			return
 		}
@@ -792,17 +807,17 @@ func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, nodeID stri
 	return
 }
 
-// Will dump everything inside datadb to files
-func (iDB *InternalDB) DumpDataDB() (err error) {
+// Will dump everything inside db to files
+func (iDB *InternalDB) DumpDB() (err error) {
 	return iDB.db.DumpAll()
 }
 
-// Will rewrite every dump file of DataDB
-func (iDB *InternalDB) RewriteDataDB() (err error) {
+// Will rewrite every dump file of DB
+func (iDB *InternalDB) RewriteDB() (err error) {
 	return iDB.db.RewriteAll()
 }
 
-// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
-func (iDB *InternalDB) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+// BackupDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
+func (iDB *InternalDB) BackupDB(backupFolderPath string, zip bool) (err error) {
 	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }

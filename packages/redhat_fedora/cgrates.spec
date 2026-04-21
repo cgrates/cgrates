@@ -101,10 +101,8 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/loader/in
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/loader/out
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/datadb
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/datadb
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/stordb
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/stordb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/db
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/db
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/configdb
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/configdb
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d

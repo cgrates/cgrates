@@ -32,7 +32,7 @@ type internalMigrator struct {
 
 func newInternalMigrator(dm *engine.DataManager) (iDBMig *internalMigrator) {
 	var iDB *engine.InternalDB
-	for _, dbInf := range dm.DataDB() {
+	for _, dbInf := range dm.DB() {
 		var canCast bool
 		if iDB, canCast = dbInf.(*engine.InternalDB); canCast {
 			return &internalMigrator{

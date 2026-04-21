@@ -64,7 +64,7 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DBService).DataManager()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -113,7 +113,7 @@ func (s *LoaderService) Reload(shutdown *utils.SyncedChan, registry *servmanager
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DBService).DataManager()
 	close(s.stopChan)
 	s.stopChan = make(chan struct{})
 

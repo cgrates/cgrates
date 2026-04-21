@@ -52,12 +52,12 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 	}
 	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
+	db, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -105,12 +105,12 @@ func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
-	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
+	db, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

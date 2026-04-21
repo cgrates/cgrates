@@ -65,7 +65,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	trs.mu.Lock()
 	defer trs.mu.Unlock()

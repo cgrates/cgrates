@@ -44,7 +44,7 @@ type mongoMigrator struct {
 
 func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
 	var mgoDB *engine.MongoStorage
-	for _, dbInf := range dm.DataDB() {
+	for _, dbInf := range dm.DB() {
 		var canCast bool
 		if mgoDB, canCast = dbInf.(*engine.MongoStorage); canCast {
 			return &mongoMigrator{
