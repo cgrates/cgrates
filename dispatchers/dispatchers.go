@@ -189,6 +189,37 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	return d.Dispatch(routeID, subsys, serviceMethod, args, reply)
 }
 
+func (dS *DispatcherService) V1CheckDispatcherProfileHosts(args *utils.TenantID,
+	reply *map[string]string) error {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	pfl, err := dS.dm.GetDispatcherProfile(args.Tenant, args.ID,
+		true, true, utils.NonTransactional)
+	if err != nil {
+		return utils.NewErrDispatcherS(err)
+	}
+	result := make(map[string]string, len(pfl.Hosts))
+	for _, hostPfl := range pfl.Hosts {
+		dH, err := dS.dm.GetDispatcherHost(args.Tenant, hostPfl.ID,
+			true, true, utils.NonTransactional)
+		if err != nil {
+			result[hostPfl.ID] = "-1"
+			continue
+		}
+		var pingReply string
+		start := time.Now()
+		if err := dH.Call(utils.CoreSv1Ping,
+			new(utils.CGREventWithArgDispatcher), &pingReply); err != nil {
+			result[hostPfl.ID] = "-1"
+			continue
+		}
+		result[hostPfl.ID] = time.Since(start).String()
+	}
+	*reply = result
+	return nil
+}
+
 func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
 	dPfl *engine.DispatcherProfile) (err error) {
 	retDPfl, errDpfl := dS.dispatcherProfileForEvent(&ev.CGREvent, ev.Subsystem)
