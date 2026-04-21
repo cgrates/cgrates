@@ -49,7 +49,7 @@ type ConfigDbJsonCfg struct {
 	Opts        *DBOptsJson
 }
 
-// loadConfigDBCfg loads the DataDB section of the configuration
+// loadConfigDBCfg loads the DB section of the configuration
 func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnConfigDBCfg := new(ConfigDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ConfigDBJSON, jsnConfigDBCfg); err != nil {
@@ -141,16 +141,16 @@ func (dbcfg ConfigDBCfg) AsMapInterface() any {
 		utils.RedisCACertificateCfg:        dbcfg.Opts.RedisCACertificate,
 	}
 	mp := map[string]any{
-		utils.DataDbTypeCfg: dbcfg.Type,
-		utils.DataDbHostCfg: dbcfg.Host,
-		utils.DataDbNameCfg: dbcfg.Name,
-		utils.DataDbUserCfg: dbcfg.User,
-		utils.DataDbPassCfg: dbcfg.Password,
-		utils.OptsCfg:       opts,
+		utils.DbTypeCfg: dbcfg.Type,
+		utils.DbHostCfg: dbcfg.Host,
+		utils.DbNameCfg: dbcfg.Name,
+		utils.DbUserCfg: dbcfg.User,
+		utils.DbPassCfg: dbcfg.Password,
+		utils.OptsCfg:   opts,
 	}
 	mp[utils.OptsCfg] = opts
 	if dbcfg.Port != "" {
-		mp[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
+		mp[utils.DbPortCfg], _ = strconv.Atoi(dbcfg.Port)
 	}
 	return mp
 }

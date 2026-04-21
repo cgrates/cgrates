@@ -108,12 +108,12 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		return nil, fmt.Errorf("Unsuported exporter type")
 	}
 	// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "alp_cgrates.org:ATTR_1" -- just ATTR_1
-	dataDB, _, err := dm.DBConns().GetConn(itemID)
+	db, _, err := dm.DBConns().GetConn(itemID)
 	if err != nil {
 		return nil, err
 	}
 	var dbKeys []string
-	if dbKeys, err = dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
+	if dbKeys, err = db.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
 		return nil, err
 	}
 	profileIDs = make([]string, 0, len(dbKeys))

@@ -51,12 +51,12 @@ func (adms *AdminS) V1GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 	}
 	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaResourceProfiles)
+	db, _, err := adms.dm.DBConns().GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -104,12 +104,12 @@ func (admS *AdminS) V1GetResourceProfilesCount(ctx *context.Context, args *utils
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
-	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaResourceProfiles)
+	db, _, err := admS.dm.DBConns().GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

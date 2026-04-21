@@ -87,7 +87,7 @@ type DBOpts struct {
 	MySQLLocation             string
 }
 
-// DBConn the config to establish connection to DataDB
+// DBConn the config to establish connection to DB
 type DBConn struct {
 	Type                string
 	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
@@ -97,7 +97,7 @@ type DBConn struct {
 	Password            string // The user's password.
 	StringIndexedFields []string
 	PrefixIndexedFields []string
-	RmtConns            []string // Remote DataDB  connIDs
+	RmtConns            []string // Remote DB  connIDs
 	RmtConnID           string
 	RplConns            []string // Replication connIDs
 	RplFiltered         bool
@@ -107,7 +107,7 @@ type DBConn struct {
 	Opts                *DBOpts
 }
 
-// loadFromJSONCfg load the DBConn section of the DataDBCfg
+// loadFromJSONCfg load the DBConn section of the DBCfg
 func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
 	if dbC == nil {
 		return
@@ -186,7 +186,7 @@ func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
 	return
 }
 
-// DBConns the config for all DataDB connections
+// DBConns the config for all DB connections
 type DBConns map[string]*DBConn
 
 // DbCfg Database config
@@ -195,7 +195,7 @@ type DbCfg struct {
 	Items   map[string]*ItemOpts
 }
 
-// loadDataDBCfg loads the DataDB section of the configuration
+// loadDBCfg loads the DB section of the configuration
 func (dbcfg *DbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnDbCfg := new(DbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, DBJSON, jsnDbCfg); err != nil {
@@ -210,8 +210,8 @@ func (dbcfg *DbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) 
 		if dbCfg.Type != utils.MetaInternal {
 			continue
 		}
-		// overwrite only StatelessDataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
-		for key := range utils.StatelessDataDBPartitions {
+		// overwrite only StatelessDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
+		for key := range utils.StatelessDBPartitions {
 			if _, has := cfg.cacheCfg.Partitions[key]; has {
 				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
 			}
@@ -541,11 +541,11 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			opts[utils.PgSSLRootCertCfg] = dbc.Opts.PgSSLRootCert
 		}
 		dbConns[k] = map[string]any{
-			utils.DataDbTypeCfg:           dbc.Type,
-			utils.DataDbHostCfg:           dbc.Host,
-			utils.DataDbNameCfg:           dbc.Name,
-			utils.DataDbUserCfg:           dbc.User,
-			utils.DataDbPassCfg:           dbc.Password,
+			utils.DbTypeCfg:               dbc.Type,
+			utils.DbHostCfg:               dbc.Host,
+			utils.DbNameCfg:               dbc.Name,
+			utils.DbUserCfg:               dbc.User,
+			utils.DbPassCfg:               dbc.Password,
 			utils.StringIndexedFieldsCfg:  dbc.StringIndexedFields,
 			utils.PrefixIndexedFieldsCfg:  dbc.PrefixIndexedFields,
 			utils.RemoteConnsCfg:          dbc.RmtConns,
@@ -558,11 +558,11 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			utils.OptsCfg:                 opts,
 		}
 		if dbc.Port != "" {
-			dbConns[k][utils.DataDbPortCfg], _ = strconv.Atoi(dbc.Port)
+			dbConns[k][utils.DbPortCfg], _ = strconv.Atoi(dbc.Port)
 		}
 	}
 	mp := map[string]any{
-		utils.DataDbConnsCfg: dbConns,
+		utils.DbConnsCfg: dbConns,
 	}
 	if dbcfg.Items != nil {
 		items := make(map[string]any)
@@ -789,7 +789,7 @@ type DbJsonCfg struct {
 	Items    map[string]*ItemOptsJson
 }
 
-func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
+func diffDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
 	if d == nil {
 		d = new(DBOptsJson)
 	}
@@ -901,7 +901,7 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
 	return d
 }
 
-func diffDataDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
+func diffDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	if d == nil {
 		d = new(DbConnJson)
 	}
@@ -951,19 +951,19 @@ func diffDataDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	if v1.RplInterval != v2.RplInterval {
 		d.RplInterval = utils.StringPointer(v2.RplInterval.String())
 	}
-	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
+	d.Opts = diffDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
 
-func diffDataDBConnsJsonCfg(d DbConnsJson, v1, v2 DBConns) DbConnsJson {
+func diffDBConnsJsonCfg(d DbConnsJson, v1, v2 DBConns) DbConnsJson {
 	if d == nil {
 		d = make(DbConnsJson)
 	}
 	for key, val2 := range v2 {
 		if val1, has := v1[key]; !has {
-			d[key] = diffDataDBConnJsonCfg(d[key], new(DBConn), val2)
+			d[key] = diffDBConnJsonCfg(d[key], new(DBConn), val2)
 		} else if !val1.Equals(val2) {
-			d[key] = diffDataDBConnJsonCfg(d[key], val1, val2)
+			d[key] = diffDBConnJsonCfg(d[key], val1, val2)
 		}
 	}
 	return d
@@ -1003,16 +1003,16 @@ func (dbC *DBConn) Equals(dbC2 *DBConn) bool {
 	return true
 }
 
-func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DbCfg) *DbJsonCfg {
+func diffDBJsonCfg(d *DbJsonCfg, v1, v2 *DbCfg) *DbJsonCfg {
 	if d == nil {
 		d = new(DbJsonCfg)
 	}
-	d.Db_conns = diffDataDBConnsJsonCfg(d.Db_conns, v1.DBConns, v2.DBConns)
+	d.Db_conns = diffDBConnsJsonCfg(d.Db_conns, v1.DBConns, v2.DBConns)
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
 	return d
 }
 
-// ToTransCacheOpts returns to ltcache.TransCacheOpts from DataDBOpts
+// ToTransCacheOpts returns to ltcache.TransCacheOpts from DBOpts
 func (d *DBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
 	if d == nil {
 		return nil

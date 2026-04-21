@@ -77,7 +77,7 @@ func (sS *StatS) Shutdown(ctx *context.Context) {
 	sS.storeStats(ctx)
 }
 
-// runBackup will regularly store statQueues changed to dataDB
+// runBackup will regularly store statQueues changed to DB
 func (sS *StatS) runBackup(ctx *context.Context) {
 	storeInterval := sS.cfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -616,11 +616,11 @@ func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOp
 		tenant = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	dataDB, _, err := sS.dm.DBConns().GetConn(utils.MetaStatQueues)
+	db, _, err := sS.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
+	keys, err := db.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}

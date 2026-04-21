@@ -46,14 +46,14 @@ type IndexHealthArgs struct {
 }
 
 type FilterIHReply struct {
-	MissingObjects []string            // list of object that are referenced in indexes but are not found in the dataDB
+	MissingObjects []string            // list of object that are referenced in indexes but are not found in the DB
 	MissingIndexes map[string][]string // list of missing indexes for each object (the map has the key as the objectID and a list of indexes)
 	BrokenIndexes  map[string][]string // list of broken indexes for each object (the map has the key as the index and a list of objects)
 	MissingFilters map[string][]string // list of broken references (the map has the key as the filterID and a list of  objectIDs)
 }
 
 type ReverseFilterIHReply struct {
-	MissingObjects        []string            // list of object that are referenced in indexes but are not found in the dataDB
+	MissingObjects        []string            // list of object that are referenced in indexes but are not found in the DB
 	MissingReverseIndexes map[string][]string // list of missing indexes for each object (the map has the key as the objectID and a list of indexes)
 	BrokenReverseIndexes  map[string][]string // list of broken indexes for each object (the map has the key as the objectID and a list of indexes)
 	MissingFilters        map[string][]string // list of broken references (the map has the key as the filterID and a list of  objectIDs)
@@ -287,12 +287,12 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 		MissingFilters: make(map[string][]string),
 	}
 	objPrfx := utils.CacheIndexesToPrefix[indxType]
-	dataDB, _, err := dm.DBConns().GetConn(indxType)
+	db, _, err := dm.DBConns().GetConn(indxType)
 	if err != nil {
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
+	if ids, err = db.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids { // get all the objects from DB
@@ -311,7 +311,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 	// check the indexes( index->filter->obj relation)
 	idxPrfx := utils.CacheInstanceToPrefix[indxType]
 	var indexKeys []string
-	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, idxPrfx, utils.EmptyString); err != nil {
+	if indexKeys, err = db.GetKeysForPrefix(ctx, idxPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}
@@ -385,12 +385,12 @@ func getRevFltrIdxHealthFromObj(ctx *context.Context, dm *DataManager, fltrCache
 		MissingFilters:        make(map[string][]string),
 	}
 	objPrfx := utils.CacheIndexesToPrefix[indxType]
-	dataDB, _, err := dm.DBConns().GetConn(indxType)
+	db, _, err := dm.DBConns().GetConn(indxType)
 	if err != nil {
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
+	if ids, err = db.GetKeysForPrefix(ctx, objPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids { // get all the objects
@@ -433,12 +433,12 @@ func getRevFltrIdxHealthFromObj(ctx *context.Context, dm *DataManager, fltrCache
 
 // getRevFltrIdxHealthFromReverse parses the reverse indexes and updates the reply
 func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache, rply map[string]*ReverseFilterIHReply) (_ map[string]*ReverseFilterIHReply, err error) {
-	dataDB, _, err := dm.DBConns().GetConn(utils.CacheReverseFilterIndexes)
+	db, _, err := dm.DBConns().GetConn(utils.CacheReverseFilterIndexes)
 	if err != nil {
 		return
 	}
 	var revIndexKeys []string
-	if revIndexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.FilterIndexPrfx, utils.EmptyString); err != nil {
+	if revIndexKeys, err = db.GetKeysForPrefix(ctx, utils.FilterIndexPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	missingObj := utils.StringSet{}
@@ -560,12 +560,12 @@ func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCac
 		BrokenIndexes:  make(map[string][]string),
 		MissingFilters: make(map[string][]string),
 	}
-	dataDB, _, err := dm.DBConns().GetConn(utils.MetaRateProfiles)
+	db, _, err := dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
+	if ids, err = db.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids {
@@ -585,7 +585,7 @@ func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCac
 
 	// check the indexes( index->filter->obj relation)
 	var indexKeys []string
-	if indexKeys, err = dataDB.GetKeysForPrefix(ctx, utils.RateFilterIndexPrfx, utils.EmptyString); err != nil {
+	if indexKeys, err = db.GetKeysForPrefix(ctx, utils.RateFilterIndexPrfx, utils.EmptyString); err != nil {
 		return
 	}
 	for _, dataID := range indexKeys {
@@ -665,12 +665,12 @@ func getRevFltrIdxHealthFromRateRates(ctx *context.Context, dm *DataManager, flt
 		BrokenReverseIndexes:  make(map[string][]string),
 		MissingFilters:        make(map[string][]string),
 	}
-	dataDB, _, err := dm.DBConns().GetConn(utils.MetaRateProfiles)
+	db, _, err := dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return
 	}
 	var ids []string
-	if ids, err = dataDB.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
+	if ids, err = db.GetKeysForPrefix(ctx, utils.RateProfilePrefix, utils.EmptyString); err != nil {
 		return
 	}
 	for _, id := range ids {

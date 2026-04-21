@@ -1027,7 +1027,7 @@
 
 // "resources": {
 // 	"enabled": false,		// starts ResourceLimiter service: <true|false>
-// 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"thresholds_conns": [],		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1064,7 +1064,7 @@
 
 // "stats": {
 // 	"enabled": false,		// starts Stat service: <true|false>
-// 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"store_uncompressed_limit": 0,	// used to compress data
 // 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
@@ -1104,7 +1104,7 @@
 
 // "thresholds": {
 // 	"enabled": false,			// starts ThresholdS service: <true|false>
-// 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_interval": "",			// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"indexed_selects": true,		// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -1134,7 +1134,7 @@
 
 // "trends":{
 // 	"enabled": false,		// starts TrendS service: <true|false>.
-// 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"store_uncompressed_limit": 0,	// used to compress metrics
 // 	"stats_conns": [],		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"scheduled_ids": {},		// autoload these trend ids on start
@@ -1146,7 +1146,7 @@
 
 // "rankings":{
 // 	"enabled": false,	// starts RankingS service: <true|false>.
-// 	"store_interval": "",	// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_interval": "",	// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"scheduled_ids": {},	// autoload these ranking ids on start
 // 	"thresholds_conns": [],	// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>

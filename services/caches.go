@@ -56,7 +56,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return err
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
 

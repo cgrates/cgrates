@@ -981,7 +981,7 @@ func (ms *MongoStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) 
 	})
 }
 
-// GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
+// GetStatQueueProfileDrv retrieves a StatQueueProfile from DB
 func (ms *MongoStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (*StatQueueProfile, error) {
 	sqProfile := new(StatQueueProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
@@ -995,7 +995,7 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 	return sqProfile, err
 }
 
-// SetStatQueueProfileDrv stores a StatsQueue into DataDB
+// SetStatQueueProfileDrv stores a StatsQueue into DB
 func (ms *MongoStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColSqp).UpdateOne(sctx, bson.M{"tenant": sq.Tenant, "id": sq.ID},
@@ -1006,7 +1006,7 @@ func (ms *MongoStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQue
 	})
 }
 
-// RemStatQueueProfileDrv removes a StatsQueue from dataDB
+// RemStatQueueProfileDrv removes a StatsQueue from DB
 func (ms *MongoStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		dr, err := ms.getCol(ColSqp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -1061,7 +1061,7 @@ func (ms *MongoStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	})
 }
 
-// GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
+// GetThresholdProfileDrv retrieves a ThresholdProfile from DB
 func (ms *MongoStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (*ThresholdProfile, error) {
 	thProfile := new(ThresholdProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
@@ -1075,7 +1075,7 @@ func (ms *MongoStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID 
 	return thProfile, err
 }
 
-// SetThresholdProfileDrv stores a ThresholdProfile into DataDB
+// SetThresholdProfileDrv stores a ThresholdProfile into DB
 func (ms *MongoStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColTps).UpdateOne(sctx, bson.M{"tenant": tp.Tenant, "id": tp.ID},
@@ -1085,7 +1085,7 @@ func (ms *MongoStorage) SetThresholdProfileDrv(ctx *context.Context, tp *Thresho
 	})
 }
 
-// RemoveThresholdProfile removes a ThresholdProfile from dataDB/cache
+// RemoveThresholdProfile removes a ThresholdProfile from DB/cache
 func (ms *MongoStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		dr, err := ms.getCol(ColTps).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -1318,7 +1318,7 @@ func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	if err != nil {
 		return nil, err
 	}
-	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, ms.ms)
+	return utils.NewRateProfileFromMapDBMap(tenant, id, mapRP, ms.ms)
 }
 
 func (ms *MongoStorage) GetRateProfileRatesDrv(ctx *context.Context, tenant, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
@@ -1388,7 +1388,7 @@ func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) 
 }
 
 func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) error {
-	rpMap, err := rpp.AsDataDBMap(ms.ms)
+	rpMap, err := rpp.AsDBMap(ms.ms)
 	if err != nil {
 		return err
 	}
@@ -1718,17 +1718,27 @@ func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 	return nil
 }
 
-// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
-func (ms *MongoStorage) DumpDataDB() error {
+// DumpDB will dump all of db from memory to a file, only for InternalDB
+func (ms *MongoStorage) DumpDB() error {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of DataDB, only for InternalDB
-func (ms *MongoStorage) RewriteDataDB() (err error) {
+// Will rewrite every dump file of DB, only for InternalDB
+func (ms *MongoStorage) RewriteDB() (err error) {
 	return utils.ErrNotImplemented
 }
 
-// BackupDataDB only for InternalDB
-func (ms *MongoStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+// BackupDB only for InternalDB
+func (ms *MongoStorage) BackupDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RestoreDB only for InternalDB
+func (ms *MongoStorage) RestoreDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotDB only for InternalDB
+func (ms *MongoStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }

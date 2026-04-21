@@ -389,7 +389,7 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffDataDBJsonCfg(jsn, v1.DbCfg(), v2.DbCfg()))
+		return db.SetSection(ctx, section, diffDBJsonCfg(jsn, v1.DbCfg(), v2.DbCfg()))
 	case FilterSJSON:
 		jsn := new(FilterSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

@@ -29,10 +29,10 @@ import (
 
 // Various helpers to deal with database
 
-// NewDataDBConn creates a DataDB connection
-func NewDataDBConn(dbType, host, port, name, user,
+// NewDBConn creates a DB connection
+func NewDBConn(dbType, host, port, name, user,
 	pass, marshaler string, stringIndexedFields, prefixIndexedFields []string,
-	opts *config.DBOpts, itmsCfg map[string]*config.ItemOpts) (d DataDBDriver, err error) {
+	opts *config.DBOpts, itmsCfg map[string]*config.ItemOpts) (d DBDriver, err error) {
 	switch dbType {
 	case utils.MetaRedis:
 		var dbNo int

@@ -541,7 +541,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.TBLVersions)
 }
 
-// GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
+// GetStatQueueProfileDrv retrieves a StatQueueProfile from db
 func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
@@ -554,7 +554,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 	return
 }
 
-// SetStatQueueProfileDrv stores a StatsQueue into DataDB
+// SetStatQueueProfileDrv stores a StatsQueue into db
 func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sq); err != nil {
@@ -563,7 +563,7 @@ func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQue
 	return rs.Cmd(nil, redisSET, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), string(result))
 }
 
-// RemStatQueueProfileDrv removes a StatsQueue from dataDB
+// RemStatQueueProfileDrv removes a StatsQueue from db
 func (rs *RedisStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
@@ -700,7 +700,7 @@ func (rs *RedisStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string
 	return rs.Cmd(nil, redisDEL, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-// GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
+// GetThresholdProfileDrv retrieves a ThresholdProfile from DB
 func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, ID)); err != nil {
@@ -713,7 +713,7 @@ func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID 
 	return
 }
 
-// SetThresholdProfileDrv stores a ThresholdProfile into DataDB
+// SetThresholdProfileDrv stores a ThresholdProfile into DB
 func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(tp); err != nil {
@@ -722,7 +722,7 @@ func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *Thresho
 	return rs.Cmd(nil, redisSET, utils.ThresholdProfilePrefix+tp.TenantID(), string(result))
 }
 
-// RemThresholdProfileDrv removes a ThresholdProfile from dataDB/cache
+// RemThresholdProfileDrv removes a ThresholdProfile from DB/cache
 func (rs *RedisStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
@@ -888,7 +888,7 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 }
 
 func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
-	rpMap, err := rpp.AsDataDBMap(rs.ms)
+	rpMap, err := rpp.AsDBMap(rs.ms)
 	if err != nil {
 		return
 	}
@@ -906,7 +906,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 		err = utils.ErrNotFound
 		return
 	}
-	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
+	return utils.NewRateProfileFromMapDBMap(tenant, id, mapRP, rs.ms)
 }
 
 // GetRateProfileRateIDsDrv will return back all the rate IDs from a profile
@@ -1531,17 +1531,27 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	return nil
 }
 
-// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
-func (rs *RedisStorage) DumpDataDB() error {
+// DumpDB will dump all of db from memory to a file, only for InternalDB
+func (rs *RedisStorage) DumpDB() error {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of DataDB,  only for InternalDB
-func (rs *RedisStorage) RewriteDataDB() (err error) {
+// Will rewrite every dump file of DB,  only for InternalDB
+func (rs *RedisStorage) RewriteDB() (err error) {
 	return utils.ErrNotImplemented
 }
 
-// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead, only for InternalDB
-func (rs *RedisStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+// BackupDB is intended only for InternalDB
+func (rs *RedisStorage) BackupDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RestoreDB is intended only for InternalDB
+func (rs *RedisStorage) RestoreDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotDB is intended only for InternalDB
+func (rs *RedisStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }

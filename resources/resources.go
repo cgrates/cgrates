@@ -233,7 +233,7 @@ func (s *ResourceS) Shutdown(ctx *context.Context) {
 	s.storeResources(ctx)
 }
 
-// backup will regularly store resources changed to dataDB
+// backup will regularly store resources changed to DB
 func (s *ResourceS) runBackup(ctx *context.Context) {
 	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -413,7 +413,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			}
 		}()
 
-	} else { // select the resourceIDs out of dataDB
+	} else { // select the resourceIDs out of DB
 		rIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.ResourceSCfg().StringIndexedFields,
 			s.cfg.ResourceSCfg().PrefixIndexedFields,

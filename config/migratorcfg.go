@@ -202,6 +202,6 @@ func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCf
 		d.Users_filters = utils.SliceStringPointer(slices.Clone(v2.UsersFilters))
 	}
 	d.FromItems = diffMapFromItemJson(d.FromItems, v1.FromItems, v2.FromItems)
-	d.Out_db_opts = diffDataDBOptsJsonCfg(d.Out_db_opts, v1.OutDBOpts, v2.OutDBOpts)
+	d.Out_db_opts = diffDBOptsJsonCfg(d.Out_db_opts, v1.OutDBOpts, v2.OutDBOpts)
 	return d
 }

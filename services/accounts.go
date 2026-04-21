@@ -64,7 +64,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DBService).DataManager()
 
 	acts.mu.Lock()
 	defer acts.mu.Unlock()

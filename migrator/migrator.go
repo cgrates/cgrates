@@ -110,7 +110,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			mongoDBFound := false // track if no mongo DBs were found for case *ensure_indexes
 			// since DataManager is the same in all OUT migratorDataDBs, taking the default
 			// migratorDataDB will suffice
-			for _, db := range m.dmTo[utils.MetaDefault].DataManager().DataDB() {
+			for _, db := range m.dmTo[utils.MetaDefault].DataManager().DB() {
 				if db.GetStorageType() == utils.MetaMongo {
 					mgo := db.(*engine.MongoStorage)
 					if err = mgo.EnsureIndexes(); err != nil {
@@ -159,7 +159,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
 	// since DataManager is the same in all OUT migratorDataDBs, taking the default
 	// migratorDataDB will suffice
-	for _, db := range m.dmTo[utils.MetaDefault].DataManager().DataDB() {
+	for _, db := range m.dmTo[utils.MetaDefault].DataManager().DB() {
 		if db.GetStorageType() == utils.MetaMongo {
 			mgo := db.(*engine.MongoStorage)
 			if err := mgo.EnsureIndexes(cols...); err != nil {

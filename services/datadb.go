@@ -28,16 +28,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, setVersions bool) *DataDBService {
-	return &DataDBService{
+// NewDBService returns the DB Service
+func NewDBService(cfg *config.CGRConfig, setVersions bool) *DBService {
+	return &DBService{
 		cfg:         cfg,
 		setVersions: setVersions,
 	}
 }
 
-// DataDBService implements Service interface
-type DataDBService struct {
+// DBService implements Service interface
+type DBService struct {
 	mu          sync.RWMutex
 	cfg         *config.CGRConfig
 	oldDBCfg    *config.DbCfg
@@ -46,7 +46,7 @@ type DataDBService struct {
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+func (db *DBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP, db.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -56,15 +56,15 @@ func (db *DataDBService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	db.oldDBCfg = db.cfg.DbCfg().Clone()
 	dbConnMap := new(engine.DBConnManager)
 	for dbConnKey, dbconn := range db.cfg.DbCfg().DBConns {
-		dbConn, err := engine.NewDataDBConn(dbconn.Type,
+		dbConn, err := engine.NewDBConn(dbconn.Type,
 			dbconn.Host, dbconn.Port, dbconn.Name, dbconn.User,
 			dbconn.Password, db.cfg.GeneralCfg().DBDataEncoding, dbconn.StringIndexedFields,
 			dbconn.PrefixIndexedFields, dbconn.Opts, db.cfg.DbCfg().Items)
 		if err != nil { // Cannot configure getter database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			utils.Logger.Crit(fmt.Sprintf("Could not configure DB: %s exiting!", err))
 			return err
 		}
-		dbConnMap.AddDataDBDriver(dbConnKey, dbConn)
+		dbConnMap.AddDBDriver(dbConnKey, dbConn)
 		if dbconn.Type != utils.MetaInternal {
 			utils.Logger.Info(fmt.Sprintf("<DB> connection established with <%s:%s> with DB name <%s>, Type <%s>", dbconn.Host, dbconn.Port, dbconn.Name, dbconn.Type))
 		} else {
@@ -73,16 +73,16 @@ func (db *DataDBService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	}
 	db.dm = engine.NewDataManager(dbConnMap, db.cfg, cms.(*ConnManagerService).ConnManager())
 	if db.setVersions {
-		dataDB, _, err := dbConnMap.GetConn(utils.CacheVersions)
+		db, _, err := dbConnMap.GetConn(utils.CacheVersions)
 		if err != nil {
 			return err
 		}
-		if err = engine.OverwriteDBVersions(dataDB); err != nil {
+		if err = engine.OverwriteDBVersions(db); err != nil {
 			return err
 		}
 	} else {
-		for _, dataDB := range db.dm.DataDB() {
-			if err = engine.CheckVersions(dataDB); err != nil {
+		for _, db := range db.dm.DB() {
+			if err = engine.CheckVersions(db); err != nil {
 				return err
 			}
 		}
@@ -91,7 +91,7 @@ func (db *DataDBService) Start(shutdown *utils.SyncedChan, registry *servmanager
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
+func (db *DBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.needsConnectionReload() {
@@ -104,14 +104,14 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (e
 	for dbKey, dbConn := range db.cfg.DbCfg().DBConns {
 		switch dbConn.Type {
 		case utils.MetaMongo:
-			mgo, canCast := db.dm.DataDB()[dbKey].(*engine.MongoStorage)
+			mgo, canCast := db.dm.DB()[dbKey].(*engine.MongoStorage)
 			if !canCast {
-				return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
+				return fmt.Errorf("can't convert DB of type %s to MongoStorage",
 					dbConn.Type)
 			}
 			mgo.SetTTL(dbConn.Opts.MongoQueryTimeout)
 		case utils.MetaPostgres, utils.MetaMySQL:
-			msql, canCast := db.dm.DataDB()[dbKey].(*engine.SQLStorage)
+			msql, canCast := db.dm.DB()[dbKey].(*engine.SQLStorage)
 			if !canCast {
 				return fmt.Errorf("can't convert DB of type %s to SQLStorage",
 					dbConn.Type)
@@ -120,7 +120,7 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (e
 			msql.DB.SetMaxIdleConns(dbConn.Opts.SQLMaxIdleConns)
 			msql.DB.SetConnMaxLifetime(dbConn.Opts.SQLConnMaxLifetime)
 		case utils.MetaInternal:
-			idb, canCast := db.dm.DataDB()[dbKey].(*engine.InternalDB)
+			idb, canCast := db.dm.DB()[dbKey].(*engine.InternalDB)
 			if !canCast {
 				return fmt.Errorf("can't convert DB of type %s to InternalDB",
 					dbConn.Type)
@@ -134,7 +134,7 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (e
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown(registry *servmanager.Registry) error {
+func (db *DBService) Shutdown(registry *servmanager.Registry) error {
 	deps := []string{
 		utils.ResourceS,
 		utils.IPs,
@@ -159,17 +159,17 @@ func (db *DataDBService) Shutdown(registry *servmanager.Registry) error {
 }
 
 // ServiceName returns the service name
-func (db *DataDBService) ServiceName() string {
+func (db *DBService) ServiceName() string {
 	return utils.DB
 }
 
 // ShouldRun returns if the service should be running
-func (db *DataDBService) ShouldRun() bool { // db should allways run
+func (db *DBService) ShouldRun() bool { // db should allways run
 	return true // ||db.mandatoryDB() || db.cfg.SessionSCfg().Enabled
 }
 
 // needsConnectionReload returns if the DB connection needs to reloaded
-func (db *DataDBService) needsConnectionReload() bool {
+func (db *DBService) needsConnectionReload() bool {
 	if len(db.oldDBCfg.DBConns) != len(db.cfg.DbCfg().DBConns) {
 		return true
 	}
@@ -227,6 +227,6 @@ func (db *DataDBService) needsConnectionReload() bool {
 }
 
 // DataManager returns the DataManager object.
-func (db *DataDBService) DataManager() *engine.DataManager {
+func (db *DBService) DataManager() *engine.DataManager {
 	return db.dm
 }

@@ -58,7 +58,7 @@ func (ts *TPeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
-	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DBService).DataManager()
 
 	ts.mu.Lock()
 	defer ts.mu.Unlock()

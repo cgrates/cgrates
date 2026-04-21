@@ -66,7 +66,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	thrs.mu.Lock()
 	defer thrs.mu.Unlock()

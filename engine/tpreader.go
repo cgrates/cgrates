@@ -385,7 +385,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 }
 
 func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
-	for _, db := range tpr.dm.DataDB() {
+	for _, db := range tpr.dm.DB() {
 		if db == nil {
 			return errors.New("no database connection")
 		}

@@ -67,7 +67,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Regi
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

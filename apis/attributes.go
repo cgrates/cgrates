@@ -53,12 +53,12 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.A
 	}
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
-	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
+	db, _, err := admS.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -107,12 +107,12 @@ func (admS *AdminSv1) GetAttributeProfilesCount(ctx *context.Context, args *util
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
+	db, _, err := admS.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
 	}
 	var keys []string
-	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
+	if keys, err = db.GetKeysForPrefix(ctx, prfx, args.ItemsSearch); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

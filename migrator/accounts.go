@@ -33,12 +33,12 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 	if err != nil {
 		return err
 	}
-	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaAccounts)
+	db, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
 	}
 	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AccountPrefix, utils.EmptyString)
+	ids, err = db.GetKeysForPrefix(context.TODO(), utils.AccountPrefix, utils.EmptyString)
 	if err != nil {
 		return err
 	}

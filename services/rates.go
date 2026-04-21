@@ -66,7 +66,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.R
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DBService).DataManager()
 
 	rs.mu.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)

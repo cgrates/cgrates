@@ -64,7 +64,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dm := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dm := srvDeps[utils.DB].(*DBService).DataManager()
 
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()

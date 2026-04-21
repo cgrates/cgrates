@@ -133,7 +133,7 @@ const CGRATES_CFG_JSON = `
 			"replication_interval": "", 		// interval between batched replications (0 for immediate)
 			"opts":{
 	        	"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
-	        	"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.Backupdb when "BackupFolderPath" is not provided
+	        	"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.BackupDB, AdminSv1.RestoreDB and AdminSv1.SnapshotDB when "BackupFolderPath" is not provided in params of the API
 	        	"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
 	        	"internalDBDumpInterval": "1m",		// dump db regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 	        	"internalDBRewriteInterval": "1h",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>

@@ -107,7 +107,7 @@ func main() {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
 		if mgrCfg.ConfigDBCfg().Type != utils.MetaInternal {
-			d, err := engine.NewDataDBConn(mgrCfg.ConfigDBCfg().Type,
+			d, err := engine.NewDBConn(mgrCfg.ConfigDBCfg().Type,
 				mgrCfg.ConfigDBCfg().Host, mgrCfg.ConfigDBCfg().Port,
 				mgrCfg.ConfigDBCfg().Name, mgrCfg.ConfigDBCfg().User,
 				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding, nil, nil,

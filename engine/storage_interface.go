@@ -113,13 +113,15 @@ type DataDB interface {
 	SetCDR(*context.Context, *utils.CGREvent, bool) error
 	GetCDRs(*context.Context, []*Filter, map[string]any) ([]*utils.CDR, error)
 	RemoveCDRs(*context.Context, []*Filter) error
-	DumpDataDB() error
-	RewriteDataDB() error
-	BackupDataDB(string, bool) error
+	DumpDB() error
+	RewriteDB() error
+	BackupDB(string, bool) error
+	RestoreDB(string) error
+	SnapshotDB(string, bool) error
 }
 
-// DataDBDriver used as a DataDB but also as a ConfigProvider
-type DataDBDriver interface {
+// DBDriver used as a DataDB but also as a ConfigProvider
+type DBDriver interface {
 	DataDB
 	config.ConfigDB
 }

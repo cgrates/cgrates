@@ -308,7 +308,7 @@ func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 	return chS.pcItems[chID]
 }
 
-// Precache loads data from DataDB into cache at engine start
+// Precache loads data from DB into cache at engine start
 func (chS *CacheS) Precache(shutdown *utils.SyncedChan) {
 	for cacheID, cacheCfg := range chS.cfg.CacheCfg().Partitions {
 		if !cacheCfg.Precache {

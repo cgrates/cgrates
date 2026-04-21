@@ -125,7 +125,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 			log.Fatalf("Error loading config file %s", err)
 		}
 		if ldrCfg.ConfigDBCfg().Type != utils.MetaInternal {
-			d, err := engine.NewDataDBConn(ldrCfg.ConfigDBCfg().Type,
+			d, err := engine.NewDBConn(ldrCfg.ConfigDBCfg().Type,
 				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
 				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,
 				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding, nil, nil,
@@ -317,7 +317,7 @@ func main() {
 	// we initialize connManager here with nil for InternalChannels
 	cM := engine.NewConnManager(ldrCfg)
 
-	if dataDB, err = engine.NewDataDBConn(ldrCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+	if dataDB, err = engine.NewDBConn(ldrCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Host,
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Port,
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Name,

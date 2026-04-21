@@ -65,7 +65,7 @@ func (cSv1 *ConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.Sectio
 	return cSv1.cfg.V1GetConfigAsJSON(ctx, args, reply)
 }
 
-// StoreCfgInDB will store the config section in the dataDB
+// StoreCfgInDB will store the config section in DB
 // if the section is empty or *all all config is stored in DB
 func (cSv1 *ConfigSv1) StoreCfgInDB(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
 	return cSv1.cfg.V1StoreCfgInDB(ctx, args, reply)
@@ -90,7 +90,7 @@ func (cSv1 *ConfigSv1) RewriteConfigDB(ctx *context.Context, ignr *string, reply
 }
 
 // BackupConfigDB will momentarely stop any dumping and rewriting in configDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
-func (cSv1 *ConfigSv1) BackupConfigDB(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+func (cSv1 *ConfigSv1) BackupConfigDB(ctx *context.Context, params BackupParams, reply *string) (err error) {
 	if err = cSv1.cfg.ConfigDB().BackupConfigDB(params.BackupFolderPath, params.Zip); err != nil {
 		return
 	}

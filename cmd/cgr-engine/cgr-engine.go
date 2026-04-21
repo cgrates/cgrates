@@ -209,7 +209,7 @@ func runCGREngine(fs []string) (err error) {
 		services.NewAnalyzerService(cfg),
 		services.NewConnManagerService(cfg),
 		services.NewLoggerService(cfg, flags.logger.typ),
-		services.NewDataDBService(cfg, flags.data.setVersions),
+		services.NewDBService(cfg, flags.data.setVersions),
 		services.NewConfigService(cfg),
 		services.NewGuardianService(cfg),
 		coreS,
@@ -324,7 +324,7 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 	if !(cfg.ConfigDBCfg().Type == utils.MetaInternal &&
 		cfg.ConfigDBCfg().Opts.InternalDBDumpInterval == 0) { // ignore if offline internal is disabled
 		var d config.ConfigDB
-		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
+		if d, err = engine.NewDBConn(cfg.ConfigDBCfg().Type,
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
 			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,

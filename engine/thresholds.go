@@ -283,7 +283,7 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 	}
 }
 
-// ThresholdS manages Threshold execution and storing them to dataDB
+// ThresholdS manages Threshold execution and storing them to DB
 type ThresholdS struct {
 	dm          *DataManager
 	cfg         *config.CGRConfig
@@ -314,7 +314,7 @@ func (tS *ThresholdS) Shutdown(ctx *context.Context) {
 	tS.storeThresholds(ctx)
 }
 
-// backup will regularly store thresholds changed to dataDB
+// backup will regularly store thresholds changed to DB
 func (tS *ThresholdS) runBackup(ctx *context.Context) {
 	storeInterval := tS.cfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -727,11 +727,11 @@ func (tS *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.Tenant
 		tenant = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
-	dataDB, _, err := tS.dm.DBConns().GetConn(utils.MetaThresholds)
+	db, _, err := tS.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err
 	}
-	keys, err := dataDB.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
+	keys, err := db.GetKeysForPrefix(ctx, prfx, utils.EmptyString)
 	if err != nil {
 		return err
 	}

@@ -59,7 +59,7 @@ func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	cs.mu.Lock()
 	defer cs.mu.Unlock()

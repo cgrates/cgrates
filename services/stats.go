@@ -66,7 +66,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	sts.mu.Lock()
 	defer sts.mu.Unlock()

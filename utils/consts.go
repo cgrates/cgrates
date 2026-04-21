@@ -36,8 +36,8 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
-	// DataDBPartitions excluding Resources, Thresholds, Trends, Rankings, IPs, Stats
-	StatelessDataDBPartitions = NewStringSet([]string{
+	// DBPartitions excluding Resources, Thresholds, Trends, Rankings, IPs, Stats
+	StatelessDBPartitions = NewStringSet([]string{
 		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheLoadIDs,
@@ -46,7 +46,7 @@ var (
 		CacheAccountsFilterIndexes, CacheReverseFilterIndexes, CacheAccounts,
 	})
 
-	DataDBPartitions = NewStringSet([]string{
+	DBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheIPProfiles, CacheIPAllocations,
 		CacheEventIPs, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles,
 		CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
@@ -59,7 +59,7 @@ var (
 	})
 
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions)
+	CachePartitions = JoinStringSet(extraDBPartition, DBPartitions)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheResourceProfiles:            ResourceProfilesPrefix,
@@ -1536,6 +1536,11 @@ const (
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 	AdminSv1GetCDRs                   = "AdminSv1.GetCDRs"
 	AdminSv1RemoveCDRs                = "AdminSv1.RemoveCDRs"
+	AdminSv1DumpDB                    = "AdminSv1.DumpDB"
+	AdminSv1RewriteDB                 = "AdminSv1.RewriteDB"
+	AdminSv1BackupDB                  = "AdminSv1.BackupDB"
+	AdminSv1RestoreDB                 = "AdminSv1.RestoreDB"
+	AdminSv1SnapshotDB                = "AdminSv1.SnapshotDB"
 )
 
 const (
@@ -2170,15 +2175,15 @@ const (
 	MysqlLocation             = "mysqlLocation"
 )
 
-// DataDbCfg
+// DbCfg
 const (
-	DataDbConnsCfg               = "db_conns"
-	DataDbTypeCfg                = "db_type"
-	DataDbHostCfg                = "db_host"
-	DataDbPortCfg                = "db_port"
-	DataDbNameCfg                = "db_name"
-	DataDbUserCfg                = "db_user"
-	DataDbPassCfg                = "db_password"
+	DbConnsCfg                   = "db_conns"
+	DbTypeCfg                    = "db_type"
+	DbHostCfg                    = "db_host"
+	DbPortCfg                    = "db_port"
+	DbNameCfg                    = "db_name"
+	DbUserCfg                    = "db_user"
+	DbPassCfg                    = "db_password"
 	InternalDBDumpPathCfg        = "internalDBDumpPath"
 	InternalDBBackupPathCfg      = "internalDBBackupPath"
 	InternalDBStartTimeoutCfg    = "internalDBStartTimeout"

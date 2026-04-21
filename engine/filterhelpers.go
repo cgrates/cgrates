@@ -38,7 +38,7 @@ const matchedItemsWarningThreshold int = 100
 
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
-// helper on top of dataDB.GetIndexes, adding utils.MetaAny to list of fields queried
+// helper on top of db.GetIndexes, adding utils.MetaAny to list of fields queried
 func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
@@ -50,13 +50,13 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if !indexedSelects {
-			var dataDB DataDB
-			dataDB, _, err = dm.dbConns.GetConn(cacheID)
+			var db DataDB
+			db, _, err = dm.dbConns.GetConn(cacheID)
 			if err != nil {
 				return
 			}
 			var keysWithID []string
-			if keysWithID, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID], utils.EmptyString); err != nil {
+			if keysWithID, err = db.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID], utils.EmptyString); err != nil {
 				return
 			}
 			var sliceIDs []string

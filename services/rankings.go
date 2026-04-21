@@ -66,7 +66,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	ran.mu.Lock()
 	defer ran.mu.Unlock()

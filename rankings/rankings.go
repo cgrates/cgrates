@@ -248,7 +248,7 @@ func (r *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err er
 	return
 }
 
-// storeRankings stores modified rankings from cache in dataDB
+// storeRankings stores modified rankings from cache in DB
 // Reschedules failed ranking IDs for next storage cycle.
 // This function is safe for concurrent use.
 func (r *RankingS) storeRankings(ctx *context.Context) {
