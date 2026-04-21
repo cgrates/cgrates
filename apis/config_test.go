@@ -106,7 +106,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 
 func TestConfigSetGetReloadConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.CacheCfg().Partitions[key].Limit = 0
 	}
 	rlcCfg := NewConfigSv1(cfg)

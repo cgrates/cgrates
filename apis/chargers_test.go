@@ -95,7 +95,7 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	if !reflect.DeepEqual(setRply, "") {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "", utils.ToJSON(setRply))
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -146,7 +146,7 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	if !reflect.DeepEqual(setRply, "") {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "", utils.ToJSON(setRply))
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -204,7 +204,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	if !reflect.DeepEqual(setRply, "") {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "", utils.ToJSON(setRply))
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -311,7 +311,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -333,7 +333,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -561,7 +561,7 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -606,7 +606,7 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -659,7 +659,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]", err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
 
@@ -847,7 +847,7 @@ func TestChargersGetChargerProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
@@ -893,7 +893,7 @@ func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
@@ -941,7 +941,7 @@ func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestChargersGetChargerProfilesCountErrMock(t *testing.T) {
@@ -1080,7 +1080,7 @@ func TestChargersSetGetRemChargerProfile(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestChargersGetChargerProfileCheckErrors(t *testing.T) {
@@ -1115,5 +1115,5 @@ func TestChargersGetChargerProfileCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

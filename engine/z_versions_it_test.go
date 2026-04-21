@@ -76,7 +76,7 @@ func testInitConfig(t *testing.T) {
 }
 
 func testInitDataDB(t *testing.T) {
-	dbConn, err := NewDataDBConn(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+	dbConn, err := NewDBConn(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Host, vrsCfg.DbCfg().DBConns[utils.MetaDefault].Port,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Name, vrsCfg.DbCfg().DBConns[utils.MetaDefault].User,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Password, vrsCfg.GeneralCfg().DBDataEncoding, vrsCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields, vrsCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
@@ -93,7 +93,7 @@ func testInitDataDB(t *testing.T) {
 }
 
 func testVersionsFlush(t *testing.T) {
-	err := dm3.DataDB()[utils.MetaDefault].Flush(path.Join(vrsCfg.DataFolderPath, "storage", strings.Trim(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type, "*")))
+	err := dm3.DB()[utils.MetaDefault].Flush(path.Join(vrsCfg.DataFolderPath, "storage", strings.Trim(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type, "*")))
 	if err != nil {
 		t.Error("Error when flushing ", err.Error())
 	}
@@ -111,7 +111,7 @@ func testVersion(t *testing.T) {
 		allVersions[k] = v
 	}
 
-	storType := dm3.DataDB()[utils.MetaDefault].GetStorageType()
+	storType := dm3.DB()[utils.MetaDefault].GetStorageType()
 	switch storType {
 	case utils.MetaInternal:
 		currentVersion = allVersions
@@ -127,30 +127,30 @@ func testVersion(t *testing.T) {
 	}
 
 	//dataDB
-	if _, rcvErr := dm3.DataDB()[utils.MetaDefault].GetVersions(""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DB()[utils.MetaDefault].GetVersions(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := CheckVersions(dm3.DataDB()[utils.MetaDefault]); err != nil {
+	if err := CheckVersions(dm3.DB()[utils.MetaDefault]); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := dm3.DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if rcv, err := dm3.DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if len(currentVersion) != len(rcv) {
 		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
 	}
-	if err := dm3.DataDB()[utils.MetaDefault].RemoveVersions(currentVersion); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].RemoveVersions(currentVersion); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := dm3.DataDB()[utils.MetaDefault].GetVersions(""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DB()[utils.MetaDefault].GetVersions(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(testVersion, false); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(testVersion, false); err != nil {
 		t.Error(err)
 	}
-	if err := CheckVersions(dm3.DataDB()[utils.MetaDefault]); err == nil || err.Error() != test {
+	if err := CheckVersions(dm3.DB()[utils.MetaDefault]); err == nil || err.Error() != test {
 		t.Error(err)
 	}
-	if err := dm3.DataDB()[utils.MetaDefault].RemoveVersions(testVersion); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
 	switch storType {
@@ -170,7 +170,7 @@ func testVersion(t *testing.T) {
 func testUpdateVersionsAccounts(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.AccountsStr] = 2
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -190,7 +190,7 @@ func testUpdateVersionsAccounts(t *testing.T) {
 func testUpdateVersionsActions(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Actions] = 1
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -210,7 +210,7 @@ func testUpdateVersionsActions(t *testing.T) {
 func testUpdateVersionsChargers(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Chargers] = 1
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -230,7 +230,7 @@ func testUpdateVersionsChargers(t *testing.T) {
 func testUpdateVersionsDestinations(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Destination] = 0
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -249,7 +249,7 @@ func testUpdateVersionsDestinations(t *testing.T) {
 func testUpdateVersionsAttributes(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Attributes] = 3
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -269,7 +269,7 @@ func testUpdateVersionsAttributes(t *testing.T) {
 func testUpdateVersionsLoadIDs(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	delete(newVersions, utils.LoadIDsVrs)
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -289,7 +289,7 @@ func testUpdateVersionsLoadIDs(t *testing.T) {
 func testUpdateVersionsRQF(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.RQF] = 2
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -309,7 +309,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 func testUpdateVersionsResource(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.ResourceStr] = 0
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -329,7 +329,7 @@ func testUpdateVersionsResource(t *testing.T) {
 func testUpdateVersionsRoutes(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Routes] = 1
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -349,7 +349,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 func testUpdateVersionsStats(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Stats] = 3
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -369,7 +369,7 @@ func testUpdateVersionsStats(t *testing.T) {
 func testUpdateVersionsSubscribers(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Subscribers] = 0
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
@@ -389,7 +389,7 @@ func testUpdateVersionsSubscribers(t *testing.T) {
 func testUpdateVersionsThresholds(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Thresholds] = 2
-	if err := dm3.DataDB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
+	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)

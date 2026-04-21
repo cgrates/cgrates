@@ -1207,7 +1207,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dbConns: &DBConnManager{dataDBs: map[string]DataDB{
+			dbConns: &DBConnManager{dbs: map[string]DataDB{
 				utils.MetaDefault: idb,
 			}},
 		},

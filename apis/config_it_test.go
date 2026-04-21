@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	connDb  engine.DataDBDriver
+	connDb  engine.DBDriver
 	cfgPath string
 	cfgCfg  *config.CGRConfig
 	cfgRPC  *birpc.Client
@@ -430,7 +430,7 @@ func testCfgRPCConnStore(t *testing.T) {
 
 func testCfgDataDBConnStore(t *testing.T) {
 	var err error
-	connDb, err = engine.NewDataDBConn(cfgCfg.ConfigDBCfg().Type,
+	connDb, err = engine.NewDBConn(cfgCfg.ConfigDBCfg().Type,
 		cfgCfg.ConfigDBCfg().Host, cfgCfg.ConfigDBCfg().Port,
 		cfgCfg.ConfigDBCfg().Name, cfgCfg.ConfigDBCfg().User,
 		cfgCfg.ConfigDBCfg().Password, cfgCfg.GeneralCfg().DBDataEncoding, nil, nil,

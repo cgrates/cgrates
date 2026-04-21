@@ -129,8 +129,8 @@ func testStsITConnect(t *testing.T) {
 }
 
 func testStsITFlush(t *testing.T) {
-	stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if err := engine.SetDBVersions(stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	stsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(stsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -368,7 +368,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error("Error when setting v1Stat ", err.Error())
 	}
 
-	if err := stsMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(engine.Versions{utils.Stats: 1}, true); err != nil {
+	if err := stsMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(engine.Versions{utils.Stats: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	}
 
@@ -376,7 +376,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error(err)
 	}
 
-	if vrs, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(utils.Stats); err != nil {
+	if vrs, err := stsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(utils.Stats); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	} else if vrs[utils.Stats] != 4 {
 		t.Errorf("Expecting: 4, received: %+v", vrs[utils.Stats])

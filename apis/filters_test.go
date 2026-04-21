@@ -984,7 +984,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersSetFilterClearCache(t *testing.T) {
@@ -1160,7 +1160,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -1616,7 +1616,7 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
@@ -1662,7 +1662,7 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
@@ -1710,7 +1710,7 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersSetFilterNoRulesErr(t *testing.T) {

@@ -669,7 +669,7 @@ func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
@@ -749,7 +749,7 @@ func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
@@ -830,7 +830,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
@@ -889,7 +889,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
@@ -1053,7 +1053,7 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
@@ -1108,7 +1108,7 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
@@ -1258,7 +1258,7 @@ func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
@@ -1313,7 +1313,7 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
@@ -1472,7 +1472,7 @@ func TestUpdateFilterIndexRouteErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
@@ -1527,7 +1527,7 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
@@ -1676,7 +1676,7 @@ func TestUpdateFilterIndexChargerErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
@@ -1731,7 +1731,7 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
@@ -1892,7 +1892,7 @@ func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
@@ -1947,7 +1947,7 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
@@ -2002,7 +2002,7 @@ func TestUpdateFilterIndexAttributeErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
@@ -2057,7 +2057,7 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
@@ -2219,7 +2219,7 @@ func TestUpdateFilterActionProfilesIndexErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
@@ -2274,7 +2274,7 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
@@ -2436,7 +2436,7 @@ func TestUpdateFilterRateProfilesIndexErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
@@ -2491,7 +2491,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
@@ -2540,7 +2540,7 @@ func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return make(map[string]utils.StringSet), utils.ErrNotImplemented
 		},
@@ -3026,7 +3026,7 @@ func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
 	}
 
 	tntCtx := newFlt.TenantID()
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
 		utils.CacheRateFilterIndexes: {
 			"RATE_TEST": {},
 		},
@@ -3076,7 +3076,7 @@ func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
 	}
 
 	tntCtx := newFlt.TenantID()
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
 		utils.CacheRateFilterIndexes: {
 			"CUSTOM_RATE2:RP2": {},
 		},
@@ -3176,7 +3176,7 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 	}
 
 	tntCtx := newFlt.TenantID()
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
 		utils.CacheRateFilterIndexes: {
 			"CUSTOM_RATE2:RP2": {},
 		},

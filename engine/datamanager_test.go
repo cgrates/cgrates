@@ -35,7 +35,7 @@ import (
 func TestDatamanagerCacheDataFromDBNoPrfxErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{
-		dataDBCfg: cfg.DbCfg(),
+		dbCfg: cfg.DbCfg(),
 	}, cfg, nil)
 	err := dm.CacheDataFromDB(context.Background(), "", []string{}, false)
 	if err == nil || err.Error() != "unsupported cache prefix" {
@@ -54,7 +54,7 @@ func TestDatamanagerCacheDataFromDBNoDMErr(t *testing.T) {
 func TestDatamanagerCacheDataFromDBNoLimitZeroErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{
-		dataDBCfg: cfg.DbCfg(),
+		dbCfg: cfg.DbCfg(),
 	}, cfg, nil)
 	dm.cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
 		utils.CachePrefixToInstance[utils.AttributeProfilePrefix]: {
@@ -70,7 +70,7 @@ func TestDatamanagerCacheDataFromDBNoLimitZeroErr(t *testing.T) {
 func TestDatamanagerCacheDataFromDBMetaAPIBanErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{
-		dataDBCfg: cfg.DbCfg(),
+		dbCfg: cfg.DbCfg(),
 	}, cfg, nil)
 	dm.cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
 		utils.CachePrefixToInstance[utils.MetaAPIBan]: {
@@ -86,7 +86,7 @@ func TestDatamanagerCacheDataFromDBMetaAPIBanErr(t *testing.T) {
 func TestDatamanagerCacheDataFromDBMustBeCached(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{
-		dataDBCfg: cfg.DbCfg(),
+		dbCfg: cfg.DbCfg(),
 	}, cfg, nil)
 	dm.cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
 		utils.CachePrefixToInstance[utils.AttributeProfilePrefix]: {
@@ -101,7 +101,7 @@ func TestDatamanagerCacheDataFromDBMustBeCached(t *testing.T) {
 
 func TestDataManagerDataDB(t *testing.T) {
 	var dm *DataManager
-	rcv := dm.DataDB()
+	rcv := dm.DB()
 	if rcv != nil {
 		t.Errorf("Expected DataDB to be nil, Received <%+v>", rcv)
 	}
@@ -164,7 +164,7 @@ func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
 		},
@@ -200,7 +200,7 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -238,7 +238,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
@@ -290,7 +290,7 @@ func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -320,7 +320,7 @@ func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
 		},
@@ -350,7 +350,7 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
@@ -381,7 +381,7 @@ func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
 		},
@@ -447,7 +447,7 @@ func TestDataManagerRemoveFilterReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
 		},
@@ -493,7 +493,7 @@ func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -523,7 +523,7 @@ func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
@@ -583,7 +583,7 @@ func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
@@ -621,7 +621,7 @@ func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				FilterIDs: []string{"fltr1"},
@@ -663,7 +663,7 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
@@ -698,7 +698,7 @@ func TestDMRemoveAccountReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
@@ -793,7 +793,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -855,7 +855,7 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				Tenant: "cgrates.org",
@@ -922,7 +922,7 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				Tenant: "cgrates.org",
@@ -994,7 +994,7 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
@@ -1066,7 +1066,7 @@ func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -1090,7 +1090,7 @@ func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return nil, nil
 		},
@@ -1115,7 +1115,7 @@ func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return nil, nil
 		},
@@ -1140,7 +1140,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{
 				Tenant:           "cgrates.org",
@@ -1178,7 +1178,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{
 				Tenant:           "cgrates.org",
@@ -1224,7 +1224,7 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{
 				Tenant:           "cgrates.org",
@@ -1262,7 +1262,7 @@ func TestDMSetThresholdErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetThresholdDrvF: func(ctx *context.Context, t *Threshold) error { return utils.ErrNotImplemented },
 	}
 
@@ -1330,7 +1330,7 @@ func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
 		Hits:   0,
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].SetThresholdDrv(context.Background(), th); err != nil {
+	if err := dm.DB()[utils.MetaDefault].SetThresholdDrv(context.Background(), th); err != nil {
 		t.Error(err)
 	}
 
@@ -1506,7 +1506,7 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) error { return utils.ErrNotImplemented },
 	}
 
@@ -1604,7 +1604,7 @@ func TestDMRemoveStatQueueErrDrv(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
 	}
 
@@ -1777,7 +1777,7 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 		MinItems: 1,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
@@ -1840,7 +1840,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 		MinItems: 1,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
@@ -1905,7 +1905,7 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 		MinItems: 1,
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
+	if err := dm.DB()[utils.MetaDefault].SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
 		t.Error(err)
 	}
 
@@ -1948,7 +1948,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*Threshold, error) {
 			return &Threshold{}, nil
 		},
@@ -2124,7 +2124,7 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{}, nil
 		},
@@ -3284,7 +3284,7 @@ func TestDMGetAccountReplicate(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return ap, utils.ErrNotFound
 		},
@@ -3344,7 +3344,7 @@ func TestDMGetRateProfileRatesOK(t *testing.T) {
 		},
 	}
 
-	dm.DataDB()[utils.MetaDefault].SetRateProfileDrv(context.Background(), rps, true)
+	dm.DB()[utils.MetaDefault].SetRateProfileDrv(context.Background(), rps, true)
 
 	args := &utils.ArgsSubItemIDs{
 		Tenant:      "cgrates.org",
@@ -3398,7 +3398,7 @@ func TestDMSetLoadIDsDrvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
 	}
 
@@ -3443,7 +3443,7 @@ func TestDMSetLoadIDsReplicate(t *testing.T) {
 func TestDMCheckFiltersErrBadReference(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(&DBConnManager{dataDBs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
+	dm := NewDataManager(&DBConnManager{dbs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
 	expErr := "broken reference to filter: <*string:~*req.Account>"
 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~*req.Account"}); expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -3454,7 +3454,7 @@ func TestDMCheckFiltersErrBadReference(t *testing.T) {
 func TestDMCheckFiltersErrBadPath(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(&DBConnManager{dataDBs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
+	dm := NewDataManager(&DBConnManager{dbs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
 	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"*string:~missing path:chp1","Rules":[{"Type":"*string","Element":"~missing path","Values":["chp1"]}]}>`
 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~missing path:chp1"}); expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -3506,7 +3506,7 @@ func TestDMCheckFiltersErrCall(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		HasDataDrvF: func(ctx *context.Context, category, subject, tenant string) (bool, error) {
 			return false, utils.ErrNotFound
 		},
@@ -3757,7 +3757,7 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		RemoveIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
 			return utils.ErrNotImplemented
 		},
@@ -3790,11 +3790,11 @@ func TestDMRemoveIndexesReplicate(t *testing.T) {
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
-	_, err := dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
+	_, err := dm.dbConns.dbs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
 	}
@@ -3803,7 +3803,7 @@ func TestDMRemoveIndexesReplicate(t *testing.T) {
 		t.Errorf("Expected error <%v>, received error <%v>", nil, err)
 	}
 
-	_, err = dm.dbConns.dataDBs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
+	_, err = dm.dbConns.dbs[utils.MetaDefault].GetIndexesDrv(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", utils.NonTransactional)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -3901,7 +3901,7 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 
 	indexes2 := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return indexes2, utils.ErrNotFound
 		},
@@ -4023,7 +4023,7 @@ func TestDMRemoveActionProfileErrGetActionProf(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -4064,7 +4064,7 @@ func TestDMRemoveActionProfileErrRemvProfDrv(t *testing.T) {
 		Actions:  []*utils.APAction{{}},
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, nil
 		},
@@ -4092,7 +4092,7 @@ func TestDMCacheDataFromDBPrefixKeysErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, utils.ErrNotImplemented
 		},
@@ -4180,7 +4180,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 		Async: true,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return th, utils.ErrNotFound
 		},
@@ -4265,7 +4265,7 @@ func TestDMSetThresholdProfileGetThPrfErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
@@ -4321,7 +4321,7 @@ func TestDMSetThresholdProfileSetThPrflDrvErr(t *testing.T) {
 		Async: true,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return th, nil
 		},
@@ -4348,7 +4348,7 @@ func TestDMSetThresholdProfileUpdatedIndexesErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{
 				Tenant: utils.CGRateSorg,
@@ -4616,7 +4616,7 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 		SQMetrics: make(map[string]StatMetric),
 	}
 
-	if err := dm.DataDB()[utils.MetaDefault].SetStatQueueDrv(context.Background(), ssq, sq); err != nil {
+	if err := dm.DB()[utils.MetaDefault].SetStatQueueDrv(context.Background(), ssq, sq); err != nil {
 		t.Error(err)
 	}
 
@@ -4773,7 +4773,7 @@ func TestDMSetStatQueueProfileGetStatQProflErr(t *testing.T) {
 		MinItems: 1,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
 			return sqp, utils.ErrNotImplemented
 		},
@@ -4821,7 +4821,7 @@ func TestDMSetStatQueueProfileSetStatQPrflDrvErr(t *testing.T) {
 		MinItems: 1,
 	}
 
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) { return sqp, nil },
 		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
@@ -4989,7 +4989,7 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 		},
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetResourceDrv(context.Background(), rs); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetResourceDrv(context.Background(), rs); err != nil {
 		t.Error(err)
 	}
 
@@ -5264,7 +5264,7 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 		UsageTTL:          time.Millisecond,
 		AllocationMessage: "ALLOC",
 	}
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetResourceProfileDrv(context.Background(), rp); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetResourceProfileDrv(context.Background(), rp); err != nil {
 		t.Error(err)
 	}
 
@@ -5395,7 +5395,7 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 		},
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetFilterDrv(context.Background(), f); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetFilterDrv(context.Background(), f); err != nil {
 		t.Error(err)
 	}
 
@@ -6062,7 +6062,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 		}},
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetRouteProfileDrv(context.Background(), rp); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetRouteProfileDrv(context.Background(), rp); err != nil {
 		t.Error(err)
 	}
 
@@ -8585,7 +8585,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 		Actions:  []*utils.APAction{{}},
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetActionProfileDrv(context.Background(), ap); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetActionProfileDrv(context.Background(), ap); err != nil {
 		t.Error(err)
 	}
 
@@ -8714,7 +8714,7 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 		Weights: make(utils.DynamicWeights, 1),
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetAttributeProfileDrv(context.Background(), attrPrfl); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetAttributeProfileDrv(context.Background(), attrPrfl); err != nil {
 		t.Error(err)
 	}
 
@@ -8936,7 +8936,7 @@ func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
 		t.Error(err)
 	}
 
@@ -9395,7 +9395,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 		},
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetChargerProfileDrv(context.Background(), cpp); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetChargerProfileDrv(context.Background(), cpp); err != nil {
 		t.Error(err)
 	}
 
@@ -9539,7 +9539,7 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 		"ID_1": 21,
 	}
 
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetLoadIDsDrv(context.Background(), itmLIDs); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetLoadIDsDrv(context.Background(), itmLIDs); err != nil {
 		t.Error(err)
 	}
 
@@ -9752,7 +9752,7 @@ func TestDMResourcesUpdateResource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestDMGetTrend(t *testing.T) {
@@ -9801,7 +9801,7 @@ func TestDMGetTrend(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.dbConns.dataDBs[utils.MetaDefault].SetTrendDrv(context.Background(), tr); err != nil {
+	if err := dm.dbConns.dbs[utils.MetaDefault].SetTrendDrv(context.Background(), tr); err != nil {
 		t.Fatalf("failed SetTrendDrv: %v", err)
 	}
 	got, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendOk", false, true, utils.NonTransactional)

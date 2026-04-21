@@ -1324,7 +1324,7 @@ func TestConfigSanityCache(t *testing.T) {
 
 func TestConfigSanityRegistrarCRPC(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.registrarCCfg = &RegistrarCCfgs{
@@ -1392,7 +1392,7 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 
 func TestConfigSanityAnalyzer(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
@@ -1506,7 +1506,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 
 func TestConfigSanityAPIer(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.admS.Conns[utils.MetaAttributes] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
@@ -1550,7 +1550,7 @@ func TestConfigSanityCacheS(t *testing.T) {
 
 func TestConfigSanityFilterS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.filterSCfg.Conns[utils.MetaStats] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
@@ -1810,7 +1810,7 @@ func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
 func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.cacheCfg.RemoteConns = []string{"remote conn"}
@@ -1833,7 +1833,7 @@ func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 func TestCGRConfigcheckConfigSanityCacheSTransportErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.cacheCfg.RemoteConns = []string{"con1"}
@@ -1873,7 +1873,7 @@ func TestCGRConfigcheckConfigSanityCacheSPartitionErr(t *testing.T) {
 func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.eesCfg = &EEsCfg{Enabled: false}
@@ -1892,7 +1892,7 @@ func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityAnalyzerSErr(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfg.eesCfg = &EEsCfg{Enabled: true}

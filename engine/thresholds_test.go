@@ -3179,7 +3179,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	dm.dbConns.dataDBs[utils.MetaDefault] = &DataDBMock{
+	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 			return &ThresholdProfile{
 				Tenant:           "cgrates.org",

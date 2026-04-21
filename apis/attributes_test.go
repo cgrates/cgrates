@@ -105,7 +105,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
@@ -184,7 +184,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
@@ -217,7 +217,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
@@ -296,7 +296,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
 
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
@@ -347,7 +347,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
@@ -387,7 +387,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
@@ -414,7 +414,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
@@ -469,7 +469,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	engine.Cache.Clear(nil)
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfilesOK(t *testing.T) {
@@ -698,7 +698,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
@@ -744,7 +744,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
@@ -792,7 +792,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {

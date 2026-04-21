@@ -89,7 +89,7 @@ func testLoaderITInitConfig(t *testing.T) {
 
 func testLoaderITInitDataDB(t *testing.T) {
 	var err error
-	dbConn, err := NewDataDBConn(lCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+	dbConn, err := NewDBConn(lCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		lCfg.DbCfg().DBConns[utils.MetaDefault].Host, lCfg.DbCfg().DBConns[utils.MetaDefault].Port, lCfg.DbCfg().DBConns[utils.MetaDefault].Name,
 		lCfg.DbCfg().DBConns[utils.MetaDefault].User, lCfg.DbCfg().DBConns[utils.MetaDefault].Password, lCfg.GeneralCfg().DBDataEncoding, lCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields, lCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
 		lCfg.DbCfg().DBConns[utils.MetaDefault].Opts, lCfg.DbCfg().Items)
@@ -130,7 +130,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
+	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderConnMgr)
 	if err != nil {
@@ -177,7 +177,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbCM := NewDBConnManager(dataDbCsv.DataDB(), lCfg.DbCfg())
+	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderConnMgr)
 	if err != nil {

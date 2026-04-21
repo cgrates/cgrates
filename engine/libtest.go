@@ -47,7 +47,7 @@ import (
 
 func InitDB(cfg *config.CGRConfig) error {
 	for _, dbConn := range cfg.DbCfg().DBConns {
-		dataDB, err := NewDataDBConn(dbConn.Type,
+		dataDB, err := NewDBConn(dbConn.Type,
 			dbConn.Host, dbConn.Port,
 			dbConn.Name, dbConn.User,
 			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
@@ -81,7 +81,7 @@ func InitDB(cfg *config.CGRConfig) error {
 }
 
 func InitConfigDB(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.ConfigDBCfg().Type,
+	d, err := NewDBConn(cfg.ConfigDBCfg().Type,
 		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
 		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
@@ -171,8 +171,8 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableR
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	dataDBs := make(map[string]DataDB, len(dm.DataDB()))
-	for connID, dataDB := range dm.DataDB() {
+	dataDBs := make(map[string]DataDB, len(dm.DB()))
+	for connID, dataDB := range dm.DB() {
 		dataDBs[connID] = dataDB
 	}
 	dbcManager := NewDBConnManager(dataDBs, dm.cfg.DbCfg())

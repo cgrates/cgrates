@@ -147,26 +147,26 @@ func testChrgITConnect(t *testing.T) {
 }
 
 func testChrgITFlush(t *testing.T) {
-	if err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if isEmpty, err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if isEmpty, err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("Expecting: true got :%+v", isEmpty)
 	}
-	if err := engine.SetDBVersions(chrgMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	if err := engine.SetDBVersions(chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	if err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if isEmpty, err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if isEmpty, err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("Expecting: true got :%+v", isEmpty)
 	}
-	if err := engine.SetDBVersions(chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	if err := engine.SetDBVersions(chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -204,7 +204,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+		err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Chargers ", err.Error())
 		}

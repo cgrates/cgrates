@@ -119,7 +119,7 @@ func TestFilterIndexUpdates(t *testing.T) {
 		t.Fatal(err)
 	}
 	dbConnCfg := cfg.DbCfg().DBConns[utils.MetaDefault]
-	dbConn, err := engine.NewDataDBConn(dbConnCfg.Type,
+	dbConn, err := engine.NewDBConn(dbConnCfg.Type,
 		dbConnCfg.Host, dbConnCfg.Port,
 		dbConnCfg.Name, dbConnCfg.User,
 		dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
@@ -464,7 +464,7 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 		b.Fatal(err)
 	}
 	dbConnCfg := cfg.DbCfg().DBConns[utils.MetaDefault]
-	dbConn, err := engine.NewDataDBConn(dbConnCfg.Type,
+	dbConn, err := engine.NewDBConn(dbConnCfg.Type,
 		dbConnCfg.Host, dbConnCfg.Port,
 		dbConnCfg.Name, dbConnCfg.User,
 		dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,

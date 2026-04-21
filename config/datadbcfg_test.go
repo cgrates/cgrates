@@ -625,12 +625,12 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	},		
 }`
 	eMap := map[string]any{
-		utils.DataDbTypeCfg: "*redis",
-		utils.DataDbHostCfg: "127.0.0.1",
-		utils.DataDbPortCfg: 6379,
-		utils.DataDbNameCfg: "10",
-		utils.DataDbUserCfg: "cgrates",
-		utils.DataDbPassCfg: "",
+		utils.DbTypeCfg: "*redis",
+		utils.DbHostCfg: "127.0.0.1",
+		utils.DbPortCfg: 6379,
+		utils.DbNameCfg: "10",
+		utils.DbUserCfg: "cgrates",
+		utils.DbPassCfg: "",
 		utils.OptsCfg: map[string]any{
 			utils.RedisSentinelNameCfg: "",
 			utils.MongoQueryTimeoutCfg: "10s",
@@ -906,7 +906,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffDataDBJsonCfg(d, v1, v2)
+	rcv := diffDBJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -916,7 +916,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		Db_conns: DbConnsJson{},
 		Items:    map[string]*ItemOptsJson{},
 	}
-	rcv = diffDataDBJsonCfg(d, v1, v2_2)
+	rcv = diffDBJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
@@ -976,7 +976,7 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisMaxConns:           utils.IntPointer(3),
 	}
 
-	rcv := diffDataDBOptsJsonCfg(d, v1, v2)
+	rcv := diffDBOptsJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}

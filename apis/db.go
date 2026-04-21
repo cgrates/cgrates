@@ -66,8 +66,8 @@ func (adms *AdminSv1) RestoreDB(ctx *context.Context, backupFolderPath string, r
 	return
 }
 
-// RestoreDB will take the BackupFolderPath (or default backup path if empty) to backup the
-// live dump folder taking zip as parameter to zip the backup or not, after which it cleares
+// SnapshotDB will take the BackupFolderPath (or default backup path if empty) to backup the
+// live dump folder taking zip as parameter to zip the backup or not; after which it cleares
 // the live dump folder and creates new dump files out of the live internal DB data. Only
 // intended for offline internal DB
 func (adms *AdminSv1) SnapshotDB(ctx *context.Context, params BackupParams, reply *string) (err error) {

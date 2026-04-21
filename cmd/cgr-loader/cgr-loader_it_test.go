@@ -317,7 +317,7 @@ func testLoadItStartLoader(t *testing.T) {
 
 func testLoadItConnectToDB(t *testing.T) {
 	var err error
-	if db, err = engine.NewDataDBConn(ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+	if db, err = engine.NewDBConn(ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Host, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Port,
 		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Name, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].User,
 		ldrItCfg.DbCfg().DBConns[utils.MetaDefault].Password, ldrItCfg.GeneralCfg().DBDataEncoding, ldrItCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields,

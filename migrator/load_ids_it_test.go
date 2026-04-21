@@ -97,29 +97,29 @@ func testLoadIdsITConnect(t *testing.T) {
 }
 
 func testLoadIdsITFlush(t *testing.T) {
-	loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if err := engine.SetDBVersions(loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	loadMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(loadMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if err := engine.SetDBVersions(loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	loadMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(loadMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
 
 func testLoadIdsITMigrateAndMove(t *testing.T) {
 
-	err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetLoadIDsDrv(context.TODO(), map[string]int64{"account": 1}) // this will be deleated
+	err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetLoadIDsDrv(context.TODO(), map[string]int64{"account": 1}) // this will be deleated
 	if err != nil {
 		t.Error("Error when setting new loadID ", err.Error())
 	}
 	currentVersion := engine.Versions{utils.LoadIDsVrs: 0}
-	err = loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+	err = loadMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for LoadIDs ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := loadMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.LoadIDsVrs] != 0 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
@@ -130,13 +130,13 @@ func testLoadIdsITMigrateAndMove(t *testing.T) {
 		t.Error("Error when migrating LoadIDs ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := loadMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.LoadIDsVrs] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
 	}
 	//check if user was migrate correctly
-	_, err = loadMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetItemLoadIDsDrv(context.TODO(), "")
+	_, err = loadMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetItemLoadIDsDrv(context.TODO(), "")
 	if err != utils.ErrNotFound {
 		t.Error("Error should be not found : ", err)
 	}

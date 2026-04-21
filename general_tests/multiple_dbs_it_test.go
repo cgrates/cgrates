@@ -52,6 +52,7 @@ func TestMultipleDBs(t *testing.T) {
 		Encoding:         *utils.Encoding,
 	}
 	client, cfg := ng.Run(t)
+	time.Sleep(100 * time.Millisecond) // give engine time to start before running loader
 	t.Run("LoadTariffPlans", func(t *testing.T) {
 		var reply string
 		if err := client.Call(context.Background(), utils.LoaderSv1Run,

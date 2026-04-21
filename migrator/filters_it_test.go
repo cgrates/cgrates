@@ -124,12 +124,12 @@ func testFltrITConnect(t *testing.T) {
 }
 
 func testFltrITFlush(t *testing.T) {
-	fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if err := engine.SetDBVersions(fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	fltrMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(fltrMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if err := engine.SetDBVersions(fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
+	fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -173,12 +173,12 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.Versions{utils.RQF: 1}
-		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}
 		//check if version was set correctly
-		if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.RQF] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -190,7 +190,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Filters ", err.Error())
 		}
 		//check if version was updated
-		if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.RQF] != 5 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -209,7 +209,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}
@@ -299,12 +299,12 @@ func testFltrITMigratev2(t *testing.T) {
 	}
 
 	currentVersion := engine.Versions{utils.RQF: 2}
-	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for Filters ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -316,7 +316,7 @@ func testFltrITMigratev2(t *testing.T) {
 		t.Error("Error when migrating Filters ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -384,12 +384,12 @@ func testFltrITMigratev3(t *testing.T) {
 		t.Error("Error when setting v1 Filters ", err.Error())
 	}
 	currentVersion := engine.Versions{utils.RQF: 3}
-	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for Filters ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 3 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -400,7 +400,7 @@ func testFltrITMigratev3(t *testing.T) {
 		t.Error("Error when migrating Filters ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])

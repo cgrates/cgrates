@@ -1262,7 +1262,7 @@ func TestRatesRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
@@ -1306,7 +1306,7 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
@@ -1355,7 +1355,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
@@ -1396,7 +1396,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
@@ -1438,7 +1438,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetRateProfileErrorCache(t *testing.T) {
@@ -1492,7 +1492,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
@@ -1545,7 +1545,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
@@ -1590,7 +1590,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
@@ -1636,7 +1636,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfilesOK(t *testing.T) {
@@ -1853,7 +1853,7 @@ func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
@@ -1899,7 +1899,7 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
@@ -1947,7 +1947,7 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetGetRemRateProfileRates(t *testing.T) {
@@ -2073,7 +2073,7 @@ func TestRatesSetGetRemRateProfileRates(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRatesCheckErrors(t *testing.T) {
@@ -2109,7 +2109,7 @@ func TestRatesGetRateProfileRatesCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRatesCountErrMock(t *testing.T) {
@@ -2222,7 +2222,7 @@ func TestRatesGetRateProfileRateIDsErrNotFound(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRateIDsErrKeys(t *testing.T) {
@@ -2251,7 +2251,7 @@ func TestRatesGetRateProfileRateIDsErrKeys(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRateIDsGetOptsErr(t *testing.T) {
@@ -2292,7 +2292,7 @@ func TestRatesGetRateProfileRateIDsGetOptsErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRateIDsPaginateErr(t *testing.T) {
@@ -2334,7 +2334,7 @@ func TestRatesGetRateProfileRateIDsPaginateErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesGetRateProfileRateIDsErrMissing(t *testing.T) {
@@ -2359,7 +2359,7 @@ func TestRatesGetRateProfileRateIDsErrMissing(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestRatesSetRateProfileErrConvertOverwriteOpt(t *testing.T) {

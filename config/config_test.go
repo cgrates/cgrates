@@ -3677,14 +3677,14 @@ func TestV1GetConfigGeneral(t *testing.T) {
 func TestV1GetConfigDataDB(t *testing.T) {
 	var reply map[string]any
 	expected := map[string]any{
-		utils.DataDbConnsCfg: map[string]map[string]any{
+		utils.DbConnsCfg: map[string]map[string]any{
 			utils.MetaDefault: {
-				utils.DataDbTypeCfg:           utils.MetaInternal,
-				utils.DataDbHostCfg:           utils.EmptyString,
-				utils.DataDbPortCfg:           0,
-				utils.DataDbNameCfg:           utils.EmptyString,
-				utils.DataDbUserCfg:           utils.EmptyString,
-				utils.DataDbPassCfg:           utils.EmptyString,
+				utils.DbTypeCfg:               utils.MetaInternal,
+				utils.DbHostCfg:               utils.EmptyString,
+				utils.DbPortCfg:               0,
+				utils.DbNameCfg:               utils.EmptyString,
+				utils.DbUserCfg:               utils.EmptyString,
+				utils.DbPassCfg:               utils.EmptyString,
 				utils.StringIndexedFieldsCfg:  []string{},
 				utils.PrefixIndexedFieldsCfg:  []string{},
 				utils.ReplicationFilteredCfg:  false,
@@ -4711,7 +4711,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfgCgr.cacheCfg.Partitions[key].Limit = 0
 	}
 	cfgCgr.ConfigSCfg().Enabled = true
@@ -4723,7 +4723,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 
 	var result string
 	cfgCgr2 := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfgCgr2.cacheCfg.Partitions[key].Limit = 0
 	}
 	if err := cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
@@ -4735,7 +4735,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 	}
 
 	cfgCgr2 = NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfgCgr2.cacheCfg.Partitions[key].Limit = 0
 	}
 	if err := cfgCgr2.V1SetConfig(context.Background(), &SetConfigArgs{Config: reply}, &result); err != nil {
@@ -5841,7 +5841,7 @@ func TestStoreCfgInDb(t *testing.T) {
 
 func TestSetCfgInDb(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	db := &CgrJsonCfg{}
@@ -5937,7 +5937,7 @@ func TestSetCfgInDb(t *testing.T) {
 
 func TestSetNilCfgInDb(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	db := &CgrJsonCfg{}

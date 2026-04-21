@@ -86,8 +86,8 @@ func testVrsITConnect(t *testing.T) {
 }
 
 func testVrsITFlush(t *testing.T) {
-	vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
-	if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush("")
+	if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected err=%s received err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
 	}
 }
@@ -99,14 +99,14 @@ func testVrsITMigrate(t *testing.T) {
 	vrsMigrator.Migrate([]string{utils.MetaSetVersions})
 	if vrsSameOutDB {
 		expVrs := engine.CurrentAllDBVersions()
-		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	} else {
 		expVrs := engine.CurrentDataDBVersions()
-		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
@@ -114,7 +114,7 @@ func testVrsITMigrate(t *testing.T) {
 	}
 
 	currentVersion := engine.Versions{utils.Attributes: 0}
-	err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
+	err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version ", err.Error())
 	}
@@ -122,14 +122,14 @@ func testVrsITMigrate(t *testing.T) {
 	vrsMigrator.Migrate([]string{utils.MetaSetVersions})
 	if vrsSameOutDB {
 		expVrs := engine.CurrentAllDBVersions()
-		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))
 		}
 	} else {
 		expVrs := engine.CurrentDataDBVersions()
-		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
+		if vrs, err := vrsMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expVrs, vrs) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(expVrs), utils.ToJSON(vrs))

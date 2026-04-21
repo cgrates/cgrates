@@ -987,7 +987,7 @@ func TestV1SetConfigErr2(t *testing.T) {
 
 func TestV1SetConfigErr3(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDataDBPartitions {
+	for key := range utils.StatelessDBPartitions {
 		cfg.cacheCfg.Partitions[key].Limit = 0
 	}
 	args := &SetConfigArgs{
