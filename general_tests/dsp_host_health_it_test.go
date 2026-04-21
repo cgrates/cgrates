@@ -21,12 +21,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc/jsonrpc"
-	"slices"
-	"sort"
 	"testing"
+	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -102,17 +99,19 @@ func TestDispatcherHostHealth(t *testing.T) {
 	tpFiles := map[string]string{
 		utils.DispatcherHostsCsv: `#Tenant,ID,Address,Transport,TLS
 cgrates.org,RATER1,127.0.0.1:5012,*json,false
-cgrates.org,RATER2,127.0.0.1:5112,*json,false`,
+cgrates.org,RATER2,127.0.0.1:5112,*json,false
+cgrates.org,DOWN,127.0.0.1:1,*json,false`,
 		utils.DispatcherProfilesCsv: `#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
 cgrates.org,DSP_ANY,*any,,,*weight,,RATER1,,10,false,,10
-cgrates.org,DSP_ANY,,,,,,RATER2,,5,,,`,
+cgrates.org,DSP_ANY,,,,,,RATER2,,5,,,
+cgrates.org,DSP_ANY,,,,,,DOWN,,1,,,`,
 	}
 
 	ngMgmt := TestEnvironment{
 		ConfigJSON: cfgMgmt,
 		TpFiles:    tpFiles,
 	}
-	clientMgmt, _ := ngMgmt.Setup(t, 0)
+	ngMgmt.Setup(t, 0)
 
 	ngR1 := TestEnvironment{
 		ConfigJSON:     cfgR1,
@@ -145,7 +144,6 @@ cgrates.org,DSP_ANY,,,,,,RATER2,,5,,,`,
 		t.Errorf("Ping dispatcher (nil CGREvent) = %q, want %q", reply, utils.Pong)
 	}
 
-	// same but with tenant set explicitly
 	reply = ""
 	if err := clientDsp.Call(utils.CoreSv1Ping,
 		&utils.CGREventWithArgDispatcher{
@@ -157,49 +155,21 @@ cgrates.org,DSP_ANY,,,,,,RATER2,,5,,,`,
 		t.Errorf("Ping dispatcher (with tenant) = %q, want %q", reply, utils.Pong)
 	}
 
-	// get hosts and their addresses, connect directly, call Status
-	var hostIDs []string
-	if err := clientMgmt.Call(utils.APIerSv1GetDispatcherHostIDs,
-		utils.TenantArgWithPaginator{
-			TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
-		}, &hostIDs); err != nil {
-		t.Fatalf("GetDispatcherHostIDs: %v", err)
+	var hostStatus map[string]string
+	if err := clientDsp.Call(utils.DispatcherSv1CheckDispatcherProfileHosts,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DSP_ANY"},
+		&hostStatus); err != nil {
+		t.Fatalf("CheckDispatcherProfileHosts: %v", err)
 	}
-	sort.Strings(hostIDs)
-	wantHostIDs := []string{"RATER1", "RATER2"}
-	if !slices.Equal(hostIDs, wantHostIDs) {
-		t.Fatalf("GetDispatcherHostIDs = %v, want %v", hostIDs, wantHostIDs)
+	for _, hostID := range []string{"RATER1", "RATER2"} {
+		dur, ok := hostStatus[hostID]
+		if !ok {
+			t.Errorf("CheckDispatcherProfileHosts missing %s", hostID)
+		} else if _, err := time.ParseDuration(dur); err != nil {
+			t.Errorf("CheckDispatcherProfileHosts %s = %q, not a duration", hostID, dur)
+		}
 	}
-
-	wantNodeID := map[string]string{
-		"RATER1": "rater1",
-		"RATER2": "rater2",
-	}
-	for _, id := range hostIDs {
-		var host engine.DispatcherHost
-		if err := clientMgmt.Call(utils.APIerSv1GetDispatcherHost,
-			&utils.TenantID{Tenant: "cgrates.org", ID: id},
-			&host); err != nil {
-			t.Fatalf("GetDispatcherHost(%s): %v", id, err)
-		}
-		if len(host.Conns) == 0 {
-			t.Fatalf("host %s has no connections", id)
-		}
-
-		addr := host.Conns[0].Address
-		client, err := jsonrpc.Dial("tcp", addr)
-		if err != nil {
-			t.Fatalf("dial %s (%s): %v", id, addr, err)
-		}
-		defer client.Close()
-
-		var hostStatus map[string]any
-		if err := client.Call(utils.CoreSv1Status, nil, &hostStatus); err != nil {
-			t.Fatalf("Status on %s (%s): %v", id, addr, err)
-		}
-		hostNodeID, _ := hostStatus[utils.NodeID].(string)
-		if hostNodeID != wantNodeID[id] {
-			t.Errorf("host %s: NodeID = %q, want %q", id, hostNodeID, wantNodeID[id])
-		}
+	if got := hostStatus["DOWN"]; got != "-1" {
+		t.Errorf("CheckDispatcherProfileHosts DOWN = %q, want %q", got, "-1")
 	}
 }

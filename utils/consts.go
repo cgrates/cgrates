@@ -1360,10 +1360,11 @@ const (
 
 // DispatcherS APIs
 const (
-	DispatcherSv1Ping               = "DispatcherSv1.Ping"
-	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
-	DispatcherSv1Apier              = "DispatcherSv1.Apier"
-	DispatcherServicePing           = "DispatcherService.Ping"
+	DispatcherSv1Ping                        = "DispatcherSv1.Ping"
+	DispatcherSv1GetProfileForEvent          = "DispatcherSv1.GetProfileForEvent"
+	DispatcherSv1Apier                       = "DispatcherSv1.Apier"
+	DispatcherSv1CheckDispatcherProfileHosts = "DispatcherSv1.CheckDispatcherProfileHosts"
+	DispatcherServicePing                    = "DispatcherService.Ping"
 )
 
 // AnalyzerS APIs

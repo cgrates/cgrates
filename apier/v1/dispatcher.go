@@ -692,6 +692,11 @@ func (dSv1 DispatcherSv1) GetProfileForEvent(ev *dispatchers.DispatcherEvent,
 	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
 }
 
+func (dSv1 DispatcherSv1) CheckDispatcherProfileHosts(args *utils.TenantID,
+	reply *map[string]string) error {
+	return dSv1.dS.V1CheckDispatcherProfileHosts(args, reply)
+}
+
 func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *any) (err error) {
 	return dSv1.dS.V1Apier(new(APIerSv1), args, reply)
 }
