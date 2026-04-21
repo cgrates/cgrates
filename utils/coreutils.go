@@ -1125,10 +1125,3 @@ func ParseBinarySize(size string) (int64, error) {
 
 	return 0, fmt.Errorf("unknown unit: %s", unit)
 }
-
-// DiameterSyIDs contains needed IDs to build and run a Diameter Sy session
-type DiameterSyIDs struct {
-	CGRID              string // CGRID of the session
-	ClientConnID       string // ID of the Client Connection related to the diameter Sy session
-	ThresholdProfileID string // ID of the Threshold Profile related to the diameter Sy session
-}

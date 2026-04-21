@@ -1627,7 +1627,7 @@ func (sS *SessionS) restoreSessions(sessions []*Session) {
 				var rply string // will always reply with OK
 				if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
 					utils.ThresholdSv1StoreClientConnID,
-					&utils.DiameterSyIDs{
+					&utils.SyConnIDs{
 						CGRID:              s.CGRID,
 						ThresholdProfileID: utils.MetaSy + utils.Underline + s.EventStart[utils.OriginID].(string),
 					},
@@ -2567,17 +2567,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.AccountField) // account is mandatory
 		}
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
-			utils.APIerSv2GetAccount, &utils.AttrGetAccount{
-				Tenant:  args.CGREvent.Tenant,
-				Account: accField,
-			}, &engine.Account{}); err != nil {
-			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<Sessions> Failed to stary session, Account <%s> not found", accField))
-				return utils.ErrAccountNotFound
-			}
-			return utils.APIErrorHandler(err)
-		}
 		var filters []string
 		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.ID, accField))
 		// event will always have *syPolicyFilters by default
@@ -2603,16 +2592,23 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			sS.bkpSessionIDs.Add(s.CGRID)
 			sS.bkpSessionIDsMux.Unlock()
 		}
+
+		timeNow := time.Now()
 		var result string
 		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
 			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
 				ThresholdProfile: &engine.ThresholdProfile{
-					Tenant:    args.Tenant,
-					ID:        utils.MetaSy + utils.Underline + originID,
+					Tenant: args.Tenant,
+					ID:     utils.MetaSy + utils.Underline + originID,
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: timeNow,
+						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
+					},
 					FilterIDs: filters, // taken from templates
 					MaxHits:   1,
 					MinHits:   1,
 					Async:     true,
+					ActionIDs: []string{utils.MetaSyPublish},
 				},
 			}, &result); err != nil {
 			sS.terminateSession(s, nil, nil, nil, false)
@@ -2621,7 +2617,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		var rply string // will always reply with OK
 		if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
 			utils.ThresholdSv1StoreClientConnID,
-			&utils.DiameterSyIDs{
+			&utils.SyConnIDs{
 				CGRID:              s.CGRID,
 				ThresholdProfileID: utils.MetaSy + utils.Underline + originID,
 			},
@@ -2912,16 +2908,22 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			sS.bkpSessionIDs.Add(s.CGRID)
 			sS.bkpSessionIDsMux.Unlock()
 		}
+		timeNow := time.Now()
 		var result string
 		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
 			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
 				ThresholdProfile: &engine.ThresholdProfile{
-					Tenant:    args.Tenant,
-					ID:        utils.MetaSy + utils.Underline + originID,
+					Tenant: args.Tenant,
+					ID:     utils.MetaSy + utils.Underline + originID,
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: timeNow,
+						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
+					},
 					FilterIDs: filters, // taken from templates
 					MaxHits:   1,
 					MinHits:   1,
 					Async:     true,
+					ActionIDs: []string{utils.MetaSyPublish},
 				},
 			}, &result); err != nil {
 			return err // dont terminate the session
@@ -3111,7 +3113,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			}
 		}
 		if s == nil {
-			// dont create session but reply with SESSION_NOT_FOUND to comply with diameter Sy standarts
+			// dont create session but reply with SESSION_NOT_FOUND to comply with diameter Sy standards
 			utils.Logger.Warning(fmt.Sprintf("<SessionS> could not find session with CGRID <%s>", cgrID))
 			return utils.ErrSessionNotFound
 		}
@@ -4358,7 +4360,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 					var rply string // will always reply with OK
 					if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
 						utils.ThresholdSv1StoreClientConnID,
-						&utils.DiameterSyIDs{
+						&utils.SyConnIDs{
 							CGRID:              s.CGRID,
 							ThresholdProfileID: utils.MetaSy + utils.Underline + s.EventStart[utils.OriginID].(string),
 						},
@@ -4927,8 +4929,8 @@ func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
 	return nil
 }
 
-// NotificationRequest creates and sends SNR to diameter agent
-func (sS *SessionS) BiRPCv1NotificationRequest(ctx *context.Context,
+// ThresholdNotify creates and sends SNR to diameter agent
+func (sS *SessionS) BiRPCv1ThresholdNotify(ctx *context.Context,
 	cgrID string, rply *string) (err error) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
@@ -4941,12 +4943,11 @@ func (sS *SessionS) BiRPCv1NotificationRequest(ctx *context.Context,
 				utils.AgentV1SpendingStatusNotification, s.ClientConnID)
 		}
 		var rply string
-		if err = clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents(), &rply); err != nil {
+		if err = clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], &rply); err != nil {
 			return
 		}
-
 	} else {
-		utils.Logger.Warning(fmt.Sprintf("<SessionS> NotificationRequest could not find session with CGRID <%s>", cgrID))
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find session with CGRID <%s>", cgrID))
 		return utils.ErrNotFound
 	}
 	*rply = utils.OK

@@ -24,7 +24,6 @@ import (
 	"runtime"
 	"slices"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -330,7 +329,7 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 		loopStopped:   make(chan struct{}),
 		storedTdIDs:   make(utils.StringSet),
 		sBiRPCClients: utils.NewServiceBiRPCClients(),
-		clientConnID:  make(map[string]*utils.DiameterSyIDs),
+		clientConnID:  make(map[string]*utils.SyConnIDs),
 	}
 }
 
@@ -344,8 +343,8 @@ type ThresholdService struct {
 	storedTdIDs   utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
 	stMux         sync.RWMutex    // protects storedTdIDs
 	connMgr       *ConnManager
-	sBiRPCClients *utils.ServiceBiRPCClients      // will hold ThresholdS BiRPC clients and conns
-	clientConnID  map[string]*utils.DiameterSyIDs // holds ClientConnID per threshold profile, used for birpc calls. [ThresholdProfileID]DiameterSyIDs
+	sBiRPCClients *utils.ServiceBiRPCClients  // will hold ThresholdS BiRPC clients and conns
+	clientConnID  map[string]*utils.SyConnIDs // holds ClientConnID per threshold profile, used for birpc calls. [ThresholdProfileID]SyConnIds
 }
 
 // Reload stops the backupLoop and restarts it
@@ -561,6 +560,25 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 	return
 }
 
+// getThresholdSyConn returns the syConnIDs and client corresponding to the thresholdProfileID, or returns nil if not found
+func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thresholdSyConn, error) {
+	if syIds, has := tS.clientConnID[thresholdProfileID]; has {
+		clnt := tS.sBiRPCClients.BiJClnt(syIds.ClientConnID)
+		if clnt == nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<ThresholdS> processEvent failed calling <%s>. Requires bidirectional JSON connection, connID: <%s>",
+					utils.SessionSv1ThresholdNotify, syIds))
+			return nil, utils.ErrPartiallyExecuted
+		}
+		return &thresholdSyConn{
+			syConnIDs:       syIds,
+			thresholdClient: clnt,
+		}, nil
+	}
+	return nil, nil
+}
+
 // processEvent processes a new event, dispatching to matching thresholds
 func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
 	var matchTs Thresholds
@@ -601,13 +619,18 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 				if tntAcnt != utils.EmptyString {
 					at.accountIDs = utils.NewStringMap(tntAcnt)
 				}
+				thSC, err := tS.getThresholdSyConn(t.tPrfl.ID)
+				if err != nil {
+					withErrors = true
+					continue
+				}
 				if t.tPrfl.Async {
 					go func(setID string) {
-						if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
+						if errExec := at.Execute(tS.filterS, utils.ThresholdS, thSC); errExec != nil {
 							utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", setID, errExec.Error()))
 						}
 					}(actionSetID)
-				} else if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
+				} else if errExec := at.Execute(tS.filterS, utils.ThresholdS, thSC); errExec != nil {
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 					withErrors = true
 				}
@@ -626,28 +649,6 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 			tS.stMux.Lock()
 			tS.storedTdIDs.Add(t.TenantID())
 			tS.stMux.Unlock()
-		}
-		// handle Diameter Sy dynamic thresholds
-		if strings.HasPrefix(t.tPrfl.ID, utils.MetaSy) {
-			diamSyIds := tS.clientConnID[t.tPrfl.ID]
-			clnt := tS.sBiRPCClients.BiJClnt(diamSyIds.ClientConnID)
-			if clnt == nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<ThresholdS> processEvent failed calling <%s>. Requires bidirectional JSON connection, connID: <%s>",
-						utils.SessionSv1NotificationRequest, diamSyIds))
-				withErrors = true
-				continue
-			}
-			var rply string
-			if err := clnt.Conn().Call(context.TODO(), utils.SessionSv1NotificationRequest,
-				diamSyIds.CGRID, &rply); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<ThresholdS> Call to SessionSv1NotificationRequest failed with error <%s>", err))
-				withErrors = true
-			}
-
 		}
 	}
 	matchTs.unlock()
@@ -784,9 +785,9 @@ func (tS *ThresholdService) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Conte
 
 // BiRPCv1StoreClientConnID will create a ClientConnID and store it in relation to the threshold profile ID it represents
 func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
-	args *utils.DiameterSyIDs, reply *string) error {
+	args *utils.SyConnIDs, reply *string) error {
 	time.Sleep(100 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
-	tS.clientConnID[args.ThresholdProfileID] = &utils.DiameterSyIDs{
+	tS.clientConnID[args.ThresholdProfileID] = &utils.SyConnIDs{
 		CGRID:        args.CGRID,
 		ClientConnID: tS.sBiRPCClients.BiJClntID(ctx.Client),
 	}
@@ -794,7 +795,7 @@ func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 	return nil
 }
 
-// BiRPCv1RemoveClientConnID will remove the args ClientConnID from the list of clientConnIDs on the ThresholdService
+// BiRPCv1RemoveClientConnID will remove the args ClientConnID from the list of SyConnIds on the ThresholdService
 func (tS *ThresholdService) BiRPCv1RemoveClientConnID(ctx *context.Context,
 	args string, reply *string) error {
 	delete(tS.clientConnID, args)

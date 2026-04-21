@@ -43,29 +43,29 @@ func NewBiJSONrpcClient(addr string, obj birpc.ClientConnector) (*birpc.BirpcCli
 type ServiceBiRPCClients struct {
 	biJMux   sync.RWMutex                     // mux protecting BI-JSON connections
 	biJClnts map[birpc.ClientConnector]string // index BiJSONConnection so we can sync them later
-	biJIDs   map[string]*biJClient            // identifiers of bidirectional JSON conns, used to call RPC based on connIDs
+	biJIDs   map[string]*BiJClient            // identifiers of bidirectional JSON conns, used to call RPC based on connIDs
 }
 
 func NewServiceBiRPCClients() *ServiceBiRPCClients {
 	return &ServiceBiRPCClients{
 		biJClnts: make(map[birpc.ClientConnector]string),
-		biJIDs:   make(map[string]*biJClient),
+		biJIDs:   make(map[string]*BiJClient),
 	}
 }
 
-// biJClient contains info we need to reach back a bidirectional json client
-type biJClient struct {
+// BiJClient contains info we need to reach back a bidirectional json client
+type BiJClient struct {
 	conn  birpc.ClientConnector // connection towards BiJ client
 	proto float64               // client protocol version
 }
 
 // Proto exports proto field from biJClient b (only used for SessionS)
-func (b *biJClient) Proto() float64 {
+func (b *BiJClient) Proto() float64 {
 	return b.proto
 }
 
 // Conn exports conn field from biJClient b
-func (b *biJClient) Conn() birpc.ClientConnector {
+func (b *BiJClient) Conn() birpc.ClientConnector {
 	return b.conn
 }
 
@@ -74,7 +74,7 @@ func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientPro
 	nodeID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
 	s.biJMux.Lock()
 	s.biJClnts[c] = nodeID
-	s.biJIDs[nodeID] = &biJClient{conn: c, proto: clientProtocol}
+	s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
 	s.biJMux.Unlock()
 }
 
@@ -92,12 +92,12 @@ func (s *ServiceBiRPCClients) OnBiJSONDisconnect(c birpc.ClientConnector) {
 func (s *ServiceBiRPCClients) RegisterIntBiJConn(c birpc.ClientConnector, nodeID string, clientProtocol float64) {
 	s.biJMux.Lock()
 	s.biJClnts[c] = nodeID
-	s.biJIDs[nodeID] = &biJClient{conn: c, proto: clientProtocol}
+	s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
 	s.biJMux.Unlock()
 }
 
 // biJClnt returns a bidirectional JSON client based on connection ID
-func (s *ServiceBiRPCClients) BiJClnt(connID string) (clnt *biJClient) {
+func (s *ServiceBiRPCClients) BiJClnt(connID string) (clnt *BiJClient) {
 	if connID == "" {
 		return
 	}
@@ -119,9 +119,9 @@ func (s *ServiceBiRPCClients) BiJClntID(c birpc.ClientConnector) (clntConnID str
 }
 
 // biJClnts is a thread-safe method to return the list of active clients for BiJson
-func (s *ServiceBiRPCClients) BiJClients() (clnts []*biJClient) {
+func (s *ServiceBiRPCClients) BiJClients() (clnts []*BiJClient) {
 	s.biJMux.RLock()
-	clnts = make([]*biJClient, len(s.biJIDs))
+	clnts = make([]*BiJClient, len(s.biJIDs))
 	i := 0
 	for _, clnt := range s.biJIDs {
 		clnts[i] = clnt
@@ -132,10 +132,17 @@ func (s *ServiceBiRPCClients) BiJClients() (clnts []*biJClient) {
 }
 
 // BiJClientsMap is a thread-safe method that returns a copy of biJIDs map of biJClients
-func (s *ServiceBiRPCClients) BiJClientsMap() map[string]*biJClient {
-	clients := make(map[string]*biJClient)
+func (s *ServiceBiRPCClients) BiJClientsMap() map[string]*BiJClient {
+	clients := make(map[string]*BiJClient)
 	s.biJMux.RLock()
 	maps.Copy(clients, s.biJIDs)
 	s.biJMux.RUnlock()
 	return clients
+}
+
+// SyConnIDs contains needed IDs to build and run a Diameter Sy session
+type SyConnIDs struct {
+	CGRID              string // CGRID of the session
+	ClientConnID       string // ID of the Client Connection
+	ThresholdProfileID string // ID of the Threshold Profile
 }
