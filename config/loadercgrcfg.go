@@ -120,7 +120,10 @@ func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of LoaderCgrCfg
-func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
+func (ld *LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
+	if ld == nil {
+		return nil
+	}
 	cln = &LoaderCgrCfg{
 		TpID:            ld.TpID,
 		DataPath:        ld.DataPath,

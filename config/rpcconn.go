@@ -103,7 +103,10 @@ func (rC *RPCConn) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of RPCConn
-func (rC RPCConn) Clone() (cln *RPCConn) {
+func (rC *RPCConn) Clone() (cln *RPCConn) {
+	if rC == nil {
+		return nil
+	}
 	cln = &RPCConn{
 		Strategy: rC.Strategy,
 		PoolSize: rC.PoolSize,
@@ -225,7 +228,10 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]any) {
 }
 
 // Clone returns a deep copy of RemoteHost
-func (rh RemoteHost) Clone() (cln *RemoteHost) {
+func (rh *RemoteHost) Clone() (cln *RemoteHost) {
+	if rh == nil {
+		return nil
+	}
 	return &RemoteHost{
 		ID:                   rh.ID,
 		Address:              rh.Address,

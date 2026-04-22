@@ -41,7 +41,10 @@ func (rsr *ReSearchReplace) Process(source string) string {
 }
 
 // Clone returns a deep copy of ReSearchReplace
-func (rsr ReSearchReplace) Clone() (cln *ReSearchReplace) {
+func (rsr *ReSearchReplace) Clone() (cln *ReSearchReplace) {
+	if rsr == nil {
+		return nil
+	}
 	cln = &ReSearchReplace{
 		ReplaceTemplate: rsr.ReplaceTemplate,
 	}

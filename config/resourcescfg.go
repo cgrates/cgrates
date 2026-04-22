@@ -182,7 +182,10 @@ func (resOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 }
 
 // Clone returns a deep copy of ResourceSConfig
-func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
+func (rlcfg *ResourceSConfig) Clone() (cln *ResourceSConfig) {
+	if rlcfg == nil {
+		return nil
+	}
 	cln = &ResourceSConfig{
 		Enabled:        rlcfg.Enabled,
 		IndexedSelects: rlcfg.IndexedSelects,

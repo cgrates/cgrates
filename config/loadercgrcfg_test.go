@@ -111,4 +111,10 @@ func TestLoaderCgrCfgClone(t *testing.T) {
 	if rcv.GapiToken[0] = 0; ban.GapiToken[0] != 13 {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }

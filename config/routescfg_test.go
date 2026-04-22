@@ -205,4 +205,46 @@ func TestRouteSCfgClone(t *testing.T) {
 	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+}
+
+func TestRoutesOptsClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		routesOpts *RoutesOpts
+	}{
+		{
+			name: "Complete RoutesOpts",
+			routesOpts: &RoutesOpts{
+				Context:      utils.MetaRoutes,
+				IgnoreErrors: false,
+				MaxCost:      utils.IntPointer(3),
+				Limit:        utils.IntPointer(3),
+				Offset:       utils.IntPointer(3),
+				ProfileCount: utils.IntPointer(3),
+			},
+		},
+		{
+			name:       "Nil RoutesOpts",
+			routesOpts: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.routesOpts.Clone()
+
+			if !reflect.DeepEqual(result, tt.routesOpts) {
+				t.Errorf("Clone() = %v, want %v", result, tt.routesOpts)
+			}
+
+			if result != nil && result == tt.routesOpts {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
 }

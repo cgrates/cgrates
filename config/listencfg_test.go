@@ -117,4 +117,10 @@ func TestListenCfgClone(t *testing.T) {
 	if rcv.RPCJSONListen = ""; ban.RPCJSONListen != "127.0.0.1:2012" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }

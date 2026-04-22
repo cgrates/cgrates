@@ -162,7 +162,10 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of MigratorCgrCfg
-func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
+func (mg *MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
+	if mg == nil {
+		return nil
+	}
 	cln = &MigratorCgrCfg{
 		OutDataDBType:     mg.OutDataDBType,
 		OutDataDBHost:     mg.OutDataDBHost,

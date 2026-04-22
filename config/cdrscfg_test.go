@@ -185,6 +185,12 @@ func TestCdrsCfgClone(t *testing.T) {
 	if rcv.OnlineCDRExports[0] = ""; ban.OnlineCDRExports[0] != "randomVal" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }
 
 func TestCdrsCfgOnlineCDRExports(t *testing.T) {

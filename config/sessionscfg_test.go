@@ -949,6 +949,12 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 	if rcv.AsteriskConns[0].User = ""; ban.AsteriskConns[0].User != "cgrates" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }
 
 func TestFsAgentCfgClone(t *testing.T) {
@@ -978,85 +984,149 @@ func TestFsAgentCfgClone(t *testing.T) {
 	if rcv.EventSocketConns[0].Password = ""; ban.EventSocketConns[0].Password != "ClueCon" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-}
 
-func TestSessionSCfgClone(t *testing.T) {
-	ban := &SessionSCfg{
-		Enabled:             true,
-		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
-		IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
-		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		ReplicationConns:    []string{"*conn1"},
-		DebitInterval:       2,
-		StoreSCosts:         true,
-		SessionTTL:          0,
-		SessionIndexes:      utils.StringSet{},
-		ClientProtocol:      2.5,
-		ChannelSyncInterval: 10,
-		TerminateAttempts:   6,
-		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    1,
-		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
-		SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(time.Second),
-		SessionTTLUsage:     utils.DurationPointer(time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(time.Second),
-		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
-			PayloadMaxduration: -1,
-			DefaultAttest:      "A",
-			PrivateKeyPath:     "randomPath",
-			PublicKeyPath:      "randomPath",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
-		},
-	}
-	rcv := ban.Clone()
+	ban = nil
+	rcv = ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
+}
 
-	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
+func TestSessionSCfgClone(t *testing.T) {
+	tests := []struct {
+		name        string
+		sessionSCfg *SessionSCfg
+	}{
+		{
+			name: "Complete SessionSCfg",
+			sessionSCfg: &SessionSCfg{
+				Enabled:             true,
+				ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+				RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
+				IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
+				ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+				ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+				RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
+				AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+				CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+				ReplicationConns:    []string{"*conn1"},
+				DebitInterval:       2,
+				StoreSCosts:         true,
+				SessionTTL:          0,
+				SessionIndexes:      utils.StringSet{},
+				ClientProtocol:      2.5,
+				ChannelSyncInterval: 10,
+				TerminateAttempts:   6,
+				AlterableFields:     utils.StringSet{},
+				MinDurLowBalance:    1,
+				SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+				SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
+				SessionTTLLastUsed:  utils.DurationPointer(time.Second),
+				SessionTTLUsage:     utils.DurationPointer(time.Second),
+				SessionTTLLastUsage: utils.DurationPointer(time.Second),
+				STIRCfg: &STIRcfg{
+					AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
+					PayloadMaxduration: -1,
+					DefaultAttest:      "A",
+					PrivateKeyPath:     "randomPath",
+					PublicKeyPath:      "randomPath",
+				},
+				DefaultUsage: map[string]time.Duration{
+					utils.MetaAny:   3 * time.Hour,
+					utils.MetaVoice: 3 * time.Hour,
+					utils.MetaData:  1048576,
+					utils.MetaSMS:   1,
+				},
+			},
+		},
+		{
+			name: "Nil STIRRCfg",
+			sessionSCfg: &SessionSCfg{
+				Enabled:             true,
+				ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+				RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
+				IPsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs), "*conn1"},
+				ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+				ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+				RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
+				AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+				CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+				ReplicationConns:    []string{"*conn1"},
+				DebitInterval:       2,
+				StoreSCosts:         true,
+				SessionTTL:          0,
+				SessionIndexes:      utils.StringSet{},
+				ClientProtocol:      2.5,
+				ChannelSyncInterval: 10,
+				TerminateAttempts:   6,
+				AlterableFields:     utils.StringSet{},
+				MinDurLowBalance:    1,
+				SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+				SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
+				SessionTTLLastUsed:  utils.DurationPointer(time.Second),
+				SessionTTLUsage:     utils.DurationPointer(time.Second),
+				SessionTTLLastUsage: utils.DurationPointer(time.Second),
+				STIRCfg:             nil,
+				DefaultUsage: map[string]time.Duration{
+					utils.MetaAny:   3 * time.Hour,
+					utils.MetaVoice: 3 * time.Hour,
+					utils.MetaData:  1048576,
+					utils.MetaSMS:   1,
+				},
+			},
+		},
+		{
+			name:        "Nil Case",
+			sessionSCfg: nil,
+		},
 	}
-	if rcv.IPsConns[1] = ""; ban.IPsConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RouteSConns[1] = ""; ban.RouteSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.ReplicationConns[0] = ""; ban.ReplicationConns[0] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.STIRCfg.DefaultAttest = ""; ban.STIRCfg.DefaultAttest != "A" {
-		t.Errorf("Expected clone to not modify the cloned")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.sessionSCfg.Clone()
+			if !reflect.DeepEqual(tt.sessionSCfg, rcv) {
+				t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(tt.sessionSCfg), utils.ToJSON(rcv))
+			}
+
+			if tt.sessionSCfg != nil && rcv != nil {
+				if rcv.ChargerSConns[1] = ""; tt.sessionSCfg.ChargerSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+
+				if rcv.RALsConns[1] = ""; tt.sessionSCfg.RALsConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.IPsConns[1] = ""; tt.sessionSCfg.IPsConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.ResourceSConns[1] = ""; tt.sessionSCfg.ResourceSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.ThresholdSConns[1] = ""; tt.sessionSCfg.ThresholdSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.StatSConns[1] = ""; tt.sessionSCfg.StatSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.RouteSConns[1] = ""; tt.sessionSCfg.RouteSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.AttributeSConns[1] = ""; tt.sessionSCfg.AttributeSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.CDRsConns[1] = ""; tt.sessionSCfg.CDRsConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.ReplicationConns[0] = ""; tt.sessionSCfg.ReplicationConns[0] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if tt.sessionSCfg.STIRCfg != nil {
+					if rcv.STIRCfg.DefaultAttest = ""; tt.sessionSCfg.STIRCfg.DefaultAttest != "A" {
+						t.Errorf("Expected clone to not modify the cloned")
+					}
+				}
+			}
+		})
 	}
 }

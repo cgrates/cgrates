@@ -337,4 +337,10 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 	if rcv.OutStorDBOpts.PgSSLMode = "1"; sa.OutStorDBOpts.PgSSLMode != "" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	sa = nil
+	rcv = sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
 }

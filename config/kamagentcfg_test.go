@@ -165,4 +165,43 @@ func TestKamAgentCfgClone(t *testing.T) {
 	if rcv.EvapiConns[0].Alias = ""; ban.EvapiConns[0].Alias != "randomAlias" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+}
+
+func TestKamConnCfgClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		kamConnCfg *KamConnCfg
+	}{
+		{
+			name: "Complete KamConnCfg",
+			kamConnCfg: &KamConnCfg{
+				Address:    "127.0.0.1:8448",
+				Reconnects: 10,
+				Alias:      "",
+			},
+		},
+		{
+			name:       "Nil KamConnCfg",
+			kamConnCfg: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.kamConnCfg.Clone()
+
+			if !reflect.DeepEqual(result, tt.kamConnCfg) {
+				t.Errorf("Clone() = %v, want %v", result, tt.kamConnCfg)
+			}
+
+			if result != nil && result == tt.kamConnCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
 }

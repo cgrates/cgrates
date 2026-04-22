@@ -422,6 +422,12 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		[]string{"/usr/share/cgrates/radius/dict/"}) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }
 
 func TestDAClientOptsClone(t *testing.T) {

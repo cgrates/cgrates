@@ -59,7 +59,10 @@ func (mailcfg *MailerCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of MailerCfg
-func (mailcfg MailerCfg) Clone() *MailerCfg {
+func (mailcfg *MailerCfg) Clone() *MailerCfg {
+	if mailcfg == nil {
+		return nil
+	}
 	return &MailerCfg{
 		MailerServer:   mailcfg.MailerServer,
 		MailerAuthUser: mailcfg.MailerAuthUser,

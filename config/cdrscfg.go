@@ -233,7 +233,10 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of CdrsCfg
-func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
+func (cdrscfg *CdrsCfg) Clone() (cln *CdrsCfg) {
+	if cdrscfg == nil {
+		return nil
+	}
 	cln = &CdrsCfg{
 		Enabled:            cdrscfg.Enabled,
 		ExtraFields:        cdrscfg.ExtraFields.Clone(),

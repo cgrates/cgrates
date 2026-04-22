@@ -207,4 +207,10 @@ func TestRalsCfgClone(t *testing.T) {
 	if rcv.BalanceRatingSubject[utils.MetaAny] = ""; ban.BalanceRatingSubject[utils.MetaAny] != "*zero1ns" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }
