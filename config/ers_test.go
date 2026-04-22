@@ -1654,79 +1654,123 @@ func TestEventReaderOptsCfg(t *testing.T) {
 }
 
 func TestEventReaderCfgClone(t *testing.T) {
-	ban := &EventReaderCfg{
-		ID:             "2",
-		Type:           "type",
-		RunDelay:       1 * time.Minute,
-		ConcurrentReqs: 5,
-		PartialCommitFields: []*FCTemplate{
-			{
-				Tag:  "tag1",
-				Type: "type1",
-			},
-			{
-				Tag:  "tag2",
-				Type: "type2",
+	tests := []struct {
+		name  string
+		erCfg *EventReaderCfg
+	}{
+		{
+			name: "Complete EventReaderCfg",
+			erCfg: &EventReaderCfg{
+				ID:             "2",
+				Type:           "type",
+				RunDelay:       1 * time.Minute,
+				ConcurrentReqs: 5,
+				PartialCommitFields: []*FCTemplate{
+					{
+						Tag:  "tag1",
+						Type: "type1",
+					},
+					{
+						Tag:  "tag2",
+						Type: "type2",
+					},
+				},
+				SourcePath:    "/",
+				ProcessedPath: "/path",
+				Tenant:        RSRParsers{},
+				Timezone:      "time.Utc",
+				Flags:         utils.FlagsWithParams{},
+				Opts: &EventReaderOpts{
+					PartialPath: utils.StringPointer("path"),
+					CSV: &CSVROpts{
+						PartialCSVFieldSeparator: utils.StringPointer("/"),
+						LazyQuotes:               utils.BoolPointer(false),
+					},
+					AMQP: &AMQPROpts{
+						QueueID:      utils.StringPointer("id"),
+						ConsumerTag:  utils.StringPointer("tag"),
+						Exchange:     utils.StringPointer("exchange"),
+						ExchangeType: utils.StringPointer("type"),
+						RoutingKey:   utils.StringPointer("key1"),
+					},
+					SQL: &SQLROpts{
+						DBName:              utils.StringPointer("dbname"),
+						TableName:           utils.StringPointer("tablename"),
+						BatchSize:           utils.IntPointer(0),
+						DeleteIndexedFields: utils.SliceStringPointer([]string{"id"}),
+						PgSSLMode:           utils.StringPointer("sslmode"),
+					},
+					AWS: &AWSROpts{
+
+						Region:     utils.StringPointer("eu"),
+						Key:        utils.StringPointer("key"),
+						Secret:     utils.StringPointer("secret"),
+						Token:      utils.StringPointer("token"),
+						SQSQueueID: utils.StringPointer("SQSQueue"),
+						S3BucketID: utils.StringPointer("S3BucketID"),
+					},
+					NATS: &NATSROpts{
+						JetStream:            utils.BoolPointer(false),
+						ConsumerName:         utils.StringPointer("user"),
+						StreamName:           utils.StringPointer("stream"),
+						QueueID:              utils.StringPointer("id"),
+						JWTFile:              utils.StringPointer("jwt"),
+						SeedFile:             utils.StringPointer("seed"),
+						CertificateAuthority: utils.StringPointer("authority"),
+						ClientCertificate:    utils.StringPointer("certificate"),
+						ClientKey:            utils.StringPointer("key5"),
+						JetStreamMaxWait:     utils.DurationPointer(1 * time.Minute),
+					},
+					Kafka: &KafkaROpts{
+						Topic:   utils.StringPointer("kafka"),
+						MaxWait: utils.DurationPointer(1 * time.Minute),
+						GroupID: utils.StringPointer("groupId"),
+					},
+				},
 			},
 		},
-		SourcePath:    "/",
-		ProcessedPath: "/path",
-		Tenant:        RSRParsers{},
-		Timezone:      "time.Utc",
-		Flags:         utils.FlagsWithParams{},
-		Opts: &EventReaderOpts{
-			PartialPath: utils.StringPointer("path"),
-			CSV: &CSVROpts{
-				PartialCSVFieldSeparator: utils.StringPointer("/"),
-				LazyQuotes:               utils.BoolPointer(false),
-			},
-			AMQP: &AMQPROpts{
-				QueueID:      utils.StringPointer("id"),
-				ConsumerTag:  utils.StringPointer("tag"),
-				Exchange:     utils.StringPointer("exchange"),
-				ExchangeType: utils.StringPointer("type"),
-				RoutingKey:   utils.StringPointer("key1"),
-			},
-			SQL: &SQLROpts{
-				DBName:              utils.StringPointer("dbname"),
-				TableName:           utils.StringPointer("tablename"),
-				BatchSize:           utils.IntPointer(0),
-				DeleteIndexedFields: utils.SliceStringPointer([]string{"id"}),
-				PgSSLMode:           utils.StringPointer("sslmode"),
-			},
-			AWS: &AWSROpts{
-
-				Region:     utils.StringPointer("eu"),
-				Key:        utils.StringPointer("key"),
-				Secret:     utils.StringPointer("secret"),
-				Token:      utils.StringPointer("token"),
-				SQSQueueID: utils.StringPointer("SQSQueue"),
-				S3BucketID: utils.StringPointer("S3BucketID"),
-			},
-			NATS: &NATSROpts{
-				JetStream:            utils.BoolPointer(false),
-				ConsumerName:         utils.StringPointer("user"),
-				StreamName:           utils.StringPointer("stream"),
-				QueueID:              utils.StringPointer("id"),
-				JWTFile:              utils.StringPointer("jwt"),
-				SeedFile:             utils.StringPointer("seed"),
-				CertificateAuthority: utils.StringPointer("authority"),
-				ClientCertificate:    utils.StringPointer("certificate"),
-				ClientKey:            utils.StringPointer("key5"),
-				JetStreamMaxWait:     utils.DurationPointer(1 * time.Minute),
-			},
-			Kafka: &KafkaROpts{
-				Topic:   utils.StringPointer("kafka"),
-				MaxWait: utils.DurationPointer(1 * time.Minute),
-				GroupID: utils.StringPointer("groupId"),
+		{
+			name: "Nil Opts",
+			erCfg: &EventReaderCfg{
+				ID:             "2",
+				Type:           "type",
+				RunDelay:       1 * time.Minute,
+				ConcurrentReqs: 5,
+				PartialCommitFields: []*FCTemplate{
+					{
+						Tag:  "tag1",
+						Type: "type1",
+					},
+					{
+						Tag:  "tag2",
+						Type: "type2",
+					},
+				},
+				SourcePath:    "/",
+				ProcessedPath: "/path",
+				Tenant:        RSRParsers{},
+				Timezone:      "time.Utc",
+				Flags:         utils.FlagsWithParams{},
+				Opts:          nil,
 			},
 		},
+		{
+			name:  "Nil EventReaderCfg",
+			erCfg: nil,
+		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(rcv, ban) {
-		t.Errorf("expected %v received %v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.erCfg.Clone()
+			if !reflect.DeepEqual(rcv, tt.erCfg) {
+				t.Errorf("expected %v received %v", utils.ToJSON(tt.erCfg), utils.ToJSON(rcv))
+			}
 
+			if rcv != nil && rcv == tt.erCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
 }
 
 func TestEventReaderCfgloadFromJSONCfg(t *testing.T) {

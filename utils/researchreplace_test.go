@@ -96,4 +96,10 @@ func TestReSearchReplaceClone(t *testing.T) {
 	if reflect.DeepEqual(rsr.SearchRegexp, rcv.SearchRegexp) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	rsr = nil
+	rcv = rsr.Clone()
+	if !reflect.DeepEqual(rsr, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", ToJSON(rsr), ToJSON(rcv))
+	}
 }

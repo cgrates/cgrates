@@ -49,7 +49,10 @@ func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of DispatcherHCfg
-func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
+func (dps *RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
+	if dps == nil {
+		return nil
+	}
 	return &RegistrarCCfgs{
 		RPC:         dps.RPC.Clone(),
 		Dispatchers: dps.Dispatchers.Clone(),
@@ -120,7 +123,10 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of DispatcherHCfg
-func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
+func (dps *RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
+	if dps == nil {
+		return nil
+	}
 	cln = &RegistrarCCfg{
 		RefreshInterval: dps.RefreshInterval,
 		Hosts:           make(map[string][]*RemoteHost),

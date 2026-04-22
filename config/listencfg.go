@@ -79,7 +79,10 @@ func (lstcfg *ListenCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of ListenCfg
-func (lstcfg ListenCfg) Clone() *ListenCfg {
+func (lstcfg *ListenCfg) Clone() *ListenCfg {
+	if lstcfg == nil {
+		return nil
+	}
 	return &ListenCfg{
 		RPCJSONListen:    lstcfg.RPCJSONListen,
 		RPCGOBListen:     lstcfg.RPCGOBListen,

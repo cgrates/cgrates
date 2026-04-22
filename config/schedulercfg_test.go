@@ -125,4 +125,10 @@ func TestSchedulerCfgClone(t *testing.T) {
 	if rcv.DynaprepaidActionPlans[0] = ""; ban.DynaprepaidActionPlans[0] != "plan" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }

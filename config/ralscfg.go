@@ -162,7 +162,10 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of RalsCfg
-func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
+func (ralsCfg *RalsCfg) Clone() (cln *RalsCfg) {
+	if ralsCfg == nil {
+		return nil
+	}
 	cln = &RalsCfg{
 		Enabled:                 ralsCfg.Enabled,
 		RpSubjectPrefixMatching: ralsCfg.RpSubjectPrefixMatching,

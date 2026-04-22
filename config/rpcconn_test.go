@@ -545,3 +545,90 @@ func TestRPCConnAsMApInterface(t *testing.T) {
 		t.Errorf("\nexpected %s\nreceived %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestRPCConnClone(t *testing.T) {
+	tests := []struct {
+		name string
+		rpcC *RPCConn
+	}{
+		{
+			name: "Complete RPCConn",
+			rpcC: &RPCConn{
+				Strategy: rpcclient.PoolFirst,
+				PoolSize: 0,
+				Conns: []*RemoteHost{
+					{
+						Address:   "127.0.0.1:2014",
+						Transport: rpcclient.BiRPCJSON,
+					},
+				},
+			},
+		},
+		{
+			name: "Nil Conns",
+			rpcC: &RPCConn{
+				Strategy: rpcclient.PoolFirst,
+				PoolSize: 0,
+				Conns:    nil,
+			},
+		},
+		{
+			name: "Nil RPCConn",
+			rpcC: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rpcC.Clone()
+
+			if !reflect.DeepEqual(result, tt.rpcC) {
+				t.Errorf("Clone() = %v, want %v", result, tt.rpcC)
+			}
+
+			if result != nil && result == tt.rpcC {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestRemoteHostClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		remoteHost *RemoteHost
+	}{
+		{
+			name: "Complete RemoteHost",
+			remoteHost: &RemoteHost{
+				Address:              "127.0.0.1:2012",
+				Transport:            "*json",
+				ConnectAttempts:      5,
+				Reconnects:           2,
+				ConnectTimeout:       1 * time.Minute,
+				ReplyTimeout:         1 * time.Minute,
+				TLS:                  false,
+				ClientKey:            "key_path",
+				ClientCertificate:    "cert_path",
+				CaCertificate:        "ca_path",
+				MaxReconnectInterval: 1 * time.Minute,
+			},
+		},
+		{
+			name:       "Nil RemoteHost",
+			remoteHost: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.remoteHost.Clone()
+
+			if !reflect.DeepEqual(result, tt.remoteHost) {
+				t.Errorf("Clone() = %v, want %v", result, tt.remoteHost)
+			}
+
+			if result != nil && result == tt.remoteHost {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}

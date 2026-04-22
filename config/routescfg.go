@@ -243,6 +243,9 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
+	if rts == nil {
+		return nil
+	}
 	cln = &RoutesOpts{
 		Context:      rts.Context,
 		IgnoreErrors: rts.IgnoreErrors,
@@ -264,7 +267,10 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 }
 
 // Clone returns a deep copy of RouteSCfg
-func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
+func (rts *RouteSCfg) Clone() (cln *RouteSCfg) {
+	if rts == nil {
+		return nil
+	}
 	cln = &RouteSCfg{
 		Enabled:        rts.Enabled,
 		IndexedSelects: rts.IndexedSelects,

@@ -98,4 +98,10 @@ func TestMailerCfgClone(t *testing.T) {
 	if rcv.MailerServer = ""; cS.MailerServer != "localhost" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	cS = nil
+	rcv = cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
 }

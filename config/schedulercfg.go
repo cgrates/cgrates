@@ -121,7 +121,10 @@ func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of SchedulerCfg
-func (schdcfg SchedulerCfg) Clone() (cln *SchedulerCfg) {
+func (schdcfg *SchedulerCfg) Clone() (cln *SchedulerCfg) {
+	if schdcfg == nil {
+		return nil
+	}
 	cln = &SchedulerCfg{
 		Enabled: schdcfg.Enabled,
 	}

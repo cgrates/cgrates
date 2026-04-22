@@ -74,7 +74,10 @@ func (kamCfg *KamConnCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of KamConnCfg
-func (kamCfg KamConnCfg) Clone() *KamConnCfg {
+func (kamCfg *KamConnCfg) Clone() *KamConnCfg {
+	if kamCfg == nil {
+		return nil
+	}
 	return &KamConnCfg{
 		Alias:                kamCfg.Alias,
 		Address:              kamCfg.Address,
@@ -161,7 +164,10 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of KamAgentCfg
-func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
+func (ka *KamAgentCfg) Clone() (cln *KamAgentCfg) {
+	if ka == nil {
+		return nil
+	}
 	cln = &KamAgentCfg{
 		Enabled:      ka.Enabled,
 		CreateCdr:    ka.CreateCdr,

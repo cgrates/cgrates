@@ -364,7 +364,10 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of SessionSCfg
-func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
+func (scfg *SessionSCfg) Clone() (cln *SessionSCfg) {
+	if scfg == nil {
+		return nil
+	}
 	cln = &SessionSCfg{
 		Enabled:                scfg.Enabled,
 		IPsConns:               slices.Clone(scfg.IPsConns),
@@ -575,7 +578,10 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 }
 
 // Clone returns a deep copy of FsAgentCfg
-func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
+func (fscfg *FsAgentCfg) Clone() (cln *FsAgentCfg) {
+	if fscfg == nil {
+		return nil
+	}
 	cln = &FsAgentCfg{
 		Enabled:                fscfg.Enabled,
 		SubscribePark:          fscfg.SubscribePark,
@@ -758,7 +764,10 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of AsteriskAgentCfg
-func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
+func (aCfg *AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
+	if aCfg == nil {
+		return nil
+	}
 	cln = &AsteriskAgentCfg{
 		Enabled:      aCfg.Enabled,
 		CreateCDR:    aCfg.CreateCDR,
@@ -828,7 +837,10 @@ func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 // Clone returns a deep copy of STIRcfg
-func (stirCfg STIRcfg) Clone() *STIRcfg {
+func (stirCfg *STIRcfg) Clone() *STIRcfg {
+	if stirCfg == nil {
+		return nil
+	}
 	return &STIRcfg{
 		AllowedAttest:      stirCfg.AllowedAttest.Clone(),
 		PayloadMaxduration: stirCfg.PayloadMaxduration,

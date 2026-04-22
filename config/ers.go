@@ -756,6 +756,9 @@ func (natOpts *NATSROpts) Clone() *NATSROpts {
 }
 
 func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
+	if erOpts == nil {
+		return nil
+	}
 	cln := &EventReaderOpts{}
 	if erOpts.PartialPath != nil {
 		cln.PartialPath = new(string)
@@ -796,7 +799,10 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 }
 
 // Clone returns a deep copy of EventReaderCfg
-func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
+func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
+	if er == nil {
+		return nil
+	}
 	cln = &EventReaderCfg{
 		ID:                   er.ID,
 		Type:                 er.Type,

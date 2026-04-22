@@ -201,7 +201,10 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]any {
 }
 
 // Clone returns a deep copy of RadiusAgentCfg
-func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
+func (ra *RadiusAgentCfg) Clone() *RadiusAgentCfg {
+	if ra == nil {
+		return nil
+	}
 	clone := &RadiusAgentCfg{
 		Enabled:       ra.Enabled,
 		Listeners:     slices.Clone(ra.Listeners),

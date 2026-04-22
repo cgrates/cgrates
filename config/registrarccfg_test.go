@@ -299,7 +299,7 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 	}
 }
 
-func TestDispatcherHCfgClone(t *testing.T) {
+func TestRegistrarCCfgClone(t *testing.T) {
 	ban := &RegistrarCCfg{
 		RegistrarSConns: []string{"*conn1", "*conn2"},
 		Hosts: map[string][]*RemoteHost{
@@ -337,5 +337,97 @@ func TestDispatcherHCfgClone(t *testing.T) {
 	}
 	if rcv.Hosts[utils.MetaDefault][0].ID = ""; ban.Hosts[utils.MetaDefault][0].ID != "Host1" {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+}
+
+func TestRegistrarCCfgsClone(t *testing.T) {
+	tests := []struct {
+		name           string
+		registrarCCfgs *RegistrarCCfgs
+	}{
+		{
+			name: "Complete RegistrarCCfgs",
+			registrarCCfgs: &RegistrarCCfgs{
+				RPC: &RegistrarCCfg{
+					RegistrarSConns: []string{"*conn1", "*conn2"},
+					Hosts: map[string][]*RemoteHost{
+						utils.MetaDefault: {
+							{
+								ID:        "Host1",
+								Transport: utils.MetaJSON,
+							},
+							{
+								ID:        "Host2",
+								Transport: utils.MetaGOB,
+							},
+						},
+						"cgrates.net": {
+							{
+								ID:        "Host1",
+								Transport: utils.MetaJSON,
+								TLS:       true,
+							},
+							{
+								ID:        "Host2",
+								Transport: utils.MetaGOB,
+								TLS:       true,
+							},
+						},
+					},
+					RefreshInterval: 5,
+				},
+				Dispatchers: &RegistrarCCfg{
+					RegistrarSConns: []string{"*conn1", "*conn2"},
+					Hosts: map[string][]*RemoteHost{
+						utils.MetaDefault: {
+							{
+								ID:        "Host1",
+								Transport: utils.MetaJSON,
+							},
+							{
+								ID:        "Host2",
+								Transport: utils.MetaGOB,
+							},
+						},
+						"cgrates.net": {
+							{
+								ID:        "Host1",
+								Transport: utils.MetaJSON,
+								TLS:       true,
+							},
+							{
+								ID:        "Host2",
+								Transport: utils.MetaGOB,
+								TLS:       true,
+							},
+						},
+					},
+					RefreshInterval: 5,
+				},
+			},
+		},
+		{
+			name:           "Nil RegistrarCCfgs",
+			registrarCCfgs: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.registrarCCfgs.Clone()
+
+			if !reflect.DeepEqual(result, tt.registrarCCfgs) {
+				t.Errorf("Clone() = %v, want %v", result, tt.registrarCCfgs)
+			}
+
+			if result != nil && result == tt.registrarCCfgs {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
 	}
 }
