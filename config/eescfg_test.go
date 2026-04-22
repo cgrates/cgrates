@@ -1476,7 +1476,7 @@ func TestEEsCfgappendEEsExporters(t *testing.T) {
 
 func TestEEsCfgNewEventExporterCfg(t *testing.T) {
 	str := "test"
-	rcv := NewEventExporterCfg(str, str, str, str, 1, nil)
+	rcv := NewEventExporterCfg(str, str, str, str, 1, false, nil)
 	exp := &EventExporterCfg{
 		ID:             str,
 		Type:           str,

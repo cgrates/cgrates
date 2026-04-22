@@ -86,6 +86,7 @@ var (
 	ErrCastFailed                       = errors.New("CAST_FAILED")
 	ErrNoBackupFound                    = errors.New("NO_BACKUP_FOUND")
 	ErrCorrelationUndefined             = errors.New("CORRELATION_UNDEFINED")
+	ErrWithErrors                       = errors.New("WITH_ERRORS")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():                       ErrNoMoreData,
@@ -131,6 +132,7 @@ var (
 		ErrIndexOutOfBounds.Error():                 ErrIndexOutOfBounds,
 		ErrWrongPath.Error():                        ErrWrongPath,
 		ErrDSPHostNotFound.Error():                  ErrDSPHostNotFound,
+		ErrWithErrors.Error():                       ErrWithErrors,
 	}
 )
 

@@ -351,7 +351,8 @@ func ExportWithAttempts(exp EventExporter, eEv any, key string) (err error) {
 		defer func() {
 			if err != nil {
 				AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
-					exp.Cfg().Type, exp.Cfg().Attempts, eEv, exp.Cfg().Opts)
+					exp.Cfg().Type, exp.Cfg().Attempts, exp.Cfg().Synchronous,
+					eEv, exp.Cfg().Opts)
 			}
 		}()
 	}

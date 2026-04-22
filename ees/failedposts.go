@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -52,8 +53,8 @@ func writeFailedPosts(_ string, value any) {
 	}
 }
 
-func AddFailedPost(failedPostsDir, expPath, format string, attempts int, ev any,
-	opts *config.EventExporterOpts) {
+func AddFailedPost(failedPostsDir, expPath, format string, attempts int,
+	synchronous bool, ev any, opts *config.EventExporterOpts) {
 	key := utils.ConcatenatedKey(failedPostsDir, expPath, format)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
 	var amqpQueueID string
@@ -95,6 +96,7 @@ func AddFailedPost(failedPostsDir, expPath, format string, attempts int, ev any,
 			Path:           expPath,
 			Type:           format,
 			Attempts:       attempts,
+			Synchronous:    synchronous,
 			Opts:           opts,
 			failedPostsDir: failedPostsDir,
 		}
@@ -129,6 +131,7 @@ type ExportEvents struct {
 	Opts           *config.EventExporterOpts
 	Type           string
 	Attempts       int
+	Synchronous    bool
 	Events         []any
 	failedPostsDir string
 }
@@ -159,37 +162,56 @@ func (expEv *ExportEvents) AddEvent(ev any) {
 	expEv.lk.Unlock()
 }
 
-// ReplayFailedPosts tryies to post cdrs again
+// ReplayFailedPosts tryies to post cdrs again, in parallel unless Synchronous is set.
 func (expEv *ExportEvents) ReplayFailedPosts() (failedEvents *ExportEvents, err error) {
 	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Type, expEv.Path, utils.MetaNone,
-		expEv.Attempts, expEv.Opts)
+		expEv.Attempts, expEv.Synchronous, expEv.Opts)
 	var ee EventExporter
 	if ee, err = NewEventExporter(eeCfg, config.CgrConfig(), nil, nil); err != nil {
-		return
+		return nil, err
 	}
 	keyFunc := func() string { return utils.EmptyString }
 	if expEv.Type == utils.MetaKafkajsonMap || expEv.Type == utils.MetaS3jsonMap {
 		keyFunc = utils.UUIDSha1Prefix
 	}
 	failedEvents = &ExportEvents{
-		Path:     expEv.Path,
-		Opts:     expEv.Opts,
-		Type:     expEv.Type,
-		Attempts: expEv.Attempts,
+		Path:        expEv.Path,
+		Opts:        expEv.Opts,
+		Type:        expEv.Type,
+		Attempts:    expEv.Attempts,
+		Synchronous: expEv.Synchronous,
 	}
-	for _, ev := range expEv.Events {
-		if err = ExportWithAttempts(ee, ev, keyFunc()); err != nil {
+	var hadErr atomic.Bool
+	replay := func(ev any) {
+		if e := ExportWithAttempts(ee, ev, keyFunc()); e != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ReplayFailedPosts> export failed: %v", e))
 			failedEvents.AddEvent(ev)
+			hadErr.Store(true)
 		}
+	}
+	if expEv.Synchronous {
+		for _, ev := range expEv.Events {
+			replay(ev)
+		}
+	} else {
+		const workers = 500
+		sem := make(chan struct{}, workers)
+		var wg sync.WaitGroup
+		for _, ev := range expEv.Events {
+			sem <- struct{}{}
+			wg.Add(1)
+			go func(ev any) {
+				defer wg.Done()
+				defer func() { <-sem }()
+				replay(ev)
+			}(ev)
+		}
+		wg.Wait()
 	}
 	ee.Close()
 
-	switch len(failedEvents.Events) {
-	case 0: // none failed to be replayed
+	if !hadErr.Load() {
 		return nil, nil
-	case len(expEv.Events): // all failed, return last encountered error
-		return failedEvents, err
-	default:
-		return failedEvents, utils.ErrPartiallyExecuted
 	}
+	return failedEvents, utils.ErrWithErrors
 }
