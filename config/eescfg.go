@@ -302,7 +302,8 @@ type EventExporterCfg struct {
 
 // NewEventExporterCfg is a constructor for the EventExporterCfg, that is needed to initialize posters that are used by the
 // readers and HTTP exporter actions
-func NewEventExporterCfg(ID, exportType, exportPath, failedPostsDir string, attempts int, opts *EventExporterOpts) *EventExporterCfg {
+func NewEventExporterCfg(ID, exportType, exportPath, failedPostsDir string, attempts int,
+	synchronous bool, opts *EventExporterOpts) *EventExporterCfg {
 	if opts == nil {
 		opts = new(EventExporterOpts)
 	}
@@ -312,6 +313,7 @@ func NewEventExporterCfg(ID, exportType, exportPath, failedPostsDir string, atte
 		ExportPath:     exportPath,
 		FailedPostsDir: failedPostsDir,
 		Attempts:       attempts,
+		Synchronous:    synchronous,
 		Opts:           opts,
 	}
 }

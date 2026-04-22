@@ -54,7 +54,7 @@ func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.F
 		return err
 	}
 	eeCfg := config.NewEventExporterCfg(a.Id, utils.MetaHTTPjsonMap, a.ExtraParameters, config.CgrConfig().EEsCfg().FailedPosts.Dir,
-		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+		config.CgrConfig().GeneralCfg().PosterAttempts, false, nil)
 	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *eng
 		return err
 	}
 	eeCfg := config.NewEventExporterCfg(a.Id, utils.MetaHTTPjsonMap, a.ExtraParameters, config.CgrConfig().EEsCfg().FailedPosts.Dir,
-		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+		config.CgrConfig().GeneralCfg().PosterAttempts, false, nil)
 	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.
 		return err
 	}
 	eeCfg := config.NewEventExporterCfg(a.Id, utils.MetaHTTPjsonMap, a.ExtraParameters, config.CgrConfig().EEsCfg().FailedPosts.Dir,
-		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+		config.CgrConfig().GeneralCfg().PosterAttempts, false, nil)
 	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
