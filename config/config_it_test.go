@@ -898,6 +898,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
+			EEs:                    []*DynamicBoolOpt{},
+			EEsIDs:                 []*DynamicStringOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -995,6 +997,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
+			EEs:                    []*DynamicBoolOpt{},
+			EEsIDs:                 []*DynamicStringOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -1090,6 +1094,8 @@ func testCGRConfigReloadAll(t *testing.T) {
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
+			EEs:                    []*DynamicBoolOpt{},
+			EEsIDs:                 []*DynamicStringOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
