@@ -21,8 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -87,9 +85,9 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				ConfigPath:       pth,
 				GracefulShutdown: true,
 				Encoding:         *utils.Encoding,
-				LogBuffer:        &bytes.Buffer{},
+				// LogBuffer:        &bytes.Buffer{},
 			}
-			t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+			// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 			client, cfg := ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 
@@ -340,7 +338,6 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				if i == 1 || i == 3 {
 					time.Sleep(500 * time.Millisecond) // make sure to wait for intervals to kick in
 				}
-				// t.Log("tree here")
 				// time.Sleep(5 * time.Second)
 				var dirs, files int
 				if err := filepath.Walk(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
@@ -417,7 +414,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 					}
 					if len(backupFileNames) != 1 {
 						t.Errorf("expected 1 backup zip file, received <%v>", backupFileNames)
-					} else if strings.HasPrefix(backupFileNames[0], "backup_") && strings.HasPrefix(backupFileNames[0], ".zip") {
+					} else if !strings.HasPrefix(backupFileNames[0], "backup_") || !strings.HasSuffix(backupFileNames[0], ".zip") {
 						t.Errorf("expected backup zip file, received <%v>", backupFileNames)
 					}
 				} else {
@@ -432,7 +429,6 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 			t.Run("CheckDumpFolder2", func(t *testing.T) { // make sure new files are added
 				snapshotDirs := []string{}
 				snapshotFileNames := []string{}
-				// t.Log("tree here2")
 				time.Sleep(50 * time.Millisecond)
 				var dirs, files int
 				if err := filepath.Walk(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
@@ -731,7 +727,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				}
 			})
 
-			ng.PreserveDataDB = true
+			ng.PreserveDB = true
 			client, cfg = ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 

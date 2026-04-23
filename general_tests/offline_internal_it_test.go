@@ -347,7 +347,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				}
 			})
 
-			ng.PreserveDataDB = true
+			ng.PreserveDB = true
 			client, cfg = ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 
