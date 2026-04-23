@@ -2,7 +2,7 @@
 server {
   listen 80;
   autoindex_localtime on;
-  server_name apt.cgrates.org;
+  server_name {{ nginx_server_name }};
 
   access_log /var/log/nginx/packages-error.log;
   error_log /var/log/nginx/packages-error.log;

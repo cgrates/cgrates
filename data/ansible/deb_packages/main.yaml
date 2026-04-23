@@ -2,6 +2,7 @@
 - hosts: apt
   vars:
     rootUser: root
+    nginx_server_name: apt.cgrates.org
 
     dependencies:
       - build-essential
@@ -34,7 +35,7 @@
 
     - name: Check if NGINX needs to be configured
       become: true
-      ansible.builtin.shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
+      ansible.builtin.shell: "ls /etc/nginx/sites-enabled | grep '{{ nginx_server_name }}.vhost'"
       ignore_errors: true
       register: nginxConfig
 
@@ -318,6 +319,8 @@
 
 - hosts: pkg
   vars:
+    rootUser: root
+    nginx_server_name: pkg.cgrates.org
     nginx_user: "www-data"
     cgrates_branch: "master"
     distributions:
@@ -326,6 +329,29 @@
       - codename: bullseye
         version: 11
   tasks:
+    - name: Install nginx
+      become: true
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Check if NGINX needs to be configured
+      become: true
+      ansible.builtin.shell: "ls /etc/nginx/sites-enabled | grep '{{ nginx_server_name }}.vhost'"
+      ignore_errors: true
+      register: nginxConfig
+
+    - name: Configure NGINX server
+      ansible.builtin.include_tasks: nginx.yaml
+      when: nginxConfig.stdout_lines | length < 1
+
+    - name: Enable and start nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        masked: false
+        enabled: true
+
     - name: Add user to www-data group
       become: true
       ansible.builtin.user:
