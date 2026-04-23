@@ -344,7 +344,7 @@ type TestEngine struct {
 	DBCfg            DBCfg             // custom db settings for dynamic setup (overrides static config)
 	Encoding         string            // data encoding type (e.g. JSON, GOB)
 	LogBuffer        io.Writer         // captures log output of the test environment
-	PreserveDataDB   bool              // prevents automatic data_db flush when set
+	PreserveDB       bool              // prevents automatic data_db flush when set
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
@@ -367,7 +367,7 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 	t.Helper()
 	ng.extraFlags = extraFlags
 	ng.cfg = parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg, ng.Persist)
-	FlushDBs(t, ng.cfg, !ng.PreserveDataDB)
+	FlushDBs(t, ng.cfg, !ng.PreserveDB)
 	loadData := ng.TpPath != "" || len(ng.TpFiles) != 0
 	if loadData {
 		if ng.TpPath == "" {
