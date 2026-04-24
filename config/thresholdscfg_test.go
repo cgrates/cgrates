@@ -215,31 +215,64 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 }
 
 func TestThresholdSCfgClone(t *testing.T) {
-	ban := &ThresholdSCfg{
-		Enabled:             true,
-		IndexedSelects:      true,
-		StoreInterval:       2,
-		EEsExporterIDs:      []string{"idTest"},
-		StringIndexedFields: &[]string{"*req.index1"},
-		PrefixIndexedFields: &[]string{"*req.index1"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		NestedFields:        true,
-		Opts: &ThresholdsOpts{
-			ProfileIDs: []string{},
+	tests := []struct {
+		name          string
+		thresholdSCfg *ThresholdSCfg
+	}{
+		{
+			name: "Complete ThresholdSCfg",
+			thresholdSCfg: &ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       2,
+				EEsExporterIDs:      []string{"idTest"},
+				StringIndexedFields: &[]string{"*req.index1"},
+				PrefixIndexedFields: &[]string{"*req.index1"},
+				SuffixIndexedFields: &[]string{"*req.index1"},
+				NestedFields:        true,
+				Opts: &ThresholdsOpts{
+					ProfileIDs: []string{},
+				},
+			},
+		},
+		{
+			name: "Nil Opts",
+			thresholdSCfg: &ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       2,
+				EEsExporterIDs:      []string{"idTest"},
+				StringIndexedFields: &[]string{"*req.index1"},
+				PrefixIndexedFields: &[]string{"*req.index1"},
+				SuffixIndexedFields: &[]string{"*req.index1"},
+				NestedFields:        true,
+				Opts:                nil,
+			},
+		},
+		{
+			name:          "Nil case",
+			thresholdSCfg: nil,
 		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
-	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.thresholdSCfg.Clone()
+			if !reflect.DeepEqual(tt.thresholdSCfg, rcv) {
+				t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(tt.thresholdSCfg), utils.ToJSON(rcv))
+			}
+
+			if rcv != nil && tt.thresholdSCfg != nil {
+				if (*rcv.StringIndexedFields)[0] = ""; (*tt.thresholdSCfg.StringIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.PrefixIndexedFields)[0] = ""; (*tt.thresholdSCfg.PrefixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.SuffixIndexedFields)[0] = ""; (*tt.thresholdSCfg.SuffixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+			}
+		})
 	}
 }
 

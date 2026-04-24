@@ -222,6 +222,9 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 }
 
 func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
+	if dbOpts == nil {
+		return nil
+	}
 	return &StorDBOpts{
 		InternalDBDumpPath:        dbOpts.InternalDBDumpPath,
 		InternalDBBackupPath:      dbOpts.InternalDBBackupPath,
@@ -249,6 +252,9 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 
 // Clone returns the cloned object
 func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
+	if dbcfg == nil {
+		return nil
+	}
 	cln = &StorDbCfg{
 		Type:     dbcfg.Type,
 		Host:     dbcfg.Host,

@@ -287,3 +287,36 @@ func TestAttributeSCfgClone(t *testing.T) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
 }
+
+func TestAttributesOptsClone(t *testing.T) {
+	tests := []struct {
+		name           string
+		attributesOpts *AttributesOpts
+	}{
+		{
+			name: "Complete AttributesOpts",
+			attributesOpts: &AttributesOpts{
+				ProcessRuns: 1,
+				ProfileIDs:  []string{},
+				Context:     utils.StringPointer("Context"),
+			},
+		},
+		{
+			name:           "Nil AttributesOpts",
+			attributesOpts: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.attributesOpts.Clone()
+
+			if !reflect.DeepEqual(result, tt.attributesOpts) {
+				t.Errorf("Clone() = %#+v, want %#+v", result, tt.attributesOpts)
+			}
+
+			if result != nil && result == tt.attributesOpts {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}

@@ -51,6 +51,9 @@ type Route struct {
 
 // Clone method for Route
 func (r *Route) Clone() *Route {
+	if r == nil {
+		return nil
+	}
 	clone := &Route{
 		ID:              r.ID,
 		Weight:          r.Weight,

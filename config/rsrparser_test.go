@@ -910,3 +910,39 @@ func TestRSRParsersValues(t *testing.T) {
 		})
 	}
 }
+
+func TestRSRParserClone(t *testing.T) {
+	rulesStr := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
+	expRSRField1 := &RSRParser{
+		path:  "~sip_redirected_to",
+		Rules: rulesStr,
+		rsrRules: []*utils.ReSearchReplace{
+			{
+				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
+				ReplaceTemplate: "0$1",
+			},
+		},
+		converters: nil,
+	}
+
+	rsrField, err := NewRSRParser(rulesStr)
+	if err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+
+	cln := rsrField.Clone()
+	if !reflect.DeepEqual(expRSRField1, cln) {
+		t.Errorf("Expected: %+v, received: %+v", expRSRField1, rsrField)
+	}
+
+	rulesStr = ""
+	expRSRField1 = nil
+	rsrField, err = NewRSRParser(rulesStr)
+	if err != nil {
+		t.Errorf("could not construct receiver type: %v", err)
+	}
+	cln = rsrField.Clone()
+	if !reflect.DeepEqual(expRSRField1, cln) {
+		t.Errorf("Expected: %+v, received: %+v", expRSRField1, rsrField)
+	}
+}

@@ -598,3 +598,54 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestHTTPAgentCfgClone(t *testing.T) {
+	tests := []struct {
+		name         string
+		httpAgentCfg *HTTPAgentCfg
+	}{
+		{
+			name: "Complete HTTPAgentCfg",
+			httpAgentCfg: &HTTPAgentCfg{
+				ID:              "conecto1",
+				URL:             "/conecto",
+				SessionSConns:   []string{utils.MetaInternal, "*conn1"},
+				StatSConns:      []string{utils.MetaInternal, "*conn1"},
+				ThresholdSConns: []string{utils.MetaInternal, "*conn1"},
+				RequestPayload:  "*url",
+				ReplyPayload:    "*xml",
+				RequestProcessors: []*RequestProcessor{{
+					ID:            "OutboundAUTHDryRun",
+					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+					Flags:         utils.FlagsWithParams{"*dryrun": {}},
+					RequestFields: []*FCTemplate{},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "Allow",
+						Path:      "response.Allow",
+						Type:      "*constant",
+						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
+						Mandatory: true,
+					}},
+				}},
+			},
+		},
+		{
+			name:         "Nil Case",
+			httpAgentCfg: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.httpAgentCfg.Clone()
+
+			if !reflect.DeepEqual(result, tt.httpAgentCfg) {
+				t.Errorf("Clone() = %#+v, want %#+v", result, tt.httpAgentCfg)
+			}
+
+			if result != nil && result == tt.httpAgentCfg {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}

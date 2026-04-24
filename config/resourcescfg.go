@@ -170,6 +170,9 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]any) {
 }
 
 func (resOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
+	if resOpts == nil {
+		return nil
+	}
 	cln = &ResourcesOpts{
 		UsageID: resOpts.UsageID,
 		Units:   resOpts.Units,

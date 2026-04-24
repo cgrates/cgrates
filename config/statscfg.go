@@ -197,6 +197,9 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 func (stOpts *StatsOpts) Clone() *StatsOpts {
+	if stOpts == nil {
+		return nil
+	}
 	return &StatsOpts{
 		ProfileIDs:           slices.Clone(stOpts.ProfileIDs),
 		ProfileIgnoreFilters: stOpts.ProfileIgnoreFilters,
@@ -204,7 +207,10 @@ func (stOpts *StatsOpts) Clone() *StatsOpts {
 }
 
 // Clone returns a deep copy of StatSCfg
-func (st StatSCfg) Clone() (cln *StatSCfg) {
+func (st *StatSCfg) Clone() (cln *StatSCfg) {
+	if st == nil {
+		return nil
+	}
 	cln = &StatSCfg{
 		Enabled:                st.Enabled,
 		IndexedSelects:         st.IndexedSelects,

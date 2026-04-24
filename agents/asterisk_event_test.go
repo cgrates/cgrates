@@ -695,4 +695,10 @@ func TestSMAsteriskEventClone(t *testing.T) {
 	if e.opts["opt1"] == false {
 		t.Errorf("Modifying clone affected original opts")
 	}
+
+	e = nil
+	clone = e.Clone()
+	if !reflect.DeepEqual(e, clone) {
+		t.Errorf("Expected: %+v\nReceived: %+v", e, clone)
+	}
 }

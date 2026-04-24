@@ -349,59 +349,106 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 }
 
 func TestStorDbCfgClone(t *testing.T) {
-	ban := &StorDbCfg{
-		Type:                utils.MetaMySQL,
-		Host:                "127.0.0.1",
-		Port:                "-1",
-		Name:                utils.CGRateSLwr,
-		User:                utils.CGRateSLwr,
-		Password:            "pass123",
-		StringIndexedFields: []string{"*req.index1"},
-		PrefixIndexedFields: []string{"*req.index1"},
-		RmtConns:            []string{"*conn1"},
-		RplConns:            []string{"*conn1"},
-		Items: map[string]*ItemOpt{
-			utils.MetaSessionsCosts: {
-				Remote:    true,
-				Replicate: true,
-			},
-			utils.MetaCDRs: {
-				Remote:    true,
-				Replicate: false,
+	tests := []struct {
+		name      string
+		storDbCfg *StorDbCfg
+	}{
+		{
+			name: "Complete StorDbCfg",
+			storDbCfg: &StorDbCfg{
+				Type:                utils.MetaMySQL,
+				Host:                "127.0.0.1",
+				Port:                "-1",
+				Name:                utils.CGRateSLwr,
+				User:                utils.CGRateSLwr,
+				Password:            "pass123",
+				StringIndexedFields: []string{"*req.index1"},
+				PrefixIndexedFields: []string{"*req.index1"},
+				RmtConns:            []string{"*conn1"},
+				RplConns:            []string{"*conn1"},
+				Items: map[string]*ItemOpt{
+					utils.MetaSessionsCosts: {
+						Remote:    true,
+						Replicate: true,
+					},
+					utils.MetaCDRs: {
+						Remote:    true,
+						Replicate: false,
+					},
+				},
+				Opts: &StorDBOpts{
+					SQLMaxOpenConns:    100,
+					SQLMaxIdleConns:    10,
+					SQLConnMaxLifetime: 0,
+					MySQLDSNParams:     make(map[string]string),
+					MySQLLocation:      "UTC",
+					PgSSLMode:          "disable",
+				},
 			},
 		},
-		Opts: &StorDBOpts{
-			SQLMaxOpenConns:    100,
-			SQLMaxIdleConns:    10,
-			SQLConnMaxLifetime: 0,
-			MySQLDSNParams:     make(map[string]string),
-			MySQLLocation:      "UTC",
-			PgSSLMode:          "disable",
+		{
+			name: "Nil Opts",
+			storDbCfg: &StorDbCfg{
+				Type:                utils.MetaMySQL,
+				Host:                "127.0.0.1",
+				Port:                "-1",
+				Name:                utils.CGRateSLwr,
+				User:                utils.CGRateSLwr,
+				Password:            "pass123",
+				StringIndexedFields: []string{"*req.index1"},
+				PrefixIndexedFields: []string{"*req.index1"},
+				RmtConns:            []string{"*conn1"},
+				RplConns:            []string{"*conn1"},
+				Items: map[string]*ItemOpt{
+					utils.MetaSessionsCosts: {
+						Remote:    true,
+						Replicate: true,
+					},
+					utils.MetaCDRs: {
+						Remote:    true,
+						Replicate: false,
+					},
+				},
+				Opts: nil,
+			},
+		},
+		{
+			name:      "Nil StorDbCfg",
+			storDbCfg: nil,
 		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
-	if rcv.StringIndexedFields[0] = ""; ban.StringIndexedFields[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.PrefixIndexedFields[0] = ""; ban.PrefixIndexedFields[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.storDbCfg.Clone()
+			if !reflect.DeepEqual(tt.storDbCfg, rcv) {
+				t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(tt.storDbCfg), utils.ToJSON(rcv))
+			}
 
-	if rcv.RmtConns[0] = ""; ban.RmtConns[0] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RplConns[0] = ""; ban.RplConns[0] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
+			if rcv != nil && tt.storDbCfg != nil {
+				if rcv.StringIndexedFields[0] = ""; tt.storDbCfg.StringIndexedFields[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.PrefixIndexedFields[0] = ""; tt.storDbCfg.PrefixIndexedFields[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
 
-	if rcv.Items[utils.MetaCDRs].Remote = false; !ban.Items[utils.MetaCDRs].Remote {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.Opts.PgSSLMode = ""; ban.Opts.PgSSLMode != "disable" {
-		t.Errorf("Expected clone to not modify the cloned")
+				if rcv.RmtConns[0] = ""; tt.storDbCfg.RmtConns[0] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.RplConns[0] = ""; tt.storDbCfg.RplConns[0] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+
+				if rcv.Items[utils.MetaCDRs].Remote = false; !tt.storDbCfg.Items[utils.MetaCDRs].Remote {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if rcv.Opts != nil {
+					if rcv.Opts.PgSSLMode = ""; tt.storDbCfg.Opts.PgSSLMode != "disable" {
+						t.Errorf("Expected clone to not modify the cloned")
+					}
+				}
+			}
+		})
 	}
 
 }

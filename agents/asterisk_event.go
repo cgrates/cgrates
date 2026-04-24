@@ -50,6 +50,9 @@ type SMAsteriskEvent struct { // Standalone struct so we can cache the fields wh
 
 // Clone returns a deep copy of SMAsteriskEvent.
 func (e *SMAsteriskEvent) Clone() *SMAsteriskEvent {
+	if e == nil {
+		return nil
+	}
 	ariEvClone := make(map[string]any, len(e.ariEv))
 	for k, v := range e.ariEv {
 		ariEvClone[k] = v

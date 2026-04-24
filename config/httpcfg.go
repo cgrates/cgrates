@@ -185,7 +185,10 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of HTTPCfg
-func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
+func (httpcfg *HTTPCfg) Clone() (cln *HTTPCfg) {
+	if httpcfg == nil {
+		return nil
+	}
 	dialer := &net.Dialer{
 		Timeout:       httpcfg.dialer.Timeout,
 		KeepAlive:     httpcfg.dialer.KeepAlive,

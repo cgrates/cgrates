@@ -468,6 +468,10 @@ func TestJanusAgentCfgClone(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:       "Nil janusAgent",
+			janusAgent: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -477,7 +481,7 @@ func TestJanusAgentCfgClone(t *testing.T) {
 				t.Errorf("Clone() = %v, want %v", result, tt.janusAgent)
 			}
 
-			if result == tt.janusAgent {
+			if tt.janusAgent != nil && result == tt.janusAgent {
 				t.Errorf("Clone returned the same instance, expected a new instance")
 			}
 		})

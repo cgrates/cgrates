@@ -310,39 +310,66 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 }
 
 func TestResourceSConfigClone(t *testing.T) {
-	ban := &ResourceSConfig{
-		Enabled:             true,
-		IndexedSelects:      true,
-		StoreInterval:       2 * time.Second,
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StringIndexedFields: &[]string{"*req.index1"},
-		PrefixIndexedFields: &[]string{"*req.index1"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		NestedFields:        true,
-		Opts: &ResourcesOpts{
-			UsageTTL: utils.DurationPointer(1 * time.Second),
+	tests := []struct {
+		name            string
+		resourceSConfig *ResourceSConfig
+	}{
+		{
+			name: "Complete ResourceSConfig",
+			resourceSConfig: &ResourceSConfig{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       2 * time.Second,
+				ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StringIndexedFields: &[]string{"*req.index1"},
+				PrefixIndexedFields: &[]string{"*req.index1"},
+				SuffixIndexedFields: &[]string{"*req.index1"},
+				NestedFields:        true,
+				Opts: &ResourcesOpts{
+					UsageTTL: utils.DurationPointer(1 * time.Second),
+				},
+			},
+		},
+		{
+			name: "Nil Opts",
+			resourceSConfig: &ResourceSConfig{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       2 * time.Second,
+				ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StringIndexedFields: &[]string{"*req.index1"},
+				PrefixIndexedFields: &[]string{"*req.index1"},
+				SuffixIndexedFields: &[]string{"*req.index1"},
+				NestedFields:        true,
+				Opts:                nil,
+			},
+		},
+		{
+			name:            "Nil ResourceSConfig",
+			resourceSConfig: nil,
 		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
-	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.resourceSConfig.Clone()
+			if !reflect.DeepEqual(tt.resourceSConfig, rcv) {
+				t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(tt.resourceSConfig), utils.ToJSON(rcv))
+			}
 
-	ban = nil
-	rcv = ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+			if tt.resourceSConfig != nil && rcv != nil {
+				if rcv.ThresholdSConns[1] = ""; tt.resourceSConfig.ThresholdSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.StringIndexedFields)[0] = ""; (*tt.resourceSConfig.StringIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.PrefixIndexedFields)[0] = ""; (*tt.resourceSConfig.PrefixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.SuffixIndexedFields)[0] = ""; (*tt.resourceSConfig.SuffixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+			}
+		})
 	}
 }

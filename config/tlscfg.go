@@ -74,7 +74,10 @@ func (tls *TLSCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of TLSCfg
-func (tls TLSCfg) Clone() *TLSCfg {
+func (tls *TLSCfg) Clone() *TLSCfg {
+	if tls == nil {
+		return nil
+	}
 	return &TLSCfg{
 		ServerCerificate: tls.ServerCerificate,
 		ServerKey:        tls.ServerKey,

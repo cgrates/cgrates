@@ -343,4 +343,10 @@ func TestSIPAgentCfgClone(t *testing.T) {
 	if rcv.SessionSConns[0] = ""; sa.SessionSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	sa = nil
+	rcv = sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
 }

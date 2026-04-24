@@ -207,6 +207,9 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
+	if thdOpts == nil {
+		return nil
+	}
 	return &ThresholdsOpts{
 		ProfileIDs:           slices.Clone(thdOpts.ProfileIDs),
 		ProfileIgnoreFilters: thdOpts.ProfileIgnoreFilters,
@@ -214,7 +217,10 @@ func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 }
 
 // Clone returns a deep copy of ThresholdSCfg
-func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
+func (t *ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
+	if t == nil {
+		return nil
+	}
 	cln = &ThresholdSCfg{
 		Enabled:        t.Enabled,
 		IndexedSelects: t.IndexedSelects,

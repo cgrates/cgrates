@@ -2752,3 +2752,63 @@ func TestSortedRoutesSortHighestCost(t *testing.T) {
 		}
 	}
 }
+
+func TestRouteClone(t *testing.T) {
+	tests := []struct {
+		name  string
+		route *Route
+	}{
+		{
+			name: "Complete Route",
+			route: &Route{
+				ID:              "id",
+				Weight:          21.1,
+				RouteParameters: "params",
+				AccountIDs:      []string{"acc1", "acc2", "acc3"},
+				RatingPlanIDs:   []string{"rpid"},
+				StatIDs:         []string{"stat"},
+				ResourceIDs:     []string{"res1", "res2", "res3"},
+				FilterIDs:       []string{"FLTR_ACNT"},
+				Blocker:         true,
+				lazyCheckRules: []*FilterRule{
+					{
+						Element: "~*req.Account",
+						Type:    utils.MetaString,
+						Values:  []string{"1001", "1002"},
+					},
+				},
+			},
+		},
+		{
+			name: "Nil fields",
+			route: &Route{
+				ID:              "id",
+				Weight:          21.1,
+				RouteParameters: "params",
+				AccountIDs:      nil,
+				RatingPlanIDs:   nil,
+				StatIDs:         nil,
+				ResourceIDs:     nil,
+				FilterIDs:       nil,
+				Blocker:         true,
+				lazyCheckRules:  nil,
+			},
+		},
+		{
+			name:  "Nil Route",
+			route: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.route.Clone()
+			if !reflect.DeepEqual(result, tt.route) {
+				t.Errorf("Clone() = %v, want %v", result, tt.route)
+			}
+
+			if result != nil && result == tt.route {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}

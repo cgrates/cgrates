@@ -127,7 +127,10 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) map[string]any {
 }
 
 // Clone returns a deep copy of SIPAgentCfg
-func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
+func (sa *SIPAgentCfg) Clone() *SIPAgentCfg {
+	if sa == nil {
+		return nil
+	}
 	clone := &SIPAgentCfg{
 		Enabled:             sa.Enabled,
 		Listen:              sa.Listen,
