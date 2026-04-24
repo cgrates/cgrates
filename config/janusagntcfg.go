@@ -175,6 +175,9 @@ func (jaCfg *JanusAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 }
 
 func (jaCfg *JanusAgentCfg) Clone() *JanusAgentCfg {
+	if jaCfg == nil {
+		return nil
+	}
 	cln := &JanusAgentCfg{
 		Enabled: jaCfg.Enabled,
 		URL:     jaCfg.URL,

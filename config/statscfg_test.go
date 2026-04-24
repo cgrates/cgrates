@@ -225,35 +225,69 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 }
 
 func TestStatSCfgClone(t *testing.T) {
-	ban := &StatSCfg{
-		Enabled:                true,
-		IndexedSelects:         true,
-		StoreInterval:          2,
-		StoreUncompressedLimit: 10,
-		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StringIndexedFields:    &[]string{"*req.index1"},
-		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
-		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
-		NestedFields:           true,
-		Opts: &StatsOpts{
-			ProfileIDs: []string{},
+	tests := []struct {
+		name     string
+		statSCfg *StatSCfg
+	}{
+		{
+			name: "Complete StatSCfg",
+			statSCfg: &StatSCfg{
+				Enabled:                true,
+				IndexedSelects:         true,
+				StoreInterval:          2,
+				StoreUncompressedLimit: 10,
+				ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StringIndexedFields:    &[]string{"*req.index1"},
+				PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+				SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+				NestedFields:           true,
+				Opts: &StatsOpts{
+					ProfileIDs: []string{},
+				},
+				EEsExporterIDs: []string{"exporterID"},
+			},
 		},
-		EEsExporterIDs: []string{"exporterID"},
+		{
+			name: "Nil Opts",
+			statSCfg: &StatSCfg{
+				Enabled:                true,
+				IndexedSelects:         true,
+				StoreInterval:          2,
+				StoreUncompressedLimit: 10,
+				ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+				StringIndexedFields:    &[]string{"*req.index1"},
+				PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+				SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+				NestedFields:           true,
+				Opts:                   nil,
+				EEsExporterIDs:         []string{"exporterID"},
+			},
+		},
+		{
+			name:     "Nil Case",
+			statSCfg: nil,
+		},
 	}
-	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
-	}
-	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
-		t.Errorf("Expected clone to not modify the cloned")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.statSCfg.Clone()
+			if !reflect.DeepEqual(tt.statSCfg, rcv) {
+				t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(tt.statSCfg), utils.ToJSON(rcv))
+			}
+			if tt.statSCfg != nil && rcv != nil {
+				if rcv.ThresholdSConns[1] = ""; tt.statSCfg.ThresholdSConns[1] != "*conn1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.StringIndexedFields)[0] = ""; (*tt.statSCfg.StringIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.PrefixIndexedFields)[0] = ""; (*tt.statSCfg.PrefixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+				if (*rcv.SuffixIndexedFields)[0] = ""; (*tt.statSCfg.SuffixIndexedFields)[0] != "*req.index1" {
+					t.Errorf("Expected clone to not modify the cloned")
+				}
+			}
+		})
 	}
 }

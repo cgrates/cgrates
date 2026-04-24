@@ -212,6 +212,9 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
+	if attrOpts == nil {
+		return nil
+	}
 	cln := &AttributesOpts{
 		ProfileIDs:           slices.Clone(attrOpts.ProfileIDs),
 		ProfileRuns:          attrOpts.ProfileRuns,

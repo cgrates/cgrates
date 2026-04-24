@@ -91,7 +91,7 @@ func (fs *FsConnCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of FsConnCfg
-func (fs FsConnCfg) Clone() *FsConnCfg {
+func (fs *FsConnCfg) Clone() *FsConnCfg {
 	return &FsConnCfg{
 		Address:              fs.Address,
 		Password:             fs.Password,
@@ -677,7 +677,7 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
 }
 
 // Clone returns a deep copy of AsteriskConnCfg
-func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
+func (aConnCfg *AsteriskConnCfg) Clone() *AsteriskConnCfg {
 	return &AsteriskConnCfg{
 		Alias:                aConnCfg.Alias,
 		Address:              aConnCfg.Address,

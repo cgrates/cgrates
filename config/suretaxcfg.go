@@ -208,7 +208,10 @@ func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]any
 }
 
 // Clone returns a deep copy of SureTaxCfg
-func (st SureTaxCfg) Clone() (cln *SureTaxCfg) {
+func (st *SureTaxCfg) Clone() (cln *SureTaxCfg) {
+	if st == nil {
+		return nil
+	}
 	loc := *time.UTC
 	if st.Timezone != nil {
 		loc = *st.Timezone

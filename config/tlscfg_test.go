@@ -116,4 +116,10 @@ func TestTLSCfgClone(t *testing.T) {
 	if rcv.ServerPolicy = 0; ban.ServerPolicy != 3 {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
 }

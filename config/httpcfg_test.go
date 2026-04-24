@@ -209,6 +209,12 @@ func TestHTTPCfgClone(t *testing.T) {
 	if rcv.HTTPAuthUsers["user"] = ""; ban.HTTPAuthUsers["user"] != "pass" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+
+	ban = nil
+	rcv = ban.Clone()
+	if rcv != ban {
+		t.Errorf("Expected: %#+v\nReceived: %#+v", ban, rcv)
+	}
 }
 
 func TestHTTPNewDialer(t *testing.T) {

@@ -184,7 +184,10 @@ func (ha *HTTPAgentCfg) AsMapInterface(separator string) map[string]any {
 }
 
 // Clone returns a deep copy of HTTPAgentCfg
-func (ha HTTPAgentCfg) Clone() *HTTPAgentCfg {
+func (ha *HTTPAgentCfg) Clone() *HTTPAgentCfg {
+	if ha == nil {
+		return nil
+	}
 	clone := &HTTPAgentCfg{
 		ID:                ha.ID,
 		URL:               ha.URL,

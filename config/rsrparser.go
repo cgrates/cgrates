@@ -366,7 +366,10 @@ func (prsr *RSRParser) CompileDynRule(dP utils.DataProvider) (p string, err erro
 }
 
 // Clone returns a deep copy of RSRParser
-func (prsr RSRParser) Clone() (cln *RSRParser) {
+func (prsr *RSRParser) Clone() (cln *RSRParser) {
+	if prsr == nil {
+		return nil
+	}
 	cln = &RSRParser{
 		Rules:       prsr.Rules,
 		path:        prsr.path,
