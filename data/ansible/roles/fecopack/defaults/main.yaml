@@ -1,0 +1,5 @@
+---
+app_name: fecopack
+git_repo: https://github.com/cgrates/fecopack.git
+rpms_path: /var/packages/rpm
+schedule_interval: 1h

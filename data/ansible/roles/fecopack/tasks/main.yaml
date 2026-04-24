@@ -1,0 +1,66 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Check if fecopack already exists
+  block:
+      - name: Install dependencies
+        become: true
+        ansible.builtin.apt:
+          name: [rsync, git]
+          state: present
+  
+      - name: Add user to www-data group
+        become: true
+        ansible.builtin.user:
+          name: "{{ user }}"
+          groups: www-data
+          append: true
+      
+      - name: Clone/update fecopack repository
+        ansible.builtin.git:
+          repo: "{{ git_repo }}"
+          dest: "/home/{{ user }}/{{ app_name }}"
+          force: true
+        register: git_result
+      
+      - name: Install Go
+        ansible.builtin.import_role:
+          name: ../roles/go
+      
+      - name: Ensure RPMs directory exists
+        become: true
+        ansible.builtin.file:
+          path: "{{ rpms_path }}"
+          state: directory
+          mode: "0775"
+          owner: www-data
+          group: www-data
+      
+      - name: Build fecopack binary
+        become: true
+        ansible.builtin.command: go build -o /usr/bin/{{ app_name }} .
+        args:
+          chdir: "/home/{{ user }}/{{ app_name }}"
+          creates: /usr/bin/{{ app_name }}
+        environment:
+          PATH: "{{ ansible_facts['env']['PATH'] }}:/usr/local/go/bin"
+        when: git_result.changed
+        notify: Restart fecopack
+      
+      
+      - name: Install systemd service file
+        become: true
+        ansible.builtin.template:
+          src: fecopack.service.j2
+          dest: "/etc/systemd/system/{{ app_name }}.service"
+          mode: "0644"
+        notify:
+          - Restart fecopack
+  
+- name: Ensure fecopack service is enabled and running
+  become: true
+  ansible.builtin.systemd:
+      name: "{{ app_name }}"
+      enabled: true
+      state: started

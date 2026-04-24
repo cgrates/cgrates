@@ -1,0 +1,8 @@
+---
+- name: Restart fecopack
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ app_name }}"
+    state: restarted
+    daemon_reload: true
+    enabled: true

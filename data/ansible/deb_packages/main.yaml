@@ -359,6 +359,10 @@
         groups: "{{ nginx_user }}"
         append: true
 
+    - name: Install fecopack service
+      ansible.builtin.import_role:
+        name: ../roles/fecopack
+
     - name: Create directory
       become: true
       ansible.builtin.file:
