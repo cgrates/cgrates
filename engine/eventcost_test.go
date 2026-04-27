@@ -4959,6 +4959,14 @@ func TestEvenCostProcessEventCostField(t *testing.T) {
 			expectedValue: nil,
 			expectedErr:   errors.New("unsupported field prefix: <field1>"),
 		},
+		{
+			name:          "error case",
+			fldPath:       []string{"field1"},
+			cd:            []string{"inv"},
+			event:         make(map[string]interface{}),
+			expectedValue: nil,
+			expectedErr:   errors.New("json: cannot unmarshal array into Go value of type engine.EventCost"),
+		},
 	}
 
 	for _, tc := range testCases {

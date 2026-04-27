@@ -340,6 +340,7 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 	bp = &BalanceFilter{
 		Uuid: utils.StringPointer("uuid"),
 		ID:   utils.StringPointer("id"),
+		Type: utils.StringPointer("test"),
 		Value: &utils.ValueFormula{
 			Static: 20.4,
 		},
@@ -364,6 +365,13 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 			},
 			{
 				ID:        "id2",
+				Years:     utils.Years([]int{1, 3, 2}),
+				Months:    utils.Months([]time.Month{2, 5, 6}),
+				MonthDays: utils.MonthDays([]int{2, 22, 11, 6, 4}),
+				WeekDays:  utils.WeekDays([]time.Weekday{0, 2}),
+			},
+			{
+				ID:        "id3",
 				Years:     utils.Years([]int{1, 3, 2}),
 				Months:    utils.Months([]time.Month{2, 5, 6}),
 				MonthDays: utils.MonthDays([]int{2, 22, 11, 6, 4}),
@@ -410,7 +418,12 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Timings[0]"}); err != nil {
 		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Timings[0]", "ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Timings", "id2", "ID"}); err != nil {
+		t.Error(err)
 	}
+
 	if _, err := bp.FieldAsInterface([]string{"Uuid"}); err != nil {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Uuid", "test"}); err == nil || err != utils.ErrNotFound {
@@ -468,6 +481,59 @@ func TestBalanceFilterFieldAsInterface(t *testing.T) {
 	} else if _, err = bp.FieldAsInterface([]string{"Timings", "id2"}); err != nil {
 		t.Error(err)
 	} else if _, err = bp.FieldAsInterface([]string{"Timings", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"TimingIDs"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"TimingIDs", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Factors"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Factors", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Value"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Value", "Static", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	bp = &BalanceFilter{
+		Uuid:           utils.StringPointer("uuid"),
+		ID:             utils.StringPointer("id"),
+		Type:           utils.StringPointer("test"),
+		Value:          nil,
+		ExpirationDate: utils.TimePointer(time.Date(2022, 12, 21, 20, 0, 0, 0, time.UTC)),
+		Weight:         utils.Float64Pointer(533.43),
+		DestinationIDs: nil,
+		RatingSubject:  utils.StringPointer("rate"),
+		Categories:     nil,
+		SharedGroups:   nil,
+		Timings:        nil,
+		TimingIDs:      nil,
+		Factors:        nil,
+		Disabled:       utils.BoolPointer(false),
+		Blocker:        utils.BoolPointer(false),
+	}
+
+	if _, err = bp.FieldAsInterface([]string{"DestinationIDs"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"DestinationIDs", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Categories", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"SharedGroups"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"SharedGroups", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Timings"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"TimingIDs"}); err != nil {
+		t.Error(err)
+
+	} else if _, err = bp.FieldAsInterface([]string{"TimingIDs", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Factors"}); err != nil {
+		t.Error(err)
+	} else if _, err = bp.FieldAsInterface([]string{"Factors", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -539,6 +605,45 @@ func TestBalanceFilterModifyBalance(t *testing.T) {
 	}
 
 }
+
+func TestBalanceFilterModifyBalanceNil(t *testing.T) {
+
+	bf := &BalanceFilter{
+		ID: utils.StringPointer("id"),
+
+		ExpirationDate: utils.TimePointer(time.Date(2022, 12, 24, 10, 0, 0, 0, time.UTC)),
+		RatingSubject:  utils.StringPointer("rating"),
+		Categories: &utils.StringMap{
+			"exp": true,
+		},
+		SharedGroups: &utils.StringMap{
+			"shared": false,
+		},
+		TimingIDs: &utils.StringMap{
+			"one": true,
+		},
+		Blocker: utils.BoolPointer(true),
+		Timings: []*RITiming{
+			{
+				ID:    "tId",
+				Years: utils.Years{2, 1},
+			},
+		},
+		Disabled: utils.BoolPointer(true),
+	}
+	b := &Balance{}
+	b = nil
+
+	exp := &Balance{}
+	exp = nil
+
+	bf.ModifyBalance(b)
+	if !reflect.DeepEqual(b, exp) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(exp), utils.ToJSON(b))
+	}
+
+}
+
 func TestBalanceFilterSetValue(t *testing.T) {
 	t.Run("when Value is nil", func(t *testing.T) {
 		bp := &BalanceFilter{}

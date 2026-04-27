@@ -2238,3 +2238,123 @@ func TestThresholdProcessEvent(t *testing.T) {
 		})
 	}
 }
+
+func TestThresholdProfileClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		thresholdP *ThresholdProfile
+	}{
+		{
+			name: "Compelete ThresholdProfile",
+			thresholdP: &ThresholdProfile{
+				Tenant:    "cgrates.org",
+				ID:        "THD_ACNT_1001",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+				},
+				MaxHits:   1,
+				MinHits:   1,
+				MinSleep:  1 * time.Second,
+				Blocker:   true,
+				Weight:    10,
+				ActionIDs: []string{"ACT_LOG_WARNING"},
+				Async:     true,
+				EeIDs:     []string{"eeID1", "eeID2"},
+			},
+		},
+		{
+			name: "Nil fields",
+			thresholdP: &ThresholdProfile{
+				Tenant:             "cgrates.org",
+				ID:                 "THD_ACNT_1001",
+				FilterIDs:          nil,
+				ActivationInterval: nil,
+				MaxHits:            1,
+				MinHits:            1,
+				MinSleep:           1 * time.Second,
+				Blocker:            true,
+				Weight:             10,
+				ActionIDs:          nil,
+				Async:              true,
+				EeIDs:              nil,
+			},
+		},
+		{
+			name:       "Nil case",
+			thresholdP: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.thresholdP.Clone()
+
+			if !reflect.DeepEqual(rcv, tt.thresholdP) {
+				t.Errorf("Clone() = %v, want %v", rcv, tt.thresholdP)
+			}
+
+			if rcv != nil && rcv == tt.thresholdP {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestThresholdClone(t *testing.T) {
+	tests := []struct {
+		name      string
+		threshold *Threshold
+	}{
+		{
+			name: "Complete Threshold",
+			threshold: &Threshold{
+				Tenant: "cgrates.org",
+				ID:     "TH1",
+				Hits:   2,
+				tPrfl: &ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					MaxHits:   1,
+					MinHits:   1,
+					MinSleep:  1 * time.Second,
+					Blocker:   true,
+					Weight:    10,
+					ActionIDs: []string{"ACT_LOG_WARNING"},
+					Async:     true,
+					EeIDs:     []string{"eeID1", "eeID2"},
+				},
+				dirty: utils.BoolPointer(false),
+			},
+		},
+		{
+			name: "Nil fields",
+			threshold: &Threshold{
+				Tenant: "",
+				ID:     "",
+				Hits:   2,
+				tPrfl:  nil,
+				dirty:  utils.BoolPointer(false),
+			},
+		},
+		{
+			name:      "Nil case",
+			threshold: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.threshold.Clone()
+
+			if !reflect.DeepEqual(rcv, tt.threshold) {
+				t.Errorf("Clone() = %v, want %v", rcv, tt.threshold)
+			}
+			if rcv != nil && rcv == tt.threshold {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
