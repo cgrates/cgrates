@@ -2812,3 +2812,90 @@ func TestRouteClone(t *testing.T) {
 		})
 	}
 }
+
+func TestRouteProfileClone(t *testing.T) {
+	tests := []struct {
+		name         string
+		routeProfile *RouteProfile
+	}{
+		{
+			name: "Complete RouteProfile",
+			routeProfile: &RouteProfile{
+				Tenant:    "cgrates.org",
+				ID:        "RTP_ACNT_1001",
+				FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+				},
+				SortingParameters: []string{"*acd", "*tcc"},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+						AccountIDs:      []string{"1001", "1002"},
+						RatingPlanIDs:   []string{"RP1", "RP2"},
+						ResourceIDs:     []string{"RS1", "RS2"},
+						StatIDs:         []string{"Stat_1", "Stat_1_1"},
+						Weight:          10,
+						Blocker:         true,
+						RouteParameters: "param",
+					},
+				},
+				Sorting: utils.MetaWeight,
+				Weight:  10,
+			},
+		},
+		{
+			name: "Nil Routes",
+			routeProfile: &RouteProfile{
+				Tenant:             "",
+				ID:                 "",
+				FilterIDs:          []string{"*string:~*req.Accout:1001"},
+				ActivationInterval: &utils.ActivationInterval{},
+				SortingParameters:  []string{""},
+				Routes:             nil,
+			},
+		},
+		{
+			name: "With nil fields",
+			routeProfile: &RouteProfile{
+				Tenant:             "cgrates.org",
+				ID:                 "RTP_ACNT_1001",
+				FilterIDs:          nil,
+				ActivationInterval: nil,
+				SortingParameters:  nil,
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       nil,
+						AccountIDs:      nil,
+						RatingPlanIDs:   nil,
+						ResourceIDs:     nil,
+						StatIDs:         nil,
+						Weight:          0,
+						Blocker:         false,
+						RouteParameters: "",
+					},
+				},
+				Sorting: "",
+				Weight:  0,
+			},
+		},
+		{
+			name:         "Nil RouteProfile",
+			routeProfile: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.routeProfile.Clone()
+			if !reflect.DeepEqual(result, tt.routeProfile) {
+				t.Errorf("Clone() = %v, want %v", result, tt.routeProfile)
+			}
+
+			if result != nil && result == tt.routeProfile {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
