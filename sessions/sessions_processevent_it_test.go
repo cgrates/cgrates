@@ -1125,3 +1125,145 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 	})
 
 }
+
+func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {"level": 7},
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*chargers": [{"ConnIDs": ["*localhost"]}],
+		"*routes":   [{"ConnIDs": ["*localhost"]}]
+	}
+},
+"chargers": {
+	"enabled": true
+},
+"routes": {
+	"enabled": true
+},
+"admins": {
+	"enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+	}
+
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
+
+	client, _ := ng.Run(t)
+
+	var reply string
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 10}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		&utils.RouteProfileWithAPIOpts{
+			RouteProfile: &utils.RouteProfile{
+				Tenant:  "cgrates.org",
+				ID:      "ROUTE_ALL",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Sorting: utils.MetaWeight,
+				Routes: []*utils.Route{
+					{
+						ID:       "vendor1",
+						Weights:  utils.DynamicWeights{{Weight: 10}},
+						Blockers: utils.DynamicBlockers{{Blocker: false}},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetRouteProfile failed: %v", err)
+	}
+
+	t.Run("standaloneEventChargersRun", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "standalone1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaRoutes:   true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; !hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to exist when ChargerS runs, got: %v", rply.RouteProfiles)
+		}
+	})
+
+	t.Run("sessionEventChargersSkipped", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "session1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaRoutes:   true,
+					utils.MetaSession:  true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be absent when *session=true, got: %v", rply.RouteProfiles)
+		}
+	})
+
+	t.Run("terminateEventChargersSkipped", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "terminate1",
+				APIOpts: map[string]any{
+					utils.MetaChargers:  true,
+					utils.MetaRoutes:    true,
+					utils.MetaTerminate: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be absent when *terminate=true, got: %v", rply.RouteProfiles)
+		}
+	})
+}
