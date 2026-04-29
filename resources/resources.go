@@ -21,6 +21,7 @@ package resources
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"runtime"
 	"slices"
 	"sync"
@@ -433,14 +434,18 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			return nil, nil, err
 		}
 	}
-	rs = make(Resources, 0, len(rIDs))
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(rIDs))
+
+	rs = make(Resources, 0, len(itemIDs))
 	weights := make(map[string]float64) // stores sorting weights by resource ID
-	for resName := range rIDs {
+	for _, id := range itemIDs {
 		lkID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
-			utils.ResourceLockKey(tnt, resName))
+			utils.ResourceLockKey(tnt, id))
 
-		rp, err := s.dm.GetResourceProfile(ctx, tnt, resName,
+		rp, err := s.dm.GetResourceProfile(ctx, tnt, id,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
