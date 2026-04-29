@@ -33,8 +33,9 @@
 	"cdrs": {
 		"enabled": true,
 		"conns": {
-			"*chargers": [{"ConnIDs": ["*localhost"]}]
-		},
+			"*chargers": [{"ConnIDs": ["*localhost"]}],
+			"*rates": [{"ConnIDs": ["*localhost"]}]
+		}
 	},
 	"attributes": {
 		"enabled": true,
