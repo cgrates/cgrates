@@ -1068,18 +1068,6 @@ func TestResourceUsageTTL(t *testing.T) {
 	}
 }
 
-func TestResourceResIDsMp(t *testing.T) {
-	_, _, resources, _ := newTestMatchingSetup(t)
-	expected := utils.StringSet{
-		"ResourceProfile1": struct{}{},
-		"ResourceProfile2": struct{}{},
-		"ResourceProfile3": struct{}{},
-	}
-	if rcv := resources.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
-	}
-}
-
 func TestResourceMatchWithIndexFalse(t *testing.T) {
 	rS, _, resources, events := newTestMatchingSetup(t)
 	rS.cfg.ResourceSCfg().IndexedSelects = false
@@ -1156,7 +1144,7 @@ func TestResourceCaching(t *testing.T) {
 			profile:  resProf,
 		},
 	}
-	if err := engine.Cache.Set(context.TODO(), utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
+	if err := engine.Cache.Set(context.TODO(), utils.CacheEventResources, "TestResourceCaching", []string{resProf.ID}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
@@ -1904,7 +1892,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 	rS := NewResourceService(cfg, dmRES,
 		fltrs, nil)
 
-	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringSet{"Res2": {}}, nil, true, utils.NonTransactional)
+	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", []string{"Res2"}, nil, true, utils.NonTransactional)
 	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
 	if err != utils.ErrNotFound {
@@ -1926,7 +1914,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	prfs := make([]*utils.ResourceProfile, 0)
-	ids := utils.StringSet{}
+	ids := make([]string, 0, 10)
 	for i := range 10 {
 		rPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
@@ -1942,7 +1930,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	dm.RemoveResource(context.Background(), "cgrates.org", "RES1")
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks", ids, nil, true, utils.NonTransactional)
@@ -1967,7 +1955,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	prfs := make([]*utils.ResourceProfile, 0)
-	ids := utils.StringSet{}
+	ids := make([]string, 0, 11)
 	for i := range 10 {
 		rPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
@@ -1983,7 +1971,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	rPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -2003,7 +1991,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		t.Fatal(err)
 	}
 	prfs = append(prfs, rPrf)
-	ids.Add(rPrf.ID)
+	ids = append(ids, rPrf.ID)
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
 	_, _, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
@@ -2053,9 +2041,9 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 
-	ids := utils.StringSet{}
+	ids := make([]string, 0, 10)
 	for i := range 10 {
-		ids.Add(fmt.Sprintf("RES%d", i))
+		ids = append(ids, fmt.Sprintf("RES%d", i))
 	}
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks3", ids, nil, true, utils.NonTransactional)
 	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
@@ -2342,7 +2330,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 	rS := NewResourceService(cfg, dm,
 		fltrs, nil)
 
-	ids := utils.StringSet{}
+	ids := make([]string, 0, 10)
 	for i := range 10 {
 		rPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
@@ -2359,7 +2347,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
-		ids.Add(rPrf.ID)
+		ids = append(ids, rPrf.ID)
 	}
 	if err := engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocksBlocker", ids, nil, true, utils.NonTransactional); err != nil {
 		t.Error(err)

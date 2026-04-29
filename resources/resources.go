@@ -119,15 +119,6 @@ func (r *matchedResource) clearUsage(ruID string) error {
 // Resources is a collection of matchedResource objects.
 type Resources []*matchedResource
 
-// resIDsMp returns a map of resource IDs which is used for caching
-func (rs Resources) resIDsMp() utils.StringSet {
-	mp := make(utils.StringSet)
-	for _, r := range rs {
-		mp.Add(r.Resource.ID)
-	}
-	return mp
-}
-
 // recordUsage will record the usage in all the resource limits, failing back on errors
 func (rs Resources) recordUsage(ru *utils.ResourceUsage) error {
 	var nonReservedIdx int // index of first resource not reserved
@@ -392,16 +383,16 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		}
 	}
 
-	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	if x, ok := engine.Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
+	var itemIDs []string
+	if x, ok := engine.Cache.Get(utils.CacheEventResources, evUUID); ok {
 		if x == nil {
 			return nil, nil, utils.ErrNotFound
 		}
-		rIDs = x.(utils.StringSet)
+		itemIDs = x.([]string)
 		defer func() { // make sure we uncache if we find errors
 			if err != nil {
 				// TODO: Consider using RemoveWithoutReplicate instead, as
@@ -415,7 +406,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		}()
 
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
+		rIDs, err := engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.ResourceSCfg().StringIndexedFields,
 			s.cfg.ResourceSCfg().PrefixIndexedFields,
 			s.cfg.ResourceSCfg().SuffixIndexedFields,
@@ -433,10 +424,9 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			}
 			return nil, nil, err
 		}
+		// Lock items in sorted order to prevent AB-BA deadlock.
+		itemIDs = slices.Sorted(maps.Keys(rIDs))
 	}
-
-	// Lock items in sorted order to prevent AB-BA deadlock.
-	itemIDs := slices.Sorted(maps.Keys(rIDs))
 
 	rs = make(Resources, 0, len(itemIDs))
 	weights := make(map[string]float64) // stores sorting weights by resource ID
@@ -518,7 +508,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			break
 		}
 	}
-	if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, ""); errCh != nil {
+	if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, itemIDs, nil, true, ""); errCh != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> failed caching event resources: %s", utils.ResourceS, errCh.Error()))
 	}
 	return rs, unlockAll, nil
