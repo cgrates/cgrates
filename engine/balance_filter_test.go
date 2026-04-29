@@ -99,6 +99,58 @@ func TestNewBalanceFilter(t *testing.T) {
 
 }
 
+func TestNewBalanceFilterFactors(t *testing.T) {
+	tests := []struct {
+		name        string
+		filter      map[string]any
+		expectedErr string
+		expectedKey string
+		expectValue float64
+	}{
+		{
+			name:        "Factors as JSON string",
+			filter:      map[string]any{utils.Factors: `{"key1":1.5}`},
+			expectedKey: "key1",
+			expectValue: 1.5,
+		},
+		{
+			name:        "Factors as map",
+			filter:      map[string]any{utils.Factors: map[string]any{"key2": 2.5}},
+			expectedKey: "key2",
+			expectValue: 2.5,
+		},
+		{
+			name:        "Unsupported type",
+			filter:      map[string]any{utils.Factors: func() {}},
+			expectedErr: "json: unsupported type: func()",
+		},
+		{
+			name:        "Factors as invalid JSON string",
+			filter:      map[string]any{utils.Factors: `{invalid}`},
+			expectedErr: "invalid character 'i' looking for beginning of object key string",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := NewBalanceFilter(tt.filter, "")
+			if err != nil && err.Error() != tt.expectedErr {
+				t.Errorf("Expected: %v, got %v", tt.expectedErr, err)
+			}
+
+			if res != nil {
+				if res.Factors == nil {
+					t.Error("Expected factors not to be nil")
+				}
+				factors := *res.Factors
+				got := factors[tt.expectedKey]
+				if got != tt.expectValue {
+					t.Errorf("Expected %v, got %v", tt.expectValue, got)
+				}
+			}
+		})
+	}
+}
+
 func TestBalanceFilterClone(t *testing.T) {
 	bf := &BalanceFilter{}
 	eOut := &BalanceFilter{}
@@ -813,5 +865,73 @@ func TestShowStatistics(t *testing.T) {
 
 	if !strings.Contains(logOutput, "Action plans: 1") {
 		t.Errorf("Expected log to contain 'Action plans: 1', got: %s", logOutput)
+	}
+}
+
+func TestBalanceFilterGetExpirationDate(t *testing.T) {
+	tests := []struct {
+		name        string
+		balanceFltr *BalanceFilter
+		expected    time.Time
+	}{
+		{
+			name:        "Nil",
+			balanceFltr: nil,
+			expected:    time.Time{},
+		},
+		{
+			name:        "Empty",
+			balanceFltr: &BalanceFilter{},
+			expected:    time.Time{},
+		},
+		{
+			name: "With ExpirationDate",
+			balanceFltr: &BalanceFilter{
+				ExpirationDate: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)),
+			},
+			expected: time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if res := tt.balanceFltr.GetExpirationDate(); res != tt.expected {
+				t.Errorf("Expected: %v, recieved: %v", tt.expected, res)
+			}
+		})
+	}
+}
+
+func TestBalanceFilterEmptyExpirationDate(t *testing.T) {
+	tests := []struct {
+		name     string
+		bFilter  *BalanceFilter
+		expected bool
+	}{
+		{
+			name:     "Empty",
+			bFilter:  &BalanceFilter{},
+			expected: true,
+		},
+		{
+			name: "With ExpirationDate",
+			bFilter: &BalanceFilter{
+				ExpirationDate: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)),
+			},
+			expected: false,
+		},
+		{
+			name: "Empty time",
+			bFilter: &BalanceFilter{
+				ExpirationDate: utils.TimePointer(time.Time{}),
+			},
+			expected: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if res := tt.bFilter.EmptyExpirationDate(); res != tt.expected {
+				t.Errorf("Expected: %v, recieved: %v", tt.expected, res)
+			}
+		})
 	}
 }
