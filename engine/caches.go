@@ -92,6 +92,7 @@ func init() {
 	gob.Register(new(DispatcherHostWithAPIOpts))
 	// RateProfiles
 	gob.Register(new(utils.RateProfile))
+	gob.Register(new(utils.RateProfileCost))
 	gob.Register(new(utils.RateProfileWithAPIOpts))
 	// ActionProfiles
 	gob.Register(new(utils.ActionProfile))
@@ -142,6 +143,7 @@ func init() {
 	gob.Register(new(utils.GetIndexesArg))
 
 	gob.Register(utils.StringSet{})
+	gob.Register(new(utils.Decimal))
 }
 
 // NewCacheS initializes the Cache service and executes the precaching

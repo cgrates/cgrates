@@ -94,6 +94,34 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				time.Sleep(100 * time.Millisecond)
 			})
 
+			var cdrs []*utils.CDR
+			t.Run("SetCDREvent", func(t *testing.T) {
+				args := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "2444dc54-bcc2-495c-8937-288207c566cb",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.AnswerTime:   "1777460367",
+						utils.Destination:  "7003",
+					},
+					APIOpts: map[string]any{
+						utils.MetaCDRs:     true,
+						utils.MetaOriginID: "1-6234@127.0.0.1",
+						utils.MetaUsage:    "7s",
+						utils.MetaRates:    true,
+					},
+				}
+				var reply string
+				if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+					t.Error("Unexpected error: ", err.Error())
+				} else if reply != utils.OK {
+					t.Error("Unexpected reply received: ", reply)
+				}
+				if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org"}, &cdrs); err != nil {
+					t.Error(err)
+				}
+			})
+
 			var attrs []*utils.APIAttributeProfile
 
 			t.Run("GetAttributes", func(t *testing.T) {
@@ -319,10 +347,10 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					t.Error(err)
 				} else if dirs != 36 {
 					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
-				} else if i > 6 && files != 33 {
+				} else if i > 6 && files != 34 {
+					t.Errorf("expected <%d> files, received <%d>", 34, files)
+				} else if i < 6 && files != 33 {
 					t.Errorf("expected <%d> files, received <%d>", 33, files)
-				} else if i < 6 && files != 32 {
-					t.Errorf("expected <%d> files, received <%d>", 32, files)
 				}
 			})
 
@@ -350,6 +378,20 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			ng.PreserveDataDB = true
 			client, cfg = ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
+
+			t.Run("GetCDRs", func(t *testing.T) {
+				var rply []*utils.CDR
+				if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org"}, &rply); err != nil {
+					t.Error(err)
+				}
+				if len(rply) != 1 {
+					t.Errorf("expected 1 cdr, got <%v>", utils.ToJSON(rply))
+				}
+				rply[0].CreatedAt = cdrs[0].CreatedAt // createdat is populated when GetCDRs api is ran (its not necesary to be the same for this case)
+				if !reflect.DeepEqual(cdrs, rply) {
+					t.Errorf("expected <%v>, \n received\n,<%v>", utils.ToJSON(cdrs), utils.ToJSON(rply))
+				}
+			})
 
 			t.Run("GetAttributes2", func(t *testing.T) {
 				var rcv []*utils.APIAttributeProfile
