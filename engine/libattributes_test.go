@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -123,6 +124,53 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 
 }
 
+func TestConvertExternalToProfileInvalidValue(t *testing.T) {
+	external := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs: []string{"FLTR_ACNT", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*ExternalAttribute{
+			{
+				Path: utils.EmptyString,
+			},
+		},
+		Weight: 20,
+	}
+	expectedErr := "MANDATORY_IE_MISSING: [Path]"
+	_, err := external.AsAttributeProfile()
+	if err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+}
+func TestConvertExternalToProfileEmptyPath(t *testing.T) {
+	external := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs: []string{"FLTR_ACNT", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*ExternalAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: "`error",
+			},
+		},
+		Weight: 20,
+	}
+	expectedErr := "Unclosed unspilit syntax"
+	_, err := external.AsAttributeProfile()
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected: %#v, recieved: %#v", expectedErr, err)
+	}
+}
 func TestNewAttributeFromInline(t *testing.T) {
 	attrID := "*sum:*req.Field2:10&~*req.NumField&20;*sum:*req.Field3:10&~*req.NumField4&20"
 	expAttrPrf1 := &AttributeProfile{
@@ -218,6 +266,29 @@ func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
 	}
 }
 
+func TestNewAttributeFromInlineWithEmptyRule(t *testing.T) {
+	attrID := "*variable:*req.Category:call_&*req.OriginID;*constant::*rated"
+	expAttrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       attrID,
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Category",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("call_;*req.OriginID", utils.InfieldSep),
+			},
+		},
+	}
+	expErr := "empty path in inline AttributeProfile <*variable:*req.Category:call_&*req.OriginID;*constant::*rated>"
+	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err != nil && err.Error() != expErr {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
+	}
+}
+
 func TestLibAttributesTenantIDInLine(t *testing.T) {
 	ap := &AttributeProfile{
 		Tenant:   "cgrates.org",
@@ -261,5 +332,135 @@ func TestEngineAttributeProfilesSort(t *testing.T) {
 	unsorted.Sort()
 	if !cmp.Equal(unsorted, expected) {
 		t.Errorf("Sort failed. Expected %v, got %v", expected, unsorted)
+	}
+}
+
+func TestAttributeClone(t *testing.T) {
+	tests := []struct {
+		name      string
+		attribute *Attribute
+	}{
+		{
+			name: "Complete Attribute",
+			attribute: &Attribute{
+				FilterIDs: []string{"AttrFltr1", "AttrFltr2"},
+				Path:      utils.MetaReq + utils.NestingSep + "Category",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("call_;*req.OriginID", utils.InfieldSep),
+			},
+		},
+		{
+			name: "Nil Fields",
+			attribute: &Attribute{
+				FilterIDs: nil,
+				Path:      utils.MetaReq + utils.NestingSep + "Category",
+				Type:      utils.MetaVariable,
+				Value:     nil,
+			},
+		},
+		{
+			name:      "Nil case",
+			attribute: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.attribute.Clone()
+
+			if !reflect.DeepEqual(result, tt.attribute) {
+				t.Errorf("Clone() = %v, want %v", result, tt.attribute)
+			}
+
+			if result != nil && result == tt.attribute {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestAttributeProfileClone(t *testing.T) {
+	tests := []struct {
+		name        string
+		attrProfile *AttributeProfile
+	}{
+		{
+			name: "Complete AttributeProfile",
+			attrProfile: &AttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_ID",
+				Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+				FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2026, 4, 14, 14, 35, 0, 0, time.UTC),
+				},
+				Attributes: []*Attribute{
+					{
+						Path:  utils.MetaReq + utils.NestingSep + "Account",
+						Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+					},
+				},
+				Weight: 20,
+			},
+		},
+		{
+			name: "Nil fields",
+			attrProfile: &AttributeProfile{
+				Tenant:             "cgrates.org",
+				ID:                 "ATTR_ID",
+				Contexts:           nil,
+				FilterIDs:          nil,
+				ActivationInterval: nil,
+				Attributes:         nil,
+				Weight:             20,
+			},
+		},
+		{
+			name:        "Nil case",
+			attrProfile: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.attrProfile.Clone()
+
+			if !reflect.DeepEqual(result, tt.attrProfile) {
+				t.Errorf("Clone() = %v, want %v", result, tt.attrProfile)
+			}
+
+			if result != nil && result == tt.attrProfile {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestAttributeProfileCompileError(t *testing.T) {
+	attrProfile := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "attrID",
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path: utils.MetaReq + utils.NestingSep + "Field2",
+				Type: utils.MetaSum,
+				Value: config.RSRParsers{
+					{Rules: "~*req.Field{*}"},
+				},
+			},
+		},
+	}
+	expErr := errors.New("invalid converter value in string: <*>, err: unsupported converter definition: <*>")
+	if err := attrProfile.Compile(); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected: %#v, recieved: %#v", expErr, err)
+	}
+}
+
+func TestExternalAttributeAPIError(t *testing.T) {
+	dDP := utils.MapStorage{"key": "value"}
+	_, err := externalAttributeAPI("invalid", dDP)
+	expectedErr := "url is not specified"
+	if err != nil && err.Error() != expectedErr {
+		t.Errorf("externalAttributeAPI() failed: %v", err)
 	}
 }
