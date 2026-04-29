@@ -21,6 +21,7 @@ package engine
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"runtime"
 	"slices"
 	"sync"
@@ -425,14 +426,18 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 			return nil, err
 		}
 	}
-	ts = make([]*Threshold, 0, len(tIDs))
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(tIDs))
+
+	ts = make([]*Threshold, 0, len(itemIDs))
 	weights := make(map[string]float64) // stores sorting weights by tID
-	for tID := range tIDs {
+	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			thresholdProfileLockKey(tnt, tID))
+			thresholdProfileLockKey(tnt, id))
 		var tPrfl *ThresholdProfile
-		if tPrfl, err = tS.dm.GetThresholdProfile(ctx, tnt, tID, true, true, utils.NonTransactional); err != nil {
+		if tPrfl, err = tS.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
 				err = nil
