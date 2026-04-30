@@ -2533,6 +2533,15 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 			return x.(Actions), nil // Action is cloned on ltcache side
 		}
 	}
+	// if actionID is *sy_publish or *log create an action for it
+	if key == utils.MetaSyPublish || key == utils.MetaLog {
+		return Actions{
+			&Action{
+				Id:         key,
+				ActionType: key,
+			},
+		}, nil
+	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return

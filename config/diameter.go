@@ -47,6 +47,8 @@ type DiameterAgentCfg struct {
 	SyncedConnReqs          bool
 	ASRTemplate             string
 	RARTemplate             string
+	SNRTemplate             string
+	SLRTemplate             string
 	ForcedDisconnect        string
 	ConnStatusStatQueueIDs  []string
 	ConnStatusThresholdIDs  []string
@@ -119,6 +121,12 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg, separator 
 	if jc.RARTemplate != nil {
 		da.RARTemplate = *jc.RARTemplate
 	}
+	if jc.SNRTemplate != nil {
+		da.SNRTemplate = *jc.SNRTemplate
+	}
+	if jc.SLRTemplate != nil {
+		da.SLRTemplate = *jc.SLRTemplate
+	}
 	if jc.ForcedDisconnect != nil {
 		da.ForcedDisconnect = *jc.ForcedDisconnect
 	}
@@ -182,6 +190,8 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) map[string]any {
 		utils.SyncedConnReqsCfg:          da.SyncedConnReqs,
 		utils.ASRTemplateCfg:             da.ASRTemplate,
 		utils.RARTemplateCfg:             da.RARTemplate,
+		utils.SNRTemplateCfg:             da.SNRTemplate,
+		utils.SLRTemplateCfg:             da.SLRTemplate,
 		utils.ForcedDisconnectCfg:        da.ForcedDisconnect,
 		utils.ConnHealthCheckIntervalCfg: da.ConnHealthCheckInterval.String(),
 		utils.StatSConnsCfg:              stripInternalConns(da.StatSConns),
@@ -237,6 +247,8 @@ func (da *DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		SyncedConnReqs:          da.SyncedConnReqs,
 		ASRTemplate:             da.ASRTemplate,
 		RARTemplate:             da.RARTemplate,
+		SNRTemplate:             da.SNRTemplate,
+		SLRTemplate:             da.SLRTemplate,
 		ForcedDisconnect:        da.ForcedDisconnect,
 		ConnStatusStatQueueIDs:  slices.Clone(da.ConnStatusStatQueueIDs),
 		ConnStatusThresholdIDs:  slices.Clone(da.ConnStatusThresholdIDs),

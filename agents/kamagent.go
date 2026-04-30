@@ -519,3 +519,8 @@ func (*KamailioAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string
 func (*KamailioAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }
+
+// V1SpendingStatusNotification is used to implement the sessions.BiRPClient interface
+func (*KamailioAgent) V1SpendingStatusNotification(*context.Context, *utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}

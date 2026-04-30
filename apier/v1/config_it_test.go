@@ -155,6 +155,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"stale_chan_max_extra_usage": "0",
 		"session_ttl":                "0",
 		"session_indexes":            []any{utils.OriginID},
+		utils.ApierSConnsCfg:         []any{},
 		"attributes_conns":           []any{utils.MetaLocalHost},
 		"cdrs_conns":                 []any{utils.MetaInternal},
 		"chargers_conns":             []any{utils.MetaInternal},
@@ -188,6 +189,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		var empty []string
 		exp = map[string]any{
 			"enabled":               true,
+			utils.ApierSConnsCfg:    empty,
 			"chargers_conns":        []string{utils.MetaInternal},
 			"rals_conns":            []string{utils.MetaInternal},
 			"resources_conns":       []string{utils.MetaLocalHost},
@@ -240,6 +242,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 	exp := map[string]any{
 		"enabled":                    true,
+		utils.ApierSConnsCfg:         []any{},
 		"chargers_conns":             []any{utils.MetaInternal},
 		"rals_conns":                 []any{utils.MetaInternal},
 		"resources_conns":            []any{utils.MetaLocalHost},
@@ -280,6 +283,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		var empty []string
 		exp = map[string]any{
 			"enabled":                    true,
+			utils.ApierSConnsCfg:         empty,
 			"chargers_conns":             []string{utils.MetaInternal},
 			"rals_conns":                 []string{utils.MetaInternal},
 			"resources_conns":            []string{utils.MetaLocalHost},

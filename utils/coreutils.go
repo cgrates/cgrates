@@ -414,18 +414,22 @@ func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]str
 	return time.ParseDuration(durStr)
 }
 
+// ConcatenatedKey joins strings in 1 string seperated by ":"
 func ConcatenatedKey(keyVals ...string) string {
 	return strings.Join(keyVals, ConcatenatedKeySep)
 }
 
+// SplitConcatenatedKey splits key by ":"
 func SplitConcatenatedKey(key string) []string {
 	return strings.Split(key, ConcatenatedKeySep)
 }
 
+// InfieldJoin joins strings in 1 string seperated by ";"
 func InfieldJoin(vals ...string) string {
 	return strings.Join(vals, InfieldSep)
 }
 
+// InfieldSplit splits val by ";"
 func InfieldSplit(val string) []string {
 	return strings.Split(val, InfieldSep)
 }

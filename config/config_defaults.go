@@ -669,6 +669,7 @@ const CGRATES_CFG_JSON = `
 
 "sessions": {
 	"enabled": false,			// starts the session service: <true|false>
+	"apiers_conns": [],			// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
 	"chargers_conns": [],			// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	"rals_conns": [],			// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],			// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
@@ -792,6 +793,8 @@ const CGRATES_CFG_JSON = `
 	"synced_conn_requests": false,					// process one request at the time per connection
 	"asr_template": "",						// enable AbortSession message being sent to client on DisconnectSession
 	"rar_template": "",						// template used to build the Re-Auth-Request
+	"slr_template": "",						// default SLR template 
+	"snr_template": "",						// template used to build the Spending-Status-Notification-Request
 	"forced_disconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
 	"conn_status_stat_queue_ids": [],				// StatQueue IDs for connection status events
 	"conn_status_threshold_ids": [],				// Threshold IDs for connection status events
@@ -1222,6 +1225,42 @@ const CGRATES_CFG_JSON = `
 			 "value": "~*vars.*appid", "mandatory": true},
 		{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
 			"value": "0"},
+	],
+	"*slr": [
+		{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+			"value": "~*req.Session-Id", "mandatory": true},
+		{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+			"value": "~*req.Origin-Host", "mandatory": true},
+		{"tag": "OriginRealm", "path": "*cgreq.OriginRealm", "type": "*variable",
+			"value": "~*req.Origin-Realm", "mandatory": true},
+		{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+			"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+		{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
+			"value": "*sy"},
+		{"tag": "BalanceIDPolicyFilter", "path": "*opts.*syPolicyFilters", "type": "*group",
+			"value": "*string:~*asm.BalanceSummaries.*default.ID:balance_data", "mandatory": true}
+	],
+	"*snr": [
+		{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+			"value": "~*req.Session-Id", "mandatory": true},
+		{"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+			"value": "~*req.Origin-Host", "mandatory": true},
+		{"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+			"value": "~*req.Origin-Realm", "mandatory": true},
+		{"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+			"value": "~*req.Destination-Realm", "mandatory": true},
+		{"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+			"value": "~*req.Destination-Host", "mandatory": true},
+		{"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+			 "value": "~*vars.*appid", "mandatory": true},
+		{"tag": "Policy-Counter-Identifier", "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Identifier", "type": "*group", 
+			"value": "Monthly", "new_branch": true},
+		{"tag": "Policy-Counter-Status", "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Status", "type": "*group", 
+			"value": "512KBPS"},
+        {"tag": "Pending-Policy-Counter-Information-Status", "path": "*diamreq.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status", "type": "*group", 
+			"value": "30GB"},
+        {"tag": "Pending-Policy-Counter-Information-Status-Change-Time", "path": "*diamreq.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time", "type": "*datetime", 
+			"value": "*now"}
 	],
 	"*dmr": [  // used by RadiusAgent when sending Disconnect message towards the client
 		{"tag": "User-Name", "path": "*radDAReq.User-Name", "type": "*variable", 

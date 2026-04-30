@@ -1,0 +1,710 @@
+{
+  "general": {
+    "node_id": "SyWithBackup",
+    "log_level": 7
+  },
+  "schedulers": {
+    "enabled": true,
+  },
+  "data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017
+  },
+  "stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017,
+    "db_password": ""
+  },
+  "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+  },
+  "filters": {
+    "apiers_conns": ["*internal"]
+  },
+  "thresholds": {
+    "enabled": true
+  },
+  "sessions": {
+    "enabled": true,
+    "apiers_conns": ["*internal"],
+    "thresholds_conns": ["*birpc_internal"],
+    "chargers_conns": ["*internal"],
+    "rals_conns": ["*internal"],
+    "backup_interval": "-1"
+  },
+  "chargers": {
+    "enabled": true,
+    "string_indexed_fields": ["*req.Account"]
+  },
+  "rals": {
+    "enabled": true,
+    "thresholds_conns": ["*internal"],
+    "max_computed_usage": {
+      "*data": "10737418"
+    }
+  },
+  "diameter_agent": {
+    "enabled": true,
+    "listeners": [
+      {
+        "address": "0.0.0.0:3868"
+      }
+    ],
+    "sessions_conns": ["*birpc_internal"],
+    "snr_template": "*snr",
+    "request_processors": [
+      {
+        "id": "data_init",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.CC-Request-Type:1",
+          "*string:~*req.Auth-Application-Id:4"
+        ],
+        "flags": ["*initiate", "*accounts", "*log"],
+        "request_fields": [
+          {
+            "tag": "ToR",
+            "path": "*cgreq.ToR",
+            "type": "*constant",
+            "value": "*data"
+          },
+          {
+            "tag": "Tenant",
+            "path": "*cgreq.Tenant",
+            "type": "*constant",
+            "value": "cgrates.org"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+          {
+            "tag": "SetupTime",
+            "path": "*cgreq.SetupTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "AnswerTime",
+            "path": "*cgreq.AnswerTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid"
+          },
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "data"
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]",
+            "mandatory": true
+          },
+
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC",
+            "mandatory": true
+          },
+          {
+            "tag": "Subject",
+            "path": "*cgreq.Subject",
+            "type": "*variable",
+            "value": "~*req.Service-Information.PS-Information.Called-Station-Id"
+          },
+          {
+            "tag": "Usage",
+            "path": "*cgreq.Usage",
+            "type": "*constant",
+            "value": "2048"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "CCATemplate",
+            "type": "*template",
+            "value": "*cca"
+          },
+
+          {
+            "tag": "RatingGroup",
+            "path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
+            "type": "*constant",
+            "value": "1"
+          },
+          {
+            "tag": "CCTotalOctets1",
+            "path": "*rep.Multiple-Services-Credit-Control.Granted-Service-Unit.CC-Total-Octets",
+            "type": "*constant",
+            "value": "9999999"
+          },
+          {
+            "tag": "GrantedUsage",
+            "path": "*rep.Multiple-Services-Credit-Control.Validity-Time",
+            "type": "*constant",
+            "value": "600"
+          },
+        ]
+      },
+
+      {
+        "id": "data_update",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.CC-Request-Type:2"
+        ],
+        "flags": ["*update", "*accounts", "*log"],
+        "request_fields": [
+          {
+            "tag": "ToR",
+            "path": "*cgreq.ToR",
+            "type": "*constant",
+            "value": "*data"
+          },
+          {
+            "tag": "Tenant",
+            "path": "*cgreq.Tenant",
+            "type": "*constant",
+            "value": "cgrates.org"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC",
+            "mandatory": true
+          },
+
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid"
+          },
+
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "data"
+          },
+
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]",
+            "mandatory": true
+          },
+          {
+            "tag": "SetupTime",
+            "path": "*cgreq.SetupTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "AnswerTime",
+            "path": "*cgreq.AnswerTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+
+          {
+            "tag": "Usage",
+            "path": "*cgreq.Usage",
+            "type": "*sum",
+            "value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "CCATemplate",
+            "type": "*template",
+            "value": "*cca"
+          },
+          {
+            "tag": "RatingGroup",
+            "path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
+            "type": "*constant",
+            "value": "1"
+          },
+          {
+            "tag": "CCTotalOctets1",
+            "path": "*rep.Multiple-Services-Credit-Control.Granted-Service-Unit.CC-Total-Octets",
+            "type": "*constant",
+            "value": "9999999"
+          },
+          {
+            "tag": "GrantedUsage",
+            "path": "*rep.Multiple-Services-Credit-Control.Validity-Time",
+            "type": "*constant",
+            "value": "600"
+          },
+        ]
+      },
+
+      {
+        "id": "data_terminate",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.CC-Request-Type:3"
+        ],
+        "flags": ["*terminate", "*accounts", "*log"],
+        "request_fields": [
+          {
+            "tag": "ToR",
+            "path": "*cgreq.ToR",
+            "type": "*constant",
+            "value": "*data"
+          },
+          {
+            "tag": "Tenant",
+            "path": "*cgreq.Tenant",
+            "type": "*constant",
+            "value": "cgrates.org"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandat ory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid"
+          },
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "data"
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]",
+            "mandatory": true
+          },
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC",
+            "mandatory": true
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "CCATemplate",
+            "type": "*template",
+            "value": "*cca"
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          }
+        ]
+      },
+      {
+        "id": "Sy_Initial_SLR",
+        "filters": [
+          "*string:~*vars.*cmd:SLR",
+          "*string:~*req.SL-Request-Type:0" // initial request
+        ],
+        "flags": ["*log", "*initiate"],
+        "request_fields": [
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "mandatory": true,
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*sy"
+          },
+          {
+            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "FailedAVP", // error if session exists
+            "path": "*rep.Failed-AVP",
+            "filters": ["*string:~*cgrep.Error:EXISTS"],
+            "type": "*variable",
+            "value": "~*req.SL-Request-Type"
+          },
+          {
+            "tag": "ResultCode", // error if session exists
+            "path": "*rep.Result-Code",
+            "filters": ["*string:~*cgrep.Error:EXISTS"],
+            "type": "*constant",
+            "value": "5004", // DIAMETER_INVALID_AVP_VALUE
+            "blocker": true
+          },
+          {
+            "tag": "Session-Id",
+            "path": "*rep.Session-Id",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Auth-Application-Id",
+            "path": "*rep.Auth-Application-Id",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Origin-Host",
+            "path": "*rep.Origin-Host",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "Origin-Realm",
+            "path": "*rep.Origin-Realm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          },
+          {
+            "tag": "Policy-Counter-Identifier",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier",
+            "type": "*group",
+            "value": "Monthly",
+            "new_branch": true
+          },
+          {
+            "tag": "Policy-Counter-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status-Change-Time",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time",
+            "type": "*datetime",
+            "value": "*now"
+          }
+        ]
+      },
+      {
+        "id": "Sy_Intermediate_SLR",
+        "filters": [
+          "*string:~*vars.*cmd:SLR",
+          "*string:~*req.SL-Request-Type:1" // intermediate request
+        ],
+        "flags": ["*log", "*update"],
+        "request_fields": [
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "mandatory": true,
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*sy"
+          },
+          {
+            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters",
+            "type": "*group",
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "Session-Id",
+            "path": "*rep.Session-Id",
+            "type": "*variable",
+            "value": "~*req.Session-Id"
+          },
+          {
+            "tag": "Auth-Application-Id",
+            "path": "*rep.Auth-Application-Id",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id"
+          },
+          {
+            "tag": "Origin-Host",
+            "path": "*rep.Origin-Host",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+          {
+            "tag": "Origin-Realm",
+            "path": "*rep.Origin-Realm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm"
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          },
+          {
+            "tag": "Policy-Counter-Identifier",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier",
+            "type": "*group",
+            "value": "Monthly",
+            "new_branch": true
+          },
+          {
+            "tag": "Policy-Counter-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status-Change-Time",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time",
+            "type": "*datetime",
+            "value": "*now"
+          }
+        ]
+      },
+      {
+        "id": "Sy_Terminate_STR",
+        "filters": ["*string:~*vars.*cmd:STR"],
+        "flags": ["*log", "*terminate"],
+        "request_fields": [
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*sy"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "Session-Id",
+            "path": "*rep.Session-Id",
+            "type": "*variable",
+            "value": "~*req.Session-Id"
+          },
+          {
+            "tag": "Origin-Host",
+            "path": "*rep.Origin-Host",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+          {
+            "tag": "Origin-Realm",
+            "path": "*rep.Origin-Realm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm"
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          }
+        ]
+      }
+    ]
+  },
+  "templates": {
+    "*cca": [
+      {
+        "tag": "SessionId",
+        "path": "*rep.Session-Id",
+        "type": "*variable",
+        "value": "~*req.Session-Id",
+        "mandatory": true
+      },
+      {
+        "tag": "ResultCode",
+        "path": "*rep.Result-Code",
+        "type": "*constant",
+        "value": "2001"
+      },
+      {
+        "tag": "OriginHost",
+        "path": "*rep.Origin-Host",
+        "type": "*variable",
+        "value": "~*vars.OriginHost",
+        "mandatory": true
+      },
+      {
+        "tag": "OriginRealm",
+        "path": "*rep.Origin-Realm",
+        "type": "*variable",
+        "value": "~*vars.OriginRealm",
+        "mandatory": true
+      },
+      {
+        "tag": "AuthApplicationId",
+        "path": "*rep.Auth-Application-Id",
+        "type": "*variable",
+        "value": "~*vars.*appid",
+        "mandatory": true
+      },
+      {
+        "tag": "CCRequestType",
+        "path": "*rep.CC-Request-Type",
+        "type": "*variable",
+        "value": "~*req.CC-Request-Type",
+        "mandatory": true
+      },
+      {
+        "tag": "CCRequestNumber",
+        "path": "*rep.CC-Request-Number",
+        "type": "*variable",
+        "value": "~*req.CC-Request-Number",
+        "mandatory": true
+      }
+    ]
+  }
+}

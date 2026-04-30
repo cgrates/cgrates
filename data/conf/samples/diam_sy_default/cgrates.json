@@ -1,0 +1,246 @@
+{
+  "general": {
+    "log_level": 7
+  },
+  "schedulers": {
+    "enabled": true
+  },
+  "data_db": {
+    "db_type": "*internal"
+  },
+  "stor_db": {
+    "db_type": "*internal"
+  },
+  "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*localhost"]
+  },
+  "filters": {
+    "apiers_conns": ["*localhost"]
+  },
+  "thresholds": {
+    "enabled": true
+  },
+
+  "rpc_conns": {
+    "*bijson_localhost_thresholds": {
+      "conns": [
+        {
+          "address": "127.0.0.1:2014",
+          "transport": "*birpc_json"
+        }
+      ]
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "apiers_conns": ["*localhost"],
+    // "thresholds_conns": ["*birpc_internal"],
+    "thresholds_conns": ["*bijson_localhost_thresholds"],
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"]
+  },
+  "chargers": {
+    "enabled": true,
+    "string_indexed_fields": ["*req.Account"]
+  },
+  "rals": {
+    "enabled": true,
+    "thresholds_conns": ["*localhost"],
+    "max_computed_usage": {
+      "*data": "10737418"
+    }
+  },
+  "diameter_agent": {
+    "enabled": true,
+    "listeners": [
+      {
+        "address": "0.0.0.0:3868"
+      }
+    ],
+    "sessions_conns": ["*bijson_localhost"],
+    "slr_template": "*slr",
+    "request_processors": [
+      {
+        "id": "Sy_Initial_SLR",
+        "filters": [
+          "*string:~*vars.*cmd:SLR",
+          "*string:~*req.SL-Request-Type:0" // initial request
+        ],
+        "flags": ["*log", "*initiate"],
+        "request_fields": [
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "mandatory": true,
+            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*sy"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "FailedAVP", // error if session exists
+            "path": "*rep.Failed-AVP",
+            "filters": ["*string:~*cgrep.Error:EXISTS"],
+            "type": "*variable",
+            "value": "~*req.SL-Request-Type"
+          },
+          {
+            "tag": "ResultCode", // error if session exists
+            "path": "*rep.Result-Code",
+            "filters": ["*string:~*cgrep.Error:EXISTS"],
+            "type": "*constant",
+            "value": "5004", // DIAMETER_INVALID_AVP_VALUE
+            "blocker": true
+          },
+          {
+            "tag": "Session-Id",
+            "path": "*rep.Session-Id",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Auth-Application-Id",
+            "path": "*rep.Auth-Application-Id",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Origin-Host",
+            "path": "*rep.Origin-Host",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "Origin-Realm",
+            "path": "*rep.Origin-Realm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          },
+          {
+            "tag": "Policy-Counter-Identifier",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier",
+            "type": "*group",
+            "value": "Monthly",
+            "new_branch": true
+          },
+          {
+            "tag": "Policy-Counter-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status",
+            "type": "*group",
+            "value": "30GB"
+          },
+          {
+            "tag": "Pending-Policy-Counter-Information-Status-Change-Time",
+            "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time",
+            "type": "*datetime",
+            "value": "*now"
+          }
+        ]
+      },
+      {
+        "id": "Sy_Terminate_STR",
+        "filters": ["*string:~*vars.*cmd:STR"],
+        "flags": ["*log", "*terminate"],
+        "request_fields": [
+          {
+            "tag": "OriginID",
+            "path": "*cgreq.OriginID",
+            "type": "*variable",
+            "value": "~*req.Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.Origin-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*sy"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "Session-Id",
+            "path": "*rep.Session-Id",
+            "type": "*variable",
+            "value": "~*req.Session-Id"
+          },
+          {
+            "tag": "Origin-Host",
+            "path": "*rep.Origin-Host",
+            "type": "*variable",
+            "value": "~*req.Origin-Host"
+          },
+          {
+            "tag": "Origin-Realm",
+            "path": "*rep.Origin-Realm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm"
+          },
+          {
+            "tag": "ResultCode",
+            "path": "*rep.Result-Code",
+            "type": "*constant",
+            "value": "2001"
+          }
+        ]
+      }
+    ]
+  }
+}

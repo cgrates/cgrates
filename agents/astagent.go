@@ -492,3 +492,8 @@ func (*AsteriskAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string
 func (sma *AsteriskAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }
+
+// V1SpendingStatusNotification is used to implement the sessions.BiRPClient interface
+func (sma *AsteriskAgent) V1SpendingStatusNotification(*context.Context, *utils.CGREvent, *string) error {
+	return utils.ErrNotImplemented
+}

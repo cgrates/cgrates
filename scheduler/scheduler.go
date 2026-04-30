@@ -103,7 +103,7 @@ func (s *Scheduler) Loop() {
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
-			go a0.Execute(s.fltrS, utils.SchedulerS)
+			go a0.Execute(s.fltrS, utils.SchedulerS, nil)
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
 			if strings.HasPrefix(a0.Timing.Timing.StartTime, utils.PlusChar) {

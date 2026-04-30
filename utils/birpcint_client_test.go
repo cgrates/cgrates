@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"net"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -100,5 +101,54 @@ func TestNewBiJSONrpcClient(t *testing.T) {
 			}
 
 		})
+	}
+}
+func TestOnBiJSONConnectDisconnect(t *testing.T) {
+	sClinents := NewServiceBiRPCClients()
+	//connect BiJSON
+	client := &birpc.Service{}
+	sClinents.OnBiJSONConnect(client, 0)
+
+	//we'll change the connection identifier just for testing
+	sClinents.biJClnts[client] = "test_conn"
+	sClinents.biJIDs = nil
+
+	expected := NewServiceBiRPCClients()
+	expected.biJClnts[client] = "test_conn"
+	expected.biJIDs = nil
+
+	if !reflect.DeepEqual(sClinents, expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, sClinents)
+	}
+
+	//Disconnect BiJSON
+	sClinents.OnBiJSONDisconnect(client)
+	delete(expected.biJClnts, client)
+	if !reflect.DeepEqual(sClinents, expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, sClinents)
+	}
+}
+
+type testRPCClientConnection struct{}
+
+func (*testRPCClientConnection) Call(string, any, any) error { return nil }
+
+type mockConnWarnDisconnect1 struct {
+	*testRPCClientConnection
+}
+
+func (mk *mockConnWarnDisconnect1) Call(ctx *context.Context, method string, args any, rply any) error {
+	return ErrNotImplemented
+}
+
+func TestBiJClntID(t *testing.T) {
+	client := &mockConnWarnDisconnect1{}
+	sClinents := NewServiceBiRPCClients()
+	sClinents.biJClnts = map[birpc.ClientConnector]string{
+		client: "First_connector",
+	}
+	expected := "First_connector"
+	if rcv := sClinents.BiJClntID(client); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 }
