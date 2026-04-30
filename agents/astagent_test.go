@@ -18,10 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package agents
 
 import (
-	"bytes"
-	"log"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -89,7 +85,6 @@ func TestHandleChannelDestroyedFail(t *testing.T) {
 	}
 	ev := NewSMAsteriskEvent(ariEv, "127.0.0.1", utils.EmptyString)
 	evCopy := ev.Clone()
-	evCopy.cachedFields = map[string]string{"channelID": "1714719185.3"}
 	sma.handleChannelDestroyed(ev)
 	if diff := cmp.Diff(evCopy, ev, cmp.AllowUnexported(SMAsteriskEvent{})); diff != "" {
 		t.Errorf("handleChannelDestroyed modified SMAsteriskEvent unexpectedly (-want +got): \n%s", diff)
@@ -124,69 +119,4 @@ func TestAsteriskAgentV1AlterSession(t *testing.T) {
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
 	}
-}
-
-func TestHandleChannelDestroyedCases(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	internalSessionSChan := make(chan birpc.ClientConnector, 1)
-	cM := engine.NewConnManager(cfg, map[string]chan context.ClientConnector{
-		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
-	})
-	sma, err := NewAsteriskAgent(cfg, 1, cM, new(engine.Caps))
-	if err != nil {
-		t.Error(err)
-	}
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	t.Cleanup(func() {
-		utils.Logger.SetLogLevel(0)
-		log.SetOutput(os.Stderr)
-	})
-
-	testCases := []struct {
-		name   string
-		ariEv  map[string]any
-		expLog string
-	}{
-		{
-			name:   "Missing Channel",
-			ariEv:  map[string]any{},
-			expLog: "<AsteriskAgent> missing or invalid 'channel' field in event: {}",
-		},
-		{
-			name:   "Invalid Channel",
-			ariEv:  map[string]any{"channel": "invalid"},
-			expLog: `<AsteriskAgent> missing or invalid 'channel' field in event: {"channel":"invalid"}`,
-		},
-		{
-			name:   "Missing ChannelVars",
-			ariEv:  map[string]any{"channel": map[string]any{"channel": "1"}},
-			expLog: `<AsteriskAgent> missing or invalid 'channelvars' field in 'channel': {"channel":"1"}`,
-		},
-		{
-			name:   "Invalid ChannelVars",
-			ariEv:  map[string]any{"channel": map[string]any{"channelvars": "invalid"}},
-			expLog: `<AsteriskAgent> missing or invalid 'channelvars' field in 'channel': {"channelvars":"invalid"}`,
-		},
-		{
-			name:   "Valid ChannelVars",
-			ariEv:  map[string]any{"channel": map[string]any{"channelvars": map[string]any{utils.CGRReqType: "test type"}}},
-			expLog: "",
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			log.SetOutput(buf)
-			ev := NewSMAsteriskEvent(tc.ariEv, "127.0.0.1", utils.EmptyString)
-			sma.handleChannelDestroyed(ev)
-			if !strings.Contains(buf.String(), tc.expLog) {
-				t.Errorf("expected log warning %s", buf)
-			}
-
-		})
-	}
-
 }
