@@ -3029,6 +3029,62 @@ func TestAcountSetBalanceAction(t *testing.T) {
 	}
 }
 
+func TestAcountSetBalanceActionNilBalanceMap(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSharedGroups: {
+			Limit:     3,
+			StaticTTL: true,
+		},
+	}
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	SetDataStorage(dm)
+	acc := &Account{
+		ID:         "vdf:minu",
+		BalanceMap: nil,
+	}
+	fltrs := NewFilterS(cfg, nil, nil)
+	a := &Action{
+		Balance: &BalanceFilter{
+			Uuid: utils.StringPointer("uuid1"),
+			ID:   utils.StringPointer("id"),
+			Type: utils.StringPointer("b_type"),
+			Value: &utils.ValueFormula{
+				Method: "value_method",
+			},
+			SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+		},
+	}
+
+	if err := dm.dataDB.SetSharedGroupDrv(&SharedGroup{
+		Id:        "shrdGroup",
+		MemberIds: utils.StringMap{}}); err != nil {
+		t.Error(err)
+	}
+
+	expErr := "cannot find balance with uuid: <uuid1>"
+	if err = acc.setBalanceAction(a, fltrs); err != nil && err.Error() != expErr {
+		t.Error(err)
+	}
+	exp := utils.StringMap{}
+
+	if val, err := dm.dataDB.GetSharedGroupDrv("shrdGroup"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val.MemberIds, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val.MemberIds))
+	}
+	if err = acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
+		t.Error(err)
+	}
+}
 func TestAccGetAllBalancesForPrefixLogg(t *testing.T) {
 	tmp := Cache
 	utils.Logger.SetLogLevel(4)
@@ -3147,6 +3203,42 @@ func TestAccSetBalanceAction(t *testing.T) {
 	}
 }
 
+func TestAccSetBalanceActionNilBalanceType(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	a := &Action{
+		ActionType: "*topup",
+		Balance: &BalanceFilter{
+			ID:    utils.StringPointer(utils.MetaDefault),
+			Type:  nil,
+			Value: &utils.ValueFormula{Static: 10},
+			SharedGroups: &utils.StringMap{
+				"string1": true,
+			}},
+	}
+	acc := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{
+					ID:             "voice1",
+					Weight:         20,
+					DestinationIDs: utils.StringMap{utils.MetaAny: false},
+					precision:      0,
+					SharedGroups:   utils.NewStringMap("SG_TEST"),
+					Value:          3600},
+			},
+		},
+	}
+	expErr := "missing balance type"
+	Cache.Set(utils.CacheSharedGroups, "string1", nil, []string{}, false, utils.NonTransactional)
+	if err := acc.setBalanceAction(a, nil); err != nil && err.Error() != expErr {
+		t.Error(err)
+	}
+}
 func TestAccEnableAccountAction(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmpDm := dm
@@ -3557,5 +3649,110 @@ func TestAccountFieldAsInterfaceNilAccount(t *testing.T) {
 	_, err := acc.FieldAsInterface(fldPath)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected error %v, got %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestAccountSummaryClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		accSummary *AccountSummary
+	}{
+		{
+			name: "Complete AccountSummary",
+			accSummary: &AccountSummary{
+				Tenant: "cgrates.org",
+				ID:     "CGRATES_1",
+				BalanceSummaries: BalanceSummaries{
+					&BalanceSummary{
+						ID:       "summary_1",
+						UUID:     "summary_uuid",
+						Type:     "*voice",
+						Initial:  2.0,
+						Value:    12.2,
+						Disabled: true,
+					},
+					&BalanceSummary{
+						ID:       "summary_2",
+						UUID:     "summary_uuid2",
+						Type:     "*voice",
+						Initial:  4.0,
+						Value:    20.2,
+						Disabled: false,
+					},
+				},
+				AllowNegative: false,
+				Disabled:      false,
+			},
+		},
+		{
+			name: "No Tenant",
+			accSummary: &AccountSummary{
+				ID: "CGRATES_1",
+				BalanceSummaries: BalanceSummaries{
+					&BalanceSummary{
+						ID:       "summary_1",
+						UUID:     "summary_uuid",
+						Type:     "*voice",
+						Initial:  2.0,
+						Value:    12.2,
+						Disabled: true,
+					},
+					&BalanceSummary{
+						ID:       "summary_2",
+						UUID:     "summary_uuid2",
+						Type:     "*voice",
+						Initial:  4.0,
+						Value:    20.2,
+						Disabled: false,
+					},
+				},
+				AllowNegative: false,
+				Disabled:      false,
+			},
+		},
+		{
+			name: "Nil BalanceSummaries",
+			accSummary: &AccountSummary{
+				Tenant:           "cgrates.org",
+				ID:               "CGRATES_1",
+				BalanceSummaries: nil,
+				AllowNegative:    false,
+				Disabled:         false,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.accSummary.Clone()
+
+			if !reflect.DeepEqual(result, tt.accSummary) {
+				t.Errorf("Clone() = %v, want %v", result, tt.accSummary)
+			}
+
+			if result != nil && result == tt.accSummary {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+
+			if tt.accSummary.Tenant != result.Tenant {
+				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.Tenant, result.Tenant)
+			}
+			if tt.accSummary.ID != result.ID {
+				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.ID, result.ID)
+			}
+			if tt.accSummary.BalanceSummaries != nil {
+				if utils.ToJSON(tt.accSummary.BalanceSummaries[0]) != utils.ToJSON(result.BalanceSummaries[0]) {
+					t.Errorf("Expected: %v, recieved: %v", tt.accSummary.BalanceSummaries[0], result.BalanceSummaries[0])
+				}
+				if utils.ToJSON(tt.accSummary.BalanceSummaries[1]) != utils.ToJSON(result.BalanceSummaries[1]) {
+					t.Errorf("Expected: %v, recieved: %v", tt.accSummary.BalanceSummaries[1], result.BalanceSummaries[1])
+				}
+			}
+			if tt.accSummary.AllowNegative != result.AllowNegative {
+				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.AllowNegative, result.AllowNegative)
+			}
+			if tt.accSummary.Disabled != result.Disabled {
+				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.Disabled, result.Disabled)
+			}
+		})
 	}
 }
