@@ -29,11 +29,8 @@ import (
 )
 
 var (
-	stasisStart                = `{"application":"cgrates_auth","type":"StasisStart","timestamp":"2016-09-12T13:53:48.919+0200","args":["cgr_reqtype=*prepaid","cgr_route=supplier1", "extra1=val1", "extra2=val2"],"channel":{"id":"1473681228.6","state":"Ring","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
-	channelStateChange         = `{"application":"cgrates_auth","type":"ChannelStateChange","timestamp":"2016-09-12T13:53:52.110+0200","channel":{"id":"1473681228.6","state":"Up","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":3},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
-	channelAnsweredDestroyed   = `{"type":"ChannelDestroyed","timestamp":"2016-09-12T13:54:27.335+0200","application":"cgrates_auth","cause_txt":"Normal Clearing","channel":{"id":"1473681228.6","state":"Up","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":3},"creationtime":"2016-09-12T13:53:48.918+0200"},"cause":16}`
-	channelUnansweredDestroyed = `{"type":"ChannelDestroyed","timestamp":"2016-09-12T18:00:18.121+0200","application":"cgrates_auth","cause_txt":"Normal Clearing","channel":{"id":"1473696018.2","state":"Ring","name":"PJSIP/1002-00000002","caller":{"name":"1002","number":"1002"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T18:00:18.109+0200"},"cause":16}`
-	channelBusyDestroyed       = `{"type":"ChannelDestroyed","timestamp":"2016-09-13T12:59:48.806+0200","application":"cgrates_auth","cause_txt":"User busy","channel":{"id":"1473764378.3","state":"Ring","name":"PJSIP/1001-00000002","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":4},"creationtime":"2016-09-13T12:59:38.839+0200"},"cause":17}`
+	stasisStart        = `{"application":"cgrates_auth","type":"StasisStart","timestamp":"2016-09-12T13:53:48.919+0200","args":["cgr_reqtype=*prepaid","cgr_route=supplier1", "extra1=val1", "extra2=val2"],"channel":{"id":"1473681228.6","state":"Ring","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
+	channelStateChange = `{"application":"cgrates_auth","type":"ChannelStateChange","timestamp":"2016-09-12T13:53:52.110+0200","channel":{"id":"1473681228.6","state":"Up","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":3},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
 )
 
 func TestSMAParseStasisArgs(t *testing.T) {
@@ -477,58 +474,6 @@ func TestRequestType(t *testing.T) {
 	}
 }
 
-func TestSMAsteriskEventUpdateCGREvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event:  make(map[string]any),
-	}
-
-	testCases := []struct {
-		smaEv     *SMAsteriskEvent
-		wantErr   bool
-		eventName string
-	}{
-		{
-			smaEv: &SMAsteriskEvent{
-				cachedFields: map[string]string{
-					eventType: ARIChannelStateChange,
-					timestamp: "2023-05-05T10:00:00Z",
-				},
-			},
-			wantErr:   false,
-			eventName: SMASessionStart,
-		},
-		{
-			smaEv: &SMAsteriskEvent{
-				cachedFields: map[string]string{
-					eventType: ARIChannelDestroyed,
-					timestamp: "2023-05-05T10:00:00Z",
-				},
-			},
-			wantErr:   false,
-			eventName: SMASessionTerminate,
-		},
-	}
-
-	for _, testCase := range testCases {
-		err := testCase.smaEv.UpdateCGREvent(cgrEv)
-		if testCase.wantErr && err == nil {
-			t.Fatal("expected an error, but got no error")
-		}
-		if !testCase.wantErr && err != nil {
-			t.Fatalf("expected no error, but got error: %v", err)
-		}
-
-		if !testCase.wantErr {
-			if eventName, ok := cgrEv.Event[utils.EventName]; !ok || eventName != testCase.eventName {
-				t.Fatalf("expected event name: %s, but got: %v", testCase.eventName, eventName)
-			}
-		}
-
-	}
-}
-
 func TestRestoreAndUpdateFieldsOk(t *testing.T) {
 	ariEv := map[string]any{
 		"application": "cgrates_auth",
@@ -657,7 +602,7 @@ func TestRestoreAndUpdateFieldsFail(t *testing.T) {
 			utils.Source:       utils.AsteriskAgent,
 		},
 	}
-	expErr := "channelvars not found in event <map[accountcode: caller:map[name:1001 number:1001] connected:map[name: number:1002] creationtime:2024-05-03T08:53:05.234+0200 dialplan:map[app_data: app_name: context:internal exten:1002 priority:9] id:1714719185.3 language:en name:PJSIP/1001-00000002 protocol_id:cb1bb28866dd7d52b42484e5b38765ec@0:0:0:0:0:0:0:0 state:Up]>"
+	expErr := "channelvars not found in channel <map[accountcode: caller:map[name:1001 number:1001] connected:map[name: number:1002] creationtime:2024-05-03T08:53:05.234+0200 dialplan:map[app_data: app_name: context:internal exten:1002 priority:9] id:1714719185.3 language:en name:PJSIP/1001-00000002 protocol_id:cb1bb28866dd7d52b42484e5b38765ec@0:0:0:0:0:0:0:0 state:Up]>"
 	if err := smaEv.RestoreAndUpdateFields(&cgrEv); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, \nreceived <%+v>", expErr, err)
 	}
