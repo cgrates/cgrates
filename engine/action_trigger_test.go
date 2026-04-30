@@ -634,4 +634,49 @@ func TestUpdateActionTrigger(t *testing.T) {
 	if at.ThresholdType != oldType {
 		t.Errorf("expected ThresholdType unchanged, got %s", at.ThresholdType)
 	}
+
+	at = &ActionTrigger{
+		ID: utils.EmptyString,
+	}
+	attr = &AttrSetActionTrigger{
+		GroupID:       "",
+		ActionTrigger: map[string]any{"ThresholdType": "min_balance"},
+	}
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	expectedErr := "MANDATORY_IE_MISSING: [GroupID]"
+	if err != nil && err.Error() != expectedErr {
+		t.Errorf("Expected: %v, recieved %v", expectedErr, err)
+	}
+	if updated {
+		t.Errorf("Expected updated=false when mandatory fields missing")
+	}
+
+	at = &ActionTrigger{
+		ID: utils.EmptyString,
+	}
+	attr = &AttrSetActionTrigger{
+		GroupID:  "gr1",
+		UniqueID: "id1",
+		ActionTrigger: map[string]any{
+			"ThresholdType":  "min_balance",
+			"ThresholdValue": 10.5,
+			"Recurrent":      true,
+			"Executed":       true,
+			"MinSleep":       "1s",
+			"ExpirationDate": "2025-01-01T00:00:00Z",
+			"ActivationDate": "2024-01-01T00:00:00Z",
+			"BalanceType":    "minutes",
+			"Weight":         5,
+		},
+	}
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err != nil {
+		t.Errorf("Expected: %v, recieved %v", expectedErr, err)
+	}
+	if at.ID != attr.GroupID {
+		t.Errorf("Expected: %v, recieved: %v", attr.GroupID, at.ID)
+	}
+	if !updated {
+		t.Errorf("Expected updated=true when mandatory fields missing")
+	}
 }
