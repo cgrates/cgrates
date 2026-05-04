@@ -227,69 +227,58 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-// Will populate CGREvent with required fields restored from the channel variables
-func (smaEv *SMAsteriskEvent) RestoreAndUpdateFields(cgrEv *utils.CGREvent) error {
-	resCGREv := *cgrEv
-	// make sure the channel contains the channelvars field to be recovered
-	channvars, has := smaEv.ariEv["channel"].(map[string]any)["channelvars"].(map[string]any)
-	if !has {
-		return fmt.Errorf("channelvars not found in event <%+v>", smaEv.ariEv["channel"].(map[string]any))
+// IsCGRChannel checks whether the channel belongs to a CGRateS-managed session
+func (smaEv *SMAsteriskEvent) IsCGRChannel() bool {
+	channelData, ok := smaEv.ariEv["channel"].(map[string]any)
+	if !ok {
+		return false
 	}
-	for key, val := range channvars {
-		switch {
-		case key == utils.CGRFlags:
-			// "+" characters are converted to " " white space characters when put in channel variables, cgr_flags dont contain white spaces so we can convert them back to "+" without a problem
-			cgrFlags := strings.ReplaceAll(val.(string), " ", "+")
-			resCGREv.Event[utils.CGRFlags] = cgrFlags
-		case key == "CDR(answer)":
-			resCGREv.Event[utils.AnswerTime] = val.(string)
-		case key == "CDR(billsec)":
-			resCGREv.Event[utils.Usage] = val.(string) + "s"
-		case key == utils.CGRReqType:
-			resCGREv.Event[utils.RequestType] = val.(string)
-		default:
-			resCGREv.Event[key] = val.(string)
-		}
-
+	channvars, ok := channelData["channelvars"].(map[string]any)
+	if !ok {
+		return false
 	}
-	resCGREv.Event[utils.EventName] = SMASessionTerminate
-	resCGREv.Event[utils.DisconnectCause] = smaEv.DisconnectCause()
-
-	for k, v := range smaEv.opts {
-		resCGREv.APIOpts[k] = v
-	}
-	*cgrEv = resCGREv
-	return nil
+	rt, _ := channvars[utils.CGRReqType].(string)
+	return rt != ""
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
-	resCGREv := *cgrEv
-	switch smaEv.EventType() {
-	case ARIChannelStateChange:
-		resCGREv.Event[utils.EventName] = SMASessionStart
-		resCGREv.Event[utils.AnswerTime] = smaEv.Timestamp()
-	case ARIChannelDestroyed:
-		resCGREv.Event[utils.EventName] = SMASessionTerminate
-		resCGREv.Event[utils.DisconnectCause] = smaEv.DisconnectCause()
-		if _, hasIt := resCGREv.Event[utils.AnswerTime]; !hasIt {
-			resCGREv.Event[utils.Usage] = "0s"
-		} else if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime],
-			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-			return err
-		} else if aTime.IsZero() {
-			resCGREv.Event[utils.Usage] = "0s"
-		} else {
-			actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
-			if err != nil {
-				return err
+func (smaEv *SMAsteriskEvent) RestoreAndUpdateFields(cgrEv *utils.CGREvent) error {
+	channelData, ok := smaEv.ariEv["channel"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("missing channel field in event")
+	}
+	channvars, ok := channelData["channelvars"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("channelvars not found in channel <%+v>", channelData)
+	}
+	for key, val := range channvars {
+		sval, _ := val.(string)
+		if sval == "" {
+			continue
+		}
+		switch key {
+		case utils.CGRFlags:
+			// "+" characters are converted to " " whitespace when put in
+			// channel variables; cgr_flags don't contain whitespace so we
+			// can convert them back to "+" safely.
+			cgrEv.Event[utils.CGRFlags] = strings.ReplaceAll(sval, " ", "+")
+		case "CDR(answer)":
+			cgrEv.Event[utils.AnswerTime] = sval
+		case "CDR(billsec)":
+			if smaEv.EventType() == ARIChannelDestroyed {
+				cgrEv.Event[utils.Usage] = sval + "s"
 			}
-			resCGREv.Event[utils.Usage] = actualTime.Sub(aTime).String()
+		case utils.CGRReqType:
+			cgrEv.Event[utils.RequestType] = sval
+		default:
+			cgrEv.Event[key] = sval
 		}
 	}
-	for k, v := range smaEv.opts {
-		resCGREv.APIOpts[k] = v
+	if smaEv.EventType() == ARIChannelStateChange {
+		cgrEv.Event[utils.AnswerTime] = smaEv.Timestamp()
 	}
-	*cgrEv = resCGREv
+	if smaEv.EventType() == ARIChannelDestroyed {
+		cgrEv.Event[utils.DisconnectCause] = smaEv.DisconnectCause()
+	}
 	return nil
 }
 
