@@ -1125,3 +1125,337 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 	})
 
 }
+
+func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {"level": 7},
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*chargers": [{"ConnIDs": ["*localhost"]}],
+		"*routes":   [{"ConnIDs": ["*localhost"]}]
+	}
+},
+"chargers": {
+	"enabled": true
+},
+"routes": {
+	"enabled": true
+},
+"admins": {
+	"enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+	}
+
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
+
+	client, _ := ng.Run(t)
+
+	var reply string
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 10}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		&utils.RouteProfileWithAPIOpts{
+			RouteProfile: &utils.RouteProfile{
+				Tenant:  "cgrates.org",
+				ID:      "ROUTE_ALL",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Sorting: utils.MetaWeight,
+				Routes: []*utils.Route{
+					{
+						ID:       "vendor1",
+						Weights:  utils.DynamicWeights{{Weight: 10}},
+						Blockers: utils.DynamicBlockers{{Blocker: false}},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetRouteProfile failed: %v", err)
+	}
+
+	t.Run("standaloneEventChargersRun", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "standalone1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaRoutes:   true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; !hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to exist when ChargerS runs, got: %v", rply.RouteProfiles)
+		}
+	})
+
+	t.Run("sessionEventChargersSkipped", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "session1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaRoutes:   true,
+					utils.MetaSession:  true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be absent when *session=true, got: %v", rply.RouteProfiles)
+		}
+	})
+
+	t.Run("terminateEventChargersSkipped", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "terminate1",
+				APIOpts: map[string]any{
+					utils.MetaChargers:  true,
+					utils.MetaRoutes:    true,
+					utils.MetaTerminate: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be absent when *terminate=true, got: %v", rply.RouteProfiles)
+		}
+	})
+}
+
+func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbcfg = engine.RedisDBCfg
+	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+			"logger": {"level": 7},
+			"sessions": {
+				"enabled": true,
+				"conns": {
+					"*rates":    [{"ConnIDs": ["*localhost"]}],
+					"*chargers": [{"ConnIDs": ["*localhost"]}]
+				}
+			},
+			"rates": {
+				"enabled": true
+			},
+			"chargers": {
+				"enabled": true
+			},
+			"admins": {
+				"enabled": true
+			}
+		}`,
+		DBCfg:    dbcfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaPrimary,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 0}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		&utils.RateProfileWithAPIOpts{
+			RateProfile: &utils.RateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP_1001",
+				FilterIDs:       []string{"*string:~*req.Account:1001"},
+				Weights:         utils.DynamicWeights{{Weight: 0}},
+				MaxCostStrategy: utils.MetaMaxCostDisconnect,
+				Rates: map[string]*utils.Rate{
+					"RT_DEFAULT": {
+						ID:              "RT_DEFAULT",
+						FilterIDs:       []string{},
+						Weights:         utils.DynamicWeights{{Weight: 0}},
+						ActivationTimes: "* * * * *",
+						IntervalRates: []*utils.IntervalRate{
+							{
+								IntervalStart: utils.NewDecimalFromFloat64(0),
+								RecurrentFee:  utils.NewDecimalFromFloat64(0.01),
+								Unit:          utils.NewDecimalFromFloat64(float64(time.Minute)),
+								Increment:     utils.NewDecimalFromFloat64(float64(time.Minute)),
+							},
+						},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetRateProfile failed: %v", err)
+	}
+
+	t.Run("noRatesFlagEmptyReply", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant:  "cgrates.org",
+				ID:      "noRatesFlagEmptyReply",
+				APIOpts: map[string]any{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					utils.Usage:        "60s",
+				},
+			}, &rply)
+
+		if err != nil {
+			t.Fatalf("ProcessEvent without *rates flag failed: %v", err)
+		}
+		if len(rply.RateSCost) != 0 {
+			t.Errorf("RateSCost should be empty without *rates flag, got: %v", rply.RateSCost)
+		}
+	})
+
+	t.Run("withRatesFlagPopulatesReply", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "withRatesFlagPopulatesReply",
+				APIOpts: map[string]any{
+					utils.MetaRates: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					utils.Usage:        "60s",
+				},
+			}, &rply)
+
+		if err != nil {
+			t.Fatalf("ProcessEvent with *rates flag failed: %v", err)
+		}
+		if len(rply.RateSCost) == 0 {
+			t.Fatal("RateSCost should be populated when *rates flag is set")
+		}
+		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("expected *primary runID in RateSCost, got keys: %v", rply.RateSCost)
+		}
+		if cost != 0.01 {
+			t.Errorf("expected cost 0.01 (1min × 0.01/min), got: %v", cost)
+		}
+	})
+
+	t.Run("noMatchingRateProfileNonBlocker", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchingRateProfileNonBlocker",
+				APIOpts: map[string]any{
+					utils.MetaRates:           true,
+					utils.OptsSesBlockerError: false,
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					utils.Usage:        "60s",
+				},
+			}, &rply)
+
+		if err == nil {
+			t.Error("expected PARTIALLY_EXECUTED error, got nil")
+		} else if err.Error() != utils.ErrPartiallyExecuted.Error() {
+			t.Errorf("expected PARTIALLY_EXECUTED, got: %v", err)
+		}
+	})
+
+	t.Run("noMatchingRateProfileBlockerError", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchingRateProfileBlockerError",
+				APIOpts: map[string]any{
+					utils.MetaRates:           true,
+					utils.OptsSesBlockerError: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					utils.Usage:        "60s",
+				},
+			}, &rply)
+
+		if err == nil {
+			t.Error("expected an error with blocker=true and no matching RateProfile, got nil")
+		}
+	})
+}
