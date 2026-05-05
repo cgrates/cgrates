@@ -1,0 +1,17 @@
+
+[Unit]
+Description=Fetching packages in interval from copr api
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/{{ app_name }} -schedule={{ schedule_interval }}
+Restart=always
+RestartSec=5s
+User=www-data
+Group=www-data
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
