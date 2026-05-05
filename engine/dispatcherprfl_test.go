@@ -20,6 +20,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -337,5 +338,145 @@ func TestDispatcherHostCallErr(t *testing.T) {
 	var reply string
 	if err := dH.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
 		t.Error(err)
+	}
+}
+
+func TestDispatcherHostIDsClone(t *testing.T) {
+	tests := []struct {
+		name              string
+		dispatcherHostIDs DispatcherHostIDs
+	}{
+		{
+			name:              "Complete DispatcherHostIDs",
+			dispatcherHostIDs: DispatcherHostIDs{"testID1", "testID2"},
+		},
+		{
+			name:              "Empty DispatcherHostIDs",
+			dispatcherHostIDs: DispatcherHostIDs{},
+		},
+		{
+			name:              "Nil DispatcherHostIDs",
+			dispatcherHostIDs: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			result := tt.dispatcherHostIDs.Clone()
+
+			if !reflect.DeepEqual(result, tt.dispatcherHostIDs) {
+				t.Errorf("Clone() = %v, want %v", result, tt.dispatcherHostIDs)
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+
+			cache := tt.dispatcherHostIDs.CacheClone()
+
+			if !reflect.DeepEqual(cache, tt.dispatcherHostIDs) {
+				t.Errorf("CacheClone() = %v, want %v", cache, tt.dispatcherHostIDs)
+			}
+
+			_, ok := cache.(DispatcherHostIDs)
+			if !ok {
+				t.Errorf("CacheClone() returned type %T, want DispatcherHostIDs", cache)
+				return
+			}
+		})
+	}
+}
+
+func TestDispatcherProfileClone(t *testing.T) {
+	tests := []struct {
+		name              string
+		dispatcherProfile *DispatcherProfile
+	}{
+		{
+			name: "Complete DispatcherProfile",
+			dispatcherProfile: &DispatcherProfile{
+				Tenant:     "cgrates.org",
+				ID:         "Dsp",
+				Subsystems: []string{"*any"},
+				FilterIDs:  []string{"FLTR_ACNT", "FLTR_DST"},
+				Strategy:   utils.MetaFirst,
+				ActivationInterval: &utils.ActivationInterval{
+					ExpiryTime: time.Now(),
+				},
+				StrategyParams: map[string]any{},
+				Weight:         20,
+				Hosts: DispatcherHostProfiles{
+					{
+						ID:        "C1",
+						FilterIDs: []string{},
+						Weight:    10,
+						Blocker:   false,
+					},
+					{
+						ID:        "C2",
+						FilterIDs: []string{},
+						Weight:    10,
+						Blocker:   false,
+					},
+				},
+			},
+		},
+		{
+			name: "Nil fields",
+			dispatcherProfile: &DispatcherProfile{
+				Tenant:             "cgrates.org",
+				ID:                 "Dsp",
+				Subsystems:         nil,
+				FilterIDs:          nil,
+				Strategy:           utils.MetaFirst,
+				ActivationInterval: nil,
+				StrategyParams:     nil,
+				Weight:             20,
+				Hosts:              nil,
+			},
+		},
+		{
+			name: "Empty fields",
+			dispatcherProfile: &DispatcherProfile{
+				Tenant:             "cgrates.org",
+				ID:                 "Dsp",
+				Subsystems:         []string{},
+				FilterIDs:          []string{},
+				Strategy:           utils.MetaFirst,
+				ActivationInterval: &utils.ActivationInterval{},
+				StrategyParams:     map[string]any{},
+				Weight:             20,
+				Hosts:              DispatcherHostProfiles{},
+			},
+		},
+		{
+			name:              "Nil Case",
+			dispatcherProfile: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.dispatcherProfile.Clone()
+
+			if !reflect.DeepEqual(got, tt.dispatcherProfile) {
+				t.Errorf("Clone() = %#+v, want %#+v", got, tt.dispatcherProfile)
+			}
+
+			if got != nil && got == tt.dispatcherProfile {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+			cache := tt.dispatcherProfile.CacheClone()
+
+			if !reflect.DeepEqual(cache, tt.dispatcherProfile) {
+				t.Errorf("CacheClone() = %v, want %v", cache, tt.dispatcherProfile)
+			}
+
+			_, ok := cache.(*DispatcherProfile)
+
+			if !ok {
+				t.Errorf("CacheClone() returned type %T, want *DispatcherProfile", cache)
+				return
+			}
+		})
 	}
 }

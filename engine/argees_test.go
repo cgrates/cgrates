@@ -127,6 +127,109 @@ func TestArgEEsUnmarshalJSON(t *testing.T) {
 				utils.ToJSON(cgrEvWithIDs), utils.ToJSON(rcvCGREv))
 		}
 	})
+	t.Run("Unmarshall AccountUpdate", func(t *testing.T) {
+		var cdMap map[string]any
+		if err = json.Unmarshal(cdBytes, &cdMap); err != nil {
+			t.Fatal(err)
+		}
+		acc := &Account{
+			ID: "1001",
+			BalanceMap: map[string]Balances{
+				"*monetary": {
+					&Balance{
+						ID:    "Balance1",
+						Value: 40,
+					},
+				}},
+			UnitCounters: UnitCounters{
+				"*event_connect": []*UnitCounter{
+					{
+						CounterType: "*balance",
+						Counters: CounterFilters{
+							{
+								Value:  5,
+								Filter: &BalanceFilter{},
+							},
+						},
+					}},
+				"*monetary": []*UnitCounter{
+					{
+						CounterType: "*balance",
+						Counters: CounterFilters{
+							{
+								Value:  11,
+								Filter: &BalanceFilter{},
+							},
+						},
+					},
+				},
+			},
+			ActionTriggers: ActionTriggers{
+				{
+					ThresholdType:  "*max_event_connect_counter",
+					ThresholdValue: 5,
+					ID:             "TRIGGER1",
+					Executed:       true,
+				},
+				{
+
+					ThresholdType:  "*max_balance_counter",
+					ThresholdValue: 20,
+					Recurrent:      true,
+					ID:             "TRIGGER2",
+				},
+			},
+		}
+
+		cgrEvWithIDs := CGREventWithEeIDs{
+			EeIDs: []string{"id1", "id2"},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ev1",
+				Event: map[string]any{
+					utils.AccountField: acc,
+					utils.EventType:    utils.AccountUpdate,
+					utils.EventSource:  utils.AccountService,
+					utils.CostDetails:  cdMap,
+				},
+			},
+		}
+
+		cgrEvBytes, err := json.Marshal(cgrEvWithIDs)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var rcvCGREv CGREventWithEeIDs
+		if err = json.Unmarshal(cgrEvBytes, &rcvCGREv); err != nil {
+			t.Fatal(err)
+		}
+
+		cgrEvWithIDs.Event[utils.CostDetails] = testEC
+		if !reflect.DeepEqual(rcvCGREv, cgrEvWithIDs) {
+			t.Errorf("expected: %v,\nreceived: %v", utils.ToJSON(cgrEvWithIDs), utils.ToJSON(rcvCGREv))
+		}
+	})
+	t.Run("Unmarshal error", func(t *testing.T) {
+		cgrEvWithIDs := CGREventWithEeIDs{
+			CGREvent: &utils.CGREvent{
+				Event: map[string]any{
+					utils.AccountField: "`1001",
+					utils.EventType:    utils.AccountUpdate,
+				},
+			},
+		}
+		cgrEvBytes, err := json.Marshal(cgrEvWithIDs)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expectedErr := "json: cannot unmarshal string into Go value of type engine.Account"
+		var rcvCGREv CGREventWithEeIDs
+		if err = json.Unmarshal(cgrEvBytes, &rcvCGREv); err != nil && err.Error() != expectedErr {
+			t.Errorf("Expected: %v, recieved: %v", expectedErr, err)
+		}
+	})
 }
 
 func TestEngineCGREventWithEeIDsSetCloneable(t *testing.T) {

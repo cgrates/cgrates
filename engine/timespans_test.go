@@ -269,6 +269,14 @@ func TestSetRateInterval(t *testing.T) {
 	if ts1.RateInterval != i2 {
 		t.Error("Bigger ponder interval should win")
 	}
+
+	i3 := &RateInterval{}
+	i3 = nil
+	ts := TimeSpan{RateInterval: i3}
+	ts.SetRateInterval(i3)
+	if ts.RateInterval != i3 {
+		t.Errorf("Expected %#v, recieved %#v", i3, ts.RateInterval)
+	}
 }
 
 func TestTimespanSplitGroupedRates(t *testing.T) {
@@ -2225,4 +2233,231 @@ func TestTimespanCreateSecondsSliceNegativeIncrementErr(t *testing.T) {
 			expLog, rcvLog)
 	}
 
+}
+
+func TestIncrementsClone(t *testing.T) {
+	tests := []struct {
+		name       string
+		increments Increments
+	}{
+		{
+			name: "Complete Increments",
+			increments: Increments{
+				&Increment{
+					Cost: 20,
+					BalanceInfo: &DebitInfo{
+						Unit: &UnitInfo{
+							ID:            "1001",
+							UUID:          "unitUUID2",
+							Value:         10,
+							DestinationID: "1002",
+							Consumed:      20,
+							ToR:           "*sms",
+							RateInterval: &RateInterval{
+								Weight: 15,
+								Rating: &RIRate{},
+								Timing: &RITiming{},
+							},
+						},
+					},
+					Duration:       24 * time.Second,
+					CompressFactor: 2,
+				},
+			},
+		},
+		{
+			name:       "Nil Increments",
+			increments: nil,
+		},
+		{
+			name: "Empty incement",
+			increments: Increments{
+				&Increment{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.increments.Clone()
+
+			if !reflect.DeepEqual(rcv, tt.increments) {
+				t.Errorf("Clone() = %v, want %v", rcv, tt.increments)
+			}
+
+			for _, in := range rcv {
+				if tt.increments[0].Cost != in.Cost {
+					t.Errorf("Expected: %v, recieved: %v", tt.increments[0].Cost, in.Cost)
+				}
+				if in.BalanceInfo != nil && utils.ToJSON(tt.increments[0].BalanceInfo.Unit) != utils.ToJSON(in.BalanceInfo.Unit) {
+					t.Errorf("Expected: %v, recieved: %v", tt.increments[0].BalanceInfo.Unit, in.BalanceInfo.Unit)
+				}
+				if tt.increments[0].Duration != in.Duration {
+					t.Errorf("Expected: %v, recieved: %v", tt.increments[0].Duration, in.Duration)
+				}
+				if tt.increments[0].CompressFactor != in.CompressFactor {
+					t.Errorf("Expected: %v, recieved: %v", tt.increments[0].CompressFactor, in.CompressFactor)
+				}
+			}
+		})
+	}
+}
+
+func TestDebitInfoClone(t *testing.T) {
+	tests := []struct {
+		name      string
+		debitInfo *DebitInfo
+	}{
+		{
+			name: "Complete DebitInfo",
+			debitInfo: &DebitInfo{
+				Unit: &UnitInfo{
+					UUID:          "1",
+					Value:         25,
+					DestinationID: "1",
+					Consumed:      1,
+					ToR:           utils.MetaVoice,
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							Rates: RateGroups{
+								&RGRate{
+									GroupIntervalStart: 0,
+									Value:              100,
+									RateIncrement:      10 * time.Second,
+									RateUnit:           time.Second,
+								},
+							},
+						},
+					},
+				},
+				Monetary: &MonetaryInfo{
+					UUID:  "2",
+					Value: 98,
+				},
+				AccountID: "3",
+			},
+		},
+		{
+			name: "Nil Unit",
+			debitInfo: &DebitInfo{
+				Unit: nil,
+				Monetary: &MonetaryInfo{
+					UUID:  "2",
+					Value: 98,
+				},
+				AccountID: "3",
+			},
+		},
+		{
+			name: "Nil Monetary",
+			debitInfo: &DebitInfo{
+				Unit: &UnitInfo{
+					UUID:          "1",
+					Value:         25,
+					DestinationID: "1",
+					Consumed:      1,
+					ToR:           utils.MetaVoice,
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							Rates: RateGroups{
+								&RGRate{
+									GroupIntervalStart: 0,
+									Value:              100,
+									RateIncrement:      10 * time.Second,
+									RateUnit:           time.Second,
+								},
+							},
+						},
+					},
+				},
+				Monetary:  nil,
+				AccountID: "3",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.debitInfo.Clone()
+
+			if !reflect.DeepEqual(result, tt.debitInfo) {
+				t.Errorf("Clone() = %v, want %v", result, tt.debitInfo)
+			}
+
+			if result != nil && result == tt.debitInfo {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+
+			if utils.ToJSON(tt.debitInfo.Unit) != utils.ToJSON(result.Unit) {
+				t.Errorf("Expected: %#v, recieved: %#v", tt.debitInfo.Unit, result.Unit)
+			}
+			if utils.ToJSON(tt.debitInfo.Monetary) != utils.ToJSON(result.Monetary) {
+				t.Errorf("Expected: %v, recieved: %v", tt.debitInfo.Monetary, result.Monetary)
+			}
+			if tt.debitInfo.AccountID != result.AccountID {
+				t.Errorf("Expected: %v, recieved: %v", tt.debitInfo.AccountID, result.AccountID)
+			}
+		})
+	}
+}
+
+func TestMonetaryInfoClone(t *testing.T) {
+	tests := []struct {
+		name string
+		mi   *MonetaryInfo
+	}{
+		{
+			name: "Complete MonetaryInfo",
+			mi: &MonetaryInfo{
+				UUID:  "uuid",
+				ID:    "id",
+				Value: 23.1,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						Rates: RateGroups{
+							&RGRate{
+								GroupIntervalStart: 0,
+								Value:              100,
+								RateIncrement:      10 * time.Second,
+								RateUnit:           time.Second,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Nil RateInterval",
+			mi: &MonetaryInfo{
+				UUID:         "uuid",
+				ID:           "id",
+				Value:        23.1,
+				RateInterval: nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.mi.Clone()
+
+			if !reflect.DeepEqual(result, tt.mi) {
+				t.Errorf("Clone() = %v, want %v", result, tt.mi)
+			}
+
+			if result != nil && result == tt.mi {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+
+			if tt.mi.UUID != result.UUID {
+				t.Errorf("Expected: %v, recieved: %v", tt.mi.UUID, result.UUID)
+			}
+			if tt.mi.ID != result.ID {
+				t.Errorf("Expected: %v, recieved: %v", tt.mi.ID, result.ID)
+			}
+			if tt.mi.Value != result.Value {
+				t.Errorf("Expected: %v, recieved: %v", tt.mi.Value, result.Value)
+			}
+			if tt.mi.RateInterval != result.RateInterval {
+				t.Errorf("Expected: %v, recieved: %v", tt.mi.RateInterval, result.RateInterval)
+			}
+		})
+	}
 }
