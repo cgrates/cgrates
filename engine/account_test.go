@@ -3756,3 +3756,200 @@ func TestAccountSummaryClone(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountRestoreFromBalanceSummary(t *testing.T) {
+	tests := []struct {
+		name        string
+		acc         *Account
+		bf          *BalanceFilter
+		fltrS       *FilterS
+		expectedErr string
+	}{
+		{
+			name: "Uuid match existing balance",
+			acc: &Account{
+				ID: "testId",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						&Balance{
+							Uuid:  "test",
+							ID:    "id",
+							Value: 10,
+							DestinationIDs: utils.StringMap{
+								"NAT": true,
+								"RET": false,
+							},
+						},
+					},
+				},
+			},
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer("BALANCE_ID"),
+				Uuid:           utils.StringPointer("test"),
+				Type:           utils.StringPointer(utils.MetaVoice),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+		},
+		{
+			name: "Default Account",
+			acc:  &Account{},
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer("BALANCE_ID"),
+				Type:           utils.StringPointer(utils.MetaVoice),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+		},
+		{
+			name: "Empty Ids",
+			acc: &Account{
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						&Balance{
+							ID:    "",
+							Value: 10,
+							DestinationIDs: utils.StringMap{
+								"NAT": true,
+								"RET": false,
+							},
+							ExpirationDate: time.Now(),
+						},
+					},
+				},
+			},
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer(""),
+				Type:           utils.StringPointer(utils.EmptyString),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+		},
+		{
+			name: "Nil Type",
+			acc: &Account{
+				ID: "testId",
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						&Balance{
+							Value: 10,
+							DestinationIDs: utils.StringMap{
+								"NAT": true,
+								"RET": false,
+							},
+							ExpirationDate: time.Now(),
+						},
+					},
+				},
+			},
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer("BALANCE_ID"),
+				Uuid:           utils.StringPointer("test"),
+				Type:           nil,
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+			expectedErr: "missing balance type",
+		},
+		{
+			name: "With Type",
+			acc: &Account{
+				ID: "vdf:minu",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							Uuid:           "uuid2",
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"),
+							Weight:         10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							Uuid:           "uuid1",
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"),
+							Weight:         20,
+						},
+					}},
+			},
+
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer("BALANCE_ID"),
+				Uuid:           utils.StringPointer("test"),
+				Type:           utils.StringPointer(utils.MetaVoice),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+		},
+		{
+			name: "ID match when Uuid not found",
+			acc: &Account{
+				ID: "vdf:minu",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							ID:             "Id1",
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"),
+							Weight:         10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							ID:             "Id1",
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"),
+							Weight:         20,
+						},
+					},
+				},
+			},
+
+			bf: &BalanceFilter{
+				ID:             utils.StringPointer("Id1"),
+				Uuid:           utils.StringPointer("test"),
+				Type:           utils.StringPointer(utils.MetaVoice),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			},
+			fltrS: &FilterS{
+				cfg:     config.CgrConfig(),
+				dm:      &DataManager{},
+				connMgr: &ConnManager{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.acc.restoreFromBalanceSummary(tt.bf, tt.fltrS)
+			if err != nil && err.Error() != tt.expectedErr {
+				t.Errorf("Expected: %v, recieved %v", tt.expectedErr, err)
+			}
+		})
+	}
+}

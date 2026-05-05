@@ -109,6 +109,12 @@ func TestActionPlanClone(t *testing.T) {
 	if !reflect.DeepEqual(at1, clned) {
 		t.Errorf("Expecting: %+v,\n received: %+v", at1, clned)
 	}
+
+	at1 = nil
+	clned = at1.Clone()
+	if !reflect.DeepEqual(at1, clned) {
+		t.Errorf("Expecting: %+v,\n received: %+v", at1, clned)
+	}
 }
 
 func TestActionTimingClone(t *testing.T) {
@@ -719,6 +725,9 @@ func TestVerifyFormat(t *testing.T) {
 		{"119911", false},
 		{"00/01/03", false},
 		{"t1:t2:t3", false},
+		{"12::56", false},
+		{"12:34:", false},
+		{"+12:34:56", true},
 	}
 
 	for _, tt := range tests {

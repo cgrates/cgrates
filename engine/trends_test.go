@@ -582,3 +582,153 @@ func TestTrendV1GetTrend(t *testing.T) {
 		})
 	}
 }
+
+func TestTrendSV1GetScheduledTrends(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	tests := []struct {
+		name    string
+		crn     map[string]map[string]cron.EntryID
+		args    *utils.ArgScheduledTrends
+		expLen  int
+		wantErr string
+	}{
+		{
+			name: "Tenant not found",
+			crn:  map[string]map[string]cron.EntryID{},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "test.org",
+					},
+				},
+			},
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name: "Empty tenant",
+			crn: map[string]map[string]cron.EntryID{
+				"test": {"T1": 1},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "",
+					},
+				},
+			},
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name: "Prefix does not match",
+			crn: map[string]map[string]cron.EntryID{
+				"test": {"T1": 1},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+						ID:     "testid",
+					},
+				},
+				TrendIDPrefixes: []string{"x_"},
+			},
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name: "Entry skipped",
+			crn: map[string]map[string]cron.EntryID{
+				"cgrates.org": {"tst": 1},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+					},
+				},
+			},
+			expLen: 0,
+		},
+		{
+			name: "Prefix matches",
+			crn: map[string]map[string]cron.EntryID{
+				"cgrates.org": {"T_1": 1, "T_2": 2},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+					},
+				},
+				TrendIDPrefixes: []string{"T_"},
+			},
+			expLen: 0,
+		},
+		{
+			name: "With different prefixes",
+			crn: map[string]map[string]cron.EntryID{
+				"cgrates.org": {"T_1": 1, "B_2": 2},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+					},
+				},
+				TrendIDPrefixes: []string{"T_"},
+			},
+			expLen: 0,
+		},
+		{
+			name: "Empty",
+			crn: map[string]map[string]cron.EntryID{
+				"cgrates.org": {},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+					},
+				},
+				TrendIDPrefixes: []string{"T_"},
+			},
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name: "No prefix",
+			crn: map[string]map[string]cron.EntryID{
+				"cgrates.org": {"T_1": 1, "T_2": 2},
+			},
+			args: &utils.ArgScheduledTrends{
+				TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{
+						Tenant: "cgrates.org",
+					},
+				},
+			},
+			expLen: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			ts := &TrendS{
+				cgrcfg:    cfg,
+				crn:       cron.New(),
+				crnTQs:    tt.crn,
+				crnTQsMux: &sync.RWMutex{},
+			}
+
+			var scheduled []utils.ScheduledTrend
+			err := ts.V1GetScheduledTrends(context.Background(), tt.args, &scheduled)
+			if err != nil && tt.wantErr != err.Error() {
+				t.Error(err)
+			}
+
+			if len(scheduled) != tt.expLen {
+				t.Errorf("Expected %v, recieved %v", tt.expLen, len(scheduled))
+			}
+		})
+	}
+}

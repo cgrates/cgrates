@@ -3888,3 +3888,73 @@ func TestFiltersPassNIPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterCacheClone(t *testing.T) {
+	tests := []struct {
+		name   string
+		filter *Filter
+	}{
+		{
+			name: "Complete Filter",
+			filter: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules: []*FilterRule{
+					{
+						Type:    "*string",
+						Element: "~*req.Account",
+						Values:  []string{"1001", "1002"},
+					},
+				},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2026, 5, 5, 15, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+		{
+			name: "Nil Rules",
+			filter: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules:  nil,
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2026, 5, 5, 15, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+		{
+			name: "Nil ActivationInterval",
+			filter: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules: []*FilterRule{
+					{
+						Type:    "*string",
+						Element: "~*req.Account",
+						Values:  []string{"1001", "1002"},
+					},
+				},
+				ActivationInterval: nil,
+			},
+		},
+		{
+			name:   "Nil Filter",
+			filter: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cache := tt.filter.CacheClone()
+
+			if !reflect.DeepEqual(cache, tt.filter) {
+				t.Errorf("CacheClone() = %v, want %v", cache, tt.filter)
+			}
+
+			_, ok := cache.(*Filter)
+			if !ok {
+				t.Errorf("CacheClone() returned type %T, want *Filter", cache)
+				return
+			}
+		})
+	}
+}

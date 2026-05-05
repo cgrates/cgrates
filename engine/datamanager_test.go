@@ -4076,6 +4076,24 @@ func TestCacheDataFromDB(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.ResourcesPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
 		t.Error(err)
 	}
+	if err := dm.CacheDataFromDB(utils.IPProfilesPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.IPAllocationsPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.RankingsProfilePrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.RankingPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.TrendsProfilePrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.TrendPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
 	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{"cgrates.org:*string:~*req.RequestType:*rated"}, false); err != nil {
 		t.Error(err)
 	}
@@ -4337,6 +4355,48 @@ func TestCacheDataFromDBErr(t *testing.T) {
 
 	if err := dm.CacheDataFromDB(utils.ThresholdProfilePrefix, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
 		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.AttributeFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.StatFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ThresholdFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.RouteFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ChargerFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.DispatcherFilterIndexes, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+}
+func TestCacheDataFromDBNil(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm = nil
+	expectedErr := "NO_DATABASE_CONNECTION"
+	if err := dm.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %v, recieved %v", expectedErr, err)
 	}
 }
 
