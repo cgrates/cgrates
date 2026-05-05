@@ -71,6 +71,9 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 		}
 	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
+		if connCfg == nil {
+			return nil, fmt.Errorf("unknown connection ID %q", connID)
+		}
 		for _, rpcConn := range connCfg.Conns {
 			if rpcConn.Address == utils.MetaInternal {
 				intChan = cM.GetInternalChan()
