@@ -45,16 +45,16 @@ func (s *LoggerService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if s.loggerType != utils.MetaKafkaLog {
 		return nil
 	}
-	// TODO: check if we should also wait for EFs. Currently, in case of *kafka
-	// logger, we log to *stdout until initiated. We should also consider
-	// removing ErrLoggerChanged error cases if they turn out to be redundant
-	// (see engine/kafka_logger.go).
-	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP,
-		s.cfg.GeneralCfg().ConnectTimeout)
+	deps := []string{utils.ConnManager}
+	if s.cfg.EFsCfg().Enabled {
+		deps = append(deps, utils.EFs)
+	}
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
+		deps, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	cm := cms.(*ConnManagerService).ConnManager()
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	utils.Logger = engine.NewExportLogger(context.TODO(), s.cfg.GeneralCfg().DefaultTenant, cm, s.cfg)
 	return nil
 }
