@@ -74,7 +74,7 @@ func TestNavigableMap2Field(t *testing.T) {
 	if val, err := nm.Field(PathItems{{Field: "Field5", Index: IntPointer(0)}}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
+		t.Errorf("Expected %v ,received: %v", 10, val.Interface())
 	}
 	if _, err := nm.Field(PathItems{{Field: "Field3", Index: IntPointer(0)}}); err != ErrNotFound {
 		t.Error(err)
@@ -347,14 +347,14 @@ func TestNavigableMap2GetSet(t *testing.T) {
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val.Interface())
+		t.Errorf("Expected %v ,received: %v", 10, val.Interface())
 	}
 
 	path = PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Interface() != 5 {
-		t.Errorf("Expected %q ,received: %q", 5, val.Interface())
+		t.Errorf("Expected %v ,received: %v", 5, val.Interface())
 	}
 
 	path = PathItems{{Field: "Field2", Index: IntPointer(2)}}
@@ -403,7 +403,7 @@ func TestNavigableMap2FieldAsInterface(t *testing.T) {
 	if val, err := nm.FieldAsInterface([]string{"Field5[0]"}); err != nil {
 		t.Error(err)
 	} else if val != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val)
+		t.Errorf("Expected %v ,received: %v", 10, val)
 	}
 }
 
