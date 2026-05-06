@@ -49,6 +49,7 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
+			utils.DB,
 		},
 		es.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -57,11 +58,12 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, fs, cms.ConnManager())
+	es.eeS, err = ees.NewEventExporterS(es.cfg, fs, cms.ConnManager(), dbs.DataManager())
 	if err != nil {
 		return err
 	}

@@ -42,7 +42,7 @@ type EventExporter interface {
 
 // NewEventExporter produces exporters
 func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
-	filterS *engine.FilterS, connMngr *engine.ConnManager) (ee EventExporter, err error) {
+	filterS *engine.FilterS, connMngr *engine.ConnManager, dm *engine.DataManager) (ee EventExporter, err error) {
 	timezone := utils.FirstNonEmpty(cfg.Timezone, cgrCfg.GeneralCfg().DefaultTimezone)
 	em, err := utils.NewExporterMetrics(cfg.MetricsResetSchedule, timezone)
 	if err != nil {
@@ -77,6 +77,8 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 		return NewElasticEE(cfg, em)
 	case utils.MetaSQL:
 		return NewSQLEe(cfg, em)
+	case utils.MetaCgrcdr:
+		return NewCgrcdr(cfg, em, dm)
 	case utils.MetaLog:
 		return NewLogEE(cfg, em), nil
 	case utils.MetaRpc:

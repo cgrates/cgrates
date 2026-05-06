@@ -238,7 +238,7 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(ctx *context.Context, attempt
 	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Format, expEv.Path, utils.MetaNone,
 		attempts, expEv.Opts)
 	var ee ees.EventExporter
-	if ee, err = ees.NewEventExporter(eeCfg, config.CgrConfig(), nil, nil); err != nil {
+	if ee, err = ees.NewEventExporter(eeCfg, config.CgrConfig(), nil, nil, nil); err != nil {
 		return
 	}
 	keyFunc := func() string { return utils.EmptyString }
