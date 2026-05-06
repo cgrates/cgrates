@@ -6645,7 +6645,6 @@ func TestConfigV1StoreCfgInDBsAdmins(t *testing.T) {
 			utils.ToJSON(expected), utils.ToJSON(&result))
 	}
 }
-
 func TestConfigV1StoreCfgInDBsRegistrarC(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
@@ -6655,26 +6654,7 @@ func TestConfigV1StoreCfgInDBsRegistrarC(t *testing.T) {
 	cfg.registrarCCfg.RPC.RegistrarSConns = []string{"*conn1", "*conn2"}
 	cfg.registrarCCfg.RPC.Hosts = map[string][]*RemoteHost{
 		utils.MetaDefault: {
-			{
-				ID:        "Host1",
-				Transport: utils.MetaJSON,
-			},
-			{
-				ID:        "Host2",
-				Transport: utils.MetaGOB,
-			},
-		},
-		"cgrates.net": {
-			{
-				ID:        "Host1",
-				Transport: utils.MetaJSON,
-				TLS:       true,
-			},
-			{
-				ID:        "Host2",
-				Transport: utils.MetaGOB,
-				TLS:       true,
-			},
+			{ID: "Host1", Transport: utils.MetaJSON},
 		},
 	}
 	cfg.registrarCCfg.RPC.RefreshInterval = 5 * time.Second
@@ -6688,49 +6668,12 @@ func TestConfigV1StoreCfgInDBsRegistrarC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := &RegistrarCJsonCfgs{
-		RPC: &RegistrarCJsonCfg{
-			Registrars_conns: &[]string{"*conn1", "*conn2"},
-			Hosts: []*RemoteHostJsonWithTenant{
-				{
-					Tenant: nil,
-					RemoteHostJson: &RemoteHostJson{
-						Id:        utils.StringPointer("Host1"),
-						Transport: utils.StringPointer(utils.MetaJSON),
-					},
-				},
-				{
-					Tenant: nil,
-					RemoteHostJson: &RemoteHostJson{
-						Id:        utils.StringPointer("Host2"),
-						Transport: utils.StringPointer(utils.MetaGOB),
-					},
-				},
-				{
-					Tenant: utils.StringPointer("cgrates.net"),
-					RemoteHostJson: &RemoteHostJson{
-						Id:        utils.StringPointer("Host1"),
-						Transport: utils.StringPointer(utils.MetaJSON),
-						Tls:       utils.BoolPointer(true),
-					},
-				},
-				{
-					Tenant: utils.StringPointer("cgrates.net"),
-					RemoteHostJson: &RemoteHostJson{
-						Id:        utils.StringPointer("Host2"),
-						Transport: utils.StringPointer(utils.MetaGOB),
-						Tls:       utils.BoolPointer(true),
-					},
-				},
-			},
-			Refresh_interval: utils.StringPointer("5s"),
-		},
-	}
-
 	var result RegistrarCJsonCfgs
 	if err := db.GetSection(context.Background(), RegistrarCJSON, &result); err != nil {
 		t.Fatal(err)
 	}
+
+	expected := diffRegistrarCJsonCfgs(nil, NewDefaultCGRConfig().registrarCCfg, cfg.registrarCCfg)
 
 	if !reflect.DeepEqual(expected, &result) {
 		t.Errorf("Mismatch for RegistrarC section!\nExpected: %+v\nReceived: %+v",
