@@ -210,7 +210,7 @@ func TestCGREventOptAsInt64(t *testing.T) {
 	expected := int64(13)
 
 	if received != expected {
-		t.Errorf("\nExpected: %q, \nReceived: %q", expected, received)
+		t.Errorf("\nExpected: %d, \nReceived: %d", expected, received)
 	}
 	errExpect := ErrNotFound
 	if _, err = ev.OptAsInt64("nonExistingKey"); err == nil || err != errExpect {
