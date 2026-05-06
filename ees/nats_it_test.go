@@ -60,7 +60,7 @@ func TestNatsEEJetStream(t *testing.T) {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil)
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestNatsEE(t *testing.T) {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil)
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

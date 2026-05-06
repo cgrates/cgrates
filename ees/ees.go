@@ -39,11 +39,12 @@ func onCacheEvicted(_ string, value any) {
 
 // NewEventExporterS initializes a new EventExporterS.
 func NewEventExporterS(cfg *config.CGRConfig, fltrS *engine.FilterS,
-	connMgr *engine.ConnManager) (*EeS, error) {
+	connMgr *engine.ConnManager, dm *engine.DataManager) (*EeS, error) {
 	eeS := &EeS{
 		cfg:     cfg,
 		fltrS:   fltrS,
 		connMgr: connMgr,
+		dm:      dm,
 	}
 	if err := eeS.SetupExporterCache(); err != nil {
 		return nil, fmt.Errorf("failed to set up exporter cache: %v", err)
@@ -56,6 +57,7 @@ type EeS struct {
 	cfg     *config.CGRConfig
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
+	dm      *engine.DataManager
 
 	exporterCache map[string]*ltcache.Cache // map[eeType]*ltcache.Cache
 	mu            sync.RWMutex              // protects exporterCache
@@ -91,7 +93,7 @@ func (eeS *EeS) SetupExporterCache() error {
 		if chCfg.Precache {
 			for _, expCfg := range eesCfg.Exporters {
 				if expCfg.Type == chID {
-					ee, err := NewEventExporter(expCfg, eeS.cfg, eeS.fltrS, eeS.connMgr)
+					ee, err := NewEventExporter(expCfg, eeS.cfg, eeS.fltrS, eeS.connMgr, eeS.dm)
 					if err != nil {
 						return fmt.Errorf("precache: failed to init EventExporter %q: %v", expCfg.ID, err)
 					}

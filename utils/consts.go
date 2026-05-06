@@ -316,6 +316,7 @@ const (
 	MetaKafkajsonMap          = "*kafkaJSONMap"
 	MetaNATSJSONMap           = "*natsJSONMap"
 	MetaSQL                   = "*sql"
+	MetaCgrcdr                = "*cgrcdr"
 	MetaMySQL                 = "*mysql"
 	MetaS3jsonMap             = "*s3JSONMap"
 	ConfigPath                = "/etc/cgrates/"

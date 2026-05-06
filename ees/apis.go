@@ -88,7 +88,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.fltrS, eeS.connMgr); err != nil {
+			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.fltrS, eeS.connMgr, eeS.dm); err != nil {
 				return fmt.Errorf("failed to init EventExporter %q: %v", eeCfg.ID, err)
 			}
 			if hasCache {
