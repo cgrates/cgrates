@@ -205,7 +205,7 @@ func TestOrderedNavigableMapField(t *testing.T) {
 	if val, err := nm.Field([]string{"Field5", "0"}); err != nil {
 		t.Error(err)
 	} else if val.Data != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val.Data)
+		t.Errorf("Expected %v ,received: %v", 10, val.Data)
 	}
 	if _, err := nm.Field([]string{"Field3", "0"}); err != ErrNotFound {
 		t.Error(err)
@@ -269,14 +269,14 @@ func TestOrderedNavigableMapGetSet(t *testing.T) {
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Data != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val.Data)
+		t.Errorf("Expected %v ,received: %v", 10, val.Data)
 	}
 
 	path = []string{"Field3", "Field4", "Field5"}
 	if val, err := nm.Field(path); err != nil {
 		t.Error(err)
 	} else if val.Data != 5 {
-		t.Errorf("Expected %q ,received: %q", 5, val.Data)
+		t.Errorf("Expected %v ,received: %v", 5, val.Data)
 	}
 
 	path = []string{"Field2", "2"}
@@ -322,7 +322,7 @@ func TestOrderedNavigableMapFieldAsInterface(t *testing.T) {
 	if val, err := nm.FieldAsInterface([]string{"Field5[0]"}); err != nil {
 		t.Error(err)
 	} else if val != 10 {
-		t.Errorf("Expected %q ,received: %q", 10, val)
+		t.Errorf("Expected %v ,received: %v", 10, val)
 	}
 }
 
@@ -343,7 +343,7 @@ func TestOrderedNavigableMapFieldAsString(t *testing.T) {
 	if val, err := nm.FieldAsString([]string{"Field5[0]"}); err != nil {
 		t.Error(err)
 	} else if val != "10" {
-		t.Errorf("Expected %q ,received: %q", 10, val)
+		t.Errorf("Expected %v ,received: %v", 10, val)
 	}
 }
 
