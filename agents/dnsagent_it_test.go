@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -148,10 +147,10 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Preference != 10 {
-			t.Errorf("received: <%q>", answr.Preference)
+			t.Errorf("received: <%v>", answr.Preference)
 		}
 		if answr.Flags != "U" {
 			t.Errorf("received: <%q>", answr.Flags)
@@ -182,7 +181,7 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -227,7 +226,7 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
 	}
-	for i := 0; i < 5; i++ { // send again the same request to check if the stats counter it
+	for range 5 { // send again the same request to check if the stats counter it
 		if err := dnsClnt.WriteMsg(m); err != nil {
 			t.Error(err)
 		}
@@ -290,7 +289,7 @@ func testDNSitClntNAPTRNotFoundSuppliers(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics, metrics2)
 	}
-	for i := 0; i < 5; i++ { // send again the same request to check if the stats counter it
+	for range 5 { // send again the same request to check if the stats counter it
 		if err := dnsClnt.WriteMsg(m); err != nil {
 			t.Error(err)
 		}
