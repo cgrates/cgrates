@@ -138,17 +138,17 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	if kev.MissingParameter() {
 		if kRply, err := kev.AsKamAuthReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		}
 		return
 	}
 	authArgs := kev.AsCGREvent(ka.timezone)
 	if authArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
+			utils.KamailioAgent, kev[utils.MetaOriginID]))
 		return
 	}
 	authArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
@@ -159,10 +159,10 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	}
 }
 
@@ -208,7 +208,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 		cgrEv, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		ka.disconnectSession(connIdx,
 			NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID],
 				utils.ErrServerError.Error()))
@@ -242,7 +242,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	if kev.MissingParameter() {
 		utils.Logger.Err(fmt.Sprintf("<%s> mandatory IE missing out from event: %s",
-			utils.KamailioAgent, kev[utils.OriginID]))
+			utils.KamailioAgent, kev[utils.MetaOriginID]))
 		return
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
@@ -256,7 +256,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		cgrEv, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		// no return here since we want CDR anyhow
 	}
 	if ka.cfg.CreateCdr || strings.Contains(kev[utils.CGRFlags], utils.MetaCDRs) {
@@ -321,10 +321,10 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	if kev.MissingParameter() {
 		if kRply, err := kev.AsKamProcessMessageReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed sending process session event reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		}
 		return
 	}
@@ -334,14 +334,14 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	if _, has := kev[utils.CGRFlags]; !has {
 		if err = ka.conns[connIdx].Send(kev.AsKamProcessMessageEmptyReply().String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed sending empty process message reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		}
 	}
 
 	procEvArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if procEvArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process message session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
+			utils.KamailioAgent, kev[utils.MetaOriginID]))
 		return
 	}
 	procEvArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
@@ -353,10 +353,10 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	// and send it as parameter to AsKamProcessMessageReply
 	if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	}
 }
 
@@ -385,10 +385,10 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	if kev.MissingParameter() {
 		if kRply, err := kev.AsKamProcessCDRReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed sending process session event reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+				utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 		}
 		return
 	}
@@ -396,7 +396,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	procCDRArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if procCDRArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process cdr session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
+			utils.KamailioAgent, kev[utils.MetaOriginID]))
 		return
 	}
 	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
@@ -408,10 +408,10 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	// and send it as parameter to AsKamProcessCDRReply
 	if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+			utils.KamailioAgent, kev[utils.MetaOriginID], err.Error()))
 	}
 }
 

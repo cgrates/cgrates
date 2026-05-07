@@ -95,14 +95,14 @@ func (kev KamEvent) MissingParameter() bool {
 		return slices.Contains([]string{
 			kev[KamHashEntry],
 			kev[KamHashID],
-			kev[utils.OriginID],
+			kev[utils.MetaOriginID],
 			kev[utils.AnswerTime],
 			kev[utils.AccountField],
 			kev[utils.Destination],
 		}, "")
 	case CGR_CALL_END:
 		return slices.Contains([]string{
-			kev[utils.OriginID],
+			kev[utils.MetaOriginID],
 			kev[utils.AnswerTime],
 			kev[utils.AccountField],
 			kev[utils.Destination],
@@ -114,19 +114,14 @@ func (kev KamEvent) MissingParameter() bool {
 		// in case that the user populate cgr_flags we treat it like a ProcessEvent
 		// and expect to have the required fields
 		if has {
-			mndPrm = append(mndPrm, kev[utils.OriginID],
+			mndPrm = append(mndPrm, kev[utils.MetaOriginID],
 				kev[utils.AnswerTime],
 				kev[utils.AccountField],
 				kev[utils.Destination])
 		}
 		return slices.Contains(mndPrm, "")
 	case CGR_PROCESS_CDR:
-		// TRIndex and TRLabel must exist in order to know where to send back the response
-		return slices.Contains([]string{
-			kev[KamTRIndex],
-			kev[KamTRLabel],
-			kev[utils.OriginID],
-		}, "")
+		return kev[utils.MetaOriginID] == ""
 	default: // no/unsupported event
 		return true
 	}
