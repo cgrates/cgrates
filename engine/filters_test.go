@@ -3958,3 +3958,71 @@ func TestFilterCacheClone(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterClone(t *testing.T) {
+	tests := []struct {
+		name string
+		fltr *Filter
+	}{
+		{
+			name: "Complete Filter",
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules: []*FilterRule{
+					{
+						Type:    "*string",
+						Element: "~*req.Account",
+						Values:  []string{"1001", "1002"},
+					},
+				},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2026, 5, 7, 15, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+		{
+			name: "Nil Rules",
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules:  nil,
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2026, 5, 7, 15, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+		{
+			name: "Nil ActivationInterval",
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "Fltr_1",
+				Rules: []*FilterRule{
+					{
+						Type:    "*string",
+						Element: "~*req.Account",
+						Values:  []string{"1001", "1002"},
+					},
+				},
+				ActivationInterval: nil,
+			},
+		},
+		{
+			name: "Nil Filter",
+			fltr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.fltr.Clone()
+
+			if !reflect.DeepEqual(result, tt.fltr) {
+				t.Errorf("Clone() = %v, want %v", result, tt.fltr)
+			}
+
+			if result != nil && result == tt.fltr {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
