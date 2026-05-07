@@ -2693,7 +2693,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
-	OptsRoundingDecimals})
+	OptsRoundingDecimals, MetaAuthorize, MetaUsage, MetaOriginID})
 
 // Event Opts
 const (
