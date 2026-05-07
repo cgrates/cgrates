@@ -732,3 +732,463 @@ func TestTrendSV1GetScheduledTrends(t *testing.T) {
 		})
 	}
 }
+
+func TestTrendSProcessThresholds(t *testing.T) {
+	tests := []struct {
+		name   string
+		conns  []string
+		trnd   *Trend
+		expErr error
+	}{
+		{
+			name:  "Nil RunTimes",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1", "threshold2"},
+				},
+				RunTimes: nil,
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name:  "Case with *none",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        2,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{utils.MetaNone},
+				},
+				RunTimes: []time.Time{time.Now(), time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name:  "Empty conns",
+			conns: []string{},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1"},
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name:  "Nil conns",
+			conns: nil,
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1"},
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name: "Empty Trend",
+			trnd: &Trend{},
+		},
+		{
+			name:  "RunTimes below MinItems",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        3,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"th1"},
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+			expErr: utils.ErrPartiallyExecuted,
+		},
+		{
+			name:  "RunTimes reaches MinItems",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"th1"},
+				},
+				RunTimes: []time.Time{time.Now(), time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+			expErr: utils.ErrPartiallyExecuted,
+		},
+		{
+			name:  "Nil ThresholdIDs",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    nil,
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+			expErr: utils.ErrPartiallyExecuted,
+		},
+		{
+			name:  "Nil Metrics",
+			conns: []string{},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        3,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1"},
+				},
+				RunTimes: []time.Time{time.Now(), time.Now(), time.Now()},
+				Metrics:  nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			cfg := config.NewDefaultCGRConfig()
+			cfg.TrendSCfg().ThresholdSConns = tt.conns
+
+			conn := make(chan context.ClientConnector, 1)
+			conn <- &ccMock{
+				calls: map[string]func(ctx *context.Context, args any, reply any) error{
+					utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+						*reply.(*[]string) = []string{"*thr"}
+						return err
+					},
+				},
+			}
+			connMgr := NewConnManager(cfg, map[string]chan context.ClientConnector{
+				utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): conn,
+			})
+
+			trendS := &TrendS{
+				cgrcfg:  cfg,
+				connMgr: connMgr,
+			}
+
+			err := trendS.processThresholds(tt.trnd)
+			if err != nil && err != tt.expErr {
+				t.Errorf("Expected %v recieved %v", tt.expErr, err)
+			}
+		})
+	}
+}
+
+func TestTrendSProcessEEs(t *testing.T) {
+	tests := []struct {
+		name   string
+		conns  []string
+		trnd   *Trend
+		expErr error
+	}{
+		{
+			name:  "Empty conns",
+			conns: []string{},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1"},
+				},
+				RunTimes: []time.Time{time.Now(), time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name:  "Nil conns",
+			conns: nil,
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1"},
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+		{
+			name: "Empty Trend",
+			trnd: &Trend{},
+		},
+		{
+			name:  "Error case: PARTIALLY_EXECUTED",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        2,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"th1"},
+				},
+				RunTimes: []time.Time{time.Now(), time.Now()},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+			expErr: utils.ErrPartiallyExecuted,
+		},
+		{
+			name:  "Nil Metrics",
+			conns: []string{"conn1", "conn2"},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        5,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"id1"},
+				},
+				RunTimes: []time.Time{time.Now()},
+				Metrics:  nil,
+			},
+		},
+		{
+			name:  "Nil RunTimes",
+			conns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			trnd: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "trendID1",
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendID1",
+					Schedule:        "@every 1s",
+					StatID:          "stat1",
+					Metrics:         []string{"metric1", "metric2"},
+					TTL:             time.Minute,
+					QueueLength:     100,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"id1", "id2"},
+				},
+				RunTimes: nil,
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					now: {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			cfg := config.NewDefaultCGRConfig()
+			cfg.TrendSCfg().EEsConns = tt.conns
+
+			conn := make(chan context.ClientConnector, 1)
+			conn <- &ccMock{
+				calls: map[string]func(ctx *context.Context, args any, reply any) error{
+					utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+						rpl := &map[string]map[string]any{}
+						*reply.(*map[string]map[string]any) = *rpl
+
+						return nil
+					},
+				},
+			}
+			connMgr := NewConnManager(cfg, map[string]chan context.ClientConnector{
+				utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): conn,
+			})
+
+			trendS := &TrendS{
+				cgrcfg:  cfg,
+				connMgr: connMgr,
+			}
+
+			err := trendS.processEEs(tt.trnd)
+			if err != nil && err != tt.expErr {
+				t.Errorf("Expected %v recieved %v", tt.expErr, err)
+			}
+		})
+	}
+}

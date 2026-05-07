@@ -3963,35 +3963,98 @@ func TestRemoveBalanceActionErr(t *testing.T) {
 }
 
 func TestDebitResetAction(t *testing.T) {
-
-	ub := &Account{
-		ID: "OUT:CUSTOMER_1:rif",
-		BalanceMap: map[string]Balances{
-			utils.MetaVoice:    {&Balance{Value: 21}},
-			utils.MetaMonetary: {&Balance{Value: 21}},
+	tests := []struct {
+		name   string
+		ub     *Account
+		a      *Action
+		expErr string
+	}{
+		{
+			name: "Default case",
+			ub: &Account{
+				ID: "OUT:CUSTOMER_1:rif",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice:    {&Balance{Value: 21}},
+					utils.MetaMonetary: {&Balance{Value: 21}},
+				},
+			},
+			a: &Action{
+				Id:               "MINI",
+				ActionType:       utils.MetaTopUpReset,
+				ExpirationString: utils.MetaUnlimited,
+				ExtraParameters:  "",
+				Weight:           10,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.MetaMonetary),
+					Uuid:           utils.StringPointer("uuid"),
+					Value:          &utils.ValueFormula{Static: 10},
+					Weight:         utils.Float64Pointer(10),
+					DestinationIDs: nil,
+					TimingIDs:      nil,
+					SharedGroups:   nil,
+					Categories:     nil,
+					Disabled:       utils.BoolPointer(false),
+					Blocker:        utils.BoolPointer(false),
+				},
+			},
+		},
+		{
+			name: "Nil BalanceMap",
+			ub: &Account{
+				ID:         "OUT:CUSTOMER_1:rif",
+				BalanceMap: nil,
+			},
+			a: &Action{
+				Id:               "MINI",
+				ActionType:       utils.MetaTopUpReset,
+				ExpirationString: utils.MetaUnlimited,
+				ExtraParameters:  "",
+				Weight:           10,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.MetaMonetary),
+					Uuid:           utils.StringPointer("uuid"),
+					Value:          &utils.ValueFormula{Static: 10},
+					Weight:         utils.Float64Pointer(10),
+					DestinationIDs: nil,
+					TimingIDs:      nil,
+					SharedGroups:   nil,
+					Categories:     nil,
+					Disabled:       utils.BoolPointer(false),
+					Blocker:        utils.BoolPointer(false),
+				},
+			},
+		},
+		{
+			name: "Nil ub",
+			ub:   nil,
+			a: &Action{
+				Id:               "MINI",
+				ActionType:       utils.MetaTopUpReset,
+				ExpirationString: utils.MetaUnlimited,
+				ExtraParameters:  "",
+				Weight:           10,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.MetaMonetary),
+					Uuid:           utils.StringPointer("uuid"),
+					Value:          &utils.ValueFormula{Static: 10},
+					Weight:         utils.Float64Pointer(10),
+					DestinationIDs: nil,
+					TimingIDs:      nil,
+					SharedGroups:   nil,
+					Categories:     nil,
+					Disabled:       utils.BoolPointer(false),
+					Blocker:        utils.BoolPointer(false),
+				},
+			},
+			expErr: "nil account",
 		},
 	}
-	a := &Action{
-		Id:               "MINI",
-		ActionType:       utils.MetaTopUpReset,
-		ExpirationString: utils.MetaUnlimited,
-		ExtraParameters:  "",
-		Weight:           10,
-		Balance: &BalanceFilter{
-			Type:           utils.StringPointer(utils.MetaMonetary),
-			Uuid:           utils.StringPointer("uuid"),
-			Value:          &utils.ValueFormula{Static: 10},
-			Weight:         utils.Float64Pointer(10),
-			DestinationIDs: nil,
-			TimingIDs:      nil,
-			SharedGroups:   nil,
-			Categories:     nil,
-			Disabled:       utils.BoolPointer(false),
-			Blocker:        utils.BoolPointer(false),
-		},
-	}
-	if err := debitResetAction(ub, a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
-		t.Error(err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := debitResetAction(tt.ub, tt.a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v recieved %v", tt.expErr, err)
+			}
+		})
 	}
 }
 
