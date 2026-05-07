@@ -149,6 +149,7 @@ const CGRATES_CFG_JSON = `
 		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
 		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
+		"redisBatchSize": 1000,         // COUNT size used in redis SCAN queries
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used

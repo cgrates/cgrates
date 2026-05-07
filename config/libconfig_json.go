@@ -111,6 +111,7 @@ type DBOptsJson struct {
 	InternalDBDumpInterval    *string           `json:"internalDBDumpInterval"`
 	InternalDBRewriteInterval *string           `json:"internalDBRewriteInterval"`
 	InternalDBFileSizeLimit   *string           `json:"internalDBFileSizeLimit"`
+	RedisBatchSize            *int              `json:"redisBatchSize"`
 	RedisMaxConns             *int              `json:"redisMaxConns"`
 	RedisConnectAttempts      *int              `json:"redisConnectAttempts"`
 	RedisSentinel             *string           `json:"redisSentinel"`
