@@ -69,6 +69,7 @@ func TestLoadConfig(t *testing.T) {
 			InternalDBBackupPath:    "/var/lib/cgrates/internal_db/backup/datadb",
 			InternalDBStartTimeout:  5 * time.Minute,
 			InternalDBFileSizeLimit: 1 << 30,
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "sentinel1",

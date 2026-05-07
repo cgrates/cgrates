@@ -54,6 +54,7 @@ func TestDataDBCoverage(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",

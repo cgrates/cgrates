@@ -79,6 +79,8 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	The maximum amount of dial attempts (default 20)
   -redisConnectTimeout duration
     	The amount of wait time until timeout for a connection attempt
+  -redisBatchSize int
+    	COUNT size used in redis SCAN queries (default 1000)
   -redisMaxConns int
     	The connection pool size (default 10)
   -redisReadTimeout duration

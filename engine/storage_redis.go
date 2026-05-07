@@ -311,12 +311,11 @@ func (rs *RedisStorage) scanKeysForPrefixContaining(prefix, search string) ([]st
 	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
 		Command: redis_SCAN,
 		Pattern: prefix + utils.Meta + search + utils.Meta, // Match all keys with the given prefix and containing search value
+		Count:   config.CgrConfig().DataDbCfg().Opts.RedisBatchSize,
 	})
 	var key string
 	for scanner.Next(&key) {
-		if strings.Contains(key, search) {
-			keys = append(keys, key)
-		}
+		keys = append(keys, key)
 	}
 	if err := scanner.Close(); err != nil {
 		return nil, err
@@ -330,12 +329,11 @@ func (rs *RedisStorage) scanKeysForPrefix(prefix string) ([]string, error) {
 	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
 		Command: redis_SCAN,
 		Pattern: prefix + "*", // Match all keys with the given prefix
+		Count:   config.CgrConfig().DataDbCfg().Opts.RedisBatchSize,
 	})
 	var key string
 	for scanner.Next(&key) {
-		if strings.HasPrefix(key, prefix) {
-			keys = append(keys, key)
-		}
+		keys = append(keys, key)
 	}
 	if err := scanner.Close(); err != nil {
 		return nil, err

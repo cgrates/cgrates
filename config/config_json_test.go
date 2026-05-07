@@ -314,6 +314,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			InternalDBDumpInterval:    utils.StringPointer("0s"),
 			InternalDBRewriteInterval: utils.StringPointer("0s"),
 			InternalDBFileSizeLimit:   utils.StringPointer("1GB"),
+			RedisBatchSize:            utils.IntPointer(1000),
 			RedisMaxConns:             utils.IntPointer(10),
 			RedisConnectAttempts:      utils.IntPointer(20),
 			RedisSentinel:             utils.StringPointer(utils.EmptyString),

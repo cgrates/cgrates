@@ -56,6 +56,8 @@ var (
 		"The DataDb user's password.")
 	dbDataEncoding = cgrLoaderFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
+	dbRedisBatchSize = cgrLoaderFlags.Int(utils.RedisBatchSizeCfg, dfltCfg.DataDbCfg().Opts.RedisBatchSize,
+		"COUNT size used in redis SCAN queries")
 	dbRedisMaxConns = cgrLoaderFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
 		"The connection pool size")
 	dbRedisConnectAttempts = cgrLoaderFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisConnectAttempts,
@@ -168,6 +170,9 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
 		ldrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
+	}
+	if *dbRedisBatchSize != dfltCfg.DataDbCfg().Opts.RedisBatchSize {
+		ldrCfg.DataDbCfg().Opts.RedisBatchSize = *dbRedisBatchSize
 	}
 	if *dbRedisConnectAttempts != dfltCfg.DataDbCfg().Opts.RedisConnectAttempts {
 		ldrCfg.DataDbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts

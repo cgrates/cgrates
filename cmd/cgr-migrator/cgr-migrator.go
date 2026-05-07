@@ -63,6 +63,8 @@ var (
 		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
+	dbRedisBatchSize = cgrMigratorFlags.Int(utils.RedisBatchSizeCfg, dfltCfg.DataDbCfg().Opts.RedisBatchSize,
+		"COUNT size used in redis SCAN queries")
 	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
 		"The connection pool size")
 	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisConnectAttempts,
@@ -184,6 +186,9 @@ func main() {
 	}
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
+	}
+	if *dbRedisBatchSize != dfltCfg.DataDbCfg().Opts.RedisBatchSize {
+		mgrCfg.DataDbCfg().Opts.RedisBatchSize = *dbRedisBatchSize
 	}
 	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
 		mgrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns

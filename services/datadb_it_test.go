@@ -94,6 +94,7 @@ func TestDataDBReload(t *testing.T) {
 			InternalDBStartTimeout:  5 * time.Minute,
 			InternalDBFileSizeLimit: 1073741824,
 			MongoConnScheme:         "mongodb",
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
@@ -231,6 +232,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
@@ -354,6 +356,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
@@ -572,6 +575,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
@@ -714,6 +718,7 @@ func TestDataDBReloadError(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			RedisBatchSize:          1000,
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
 			RedisSentinel:           "",
