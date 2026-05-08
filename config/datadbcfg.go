@@ -56,6 +56,7 @@ type DBOpts struct {
 	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
 	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
 	InternalDBFileSizeLimit   int64         // maximum size that can be written in a singular dump file
+	RedisBatchSize            int
 	RedisMaxConns             int
 	RedisConnectAttempts      int
 	RedisSentinel             string
@@ -251,6 +252,9 @@ func (dbOpts *DBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.RedisBatchSize != nil {
+		dbOpts.RedisBatchSize = *jsnCfg.RedisBatchSize
+	}
 	if jsnCfg.RedisMaxConns != nil {
 		dbOpts.RedisMaxConns = *jsnCfg.RedisMaxConns
 	}
@@ -410,6 +414,7 @@ func (dbOpts *DBOpts) Clone() *DBOpts {
 		InternalDBDumpInterval:    dbOpts.InternalDBDumpInterval,
 		InternalDBRewriteInterval: dbOpts.InternalDBRewriteInterval,
 		InternalDBFileSizeLimit:   dbOpts.InternalDBFileSizeLimit,
+		RedisBatchSize:            dbOpts.RedisBatchSize,
 		RedisMaxConns:             dbOpts.RedisMaxConns,
 		RedisConnectAttempts:      dbOpts.RedisConnectAttempts,
 		RedisSentinel:             dbOpts.RedisSentinel,
@@ -500,6 +505,7 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			utils.InternalDBDumpIntervalCfg:    dbc.Opts.InternalDBDumpInterval.String(),
 			utils.InternalDBRewriteIntervalCfg: dbc.Opts.InternalDBRewriteInterval.String(),
 			utils.InternalDBFileSizeLimitCfg:   dbc.Opts.InternalDBFileSizeLimit,
+			utils.RedisBatchSizeCfg:            dbc.Opts.RedisBatchSize,
 			utils.RedisMaxConnsCfg:             dbc.Opts.RedisMaxConns,
 			utils.RedisConnectAttemptsCfg:      dbc.Opts.RedisConnectAttempts,
 			utils.RedisSentinelNameCfg:         dbc.Opts.RedisSentinel,
@@ -731,6 +737,7 @@ type DBOptsJson struct {
 	InternalDBDumpInterval    *string           `json:"internalDBDumpInterval"`
 	InternalDBRewriteInterval *string           `json:"internalDBRewriteInterval"`
 	InternalDBFileSizeLimit   *string           `json:"internalDBFileSizeLimit"`
+	RedisBatchSize            *int              `json:"redisBatchSize"`
 	RedisMaxConns             *int              `json:"redisMaxConns"`
 	RedisConnectAttempts      *int              `json:"redisConnectAttempts"`
 	RedisSentinel             *string           `json:"redisSentinel"`
@@ -810,6 +817,9 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
 	}
 	if v1.InternalDBFileSizeLimit != v2.InternalDBFileSizeLimit {
 		d.InternalDBFileSizeLimit = utils.StringPointer(fmt.Sprint(v2.InternalDBFileSizeLimit))
+	}
+	if v1.RedisBatchSize != v2.RedisBatchSize {
+		d.RedisBatchSize = utils.IntPointer(v2.RedisBatchSize)
 	}
 	if v1.RedisMaxConns != v2.RedisMaxConns {
 		d.RedisMaxConns = utils.IntPointer(v2.RedisMaxConns)

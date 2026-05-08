@@ -38,6 +38,7 @@ import (
 type RedisStorage struct {
 	stringIndexedFields []string // used for CDR indexing
 	prefixIndexedFields []string // used for CDR indexing
+	redisBatchSize      int      // holds the COUNT value used for SCAN queries
 	client              radix.Client
 	ms                  utils.Marshaler
 }
@@ -79,7 +80,7 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
 	clusterOnDownDelay, connTimeout, readTimeout, writeTimeout time.Duration,
 	pipelineWindow time.Duration, pipelineLimit int,
-	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string,
+	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string, batchSize int,
 	stringIndexedFields, prefixIndexedFields []string) (_ *RedisStorage, err error) {
 	var ms utils.Marshaler
 	if ms, err = utils.NewMarshaler(mrshlerStr); err != nil {
@@ -140,6 +141,7 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	return &RedisStorage{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
+		redisBatchSize:      batchSize,
 		ms:                  ms,
 		client:              client,
 	}, nil
@@ -266,6 +268,7 @@ func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix, search st
 		scanner := radix.NewScanner(rs.client, radix.ScanOpts{
 			Command: redisSCAN,
 			Pattern: prefix + utils.Meta + search + utils.Meta, // Match all keys with the given prefix and containing search value
+			Count:   rs.redisBatchSize,
 		})
 		var key string
 		for scanner.Next(&key) {
@@ -280,6 +283,7 @@ func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix, search st
 		scan := radix.NewScanner(rs.client, radix.ScanOpts{
 			Command: redisSCAN,
 			Pattern: prefix + utils.Meta,
+			Count:   rs.redisBatchSize,
 		})
 		var key string
 		for scan.Next(&key) {

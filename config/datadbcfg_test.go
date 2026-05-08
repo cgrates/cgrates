@@ -935,6 +935,7 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisClientCertificate:  "",
 		RedisClientKey:          "",
 		RedisCACertificate:      "",
+		RedisBatchSize:          400,
 		RedisMaxConns:           2,
 		RedisConnectAttempts:    3,
 		RedisConnectTimeout:     3,
@@ -952,6 +953,7 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisClientCertificate:  "1",
 		RedisClientKey:          "1",
 		RedisCACertificate:      "1",
+		RedisBatchSize:          500,
 		RedisMaxConns:           3,
 		RedisConnectAttempts:    4,
 		RedisConnectTimeout:     4,
@@ -973,6 +975,7 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisReadTimeout:        utils.StringPointer("3ns"),
 		RedisConnectTimeout:     utils.StringPointer("4ns"),
 		RedisConnectAttempts:    utils.IntPointer(4),
+		RedisBatchSize:          utils.IntPointer(500),
 		RedisMaxConns:           utils.IntPointer(3),
 	}
 

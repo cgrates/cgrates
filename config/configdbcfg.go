@@ -124,6 +124,7 @@ func (dbcfg ConfigDBCfg) AsMapInterface() any {
 		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval.String(),
 		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval.String(),
 		utils.InternalDBFileSizeLimitCfg:   dbcfg.Opts.InternalDBFileSizeLimit,
+		utils.RedisBatchSizeCfg:            dbcfg.Opts.RedisBatchSize,
 		utils.RedisMaxConnsCfg:             dbcfg.Opts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:      dbcfg.Opts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:         dbcfg.Opts.RedisSentinel,

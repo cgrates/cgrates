@@ -200,7 +200,8 @@ func (db *DataDBService) needsConnectionReload() bool {
 			}
 		}
 		if db.oldDBCfg.DBConns[dbConnKey].Type == utils.MetaRedis &&
-			(dbConn.Opts.RedisMaxConns != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisMaxConns ||
+			(dbConn.Opts.RedisBatchSize != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisBatchSize ||
+				dbConn.Opts.RedisMaxConns != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisMaxConns ||
 				dbConn.Opts.RedisConnectAttempts != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisConnectAttempts ||
 				dbConn.Opts.RedisSentinel != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisSentinel ||
 				dbConn.Opts.RedisCluster != db.cfg.DbCfg().DBConns[dbConnKey].Opts.RedisCluster ||
