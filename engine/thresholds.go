@@ -344,6 +344,7 @@ type ThresholdService struct {
 	stMux         sync.RWMutex    // protects storedTdIDs
 	connMgr       *ConnManager
 	sBiRPCClients *utils.ServiceBiRPCClients  // will hold ThresholdS BiRPC clients and conns
+	ccidMux       sync.RWMutex                // protects clientConnID
 	clientConnID  map[string]*utils.SyConnIDs // holds ClientConnID per threshold profile, used for birpc calls. [ThresholdProfileID]SyConnIds
 }
 
@@ -562,6 +563,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 
 // getThresholdSyConn returns the syConnIDs and client corresponding to the thresholdProfileID, or returns nil if not found
 func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thresholdSyConn, error) {
+	tS.ccidMux.RLock()
+	defer tS.ccidMux.RUnlock()
 	if syIds, has := tS.clientConnID[thresholdProfileID]; has {
 		clnt := tS.sBiRPCClients.BiJClnt(syIds.ClientConnID)
 		if clnt == nil {
@@ -787,10 +790,12 @@ func (tS *ThresholdService) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Conte
 func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 	args *utils.SyConnIDs, reply *string) error {
 	time.Sleep(100 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
+	tS.ccidMux.Lock()
 	tS.clientConnID[args.ThresholdProfileID] = &utils.SyConnIDs{
 		CGRID:        args.CGRID,
 		ClientConnID: tS.sBiRPCClients.BiJClntID(ctx.Client),
 	}
+	tS.ccidMux.Unlock()
 	*reply = utils.OK
 	return nil
 }
@@ -798,7 +803,9 @@ func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 // BiRPCv1RemoveClientConnID will remove the args ClientConnID from the list of SyConnIds on the ThresholdService
 func (tS *ThresholdService) BiRPCv1RemoveClientConnID(ctx *context.Context,
 	args string, reply *string) error {
+	tS.ccidMux.Lock()
 	delete(tS.clientConnID, args)
+	tS.ccidMux.Unlock()
 	*reply = utils.OK
 	return nil
 }
