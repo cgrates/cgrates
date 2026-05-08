@@ -297,7 +297,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	}
 	if sma.caps.IsLimited() {
 		if err := sma.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
+			sma.hangupChannel(ev.ChannelID(),
 				fmt.Sprintf("<%s> caps limit reached, rejecting state change for channel %s: %v",
 					utils.AsteriskAgent, ev.ChannelID(), err))
 			return
