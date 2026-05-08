@@ -348,21 +348,24 @@ func (l *loader) processIFile(fileName string) (err error) {
 	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
 }
 
-func (l *loader) processFolder(ctx *context.Context, opts map[string]any, withIndex, stopOnError bool) (err error) {
+func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}
 	defer l.Unlock()
+	if inPath == utils.EmptyString {
+		inPath = l.ldrCfg.TpInDir
+	}
 	var csvType CSVProvider = fileProvider{}
 	switch {
 	// case strings.HasPrefix(inPath, gprefix): // uncomment this after *gapi is implemented
 	// 	csvType = utils.MetaGoogleAPI
 	// 	inPath = strings.TrimPrefix(inPath, gprefix)
-	case utils.IsURL(l.ldrCfg.TpInDir):
+	case utils.IsURL(inPath):
 		csvType = urlProvider{}
 	}
 	for _, cfg := range l.ldrCfg.Data {
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
+		if err = l.processFile(ctx, cfg, inPath, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
@@ -373,18 +376,18 @@ func (l *loader) processFolder(ctx *context.Context, opts map[string]any, withIn
 		}
 	}
 	if len(l.ldrCfg.TpOutDir) != 0 {
-		err = l.moveUnprocessedFiles()
+		err = l.moveUnprocessedFiles(inPath)
 	}
 	return
 }
 
-func (l *loader) moveUnprocessedFiles() (err error) {
+func (l *loader) moveUnprocessedFiles(inPath string) (err error) {
 	var fs []os.DirEntry
-	if fs, err = os.ReadDir(l.ldrCfg.TpInDir); err != nil {
+	if fs, err = os.ReadDir(inPath); err != nil {
 		return
 	}
 	for _, f := range fs {
-		if pathIn := path.Join(l.ldrCfg.TpInDir, f.Name()); !l.IsLockFile(pathIn) {
+		if pathIn := path.Join(inPath, f.Name()); !l.IsLockFile(pathIn) {
 			if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
 				return
 			}
@@ -395,7 +398,7 @@ func (l *loader) moveUnprocessedFiles() (err error) {
 
 func (l *loader) handleFolder(stopChan chan struct{}) {
 	for {
-		go l.processFolder(context.Background(), nil, l.ldrCfg.Opts.WithIndex, false)
+		go l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false)
 		timer := time.NewTimer(l.ldrCfg.RunDelay)
 		select {
 		case <-stopChan:
