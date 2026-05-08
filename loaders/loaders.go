@@ -68,6 +68,7 @@ func (ldrS *LoaderS) ListenAndServe(stopChan chan struct{}) (err error) {
 
 type ArgsProcessFolder struct {
 	LoaderID string
+	Path     string
 	APIOpts  map[string]any
 }
 
@@ -113,7 +114,7 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 			return
 		}
 	}
-	if err := ldr.processFolder(context.Background(), args.APIOpts,
+	if err := ldr.processFolder(context.Background(), args.Path, args.APIOpts,
 		wI, soE); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -1053,7 +1053,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := ld.processFolder(context.Background(),
+	if err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != nil {
 		t.Fatal(err)
 	}
@@ -1086,7 +1086,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	}
 
 	ld.Locker = mockLock{}
-	if err := ld.processFolder(context.Background(),
+	if err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != utils.ErrExists {
 		t.Fatal(err)
 	}
@@ -1094,7 +1094,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	ld.Locker = nopLock{}
 	ld.ldrCfg.TpInDir = "http://localhost:0"
 	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
-	if err := ld.processFolder(context.Background(),
+	if err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
@@ -1165,7 +1165,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	}
 
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := ld.processFolder(context.Background(),
+	if err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
@@ -1185,7 +1185,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	if err := ld.processFolder(context.Background(),
+	if err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -1209,7 +1209,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 	}, nil, nil, nil, nil, nil)
 
 	expErrMsg := "open notAFolder: no such file or directory"
-	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
+	if err := ld.moveUnprocessedFiles(ld.ldrCfg.TpInDir); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderMoveUnprocessedFilesErrorsIn")
@@ -1228,7 +1228,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	expErrMsg = fmt.Sprintf("rename %s/Attributes.csv notAFolder/Attributes.csv: no such file or directory", tmpIn)
-	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
+	if err := ld.moveUnprocessedFiles(ld.ldrCfg.TpInDir); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }

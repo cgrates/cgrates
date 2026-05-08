@@ -531,3 +531,80 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
+
+func TestLoaderServiceV1RunPath(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	tmpPath, err := os.MkdirTemp(utils.EmptyString, "TestLoaderServiceV1RunPath")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpPath)
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].Data = []*config.LoaderDataType{{
+		Type:     utils.MetaAttributes,
+		Filename: utils.AttributesCsv,
+		Fields:   fc,
+	}}
+	cfg.LoaderCfg()[0].TpOutDir = utils.EmptyString
+
+	f, err := os.Create(path.Join(tmpPath, utils.AttributesCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(`cgrates.org,ID`); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	inPath, err := os.MkdirTemp(utils.EmptyString, "TestLoaderServiceV1RunTpIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.LoaderCfg()[0].TpInDir = inPath
+	defer os.RemoveAll(inPath)
+
+	cM := engine.NewConnManager(cfg)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+
+	ld := NewLoaderS(cfg, dm, fS, cM)
+	var rply string
+	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
+		Path: tmpPath,
+		APIOpts: map[string]any{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   true,
+			utils.MetaStopOnError: true,
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err != nil {
+		t.Fatal(err)
+	} else if rply != utils.OK {
+		t.Errorf("Expected: %q,received: %q", utils.OK, rply)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else {
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+	}
+}
