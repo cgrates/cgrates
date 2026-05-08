@@ -281,6 +281,7 @@ func TestGetSectionAsMap(t *testing.T) {
 			utils.InternalDBFileSizeLimitCfg:   int64(1073741824),
 			utils.InternalDBRewriteIntervalCfg: "0s",
 			utils.InternalDBStartTimeoutCfg:    "5m0s",
+			utils.RedisBatchSizeCfg:            1000,
 			"redisMaxConns":                    10,
 			"redisConnectAttempts":             20,
 			"redisSentinel":                    "",

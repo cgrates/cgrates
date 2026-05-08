@@ -443,7 +443,8 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl29 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl29)
 	}
-	if testCfgDir == "tutredis" || testCfgDir == "tutmysql" {
+	switch testCfgDir {
+	case "tutredis", "tutmysql":
 		cfgStr = `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_db_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"*redis","out_datadb_user":"cgrates","users_filters":["Account"]}}`
 		var rpl30 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -454,7 +455,7 @@ func testConfigSReload(t *testing.T) {
 		} else if cfgStr != rpl30 {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl30)
 		}
-	} else if testCfgDir == "tutmongo" {
+	case "tutmongo":
 		cfgStr = `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_db_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"27017","out_datadb_type":"*mongo","out_datadb_user":"cgrates","users_filters":["Account"]}}`
 		var rpl30 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
