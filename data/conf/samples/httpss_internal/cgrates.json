@@ -1,0 +1,95 @@
+{
+// CGRateS Configuration file
+//
+
+
+"logger": {
+	"level": 7
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080"
+},
+
+"db": {							
+	"db_conns": {
+		"*default": {			
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
+		}
+	}
+},
+
+
+"rates": {
+	"enabled": true
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"conns": {
+		"*chargers": [{"ConnIDs": ["*internal"]}],
+		"*rates": [{"ConnIDs": ["*internal"]}]
+	},
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"conns": {
+		"*attributes": [{"ConnIDs": ["*internal"]}]
+	},
+},
+
+
+"sessions": {
+	"enabled": true,
+	"conns":{
+	"*attributes": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"ConnIDs": ["*localhost"]
+		 }
+	],
+	"*cdrs": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"ConnIDs": ["*localhost"]
+		 }
+	],
+	"*rates": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"ConnIDs": ["*localhost"]
+		 }
+	],
+	"*chargers": [
+		 {
+			"Tenant": "",
+			"FilterIDs": [],
+			"ConnIDs": ["*internal"]
+		 }
+	]
+			},
+},
+
+
+"admins": {
+	"enabled": true,
+},
+
+
+}

@@ -1,0 +1,12 @@
+{
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"run_delay": "0",
+		"tp_out_dir": ""
+	}
+]
+
+}
