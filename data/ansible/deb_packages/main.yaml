@@ -156,6 +156,11 @@
         cgrates_dbs: []
         cgrates_dependencies: []
 
+    - name: Remove leftover dependencies/ from a prior failed deb build
+      ansible.builtin.file:
+        path: "{{ cgrates_dir }}/dependencies"
+        state: absent
+
     - name: Sync the go mod with vendor
       ansible.builtin.command:
         cmd: go mod vendor
