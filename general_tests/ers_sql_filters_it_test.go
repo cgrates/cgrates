@@ -88,8 +88,8 @@ var (
 				},
 			},
 			AccountSummary: &engine.AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "1001",
+				Tenant:    "cgrates.org",
+				AccountID: "1001",
 				BalanceSummaries: []*engine.BalanceSummary{
 					{
 						UUID:  "uuid1",
@@ -182,8 +182,8 @@ var (
 				},
 			},
 			AccountSummary: &engine.AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "1001",
+				Tenant:    "cgrates.org",
+				AccountID: "1001",
 				BalanceSummaries: []*engine.BalanceSummary{
 					{
 						UUID:  "uuid1",
@@ -1062,7 +1062,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		timeStartFormated := rslt2[0]["answer_time"]
 		createdAt := rslt2[0]["created_at"]
 		updatedAt := rslt2[0]["updated_at"]
-		exp := fmt.Sprintf("map[account:1001 answer_time:%s category:call cgrid:%s cost:1.01 cost_details:{\"CGRID\":\"test1\",\"RunID\":\"*default\",\"StartTime\":\"2017-01-09T16:18:21Z\",\"Usage\":180000000000,\"Cost\":2.3,\"Charges\":[{\"RatingID\":\"RatingID2\",\"Increments\":[{\"Usage\":120000000000,\"Cost\":2,\"AccountingID\":\"a012888\",\"CompressFactor\":1},{\"Usage\":1000000000,\"Cost\":0.005,\"AccountingID\":\"44d6c02\",\"CompressFactor\":60}],\"CompressFactor\":1}],\"AccountSummary\":{\"Tenant\":\"cgrates.org\",\"ID\":\"1001\",\"BalanceSummaries\":[{\"UUID\":\"uuid1\",\"ID\":\"\",\"Type\":\"*monetary\",\"Initial\":0,\"Value\":50,\"Disabled\":false}],\"AllowNegative\":false,\"Disabled\":false},\"Rating\":{\"c1a5ab9\":{\"ConnectFee\":0.1,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":5,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"TimingID\":\"\",\"RatesID\":\"ec1a177\",\"RatingFiltersID\":\"43e77dc\"}},\"Accounting\":{\"44d6c02\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"},\"a012888\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"}},\"RatingFilters\":null,\"Rates\":{\"ec1a177\":[{\"GroupIntervalStart\":0,\"Value\":0.01,\"RateIncrement\":60000000000,\"RateUnit\":1000000000}]},\"Timings\":null} cost_source:cost source created_at:%s deleted_at:<nil> destination:1002 extra_fields:{\"field_extr1\":\"val_extr1\",\"fieldextr2\":\"valextr2\"} extra_info:extraInfo id:2 origin_host:192.168.1.1 origin_id:oid2 request_type:*rated run_id:*default setup_time:%s source:test subject:1001 tenant:cgrates.org tor:*voice updated_at:%s usage:10000000000]", timeStartFormated, cgrID, createdAt, timeStartFormated, updatedAt)
+		exp := fmt.Sprintf("map[account:1001 answer_time:%s category:call cgrid:%s cost:1.01 cost_details:{\"CGRID\":\"test1\",\"RunID\":\"*default\",\"StartTime\":\"2017-01-09T16:18:21Z\",\"Usage\":180000000000,\"Cost\":2.3,\"Charges\":[{\"RatingID\":\"RatingID2\",\"Increments\":[{\"Usage\":120000000000,\"Cost\":2,\"AccountingID\":\"a012888\",\"CompressFactor\":1},{\"Usage\":1000000000,\"Cost\":0.005,\"AccountingID\":\"44d6c02\",\"CompressFactor\":60}],\"CompressFactor\":1}],\"AccountSummary\":{\"Tenant\":\"cgrates.org\",\"AccountID\":\"1001\",\"BalanceSummaries\":[{\"UUID\":\"uuid1\",\"ID\":\"\",\"Type\":\"*monetary\",\"Initial\":0,\"Value\":50,\"Disabled\":false}],\"AllowNegative\":false,\"Disabled\":false},\"Rating\":{\"c1a5ab9\":{\"ConnectFee\":0.1,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":5,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"TimingID\":\"\",\"RatesID\":\"ec1a177\",\"RatingFiltersID\":\"43e77dc\"}},\"Accounting\":{\"44d6c02\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"},\"a012888\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"}},\"RatingFilters\":null,\"Rates\":{\"ec1a177\":[{\"GroupIntervalStart\":0,\"Value\":0.01,\"RateIncrement\":60000000000,\"RateUnit\":1000000000}]},\"Timings\":null} cost_source:cost source created_at:%s deleted_at:<nil> destination:1002 extra_fields:{\"field_extr1\":\"val_extr1\",\"fieldextr2\":\"valextr2\"} extra_info:extraInfo id:2 origin_host:192.168.1.1 origin_id:oid2 request_type:*rated run_id:*default setup_time:%s source:test subject:1001 tenant:cgrates.org tor:*voice updated_at:%s usage:10000000000]", timeStartFormated, cgrID, createdAt, timeStartFormated, updatedAt)
 		// Print the entire table as a string
 		for _, row := range rslt2 {
 			if !strings.Contains(fmt.Sprintf("%+v", row), exp) {

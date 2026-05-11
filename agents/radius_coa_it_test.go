@@ -120,7 +120,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 			ID:     "THD_ACNT_1001",
 			FilterIDs: []string{
 				"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:1001",
+				"*string:~*asm.AccountID:1001",
 			},
 			//MinHits:   1,
 			MaxHits:   1,

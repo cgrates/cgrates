@@ -3365,8 +3365,8 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 			Cost:      utils.Float64Pointer(12.1),
 			Charges:   []*ChargingInterval{},
 			AccountSummary: &AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "acc_Id",
+				Tenant:    "cgrates.org",
+				AccountID: "acc_Id",
 				BalanceSummaries: BalanceSummaries{
 					{
 						UUID:     "uuid",

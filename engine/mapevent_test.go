@@ -516,8 +516,8 @@ func TestMapEventAsCDR(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					Type:     "*monetary",

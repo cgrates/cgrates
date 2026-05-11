@@ -1112,8 +1112,8 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		ToR:         "*data",
 		Cost:        1.01,
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "AccountFromAccountSummary",
+			Tenant:    "cgrates.org",
+			AccountID: "AccountFromAccountSummary",
 			BalanceSummaries: []*engine.BalanceSummary{
 				{
 					UUID:  "f9be602747f4",
@@ -1520,7 +1520,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 			ID:     "StatForAccountUpdate",
 			FilterIDs: []string{
 				"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:testV1STSSimulateAccountUpdate",
+				"*string:~*asm.AccountID:testV1STSSimulateAccountUpdate",
 			},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

@@ -2184,8 +2184,8 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		},
 	}
 	expectacntSummary := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "account1",
+		Tenant:    "cgrates.org",
+		AccountID: "account1",
 		BalanceSummaries: []*BalanceSummary{
 			{ID: "data1", Type: utils.MetaData, Value: 1204, Disabled: false},
 			{ID: "sms1", Type: utils.MetaSMS, Value: 14, Disabled: false},
@@ -2452,8 +2452,8 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 				Initial: 20.54,
 				Value:   1,
 			}},
-		Tenant: "tenant",
-		ID:     "accID",
+		Tenant:    "tenant",
+		AccountID: "accID",
 	}
 
 	if _, err := as.FieldAsInterface(nil); err == nil || err != utils.ErrNotFound {
@@ -2469,9 +2469,9 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = as.FieldAsInterface([]string{"Tenant", "Value"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"ID"}); err != nil {
+	} else if _, err = as.FieldAsInterface([]string{"AccountID"}); err != nil {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"ID", "test"}); err == nil || err != utils.ErrNotFound {
+	} else if _, err = as.FieldAsInterface([]string{"AccountID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if val, err := as.FieldAsInterface([]string{"BalanceSummaries"}); err != nil {
@@ -2821,8 +2821,8 @@ func TestAccountAsOldStructure(t *testing.T) {
 func TestAccountSummary(t *testing.T) {
 
 	as := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "CGRATES_1",
+		Tenant:    "cgrates.org",
+		AccountID: "CGRATES_1",
 		BalanceSummaries: BalanceSummaries{
 			&BalanceSummary{
 				ID:       "summary_1",
@@ -2846,8 +2846,8 @@ func TestAccountSummary(t *testing.T) {
 	}
 
 	asOld := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "CGRATES_1",
+		Tenant:    "cgrates.org",
+		AccountID: "CGRATES_1",
 		BalanceSummaries: BalanceSummaries{
 			&BalanceSummary{
 				ID:       "oldsummary_1",
@@ -2870,8 +2870,8 @@ func TestAccountSummary(t *testing.T) {
 		Disabled:      false,
 	}
 	expAs := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "CGRATES_1",
+		Tenant:    "cgrates.org",
+		AccountID: "CGRATES_1",
 		BalanceSummaries: BalanceSummaries{
 			&BalanceSummary{
 				ID:       "summary_1",
@@ -3495,10 +3495,10 @@ func TestEngineNewAccountSummaryFromJSON(t *testing.T) {
 	}{
 		{
 			name:    "Valid JSON",
-			jsonStr: `{"tenant": "cgrates.org", "id": "1234", "balanceSummaries": [], "allowNegative": false, "disabled": true}`,
+			jsonStr: `{"tenant": "cgrates.org", "accountId": "1234", "balanceSummaries": [], "allowNegative": false, "disabled": true}`,
 			want: &AccountSummary{
 				Tenant:           "cgrates.org",
-				ID:               "1234",
+				AccountID:        "1234",
 				BalanceSummaries: BalanceSummaries{},
 				AllowNegative:    false,
 				Disabled:         true,
@@ -3533,7 +3533,7 @@ func TestEngineNewAccountSummaryFromJSON(t *testing.T) {
 func TestAccountSummaryString(t *testing.T) {
 	account := &AccountSummary{
 		Tenant:        "cgrates.org",
-		ID:            "2012",
+		AccountID:     "2012",
 		AllowNegative: true,
 		Disabled:      false,
 		BalanceSummaries: BalanceSummaries{
@@ -3569,7 +3569,7 @@ func TestAccountProcessAccountSummaryField(t *testing.T) {
 			name: "Direct access for *AccountSummary (Tenant)",
 			args: args{
 				fldPath:    []string{"Tenant"},
-				accSummary: &AccountSummary{Tenant: "test_tenant", ID: "id1"},
+				accSummary: &AccountSummary{Tenant: "test_tenant", AccountID: "id1"},
 				event:      make(map[string]any),
 			},
 			want:    "test_tenant",
@@ -3660,8 +3660,8 @@ func TestAccountSummaryClone(t *testing.T) {
 		{
 			name: "Complete AccountSummary",
 			accSummary: &AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "CGRATES_1",
+				Tenant:    "cgrates.org",
+				AccountID: "CGRATES_1",
 				BalanceSummaries: BalanceSummaries{
 					&BalanceSummary{
 						ID:       "summary_1",
@@ -3687,7 +3687,7 @@ func TestAccountSummaryClone(t *testing.T) {
 		{
 			name: "No Tenant",
 			accSummary: &AccountSummary{
-				ID: "CGRATES_1",
+				AccountID: "CGRATES_1",
 				BalanceSummaries: BalanceSummaries{
 					&BalanceSummary{
 						ID:       "summary_1",
@@ -3714,7 +3714,7 @@ func TestAccountSummaryClone(t *testing.T) {
 			name: "Nil BalanceSummaries",
 			accSummary: &AccountSummary{
 				Tenant:           "cgrates.org",
-				ID:               "CGRATES_1",
+				AccountID:        "CGRATES_1",
 				BalanceSummaries: nil,
 				AllowNegative:    false,
 				Disabled:         false,
@@ -3736,8 +3736,8 @@ func TestAccountSummaryClone(t *testing.T) {
 			if tt.accSummary.Tenant != result.Tenant {
 				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.Tenant, result.Tenant)
 			}
-			if tt.accSummary.ID != result.ID {
-				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.ID, result.ID)
+			if tt.accSummary.AccountID != result.AccountID {
+				t.Errorf("Expected: %v, recieved: %v", tt.accSummary.AccountID, result.AccountID)
 			}
 			if tt.accSummary.BalanceSummaries != nil {
 				if utils.ToJSON(tt.accSummary.BalanceSummaries[0]) != utils.ToJSON(result.BalanceSummaries[0]) {

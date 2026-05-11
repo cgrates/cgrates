@@ -2065,8 +2065,8 @@ func TestCalldescAccountSummaryNilAcc(t *testing.T) {
 		Destination: "1002",
 	}
 	initialAcc := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "testID",
+		Tenant:    "cgrates.org",
+		AccountID: "testID",
 	}
 
 	rcv := cd.AccountSummary(initialAcc)

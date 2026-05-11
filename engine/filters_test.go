@@ -1457,7 +1457,7 @@ func TestEventCostFilter(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			ID:            "234189200129930",
+			AccountID:     "234189200129930",
 			Tenant:        "cgrates.org",
 			Disabled:      false,
 			AllowNegative: false,

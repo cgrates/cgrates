@@ -104,8 +104,8 @@ func TestGetAccountCost(t *testing.T) {
 		}
 
 		expAcntS := &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: engine.BalanceSummaries{
 				{
 					UUID:  acnt.BalanceMap[utils.MetaVoice][0].Uuid,

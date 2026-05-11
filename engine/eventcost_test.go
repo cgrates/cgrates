@@ -104,8 +104,8 @@ var testEC = &EventCost{
 		},
 	},
 	AccountSummary: &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "dan",
+		Tenant:    "cgrates.org",
+		AccountID: "dan",
 		BalanceSummaries: []*BalanceSummary{
 			{
 				UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
@@ -323,8 +323,8 @@ func TestECComputeAndReset(t *testing.T) {
 
 func TestNewEventCostFromCallCost(t *testing.T) {
 	acntSummary := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "dan",
+		Tenant:    "cgrates.org",
+		AccountID: "dan",
 		BalanceSummaries: []*BalanceSummary{
 			{
 				Type:     "*monetary",
@@ -1035,8 +1035,8 @@ func TestECAsRefundIncrements(t *testing.T) {
 
 func TestECAsCallCost(t *testing.T) {
 	acntSummary := &AccountSummary{
-		Tenant: "cgrates.org",
-		ID:     "dan",
+		Tenant:    "cgrates.org",
+		AccountID: "dan",
 		BalanceSummaries: []*BalanceSummary{
 			{
 				Type:     "*monetary",
@@ -1660,8 +1660,8 @@ func TestECMergeGT(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1718,8 +1718,8 @@ func TestECMergeGT(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1777,8 +1777,8 @@ func TestECMergeGT(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2578,8 +2578,8 @@ func TestECSyncKeys(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
@@ -2725,7 +2725,7 @@ func TestECAsDataProvider(t *testing.T) {
 	} else if data != utils.MetaDefault {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.MetaDefault, data)
 	}
-	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "ID"}); err != nil {
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "AccountID"}); err != nil {
 		t.Error(err)
 	} else if data != "dan" {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", "data", data)
@@ -2882,10 +2882,10 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	// case utils.AccountSummary:
 	eventCost = &EventCost{
 		AccountSummary: &AccountSummary{
-			ID: "IDtest",
+			AccountID: "IDtest",
 		},
 	}
-	expectedAccountSummary := &AccountSummary{ID: "IDtest"}
+	expectedAccountSummary := &AccountSummary{AccountID: "IDtest"}
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.AccountSummary}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedAccountSummary, rcv) {
@@ -2893,8 +2893,8 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	}
 	eventCost = &EventCost{
 		AccountSummary: &AccountSummary{
-			ID:     "IDtest1",
-			Tenant: "Tenant",
+			AccountID: "IDtest1",
+			Tenant:    "Tenant",
 		},
 		CGRID: "test",
 	}
@@ -3443,7 +3443,7 @@ func TestEventCostString(t *testing.T) {
 			},
 		},
 	}
-	eOut = `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"","ID":"ID","Type":"","Initial":0,"Value":0,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
+	eOut = `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":{"Tenant":"","AccountID":"","BalanceSummaries":[{"UUID":"","ID":"ID","Type":"","Initial":0,"Value":0,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
 	if rcv := eventCost.String(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
@@ -3621,8 +3621,8 @@ func TestECAsCallCost3(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					Type:     utils.MetaMonetary,
@@ -3717,8 +3717,8 @@ func TestECAsCallCost3(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
@@ -3841,7 +3841,7 @@ func TestECAsDataProvider2(t *testing.T) {
 	} else if data != utils.MetaDefault {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.MetaDefault, data)
 	}
-	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "ID"}); err != nil {
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "AccountID"}); err != nil {
 		t.Error(err)
 	} else if data != "dan" {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", "data", data)
@@ -4614,7 +4614,7 @@ func TestECnewIntervalFromCharge(t *testing.T) {
 		},
 		AccountSummary: &AccountSummary{
 			Tenant:        "cgrates.org",
-			ID:            "1001",
+			AccountID:     "1001",
 			AllowNegative: true,
 			BalanceSummaries: BalanceSummaries{
 				&BalanceSummary{

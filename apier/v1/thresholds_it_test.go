@@ -68,9 +68,9 @@ var (
 						Value: 12.3,
 					},
 				},
-				utils.ID:       "1001",
-				utils.Tenant:   "cgrates.org",
-				utils.Disabled: false,
+				utils.AccountID: "1001",
+				utils.Tenant:    "cgrates.org",
+				utils.Disabled:  false,
 			},
 			APIOpts: map[string]any{
 				utils.MetaEventType: utils.AccountUpdate,
@@ -889,7 +889,7 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 			ID:     "TH_ACNT_UPDATE_EV",
 			FilterIDs: []string{
 				"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:testV1TSProcessAccountUpdateEvent",
+				"*string:~*asm.AccountID:testV1TSProcessAccountUpdateEvent",
 				"*gt:~*asm.BalanceSummaries.HolidayBalance.Value:1.0",
 			},
 			MaxHits:   10,

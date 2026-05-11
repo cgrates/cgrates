@@ -304,8 +304,8 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 		ToR:         "*data",
 		Cost:        0,
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "AccountFromAccountSummary",
+			Tenant:    "cgrates.org",
+			AccountID: "AccountFromAccountSummary",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:  "f9be602747f4",
@@ -353,7 +353,7 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 
-	prsr = config.NewRSRParserMustCompile("~*req.CostDetails.AccountSummary.ID")
+	prsr = config.NewRSRParserMustCompile("~*req.CostDetails.AccountSummary.AccountID")
 	eFldVal = "AccountFromAccountSummary"
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
@@ -973,8 +973,8 @@ func TestCompressedCDR(t *testing.T) {
 				},
 			},
 			AccountSummary: &AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "1001",
+				Tenant:    "cgrates.org",
+				AccountID: "1001",
 				BalanceSummaries: []*BalanceSummary{
 					{
 						UUID:  "uuid1",
