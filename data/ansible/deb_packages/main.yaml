@@ -160,13 +160,6 @@
         path: "{{ cgrates_dir }}/dependencies"
         state: absent
 
-    - name: Sync the go mod with vendor
-      ansible.builtin.command:
-        cmd: go mod vendor
-        chdir: "{{ cgrates_dir }}"
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
-
     - name: Get current Git tag
       ansible.builtin.command: git tag -l --points-at HEAD
       args:
