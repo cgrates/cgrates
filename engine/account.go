@@ -1283,10 +1283,10 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 	idSplt := strings.Split(acc.ID, utils.ConcatenatedKeySep)
 	ad := &AccountSummary{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
 	if len(idSplt) == 1 {
-		ad.ID = idSplt[0]
+		ad.AccountID = idSplt[0]
 	} else if len(idSplt) == 2 {
 		ad.Tenant = idSplt[0]
-		ad.ID = idSplt[1]
+		ad.AccountID = idSplt[1]
 	}
 
 	for _, balanceType := range []string{utils.MetaData, utils.MetaSMS, utils.MetaMMS, utils.MetaVoice, utils.MetaGeneric, utils.MetaMonetary} {
@@ -1355,7 +1355,7 @@ func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err err
 // AccountSummary contains compressed information about an Account
 type AccountSummary struct {
 	Tenant           string
-	ID               string // unfinished , change this to Account
+	AccountID        string
 	BalanceSummaries BalanceSummaries
 	AllowNegative    bool
 	Disabled         bool
@@ -1365,7 +1365,7 @@ type AccountSummary struct {
 func (as *AccountSummary) Clone() (cln *AccountSummary) {
 	cln = new(AccountSummary)
 	cln.Tenant = as.Tenant
-	cln.ID = as.ID
+	cln.AccountID = as.AccountID
 	cln.AllowNegative = as.AllowNegative
 	cln.Disabled = as.Disabled
 	if as.BalanceSummaries != nil {
@@ -1446,11 +1446,11 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val any, err error
 			return nil, utils.ErrNotFound
 		}
 		return as.Tenant, nil
-	case utils.ID:
+	case utils.AccountID:
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
 		}
-		return as.ID, nil
+		return as.AccountID, nil
 	case utils.BalanceSummaries:
 		if len(fldPath) == 1 {
 			return as.BalanceSummaries, nil
@@ -1494,7 +1494,7 @@ func (as *AccountSummary) String() string {
 func (as *AccountSummary) AsMapInterface() map[string]any {
 	return map[string]any{
 		utils.Tenant:           as.Tenant,
-		utils.ID:               as.ID,
+		utils.AccountID:        as.AccountID,
 		utils.AllowNegative:    as.AllowNegative,
 		utils.Disabled:         as.Disabled,
 		utils.BalanceSummaries: as.BalanceSummaries,

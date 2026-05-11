@@ -1147,7 +1147,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(ctx *context.Context, args *ArgsV2CDRS
 	cc := args.Cost.CostDetails.AsCallCost(utils.EmptyString)
 	if args.Cost.CostDetails.AccountSummary != nil {
 		cc.Tenant = args.Cost.CostDetails.AccountSummary.Tenant
-		cc.Account = args.Cost.CostDetails.AccountSummary.ID
+		cc.Account = args.Cost.CostDetails.AccountSummary.AccountID
 	}
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()

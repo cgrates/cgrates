@@ -603,7 +603,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 			var tntAcnt string
 			var acnt string
 			if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
-				acnt, _ = args.FieldAsString(utils.ID)
+				acnt, _ = args.FieldAsString(utils.AccountID)
 			} else {
 				acnt, _ = args.FieldAsString(utils.AccountField)
 			}
