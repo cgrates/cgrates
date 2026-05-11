@@ -679,4 +679,319 @@ func TestUpdateActionTrigger(t *testing.T) {
 	if !updated {
 		t.Errorf("Expected updated=true when mandatory fields missing")
 	}
+
+	at = &ActionTrigger{
+		ID:                "gr1",
+		UniqueID:          "unId",
+		ThresholdType:     "*max_balance_counter",
+		ThresholdValue:    16.1,
+		Recurrent:         true,
+		MinSleep:          1 * time.Second,
+		ExpirationDate:    time.Date(2026, 05, 12, 1, 0, 0, 0, time.UTC),
+		ActivationDate:    time.Date(2025, 05, 12, 1, 0, 0, 0, time.UTC),
+		Balance:           &BalanceFilter{},
+		Weight:            1.02,
+		ActionsID:         "acID",
+		MinQueuedItems:    5,
+		Executed:          true,
+		LastExecutionTime: time.Date(2026, 2, 22, 1, 0, 0, 0, time.UTC),
+	}
+	attr = &AttrSetActionTrigger{
+		GroupID:  "gr1",
+		UniqueID: "unId",
+		ActionTrigger: map[string]any{
+			utils.ThresholdType:         "THR",
+			utils.ThresholdValue:        10.5,
+			utils.Recurrent:             true,
+			utils.Executed:              true,
+			utils.MinSleep:              "1s",
+			utils.ExpirationDate:        "2025-01-01T00:00:00Z",
+			utils.ActivationDate:        "2024-01-01T00:00:00Z",
+			utils.BalanceType:           "*monetary",
+			utils.Weight:                5,
+			utils.BalanceID:             "*default",
+			utils.BalanceDestinationIds: []string{"DST1", "DST2"},
+			utils.BalanceWeight:         5,
+			utils.BalanceExpirationDate: "2025-01-01T00:00:00Z",
+			utils.BalanceTimingTags:     []string{"*asap"},
+			utils.BalanceRatingSubject:  "*zero",
+			utils.BalanceCategories:     []string{"call"},
+			utils.BalanceSharedGroups:   []string{"SHRGroup"},
+			utils.BalanceBlocker:        true,
+			utils.BalanceDisabled:       false,
+			utils.MinQueuedItems:        5,
+			utils.ActionsID:             "ACT1",
+		},
+	}
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err != nil {
+		t.Errorf("Expected: %v, recieved %v", expectedErr, err)
+	}
+	if at.ID != attr.GroupID {
+		t.Errorf("Expected: %v, recieved: %v", attr.GroupID, at.ID)
+	}
+	if !updated {
+		t.Errorf("Expected updated=true when mandatory fields missing")
+	}
+}
+
+func TestUpdateActionTriggerError(t *testing.T) {
+	tests := []struct {
+		name   string
+		at     *ActionTrigger
+		attr   *AttrSetActionTrigger
+		expErr string
+	}{
+		{
+			name: "ThresholdValue",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": "test",
+				},
+			},
+			expErr: `strconv.ParseFloat: parsing "test": invalid syntax`,
+		},
+		{
+			name: "Recurrent",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"Recurrent":      "test",
+				},
+			},
+			expErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			name: "Executed",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"Executed":       "tst",
+				},
+			},
+			expErr: `strconv.ParseBool: parsing "tst": invalid syntax`,
+		},
+		{
+			name: "MinSleep",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"MinSleep":       "1ss",
+				},
+			},
+			expErr: `time: unknown unit "ss" in duration "1ss"`,
+		},
+		{
+			name: "ExpirationDate",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"ExpirationDate": "20250101T000000ZZZZ",
+				},
+			},
+			expErr: `Unsupported time format`,
+		},
+		{
+			name: "ActivationDate",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"ActivationDate": "20240101T000000Z",
+				},
+			},
+			expErr: `Unsupported time format`,
+		},
+		{
+			name: "BalanceDestinationIds",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":         "THR",
+					"ThresholdValue":        10.5,
+					"BalanceDestinationIds": "id1",
+				},
+			},
+			expErr: `cannot convert field: string to []string`,
+		},
+		{
+			name: "BalanceWeight",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"BalanceWeight":  "err",
+				},
+			},
+			expErr: `strconv.ParseFloat: parsing "err": invalid syntax`,
+		},
+		{
+			name: "BalanceExpirationDate",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":         "THR",
+					"ThresholdValue":        10.5,
+					"BalanceExpirationDate": "20250101T000000Z",
+				},
+			},
+			expErr: `Unsupported time format`,
+		},
+		{
+			name: "BalanceTimingTags",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":     "THR",
+					"ThresholdValue":    10.5,
+					"BalanceTimingTags": "tag",
+				},
+			},
+			expErr: `cannot convert field: string to []string`,
+		},
+		{
+			name: "BalanceCategories",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":     "THR",
+					"ThresholdValue":    10.5,
+					"BalanceCategories": "call",
+				},
+			},
+			expErr: `cannot convert field: string to []string`,
+		},
+		{
+			name: "BalanceSharedGroups",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":       "THR",
+					"ThresholdValue":      10.5,
+					"BalanceSharedGroups": "shared1",
+				},
+			},
+			expErr: `cannot convert field: string to []string`,
+		},
+		{
+			name: "BalanceBlocker",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"BalanceBlocker": "err",
+				},
+			},
+			expErr: `strconv.ParseBool: parsing "err": invalid syntax`,
+		},
+		{
+			name: "BalanceDisabled",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":   "THR",
+					"ThresholdValue":  10.5,
+					"BalanceDisabled": "err",
+				},
+			},
+			expErr: `strconv.ParseBool: parsing "err": invalid syntax`,
+		},
+		{
+			name: "MinQueuedItems",
+			at: &ActionTrigger{
+				ID: utils.EmptyString,
+			},
+			attr: &AttrSetActionTrigger{
+				GroupID:  "gr1",
+				UniqueID: "id1",
+				ActionTrigger: map[string]any{
+					"ThresholdType":  "THR",
+					"ThresholdValue": 10.5,
+					"MinQueuedItems": "err",
+				},
+			},
+			expErr: `strconv.ParseInt: parsing "err": invalid syntax`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			updated, err := tt.attr.UpdateActionTrigger(tt.at, "UTC")
+			if err == nil || err.Error() != tt.expErr {
+				t.Errorf("expected %v, got %v", tt.expErr, err)
+			}
+			if !updated {
+				t.Errorf("Expected updated=true, got %v", updated)
+			}
+		})
+	}
+
 }

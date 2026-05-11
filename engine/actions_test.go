@@ -3069,73 +3069,108 @@ func TestActionPublishAccount(t *testing.T) {
 
 	SetConnManager(connMgr)
 	config.SetCgrConfig(cfg)
-	ub := &Account{
-		ID: "ACCID",
-		ActionTriggers: ActionTriggers{
-			&ActionTrigger{
-				ID:        "acTrigger",
-				UniqueID:  "uuid_acc",
-				Recurrent: false,
-			},
-			&ActionTrigger{
-				ID:        "acTrigger1",
-				UniqueID:  "uuid_acc1",
-				Recurrent: false,
-			},
-		},
-		BalanceMap: map[string]Balances{
-			utils.MetaMonetary: {
-				&Balance{Value: 10,
-					DestinationIDs: utils.StringMap{
-
-						"*ddc_dest": true,
-						"*dest":     false,
-					}},
-			},
-			utils.MetaVoice: {
-				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
-				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
-			},
-		},
-		UnitCounters: UnitCounters{
-			utils.MetaMonetary: []*UnitCounter{
-				{
-					Counters: CounterFilters{
-						&CounterFilter{Value: 1},
-					},
-				},
-			},
-		},
-	}
 	a := &Action{
 		Id:              "CDRLog1",
 		ActionType:      utils.CDRLog,
 		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
 		Weight:          50,
 	}
-	acs := Actions{
-		a,
-		&Action{
-			Id:         "CdrDebit",
-			ActionType: "*debit",
-			Balance: &BalanceFilter{
-				ID:     utils.StringPointer(utils.MetaDefault),
-				Value:  &utils.ValueFormula{Static: 9.95},
-				Type:   utils.StringPointer(utils.MetaMonetary),
-				Weight: utils.Float64Pointer(0),
+
+	tests := []struct {
+		name   string
+		ub     *Account
+		acs    Actions
+		expErr string
+	}{
+		{
+			ub: &Account{
+				ID: "ACCID",
+				ActionTriggers: ActionTriggers{
+					&ActionTrigger{
+						ID:        "acTrigger",
+						UniqueID:  "uuid_acc",
+						Recurrent: false,
+					},
+					&ActionTrigger{
+						ID:        "acTrigger1",
+						UniqueID:  "uuid_acc1",
+						Recurrent: false,
+					},
+				},
+				BalanceMap: map[string]Balances{
+					utils.MetaMonetary: {
+						&Balance{Value: 10,
+							DestinationIDs: utils.StringMap{
+
+								"*ddc_dest": true,
+								"*dest":     false,
+							}},
+					},
+					utils.MetaVoice: {
+						&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+						&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
+					},
+				},
+				UnitCounters: UnitCounters{
+					utils.MetaMonetary: []*UnitCounter{
+						{
+							Counters: CounterFilters{
+								&CounterFilter{Value: 1},
+							},
+						},
+					},
+				},
 			},
-			Weight:       float64(90),
-			balanceValue: 10,
+			acs: Actions{
+				a,
+				&Action{
+					Id:         "CdrDebit",
+					ActionType: "*debit",
+					Balance: &BalanceFilter{
+						ID:     utils.StringPointer(utils.MetaDefault),
+						Value:  &utils.ValueFormula{Static: 9.95},
+						Type:   utils.StringPointer(utils.MetaMonetary),
+						Weight: utils.Float64Pointer(0),
+					},
+					Weight:       float64(90),
+					balanceValue: 10,
+				},
+			},
+		},
+		{
+			name: "Nil Account",
+			ub:   nil,
+			acs: Actions{
+				a,
+				&Action{
+					Id:         "CdrDebit",
+					ActionType: "*debit",
+					Balance: &BalanceFilter{
+						ID:     utils.StringPointer(utils.MetaDefault),
+						Value:  &utils.ValueFormula{Static: 9.95},
+						Type:   utils.StringPointer(utils.MetaMonetary),
+						Weight: utils.Float64Pointer(0),
+					},
+					Weight:       float64(90),
+					balanceValue: 10,
+				},
+			},
+			expErr: "nil account",
 		},
 	}
-	expLog := ` with ThresholdS`
-	expLog2 := `with StatS.`
-	if err := publishAccount(ub, a, acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
-		t.Errorf("received %v", err)
-	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
-	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog2) {
-		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog2)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			expLog := ` with ThresholdS`
+			expLog2 := `with StatS.`
+			if err := publishAccount(tt.ub, a, tt.acs, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil && err.Error() != tt.expErr {
+				t.Errorf("received %v", err)
+			} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+				t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+			} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog2) {
+				t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog2)
+			}
+		})
 	}
 }
 
@@ -7733,5 +7768,240 @@ func TestAccountActions(t *testing.T) {
 		if err != nil {
 			t.Errorf("Got error for action account type %s, error %v ", actType, err)
 		}
+	}
+}
+
+func TestTopupZeroNegativeAction(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tests := []struct {
+		name   string
+		ub     *Account
+		a      *Action
+		fltrS  *FilterS
+		expErr string
+	}{
+		{
+			ub: &Account{
+				ID: "cgrates.org:account1",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							Uuid:           "uuid2",
+							ExpirationDate: time.Date(2026, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"),
+							Weight:         10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							Uuid:           "uuid1",
+							ExpirationDate: time.Date(2025, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"),
+							Weight:         20,
+						},
+					}},
+			},
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+			fltrS: NewFilterS(cfg, nil, nil),
+		},
+		{
+			name: "Nil Account",
+			ub:   nil,
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+			fltrS:  NewFilterS(cfg, nil, nil),
+			expErr: "nil account",
+		},
+		{
+			name: "Nil Action",
+			ub: &Account{
+				ID: "cgrates.org:account1",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							Uuid:           "uuid2",
+							ExpirationDate: time.Date(2026, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"), Weight: 10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							Uuid:           "uuid1",
+							ExpirationDate: time.Date(2025, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+					}},
+			},
+			a:      nil,
+			fltrS:  NewFilterS(cfg, nil, nil),
+			expErr: "nil action",
+		},
+		{
+			name: "Nil BalanceMap",
+			ub: &Account{
+				ID:         "cgrates.org:account1",
+				BalanceMap: nil,
+			},
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+			fltrS: NewFilterS(cfg, nil, nil),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := topupZeroNegativeAction(tt.ub, tt.a, nil, tt.fltrS, nil, SharedActionsData{}, ActionConnCfg{})
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+			}
+		})
+	}
+}
+
+func TestSetExpiryAction(t *testing.T) {
+	tests := []struct {
+		name    string
+		ub      *Account
+		a       *Action
+		wantErr string
+	}{
+		{
+			ub: &Account{
+				ID: "cgrates.org:account1",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							Uuid:           "uuid2",
+							ExpirationDate: time.Date(2026, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"), Weight: 10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							Uuid:           "uuid1",
+							ExpirationDate: time.Date(2025, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+					}},
+			},
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+		},
+		{
+			name: "Nil Account",
+			ub:   nil,
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+			wantErr: "nil account",
+		},
+		{
+			name: "Nil balance type",
+			ub: &Account{
+				ID: "cgrates.org:account1",
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{
+							Uuid:           "uuid2",
+							ExpirationDate: time.Date(2026, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          200 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("NAT"), Weight: 10,
+							SharedGroups: utils.StringMap{
+								"SharedGroups_true":  true,
+								"SharedGroups_false": false,
+							},
+						},
+						&Balance{
+							Uuid:           "uuid1",
+							ExpirationDate: time.Date(2025, 5, 11, 2, 0, 0, 0, time.UTC),
+							Value:          100 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+					}},
+			},
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: nil,
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+		},
+		{
+			name: "Nil BalanceMap",
+			ub: &Account{
+				ID:         "cgrates.org:account1",
+				BalanceMap: nil,
+			},
+			a: &Action{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer(utils.MetaVoice),
+					Value: &utils.ValueFormula{
+						Static: 3,
+					},
+					SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := setExpiryAction(tt.ub, tt.a, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %v, recieved %v", tt.wantErr, err)
+			}
+		})
 	}
 }
