@@ -27,29 +27,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCgrcdr(cfg *config.EventExporterCfg, em *utils.ExporterMetrics,
-	dm *engine.DataManager) (*Cgrcdr, error) {
+func NewCgrCDR(cfg *config.EventExporterCfg, em *utils.ExporterMetrics,
+	dm *engine.DataManager) (*CgrCDR, error) {
 	if dm == nil {
 		return nil, fmt.Errorf("%s exporter requires DataManager", utils.MetaCgrcdr)
 	}
-	return &Cgrcdr{cfg: cfg, em: em, dm: dm}, nil
+	return &CgrCDR{cfg: cfg, em: em, dm: dm}, nil
 }
 
-type Cgrcdr struct {
+type CgrCDR struct {
 	cfg *config.EventExporterCfg
 	em  *utils.ExporterMetrics
 	dm  *engine.DataManager
 }
 
-func (cgr *Cgrcdr) Cfg() *config.EventExporterCfg                           { return cgr.cfg }
-func (cgr *Cgrcdr) Connect() error                                          { return nil }
-func (cgr *Cgrcdr) Close() error                                            { return nil }
-func (cgr *Cgrcdr) GetMetrics() *utils.ExporterMetrics                      { return cgr.em }
-func (cgr *Cgrcdr) ExtraData(ev *utils.CGREvent) any                        { return ev }
-func (cgr *Cgrcdr) PrepareMap(*utils.CGREvent) (any, error)                 { return nil, nil }
-func (cgr *Cgrcdr) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) { return nil, nil }
+func (cgr *CgrCDR) Cfg() *config.EventExporterCfg                           { return cgr.cfg }
+func (cgr *CgrCDR) Connect() error                                          { return nil }
+func (cgr *CgrCDR) Close() error                                            { return nil }
+func (cgr *CgrCDR) GetMetrics() *utils.ExporterMetrics                      { return cgr.em }
+func (cgr *CgrCDR) ExtraData(ev *utils.CGREvent) any                        { return ev }
+func (cgr *CgrCDR) PrepareMap(*utils.CGREvent) (any, error)                 { return nil, nil }
+func (cgr *CgrCDR) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) { return nil, nil }
 
-func (cgr *Cgrcdr) ExportEvent(ctx *context.Context, _, extraData any) error {
+func (cgr *CgrCDR) ExportEvent(ctx *context.Context, _, extraData any) error {
 	cgrEv, ok := extraData.(*utils.CGREvent)
 	if !ok {
 		return fmt.Errorf("unexpected extraData type %T", extraData)

@@ -58,6 +58,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents 
 		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaNATSJSONMap:
 		return NewNatsER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaCgrcdr:
+		return NewCgrCdr(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, dm)
 	}
 	return nil, fmt.Errorf("unsupported reader type: <%s>", cfg.ERsCfg().Readers[cfgIdx].Type)
 }
