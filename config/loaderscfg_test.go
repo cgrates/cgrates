@@ -2764,7 +2764,7 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 func TestLockFolderRelativePath(t *testing.T) {
 	ldr := &LoaderSCfg{
 		TpInDir:      "/var/spool/cgrates/loader/in/",
-		TpOutDir:     "/var/spool/cgrates/loader/out/",
+		TpOutDir:     "",
 		LockFilePath: utils.ResourcesCsv,
 	}
 

@@ -1849,7 +1849,7 @@ const CGRATES_CFG_JSON = `
 		"caches_conns": ["*internal"],
 		"field_separator": ",",				// separator used in case of csv files
 		"tp_in_dir": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
-		"tp_out_dir": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed TPs will be moved
+		"tp_out_dir": "",	// absolute path towards the directory where processed TPs will be moved
 		"action": "*store", 				// what should the loader do<*store|*parse|*remove|*dryRun>
 		"opts": {
 			// "*cache": "*reload",
