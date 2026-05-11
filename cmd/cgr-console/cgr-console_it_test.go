@@ -4521,8 +4521,8 @@ func testConsoleItDebitMax(t *testing.T) {
 		},
 		RatedUsage: 60000000000.,
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: engine.BalanceSummaries{
 				{
 					UUID:     "",

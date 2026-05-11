@@ -33,8 +33,8 @@ func TestArgEEsUnmarshalJSON(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",

@@ -496,8 +496,8 @@ func testActionsitCDRAccount(t *testing.T) {
 				CGRID: utils.UUIDSha1Prefix(),
 				RunID: utils.MetaDefault,
 				AccountSummary: &AccountSummary{
-					Tenant: "cgrates.org",
-					ID:     acnt,
+					Tenant:    "cgrates.org",
+					AccountID: acnt,
 					BalanceSummaries: []*BalanceSummary{
 						{
 							UUID:  uuid,
@@ -871,8 +871,8 @@ func testActionsitresetAccountCDR(t *testing.T) {
 				CGRID: utils.UUIDSha1Prefix(),
 				RunID: utils.MetaDefault,
 				AccountSummary: &AccountSummary{
-					Tenant: "cgrates.org",
-					ID:     account,
+					Tenant:    "cgrates.org",
+					AccountID: account,
 					BalanceSummaries: []*BalanceSummary{
 						{
 							UUID:  uuid,

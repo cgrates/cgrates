@@ -143,7 +143,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 						Type: utils.MetaVariable,
 						Value: config.RSRParsers{
 							&config.RSRParser{
-								Rules: `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":[{"RatingID":"","Increments":[{"Usage":0,"Cost":0,"AccountingID":"ACCOUNTING_TEST","CompressFactor":0}],"CompressFactor":0}],"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"123456","ID":"BALANCE_TEST","Type":"*voice","Initial":0,"Value":11,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":{"ACCOUNTING_TEST":{"AccountID":"","BalanceUUID":"123456","RatingID":"","Units":0,"ExtraChargeID":""}},"RatingFilters":null,"Rates":null,"Timings":null}`,
+								Rules: `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":[{"RatingID":"","Increments":[{"Usage":0,"Cost":0,"AccountingID":"ACCOUNTING_TEST","CompressFactor":0}],"CompressFactor":0}],"AccountSummary":{"Tenant":"","AccountID":"","BalanceSummaries":[{"UUID":"123456","ID":"BALANCE_TEST","Type":"*voice","Initial":0,"Value":11,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":{"ACCOUNTING_TEST":{"AccountID":"","BalanceUUID":"123456","RatingID":"","Units":0,"ExtraChargeID":""}},"RatingFilters":null,"Rates":null,"Timings":null}`,
 							},
 						},
 					},

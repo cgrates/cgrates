@@ -1637,7 +1637,7 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 				},
 				AccountSummary: &AccountSummary{
 					Tenant:           "Tenant",
-					ID:               "acc_id",
+					AccountID:        "acc_id",
 					BalanceSummaries: BalanceSummaries{},
 					AllowNegative:    false,
 					Disabled:         true,
@@ -1944,7 +1944,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 				},
 				AccountSummary: &AccountSummary{
 					Tenant:           "Tenant",
-					ID:               "acc_id",
+					AccountID:        "acc_id",
 					BalanceSummaries: BalanceSummaries{},
 					AllowNegative:    false,
 					Disabled:         true,
@@ -2231,8 +2231,8 @@ func TestCdrSRateCDR(t *testing.T) {
 			},
 		},
 		AccountSummary: &AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "dan",
+			Tenant:    "cgrates.org",
+			AccountID: "dan",
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2440,8 +2440,8 @@ func TestStoreSMCostErr(t *testing.T) {
 				},
 			},
 			AccountSummary: &AccountSummary{
-				Tenant: "cgrates.org",
-				ID:     "dan",
+				Tenant:    "cgrates.org",
+				AccountID: "dan",
 				BalanceSummaries: []*BalanceSummary{
 					{
 						UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",

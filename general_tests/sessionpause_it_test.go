@@ -460,8 +460,8 @@ func testSesPauseItInitPause(t *testing.T) {
 			CompressFactor: 1,
 		}},
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: engine.BalanceSummaries{{
 				UUID:    "219cabeb-16cb-446c-837c-8cc74230eecf",
 				ID:      "test",
@@ -657,8 +657,8 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 			CompressFactor: 1,
 		}},
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: engine.BalanceSummaries{{
 				UUID:    "219cabeb-16cb-446c-837c-8cc74230eecf",
 				ID:      "test",
@@ -856,8 +856,8 @@ func testSesPauseItUpdatePause(t *testing.T) {
 			},
 		},
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: engine.BalanceSummaries{{
 				UUID:    "219cabeb-16cb-446c-837c-8cc74230eecf",
 				ID:      "test",

@@ -435,7 +435,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestHealthIndexThreshold",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:1002",         // *asm will not be indexing
+				"*string:~*asm.AccountID:1002",  // *asm will not be indexing
 				"*suffix:BrokenFilter:Invalid"}, // static value, won't index
 			MaxHits: 1,
 		},
@@ -503,7 +503,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestHealthIndexThreshold",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:1002",
+				"*string:~*asm.AccountID:1002",
 				"FLTR_1_DOES_NOT_EXIST"},
 			MaxHits: 1,
 		},
@@ -550,7 +550,7 @@ func TestHealthIndexCharger(t *testing.T) {
 		FilterIDs: []string{
 			"*string:~*opts.*eventType:ChargerAccountUpdate",
 			"*string:~*req.*Account:1234",
-			"*string:~*asm.ID:1002", // *asm will not be indexing
+			"*string:~*asm.AccountID:1002", // *asm will not be indexing
 			"*suffix:BrokenFilter:Invalid"},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
@@ -622,7 +622,7 @@ func TestHealthIndexCharger(t *testing.T) {
 		FilterIDs: []string{
 			"*string:~*opts.*eventType:ChargerAccountUpdate",
 			"*string:~*req.*Account:1234",
-			"*string:~*asm.ID:1002", // *asm will not be indexing
+			"*string:~*asm.AccountID:1002", // *asm will not be indexing
 			"*suffix:BrokenFilter:Invalid",
 			"FLTR_1_DOES_NOT_EXIST_CHRGR"},
 		RunID:        "raw",
@@ -1309,7 +1309,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		FilterIDs: []string{
 			"*string:~*opts.*eventType:ChargerAccountUpdate",
 			"*string:~*req.Account:1234",
-			"*string:~*asm.ID:1002", // *asm will not be indexing
+			"*string:~*asm.AccountID:1002", // *asm will not be indexing
 			"*suffix:BrokenFilter:Invalid"},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},

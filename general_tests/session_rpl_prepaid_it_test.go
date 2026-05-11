@@ -198,8 +198,8 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 					CompressFactor: 1,
 				}},
 				AccountSummary: &engine.AccountSummary{
-					Tenant: "cgrates.org",
-					ID:     "1005",
+					Tenant:    "cgrates.org",
+					AccountID: "1005",
 					BalanceSummaries: engine.BalanceSummaries{{
 						UUID:    "dc88acfb-18c7-4658-9d36-056b74b84b57",
 						ID:      "TestRplDebitBalance",

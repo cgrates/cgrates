@@ -58,8 +58,8 @@ func TestV2toV3Cost(t *testing.T) {
 		},
 		RatedUsage: 10,
 		AccountSummary: &engine.AccountSummary{
-			Tenant: "cgrates.org",
-			ID:     "1001",
+			Tenant:    "cgrates.org",
+			AccountID: "1001",
 			BalanceSummaries: []*engine.BalanceSummary{
 				{
 					UUID:  "UUID",

@@ -273,23 +273,23 @@ func testDynThdSetAction(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{
 				Identifier:      utils.MetaDynamicThreshold,
-				ExtraParameters: "cgrates.org;DYNAMICLY_THR_<~*req.ID>;*string:~*opts.*eventType:AccountUpdate;;1;;;true;10;;true;;~*opts",
+				ExtraParameters: "cgrates.org;DYNAMICLY_THR_<~*req.AccountID>;*string:~*opts.*eventType:AccountUpdate;;1;;;true;10;;true;;~*opts",
 			},
 			{
 				Identifier:      utils.MetaDynamicStats,
-				ExtraParameters: "*tenant;DYNAMICLY_STAT_<~*req.ID>;*string:~*opts.*eventType:AccountUpdate;*now;100;10s;0;*acd&*tcd&*asr;;false;true;30;*none;~*opts",
+				ExtraParameters: "*tenant;DYNAMICLY_STAT_<~*req.AccountID>;*string:~*opts.*eventType:AccountUpdate;*now;100;10s;0;*acd&*tcd&*asr;;false;true;30;*none;~*opts",
 			},
 			{
 				Identifier:      utils.MetaDynamicAttribute,
-				ExtraParameters: "*tenant;DYNAMICLY_ATTR_<~*req.ID>;*any;*string:~*opts.*eventType:AccountUpdate;*now;;*req.Subject;*constant;SUPPLIER1;true;10;~*opts",
+				ExtraParameters: "*tenant;DYNAMICLY_ATTR_<~*req.AccountID>;*any;*string:~*opts.*eventType:AccountUpdate;*now;;*req.Subject;*constant;SUPPLIER1;true;10;~*opts",
 			},
 			{
 				Identifier:      utils.MetaDynamicActionPlan,
-				ExtraParameters: "DYNAMICLY_ACT_PLN_<~*req.ID>;LOG_WARNING_<~*req.ID>;*asap;10;",
+				ExtraParameters: "DYNAMICLY_ACT_PLN_<~*req.AccountID>;LOG_WARNING_<~*req.AccountID>;*asap;10;",
 			},
 			{
 				Identifier:      utils.MetaDynamicAction,
-				ExtraParameters: "DYNAMICLY_ACT_<~*req.ID>;*cdrlog;\f{\"Account\":\"<~*req.ID>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.ID>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;*daily;10;10;true;false;10;false",
+				ExtraParameters: "DYNAMICLY_ACT_<~*req.AccountID>;*cdrlog;\f{\"Account\":\"<~*req.AccountID>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.AccountID>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;*daily;10;10;true;false;10;false",
 			},
 			{
 				Identifier:      utils.MetaDynamicDestination,
@@ -297,31 +297,31 @@ func testDynThdSetAction(t *testing.T) {
 			},
 			{
 				Identifier:      utils.MetaDynamicFilter,
-				ExtraParameters: "*tenant;DYNAMICLY_FLT_<~*req.ID>;*string;~*req.Account;<~*req.ID>;*now;",
+				ExtraParameters: "*tenant;DYNAMICLY_FLT_<~*req.AccountID>;*string;~*req.Account;<~*req.AccountID>;*now;",
 			},
 			{
 				Identifier:      utils.MetaDynamicRoute,
-				ExtraParameters: "*tenant;DYNAMICLY_ROUTE_<~*req.ID>;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;*now;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;<~*req.ID>;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+				ExtraParameters: "*tenant;DYNAMICLY_ROUTE_<~*req.AccountID>;*string:~*req.Account:<~*req.AccountID>&*string:~*req.Destination:1003;*now;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.AccountID>&*string:~*req.Destination:1003;<~*req.AccountID>;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
 			},
 			{
 				Identifier:      utils.MetaDynamicRanking,
-				ExtraParameters: "*tenant;DYNAMICLY_RANKING_<~*req.ID>;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
+				ExtraParameters: "*tenant;DYNAMICLY_RANKING_<~*req.AccountID>;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
 			},
 			{
 				Identifier:      utils.MetaDynamicRatingProfile,
-				ExtraParameters: "*tenant;call;~*req.ID;*now;RP_<~*req.ID>;;key:value",
+				ExtraParameters: "*tenant;call;~*req.AccountID;*now;RP_<~*req.AccountID>;;key:value",
 			},
 			{
 				Identifier:      utils.MetaDynamicTrend,
-				ExtraParameters: "*tenant;DYNAMICLY_TREND_<~*req.ID>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+				ExtraParameters: "*tenant;DYNAMICLY_TREND_<~*req.AccountID>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
 			},
 			{
 				Identifier:      utils.MetaDynamicResource,
-				ExtraParameters: "*tenant;DYNAMICLY_RESOURCE_<~*req.ID>;*string:~*req.Account:<~*req.ID>;;1h;1;msg_<~*req.ID>;true;true;10;TD1&TD2;key:value",
+				ExtraParameters: "*tenant;DYNAMICLY_RESOURCE_<~*req.AccountID>;*string:~*req.Account:<~*req.AccountID>;;1h;1;msg_<~*req.AccountID>;true;true;10;TD1&TD2;key:value",
 			},
 			{
 				Identifier:      utils.MetaDynamicActionTrigger,
-				ExtraParameters: "DYNAMICLY_ACTTRGR_<~*req.ID>;uid_<~*req.ID>;*max_balance;20;true;1s;2014-07-29T15:00:00Z;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST_<~*req.ID>&DST2;SPECIAL_<~*req.ID>;SHRGroup_<~*req.ID>&SHRGroup2;2014-07-29T15:00:00Z;*asap;10;true;true;ACT_<~*req.ID>;20",
+				ExtraParameters: "DYNAMICLY_ACTTRGR_<~*req.AccountID>;uid_<~*req.AccountID>;*max_balance;20;true;1s;2014-07-29T15:00:00Z;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST_<~*req.AccountID>&DST2;SPECIAL_<~*req.AccountID>;SHRGroup_<~*req.AccountID>&SHRGroup2;2014-07-29T15:00:00Z;*asap;10;true;true;ACT_<~*req.AccountID>;20",
 			},
 		}}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2SetActions,
@@ -336,7 +336,7 @@ func testDynThdSetThresholdProfile(t *testing.T) {
 	ThdPrf := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*asm.ID:1002", "*lt:~*asm.BalanceSummaries.testBalanceID.Value:56m", "*gte:~*asm.BalanceSummaries.testBalanceID.Initial:58m"},
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*asm.AccountID:1002", "*lt:~*asm.BalanceSummaries.testBalanceID.Value:56m", "*gte:~*asm.BalanceSummaries.testBalanceID.Initial:58m"},
 			ID:        "THD_ACNT_1002",
 			MaxHits:   1,
 			ActionIDs: []string{"DYNAMIC_THRESHOLD_ACTION"},

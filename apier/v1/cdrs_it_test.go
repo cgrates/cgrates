@@ -310,8 +310,8 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 					},
 				},
 				AccountSummary: &engine.AccountSummary{
-					Tenant: "cgrates.org",
-					ID:     "testV1CDRsRefundOutOfSessionCost",
+					Tenant:    "cgrates.org",
+					AccountID: "testV1CDRsRefundOutOfSessionCost",
 					BalanceSummaries: []*engine.BalanceSummary{
 						{
 							UUID:  balanceUuid,
@@ -465,8 +465,8 @@ func testV1CDRsRefundCDR(t *testing.T) {
 						},
 					},
 					AccountSummary: &engine.AccountSummary{
-						Tenant: "cgrates.org",
-						ID:     "testV1CDRsRefundCDR",
+						Tenant:    "cgrates.org",
+						AccountID: "testV1CDRsRefundCDR",
 						BalanceSummaries: []*engine.BalanceSummary{
 							{
 								UUID:  balanceUuid,

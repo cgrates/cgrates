@@ -179,7 +179,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		t.Error(err)
 	}
 	if time.Now().Sub(tStart) > 50*time.Millisecond {
-		t.Error("Take's too long for GetDataCost")
+		t.Error("Takes too long for GetDataCost")
 	}
 
 	expected = 100000000.0

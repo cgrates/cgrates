@@ -252,7 +252,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "THD_AccDisableAndLog",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:testAccThreshold"},
+				"*string:~*asm.AccountID:testAccThreshold"},
 			MaxHits:   -1,
 			MinSleep:  time.Second,
 			Weight:    20.0,
