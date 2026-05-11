@@ -2568,7 +2568,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.AccountField) // account is mandatory
 		}
 		var filters []string
-		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.ID, accField))
+		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, accField))
 		// event will always have *syPolicyFilters by default
 		syOpts := args.APIOpts[utils.OptsSyPolicyFilters]
 		// populate filters of the threshold with *syPolicyFilters
@@ -2879,7 +2879,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.AccountField) // account is mandatory
 		}
 		var filters []string
-		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.ID, accField))
+		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, accField))
 		// event will always have *syPolicyFilters by default
 		syOpts := args.APIOpts[utils.OptsSyPolicyFilters]
 		// populate filters of the threshold with *syPolicyFilters
