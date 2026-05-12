@@ -1,12 +1,13 @@
 {
-
-"loaders": [
-	{
-		"id": "*default",
-		"enabled": true,
-		"run_delay": "0",
-		"tp_out_dir": ""
-	}
-]
-
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "run_delay": "0",
+            "caches_conns": ["*internal"],
+            "tp_in_dir": "/tmp/TestHttpSessionsIt/loader/in",
+            "tp_out_dir": "",
+            "data": []
+        }
+    ]
 }
