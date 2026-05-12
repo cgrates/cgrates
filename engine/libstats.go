@@ -349,7 +349,7 @@ func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils
 }
 
 func (sq *StatQueue) isOneEvent() bool {
-	return sq.ttl != nil && *sq.ttl == -1
+	return sq.sqPrfl != nil && sq.sqPrfl.TTL == -1 && sq.sqPrfl.QueueLength == -1
 }
 
 func (sq *StatQueue) addOneEvent(tnt string, filterS *FilterS, evNm utils.MapStorage) (err error) {
