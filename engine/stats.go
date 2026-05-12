@@ -230,9 +230,6 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 		if sqPrfl.TTL > 0 {
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
-		if sqPrfl.TTL == -1 || sqPrfl.QueueLength == -1 {
-			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
-		}
 		sq.sqPrfl = sqPrfl
 		sqs = append(sqs, sq)
 	}
