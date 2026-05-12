@@ -938,6 +938,9 @@ RP_1001,DR_DATA,*any,10`,
 	ng.PreserveDataDB = true
 	client, cfg = ng.Run(t)
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	engine.WaitForService(t, ctx, client, utils.SessionSv1)
 
 	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,

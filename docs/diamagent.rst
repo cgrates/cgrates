@@ -31,6 +31,7 @@ With explanations in the comments:
 	"listen_net": "tcp",				// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory
 										//   holding additional dictionaries to load
+	"dictionaries_append_defaults": true,         // if true, dictionaries from the provided path will be appended to the default dictionaries from the go-diameter library
 	"sessions_conns": ["*internal"],	// connection towards SessionS
 	"origin_host": "CGR-DA",			// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
