@@ -20,6 +20,7 @@ package engine
 import (
 	"reflect"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
 
@@ -888,6 +889,223 @@ func TestActionTimingGetNextStartTime2(t *testing.T) {
 			if !cachedResult.Equal(result) {
 				t.Errorf("Cached result differs: got %v, want %v",
 					cachedResult, result)
+			}
+		})
+	}
+}
+
+func TestAttrActionPlanGetRITiming(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	db, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tp := &utils.TPTiming{
+		ID:        "TM_MORNING",
+		Years:     utils.Years{2025},
+		Months:    utils.Months{1},
+		MonthDays: utils.MonthDays{1},
+		WeekDays:  utils.WeekDays{1},
+		StartTime: "00:00:00",
+		EndTime:   "00:00:01",
+	}
+	dm.SetTiming(tp)
+	var dm2 *DataManager
+
+	tests := []struct {
+		name    string
+		attr    *AttrActionPlan
+		dm      *DataManager
+		want    *RITiming
+		wantErr string
+	}{
+		{
+			name: "NO_DATABASE_CONNECTION error",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "TM_MORNING",
+				Years:     "2026",
+				Months:    "2",
+				MonthDays: "2",
+				WeekDays:  "2",
+				Time:      "00:00:00",
+			},
+			dm:      dm2,
+			want:    nil,
+			wantErr: "NO_DATABASE_CONNECTION",
+		},
+		{
+			name: "Empty fields",
+			dm:   dm,
+			attr: &AttrActionPlan{},
+			want: &RITiming{
+				ID:         "",
+				Years:      utils.Years{},
+				Months:     utils.Months{},
+				MonthDays:  utils.MonthDays{},
+				WeekDays:   utils.WeekDays{},
+				StartTime:  "",
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+		},
+		{
+			name: "Empty TimingID",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  utils.EmptyString,
+				Years:     "2025",
+				Months:    "1",
+				MonthDays: "1",
+				WeekDays:  "1",
+				Time:      "12:00:00",
+			},
+			dm: nil,
+			want: &RITiming{
+				ID:         utils.EmptyString,
+				Years:      utils.Years{2025},
+				Months:     utils.Months{time.January},
+				MonthDays:  utils.MonthDays{1},
+				WeekDays:   utils.WeekDays{time.Monday},
+				StartTime:  "12:00:00",
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+		},
+		{
+			name: "TimingID found",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "TM_MORNING",
+				Years:     "2026",
+				Months:    "2",
+				MonthDays: "2",
+				WeekDays:  "2",
+				Time:      "00:00:00",
+			},
+			dm: dm,
+			want: &RITiming{
+				ID:         "TM_MORNING",
+				Years:      utils.Years{2025, 2026},
+				Months:     utils.Months{1, 2},
+				MonthDays:  utils.MonthDays{1, 2},
+				WeekDays:   utils.WeekDays{1, 2},
+				StartTime:  "00:00:00",
+				EndTime:    "00:00:01",
+				cronString: "",
+				tag:        ""},
+		},
+		{
+			name: "UNSUPPORTED_FORMAT",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "Timing1",
+				Years:     "2025",
+				Months:    "1",
+				MonthDays: "1",
+				WeekDays:  "1",
+				Time:      "120000",
+			},
+			dm: dm,
+			want: &RITiming{
+				ID:         "Timing1",
+				Years:      utils.Years{2025},
+				Months:     utils.Months{time.January},
+				MonthDays:  utils.MonthDays{1},
+				WeekDays:   utils.WeekDays{time.Monday},
+				StartTime:  "",
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+			wantErr: "UNSUPPORTED_FORMAT:120000",
+		},
+		{
+			name: "DataManager with no timing set",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "Timing1",
+				Years:     "2025",
+				Months:    "1",
+				MonthDays: "1",
+				WeekDays:  "1",
+				Time:      "12:00:00",
+			},
+			dm: NewDataManager(db, cfg.CacheCfg(), nil),
+			want: &RITiming{
+				ID:         "Timing1",
+				Years:      utils.Years{2025},
+				Months:     utils.Months{time.January},
+				MonthDays:  utils.MonthDays{1},
+				WeekDays:   utils.WeekDays{time.Monday},
+				StartTime:  "12:00:00",
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+		},
+		{
+			name: "Default timing: *hourly",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "Timing1",
+				Years:     "2025",
+				Months:    "1",
+				MonthDays: "1",
+				WeekDays:  "1",
+				Time:      utils.MetaHourly,
+			},
+			dm: NewDataManager(db, cfg.CacheCfg(), nil),
+			want: &RITiming{
+				ID:         "*hourly",
+				Years:      utils.Years{},
+				Months:     utils.Months{},
+				MonthDays:  utils.MonthDays{},
+				WeekDays:   utils.WeekDays{},
+				StartTime:  utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+		},
+		{
+			name: "Empty DataManager",
+			attr: &AttrActionPlan{
+				ActionsId: "actionId1",
+				TimingID:  "Timing1",
+				Years:     "2025",
+				Months:    "1",
+				MonthDays: "1",
+				WeekDays:  "1",
+				Time:      "12:00:00",
+			},
+			dm: &DataManager{},
+			want: &RITiming{
+				ID:         "Timing1",
+				Years:      utils.Years{2025},
+				Months:     utils.Months{time.January},
+				MonthDays:  utils.MonthDays{1},
+				WeekDays:   utils.WeekDays{time.Monday},
+				StartTime:  "12:00:00",
+				EndTime:    "",
+				cronString: "",
+				tag:        "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.attr.GetRITiming(tt.dm)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %v recieved %v", tt.wantErr, err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetRITiming() = %#+v, want %#+v", got, tt.want)
 			}
 		})
 	}
