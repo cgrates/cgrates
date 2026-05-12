@@ -52,43 +52,10 @@
 },
 
 
-"sessions": {
-	"enabled": true,
-	"conns":{
-	"*attributes": [
-		 {
-			"Tenant": "",
-			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
-		 }
-	],
-	"*cdrs": [
-		 {
-			"Tenant": "",
-			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
-		 }
-	],
-	"*rates": [
-		 {
-			"Tenant": "",
-			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
-		 }
-	],
-	"*chargers": [
-		 {
-			"Tenant": "",
-			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
-		 }
-	]
-			},
-},
 
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 
