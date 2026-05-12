@@ -36,16 +36,16 @@
         "id": "*default",
         "enabled": true,
         "tenant": "cgrates.org",
-        "tp_in_dir": "/tmp/TestDataConverter/in",
-        "tp_out_dir": ""
+        "tp_in_path": "/tmp/TestDataConverter/in",
+        "tp_out_path": ""
     },
     {
         "id": "remove",
         "action": "*remove",
         "enabled": true,
         "tenant": "cgrates.org",
-        "tp_in_dir": "/tmp/TestDataConverter/in",
-        "tp_out_dir": "",
+        "tp_in_path": "/tmp/TestDataConverter/in",
+        "tp_out_path": "",
         "data":[											
         {
             "type": "*attributes",						

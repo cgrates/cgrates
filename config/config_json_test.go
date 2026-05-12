@@ -1095,8 +1095,8 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			Lockfile_path:   utils.StringPointer(".cgr.lck"),
 			Caches_conns:    &[]string{utils.MetaInternal},
 			Field_separator: utils.StringPointer(","),
-			Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in"),
-			Tp_out_dir:      utils.StringPointer(""),
+			Tp_in_path:      utils.StringPointer("/var/spool/cgrates/loader/in"),
+			Tp_out_path:     utils.StringPointer(""),
 			Action:          utils.StringPointer(utils.MetaStore),
 			Opts:            &LoaderJsonOptsCfg{WithIndex: utils.BoolPointer(true)},
 			Data: &[]*LoaderJsonDataType{

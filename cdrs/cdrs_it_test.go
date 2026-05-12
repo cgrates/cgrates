@@ -111,8 +111,8 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"lockfile_path": ".cgr.lck",
-		"tp_in_dir": "%s",
-		"tp_out_dir": ""
+		"tp_in_path": "%s",
+		"tp_out_path": ""
 	}
 ]
 

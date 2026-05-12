@@ -1848,8 +1848,8 @@ const CGRATES_CFG_JSON = `
 		"lockfile_path": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": ["*internal"],
 		"field_separator": ",",				// separator used in case of csv files
-		"tp_in_dir": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
-		"tp_out_dir": "",	// absolute path towards the directory where processed TPs will be moved
+		"tp_in_path": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
+		"tp_out_path": "",	// absolute path towards the directory where processed TPs will be moved
 		"action": "*store", 				// what should the loader do<*store|*parse|*remove|*dryRun>
 		"opts": {
 			// "*cache": "*reload",
@@ -1875,7 +1875,7 @@ const CGRATES_CFG_JSON = `
 		"data":[					// data profiles to load
 			{
 				"type": "*filters",		// data source type
-				"file_name": "Filters.csv",	// file name in the tp_in_dir
+				"file_name": "Filters.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1886,7 +1886,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*attributes",		// data source type
-				"file_name": "Attributes.csv",	// file name in the tp_in_dir
+				"file_name": "Attributes.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1902,7 +1902,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*resources",		// data source type
-				"file_name": "Resources.csv",	// file name in the tp_in_dir
+				"file_name": "Resources.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1918,7 +1918,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*ips",		// data source type
-				"file_name": "IPs.csv",	// file name in the tp_in_dir
+				"file_name": "IPs.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1938,7 +1938,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*stats",		// data source type
-				"file_name": "Stats.csv",	// file name in the tp_in_dir
+				"file_name": "Stats.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1957,7 +1957,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*thresholds",		// data source type
-				"file_name": "Thresholds.csv",	// file name in the tp_in_dir
+				"file_name": "Thresholds.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1975,7 +1975,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*trends",		// data source type
-				"file_name": "Trends.csv",	// file name in the tp_in_dir
+				"file_name": "Trends.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1993,7 +1993,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rankings",		// data source type
-				"file_name": "Rankings.csv",	// file name in the tp_in_dir
+				"file_name": "Rankings.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2008,7 +2008,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*routes",		// data source type
-				"file_name": "Routes.csv",	// file name in the tp_in_dir
+				"file_name": "Routes.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2030,7 +2030,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*chargers",		// data source type
-				"file_name": "Chargers.csv",	// file name in the tp_in_dir
+				"file_name": "Chargers.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2043,7 +2043,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rate_profiles",	// data source type
-				"file_name": "Rates.csv",	// file name in the tp_in_dir
+				"file_name": "Rates.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2066,7 +2066,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*action_profiles",	// data source type
-				"file_name": "Actions.csv",	// file name in the tp_in_dir
+				"file_name": "Actions.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2092,7 +2092,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*accounts",		// data source type
-				"file_name": "Accounts.csv",	// file name in the tp_in_dir
+				"file_name": "Accounts.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

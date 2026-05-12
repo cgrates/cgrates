@@ -155,8 +155,8 @@
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"lockfile_path": ".cgr.lck",
-		"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
-		"tp_out_dir": ""
+		"tp_in_path": "/usr/share/cgrates/tariffplans/dnsagent",
+		"tp_out_path": ""
 	}
 ]
 

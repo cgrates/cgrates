@@ -70,8 +70,8 @@
     "conns": {
     	"*caches": [{"ConnIDs": ["engine"]}]
     },
-    "tp_in_dir": "/usr/share/cgrates/tariffplans/tutorial/",
-    "tp_out_dir": ""
+    "tp_in_path": "/usr/share/cgrates/tariffplans/tutorial/",
+    "tp_out_path": ""
 }],
 
 "admins": {

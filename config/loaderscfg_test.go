@@ -36,8 +36,8 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 		"lockfile_path": ".cgr.lck",
 		"caches_conns": ["*internal","*conn1"],
 		"field_separator": ",",
-		"tp_in_dir": "/var/spool/cgrates/loader/in",
-		"tp_out_dir": "/var/spool/cgrates/loader/out",
+		"tp_in_path": "/var/spool/cgrates/loader/in",
+		"tp_out_path": "/var/spool/cgrates/loader/out",
 		"data":[
 			{
 				"type": "*attributes",
@@ -1219,8 +1219,8 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*internal:*caches"],
 		"field_separator": ",",								
-		"tp_in_dir": "/var/spool/cgrates/loader/in",		
-		"tp_out_dir": "/var/spool/cgrates/loader/out",		
+		"tp_in_path": "/var/spool/cgrates/loader/in",		
+		"tp_out_path": "/var/spool/cgrates/loader/out",		
 		"data":[											
 			{
 				"type": "*attributes",						
@@ -1244,8 +1244,8 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{utils.MetaInternal},
 			utils.FieldSepCfg:     ",",
-			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
-			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
+			utils.TpInPathCfg:     "/var/spool/cgrates/loader/in",
+			utils.TpOutPathCfg:    "/var/spool/cgrates/loader/out",
 			utils.ActionCfg:       utils.MetaStore,
 			utils.OptsCfg: map[string]any{
 				utils.MetaCache:       "",
@@ -2352,8 +2352,8 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*conn1"],
 		"field_separator": ",",								
-		"tp_in_dir": "/var/spool/cgrates/loader/in",		
-		"tp_out_dir": "/var/spool/cgrates/loader/out",		
+		"tp_in_path": "/var/spool/cgrates/loader/in",		
+		"tp_out_path": "/var/spool/cgrates/loader/out",		
 		"data":[											
 			{
 				"type": "*attributes",						
@@ -2376,8 +2376,8 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{"*conn1"},
 			utils.FieldSepCfg:     ",",
-			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
-			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
+			utils.TpInPathCfg:     "/var/spool/cgrates/loader/in",
+			utils.TpOutPathCfg:    "/var/spool/cgrates/loader/out",
 			utils.DataCfg: []map[string]any{
 				{
 					utils.TypeCfg:     "*attributes",
@@ -2566,8 +2566,8 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 		Lockfile_path:   utils.StringPointer("lockFileName2"),
 		Caches_conns:    &[]string{"*birpc"},
 		Field_separator: utils.StringPointer(":"),
-		Tp_in_dir:       utils.StringPointer("/tp/in/dir/2"),
-		Tp_out_dir:      utils.StringPointer("/tp/out/dir/2"),
+		Tp_in_path:      utils.StringPointer("/tp/in/dir/2"),
+		Tp_out_path:     utils.StringPointer("/tp/out/dir/2"),
 		Data: &[]*LoaderJsonDataType{
 			{
 				Id:        utils.StringPointer(""),
@@ -2725,8 +2725,8 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			Lockfile_path:   utils.StringPointer("lockFileName2"),
 			Caches_conns:    &[]string{"*birpc"},
 			Field_separator: utils.StringPointer(":"),
-			Tp_in_dir:       utils.StringPointer("/tp/in/dir/2"),
-			Tp_out_dir:      utils.StringPointer("/tp/out/dir/2"),
+			Tp_in_path:      utils.StringPointer("/tp/in/dir/2"),
+			Tp_out_path:     utils.StringPointer("/tp/out/dir/2"),
 			Data: &[]*LoaderJsonDataType{
 				{
 					Id:        utils.StringPointer(""),
@@ -2774,8 +2774,8 @@ func TestLockFolderRelativePath(t *testing.T) {
 		Tenant:          utils.StringPointer("cgrates.org"),
 		Lockfile_path:   utils.StringPointer(utils.ResourcesCsv),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
-		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
-		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+		Tp_in_path:      utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_path:     utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join(ldr.LockFilePath)
 	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}); err != nil {
@@ -2797,8 +2797,8 @@ func TestLockFolderNonRelativePath(t *testing.T) {
 		Tenant:          utils.StringPointer("cgrates.org"),
 		Lockfile_path:   utils.StringPointer(path.Join("/tmp/", utils.ResourcesCsv)),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
-		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
-		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+		Tp_in_path:      utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_path:     utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join("/tmp/", utils.ResourcesCsv)
 	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}); err != nil {
@@ -2819,8 +2819,8 @@ func TestLockFolderIsDir(t *testing.T) {
 		Tenant:          utils.StringPointer("cgrates.org"),
 		Lockfile_path:   utils.StringPointer("/tmp"),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
-		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
-		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+		Tp_in_path:      utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_path:     utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join("/tmp")
 

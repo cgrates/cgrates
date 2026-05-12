@@ -597,8 +597,8 @@ func setupLoader(t testing.TB, tpPath, cfgPath string) {
 	"id": "*default",
 	"enabled": true,
 	"run_delay": "0",
-	"tp_in_dir": "%s",
-	"tp_out_dir": "",
+	"tp_in_path": "%s",
+	"tp_out_path": "",
 	"action": "*store",
 	"opts": {
 		"*stopOnError": false

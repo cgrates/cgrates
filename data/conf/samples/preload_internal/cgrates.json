@@ -30,8 +30,8 @@
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
       "field_separator": ",",
-      "tp_in_dir": "/tmp/RatesIn",
-      "tp_out_dir": "/tmp/RatesOut",
+      "tp_in_path": "/tmp/RatesIn",
+      "tp_out_path": "/tmp/RatesOut",
       "data":[
         {
           "type": "*rate_profiles",
@@ -69,8 +69,8 @@
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
       "field_separator": ",",
-      "tp_in_dir": "/tmp/AccountsIn",
-      "tp_out_dir": "/tmp/AccountsOut",
+      "tp_in_path": "/tmp/AccountsIn",
+      "tp_out_path": "/tmp/AccountsOut",
       "data":[
         {
           "type": "*accounts",
@@ -109,8 +109,8 @@
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
       "field_separator": ",",
-      "tp_in_dir": "/tmp/ActionsIn",
-      "tp_out_dir": "/tmp/ActionsOut",
+      "tp_in_path": "/tmp/ActionsIn",
+      "tp_out_path": "/tmp/ActionsOut",
       "data":[
         {
           "type": "*action_profiles",
