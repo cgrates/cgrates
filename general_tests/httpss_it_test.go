@@ -30,6 +30,7 @@ import (
 	// 	"net/http"
 
 	"net/http"
+	"os"
 	"path"
 	"testing"
 
@@ -77,14 +78,14 @@ func TestHttpSessionsIt(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		httpSsCfgDIR = "httpss_internal"
-		// 	case utils.MetaRedis:
-		//     t.SkipNow()
-		// case utils.MetaMySQL:
-		// 		httpSsCfgDIR = "httpagent_mysql"
-		// 	case utils.MetaMongo:
-		// 		httpSsCfgDIR = "httpagent_mongo"
-		// 	case utils.MetaPostgres:
-		// 		t.SkipNow()
+	case utils.MetaRedis:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		httpSsCfgDIR = "httpagent_mysql"
+	case utils.MetaMongo:
+		httpSsCfgDIR = "httpagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -97,6 +98,12 @@ func TestHttpSessionsIt(t *testing.T) {
 // // Init config first
 func testHttpSsInitCfg(t *testing.T) {
 	var err error
+	if err := os.RemoveAll("/tmp/TestHttpSessionsIt/loader/in"); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll("/tmp/TestHttpSessionsIt/loader/in", 0755); err != nil {
+		t.Fatal(err)
+	}
 	httpSsCfgPath = path.Join(*utils.DataDir, "conf", "samples", httpSsCfgDIR)
 	httpSsCfg, err = config.NewCGRConfigFromPath(context.Background(), httpSsCfgPath)
 	if err != nil {
