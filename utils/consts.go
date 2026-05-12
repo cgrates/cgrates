@@ -800,7 +800,7 @@ const (
 	Service                 = "Service"
 	MetaAnalyzerS           = "*analyzers"
 	CGREventString          = "CGREvent"
-	MetaTextPlain           = "*text_plain"
+	MetaText                = "*text"
 	MetaRelease             = "*release"
 	MetaAllocate            = "*allocate"
 	MetaAuthorize           = "*authorize"
