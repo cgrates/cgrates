@@ -2,6 +2,8 @@
 - hosts: apt
   vars:
     rootUser: root
+    cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
+    cgrates_branch: master
 
     dependencies:
       - build-essential
@@ -147,13 +149,13 @@
 
     ###########################################################################################################################
     ###########################################################################################################################
-    - name: Set up cgrates
-      ansible.builtin.import_role:
-        name: ../../roles/cgrates
-      vars:
-        cgrates_bin_path: ""
-        cgrates_dbs: []
-        cgrates_dependencies: []
+    - name: Clone cgrates source
+      ansible.builtin.git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: "{{ cgrates_dir }}"
+        version: "{{ cgrates_branch }}"
+        update: true
+        force: true
 
     - name: Remove leftover dependencies/ from a prior failed deb build
       ansible.builtin.file:
