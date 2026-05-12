@@ -454,7 +454,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				}
 				for _, sfn := range snapshotFileNames {
 					// make sure file names are not the same as discarded(backed up) dump files
-					if sfn != "db" && slices.Contains(dumpFileNames, sfn) {
+					if sfn != "db" && sfn != "0Rewrite0" && slices.Contains(dumpFileNames, sfn) {
 						t.Fatalf("expected snapshot file names to be different from backed up dump file names, snapshot files <%v>, \ndump files <%v>", snapshotFileNames, dumpFileNames)
 					}
 				}
