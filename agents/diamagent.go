@@ -55,15 +55,16 @@ var (
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps) (*DiameterAgent, error) {
 	da := &DiameterAgent{
-		cgrCfg:  cgrCfg,
-		filterS: filterS,
-		connMgr: connMgr,
-		caps:    caps,
-		raa:     make(map[string]chan *diam.Message),
-		dpa:     make(map[string]chan *diam.Message),
-		peers:   make(map[string]diam.Conn),
-		sySNR:   make(map[string]chan struct{}),
-		sySNA:   make(map[string]chan struct{}),
+		cgrCfg:     cgrCfg,
+		filterS:    filterS,
+		connMgr:    connMgr,
+		caps:       caps,
+		raa:        make(map[string]chan *diam.Message),
+		dpa:        make(map[string]chan *diam.Message),
+		peers:      make(map[string]diam.Conn),
+		sySNR:      make(map[string]chan struct{}),
+		sySNA:      make(map[string]chan struct{}),
+		dictionary: dict.Default,
 	}
 	srv, err := birpc.NewServiceWithMethodsRename(da, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
@@ -74,8 +75,13 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	da.ctx = context.WithClient(context.TODO(), srv)
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
+		if !cgrCfg.DiameterAgentCfg().DictionariesAppendDefaults {
+			if da.dictionary, err = dict.NewParser(); err != nil {
+				return nil, err
+			}
+		}
 		diamDictOnce.Do(func() {
-			err = loadDictionaries(dictsPath, utils.DiameterAgent)
+			err = loadDictionaries(da.dictionary, dictsPath, utils.DiameterAgent)
 		})
 		if err != nil {
 			return nil, err
@@ -115,8 +121,9 @@ type DiameterAgent struct {
 	sySNR    map[string]chan struct{} // channels created when trying to send SNR and deleted on terminate. Used for blocking SNRs from being sent per session while an SNR is already waiting for an answer
 	sySNRMux sync.RWMutex             // protects sySNR
 
-	sySNA    map[string]chan struct{} // channels created when starting to wait for SNR and deleted on SNA, used to wait for SNA or timeout general reply timeout
-	sySNAMux sync.RWMutex             // protects sySNA
+	sySNA      map[string]chan struct{} // channels created when starting to wait for SNR and deleted on SNA, used to wait for SNA or timeout general reply timeout
+	sySNAMux   sync.RWMutex             // protects sySNA
+	dictionary *dict.Parser             // Holds the dictionary to be used by the agent
 
 	ctx *context.Context
 }
@@ -186,6 +193,7 @@ func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 // Creates the message handlers
 func (da *DiameterAgent) handlers() *sm.StateMachine {
 	settings := &sm.Settings{
+		Dict:             da.dictionary,
 		SupportedApps:    da.cgrCfg.DiameterAgentCfg().CeApplications,
 		OriginHost:       datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost),
 		OriginRealm:      datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginRealm),
@@ -720,7 +728,7 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 
 	// RFC 6733 Section 5.4.1: DPR contains sender's Origin-Host/Realm
 	m := diam.NewRequest(diam.DisconnectPeer,
-		diam.CHARGING_CONTROL_APP_ID, dict.Default)
+		diam.CHARGING_CONTROL_APP_ID, da.dictionary)
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0,
 		datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost))
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0,

@@ -45,11 +45,25 @@ var (
 	}
 )
 
-// Test start here
 func TestDiamEmptyCEItTcp(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIRND = "diamagent_internal_empty_apps"
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	for _, stest := range sTestsDiamND {
+		t.Run(diamConfigDIRND, stest)
+	}
+}
+
+// Made to fail to prove no default dictionaries were loaded
+func TestDiamNoDefaultDict(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		diamConfigDIRND = "diamagent_no_default_dict"
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -102,8 +116,8 @@ func testDiamEmptyCEItConnectDiameterClient(t *testing.T) {
 		daCfgND.DiameterAgentCfg().OriginRealm, daCfgND.DiameterAgentCfg().VendorID,
 		daCfgND.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		daCfgND.DiameterAgentCfg().DictionariesPath, daCfgND.DiameterAgentCfg().Listeners[0].Network)
-	if err.Error() != "missing application" {
-		t.Fatal(err)
+	if err == nil || err.Error() != "missing application" {
+		t.Fatalf("expected error <missing application>, error <%v>", err)
 	}
 }
 

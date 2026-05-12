@@ -783,6 +783,7 @@ const CGRATES_CFG_JSON = `
 	   }
 	],
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+	"dictionaries_append_defaults": true,         // if true, dictionaries from the provided path will be appended to the default dictionaries from the go-diameter library
 	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 	"sessions_conns": ["*birpc_internal"],
 	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
