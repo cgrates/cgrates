@@ -40,8 +40,8 @@
         "lock_filename": ".cgr.lck",
         "caches_conns": ["*internal"],
         "field_separator": ",",
-        "tp_in_dir": "/tmp/TestHttpSessionsIt/loader/in",
-        "tp_out_dir": "",
+        "tp_in_path": "/tmp/TestHttpSessionsIt/loader/in",
+        "tp_out_path": "",
         "data": []
     }
 ],

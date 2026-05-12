@@ -56,8 +56,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
-		"tp_in_dir": "/tmp/In",
-		"tp_out_dir": "/tmp/Out",
+		"tp_in_path": "/tmp/In",
+		"tp_out_path": "/tmp/Out",
 		"data":[	
 			{
 				"type": "*attributes",						
@@ -78,8 +78,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
-		"tp_in_dir": "/tmp/LoaderIn",
-		"tp_out_dir": "",
+		"tp_in_path": "/tmp/LoaderIn",
+		"tp_out_path": "",
 		"data":[
 			{
 				"type": "*attributes",
@@ -101,8 +101,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
-		"tp_in_dir": "/tmp/SubpathWithoutMove",
-		"tp_out_dir": "",
+		"tp_in_path": "/tmp/SubpathWithoutMove",
+		"tp_out_path": "",
 		"data":[
 			{
 				"type": "*attributes",
@@ -124,8 +124,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
-		"tp_in_dir": "/tmp/SubpathLoaderWithMove",
-		"tp_out_dir": "/tmp/SubpathOut",
+		"tp_in_path": "/tmp/SubpathLoaderWithMove",
+		"tp_out_path": "/tmp/SubpathOut",
 		"data":[
 			{
 				"type": "*attributes",
@@ -147,8 +147,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": ",",
-		"tp_in_dir": "/tmp/templateLoaderIn",
-		"tp_out_dir": "/tmp/templateLoaderOut",
+		"tp_in_path": "/tmp/templateLoaderIn",
+		"tp_out_path": "/tmp/templateLoaderOut",
 		"data":[
 			{
 				"type": "*attributes",
@@ -169,8 +169,8 @@
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
 		"field_separator": "\t",							
-		"tp_in_dir": "/tmp/customSepLoaderIn",				
-		"tp_out_dir": "/tmp/customSepLoaderOut",									
+		"tp_in_path": "/tmp/customSepLoaderIn",				
+		"tp_out_path": "/tmp/customSepLoaderOut",									
 		"data":[	
 			{
 				"type": "*attributes",				

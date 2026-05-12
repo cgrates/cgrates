@@ -33,8 +33,8 @@
 	{
 		"id": "ParseLoader",									
 		"enabled": true,									
-		"tp_in_dir": "/tmp/In",		
-		"tp_out_dir": "/tmp/parsed",	
+		"tp_in_path": "/tmp/In",		
+		"tp_out_path": "/tmp/parsed",	
 		"run_delay": "-1", 
 		"action": "*parse",
 		"data":[	
@@ -125,8 +125,8 @@
 	{
 		"id": "StoreLoader",
 		"enabled": true,
-		"tp_in_dir": "/tmp/parsed",
-		"tp_out_dir": "/tmp/Out",
+		"tp_in_path": "/tmp/parsed",
+		"tp_out_path": "/tmp/Out",
 		"run_delay": "-1",
 		"action": "*store",
 		"data":[

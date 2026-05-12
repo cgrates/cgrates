@@ -2446,8 +2446,8 @@ const (
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
 	LockFilePathCfg = "lockfile_path"
-	TpInDirCfg      = "tp_in_dir"
-	TpOutDirCfg     = "tp_out_dir"
+	TpInPathCfg     = "tp_in_path"
+	TpOutPathCfg    = "tp_out_path"
 	DataCfg         = "data"
 
 	DefaultRatioCfg   = "default_ratio"

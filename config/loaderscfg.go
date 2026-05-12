@@ -197,11 +197,11 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	if jsnCfg.Field_separator != nil {
 		l.FieldSeparator = *jsnCfg.Field_separator
 	}
-	if jsnCfg.Tp_in_dir != nil {
-		l.TpInDir = *jsnCfg.Tp_in_dir
+	if jsnCfg.Tp_in_path != nil {
+		l.TpInDir = *jsnCfg.Tp_in_path
 	}
-	if jsnCfg.Tp_out_dir != nil {
-		l.TpOutDir = *jsnCfg.Tp_out_dir
+	if jsnCfg.Tp_out_path != nil {
+		l.TpOutDir = *jsnCfg.Tp_out_path
 	}
 	if jsnCfg.Lockfile_path != nil {
 		// Check if path is relative, case in which "tpIn" folder should be prepended
@@ -326,8 +326,8 @@ func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 		utils.EnabledCfg:      l.Enabled,
 		utils.LockFilePathCfg: l.LockFilePath,
 		utils.FieldSepCfg:     l.FieldSeparator,
-		utils.TpInDirCfg:      l.TpInDir,
-		utils.TpOutDirCfg:     l.TpOutDir,
+		utils.TpInPathCfg:     l.TpInDir,
+		utils.TpOutPathCfg:    l.TpOutDir,
 		utils.RunDelayCfg:     "0",
 		utils.ActionCfg:       l.Action,
 		utils.OptsCfg: map[string]any{
@@ -383,8 +383,8 @@ type LoaderJsonCfg struct {
 	Lockfile_path   *string
 	Caches_conns    *[]string
 	Field_separator *string
-	Tp_in_dir       *string
-	Tp_out_dir      *string
+	Tp_in_path      *string
+	Tp_out_path     *string
 	Data            *[]*LoaderJsonDataType
 
 	Action *string
@@ -448,10 +448,10 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg) (d *LoaderJsonCfg) {
 		d.Field_separator = utils.StringPointer(v2.FieldSeparator)
 	}
 	if v1.TpInDir != v2.TpInDir {
-		d.Tp_in_dir = utils.StringPointer(v2.TpInDir)
+		d.Tp_in_path = utils.StringPointer(v2.TpInDir)
 	}
 	if v1.TpOutDir != v2.TpOutDir {
-		d.Tp_out_dir = utils.StringPointer(v2.TpOutDir)
+		d.Tp_out_path = utils.StringPointer(v2.TpOutDir)
 	}
 	if !equalsLoaderDatasType(v1.Data, v2.Data) {
 		data := make([]*LoaderJsonDataType, len(v2.Data))

@@ -158,8 +158,8 @@
         "id": "*default",
         "enabled": true,
         "tenant": "cgrates.org",
-        "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume/routes1",
-        "tp_out_dir": "",
+        "tp_in_path": "/usr/share/cgrates/tariffplans/sessions_discount_volume/routes1",
+        "tp_out_path": "",
         "lockfile_path": ""
     }
 ],
