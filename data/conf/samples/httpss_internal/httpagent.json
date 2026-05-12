@@ -9,7 +9,7 @@
 			"*sessions": [{"ConnIDs": ["*localhost"]}]
 		},
 		"request_payload":	"*url",
-		"reply_payload":	"*text_plain",
+		"reply_payload":	"*text",
 		"request_processors": [
 			{
 				"id": "Authorization",
