@@ -374,6 +374,8 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 	}
 
 	ng.logBuf = new(bytes.Buffer)
+	// t.Log("start engine now")
+	// time.Sleep(5 * time.Second)
 	ng.start(t)
 
 	logBuf := ng.logBuf

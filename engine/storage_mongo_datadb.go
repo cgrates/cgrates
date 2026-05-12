@@ -2374,3 +2374,13 @@ func (ms *MongoStorage) RewriteDataDB() (err error) {
 func (ms *MongoStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// RestoreDataDB only for InternalDB
+func (ms *MongoStorage) RestoreDataDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotDataDB only for InternalDB
+func (ms *MongoStorage) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

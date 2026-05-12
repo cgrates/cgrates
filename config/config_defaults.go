@@ -144,7 +144,7 @@ const CGRATES_CFG_JSON = `
 	},
 	"opts":{
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
-		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/datadb", // default path taken by APIerSv1.BackupDataDBDump when "BackupFolderPath" is not provided
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/datadb", // default path taken by APIerSv1.BackupDataDB when "BackupFolderPath" is not provided
 		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
 		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
@@ -182,7 +182,7 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields":[],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/stordb",		// the path where stordb will be dumped
-		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/stordb", // default path taken by APIerSv1.BackupStorDBDump when "BackupFolderPath" is not provided
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/stordb", // default path taken by APIerSv1.BackupStorDB when "BackupFolderPath" is not provided
 		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
 		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
