@@ -1731,3 +1731,13 @@ func (sqls *SQLStorage) RewriteStorDB() (err error) {
 func (sqls *SQLStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// RestoreStorDB used only for InternalDB
+func (sqls *SQLStorage) RestoreStorDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotStorDB used only for InternalDB
+func (sqls *SQLStorage) SnapshotStorDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

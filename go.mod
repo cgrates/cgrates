@@ -25,7 +25,7 @@ require (
 	github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
-	github.com/cgrates/ltcache v0.0.0-20250409175814-a90b4db74697
+	github.com/cgrates/ltcache v0.0.0-20260512080837-0d98106c5460
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e

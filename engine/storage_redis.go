@@ -1543,3 +1543,13 @@ func (rs *RedisStorage) RewriteDataDB() (err error) {
 func (rs *RedisStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// RestoreDataDB, only for InternalDB
+func (rs *RedisStorage) RestoreDataDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotDataDB, only for InternalDB
+func (rs *RedisStorage) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
