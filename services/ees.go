@@ -58,7 +58,7 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	es.mu.Lock()
 	defer es.mu.Unlock()
