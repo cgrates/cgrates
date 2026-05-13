@@ -25,10 +25,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/go-diameter/diam"
 	"github.com/cgrates/go-diameter/diam/avp"
 	"github.com/cgrates/go-diameter/diam/datatype"
+	"github.com/cgrates/go-diameter/diam/dict"
 	"github.com/cgrates/go-diameter/diam/sm"
 )
 
@@ -42,6 +44,18 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		VendorID:         datatype.Unsigned32(vendorId),
 		ProductName:      datatype.UTF8String(productName),
 		FirmwareRevision: datatype.Unsigned32(firmwareRev),
+		Dict:             dict.Default,
+	}
+	if len(dictsDir) != 0 {
+		if !config.CgrConfig().DiameterAgentCfg().DictionariesAppendDefaults {
+			if cfg.Dict, err = dict.NewParser(); err != nil {
+				return nil, err
+			}
+		}
+		dictOnce.Do(func() { err = loadDictionaries(cfg.Dict, dictsDir, "DiameterClient") })
+		if err != nil {
+			return nil, err
+		}
 	}
 	interfaces, err := net.Interfaces()
 	if err != nil {
@@ -75,12 +89,6 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 			// Advertise support for credit control application
 			diam.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
 		},
-	}
-	if len(dictsDir) != 0 {
-		dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient") })
-		if err != nil {
-			return nil, err
-		}
 	}
 	conn, err := cli.DialNetwork(network, addr)
 	if err != nil {

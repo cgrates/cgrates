@@ -28,11 +28,12 @@ import (
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsonCFG := &DiameterAgentJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		ListenNet:        utils.StringPointer("tcp"),
-		Listen:           utils.StringPointer("127.0.0.1:3868"),
-		DictionariesPath: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		CEApplications:   &[]string{"Base"},
+		Enabled:                    utils.BoolPointer(true),
+		ListenNet:                  utils.StringPointer("tcp"),
+		Listen:                     utils.StringPointer("127.0.0.1:3868"),
+		DictionariesPath:           utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		DictionariesAppendDefaults: utils.BoolPointer(true),
+		CEApplications:             &[]string{"Base"},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{utils.MetaInternal, "*conn1"}},
@@ -60,11 +61,12 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &DiameterAgentCfg{
-		Enabled:          true,
-		ListenNet:        "tcp",
-		Listen:           "127.0.0.1:3868",
-		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		CEApplications:   []string{"Base"},
+		Enabled:                    true,
+		ListenNet:                  "tcp",
+		Listen:                     "127.0.0.1:3868",
+		DictionariesPath:           "/usr/share/cgrates/diameter/dict/",
+		DictionariesAppendDefaults: true,
+		CEApplications:             []string{"Base"},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
@@ -180,17 +182,18 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	eMap := map[string]any{
-		utils.ASRTemplateCfg:      "",
-		utils.DictionariesPathCfg: "/usr/share/cgrates/diameter/dict/",
-		utils.CEApplicationsCfg:   []string{"Base"},
-		utils.EnabledCfg:          false,
-		utils.ForcedDisconnectCfg: "*none",
-		utils.ListenCfg:           "127.0.0.1:3868",
-		utils.ListenNetCfg:        "tcp",
-		utils.OriginHostCfg:       "CGR-DA",
-		utils.OriginRealmCfg:      "cgrates.org",
-		utils.ProductNameCfg:      "CGRateS",
-		utils.RARTemplateCfg:      "",
+		utils.ASRTemplateCfg:                "",
+		utils.DictionariesPathCfg:           "/usr/share/cgrates/diameter/dict/",
+		utils.DictionariesAppendDefaultsCfg: true,
+		utils.CEApplicationsCfg:             []string{"Base"},
+		utils.EnabledCfg:                    false,
+		utils.ForcedDisconnectCfg:           "*none",
+		utils.ListenCfg:                     "127.0.0.1:3868",
+		utils.ListenNetCfg:                  "tcp",
+		utils.OriginHostCfg:                 "CGR-DA",
+		utils.OriginRealmCfg:                "cgrates.org",
+		utils.ProductNameCfg:                "CGRateS",
+		utils.RARTemplateCfg:                "",
 		utils.ConnsCfg: map[string][]*DynamicConns{
 			utils.MetaSessionS:   {{ConnIDs: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
 			utils.MetaStats:      {{ConnIDs: []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"}}},
@@ -248,16 +251,17 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 	},
 }`
 	eMap := map[string]any{
-		utils.ASRTemplateCfg:      "",
-		utils.DictionariesPathCfg: "/usr/share/cgrates/diameter",
-		utils.EnabledCfg:          true,
-		utils.ForcedDisconnectCfg: "*none",
-		utils.ListenCfg:           "127.0.0.1:3868",
-		utils.ListenNetCfg:        "tcp",
-		utils.OriginHostCfg:       "CGR-DA",
-		utils.OriginRealmCfg:      "cgrates.org",
-		utils.ProductNameCfg:      "CGRateS",
-		utils.RARTemplateCfg:      "",
+		utils.ASRTemplateCfg:                "",
+		utils.DictionariesPathCfg:           "/usr/share/cgrates/diameter",
+		utils.DictionariesAppendDefaultsCfg: true,
+		utils.EnabledCfg:                    true,
+		utils.ForcedDisconnectCfg:           "*none",
+		utils.ListenCfg:                     "127.0.0.1:3868",
+		utils.ListenNetCfg:                  "tcp",
+		utils.OriginHostCfg:                 "CGR-DA",
+		utils.OriginRealmCfg:                "cgrates.org",
+		utils.ProductNameCfg:                "CGRateS",
+		utils.RARTemplateCfg:                "",
 		utils.ConnsCfg: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 		},
@@ -277,10 +281,11 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 
 func TestDiameterAgentCfgClone(t *testing.T) {
 	ban := &DiameterAgentCfg{
-		Enabled:          true,
-		ListenNet:        "tcp",
-		Listen:           "127.0.0.1:3868",
-		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
+		Enabled:                    true,
+		ListenNet:                  "tcp",
+		Listen:                     "127.0.0.1:3868",
+		DictionariesPath:           "/usr/share/cgrates/diameter/dict/",
+		DictionariesAppendDefaults: true,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}},
@@ -317,10 +322,11 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 	var d *DiameterAgentJsonCfg
 
 	v1 := &DiameterAgentCfg{
-		Enabled:          false,
-		ListenNet:        "tcp",
-		Listen:           "localhost:8080",
-		DictionariesPath: "/path/",
+		Enabled:                    false,
+		ListenNet:                  "tcp",
+		Listen:                     "localhost:8080",
+		DictionariesPath:           "/path/",
+		DictionariesAppendDefaults: false,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{"*localhost"}},
@@ -347,10 +353,11 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 	}
 
 	v2 := &DiameterAgentCfg{
-		Enabled:          true,
-		ListenNet:        "udp",
-		Listen:           "localhost:8037",
-		DictionariesPath: "/path/different",
+		Enabled:                    true,
+		ListenNet:                  "udp",
+		Listen:                     "localhost:8037",
+		DictionariesPath:           "/path/different",
+		DictionariesAppendDefaults: true,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{"*birpc_internal"}},
@@ -382,11 +389,12 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &DiameterAgentJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		ListenNet:        utils.StringPointer("udp"),
-		Listen:           utils.StringPointer("localhost:8037"),
-		DictionariesPath: utils.StringPointer("/path/different"),
-		CEApplications:   utils.SliceStringPointer([]string{"Base"}),
+		Enabled:                    utils.BoolPointer(true),
+		ListenNet:                  utils.StringPointer("udp"),
+		Listen:                     utils.StringPointer("localhost:8037"),
+		DictionariesPath:           utils.StringPointer("/path/different"),
+		DictionariesAppendDefaults: utils.BoolPointer(true),
+		CEApplications:             utils.SliceStringPointer([]string{"Base"}),
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{"*birpc_internal"}},
@@ -435,10 +443,11 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentCloneSection(t *testing.T) {
 	dmtCfg := &DiameterAgentCfg{
-		Enabled:          false,
-		ListenNet:        "tcp",
-		Listen:           "localhost:8080",
-		DictionariesPath: "/path/",
+		Enabled:                    false,
+		ListenNet:                  "tcp",
+		Listen:                     "localhost:8080",
+		DictionariesPath:           "/path/",
+		DictionariesAppendDefaults: true,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{"*localhost"}},
@@ -456,10 +465,11 @@ func TestDiameterAgentCloneSection(t *testing.T) {
 	}
 
 	exp := &DiameterAgentCfg{
-		Enabled:          false,
-		ListenNet:        "tcp",
-		Listen:           "localhost:8080",
-		DictionariesPath: "/path/",
+		Enabled:                    false,
+		ListenNet:                  "tcp",
+		Listen:                     "localhost:8080",
+		DictionariesPath:           "/path/",
+		DictionariesAppendDefaults: true,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {
 				{ConnIDs: []string{"*localhost"}},
