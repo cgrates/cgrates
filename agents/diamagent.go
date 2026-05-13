@@ -50,19 +50,26 @@ const (
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps) (*DiameterAgent, error) {
 	da := &DiameterAgent{
-		cgrCfg:  cgrCfg,
-		fltrS:   filterS,
-		connMgr: connMgr,
-		caps:    caps,
-		raa:     make(map[string]chan *diam.Message),
-		dpa:     make(map[string]chan *diam.Message),
-		peers:   make(map[string]diam.Conn),
+		cgrCfg:     cgrCfg,
+		fltrS:      filterS,
+		connMgr:    connMgr,
+		caps:       caps,
+		raa:        make(map[string]chan *diam.Message),
+		dpa:        make(map[string]chan *diam.Message),
+		peers:      make(map[string]diam.Conn),
+		dictionary: dict.Default,
 	}
 	srv, _ := birpc.NewService(da, "", false)
 	da.ctx = context.WithClient(context.TODO(), srv)
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
-		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
+		if !cgrCfg.DiameterAgentCfg().DictionariesAppendDefaults {
+			var err error
+			if da.dictionary, err = dict.NewParser(); err != nil {
+				return nil, err
+			}
+		}
+		if err := loadDictionaries(da.dictionary, dictsPath, utils.DiameterAgent); err != nil {
 			return nil, err
 		}
 	}
@@ -90,12 +97,13 @@ type DiameterAgent struct {
 	connMgr *engine.ConnManager
 	caps    *engine.Caps
 
-	raaLck   sync.RWMutex
-	raa      map[string]chan *diam.Message
-	peersLck sync.Mutex
-	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
-	dpaLck   sync.RWMutex
-	dpa      map[string]chan *diam.Message
+	raaLck     sync.RWMutex
+	raa        map[string]chan *diam.Message
+	peersLck   sync.Mutex
+	peers      map[string]diam.Conn // peer index by OriginHost;OriginRealm
+	dpaLck     sync.RWMutex
+	dpa        map[string]chan *diam.Message
+	dictionary *dict.Parser // Holds the dictionary to be used by the agent
 
 	ctx *context.Context
 }
@@ -609,7 +617,7 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 
 	// RFC 6733 Section 5.4.1: DPR contains sender's Origin-Host/Realm
 	m := diam.NewRequest(diam.DisconnectPeer,
-		diam.CHARGING_CONTROL_APP_ID, dict.Default)
+		diam.CHARGING_CONTROL_APP_ID, da.dictionary)
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0,
 		datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost))
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0,
