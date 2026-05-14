@@ -4,8 +4,8 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-	"node_id":"CGRKamailio",
-	"reply_timeout": "5s",
+	"nodeID":"CGRKamailio",
+	"replyTimeout": "5s",
 },
 
 "logger": {

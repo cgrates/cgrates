@@ -162,9 +162,9 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
 	Alias                  *string
-	Address                *string
-	Reconnects             *int
-	Max_reconnect_interval *string
+	Address                *string `json:"address"`
+	Reconnects             *int    `json:"reconnects"`
+	Max_reconnect_interval *string `json:"maxReconnectInterval"`
 }
 
 func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {

@@ -109,23 +109,23 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 func TestGeneralCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"general": {
-			"node_id": "cgrates",																				
-			"rounding_decimals": 5,									
-			"dbdata_encoding": "*msgpack",							
-			"tpexport_dir": "/var/spool/cgrates/tpe",											
-			"default_request_type": "*rated",						
-			"default_category": "call",								
-			"default_tenant": "cgrates.org",						
-			"default_timezone": "Local",							
-			"default_caching":"*reload",							
-			"connect_attempts": 5,									
+			"nodeID": "cgrates",																				
+			"roundingDecimals": 5,									
+			"dbDataEncoding": "*msgpack",							
+			"tpExportDir": "/var/spool/cgrates/tpe",											
+			"defaultRequestType": "*rated",						
+			"defaultCategory": "call",								
+			"defaultTenant": "cgrates.org",						
+			"defaultTimezone": "Local",							
+			"defaultCaching":"*reload",							
+			"connectAttempts": 5,									
 			"reconnects": -1,										
-			"connect_timeout": "1s",								
-			"reply_timeout": "2s",									
-			"locking_timeout": "1s",									
-			"digest_separator": ",",								
-			"digest_equal": ":",									
-			"max_parallel_conns": 100,								
+			"connectTimeout": "1s",								
+			"replyTimeout": "2s",									
+			"lockingTimeout": "1s",									
+			"digestSeparator": ",",								
+			"digestEqual": ":",									
+			"maxParallelConns": 100,								
 		},
 	}`
 	eMap := map[string]any{
@@ -166,12 +166,12 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 func TestGeneralCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
       "general": {
-            "node_id": "ENGINE1",
-            "locking_timeout": "0",
-			"max_reconnect_interval": "5m",
-            "connect_timeout": "0s",
-            "reply_timeout": "0s",
-            "max_call_duration": "0"
+            "nodeID": "ENGINE1",
+            "lockingTimeout": "0",
+			"maxReconnectInterval": "5m",
+            "connectTimeout": "0s",
+            "replyTimeout": "0s",
+            "maxCallDuration": "0"
         }
 }`
 	eMap := map[string]any{

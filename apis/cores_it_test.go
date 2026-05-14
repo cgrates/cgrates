@@ -48,7 +48,7 @@ func TestCoreSProfilingFlags(t *testing.T) {
 
 	cfgJSON := `{
 "general": {
-	"node_id": "apis_cores_test"
+	"nodeID": "apis_cores_test"
 },
 "db": {
 	"db_conns": {

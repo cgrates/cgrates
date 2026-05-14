@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id": "Engine1"
+	"nodeID": "Engine1"
 },
 
 "logger": {

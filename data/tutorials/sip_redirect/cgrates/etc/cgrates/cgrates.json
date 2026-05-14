@@ -4,7 +4,7 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-	"node_id":"CGRSIP",
+	"nodeID":"CGRSIP",
 },
 
 "logger": {

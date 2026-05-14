@@ -1,8 +1,8 @@
 {
 
 "general": {
-	"node_id": "ConcurrentQueueEngine",
-	"reply_timeout": "50s",
+	"nodeID": "ConcurrentQueueEngine",
+	"replyTimeout": "50s",
 },
 
 "logger": {

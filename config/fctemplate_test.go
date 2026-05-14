@@ -382,7 +382,7 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
                 "blocker": true,
                 "layout": "",
                 "cost_shift_digits": 10,
-                "rounding_decimals": 1,
+                "roundingDecimals": 1,
                 "mask_destinationd_id": "randomVal",
                 "mask_length": 10,
             },

@@ -349,7 +349,7 @@ type FcTemplateJsonCfg struct {
 	Blocker              *bool
 	Layout               *string
 	Cost_shift_digits    *int
-	Rounding_decimals    *int
+	Rounding_decimals    *int `json:"roundingDecimals"`
 	Mask_destinationd_id *string
 	Mask_length          *int
 }

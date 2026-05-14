@@ -70,7 +70,7 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected cgrates.org, received %+v", *dataDBPasswd)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-dbdata_encoding", "json"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dbDataEncoding", "json"}); err != nil {
 		t.Error(err)
 	} else if *dbDataEncoding != "json" {
 		t.Errorf("Expected json, received %+v", *dbDataEncoding)

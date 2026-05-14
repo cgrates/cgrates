@@ -2,7 +2,7 @@
 
 
 "general": {
-	"reply_timeout": "50s"
+	"replyTimeout": "50s"
 },
 
 "logger": {

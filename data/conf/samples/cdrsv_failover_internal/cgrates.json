@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id": "TestFailCDRS"
+	"nodeID": "TestFailCDRS"
 },
 
 "logger": {
@@ -27,7 +27,7 @@
 "efs": {                                                    
 	"enabled": true,						                
 	"poster_attempts": 1,									
-	"failed_posts_dir": "/tmp/failed_posts",	
+	"failedPostsDir": "/tmp/failed_posts",	
 	"failed_posts_ttl": "1s"							
 },
 
@@ -89,7 +89,7 @@
 				"s3BucketID": "cgrates-cdrs"
 			},
 			"attempts": 1,
-			"failed_posts_dir": "/tmp/failed_posts",
+			"failedPostsDir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
 			]
