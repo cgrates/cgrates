@@ -1,7 +1,7 @@
 {
 	
 "general": {
-	"node_id":"MasterReplication"
+	"nodeID":"MasterReplication"
 },
 
 "logger": {

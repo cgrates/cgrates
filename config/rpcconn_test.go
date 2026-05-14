@@ -243,10 +243,10 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 						"key_path": "path_to_key",
 						"cert_path": "path_to_cert",
 						"ca_path":	"path_to_ca",
-						"connect_attempts": 5,
+						"connectAttempts": 5,
 						"reconnects": 3,
-						"connect_timeout": "1m",
-						"reply_timeout": "1m"
+						"connectTimeout": "1m",
+						"replyTimeout": "1m"
 					}
 				],
 			},
@@ -909,9 +909,9 @@ func TestRPCConnAsMapInterface(t *testing.T) {
 	}
 
 	exp := map[string]any{
-		"poolSize":      0,
-		"reply_timeout": time.Duration(2),
-		"strategy":      "",
+		"poolSize":     0,
+		"replyTimeout": time.Duration(2),
+		"strategy":     "",
 	}
 	if rcv := rC.AsMapInterface(); !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected <%+v> \n, received <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))

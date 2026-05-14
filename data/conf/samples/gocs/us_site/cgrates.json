@@ -1,6 +1,6 @@
 {
   "general": {
-    "node_id": "US_SITE"
+    "nodeID": "US_SITE"
   },
 
   "logger": {

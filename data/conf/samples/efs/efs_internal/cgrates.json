@@ -6,9 +6,9 @@
         	"*efs": [{"ConnIDs": ["*localhost"]}]
         },
         "opts": {
-            "kafka_conn": "unavailable_conn:9092",    // the connection trough kafka
-            "kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-            "kafka_attempts": 5                     // number of attempts of connecting
+            "kafkaConn": "unavailable_conn:9092",    // the connection trough kafka
+            "kafkaTopic": "TutorialTopic",    // the topic from where the events are exported
+            "kafkaAttempts": 5                     // number of attempts of connecting
         }
     },
 

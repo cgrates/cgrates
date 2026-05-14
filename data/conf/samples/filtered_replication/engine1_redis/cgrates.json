@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id" : "EngineMongo1"
+	"nodeID" : "EngineMongo1"
 },
 
 "logger": {

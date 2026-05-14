@@ -23,7 +23,7 @@ package agents
 
 // var (
 // 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
-// 	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
+// 	replyTimeout = flag.String("replyTimeout", "1s", "Maximum duration to wait for a reply")
 //
 // 	daCfgPath, diamConfigDIR string
 // 	daCfg                    *config.CGRConfig

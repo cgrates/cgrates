@@ -4,8 +4,8 @@
 
 
 "general": {
-  "reply_timeout": "50s",
-  "caching_delay": "1s",
+  "replyTimeout": "50s",
+  "cachingDelay": "1s",
 },
 
 "logger": {

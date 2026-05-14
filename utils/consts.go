@@ -1021,7 +1021,7 @@ const (
 
 	// condensed result fields
 	PID            = "pid"
-	NodeID         = "node_id"
+	NodeID         = "nodeID"
 	GoVersion      = "go_version"
 	OSThreadsInUse = "os_threads_in_use"
 	RunningSince   = "running_since"
@@ -1112,7 +1112,7 @@ const (
 	MetaAttributes        = "*attributes"
 	MetaActionProfiles    = "*action_profiles"
 	MetaLoadIDs           = "*load_ids"
-	MetaNodeID            = "*node_id"
+	MetaNodeID            = "*nodeID"
 	MetaIPv4              = "*ipv4"
 )
 
@@ -2112,44 +2112,44 @@ var (
 
 // GeneralCfg
 const (
-	NodeIDCfg               = "node_id"
+	NodeIDCfg               = "nodeID"
 	LoggerCfg               = "logger"
 	LogLevelCfg             = "log_level"
-	RoundingDecimalsCfg     = "rounding_decimals"
-	DBDataEncodingCfg       = "dbdata_encoding"
-	TpExportPathCfg         = "tpexport_dir"
+	RoundingDecimalsCfg     = "roundingDecimals"
+	DBDataEncodingCfg       = "dbDataEncoding"
+	TpExportPathCfg         = "tpExportDir"
 	PosterAttemptsCfg       = "poster_attempts"
-	FailedPostsDirCfg       = "failed_posts_dir"
+	FailedPostsDirCfg       = "failedPostsDir"
 	FailedPostsTTLCfg       = "failed_posts_ttl"
 	FailedPostsStaticTTLCfg = "failed_posts_static_ttl"
-	DefaultReqTypeCfg       = "default_request_type"
-	DefaultCategoryCfg      = "default_category"
-	DefaultTenantCfg        = "default_tenant"
-	DefaultTimezoneCfg      = "default_timezone"
-	DefaultCachingCfg       = "default_caching"
-	CachingDlayCfg          = "caching_delay"
-	ConnectAttemptsCfg      = "connect_attempts"
+	DefaultReqTypeCfg       = "defaultRequestType"
+	DefaultCategoryCfg      = "defaultCategory"
+	DefaultTenantCfg        = "defaultTenant"
+	DefaultTimezoneCfg      = "defaultTimezone"
+	DefaultCachingCfg       = "defaultCaching"
+	CachingDlayCfg          = "cachingDelay"
+	ConnectAttemptsCfg      = "connectAttempts"
 	ReconnectsCfg           = "reconnects"
-	MaxReconnectIntervalCfg = "max_reconnect_interval"
-	AriWebSocketCfg         = "ari_websocket"
-	ConnectTimeoutCfg       = "connect_timeout"
-	ReplyTimeoutCfg         = "reply_timeout"
-	LockingTimeoutCfg       = "locking_timeout"
-	DigestSeparatorCfg      = "digest_separator"
-	DigestEqualCfg          = "digest_equal"
-	MaxParallelConnsCfg     = "max_parallel_conns"
+	MaxReconnectIntervalCfg = "maxReconnectInterval"
+	AriWebSocketCfg         = "ariWebsocket"
+	ConnectTimeoutCfg       = "connectTimeout"
+	ReplyTimeoutCfg         = "replyTimeout"
+	LockingTimeoutCfg       = "lockingTimeout"
+	DigestSeparatorCfg      = "digestSeparator"
+	DigestEqualCfg          = "digestEqual"
+	MaxParallelConnsCfg     = "maxParallelConns"
 	EEsConnsCfg             = "ees_conns"
-	DecimalMaxScaleCfg      = "decimal_max_scale"
-	DecimalMinScaleCfg      = "decimal_min_scale"
-	DecimalPrecisionCfg     = "decimal_precision"
-	DecimalRoundingModeCfg  = "decimal_rounding_mode"
+	DecimalMaxScaleCfg      = "decimalMaxScale"
+	DecimalMinScaleCfg      = "decimalMinScale"
+	DecimalPrecisionCfg     = "decimalPrecision"
+	DecimalRoundingModeCfg  = "decimalRoundingMode"
 )
 
 const (
 	LevelCfg         = "level"
-	KafkaConnCfg     = "kafka_conn"
-	KafkaTopicCfg    = "kafka_topic"
-	KafkaAttemptsCfg = "kafka_attempts"
+	KafkaConnCfg     = "kafkaConn"
+	KafkaTopicCfg    = "kafkaTopic"
+	KafkaAttemptsCfg = "kafkaAttempts"
 )
 
 const (
@@ -2294,7 +2294,7 @@ const (
 
 // Efs
 const (
-	EFsConnsCfg = "efs_conns"
+	EFsConnsCfg = "efsConns"
 )
 
 // CdrsCfg

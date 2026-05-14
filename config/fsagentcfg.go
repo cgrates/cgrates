@@ -258,8 +258,8 @@ type FsConnJsonCfg struct {
 	Address              *string `json:"address"`
 	Password             *string `json:"password"`
 	Reconnects           *int    `json:"reconnects"`
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
-	ReplyTimeout         *string `json:"reply_timeout"`
+	MaxReconnectInterval *string `json:"maxReconnectInterval"`
+	ReplyTimeout         *string `json:"replyTimeout"`
 	Alias                *string `json:"alias"`
 }
 

@@ -86,7 +86,7 @@ func TestKafkaSSL(t *testing.T) {
 				"kafkaCAPath": "/tmp/ssl/kafka/ca.crt",
 				"kafkaSkipTLSVerify": false
 			},
-			"failed_posts_dir": "*none"
+			"failedPostsDir": "*none"
 		},
 		{
 			"id": "kafka_processed",
@@ -97,7 +97,7 @@ func TestKafkaSSL(t *testing.T) {
 				"kafkaTopic": "%s",
 				"kafkaBatchSize": 1
 			},
-			"failed_posts_dir": "*none"
+			"failedPostsDir": "*none"
 		}
 	]
 },

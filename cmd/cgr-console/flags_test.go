@@ -69,7 +69,7 @@ func TestCgrConsoleFlags(t *testing.T) {
 		t.Errorf("Expected true but received %+v", *rpcEncoding)
 	}
 
-	if err := cgrConsoleFlags.Parse([]string{"-reply_timeout", "200"}); err != nil {
+	if err := cgrConsoleFlags.Parse([]string{"-replyTimeout", "200"}); err != nil {
 		t.Fatal(err)
 	} else if *replyTimeOut != 200 {
 		t.Errorf("Expected 200 but received %+v", *rpcEncoding)

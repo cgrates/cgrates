@@ -4,7 +4,7 @@
     
     
     "general": {
-        "node_id": "fltr_update_e1_mysql",
+        "nodeID": "fltr_update_e1_mysql",
     },
     
     "logger": {

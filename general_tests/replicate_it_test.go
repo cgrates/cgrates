@@ -36,7 +36,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	cfg1 := `
 {
 "general": {
-	"node_id": "InternalEngine"
+	"nodeID": "InternalEngine"
 },
 
 "logger": {
@@ -98,7 +98,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	cfg2 := `
 {
 "general": {
-	"node_id": "InternalEngine2"
+	"nodeID": "InternalEngine2"
 },
 
 "logger": {

@@ -46,7 +46,7 @@ func TestFlags(t *testing.T) {
 	} else if !*version {
 		t.Errorf("Expected true received:%v ", *version)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-dbdata_encoding", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-dbDataEncoding", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *inDBDataEncoding != "true" {
 		t.Errorf("Expected true received:%v ", *inDBDataEncoding)

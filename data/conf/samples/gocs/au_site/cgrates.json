@@ -1,7 +1,7 @@
 {
 
   "general": {
-    "node_id": "AU_SITE",
+    "nodeID": "AU_SITE",
   },
 
   "logger": {

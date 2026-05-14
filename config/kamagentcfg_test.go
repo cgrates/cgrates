@@ -102,7 +102,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 			"create_cdr": true,
 			"timezone": "UTC",
 			"evapi_conns":[
-				{"address": "127.0.0.1:8448", "reconnects": 5, "max_reconnect_interval": "5m", "alias": ""}
+				{"address": "127.0.0.1:8448", "reconnects": 5, "maxReconnectInterval": "5m", "alias": ""}
 			],
 		},
 	}`

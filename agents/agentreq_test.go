@@ -2511,7 +2511,7 @@ func TestAgReqSetFieldsFromCfg(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		{Tag: "CfgField",
 			Path: utils.MetaCgreq + utils.NestingSep + "NodeID", Type: utils.MetaVariable,
-			Value: utils.NewRSRParsersMustCompile("~*cfg.general.node_id", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cfg.general.nodeID", utils.InfieldSep)},
 	}
 	for _, v := range tplFlds {
 		v.ComputePath()
