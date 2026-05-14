@@ -125,6 +125,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			paramsStr = params[len(MetaTimeString)+1:]
 		}
 		return NewTimeStringConverter(paramsStr)
+	case strings.HasPrefix(params, MetaDateTime):
+		return NewDateTimeConverter(params)
 	case strings.HasPrefix(params, MetaRandom):
 		if len(params) == len(MetaRandom) { // no extra params, defaults implied
 			return NewRandomConverter(EmptyString)
@@ -893,4 +895,26 @@ func (c *ULIConverter) Convert(in any) (any, error) {
 	}
 
 	return uli.GetField(c.path)
+}
+
+type DateTimeConverter struct {
+	inlayout string
+}
+
+func NewDateTimeConverter(params string) (DataConverter, error) {
+	_, layout, ok := strings.Cut(params, ":")
+	if !ok || layout == "" {
+		return nil, fmt.Errorf("*datetime converter: requires at least one parameter")
+	}
+	return &DateTimeConverter{inlayout: layout}, nil
+}
+
+func (dt *DateTimeConverter) Convert(in any) (any, error) {
+	inStr := IfaceAsString(in)
+	tm, err := time.Parse(dt.inlayout, inStr)
+	if err != nil {
+		return nil, fmt.Errorf("*datetime converter: parsing failed for value %q with layout %q: %w",
+			inStr, dt.inlayout, err)
+	}
+	return tm, nil
 }
