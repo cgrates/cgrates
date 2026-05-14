@@ -450,3 +450,41 @@ func optIfaceFromDP(dP utils.DataProvider, cch map[string]any, optNames []string
 	}
 	return nil, utils.ErrNotFound
 }
+
+// GetComputeCGRid will retrieve the CGRid value out of CGREvent
+// Temporary placed here until we will be able to move it to coreutils
+func GetComputeCGRid(ctx *context.Context, cgrEv *utils.CGREvent, cch map[string]any,
+	fltrS *FilterS, cgrIDDynOpts, originIDDynOpts, hostIDDynOpts []*config.DynamicStringOpt) (cgrID string, err error) {
+	if chVal, has := cch[utils.MetaCGRid]; has {
+		return chVal.(string), nil
+	}
+	dP := cgrEv.AsDataProvider()
+	if cgrID, err = GetStringOpts(ctx, cgrEv.Tenant, dP, cch,
+		fltrS, cgrIDDynOpts, utils.MetaCGRid); err != nil {
+		return
+	} else if cgrID != utils.EmptyString {
+		if len(cgrID) != utils.CGRidCharSize {
+			return "", errors.New("wrong CGRid length")
+		}
+		return
+	}
+
+	var originID, hostID string
+	if originID, err = GetStringOpts(ctx, cgrEv.Tenant, dP, cch,
+		fltrS, cgrIDDynOpts, utils.MetaOriginID); err != nil {
+		return
+	} else if originID == utils.EmptyString {
+		return "", utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
+	}
+	if originID, err = GetStringOpts(ctx, cgrEv.Tenant, dP, cch,
+		fltrS, cgrIDDynOpts, utils.MetaOriginID); err != nil {
+		return
+	} else if originID == utils.EmptyString {
+		return "", utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
+	}
+	if hostID, err = GetStringOpts(ctx, cgrEv.Tenant, dP, cch,
+		fltrS, cgrIDDynOpts, utils.MetaOriginID); err != nil {
+		return
+	}
+	return utils.Sha1(originID, hostID), nil
+}

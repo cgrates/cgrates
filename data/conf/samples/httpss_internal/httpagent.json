@@ -17,7 +17,7 @@
 				"tenant": "cgrates.org",
 				"flags": ["*authorize", "*accounts"],
 				"request_fields":[
-					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.imsi", "mandatory": true},

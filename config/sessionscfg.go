@@ -102,7 +102,9 @@ type SessionsOpts struct {
 	DebitInterval          []*DynamicDurationOpt
 	TTLMaxDelay            []*DynamicDurationOpt
 	TTLUsage               []*DynamicDurationPointerOpt
+	CGRid                  []*DynamicStringOpt
 	OriginID               []*DynamicStringOpt
+	HostID                 []*DynamicStringOpt
 	AccountsForceUsage     []*DynamicBoolOpt
 	AccountsAuthorize      []*DynamicBoolOpt
 	AccountsInitialize     []*DynamicBoolOpt

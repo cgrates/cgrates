@@ -19,7 +19,6 @@ package sessions
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
@@ -855,11 +854,25 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	cgrEvs := map[string]*utils.CGREvent{
-		utils.MetaPrimary: apiArgs,
+	cch := make(map[string]any) // cached opts
+
+	// Only  *runID *primary can be derived
+	cch[utils.MetaRunID] = utils.MetaPrimary
+	if optRunID, _ := apiArgs.OptAsString(utils.MetaRunID); optRunID != utils.EmptyString {
+		cch[utils.MetaRunID] = optRunID
+	}
+	// Set cgrID of the event, most important for the session
+	if cch[utils.MetaCGRid], err = engine.GetComputeCGRid(ctx, apiArgs, cch, sS.fltrS,
+		sS.cfg.SessionSCfg().Opts.CGRid, sS.cfg.SessionSCfg().Opts.OriginID, sS.cfg.SessionSCfg().Opts.HostID); err != nil {
+		return
+	}
+	if _, has := apiArgs.APIOpts[utils.MetaCGRid]; !has {
+		apiArgs.APIOpts[utils.MetaCGRid] = cch[utils.MetaCGRid].(string)
 	}
 
-	cch := make(map[string]any) // cached opts
+	cgrEvs := map[string]*utils.CGREvent{
+		cch[utils.MetaRunID].(string): apiArgs,
+	}
 
 	// processing AttributeS first gives us the opportunity of enhancing all the other flags
 	// check for *attribute
@@ -885,7 +898,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		}
 	}
 
-	// extracting *session here allows us to know if the event should be attached to a session so we do not fork later
+	// *session will set/add a session
 	if sesBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.Session,
 		utils.MetaSession); errBool != nil {
@@ -911,15 +924,17 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	} else {
 		cch[utils.MetaChargers] = chrgS
 	}
-	// Apply ChargerS, but only if not a session
+	// Apply ChargerS, but only if primary *runID
 	if cch[utils.MetaChargers].(bool) &&
-		!slices.Contains([]bool{cch[utils.MetaSession].(bool), cch[utils.MetaTerminate].(bool)}, true) {
+		cch[utils.MetaRunID].(string) == utils.MetaPrimary &&
+		!cch[utils.MetaTerminate].(bool) {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
 			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
 			utils.MetaSessionS, apiArgs); err != nil {
 			return
 		}
+		delete(cgrEvs, utils.MetaPrimary) // it becomes entirely ChargerS responsibility to provide events
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])
 			cgrEvs[runID] = chrgr.CGREvent
@@ -1136,6 +1151,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			utils.MetaResourcesAuthorizeCfg); errBool != nil {
 			return errBool
 		} else {
+
 			cchEv[utils.MetaResourcesAuthorizeCfg] = resAuthBool
 		}
 		if cchEv[utils.MetaResourcesAuthorizeCfg].(bool) ||

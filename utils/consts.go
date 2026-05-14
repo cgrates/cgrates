@@ -184,6 +184,8 @@ const (
 	CSVLoad                  = "CSVLOAD"
 	MetaCDRID                = "*cdrID"
 	MetaOriginID             = "*originID"
+	MetaCGRid                = "*cgrID"
+	CGRidCharSize            = 40
 	ToR                      = "ToR"
 	OrderID                  = "OrderID"
 	OriginID                 = "OriginID"

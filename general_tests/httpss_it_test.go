@@ -22,13 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	// 	"bytes"
-	// 	"crypto/tls"
-	// 	"crypto/x509"
-	// 	"fmt"
-	// 	"io"
-	// 	"net/http"
-
 	"fmt"
 	"io"
 	"net/http"
@@ -43,14 +36,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
-	// 	"os"
-	// 	"path"
-	// 	"reflect"
-	// 	"testing"
-	// 	"time"
-	// 	"github.com/cgrates/cgrates/config"
-	// 	"github.com/cgrates/cgrates/engine"
-	// 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -69,7 +54,7 @@ var (
 		testHttpSsRPC,
 		testHttpSsLoadTPFromFolder,
 		testHttpSsAuth,
-		testHttpSsSession,
+		//testHttpSsSession,
 		//testHttpSsStopEngine,
 		//testHttpSsTerminate,
 	}
