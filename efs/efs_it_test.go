@@ -196,10 +196,10 @@ func TestEFsReplayEvents(t *testing.T) {
 			"id": "nats_exporter",
 			"type": "*natsJSONMap",
 			"flags": ["*log"],
-			"efs_conns": ["*localhost"],
+			"efsConns": ["*localhost"],
 			"export_path": "nats://localhost:4222",
 			"attempts": 1,
-			"failed_posts_dir": "%s",
+			"failedPostsDir": "%s",
 			"synchronous": true,
 			"opts": {
 				"natsSubject": "processed_cdrs",

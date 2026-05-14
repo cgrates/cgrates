@@ -180,13 +180,13 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 
 type AstConnJsonCfg struct {
 	Alias                  *string
-	Address                *string
-	User                   *string
-	Password               *string
-	Connect_attempts       *int
-	Reconnects             *int
-	Ari_websocket          *bool
-	Max_reconnect_interval *string
+	Address                *string `json:"address"`
+	User                   *string `json:"user"`
+	Password               *string `json:"password"`
+	Connect_attempts       *int    `json:"connectAttempts"`
+	Reconnects             *int    `json:"reconnects"`
+	Ari_websocket          *bool   `json:"ariWebsocket"`
+	Max_reconnect_interval *string `json:"maxReconnectInterval"`
 }
 
 type AsteriskAgentJsonCfg struct {

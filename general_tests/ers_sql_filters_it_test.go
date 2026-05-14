@@ -766,8 +766,8 @@ func TestERSSQLFiltersErr(t *testing.T) {
 
 	jsonCfg := `{
 "general": {
-  "reply_timeout": "10s",
-  "default_timezone": "UTC"
+  "replyTimeout": "10s",
+  "defaultTimezone": "UTC"
 },
 "admins": {
   "enabled": true

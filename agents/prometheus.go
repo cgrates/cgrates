@@ -165,7 +165,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager, fltrS *en
 			Subsystem: "cache",
 			Name:      "groups_total",
 			Help:      "Total number of cache groups",
-		}, []string{"cache", "node_id"})
+		}, []string{"cache", "nodeID"})
 	reg.MustRegister(cacheGroupsMetric)
 
 	cacheItemsMetric := prometheus.NewGaugeVec(
@@ -174,7 +174,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager, fltrS *en
 			Subsystem: "cache",
 			Name:      "items_total",
 			Help:      "Total number of cache items",
-		}, []string{"cache", "node_id"})
+		}, []string{"cache", "nodeID"})
 	reg.MustRegister(cacheItemsMetric)
 	statMetrics := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -345,7 +345,7 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager, fltr
 		promGoSchedGomaxprocsThreads:     "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.",
 	}
 	for name, help := range gaugeMetrics {
-		c.descs[name] = prometheus.NewDesc(name, help, []string{"node_id"}, nil)
+		c.descs[name] = prometheus.NewDesc(name, help, []string{"nodeID"}, nil)
 	}
 
 	counterMetrics := map[string]string{
@@ -357,19 +357,19 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager, fltr
 		promGoMemstatsFreesTotal:            "Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.",
 	}
 	for name, help := range counterMetrics {
-		c.descs[name] = prometheus.NewDesc(name, help, []string{"node_id"}, nil)
+		c.descs[name] = prometheus.NewDesc(name, help, []string{"nodeID"}, nil)
 	}
 
 	c.descs[promGoInfo] = prometheus.NewDesc(
 		promGoInfo,
 		"Information about the Go environment.",
-		[]string{"node_id", "version"},
+		[]string{"nodeID", "version"},
 		nil)
 
 	c.descs[promGoGCDurationSeconds] = prometheus.NewDesc(
 		promGoGCDurationSeconds,
 		"A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.",
-		[]string{"node_id"},
+		[]string{"nodeID"},
 		nil,
 	)
 	return c
@@ -400,7 +400,7 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 		nodeID, ok := reply[utils.NodeID].(string)
 		if !ok {
-			panic("missing node_id in CoreSv1.Status reply")
+			panic("missing nodeID in CoreSv1.Status reply")
 		}
 
 		if version, ok := reply[utils.GoVersion].(string); ok {

@@ -52,7 +52,7 @@ package registrarc
 // 	const (
 // 		dspCfg = `{
 // "general": {
-// 	"node_id": "dispatcher",
+// 	"nodeID": "dispatcher",
 // 	"reconnects": 1
 // },
 // "caches": {
@@ -69,7 +69,7 @@ package registrarc
 // }`
 // 		workerCfg = `{
 // "general": {
-//         "node_id": "%s"
+//         "nodeID": "%s"
 // },
 // "listen": {
 //         "rpc_json": ":%[2]d12",

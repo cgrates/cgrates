@@ -3,7 +3,7 @@
     // Used in apis/filter_update_it_test.go
     
     "general": {
-        "node_id": "fltr_update_e1_mongo",
+        "nodeID": "fltr_update_e1_mongo",
     },
     
     "logger": {

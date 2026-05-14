@@ -5,7 +5,7 @@
 // Starts rater, cdrs and mediator connecting over internal channel
 
 "general": {
-	"node_id": "TestFailCDRS",
+	"nodeID": "TestFailCDRS",
 },
 
 "logger": {
@@ -15,7 +15,7 @@
 "efs": {                                                    // ExportFailover service
     "enabled": true,						                // starts the EventReader service: <true|false>
     "poster_attempts": 1,									// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
-    "failed_posts_dir": "/tmp/failed_posts",	// directory path where we store failed requests
+    "failedPostsDir": "/tmp/failed_posts",	// directory path where we store failed requests
     "failed_posts_ttl": "1s",								// time to wait before writing the failed posts in a single file
 },
 
@@ -103,7 +103,7 @@
 				// "awsToken": "sessionToken",
 			},
 			"attempts": 1,
-			"failed_posts_dir": "/tmp/failed_posts",
+			"failedPostsDir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 			],

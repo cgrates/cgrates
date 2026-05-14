@@ -5,7 +5,7 @@
 
 
 "general": {
-	"reply_timeout": "10s"
+	"replyTimeout": "10s"
 },
 
 "logger": {

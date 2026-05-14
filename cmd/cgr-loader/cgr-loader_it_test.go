@@ -460,7 +460,7 @@ func testLoadItStartLoaderWithDelayWConf(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithDelayWFlag(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*utils.DataDir, "conf", "samples", "tutinternal"), "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID", "-caching_delay=5s")
+	cmd := exec.Command("cgr-loader", "-config_path="+path.Join(*utils.DataDir, "conf", "samples", "tutinternal"), "-path="+path.Join(*utils.DataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-tpid=TPID", "-cachingDelay=5s")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	cmd.Stdout = output

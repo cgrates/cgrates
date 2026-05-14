@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"reply_timeout": "50s"
+	"replyTimeout": "50s"
 },
 
 /*
@@ -9,9 +9,9 @@
 	"type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
 	"level": 6,               // system level precision for floats 
 	"opts": {
-		"kafka_conn": "ldasdas:9092",    // the connection trough kafka
-		"kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-		"kafka_attempts": 1,                     // number of attempts of connecting
+		"kafkaConn": "ldasdas:9092",    // the connection trough kafka
+		"kafkaTopic": "TutorialTopic",    // the topic from where the events are exported
+		"kafkaAttempts": 1,                     // number of attempts of connecting
 	},
 },
 */ 

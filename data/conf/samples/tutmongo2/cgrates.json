@@ -4,7 +4,7 @@
 
 
 "general": {
-	"node_id": "CGRateSTutorial",
+	"nodeID": "CGRateSTutorial",
 },
 
 "logger": {

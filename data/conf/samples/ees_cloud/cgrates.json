@@ -35,7 +35,7 @@
                 "sqsQueueID": "testQueue"
             },
             "attempts": 1,
-            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "failedPostsDir": "/var/spool/cgrates/failed_posts2",
             "synchronous": true,
             "fields":[
                 {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -52,7 +52,7 @@
                 "s3BucketID": "cgrates-cdrs"
             },
             "attempts": 1,
-            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "failedPostsDir": "/var/spool/cgrates/failed_posts2",
             "synchronous": true,
             "fields":[
                 {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -71,7 +71,7 @@
                 "s3SkipTlsVerify": true
             },
             "attempts": 1,
-            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "failedPostsDir": "/var/spool/cgrates/failed_posts2",
             "synchronous": true,
             "fields":[
                 {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -90,7 +90,7 @@
                 "amqpPassword": "access-key"
 			},
             "attempts": 1,
-            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "failedPostsDir": "/var/spool/cgrates/failed_posts2",
             "synchronous": true,
             "fields":[
                 {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}

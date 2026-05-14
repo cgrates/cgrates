@@ -1160,7 +1160,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				"partial_record_cache": "1s",
 				"processed_path": "/tmp/ers/out",
 				"reconnects": 10,
-				"max_reconnect_interval": "2m",
+				"maxReconnectInterval": "2m",
 				"cache_dump_fields": [
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}
 				],

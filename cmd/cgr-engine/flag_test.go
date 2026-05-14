@@ -114,8 +114,8 @@ func TestFlags(t *testing.T) {
 			want:       "*stdout",
 		},
 		{
-			name:       "node_id",
-			flags:      []string{"-node_id", "CGRateS.org"},
+			name:       "nodeID",
+			flags:      []string{"-nodeID", "CGRateS.org"},
 			flagVar:    &flags.logger.nodeID,
 			defaultVal: "",
 			want:       "CGRateS.org",

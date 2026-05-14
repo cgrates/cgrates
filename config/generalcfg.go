@@ -271,31 +271,31 @@ type GeneralOptsJson struct {
 
 // General config section
 type GeneralJsonCfg struct {
-	Node_id                *string
-	Rounding_decimals      *int
-	Dbdata_encoding        *string
-	Tpexport_dir           *string
-	Default_request_type   *string
-	Default_category       *string
-	Default_tenant         *string
-	Default_timezone       *string
-	Default_caching        *string
-	Caching_delay          *string
-	Connect_attempts       *int
-	Reconnects             *int
-	Max_reconnect_interval *string
-	Connect_timeout        *string
-	Reply_timeout          *string
-	Locking_timeout        *string
-	Digest_separator       *string
-	Digest_equal           *string
-	Max_parallel_conns     *int
+	Node_id                *string `json:"nodeID"`
+	Rounding_decimals      *int    `json:"roundingDecimals"`
+	Dbdata_encoding        *string `json:"dbDataEncoding"`
+	Tpexport_dir           *string `json:"tpExportDir"`
+	Default_request_type   *string `json:"defaultRequestType"`
+	Default_category       *string `json:"defaultCategory"`
+	Default_tenant         *string `json:"defaultTenant"`
+	Default_timezone       *string `json:"defaultTimezone"`
+	Default_caching        *string `json:"defaultCaching"`
+	Caching_delay          *string `json:"cachingDelay"`
+	Connect_attempts       *int    `json:"connectAttempts"`
+	Reconnects             *int    `json:"reconnects"`
+	Max_reconnect_interval *string `json:"maxReconnectInterval"`
+	Connect_timeout        *string `json:"connectTimeout"`
+	Reply_timeout          *string `json:"replyTimeout"`
+	Locking_timeout        *string `json:"lockingTimeout"`
+	Digest_separator       *string `json:"digestSeparator"`
+	Digest_equal           *string `json:"digestEqual"`
+	Max_parallel_conns     *int    `json:"maxParallelConns"`
 
-	Decimal_max_scale     *int
-	Decimal_min_scale     *int
-	Decimal_precision     *int
-	Decimal_rounding_mode *string
-	Opts                  *GeneralOptsJson
+	Decimal_max_scale     *int             `json:"decimalMaxScale"`
+	Decimal_min_scale     *int             `json:"decimalMinScale"`
+	Decimal_precision     *int             `json:"decimalPrecision"`
+	Decimal_rounding_mode *string          `json:"decimalRoundingMode"`
+	Opts                  *GeneralOptsJson `json:"opts"`
 }
 
 func diffGeneralOptsJsonCfg(d *GeneralOptsJson, v1, v2 *GeneralOpts) *GeneralOptsJson {

@@ -1,9 +1,9 @@
 {
 
   "general": {
-    "node_id": "DISPATCH_SITE",
+    "nodeID": "DISPATCH_SITE",
     "reconnects": 2,
-    "reply_timeout": "5s",
+    "replyTimeout": "5s",
   },
 
   "logger": {

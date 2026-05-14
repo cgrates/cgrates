@@ -90,7 +90,7 @@ func TestConfigsAsMapInterface2(t *testing.T) {
 func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
 	cfgsJSONStr := `{
 		"general": {
-			"node_id": "*env:NODE_ID",
+			"nodeID": "*env:NODE_ID",
 		},
   }`
 	cfg := NewDefaultCGRConfig()

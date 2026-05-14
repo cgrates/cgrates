@@ -5,7 +5,7 @@
 // Starts rater, scheduler
 
 "general": {
-		"node_id":"node1",
+		"nodeID":"node1",
 },
 
 "listen": {

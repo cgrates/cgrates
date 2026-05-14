@@ -127,13 +127,13 @@ func testSectConfigSReloadGeneral(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"general":{"connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","failed_posts_dir":"/var/spool/cgrates/failed_posts","failed_posts_ttl":"5s","locking_timeout":"0","log_level":7,"logger":"*syslog","max_parallel_conns":100,"node_id":"98ead14","poster_attempts":3,"reconnects":-1,"reply_timeout":"50s","rounding_decimals":5,"tpexport_dir":"/var/spool/cgrates/tpe"}}`,
+		Config: `{"general":{"connectAttempts":5,"connectTimeout":"1s","dbDataEncoding":"*msgpack","defaultCaching":"*reload","defaultCategory":"call","defaultRequestType":"*rated","defaultTenant":"cgrates.org","defaultTimezone":"Local","digestEqual":":","digestSeparator":",","failedPostsDir":"/var/spool/cgrates/failed_posts","failed_posts_ttl":"5s","lockingTimeout":"0","log_level":7,"logger":"*syslog","maxParallelConns":100,"nodeID":"98ead14","poster_attempts":3,"reconnects":-1,"replyTimeout":"50s","roundingDecimals":5,"tpExportDir":"/var/spool/cgrates/tpe"}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"general":{"caching_delay":"0","connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","decimal_max_scale":0,"decimal_min_scale":0,"decimal_precision":0,"decimal_rounding_mode":"*toNearestEven","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","locking_timeout":"0","max_parallel_conns":100,"max_reconnect_interval":"0","node_id":"98ead14","opts":{"*exporterIDs":[]},"reconnects":-1,"reply_timeout":"50s","rounding_decimals":5,"tpexport_dir":"/var/spool/cgrates/tpe"}}`
+	cfgStr := `{"general":{"cachingDelay":"0","connectAttempts":5,"connectTimeout":"1s","dbDataEncoding":"*msgpack","decimalMaxScale":0,"decimalMinScale":0,"decimalPrecision":0,"decimalRoundingMode":"*toNearestEven","defaultCaching":"*reload","defaultCategory":"call","defaultRequestType":"*rated","defaultTenant":"cgrates.org","defaultTimezone":"Local","digestEqual":":","digestSeparator":",","lockingTimeout":"0","maxParallelConns":100,"maxReconnectInterval":"0","nodeID":"98ead14","opts":{"*exporterIDs":[]},"reconnects":-1,"replyTimeout":"50s","roundingDecimals":5,"tpExportDir":"/var/spool/cgrates/tpe"}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -397,7 +397,7 @@ func testSectConfigSReloadERS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"ers":{"conns":{},"enabled":true,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"ees_failed_ids":[],"ees_ids":[],"ees_success_ids":[],"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","max_reconnect_interval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime","xmlRootPath":""},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","start_delay":"0","tenant":"","timezone":"","type":"*none"}]}}`
+	cfgStr := `{"ers":{"enabled":true,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","maxReconnectInterval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime","xmlRootPath":""},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none"}],"sessions_conns":["*internal"]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -413,13 +413,13 @@ func testSectConfigSReloadEES(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"ees":{"attributes_conns":[],"cache":{"*fileCSV":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*file_csv":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":true,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"concurrent_requests":0,"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`,
+		Config: `{"ees":{"attributes_conns":[],"cache":{"*fileCSV":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*file_csv":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":true,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"concurrent_requests":0,"export_path":"/var/spool/cgrates/ees","failedPostsDir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"ees":{"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*file_csv":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"conns":{},"enabled":true,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"conns":{"*efs":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","metrics_reset_schedule":"","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`
+	cfgStr := `{"ees":{"attributes_conns":[],"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*file_csv":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":true,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"efsConns":["*internal"],"export_path":"/var/spool/cgrates/ees","failedPostsDir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"timezone":"","type":"*none"}]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -458,13 +458,13 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*birpc_internal"]}}`,
+		Config: `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connectAttempts":3,"password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*birpc_internal"]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","ari_websocket":false,"connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
+	cfgStr := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -486,6 +486,7 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
+
 	cfgStr := `{"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{

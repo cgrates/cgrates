@@ -882,7 +882,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	"max_wait_connection": "7s",
 	"active_session_delimiter": "//",
 	"event_socket_conns": [
-	{"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "reply_timeout": "2m", "alias": "127.0.0.1:8000"}
+	{"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "maxReconnectInterval": "5m", "replyTimeout": "2m", "alias": "127.0.0.1:8000"}
 ],}
 }`
 	eMap := map[string]any{
@@ -1101,7 +1101,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		},
 		"create_cdr": true,
 		"asterisk_conns":[
-			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8, "max_reconnect_interval": "5m"}
+			{"address": "127.0.0.1:8089","connectAttempts": 5,"reconnects": 8, "maxReconnectInterval": "5m"}
 		],
 	},
 }`

@@ -1,7 +1,7 @@
 {
 
 "general": {
-  "node_id": "id",						
+  "nodeID": "id",						
 },
 
 "logger": {

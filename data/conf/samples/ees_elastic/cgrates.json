@@ -26,7 +26,7 @@
 			"type": "*els",
 			"export_path": "http://localhost:9200",
 			"synchronous": true,
-			"failed_posts_dir": "*none",
+			"failedPostsDir": "*none",
 			"opts": {
 				"elsIndex": "cdrs_basic",
 				"elsRefresh": "true"
@@ -37,7 +37,7 @@
 			"type": "*els",
 			"export_path": "http://localhost:9200",
 			"synchronous": true,
-			"failed_posts_dir": "*none",
+			"failedPostsDir": "*none",
 			"opts": {
 				"elsIndex": "cdrs_fields",
 				"elsRefresh": "true"
@@ -55,7 +55,7 @@
 			"type": "*els",
 			"export_path": "ELASTIC_DEPLOYMENT",
 			"synchronous": true,
-			"failed_posts_dir": "*none",
+			"failedPostsDir": "*none",
 			"opts": {
 				"elsIndex": "cdrs",
 				"elsCloud": true,

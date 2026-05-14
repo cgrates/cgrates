@@ -4,7 +4,7 @@
     // Used for sessions/sessions_volume_discount_it_test.go
         
     "general": {
-        "reply_timeout": "10s",
+        "replyTimeout": "10s",
     },
 
     "logger": {
