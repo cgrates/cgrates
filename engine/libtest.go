@@ -505,19 +505,22 @@ type DBConnOpts struct {
 
 // DBConn contains database connection parameters.
 type DBConn struct {
-	Type     *string    `json:"db_type,omitempty"`
-	Host     *string    `json:"db_host,omitempty"`
-	Port     *int       `json:"db_port,omitempty"`
-	Name     *string    `json:"db_name,omitempty"`
-	User     *string    `json:"db_user,omitempty"`
-	Password *string    `json:"db_password,omitempty"`
-	Opts     DBConnOpts `json:"opts"`
+	Type                *string    `json:"db_type,omitempty"`
+	Host                *string    `json:"db_host,omitempty"`
+	Port                *int       `json:"db_port,omitempty"`
+	Name                *string    `json:"db_name,omitempty"`
+	User                *string    `json:"db_user,omitempty"`
+	Password            *string    `json:"db_password,omitempty"`
+	ReplicationConns    *[]string  `json:"replication_conns"`
+	ReplicationInterval *string    `json:"replication_interval,omitempty"`
+	Opts                DBConnOpts `json:"opts"`
 }
 
 // Item contains db item parameters
 type Item struct {
-	Limit  *int    `json:"limit,omitempty"`
-	DbConn *string `json:"dbConn,omitempty"`
+	Limit     *int    `json:"limit,omitempty"`
+	Replicate *bool   `json:"replicate,omitempty"`
+	DbConn    *string `json:"dbConn,omitempty"`
 }
 
 // DBParams contains database connection parameters.
