@@ -618,6 +618,10 @@ func (dbM *DataDBMock) BackupDataDB(backupFolderPath string, zip bool) (err erro
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+func (dbM *DataDBMock) RestoreDataDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }

@@ -1806,3 +1806,13 @@ func (ms *MongoStorage) RewriteStorDB() (err error) {
 func (ms *MongoStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// RestoreStorDB used only for InternalDB
+func (ms *MongoStorage) RestoreStorDB(backupFolderPath string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// SnapshotStorDB used only for InternalDB
+func (ms *MongoStorage) SnapshotStorDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

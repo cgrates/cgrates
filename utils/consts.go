@@ -1765,6 +1765,10 @@ const (
 	APIerSv1RewriteStorDB                     = "APIerSv1.RewriteStorDB"
 	APIerSv1BackupDataDB                      = "APIerSv1.BackupDataDB"
 	APIerSv1BackupStorDB                      = "APIerSv1.BackupStorDB"
+	APIerSv1RestoreDataDB                     = "APIerSv1.RestoreDataDB"
+	APIerSv1RestoreStorDB                     = "APIerSv1.RestoreStorDB"
+	APIerSv1SnapshotDataDB                    = "APIerSv1.SnapshotDataDB"
+	APIerSv1SnapshotStorDB                    = "APIerSv1.SnapshotStorDB"
 )
 
 // APIerSv1 TP APIs

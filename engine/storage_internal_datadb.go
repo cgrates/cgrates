@@ -1046,3 +1046,18 @@ func (iDB *InternalDB) RewriteDataDB() (err error) {
 func (iDB *InternalDB) BackupDataDB(backupFolderPath string, zip bool) (err error) {
 	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }
+
+// RestoreDataDB will attempt to restore the internal DB from
+// the latest backup in the specified backupPath. If backupPath is not specified, it will be
+// taken from the default's backup path.
+// Any data that was dumped from internal DB will be cleared before restoring from backup
+func (iDB *InternalDB) RestoreDataDB(backupFolderPath string) (err error) {
+	return iDB.db.Restore(backupFolderPath)
+}
+
+// SnapshotDataDB will take the BackupFolderPath (or default backup path if empty) to backup the
+// live dump folder taking zip as parameter to zip the backup or not, after which it cleares
+// the live dump folder and creates new dump files out of the live internal DB data
+func (iDB *InternalDB) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
+	return iDB.db.Snapshot(backupFolderPath, zip)
+}

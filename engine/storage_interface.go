@@ -152,6 +152,8 @@ type DataDB interface {
 	DumpDataDB() error
 	RewriteDataDB() error
 	BackupDataDB(string, bool) error
+	RestoreDataDB(string) error
+	SnapshotDataDB(string, bool) error
 }
 
 type StorDB interface {
@@ -234,6 +236,8 @@ type LoadWriter interface {
 	DumpStorDB() error
 	RewriteStorDB() error
 	BackupStorDB(string, bool) error
+	RestoreStorDB(string) error
+	SnapshotStorDB(string, bool) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr
