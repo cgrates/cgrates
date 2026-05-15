@@ -1876,3 +1876,99 @@ func TestGigaWordsConverter(t *testing.T) {
 		})
 	}
 }
+
+func TestDateTimeConverterConvert(t *testing.T) {
+	testCases := []struct {
+		name        string
+		params      string
+		inValue     string
+		want        string
+		expectedErr string
+	}{
+		{
+			name:    "CustomLayoutDefaultToRFC3339",
+			params:  "*datetime:15:04:05.000  UTC Mon Jan 02 2006",
+			inValue: "17:22:09.787  UTC Sun May 10 2026",
+			want:    "2026-05-10T17:22:09Z",
+		},
+		{
+			name:    "RFC3339Layout",
+			params:  "*datetime:2006-01-02T15:04:05Z07:00",
+			inValue: "2026-05-10T19:22:09+02:00",
+			want:    "2026-05-10T19:22:09+02:00",
+		},
+		{
+			name:        "InvalidInput",
+			params:      "*datetime:15:04:05.000  UTC Mon Jan 02 2006",
+			inValue:     "not date",
+			expectedErr: "*datetime converter: parsing failed",
+		},
+		{
+			name:        "WrongLayout",
+			params:      "*datetime:2006-01-02",
+			inValue:     "17:22:09.787  UTC Sun May 10 2026",
+			expectedErr: "*datetime converter: parsing failed",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			convsSplt := strings.Split(tc.params, ANDSep)
+			var converters DataConverters
+			for _, convStr := range convsSplt {
+				conv, err := NewDataConverter(convStr)
+				if err != nil {
+					t.Fatalf("invalid converter value in string: <%s>, err: %s",
+						convStr, err.Error())
+				}
+				converters = append(converters, conv)
+			}
+			out, err := converters.ConvertString(tc.inValue)
+			if tc.expectedErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got nil", tc.expectedErr)
+				}
+				if !strings.Contains(err.Error(), tc.expectedErr) {
+					t.Errorf("expected error containing %q, got %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if out != tc.want {
+				t.Errorf("expected %q, got %q", tc.want, out)
+			}
+		})
+	}
+}
+
+func TestNewDateTimeConverterNew(t *testing.T) {
+	testCases := []struct {
+		name        string
+		params      string
+		expectedErr string
+	}{
+		{
+			name:        "NoParameters",
+			params:      "*datetime",
+			expectedErr: "requires at least one parameter",
+		},
+		{
+			name:        "EmptyParameter",
+			params:      "*datetime:",
+			expectedErr: "requires at least one parameter",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := NewDataConverter(tc.params)
+			if err == nil {
+				t.Fatalf("expected error containing %q, got nil", tc.expectedErr)
+			}
+			if !strings.Contains(err.Error(), tc.expectedErr) {
+				t.Errorf("expected error containing %q, got %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
