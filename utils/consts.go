@@ -3137,6 +3137,8 @@ const (
 	PartialPathOpt             = "partialPath"
 	PartialCSVFieldSepartorOpt = "partialcsvFieldSeparator"
 
+	IgnoreErroredItemsOpt = "ignoreErroredItems"
+
 	// EEs Elasticsearch options
 	ElsIndex                    = "elsIndex"
 	ElsRefresh                  = "elsRefresh"
