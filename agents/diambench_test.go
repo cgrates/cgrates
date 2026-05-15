@@ -36,7 +36,7 @@ import (
 
 var (
 	capsLimit    = flag.Int("caps_limit", 0, "caps limit")
-	capsStrategy = flag.String("caps_strategy", "*busy", "caps strategy")
+	capsStrategy = flag.String("capsStrategy", "*busy", "caps strategy")
 	parallelism  = flag.Int("parallelism", 0, "parallelism")
 )
 
@@ -72,9 +72,9 @@ func BenchmarkDiameterCaps(b *testing.B) {
 },
 "cores": {
 	"caps": %d,
-	"caps_strategy": "%s",
-	// use shutdown_timeout option to set the diameter reply timeout.
-	"shutdown_timeout": "100ms"
+	"capsStrategy": "%s",
+	// use shutdownTimeout option to set the diameter reply timeout.
+	"shutdownTimeout": "100ms"
 }
 }`, *capsLimit, *capsStrategy)
 	ng := engine.TestEngine{

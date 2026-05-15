@@ -30,7 +30,7 @@
 
 
 
-"rpc_conns": {
+"rpcConns": {
 	"*jsonbirpc": {
 		"conns": [{"address": "127.0.0.1:2014", "transport":"*birpc_json"}],
 	},

@@ -81,9 +81,9 @@ func TestTlsCfgAsMapInterface1(t *testing.T) {
 	"tls":{
 		"server_certificate" : "path/To/Server/Cert",			
 		"server_key":"path/To/Server/Key",					
-		"client_certificate" : "path/To/Client/Cert",			
-		"client_key":"path/To/Client/Key",					
-		"ca_certificate":"path/To/CA/Cert",							
+		"clientCertificate" : "path/To/Client/Cert",			
+		"clientKey":"path/To/Client/Key",					
+		"caCertificate":"path/To/CA/Cert",							
 		"server_name":"TestServerName",
 		"server_policy":3,					
 	},
@@ -131,9 +131,9 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 		ServerKey:        "server_key",
 		ServerPolicy:     1,
 		ServerName:       "server_name",
-		ClientCerificate: "client_certificate",
-		ClientKey:        "client_key",
-		CaCertificate:    "ca_certificate",
+		ClientCerificate: "clientCertificate",
+		ClientKey:        "clientKey",
+		CaCertificate:    "caCertificate",
 	}
 
 	v2 := &TLSCfg{
@@ -142,8 +142,8 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 		ServerPolicy:     2,
 		ServerName:       "server_name2",
 		ClientCerificate: "client_certificate2",
-		ClientKey:        "client_key2",
-		CaCertificate:    "ca_certificate2",
+		ClientKey:        "clientKey2",
+		CaCertificate:    "caCertificate2",
 	}
 
 	expected := &TlsJsonCfg{
@@ -152,8 +152,8 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 		Server_policy:      utils.IntPointer(2),
 		Server_name:        utils.StringPointer("server_name2"),
 		Client_certificate: utils.StringPointer("client_certificate2"),
-		Client_key:         utils.StringPointer("client_key2"),
-		Ca_certificate:     utils.StringPointer("ca_certificate2"),
+		Client_key:         utils.StringPointer("clientKey2"),
+		Ca_certificate:     utils.StringPointer("caCertificate2"),
 	}
 
 	rcv := diffTlsJsonCfg(d, v1, v2)
@@ -175,9 +175,9 @@ func TestTlsCloneSection(t *testing.T) {
 		ServerKey:        "server_key",
 		ServerPolicy:     1,
 		ServerName:       "server_name",
-		ClientCerificate: "client_certificate",
-		ClientKey:        "client_key",
-		CaCertificate:    "ca_certificate",
+		ClientCerificate: "clientCertificate",
+		ClientKey:        "clientKey",
+		CaCertificate:    "caCertificate",
 	}
 
 	exp := &TLSCfg{
@@ -185,9 +185,9 @@ func TestTlsCloneSection(t *testing.T) {
 		ServerKey:        "server_key",
 		ServerPolicy:     1,
 		ServerName:       "server_name",
-		ClientCerificate: "client_certificate",
-		ClientKey:        "client_key",
-		CaCertificate:    "ca_certificate",
+		ClientCerificate: "clientCertificate",
+		ClientKey:        "clientKey",
+		CaCertificate:    "caCertificate",
 	}
 
 	rcv := tlsCfg.CloneSection()

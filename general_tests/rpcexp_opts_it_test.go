@@ -91,7 +91,7 @@ func TestRPCExpIT(t *testing.T) {
 		}
 	]
 },
-"rpc_conns": {
+"rpcConns": {
 	"thEngine": {
 		"strategy": "*first",
 		"conns": [

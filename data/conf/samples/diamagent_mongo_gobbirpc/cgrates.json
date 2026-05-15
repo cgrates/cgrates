@@ -30,7 +30,7 @@
 },
 
 
-"rpc_conns": {
+"rpcConns": {
 	"*gobbirpc": {
 		"conns": [{"address": "127.0.0.1:2015", "transport":"*birpc_gob"}],
 	},

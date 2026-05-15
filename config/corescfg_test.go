@@ -42,8 +42,8 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 		"cores": {
 			"caps": 10,							// maximum concurrent request allowed ( 0 to disabled )
-			"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
-			"caps_stats_interval": "0"			// the interval we sample for caps stats ( 0 to disabled )
+			"capsStrategy": "*busy",			// strategy in case in case of concurrent requests reached	
+			"capsStatsInterval": "0"			// the interval we sample for caps stats ( 0 to disabled )
 		},
 }`
 	expected = CoreSCfg{
@@ -79,9 +79,9 @@ func TestCoreSAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"cores": {
 			"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
-			"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
-			"caps_stats_interval": "0",			// the interval we sample for caps stats ( 0 to disabled )
-			"shutdown_timeout": "0"				// the interval we sample for caps stats ( 0 to disabled )
+			"capsStrategy": "*busy",			// strategy in case in case of concurrent requests reached	
+			"capsStatsInterval": "0",			// the interval we sample for caps stats ( 0 to disabled )
+			"shutdownTimeout": "0"				// the interval we sample for caps stats ( 0 to disabled )
 		},
 }`
 	eMap := map[string]any{

@@ -76,7 +76,7 @@ package registrarc
 //         "rpc_gob": ":%[2]d13",
 //         "http": ":%[2]d80"
 // },
-// "rpc_conns": {
+// "rpcConns": {
 //         "dispConn": {
 //                 "strategy": "*first",
 //                 "conns": [{

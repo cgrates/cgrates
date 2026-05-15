@@ -11,7 +11,7 @@
     "level": 7
   },
 
-"rpc_conns": {
+"rpcConns": {
 	"broadcast_conn": {
 		"strategy": "*broadcast",
 		"conns": [

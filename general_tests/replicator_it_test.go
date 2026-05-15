@@ -66,7 +66,7 @@ func TestReplicatorFailedPosts(t *testing.T) {
 		"*attribute_profiles": {"replicate": true}
 	}
 },
-"rpc_conns": {
+"rpcConns": {
 	"rpl": {
 		"conns": [
 			{

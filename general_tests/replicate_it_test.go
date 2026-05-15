@@ -49,7 +49,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	"http": ":2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [

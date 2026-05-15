@@ -40,7 +40,7 @@
     },
 
     
-    "rpc_conns": {
+    "rpcConns": {
         "cache_conn": {
             "strategy": "*broadcast_sync",
             "conns": [{"address": "127.0.0.1:22012", "transport": "*json"}, {"address": "127.0.0.1:2012", "transport": "*json"}],
