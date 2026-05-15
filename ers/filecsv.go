@@ -152,7 +152,10 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 	if rdr.Config().Opts.CSV.LazyQuotes != nil {
 		csvReader.LazyQuotes = *rdr.Config().Opts.CSV.LazyQuotes
 	}
-
+	var ignoreErroredItems bool
+	if rdr.Config().Opts.IgnoreErroredItems != nil {
+		ignoreErroredItems = *rdr.Config().Opts.IgnoreErroredItems
+	}
 	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
@@ -203,6 +206,9 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
+			if ignoreErroredItems {
+				continue
+			}
 			return
 		}
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, agReq.Opts)

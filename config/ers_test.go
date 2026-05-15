@@ -1594,6 +1594,7 @@ func TestEventReaderOptsCfg(t *testing.T) {
 	}
 	eventReaderOptsJson := &EventReaderOptsJson{
 		PartialPath:              utils.StringPointer("path"),
+		IgnoreErroredItems:       utils.BoolPointer(true),
 		PartialCSVFieldSeparator: utils.StringPointer("/"),
 		CSVLazyQuotes:            utils.BoolPointer(false),
 		AMQPQueueID:              utils.StringPointer("id"),

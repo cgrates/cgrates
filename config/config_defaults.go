@@ -445,6 +445,8 @@ const CGRATES_CFG_JSON = `
 				"partialCacheAction": "*none",			// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
 				"partialOrderField": "~*req.AnswerTime",	// the field after what the events are order when merged
 				// "partialcsvFieldSeparator": ","		// separator used when dumping the fields
+
+				// "ignoreErroredItems": false,			// skip items that fail processing instead of aborting the reader
 				
 				// FileCSV 
 				"csvRowLength": 0,				// Number of fields from csv file, -1 to disable checking, 0 to inherit the lenght of first record

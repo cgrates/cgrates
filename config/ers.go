@@ -389,6 +389,7 @@ type EventReaderOpts struct {
 	PartialPath        *string
 	PartialCacheAction *string
 	PartialOrderField  *string
+	IgnoreErroredItems *bool
 	XMLRootPath        *string
 	CSV                *CSVROpts
 	AMQP               *AMQPROpts
@@ -459,6 +460,9 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	}
 	if jsnCfg.PartialOrderField != nil {
 		erOpts.PartialOrderField = jsnCfg.PartialOrderField
+	}
+	if jsnCfg.IgnoreErroredItems != nil {
+		erOpts.IgnoreErroredItems = jsnCfg.IgnoreErroredItems
 	}
 	if jsnCfg.XMLRootPath != nil {
 		erOpts.XMLRootPath = jsnCfg.XMLRootPath
@@ -772,6 +776,10 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		cln.PartialOrderField = new(string)
 		*cln.PartialOrderField = *erOpts.PartialOrderField
 	}
+	if erOpts.IgnoreErroredItems != nil {
+		cln.IgnoreErroredItems = new(bool)
+		*cln.IgnoreErroredItems = *erOpts.IgnoreErroredItems
+	}
 	if erOpts.CSV != nil {
 		cln.CSV = erOpts.CSV.Clone()
 	}
@@ -855,6 +863,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 	if er.Opts.PartialOrderField != nil {
 		opts[utils.PartialOrderFieldOpt] = *er.Opts.PartialOrderField
+	}
+	if er.Opts.IgnoreErroredItems != nil {
+		opts[utils.IgnoreErroredItemsOpt] = *er.Opts.IgnoreErroredItems
 	}
 
 	if csvOpts := er.Opts.CSV; csvOpts != nil {

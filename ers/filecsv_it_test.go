@@ -526,6 +526,67 @@ func TestFileCSVProcessEvent(t *testing.T) {
 	}
 }
 
+func TestFileCSVIgnoreErroredItems(t *testing.T) {
+	flds := []*config.FCTemplate{
+		{Tag: utils.AccountField, Type: utils.MetaVariable, Path: "*cgreq.Account",
+			Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
+		{Tag: utils.ToR, Type: utils.MetaVariable, Path: "*cgreq.ToR",
+			Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
+		{Tag: "OriginID", Type: utils.MetaVariable, Path: "*cgreq.OriginID",
+			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true},
+		{Tag: utils.RequestType, Type: utils.MetaVariable, Path: "*cgreq.RequestType",
+			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
+	}
+	for i := range flds {
+		flds[i].ComputePath()
+	}
+	runProcessFile := func(t *testing.T, tempDir string, ignoreItems bool, wanterr bool) {
+		inDir := path.Join(tempDir, "in")
+		outDir := path.Join(tempDir, "out")
+		if err := os.MkdirAll(inDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(outDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		const fname = "file1.csv"
+		if err := os.WriteFile(path.Join(inDir, fname), []byte(`cgrates.org,*voice,,*prepaid`), 0644); err != nil {
+			t.Fatal(err)
+		}
+		cfg := config.NewDefaultCGRConfig()
+		rdrCfg := cfg.ERsCfg().Readers[0]
+		rdrCfg.ProcessedPath = outDir
+		rdrCfg.Opts.IgnoreErroredItems = &ignoreItems
+		rdrCfg.Fields = flds
+		eR := &CSVFileER{
+			cgrCfg:    cfg,
+			cfgIdx:    0,
+			fltrS:     &engine.FilterS{},
+			sourceDir: inDir,
+
+			rdrEvents: make(chan *erEvent, 10),
+			rdrError:  make(chan error, 1),
+			rdrExit:   make(chan struct{}),
+			conReqs:   make(chan struct{}, 1),
+		}
+		err := eR.processFile(fname)
+		if wanterr {
+			if err == nil {
+				t.Fatalf("processFile: expected an error, got nil")
+			}
+			return
+		}
+		if err != nil {
+			t.Error(err)
+		}
+	}
+	baseDir1 := t.TempDir()
+	runProcessFile(t, baseDir1, false, true)
+	baseDir2 := t.TempDir()
+	runProcessFile(t, baseDir2, true, false)
+
+}
+
 func TestFileCSVProcessEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrs := &engine.FilterS{}
