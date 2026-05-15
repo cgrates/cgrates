@@ -269,6 +269,9 @@ func TestProcessEvent(t *testing.T) {
 		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "OriginID",
+		},
 	}
 	if err := ssv1.ProcessEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
