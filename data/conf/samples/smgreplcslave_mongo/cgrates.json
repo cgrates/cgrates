@@ -15,7 +15,7 @@
 	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],

@@ -57,7 +57,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1"
 },
-"rpc_conns": {
+"rpcConns": {
 	"external": {
 		"conns": [{
 			"address": "127.0.0.1:22012",

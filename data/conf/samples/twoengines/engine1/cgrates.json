@@ -14,7 +14,7 @@
 	"http": ":2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"cacheConn": {
 		"strategy": "*broadcast",
 		"conns": [

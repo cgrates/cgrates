@@ -106,11 +106,11 @@ func (cS CoreSCfg) Clone() (cln *CoreSCfg) {
 }
 
 type CoreSJsonCfg struct {
-	Caps                *int
-	Caps_strategy       *string
-	Caps_stats_interval *string
+	Caps                *int                       `json:"caps"`
+	Caps_strategy       *string                    `json:"capsStrategy"`
+	Caps_stats_interval *string                    `json:"capsStatsInterval"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
-	Shutdown_timeout    *string
+	Shutdown_timeout    *string                    `json:"shutdownTimeout"`
 }
 
 func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
