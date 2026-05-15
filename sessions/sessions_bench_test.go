@@ -111,7 +111,9 @@ func BenchmarkProcessEventChargersOnly(b *testing.B) {
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
 			},
-			APIOpts: map[string]any{},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: utils.GenUUID(),
+			},
 		}
 		var rply V1ProcessEventReply
 		if err := sS.BiRPCv1ProcessEvent(ctx, ev, &rply); err != nil {
@@ -135,7 +137,9 @@ func BenchmarkProcessEventNoSubsystems(b *testing.B) {
 			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]any{},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: utils.GenUUID(),
+			},
 		}
 		var rply V1ProcessEventReply
 		if err := sS.BiRPCv1ProcessEvent(ctx, ev, &rply); err != nil {
@@ -159,7 +163,9 @@ func BenchmarkProcessEventChargersParallel(b *testing.B) {
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 				},
-				APIOpts: map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: utils.GenUUID(),
+				},
 			}
 			var rply V1ProcessEventReply
 			if err := sS.BiRPCv1ProcessEvent(ctx, ev, &rply); err != nil {
