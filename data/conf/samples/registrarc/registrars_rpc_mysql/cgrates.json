@@ -31,7 +31,7 @@
 	}
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"id": "attributes"}]

@@ -79,8 +79,8 @@ const CGRATES_CFG_JSON = `
 
 "cores": {
 	"caps": 0,			// maximum concurrent request allowed ( 0 to disabled )
-	"caps_strategy": "*busy",	// strategy in case of concurrent requests reached	
-	"caps_stats_interval": "0",	// the interval duration we sample for caps stats ( 0 to disabled )
+	"capsStrategy": "*busy",	// strategy in case of concurrent requests reached	
+	"capsStatsInterval": "0",	// the interval duration we sample for caps stats ( 0 to disabled )
 	"conns": {
 		// "*ees": [	// connections to EventExporter
 		// 	{
@@ -89,13 +89,13 @@ const CGRATES_CFG_JSON = `
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 	},			
-	"shutdown_timeout": "1s"	// the duration to wait until all services are stopped
+	"shutdownTimeout": "1s"	// the duration to wait until all services are stopped
 },
 
-"rpc_conns": {			// rpc connections definitions
+"rpcConns": {			// rpc connections definitions
 	// "*localhost": {
 	// 	"strategy": "*first",
-	// 	"poolsize": 0,
+	// 	"poolSize": 0,
 	// 	"replyTimeout": "2s",
 	// 	"conns": [{
 	// 		"address": "127.0.0.1:2012",
@@ -106,9 +106,9 @@ const CGRATES_CFG_JSON = `
 	// 		"connectTimeout": "1s",
 	// 		"replyTimeout": "2s",
 	// 		"tls": false,
-	// 		"client_key": "",
-	// 		"client_certificate": "",
-	// 		"ca_certificate": ""
+	// 		"clientKey": "",
+	// 		"clientCertificate": "",
+	// 		"caCertificate": ""
 	// 	}]
 	// }
 },
@@ -221,9 +221,9 @@ const CGRATES_CFG_JSON = `
 "tls": {
 	"server_certificate" : "",	// path to server certificate
 	"server_key":"",		// path to server key
-	"client_certificate" : "",	// path to client certificate
-	"client_key":"",		// path to client key
-	"ca_certificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+	"clientCertificate" : "",	// path to client certificate
+	"clientKey":"",		// path to client key
+	"caCertificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	"server_policy":4,		// server_policy determines the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
 	"server_name":""
 },

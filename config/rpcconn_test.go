@@ -232,7 +232,7 @@ func TestRemoteHostAsMapInterface(t *testing.T) {
 }
 func TestRPCConnsAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-		"rpc_conns": {
+		"rpcConns": {
 			"*localhost": {
 				"conns": [
 					{
@@ -312,7 +312,7 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 
 func TestRpcConnAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-     "rpc_conns": {
+     "rpcConns": {
 	     "*localhost": {
 		     "conns": [
                   {"address": "127.0.0.1:2018", "tls": false, "transport": "*json"},

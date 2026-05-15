@@ -14,7 +14,7 @@
 	"http": ":2080",
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],

@@ -11,7 +11,7 @@
 
 "cores": {
 	"caps": 2,							
-	"caps_strategy": "*queue",			
+	"capsStrategy": "*queue",			
 },
 
 

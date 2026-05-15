@@ -2229,9 +2229,9 @@ const (
 	ServerKeyCfg        = "server_key"
 	ServerPolicyCfg     = "server_policy"
 	ServerNameCfg       = "server_name"
-	ClientCerificateCfg = "client_certificate"
-	ClientKeyCfg        = "client_key"
-	CaCertificateCfg    = "ca_certificate"
+	ClientCerificateCfg = "clientCertificate"
+	ClientKeyCfg        = "clientKey"
+	CaCertificateCfg    = "caCertificate"
 )
 
 // ListenCfg
@@ -2521,9 +2521,9 @@ const (
 
 	// CoreSCfg
 	CapsCfg              = "caps"
-	CapsStrategyCfg      = "caps_strategy"
-	CapsStatsIntervalCfg = "caps_stats_interval"
-	ShutdownTimeoutCfg   = "shutdown_timeout"
+	CapsStrategyCfg      = "capsStrategy"
+	CapsStatsIntervalCfg = "capsStatsInterval"
+	ShutdownTimeoutCfg   = "shutdownTimeout"
 
 	// AccountSCfg
 	MaxIterations = "max_iterations"

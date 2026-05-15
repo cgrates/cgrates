@@ -942,16 +942,16 @@ func TestV1SetConfigErr1(t *testing.T) {
 	args := &SetConfigArgs{
 		Config: map[string]any{
 			"cores": map[string]any{
-				"caps":                "0",
-				"caps_strategy":       "*busy",
-				"caps_stats_interval": "0",
-				"shutdown_timeout":    "1s",
+				"caps":              "0",
+				"capsStrategy":      "*busy",
+				"capsStatsInterval": "0",
+				"shutdownTimeout":   "1s",
 			},
 		},
 	}
 
 	var reply string
-	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.Caps of type int"
+	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.caps of type int"
 	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %v \n but received \n %v", expected, err)
 	}

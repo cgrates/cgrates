@@ -333,10 +333,10 @@ func testConsoleItGetJsonSection(t *testing.T) {
 	cmd.Stdout = output
 	expected := map[string]any{
 		"cores": map[string]any{
-			"caps":                0.,
-			"caps_stats_interval": "0",
-			"caps_strategy":       "*busy",
-			"shutdown_timeout":    "1s",
+			"caps":              0.,
+			"capsStatsInterval": "0",
+			"capsStrategy":      "*busy",
+			"shutdownTimeout":   "1s",
 		},
 	}
 	if err := cmd.Run(); err != nil {

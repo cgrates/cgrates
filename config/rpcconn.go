@@ -360,9 +360,9 @@ type RemoteHostJson struct {
 	Connect_timeout        *string `json:"connectTimeout"`
 	Reply_timeout          *string `json:"replyTimeout"`
 	Tls                    *bool   `json:"tls"`
-	Client_certificate     *string `json:"client_certificate"`
-	Client_key             *string `json:"client_key"`
-	Ca_certificate         *string `json:"ca_certificate"`
+	Client_certificate     *string `json:"clientCertificate"`
+	Client_key             *string `json:"clientKey"`
+	Ca_certificate         *string `json:"caCertificate"`
 }
 
 func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {

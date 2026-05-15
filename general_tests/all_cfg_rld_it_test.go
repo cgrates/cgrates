@@ -100,7 +100,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 
-	cfgStr := `{"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*busy","conns":{},"shutdown_timeout":"1s"}}`
+	cfgStr := `{"cores":{"caps":0,"capsStatsInterval":"0","capsStrategy":"*busy","conns":{},"shutdownTimeout":"1s"}}`
 	var rpl2 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -111,7 +111,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl2)
 	}
 
-	cfgStr = `{"rpc_conns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}}}`
+	cfgStr = `{"rpcConns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}}}`
 	var rpl string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -133,7 +133,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl3)
 	}
 
-	cfgStr = `{"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`
+	cfgStr = `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`
 	var rpl4 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
