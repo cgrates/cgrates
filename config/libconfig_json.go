@@ -243,6 +243,7 @@ type EventReaderOptsJson struct {
 	PartialCacheAction       *string   `json:"partialCacheAction"`
 	PartialOrderField        *string   `json:"partialOrderField"`
 	PartialCSVFieldSeparator *string   `json:"partialcsvFieldSeparator"`
+	IgnoreErroredItems       *bool     `json:"ignoreErroredItems"`
 	CSVRowLength             *int      `json:"csvRowLength"`
 	CSVFieldSeparator        *string   `json:"csvFieldSeparator"`
 	CSVHeaderDefineChar      *string   `json:"csvHeaderDefineChar"`
