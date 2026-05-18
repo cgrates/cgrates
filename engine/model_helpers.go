@@ -2817,7 +2817,7 @@ func APItoAccount(tpAcc *utils.TPAccount, timezone string) (acc *utils.Account, 
 			acc.Balances[id].Units = units
 		}
 		if bal.Weights != utils.EmptyString {
-			weights, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
+			weights, err := utils.NewBalanceDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
