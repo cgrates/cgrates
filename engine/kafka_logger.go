@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 // Logs to kafka
@@ -39,14 +39,26 @@ type ExportLogger struct {
 
 	LogLevel   int
 	FldPostDir string
-	Writer     *kafka.Writer
+	client     *kgo.Client
+	KafkaConn  string
+	kafkaTopic string
+	attempts   int
 	NodeID     string
 	Tenant     string
 }
 
 // NewExportLogger will export loggers to kafka
 func NewExportLogger(ctx *context.Context, tenant string, connMgr *ConnManager,
-	cfg *config.CGRConfig) *ExportLogger {
+	cfg *config.CGRConfig) (*ExportLogger, error) {
+	client, err := kgo.NewClient(
+		kgo.SeedBrokers(cfg.LoggerCfg().Opts.KafkaConn),
+		kgo.DefaultProduceTopic(cfg.LoggerCfg().Opts.KafkaTopic),
+		kgo.DisableIdempotentWrite(),
+		kgo.RecordRetries(0),
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &ExportLogger{
 		ctx:        ctx,
 		efsConns:   cfg.LoggerCfg().EFsConns,
@@ -55,20 +67,25 @@ func NewExportLogger(ctx *context.Context, tenant string, connMgr *ConnManager,
 		FldPostDir: cfg.LoggerCfg().Opts.FailedPostsDir,
 		NodeID:     cfg.GeneralCfg().NodeID,
 		Tenant:     tenant,
-		Writer: &kafka.Writer{
-			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
-			Topic:       cfg.LoggerCfg().Opts.KafkaTopic,
-			MaxAttempts: cfg.LoggerCfg().Opts.KafkaAttempts,
-		},
-	}
+		client:     client,
+		KafkaConn:  cfg.LoggerCfg().Opts.KafkaConn,
+		kafkaTopic: cfg.LoggerCfg().Opts.KafkaTopic,
+		attempts:   cfg.LoggerCfg().Opts.KafkaAttempts,
+	}, nil
 }
 
-func (el *ExportLogger) Close() (err error) {
-	if el.Writer != nil {
-		err = el.Writer.Close()
-		el.Writer = nil
+func (el *ExportLogger) Close() error {
+	if el.client != nil {
+		el.client.Close()
+		el.client = nil
 	}
-	return
+	return nil
+}
+
+// WriteMessage produces content to the configured kafka topic.
+func (el *ExportLogger) WriteMessage(content []byte) error {
+	rec := &kgo.Record{Key: []byte(utils.GenUUID()), Value: content}
+	return el.client.ProduceSync(context.Background(), rec).FirstErr()
 }
 
 func (el *ExportLogger) call(m string, level int) (err error) {
@@ -86,15 +103,12 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 	if content, err = utils.ToUnescapedJSON(eventExport); err != nil {
 		return
 	}
-	if err = el.Writer.WriteMessages(el.ctx, kafka.Message{
-		Key:   []byte(utils.GenUUID()),
-		Value: content,
-	}); err != nil {
+	if err = el.WriteMessage(content); err != nil {
 		// if there are any errors in kafka, we will post in FailedPostDirectory
 		go func() {
 			args := &utils.ArgsFailedPosts{
 				Tenant:    el.Tenant,
-				Path:      el.Writer.Addr.String(),
+				Path:      el.KafkaConn,
 				Event:     eventExport,
 				FailedDir: el.FldPostDir,
 				Module:    utils.Kafka,
@@ -250,9 +264,9 @@ func (el *ExportLogger) GetMeta() map[string]any {
 		utils.Tenant:         el.Tenant,
 		utils.NodeID:         el.NodeID,
 		utils.Level:          el.LogLevel,
-		utils.Format:         el.Writer.Topic,
-		utils.Conn:           el.Writer.Addr.String(),
+		utils.Format:         el.kafkaTopic,
+		utils.Conn:           el.KafkaConn,
 		utils.FailedPostsDir: el.FldPostDir,
-		utils.Attempts:       el.Writer.MaxAttempts,
+		utils.Attempts:       el.attempts,
 	}
 }

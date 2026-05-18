@@ -41,7 +41,6 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/procfs v0.15.1
 	github.com/rabbitmq/amqp091-go v1.10.0
-	github.com/segmentio/kafka-go v0.4.50
 	github.com/twmb/franz-go v1.20.7
 	github.com/twmb/franz-go/pkg/kadm v1.17.2
 	github.com/ugorji/go/codec v1.2.12
