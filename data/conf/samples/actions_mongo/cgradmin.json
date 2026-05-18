@@ -21,16 +21,16 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_name": "10",
-			"db_port": 27017,
+			"dbType": "mongo",
+			"dbName": "10",
+			"dbPort": 27017,
 		},
 		"StorDB": {						 // The id of the DB connection
-			"db_type": "*mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
-			"db_name": "cgrates", 		 // db database name to connect to
-			"db_port": 27017, 			 // db port to reach the database
+			"dbType": "*mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"dbName": "cgrates", 		 // db database name to connect to
+			"dbPort": 27017, 			 // db port to reach the database
 		},
 	},
 	"items": {

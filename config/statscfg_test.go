@@ -160,8 +160,8 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"indexed_selects":false,
-            "string_indexed_fields": ["*req.string"],
-			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
+            "stringIndexedFields": ["*req.string"],
+			"prefixIndexedFields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields":["*req.suffix_indexed_fields"],
 			"exists_indexed_fields":["*req.exists_indexed_fields"],
 			"notexists_indexed_fields":["*req.notexists_indexed_fields"],

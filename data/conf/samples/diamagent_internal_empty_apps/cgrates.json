@@ -19,9 +19,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBRewriteInterval": "0",
 				"internalDBDumpInterval": "0"

@@ -134,7 +134,7 @@ func TestNewSQLReaderError(t *testing.T) {
 	}
 	reader.SourcePath = "#"
 	reader.ProcessedPath = ""
-	expected := "unknown db_type "
+	expected := "unknown dbType "
 	_, err := NewSQLEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, err)

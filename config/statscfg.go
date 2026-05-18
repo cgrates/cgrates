@@ -242,8 +242,8 @@ type StatServJsonCfg struct {
 	Store_interval           *string
 	Store_uncompressed_limit *int
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	String_indexed_fields    *[]string
-	Prefix_indexed_fields    *[]string
+	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
+	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
 	Suffix_indexed_fields    *[]string
 	Exists_indexed_fields    *[]string
 	Notexists_indexed_fields *[]string

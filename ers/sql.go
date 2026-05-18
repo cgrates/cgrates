@@ -382,7 +382,7 @@ func (rdr *SQLEventReader) setURL(inURL string, opts *config.EventReaderOpts) er
 	case utils.Postgres:
 		rdr.connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
 	default:
-		return fmt.Errorf("unknown db_type %s", rdr.connType)
+		return fmt.Errorf("unknown dbType %s", rdr.connType)
 	}
 	return nil
 }

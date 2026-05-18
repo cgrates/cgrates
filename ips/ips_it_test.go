@@ -176,8 +176,8 @@ func TestIPsIT(t *testing.T) {
     "enabled": true,
     "store_interval": "-1",
     "indexed_selects": true,
-    "string_indexed_fields": ["*req.Account"],
-    "prefix_indexed_fields": [],
+    "stringIndexedFields": ["*req.Account"],
+    "prefixIndexedFields": [],
     "suffix_indexed_fields": [],
     "exists_indexed_fields": [],
     "notexists_indexed_fields": [],
@@ -192,9 +192,9 @@ func TestIPsIT(t *testing.T) {
     }
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"

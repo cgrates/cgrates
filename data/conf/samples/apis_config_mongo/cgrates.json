@@ -19,20 +19,20 @@
 
 
   "db": {
-    "db_conns": {
+    "dbConns": {
 		"*default": {
-      "db_type": "mongo",
-      "db_host": "127.0.0.1",	
-      "db_port": 27017,
-      "db_name": "10",
-			"db_user": "cgrates"
+      "dbType": "mongo",
+      "dbHost": "127.0.0.1",	
+      "dbPort": 27017,
+      "dbName": "10",
+			"dbUser": "cgrates"
 	    },
       "StorDB": {						 // The id of the DB connection
-        "db_type": "mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
-        "db_host": "127.0.0.1",	
-        "db_port": 27017,			 // db port to reach the database
-        "db_name": "cgrates",		 // the host to connect to
-        "db_user": "cgrates"
+        "dbType": "mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
+        "dbHost": "127.0.0.1",	
+        "dbPort": 27017,			 // db port to reach the database
+        "dbName": "cgrates",		 // the host to connect to
+        "dbUser": "cgrates"
       }
     },
     "items": {
@@ -92,7 +92,7 @@
 
   "routes": {
     "enabled": true,
-    "prefix_indexed_fields":["*req.Destination"],
+    "prefixIndexedFields":["*req.Destination"],
     "conns": {
     	"*stats": [{"ConnIDs": ["*internal"]}],
     	"*resources": [{"ConnIDs": ["*internal"]}],
@@ -184,9 +184,9 @@
   },
 
   "config_db": {
-    "db_type": "mongo",
-    "db_name": "16",
-    "db_port": 27017,
+    "dbType": "mongo",
+    "dbName": "16",
+    "dbPort": 27017,
   },
 
   "loaders": [

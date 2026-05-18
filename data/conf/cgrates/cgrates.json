@@ -85,21 +85,21 @@
 // },
 
 // "db": {				// database used to store data (eg: accounts)
-// 	"db_conns": {
+// 	"dbConns": {
 // 		"*default": {		// The id of the DB connection
-// 			"db_type": "*internal",		// db type: <*internal|*redis|*mysql|*mongo|*postgres>
-// 			"db_host": "",		// db host address
-// 			"db_port": 0, 		// db port to reach the database
-// 			"db_name": "", 		// db database name to connect to
-// 			"db_user": "", 		// username to use when connecting to db
-// 			"db_password": "", 		// password to use when connecting to db
-// 			"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-// 			"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
-// 			"remote_conns": [],		// the conns that are queried when the items are not found in local DB
-// 			"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
-// 			"replication_conns": [],		// the conns the items are replicated
-// 			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
-// 			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+// 			"dbType": "*internal",		// db type: <*internal|*redis|*mysql|*mongo|*postgres>
+// 			"dbHost": "",		// db host address
+// 			"dbPort": 0, 		// db port to reach the database
+// 			"dbName": "", 		// db database name to connect to
+// 			"dbUser": "", 		// username to use when connecting to db
+// 			"dbPassword": "", 		// password to use when connecting to db
+// 			"stringIndexedFields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+// 			"prefixIndexedFields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+// 			"remoteConns": [],		// the conns that are queried when the items are not found in local DB
+// 			"remoteConnID": "",		// the ID to be sent to remote_conns to identify the connection
+// 			"replicationConns": [],		// the conns the items are replicated
+// 			"replicationFiltered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+// 			"replicationCache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
 // 		},
 // 	},
 // 	"items":{
@@ -261,8 +261,8 @@
 // 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// caps cached samples
 // 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
 // 	},
-// 	"replication_conns": [],
-// 	"remote_conns": []	// the conns that are queried when the items are not found in cache
+// 	"replicationConns": [],
+// 	"remoteConns": []	// the conns that are queried when the items are not found in cache
 // },
 
 
@@ -609,7 +609,7 @@
 // 	"stats_conns": [],			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 // 	"routes_conns": [],			// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 // 	"attributes_conns": [],			// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
-// 	"replication_conns": [],		// replicate sessions towards these session services
+// 	"replicationConns": [],		// replicate sessions towards these session services
 // 	"debit_interval": "0s",			// interval to perform debits on.
 // 	"store_session_costs": false,		// enable storing of the session costs within CDRs
 // 	"default_usage":{			// the usage if the event is missing the usage field
@@ -974,8 +974,8 @@
 // 	"resources_conns": [],				// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"accounts_conns": [],				// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,			// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],			// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -1017,8 +1017,8 @@
 // 	"enabled": false,		// starts charger service: <true|false>
 // 	"attributes_conns": [],		// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1031,8 +1031,8 @@
 // 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"thresholds_conns": [],		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1071,8 +1071,8 @@
 // 	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 // 	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1107,8 +1107,8 @@
 // 	"enabled": false,			// starts ThresholdS service: <true|false>
 // 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"indexed_selects": true,		// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -1159,8 +1159,8 @@
 // "routes": {
 // 	"enabled": false,		// starts RouteS service: <true|false>.
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1604,8 +1604,8 @@
 // "rates": {
 // 	"enabled": false,
 // 	"indexed_selects": true,		// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -1803,8 +1803,8 @@
 // 	"accounts_conns": [],		// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
 // 	"tenants":[],			// List of tenants to operate on
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1842,8 +1842,8 @@
 // 	"attributes_conns": [],		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 // 	"rates_conns": [],		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
 // 	"thresholds_conns": [],		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-// 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+// 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1877,12 +1877,12 @@
 
 
 // "config_db": {					// database used to store runtime data (eg: accounts)
-// 	"db_type": "*internal",			// db type: <*internal|*redis|*mongo>
-// 	"db_host": "",				// db host address
-// 	"db_port": 0,	 			// db port to reach the database
-// 	"db_name": "",	 			// db database name to connect to
-// 	"db_user": "",		 		// username to use when connecting to db
-// 	"db_password": "", 			// password to use when connecting to db
+// 	"dbType": "*internal",			// db type: <*internal|*redis|*mongo>
+// 	"dbHost": "",				// db host address
+// 	"dbPort": 0,	 			// db port to reach the database
+// 	"dbName": "",	 			// db database name to connect to
+// 	"dbUser": "",		 		// username to use when connecting to db
+// 	"dbPassword": "", 			// password to use when connecting to db
 // 	"opts":{
 // 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/configdb",		// the path where configdb will be dumped
 // 		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/configdb", // default path taken by ConfigSv1.BackupConfigDB when "BackupFolderPath" is not provided

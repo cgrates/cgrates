@@ -109,28 +109,28 @@
 
 "attributes": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],			
+	"stringIndexedFields": ["*req.Account"],			
 },
 
 
 "resources": {
 	"enabled": true,
 	"thresholds_conns": ["*internal"],
-	"string_indexed_fields": ["*req.Account"],
-	"prefix_indexed_fields": ["*req.Destination"],
+	"stringIndexedFields": ["*req.Account"],
+	"prefixIndexedFields": ["*req.Destination"],
 },
 
 
 "stats": {
 	"enabled": true,
 	"thresholds_conns": ["*internal"],
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
@@ -138,8 +138,8 @@
 	"enabled": true,
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
-	"string_indexed_fields": ["*req.Account"],
-	"prefix_indexed_fields": ["*req.Destination"],
+	"stringIndexedFields": ["*req.Account"],
+	"prefixIndexedFields": ["*req.Destination"],
 },
 
 

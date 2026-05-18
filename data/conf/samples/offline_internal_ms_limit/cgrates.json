@@ -7,9 +7,9 @@
 		"level": 7
 	},
     "db": {
-		"db_conns": {
+		"dbConns": {
 			"*default": {
-				"db_type": "*internal",
+				"dbType": "*internal",
 				  "opts":{
             	"internalDBStartTimeout": "1m",
             	"internalDBDumpInterval": "500ms",
@@ -23,7 +23,7 @@
         }
     },
 	"config_db": {
-        "db_type": "*internal",
+        "dbType": "*internal",
 		"opts": {
 			"internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
@@ -72,7 +72,7 @@
 	},
 	"routes": {
 		"enabled": true,
-		"prefix_indexed_fields": ["*req.Destination"],
+		"prefixIndexedFields": ["*req.Destination"],
 		"conns": {
 			"*stats": [{"ConnIDs": ["*localhost"]}],
 			"*resources": [{"ConnIDs": ["*localhost"]}],

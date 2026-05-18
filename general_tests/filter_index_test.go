@@ -44,10 +44,10 @@ func TestFilterIndexUpdates(t *testing.T) {
 	case utils.MetaInternal:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
-			"db_port": 0,
+			"dbType": "*internal",
+			"dbPort": 0,
 			"opts": {
 				"internalDBDumpInterval": "0s",
 				"internalDBRewriteInterval": "0s"
@@ -59,12 +59,12 @@ func TestFilterIndexUpdates(t *testing.T) {
 	case utils.MetaRedis:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*redis",
-			"db_host": "127.0.0.1",
-			"db_port": 6379,
-			"db_name": "10"
+			"dbType": "*redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10"
 		}
 	}
 }
@@ -72,13 +72,13 @@ func TestFilterIndexUpdates(t *testing.T) {
 	case utils.MetaMongo:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*mongo",
-			"db_host": "127.0.0.1",
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "*mongo",
+			"dbHost": "127.0.0.1",
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		}
 	}
 }
@@ -86,14 +86,14 @@ func TestFilterIndexUpdates(t *testing.T) {
 	case utils.MetaMySQL:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*mysql",
-			"db_host": "127.0.0.1",
-			"db_port": 3306,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "*mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	}
 }
@@ -101,14 +101,14 @@ func TestFilterIndexUpdates(t *testing.T) {
 	case utils.MetaPostgres:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*postgres",
-			"db_host": "127.0.0.1",
-			"db_port": 5432,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "*postgres",
+			"dbHost": "127.0.0.1",
+			"dbPort": 5432,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	}
 }
@@ -389,10 +389,10 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	case utils.MetaInternal:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
-			"db_port": 0,
+			"dbType": "*internal",
+			"dbPort": 0,
 			"opts": {
 				"internalDBDumpInterval": "0s",
 				"internalDBRewriteInterval": "0s"
@@ -404,12 +404,12 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	case utils.MetaRedis:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*redis",
-			"db_host": "127.0.0.1",
-			"db_port": 6379,
-			"db_name": "10"
+			"dbType": "*redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10"
 		}
 	}
 }
@@ -417,13 +417,13 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	case utils.MetaMongo:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*mongo",
-			"db_host": "127.0.0.1",
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "*mongo",
+			"dbHost": "127.0.0.1",
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		}
 	}
 }
@@ -431,14 +431,14 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	case utils.MetaMySQL:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*mysql",
-			"db_host": "127.0.0.1",
-			"db_port": 3306,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "*mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	}
 }
@@ -446,14 +446,14 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	case utils.MetaPostgres:
 		cfgJSON = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*postgres",
-			"db_host": "127.0.0.1",
-			"db_port": 5432,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "*postgres",
+			"dbHost": "127.0.0.1",
+			"dbPort": 5432,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	}
 }

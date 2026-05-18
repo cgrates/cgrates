@@ -39,14 +39,14 @@ var (
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
 	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_conns": {
+		"dbConns": {
 			"*default": {	
-				"db_type": "redis",						// data_db type: <*redis|*mongo|*internal>
-				"db_host": "127.0.0.1",					/* data_db host address*/
-				"db_port": 6379, 						// data_db port to reach the database
-				"db_name": "10",/*/*asd*/ 				// data_db database name to connect to
-				"db_user": "*env:TESTVAR", 				// username to use when connecting to data_db
-				"db_password": ",/**/", 				// password to use when connecting to data_db
+				"dbType": "redis",						// data_db type: <*redis|*mongo|*internal>
+				"dbHost": "127.0.0.1",					/* data_db host address*/
+				"dbPort": 6379, 						// data_db port to reach the database
+				"dbName": "10",/*/*asd*/ 				// data_db database name to connect to
+				"dbUser": "*env:TESTVAR", 				// username to use when connecting to data_db
+				"dbPassword": ",/**/", 				// password to use when connecting to data_db
 			},
 		},
 	},/*Multiline coment 
@@ -59,7 +59,7 @@ var (
 
 func TestEnvRawJsonReadByte(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"db":{"db_conns":{"*default":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/"}}}}`)
+	expected := []byte(`{"db":{"dbConns":{"*default":{"dbType":"redis","dbHost":"127.0.0.1","dbPort":6379,"dbName":"10","dbUser":"*env:TESTVAR","dbPassword":",/**/"}}}}`)
 	reply := []byte{}
 	bit, err := raw.ReadByte()
 	for ; err == nil; bit, err = raw.ReadByte() {
@@ -215,7 +215,7 @@ func TestEnvReaderRead(t *testing.T) {
 		t.Error(err)
 	}
 	envR := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"db":{"db_conns":{"*default":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/"}}}}`)
+	expected := []byte(`{"db":{"dbConns":{"*default":{"dbType":"redis","dbHost":"127.0.0.1","dbPort":6379,"dbName":"10","dbUser":"cgRates","dbPassword":",/**/"}}}}`)
 	reply := []byte{}
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
@@ -422,14 +422,14 @@ func TestGetErrorLine(t *testing.T) {
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
 	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_conns": {
+		"dbConns": {
 			"*default": {	
-				"db_type": "redis",	1					// data_db type: <*redis|*mongo|*internal>
-				"db_host": "127.0.0.1",					/* data_db host address*/
-				"db_port": 6379, 						// data_db port to reach the database
-				"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
-				"db_user": "user", 					// username to use when connecting to data_db
-				"db_password": ",/**/", 						// password to use when connecting to data_db
+				"dbType": "redis",	1					// data_db type: <*redis|*mongo|*internal>
+				"dbHost": "127.0.0.1",					/* data_db host address*/
+				"dbPort": 6379, 						// data_db port to reach the database
+				"dbName": "10",/*/*asd*/ 						// data_db database name to connect to
+				"dbUser": "user", 					// username to use when connecting to data_db
+				"dbPassword": ",/**/", 						// password to use when connecting to data_db
 			},
 		},
 	},/*Multiline coment 
@@ -440,7 +440,7 @@ func TestGetErrorLine(t *testing.T) {
 /**/		}//`
 	r := NewRjReaderFromBytes([]byte(jsonstr))
 	var offset int64 = 50
-	var expLine, expChar int64 = 12, 25
+	var expLine, expChar int64 = 13, 6
 	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
@@ -458,14 +458,14 @@ func TestGetErrorLine2(t *testing.T) {
 	// This file contains the default configuration hardcoded into CGRateS.
 	// This is what you get when you load CGRateS with an empty configuration file.
 	"db": {								// database used to store runtime data (eg: accounts, cdr stats)
-		"db_conns": {
+		"dbConns": {
 			"*default": {
-				"db_type": "redis",	/*some comment before*/1					// data_db type: <*redis|*mongo|*internal>
-				"db_host": "127.0.0.1",					/* data_db host address*/
-				"db_port": 6379, 						// data_db port to reach the database
-				"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
-				"db_user": "user", 					// username to use when connecting to data_db
-				"db_password": ",/**/", 						// password to use when connecting to data_db
+				"dbType": "redis",	/*some comment before*/1					// data_db type: <*redis|*mongo|*internal>
+				"dbHost": "127.0.0.1",					/* data_db host address*/
+				"dbPort": 6379, 						// data_db port to reach the database
+				"dbName": "10",/*/*asd*/ 						// data_db database name to connect to
+				"dbUser": "user", 					// username to use when connecting to data_db
+				"dbPassword": ",/**/", 						// password to use when connecting to data_db
 			},
 		},
 	},/*Multiline coment 
@@ -476,7 +476,7 @@ func TestGetErrorLine2(t *testing.T) {
 /**/		}//`
 	r := NewRjReaderFromBytes([]byte(jsonStr))
 	var offset int64 = 50
-	var expLine, expChar int64 = 12, 48
+	var expLine, expChar int64 = 13, 6
 	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {

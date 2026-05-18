@@ -48,9 +48,9 @@ func TestAnzDocIT(t *testing.T) {
 	"enabled": true
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"
@@ -60,7 +60,7 @@ func TestAnzDocIT(t *testing.T) {
 },
 "attributes": {
 	"enabled": true,
-	"prefix_indexed_fields": ["*req.Destination", "*req.Account"],
+	"prefixIndexedFields": ["*req.Destination", "*req.Account"],
 	"opts": {
 		"*processRuns": [{
 			"Tenant": "cgrates.org",

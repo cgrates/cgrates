@@ -27,20 +27,20 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {
@@ -167,7 +167,7 @@
 
 "attributes": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 
 
@@ -176,7 +176,7 @@
 	"conns": {
 		"*attributes": [{"ConnIDs": ["conn1"]}]
 	},
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 
 
@@ -185,7 +185,7 @@
 	"conns": {
 		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 
 
@@ -194,20 +194,20 @@
 	"conns": {
 		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 
 
 "routes": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.LCRProfile"],
-	"prefix_indexed_fields":["*req.Destination"],
+	"stringIndexedFields": ["*req.LCRProfile"],
+	"prefixIndexedFields":["*req.Destination"],
 },
 
 

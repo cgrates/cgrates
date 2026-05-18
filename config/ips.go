@@ -38,8 +38,8 @@ type IPsJsonCfg struct {
 	Enabled                *bool        `json:"enabled"`
 	IndexedSelects         *bool        `json:"indexed_selects"`
 	StoreInterval          *string      `json:"store_interval"`
-	StringIndexedFields    *[]string    `json:"string_indexed_fields"`
-	PrefixIndexedFields    *[]string    `json:"prefix_indexed_fields"`
+	StringIndexedFields    *[]string    `json:"stringIndexedFields"`
+	PrefixIndexedFields    *[]string    `json:"prefixIndexedFields"`
 	SuffixIndexedFields    *[]string    `json:"suffix_indexed_fields"`
 	ExistsIndexedFields    *[]string    `json:"exists_indexed_fields"`
 	NotExistsIndexedFields *[]string    `json:"not_exists_indexed_fields"`
