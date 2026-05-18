@@ -22,14 +22,13 @@ package general_tests
 
 import (
 	"fmt"
-	"net"
-	"strconv"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kadm"
+	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -81,7 +80,6 @@ func TestKafkaSSL(t *testing.T) {
 			"synchronous": true,
 			"opts": {
 				"kafkaTopic": "%s",
-				"kafkaBatchSize": 1,
 				"kafkaTLS": true,
 				"kafkaCAPath": "/tmp/ssl/kafka/ca.crt",
 				"kafkaSkipTLSVerify": false
@@ -94,8 +92,7 @@ func TestKafkaSSL(t *testing.T) {
 			"export_path": "%s",
 			"synchronous": true,
 			"opts": {
-				"kafkaTopic": "%s",
-				"kafkaBatchSize": 1
+				"kafkaTopic": "%s"
 			},
 			"failed_posts_dir": "*none"
 		}
@@ -202,16 +199,15 @@ func TestKafkaSSL(t *testing.T) {
 	// Check whether ERs managed to successfully consume the event from the
 	// 'cgrates-cdrs' topic and exported it to the 'processed' topic.
 	t.Run("verify kafka export", func(t *testing.T) {
-		r := kafka.NewReader(kafka.ReaderConfig{
-			Brokers: []string{brokerPlainURL},
-			Topic:   "processed",
-			MaxWait: time.Millisecond,
-		})
-		t.Cleanup(func() {
-			if err := r.Close(); err != nil {
-				t.Error("failed to close reader:", err)
-			}
-		})
+		cl, err := kgo.NewClient(
+			kgo.SeedBrokers(brokerPlainURL),
+			kgo.ConsumeTopics("processed"),
+			kgo.FetchMaxWait(time.Millisecond),
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { cl.Close() })
 
 		want := `{"Account":"1001","Destination":"1002","Usage":"20000000000"}`
 
@@ -220,61 +216,46 @@ func TestKafkaSSL(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		go func() {
-			m, err := r.FetchMessage(ctx)
-			if err != nil {
-				readErr <- err
+			fetches := cl.PollFetches(ctx)
+			if errs := fetches.Errors(); len(errs) > 0 {
+				readErr <- errs[0].Err
 				return
 			}
-			msg <- string(m.Value)
+			fetches.EachRecord(func(r *kgo.Record) {
+				msg <- string(r.Value)
+			})
 		}()
 
 		select {
 		case err := <-readErr:
-			t.Errorf("kafka.Reader.ReadMessage() failed unexpectedly: %v", err)
+			t.Errorf("PollFetches failed unexpectedly: %v", err)
 		case got := <-msg:
 			if got != want {
-				t.Errorf("kafka.Reader.ReadMessage() = %v, want %v", got, want)
+				t.Errorf("PollFetches = %v, want %v", got, want)
 			}
 		case <-time.After(2 * time.Second):
-			t.Errorf("kafka.Reader.ReadMessage() took too long (>%s)", 2*time.Second)
+			t.Errorf("PollFetches took too long (>%s)", 2*time.Second)
 		}
 	})
 }
 
 func createKafkaTopics(t *testing.T, brokerURL string, cleanup bool, topics ...string) {
 	t.Helper()
-	conn, err := kafka.Dial("tcp", brokerURL)
+	cl, err := kgo.NewClient(kgo.SeedBrokers(brokerURL))
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { conn.Close() })
+	t.Cleanup(func() { cl.Close() })
 
-	controller, err := conn.Controller()
+	adm := kadm.NewClient(cl)
+	_, err = adm.CreateTopics(context.Background(), 1, 1, nil, topics...)
 	if err != nil {
-		t.Fatal(err)
-	}
-	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer controllerConn.Close()
-
-	topicConfigs := make([]kafka.TopicConfig, 0, len(topics))
-	for _, topic := range topics {
-		topicConfigs = append(topicConfigs, kafka.TopicConfig{
-			Topic:             topic,
-			NumPartitions:     1,
-			ReplicationFactor: 1,
-		})
-	}
-
-	if err := controllerConn.CreateTopics(topicConfigs...); err != nil {
 		t.Fatal(err)
 	}
 
 	if cleanup {
 		t.Cleanup(func() {
-			if err := conn.DeleteTopics(topics...); err != nil {
+			if _, err := adm.DeleteTopics(context.Background(), topics...); err != nil {
 				t.Log(err)
 			}
 		})

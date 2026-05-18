@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/segmentio/kafka-go"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 const defaultKafkaTimeout = 30 * time.Second
@@ -47,53 +47,23 @@ func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Kafka
 		topic = *cfg.Opts.KafkaTopic
 	}
 
+	kgoOpts := []kgo.Opt{
+		kgo.SeedBrokers(cfg.ExportPath),
+		kgo.DefaultProduceTopic(topic),
+		kgo.DisableIdempotentWrite(),
+		kgo.RecordRetries(0),
+	}
+	if cfg.Opts.KafkaLinger != nil {
+		kgoOpts = append(kgoOpts, kgo.ProducerLinger(*cfg.Opts.KafkaLinger))
+	}
+
 	// Configure TLS if enabled.
-	var tlsCfg *tls.Config
 	if cfg.Opts.KafkaTLS != nil && *cfg.Opts.KafkaTLS {
-		rootCAs, err := x509.SystemCertPool()
+		tlsCfg, err := buildTLSConfig(cfg.Opts.KafkaCAPath, cfg.Opts.KafkaSkipTLSVerify)
 		if err != nil {
 			return nil, err
 		}
-		if rootCAs == nil {
-			rootCAs = x509.NewCertPool()
-		}
-
-		// Load additional CA certificates if a path is provided.
-		if cfg.Opts.KafkaCAPath != nil && *cfg.Opts.KafkaCAPath != "" {
-			ca, err := os.ReadFile(*cfg.Opts.KafkaCAPath)
-			if err != nil {
-				return nil, err
-			}
-			if !rootCAs.AppendCertsFromPEM(ca) {
-				return nil, errors.New("failed to append certificates from PEM file")
-			}
-		}
-
-		tlsCfg = &tls.Config{
-			RootCAs:            rootCAs,
-			InsecureSkipVerify: cfg.Opts.KafkaSkipTLSVerify != nil && *cfg.Opts.KafkaSkipTLSVerify,
-		}
-	}
-
-	pstr.writer = &kafka.Writer{
-		Addr:  kafka.TCP(pstr.Cfg().ExportPath),
-		Topic: topic,
-
-		// Leave it to the ExportWithAttempts function
-		// to handle the connect attempts.
-		MaxAttempts: 1,
-
-		// To handle both TLS and non-TLS connections consistently in the Close() function,
-		// we always specify Transport, even if empty. This allows us to call
-		// CloseIdleConnections on our Transport instance, avoiding the need to differentiate
-		// between TLS and non-TLS connections.
-		Transport: &kafka.Transport{
-			TLS: tlsCfg,
-		},
-	}
-
-	if cfg.Opts.KafkaBatchSize != nil {
-		pstr.writer.BatchSize = *cfg.Opts.KafkaBatchSize
+		kgoOpts = append(kgoOpts, kgo.DialTLSConfig(tlsCfg))
 	}
 
 	pstr.timeout = defaultKafkaTimeout
@@ -101,12 +71,18 @@ func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Kafka
 		pstr.timeout = *cfg.Opts.KafkaDeliveryTimeout
 	}
 
+	var err error
+	pstr.client, err = kgo.NewClient(kgoOpts...)
+	if err != nil {
+		return nil, err
+	}
+
 	return pstr, nil
 }
 
 // KafkaEE is a kafka poster
 type KafkaEE struct {
-	writer  *kafka.Writer
+	client  *kgo.Client
 	timeout time.Duration
 	cfg     *config.EventExporterCfg
 	em      *utils.ExporterMetrics
@@ -121,25 +97,20 @@ func (k *KafkaEE) Connect() error { return nil }
 func (k *KafkaEE) ExportEvent(_ *context.Context, content any, key any) error {
 	k.reqs.get()
 	defer k.reqs.done()
-	ctx, cancel := context.WithTimeout(context.TODO(), k.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), k.timeout)
 	defer cancel()
-	return k.writer.WriteMessages(ctx, kafka.Message{
-		Key:   []byte(key.(string)),
-		Value: content.([]byte),
-	})
+	rec := &kgo.Record{Key: []byte(key.(string)), Value: content.([]byte)}
+	ch := make(chan error, 1)
+	k.client.Produce(ctx, rec, func(_ *kgo.Record, err error) { ch <- err })
+	return <-ch
 }
 
 func (k *KafkaEE) Close() error {
-
-	// Manually close idle connections to prevent them from running indefinitely
-	// after the Kafka writer is purged. Without this, goroutines will accumulate
-	// over time with each new Kafka writer.
-	tsp, ok := k.writer.Transport.(*kafka.Transport)
-	if ok {
-		tsp.CloseIdleConnections()
-	}
-
-	return k.writer.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), k.timeout)
+	defer cancel()
+	err := k.client.Flush(ctx)
+	k.client.Close()
+	return err
 }
 
 func (k *KafkaEE) GetMetrics() *utils.ExporterMetrics { return k.em }
@@ -148,4 +119,27 @@ func (k *KafkaEE) ExtraData(ev *utils.CGREvent) any {
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),
 	)
+}
+
+func buildTLSConfig(caPath *string, skipVerify *bool) (*tls.Config, error) {
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if caPath != nil && *caPath != "" {
+		ca, err := os.ReadFile(*caPath)
+		if err != nil {
+			return nil, err
+		}
+		if !rootCAs.AppendCertsFromPEM(ca) {
+			return nil, errors.New("failed to append certificates from PEM file")
+		}
+	}
+	return &tls.Config{
+		RootCAs:            rootCAs,
+		InsecureSkipVerify: skipVerify != nil && *skipVerify,
+	}, nil
 }
