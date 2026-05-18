@@ -70,7 +70,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
 %s
 		},
@@ -121,8 +121,8 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	var dbcfg string
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbcfg = `			"db_type": "*internal",
-			"string_indexed_fields": ["*opts.*originID"],
+		dbcfg = `			"dbType": "*internal",
+			"stringIndexedFields": ["*opts.*originID"],
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
@@ -130,11 +130,11 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	case utils.MetaRedis:
-		dbcfg = `			"db_type": "*redis",
-			"db_host": "127.0.0.1",
-			"db_port": 6379,
-			"db_name": "10",
-			"string_indexed_fields": ["*opts.*originID"],`
+		dbcfg = `			"dbType": "*redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10",
+			"stringIndexedFields": ["*opts.*originID"],`
 	default:
 		t.Fatal("unknown dbtype")
 	}

@@ -12,9 +12,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -51,7 +51,7 @@
 		"*action_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
 		"*accounts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
 	},
-	"replication_conns": [],
+	"replicationConns": [],
 },
 
 }

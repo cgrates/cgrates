@@ -60,7 +60,7 @@ func TestDiamConnStats(t *testing.T) {
 "stats": {
 	"enabled": true,
 	"store_interval": "-1",
-	"string_indexed_fields": ["*opts.*eventType"]
+	"stringIndexedFields": ["*opts.*eventType"]
 },
 "thresholds": {
 	"enabled": true,

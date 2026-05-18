@@ -268,12 +268,12 @@ func TestConfigLoadFromDB(t *testing.T) {
 func TestGetSectionAsMap(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	expected := map[string]any{
-		"db_type":     utils.MetaInternal,
-		"db_host":     "",
-		"db_port":     0,
-		"db_name":     "",
-		"db_user":     "",
-		"db_password": "",
+		"dbType":     utils.MetaInternal,
+		"dbHost":     "",
+		"dbPort":     0,
+		"dbName":     "",
+		"dbUser":     "",
+		"dbPassword": "",
 		"opts": map[string]any{
 			utils.InternalDBBackupPathCfg:      "/var/lib/cgrates/internal_db/backup/configdb",
 			utils.InternalDBDumpIntervalCfg:    "0s",

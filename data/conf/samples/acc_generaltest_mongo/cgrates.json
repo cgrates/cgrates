@@ -18,17 +18,17 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_name": "10",
-			"db_port": 27017
+			"dbType": "mongo",
+			"dbName": "10",
+			"dbPort": 27017
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_name": "cgrates",
-			"db_port": 27017,
-			"db_password": ""
+			"dbType": "mongo",
+			"dbName": "cgrates",
+			"dbPort": 27017,
+			"dbPassword": ""
 		}
 	},
 	"items": {
@@ -100,7 +100,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],

@@ -62,7 +62,7 @@ func TestCacheRplDeadlock(t *testing.T) {
 	},
 
 	// replicate to self for convenience
-	"replication_conns": ["rpl_conn"]
+	"replicationConns": ["rpl_conn"]
 },
 "rpcConns": {
 	"rpl_conn": {

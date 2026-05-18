@@ -19,9 +19,9 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"
@@ -94,7 +94,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],

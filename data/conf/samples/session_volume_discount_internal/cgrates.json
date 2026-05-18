@@ -12,9 +12,9 @@
     },
         
     "db": {
-        "db_conns": {
+        "dbConns": {
             "*default": {
-                "db_type": "*internal",
+                "dbType": "*internal",
                        "opts":{
             "internalDBRewriteInterval": "0s",
             "internalDBDumpInterval": "0s"
@@ -118,7 +118,7 @@
         
     "rates": {
         "enabled": true,
-        "string_indexed_fields": ["*opts.*runID"],
+        "stringIndexedFields": ["*opts.*runID"],
         "rate_string_indexed_fields": [],
         "rate_prefix_indexed_fields": ["*req.Destination"],
         "opts":{

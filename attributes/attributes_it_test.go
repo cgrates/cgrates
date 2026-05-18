@@ -2353,9 +2353,9 @@ func TestAttributesArith(t *testing.T) {
 	"enabled": true
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"

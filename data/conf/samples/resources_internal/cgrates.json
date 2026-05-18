@@ -5,9 +5,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBDumpPath": "/tmp/internal_db/db",
 				"internalDBDumpInterval": "-1"

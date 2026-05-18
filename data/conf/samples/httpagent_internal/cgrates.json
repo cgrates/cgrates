@@ -15,14 +15,14 @@
 },
 
 "db": {							
-	"db_conns": {
+	"dbConns": {
 		"*default": {			
-			"db_type": "redis",
-			"db_port": 6379, 
-			"db_name": "10" 	
+			"dbType": "redis",
+			"dbPort": 6379, 
+			"dbName": "10" 	
 		},
 		"StorDB": {						
-			"db_type": "internal",
+			"dbType": "internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

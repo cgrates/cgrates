@@ -19,9 +19,9 @@
 },
 
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-"db_conns": {
+"dbConns": {
 		"*default": {
-      "db_type": "*internal",		
+      "dbType": "*internal",		
       "opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -82,7 +82,7 @@
 
 "routes": {
   "enabled": true,
-  "prefix_indexed_fields":["*req.Destination"],
+  "prefixIndexedFields":["*req.Destination"],
   "conns": {
   	"*stats": [{"ConnIDs": ["*internal"]}],
   	"*resources": [{"ConnIDs": ["*internal"]}],
@@ -171,9 +171,9 @@
 },
 
 "config_db": {
-  "db_type": "redis",
-  "db_port": 6379,
-  "db_name": "12"
+  "dbType": "redis",
+  "dbPort": 6379,
+  "dbName": "12"
 },
 
 "loaders": [

@@ -43,9 +43,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"http_tls": ":2280"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -95,9 +95,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"http_tls": "127.0.0.1:22280"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

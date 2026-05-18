@@ -170,9 +170,9 @@ func TestEFsReplayEvents(t *testing.T) {
 	failedDir := t.TempDir()
 	content := fmt.Sprintf(`{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

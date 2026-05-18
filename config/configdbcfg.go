@@ -40,13 +40,13 @@ type ConfigDBCfg struct {
 
 // Database config for config_db
 type ConfigDbJsonCfg struct {
-	Db_type     *string
-	Db_host     *string
-	Db_port     *int
-	Db_name     *string
-	Db_user     *string
-	Db_password *string
-	Opts        *DBOptsJson
+	Db_type     *string     `json:"dbType"`
+	Db_host     *string     `json:"dbHost"`
+	Db_port     *int        `json:"dbPort"`
+	Db_name     *string     `json:"dbName"`
+	Db_user     *string     `json:"dbUser"`
+	Db_password *string     `json:"dbPassword"`
+	Opts        *DBOptsJson `json:"opts"`
 }
 
 // loadConfigDBCfg loads the DB section of the configuration

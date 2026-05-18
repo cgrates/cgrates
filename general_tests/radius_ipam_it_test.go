@@ -70,9 +70,9 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_ipam"),
 		ConfigJSON: fmt.Sprintf(`{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

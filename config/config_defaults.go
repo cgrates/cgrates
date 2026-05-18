@@ -114,23 +114,23 @@ const CGRATES_CFG_JSON = `
 },
 
 "db": {				// database used to store data (eg: accounts)
-	"db_conns": {
+	"dbConns": {
 		"*default": {		// The id of the DB connection
-			"db_type": "*internal",		// db type: <*internal|*redis|*mysql|*mongo|*postgres>
-			"db_host": "",		// db host address
-			"db_port": 0, 		// db port to reach the database
-			"db_name": "", 		// db database name to connect to
-			"db_user": "", 		// username to use when connecting to db
-			"db_password": "", 		// password to use when connecting to db
-			"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-			"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
-			"remote_conns": [],		// the conns that are queried when the items are not found in local DB
-			"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
-			"replication_conns": [],		// the conns the items are replicated
-			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
-			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
-			"replication_failed_dir": "", 		// directory for failed batch replications (used when interval > 0)
-			"replication_interval": "", 		// interval between batched replications (0 for immediate)
+			"dbType": "*internal",		// db type: <*internal|*redis|*mysql|*mongo|*postgres>
+			"dbHost": "",		// db host address
+			"dbPort": 0, 		// db port to reach the database
+			"dbName": "", 		// db database name to connect to
+			"dbUser": "", 		// username to use when connecting to db
+			"dbPassword": "", 		// password to use when connecting to db
+			"stringIndexedFields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+			"prefixIndexedFields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+			"remoteConns": [],		// the conns that are queried when the items are not found in local DB
+			"remoteConnID": "",		// the ID to be sent to remote_conns to identify the connection
+			"replicationConns": [],		// the conns the items are replicated
+			"replicationFiltered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+			"replicationCache": "", 	// the caching action that is executed on the replicationConns when the items are replicated
+			"replicationFailedDir": "", 		// directory for failed batch replications (used when interval > 0)
+			"replicationInterval": "", 		// interval between batched replications (0 for immediate)
 			"opts":{
 	        	"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
 	        	"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.BackupDB, AdminSv1.RestoreDB and AdminSv1.SnapshotDB when "BackupFolderPath" is not provided in params of the API
@@ -308,8 +308,8 @@ const CGRATES_CFG_JSON = `
 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// caps cached samples
 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
 	},
-	"replication_conns": [],
-	"remote_conns": []	// the conns that are queried when the items are not found in cache
+	"replicationConns": [],
+	"remoteConns": []	// the conns that are queried when the items are not found in cache
 },
 
 
@@ -1424,8 +1424,8 @@ const CGRATES_CFG_JSON = `
 		// ],
 	},					
 	"indexed_selects": true,			// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],			// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -1475,8 +1475,8 @@ const CGRATES_CFG_JSON = `
 		// ],
 	},			
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1497,8 +1497,8 @@ const CGRATES_CFG_JSON = `
 		// ],
 	},		
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1532,8 +1532,8 @@ const CGRATES_CFG_JSON = `
     "enabled": false,			// enables the IPs service: <true|false>
     "store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
     "indexed_selects": true,		// enable profile matching exclusively on indexes
-    //"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-    "prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+    //"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+    "prefixIndexedFields": [],	// query indexes based on these fields for faster processing
     "suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
     "exists_indexed_fields": [],	// query indexes based on these fields for faster processing
     "notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1586,8 +1586,8 @@ const CGRATES_CFG_JSON = `
 	},		
 	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1622,8 +1622,8 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts ThresholdS service: <true|false>
 	"store_interval": "",			// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"indexed_selects": true,		// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -1737,8 +1737,8 @@ const CGRATES_CFG_JSON = `
 "routes": {
 	"enabled": false,		// starts RouteS service: <true|false>.
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -2257,8 +2257,8 @@ const CGRATES_CFG_JSON = `
 "rates": {
 	"enabled": false,
 	"indexed_selects": true,		// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -2575,8 +2575,8 @@ const CGRATES_CFG_JSON = `
 	},		
 	"tenants":[],			// List of tenants to operate on
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -2634,8 +2634,8 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},			
-	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -2669,12 +2669,12 @@ const CGRATES_CFG_JSON = `
 
 
 "config_db": {					// database used to store runtime data (eg: accounts)
-	"db_type": "*internal",			// db type: <*internal|*redis|*mongo>
-	"db_host": "",				// db host address
-	"db_port": 0,	 			// db port to reach the database
-	"db_name": "",	 			// db database name to connect to
-	"db_user": "",		 		// username to use when connecting to db
-	"db_password": "", 			// password to use when connecting to db
+	"dbType": "*internal",			// db type: <*internal|*redis|*mongo>
+	"dbHost": "",				// db host address
+	"dbPort": 0,	 			// db port to reach the database
+	"dbName": "",	 			// db database name to connect to
+	"dbUser": "",		 		// username to use when connecting to db
+	"dbPassword": "", 			// password to use when connecting to db
 	"opts":{
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/configdb",		// the path where configdb will be dumped
 		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/configdb", // default path taken by ConfigSv1.BackupConfigDB when "BackupFolderPath" is not provided

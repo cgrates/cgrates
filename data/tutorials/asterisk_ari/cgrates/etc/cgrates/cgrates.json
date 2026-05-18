@@ -127,25 +127,25 @@
 
 "attributes": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],			
+	"stringIndexedFields": ["*req.Account"],			
 },
 
 
 "resources": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
 "stats": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account","*req.RunID","*req.Destination"],
+	"stringIndexedFields": ["*req.Account","*req.RunID","*req.Destination"],
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
@@ -154,7 +154,7 @@
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
 	"rals_conns": ["*internal"],	
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 

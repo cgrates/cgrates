@@ -21,11 +21,11 @@
 },
 
 "db": {
-    "db_conns": {
+    "dbConns": {
 		"*default": {
-            "db_type": "*internal",
-            "remote_conns": ["engine"],
-            "replication_conns": ["engine"],
+            "dbType": "*internal",
+            "remoteConns": ["engine"],
+            "replicationConns": ["engine"],
             "opts":{
 	        	"internalDBRewriteInterval": "0s",
 		        "internalDBDumpInterval": "0s"
