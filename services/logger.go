@@ -55,7 +55,11 @@ func (s *LoggerService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return err
 	}
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
-	utils.Logger = engine.NewExportLogger(context.TODO(), s.cfg.GeneralCfg().DefaultTenant, cm, s.cfg)
+	exportLogger, err := engine.NewExportLogger(context.TODO(), s.cfg.GeneralCfg().DefaultTenant, cm, s.cfg)
+	if err != nil {
+		return err
+	}
+	utils.Logger = exportLogger
 	return nil
 }
 
