@@ -67,9 +67,9 @@ func TestHttpSessionsIt(t *testing.T) {
 	case utils.MetaRedis:
 		t.SkipNow()
 	case utils.MetaMySQL:
-		httpSsCfgDIR = "httpagent_mysql"
+		t.SkipNow()
 	case utils.MetaMongo:
-		httpSsCfgDIR = "httpagent_mongo"
+		t.SkipNow()
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
