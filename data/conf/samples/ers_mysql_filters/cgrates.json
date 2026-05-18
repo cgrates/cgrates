@@ -26,9 +26,8 @@
 			"opts": {
 				"sqlDBName":"cgrates2",
 				"sqlTableName":"cdrs", 
-				"sqlBatchSize": 20,
 			},
-			"start_delay": "500ms", // wait for db to be populated before starting reader 
+			"start_delay": "100ms",
 			"tenant": "cgrates.org",							
 			"filters": [
 					"*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago
