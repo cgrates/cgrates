@@ -1020,3 +1020,103 @@ func TestERSSQLFilterUnquote(t *testing.T) {
 		t.Errorf("expected Account=1001, got %v", got)
 	}
 }
+
+// MariaDB 10.11.14 (MDEV-37428): JSON_VALUE returns NULL for empty
+// strings, so JSON_EXTRACT is needed.
+func TestERSSQLFilterMetaEmpty(t *testing.T) {
+	emptyCDR := &engine.CDR{
+		CGRID:       utils.Sha1("empty", timeStart.String()),
+		RunID:       utils.MetaDefault,
+		ToR:         utils.MetaVoice,
+		OriginID:    "empty",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   timeStart,
+		AnswerTime:  timeStart,
+		Usage:       10 * time.Second,
+		ExtraFields: map[string]string{"EmptyField": ""},
+	}
+	filledCDR := &engine.CDR{
+		CGRID:       utils.Sha1("filled", timeStart.String()),
+		RunID:       utils.MetaDefault,
+		ToR:         utils.MetaVoice,
+		OriginID:    "filled",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1002",
+		Subject:     "1002",
+		Destination: "1003",
+		SetupTime:   timeStart,
+		AnswerTime:  timeStart,
+		Usage:       10 * time.Second,
+		ExtraFields: map[string]string{"EmptyField": "not_empty"},
+	}
+	_ = openTestDB(t, emptyCDR, filledCDR)
+
+	jsonCfg := `{
+"general": {
+	"reply_timeout": "10s",
+	"default_timezone": "UTC"
+},
+"apiers": {
+	"enabled": true
+},
+"sessions": {
+	"enabled": true
+},
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "mysql",
+			"type": "*sql",
+			"run_delay": "1m",
+			"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"opts": {
+				"sqlDBName": "cgrates2",
+				"sqlTableName": "cdrs",
+				"sqlBatchSize": 10
+			},
+			"start_delay": "100ms",
+			"tenant": "cgrates.org",
+			"filters": [
+				"*empty:~*req.extra_fields.EmptyField:",
+				"*exists:~*req.extra_fields.EmptyField:",
+				"*string:~*vars.*readerID:mysql"
+			],
+			"flags": ["*dryrun"],
+			"fields": [
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true}
+			]
+		}
+	]
+}
+}`
+
+	buf := &bytes.Buffer{}
+	ng := engine.TestEngine{
+		ConfigJSON:       jsonCfg,
+		DBCfg:            getDBCfg(t),
+		LogBuffer:        buf,
+		GracefulShutdown: true,
+	}
+	ng.Run(t)
+
+	waitForERsLog(t, buf, ersDryRunMySQL, 2*time.Second)
+	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
+		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
+	}
+	ev := parseCGREvent(t, buf)
+	if got := ev.Event["Account"]; got != "1001" {
+		t.Errorf("expected Account=1001, got %v", got)
+	}
+}
