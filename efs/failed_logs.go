@@ -28,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/segmentio/kafka-go"
 )
 
 // FailedExportersLog is a failover poster for kafka logger type
@@ -72,8 +71,11 @@ func NewExportEventsFromFile(filePath string) (*FailedExportersLog, error) {
 
 // ReplayFailedPosts tries to repost failed cdrs.
 func (expEv *FailedExportersLog) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) error {
-	expLogger := engine.NewExportLogger(ctx, tnt,
+	expLogger, err := engine.NewExportLogger(ctx, tnt,
 		expEv.connMngr, expEv.cfg)
+	if err != nil {
+		return err
+	}
 
 	// Fall back to config values even if LogLevel and NodeID are always passed to
 	// the opts (through the GetMeta method on the ExportLogger), just to be safe.
@@ -93,16 +95,13 @@ func (expEv *FailedExportersLog) ReplayFailedPosts(ctx *context.Context, attempt
 		if err != nil {
 			return err
 		}
-		if err := expLogger.Writer.WriteMessages(context.Background(), kafka.Message{
-			Key:   []byte(utils.GenUUID()),
-			Value: content,
-		}); err != nil {
+		if err := expLogger.WriteMessage(content); err != nil {
 			var reply string
 			// if there are any errors in kafka, we will post in FailedPostDirectory
 			return expEv.connMngr.Call(ctx, expEv.cfg.LoggerCfg().EFsConns, utils.EfSv1ProcessEvent,
 				&utils.ArgsFailedPosts{
 					Tenant:    tnt,
-					Path:      expLogger.Writer.Addr.String(),
+					Path:      expLogger.KafkaConn,
 					Event:     event,
 					FailedDir: expLogger.FldPostDir,
 					Module:    utils.Kafka,
