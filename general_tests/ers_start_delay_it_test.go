@@ -112,7 +112,8 @@ func TestErsStartDelay(t *testing.T) {
 					"processed_path": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},
                         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
 						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
@@ -132,7 +133,8 @@ func TestErsStartDelay(t *testing.T) {
 					"processed_path": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},
                         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
 						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
