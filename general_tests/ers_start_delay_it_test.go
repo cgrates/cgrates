@@ -112,14 +112,14 @@ func TestErsStartDelay(t *testing.T) {
 					"processed_path": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0", "mandatory": true},
                         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
 						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
 						{"tag":"Destination","path":"*cgreq.Destination","type":"*variable","value":"~*req.2"},
 						{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.3"},
                         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
-                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true},
+                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true}
 					]
 				},
 				{
@@ -132,16 +132,16 @@ func TestErsStartDelay(t *testing.T) {
 					"processed_path": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0", "mandatory": true},
                         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
 						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
 						{"tag":"Destination","path":"*cgreq.Destination","type":"*variable","value":"~*req.2"},
 						{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.3"},
                         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
-                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true},
-						]
-				},
+                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true}
+					]
+				}
 			]
             }
 		}`, csvFd, procFd, csvFd2, procFd)
@@ -190,7 +190,6 @@ func TestErsStartDelay(t *testing.T) {
 		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org", FilterIDs: []string{"*string:~*req.OriginID:csvfile2"}}, &cdrs); err == nil || strings.Contains(utils.ErrNotFound.Error(), err.Error()) {
 			t.Errorf("expected %v, received %v", utils.ErrNotFound, err)
 		}
-
 	})
 	time.Sleep(2200 * time.Millisecond)
 	t.Run("ReaderAfterStartDelay2s", func(t *testing.T) {
@@ -203,5 +202,4 @@ func TestErsStartDelay(t *testing.T) {
 			t.Errorf("expected %f,received %f", 3.4, cdrs[0].Opts["*cost"])
 		}
 	})
-
 }

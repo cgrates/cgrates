@@ -165,9 +165,11 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 		var rply V1ProcessEventReply
 		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noFlags",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -192,6 +194,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaRoutes:          true,
 					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -219,6 +222,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaRoutes:          true,
 					utils.OptsSesBlockerError: false,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -244,7 +248,8 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "withRoutesFlag",
 				APIOpts: map[string]any{
-					utils.MetaRoutes: true,
+					utils.MetaRoutes:   true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -283,7 +288,8 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "withRoutesFlagNoFilterMatch",
 				APIOpts: map[string]any{
-					utils.MetaRoutes: true,
+					utils.MetaRoutes:   true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -417,9 +423,11 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noFlags",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -458,8 +466,9 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "withStatsFlag",
 				APIOpts: map[string]any{
-					utils.MetaStats: true,
-					utils.MetaCost:  0.6,
+					utils.MetaStats:    true,
+					utils.MetaCost:     0.6,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -507,8 +516,9 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "secondEvent",
 				APIOpts: map[string]any{
-					utils.MetaStats: true,
-					utils.MetaCost:  1.2,
+					utils.MetaStats:    true,
+					utils.MetaCost:     1.2,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -551,6 +561,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 					utils.MetaStats:           true,
 					utils.OptsSesBlockerError: false,
 					utils.MetaCost:            9.9,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -596,6 +607,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 					utils.MetaStats:           true,
 					utils.OptsSesBlockerError: true,
 					utils.MetaCost:            9.9,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -641,6 +653,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 					utils.MetaStats:           true,
 					utils.OptsSesBlockerError: false,
 					utils.MetaCost:            5.0,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "2002",
@@ -683,8 +696,9 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "thirdEvent",
 				APIOpts: map[string]any{
-					utils.MetaStats: true,
-					utils.MetaCost:  0.3,
+					utils.MetaStats:    true,
+					utils.MetaCost:     0.3,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -806,9 +820,11 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noFlags",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -831,6 +847,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 				ID:     "withThresholdsFlag",
 				APIOpts: map[string]any{
 					utils.MetaThresholds: true,
+					utils.MetaOriginID:   "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -863,6 +880,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaThresholds:      true,
 					utils.OptsSesBlockerError: false,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -890,6 +908,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaThresholds:      true,
 					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -917,6 +936,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaThresholds:      true,
 					utils.OptsSesBlockerError: false,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "2002",
@@ -1007,9 +1027,11 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noCDRsFlag",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noCDRsFlag",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
@@ -1041,7 +1063,8 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "withCDRsFlag",
 				APIOpts: map[string]any{
-					utils.MetaCDRs: true,
+					utils.MetaCDRs:     true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1081,6 +1104,7 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaCDRs:            true,
 					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1106,6 +1130,7 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaCDRs:            true,
 					utils.OptsSesBlockerError: false,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1205,6 +1230,7 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaChargers: true,
 					utils.MetaRoutes:   true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1229,6 +1255,7 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 					utils.MetaChargers: true,
 					utils.MetaRoutes:   true,
 					utils.MetaSession:  true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1238,8 +1265,8 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
-			t.Errorf("expected RouteProfiles[*default] to be absent when *session=true, got: %v", rply.RouteProfiles)
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; !hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be present")
 		}
 	})
 
@@ -1253,6 +1280,7 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 					utils.MetaChargers:  true,
 					utils.MetaRoutes:    true,
 					utils.MetaTerminate: true,
+					utils.MetaOriginID:  "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1360,9 +1388,11 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 		var rply V1ProcessEventReply
 		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noRatesFlagEmptyReply",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noRatesFlagEmptyReply",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -1386,7 +1416,8 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "withRatesFlagPopulatesReply",
 				APIOpts: map[string]any{
-					utils.MetaRates: true,
+					utils.MetaRates:    true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -1420,6 +1451,7 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaRates:           true,
 					utils.OptsSesBlockerError: false,
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",

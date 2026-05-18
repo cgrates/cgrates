@@ -69,9 +69,11 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		var rply V1ProcessEventReply
 		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noFlags",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
@@ -94,8 +96,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "ratesFlag",
 				APIOpts: map[string]any{
-					utils.MetaRates: true,
-					utils.MetaUsage: 1 * time.Minute,
+					utils.MetaRates:    true,
+					utils.MetaUsage:    1 * time.Minute,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -127,8 +130,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "ratesSecondInterval",
 				APIOpts: map[string]any{
-					utils.MetaRates: true,
-					utils.MetaUsage: 2 * time.Minute,
+					utils.MetaRates:    true,
+					utils.MetaUsage:    2 * time.Minute,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -160,8 +164,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "ratesDisabled",
 				APIOpts: map[string]any{
-					utils.MetaRates: false,
-					utils.MetaUsage: 2*time.Minute + 30*time.Second,
+					utils.MetaRates:    false,
+					utils.MetaUsage:    2*time.Minute + 30*time.Second,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -186,8 +191,9 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "noMatchingRate",
 				APIOpts: map[string]any{
-					utils.MetaRates: true,
-					utils.MetaUsage: 1 * time.Minute,
+					utils.MetaRates:    true,
+					utils.MetaUsage:    1 * time.Minute,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
