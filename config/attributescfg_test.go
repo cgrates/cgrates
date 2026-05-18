@@ -137,8 +137,8 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		"*resources": [{"ConnIDs": ["*internal"]}],
 		"*accounts":  [{"ConnIDs": ["*internal"]}]
 	},
-	"prefix_indexed_fields": ["*req.index1","*req.index2"],
-    "string_indexed_fields": ["*req.index1"],
+	"prefixIndexedFields": ["*req.index1","*req.index2"],
+    "stringIndexedFields": ["*req.index1"],
 	"exists_indexed_fields": ["*req.index1","*req.index2"],
     "notexists_indexed_fields": ["*req.index1"],
 	"opts": {

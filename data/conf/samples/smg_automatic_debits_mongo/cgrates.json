@@ -8,20 +8,20 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "datadb",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "datadb",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "stordb",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "stordb",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {

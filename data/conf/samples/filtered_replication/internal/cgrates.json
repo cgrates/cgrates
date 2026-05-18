@@ -25,11 +25,11 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
-			"replication_conns": ["conn2"],
-			"replication_filtered": true,
+			"dbType": "*internal",
+			"replicationConns": ["conn2"],
+			"replicationFiltered": true,
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"

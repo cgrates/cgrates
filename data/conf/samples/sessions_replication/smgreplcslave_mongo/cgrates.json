@@ -29,11 +29,11 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_name": "10",
-			"db_port": 27017,
+			"dbType": "mongo",
+			"dbName": "10",
+			"dbPort": 27017,
     	}
 	}
 },

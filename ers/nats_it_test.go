@@ -125,9 +125,9 @@ func TestNatsConcurrentReaders(t *testing.T) {
 
 var natsCfg string = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"

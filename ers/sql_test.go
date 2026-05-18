@@ -89,8 +89,8 @@ func TestSQLSetURL(t *testing.T) {
 		t.Errorf("Expected: %q ,received: %q", expsql.tableName, sql.tableName)
 	}
 	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
-	if err := sql.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown db_type postgres2" {
-		t.Errorf("Expected error: 'unknown db_type postgres2' ,received: %v", err)
+	if err := sql.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown dbType postgres2" {
+		t.Errorf("Expected error: 'unknown dbType postgres2' ,received: %v", err)
 	}
 }
 

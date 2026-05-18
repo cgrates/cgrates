@@ -50,7 +50,7 @@ func TestSessionSv1ProcessEventIPsAuthorize(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1",
 	"indexed_selects": true,
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 "admins": {
 	"enabled": true

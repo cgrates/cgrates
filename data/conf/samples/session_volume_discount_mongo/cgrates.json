@@ -9,20 +9,20 @@
 },
     
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {
@@ -125,7 +125,7 @@
     
 "rates": {
     "enabled": true,
-    "string_indexed_fields": ["*opts.*runID"],
+    "stringIndexedFields": ["*opts.*runID"],
     "rate_string_indexed_fields": [],
     "rate_prefix_indexed_fields": ["*req.Destination"],
     "opts":{

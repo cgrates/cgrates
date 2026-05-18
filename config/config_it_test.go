@@ -1335,9 +1335,9 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		
 		"db": {
-			"db_conns": {
+			"dbConns": {
 				"*default": {	
-					"db_type": "*internal",
+					"dbType": "*internal",
 					"opts":{
 				      "internalDBRewriteInterval": "0s",
 				      "internalDBDumpInterval": "0s"
@@ -1419,7 +1419,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"routes": {
 			"enabled": true,
-			"prefix_indexed_fields":["*req.Destination"],
+			"prefixIndexedFields":["*req.Destination"],
 			"conns": {
 				"*stats": [{"ConnIDs": ["*internal"]}],
 				"*resources": [{"ConnIDs": ["*internal"]}]

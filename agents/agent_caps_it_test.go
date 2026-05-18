@@ -61,9 +61,9 @@ func TestAgentCapsIT(t *testing.T) {
 	"shutdownTimeout": "5ms"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBDumpInterval": "0",	
 			"internalDBRewriteInterval": "0"

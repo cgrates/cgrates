@@ -80,9 +80,9 @@ func testSharedClientLockLoadConfig(t *testing.T) {
 	"level": 7
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

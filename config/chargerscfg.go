@@ -143,14 +143,14 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 // ChargerSJsonCfg service config section
 type ChargerSJsonCfg struct {
 	Enabled                  *bool
-	Indexed_selects          *bool
+	Indexed_selects          *bool                      `json:"indexed_selects"`
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	String_indexed_fields    *[]string
-	Prefix_indexed_fields    *[]string
-	Suffix_indexed_fields    *[]string
-	Exists_indexed_fields    *[]string
-	Notexists_indexed_fields *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
+	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
+	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
+	Suffix_indexed_fields    *[]string                  `json:"suffix_indexed_fields"`
+	Exists_indexed_fields    *[]string                  `json:"exists_indexed_fields"`
+	Notexists_indexed_fields *[]string                  `json:"notexists_indexed_fields"`
+	Nested_fields            *bool                      `json:"nested_fields"` // applies when indexed fields is not defined
 }
 
 func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonCfg {

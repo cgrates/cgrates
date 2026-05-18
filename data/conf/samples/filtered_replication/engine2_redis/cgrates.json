@@ -22,21 +22,21 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",
-			"db_port": 6379,
-			"db_name": "11",
-			"remote_conns": ["conn1"],
-			"remote_conn_id": "engine2",
+			"dbType": "redis",
+			"dbPort": 6379,
+			"dbName": "11",
+			"remoteConns": ["conn1"],
+			"remoteConnID": "engine2",
 		},
 		"StorDB": {
-			"db_type": "mysql",
-			"db_host": "127.0.0.1",
-			"db_port": 3306,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	},
 	"items": {

@@ -5,10 +5,10 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
-			"string_indexed_fields": ["*opts.*accounts"],
+			"dbType": "*internal",
+			"stringIndexedFields": ["*opts.*accounts"],
 			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

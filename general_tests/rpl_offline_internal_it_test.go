@@ -64,8 +64,8 @@ func TestOfflineInternalReplication(t *testing.T) {
 "db": {
 	"db_conns": {
 		 "*default": {
-		 	"replication_conns": ["conn2"],
-			"replication_interval": "-1",
+		 	"replicationConns": ["conn2"],
+			"replicationInterval": "-1",
 			"opts":{
 				"internalDBDumpPath": "/tmp/internal_db_master/db",
 	        	"internalDBBackupPath": "/tmp/internal_db_master/backup/db",
@@ -112,7 +112,7 @@ func TestOfflineInternalReplication(t *testing.T) {
 "db": {
 	"db_conns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBDumpPath": "/tmp/internal_db_slave/db",
 	        	"internalDBBackupPath": "/tmp/internal_db_slave/backup/db",

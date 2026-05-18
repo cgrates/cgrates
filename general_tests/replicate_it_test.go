@@ -59,17 +59,17 @@ func TestReplicateMultipleDB(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*redis": {
-			"db_type": "redis",						
-			"db_port": 6379, 						
-			"db_name": "10", 
-			"replication_interval": "-1",
-			"replication_conns": ["conn2"],
+			"dbType": "redis",						
+			"dbPort": 6379, 						
+			"dbName": "10", 
+			"replicationInterval": "-1",
+			"replicationConns": ["conn2"],
 		},
 		 "*default": {
-		 	"replication_conns": ["conn2"],
-			"replication_interval": "-1",
+		 	"replicationConns": ["conn2"],
+			"replicationInterval": "-1",
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
@@ -112,18 +112,18 @@ func TestReplicateMultipleDB(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
 			}
 		},
 		"*redis": {
-			"db_type": "redis",					
-			"db_port": 6379, 						
-			"db_name": "13", 
+			"dbType": "redis",					
+			"dbPort": 6379, 						
+			"dbName": "13", 
 		},
 	},
 	"items":{

@@ -60,9 +60,9 @@ func BenchmarkDiameterCaps(b *testing.B) {
 	// CoreS config is dynamic for this benchmark.
 	jsonCfg := fmt.Sprintf(`{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"

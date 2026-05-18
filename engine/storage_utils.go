@@ -67,7 +67,7 @@ func NewDBConn(dbType, host, port, name, user,
 		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields,
 			opts.ToTransCacheOpts(), itmsCfg)
 	default:
-		err = fmt.Errorf("unsupported db_type <%s>", dbType)
+		err = fmt.Errorf("unsupported dbType <%s>", dbType)
 	}
 	return
 }

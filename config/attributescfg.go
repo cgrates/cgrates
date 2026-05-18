@@ -234,14 +234,14 @@ type AttributesOptsJson struct {
 type AttributeSJsonCfg struct {
 	Enabled                  *bool
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	Indexed_selects          *bool
-	String_indexed_fields    *[]string
-	Prefix_indexed_fields    *[]string
-	Suffix_indexed_fields    *[]string
-	Exists_indexed_fields    *[]string
-	Notexists_indexed_fields *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
-	Opts                     *AttributesOptsJson
+	Indexed_selects          *bool                      `json:"indexed_selects"`
+	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
+	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
+	Suffix_indexed_fields    *[]string                  `json:"suffix_indexed_fields"`
+	Exists_indexed_fields    *[]string                  `json:"exists_indexed_fields"`
+	Notexists_indexed_fields *[]string                  `json:"notexists_indexed_fields"`
+	Nested_fields            *bool                      `json:"nested_fields"` // applies when indexed fields is not defined
+	Opts                     *AttributesOptsJson        `json:"opts"`
 }
 
 func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *AttributesOptsJson {

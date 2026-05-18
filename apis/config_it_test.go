@@ -138,7 +138,7 @@ func testCfgGetConfig(t *testing.T) {
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []string{},
+			"prefixIndexedFields":      []string{},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
@@ -178,10 +178,10 @@ func testCfgSetGetConfig(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]any{
 				"attributes": map[string]any{
-					"enabled":               true,
-					"indexed_selects":       false,
-					"nested_fields":         false,
-					"prefix_indexed_fields": []string{},
+					"enabled":             true,
+					"indexed_selects":     false,
+					"nested_fields":       false,
+					"prefixIndexedFields": []string{},
 
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
@@ -206,7 +206,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"enabled":                  true,
 			"indexed_selects":          false,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []any{},
+			"prefixIndexedFields":      []any{},
 			"suffix_indexed_fields":    []any{},
 			"exists_indexed_fields":    []any{},
 			"notexists_indexed_fields": []any{},
@@ -303,7 +303,7 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"enabled":                       true,
 			"indexed_selects":               false,
 			"nested_fields":                 false,
-			"prefix_indexed_fields":         []string{},
+			"prefixIndexedFields":           []string{},
 			"exists_indexed_fields":         []string{},
 			"notexists_indexed_fields":      []string{},
 			"rate_indexed_selects":          true,
@@ -355,7 +355,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	"enabled":true,
 	"indexed_selects":false,
 	"nested_fields":false,
-	"prefix_indexed_fields":[],
+	"prefixIndexedFields":[],
 	"suffix_indexed_fields":[],
 	"opts":{
 		"*processRuns": [
@@ -374,7 +374,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -516,7 +516,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"enabled":               true,
 					"indexed_selects":       false,
 					"nested_fields":         false,
-					"prefix_indexed_fields": []string{},
+					"prefixIndexedFields":   []string{},
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
@@ -537,7 +537,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"enabled":                  true,
 			"indexed_selects":          false,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []string{},
+			"prefixIndexedFields":      []string{},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
@@ -668,7 +668,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []any{},
+			"prefixIndexedFields":      []any{},
 			"suffix_indexed_fields":    []any{},
 			"exists_indexed_fields":    []any{},
 			"notexists_indexed_fields": []any{},

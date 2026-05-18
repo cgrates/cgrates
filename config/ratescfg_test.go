@@ -121,8 +121,8 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
      "rates": {
 	        "enabled": true,
 	        "indexed_selects": false,				
-	        "string_indexed_fields": ["*req.index1"],			
-            "prefix_indexed_fields": ["*req.index1", "*req.index2"],			
+	        "stringIndexedFields": ["*req.index1"],			
+            "prefixIndexedFields": ["*req.index1", "*req.index2"],			
             "suffix_indexed_fields": ["*req.index1"],
 			"exists_indexed_fields": ["*req.index1", "*req.index2"],			
             "notexists_indexed_fields": ["*req.index1"],			

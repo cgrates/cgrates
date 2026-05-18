@@ -89,8 +89,8 @@ func TestCgrCDRSetURL(t *testing.T) {
 
 	rdr = new(CgrCDR)
 	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306"
-	if err := rdr.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown db_type postgres2" {
-		t.Errorf("Expected error: 'unknown db_type postgres2' ,received: %v", err)
+	if err := rdr.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown dbType postgres2" {
+		t.Errorf("Expected error: 'unknown dbType postgres2' ,received: %v", err)
 	}
 }
 

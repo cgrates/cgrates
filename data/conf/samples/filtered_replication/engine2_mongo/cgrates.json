@@ -22,22 +22,22 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "11",
-			"db_user": "cgrates",
-			"remote_conns": ["conn1"],
-			"remote_conn_id": "engine2",
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "11",
+			"dbUser": "cgrates",
+			"remoteConns": ["conn1"],
+			"remoteConnID": "engine2",
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items":{

@@ -46,7 +46,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 	"stats_conns": ["*internal"],			
 	"resources_conns": ["*internal"],		
 	"accounts_conns": ["*internal"],			
-	"prefix_indexed_fields": ["index1","index2"],		
+	"prefixIndexedFields": ["index1","index2"],		
 	"opts": {
 		"*processRuns": [
 				{
@@ -82,7 +82,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []string{"index1", "index2"},
+			"prefixIndexedFields":      []string{"index1", "index2"},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
@@ -118,7 +118,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"enabled":                  true,
 				"indexed_selects":          false,
 				"nested_fields":            false,
-				"prefix_indexed_fields":    []string{},
+				"prefixIndexedFields":      []string{},
 				"suffix_indexed_fields":    []string{},
 				"exists_indexed_fields":    []string{},
 				"notexists_indexed_fields": []string{},
@@ -146,7 +146,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"enabled":                  false,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []string{},
+			"prefixIndexedFields":      []string{},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
@@ -184,7 +184,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"enabled":                  false,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []string{},
+			"prefixIndexedFields":      []string{},
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
@@ -229,7 +229,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 			},
 		],
 	},
-	"prefix_indexed_fields":[],
+	"prefixIndexedFields":[],
 	"resources_conns":["*localhost"],
 	"stats_conns":["*localhost"],
 	"suffix_indexed_fields":[],
@@ -251,7 +251,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		Tenant:   utils.CGRateSorg,
 		Sections: []string{"attributes"},
 	}
-	expectedGet := `{"attributes":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"conns":{},"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet); err != nil {
 		t.Error(err)

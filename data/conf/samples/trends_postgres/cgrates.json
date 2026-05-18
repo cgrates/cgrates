@@ -18,21 +18,21 @@
 },
 
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {			// The id of the DB connection
-			"db_type": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
-			"db_host": "127.0.0.1",
-			"db_port": 6379, 	// db port to reach the database
-			"db_name": "10", 	// db database name to connect to
-			"db_user": "cgrates", 
+			"dbType": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379, 	// db port to reach the database
+			"dbName": "10", 	// db database name to connect to
+			"dbUser": "cgrates", 
 		},
 		"StorDB": {
-			"db_type": "postgres",
-			"db_host": "127.0.0.1",	
-			"db_port": 5432,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "postgres",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 5432,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	},
 	"items": {
@@ -93,7 +93,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],

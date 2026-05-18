@@ -738,9 +738,9 @@ func TestMultipleDBsInternalFail(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"intrnl": {
-			"db_type": "*internal"
+			"dbType": "*internal"
 		},
 	},
 	"items":{
