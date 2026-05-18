@@ -3179,73 +3179,6 @@ func TestNewFilterRule(t *testing.T) {
 	})
 }
 
-func TestFilterToSQLQuery(t *testing.T) {
-	tests := []struct {
-		name     string
-		fltrRule FilterRule
-		expected []string
-	}{
-		{"MetaEqual with values", FilterRule{Type: utils.MetaEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"RatingID2"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') = 'RatingID2'"}},
-
-		{"MetaExists with no values", FilterRule{Type: utils.MetaExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NOT NULL"}},
-
-		{"MetaExists with JSON field", FilterRule{Type: utils.MetaExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NOT NULL"}},
-
-		{"MetaNotExists with no values", FilterRule{Type: utils.MetaNotExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NULL"}},
-
-		{"MetaNotExists with JSON field", FilterRule{Type: utils.MetaNotExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NULL"}},
-
-		{"MetaString with values", FilterRule{Type: utils.MetaString, Element: "~*req.answer_time", Values: []string{"value1", "value2"}}, []string{"answer_time = 'value1'", "answer_time = 'value2'"}},
-
-		{"MetaNotString with values", FilterRule{Type: utils.MetaNotString, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"value1"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') != 'value1'"}},
-
-		{"MetaEmpty with no values", FilterRule{Type: utils.MetaEmpty, Element: "~*req.answer_time", Values: nil}, []string{"answer_time == ''"}},
-
-		{"MetaEmpty with JSON field", FilterRule{Type: utils.MetaEmpty, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') == ''"}},
-
-		{"MetaNotEmpty with no values", FilterRule{Type: utils.MetaNotEmpty, Element: "~*req.answer_time", Values: nil}, []string{"answer_time != ''"}},
-
-		{"MetaNotEmpty with JSON field", FilterRule{Type: utils.MetaNotEmpty, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') != ''"}},
-
-		{"MetaGreaterOrEqual with values", FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~*req.answer_time", Values: []string{"10"}}, []string{"answer_time >= '10'"}},
-
-		{"MetaGreaterThan with values", FilterRule{Type: utils.MetaGreaterThan, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"20"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') > '20'"}},
-
-		{"MetaLessThan with values", FilterRule{Type: utils.MetaLessThan, Element: "~*req.answer_time", Values: []string{"5"}}, []string{"answer_time < '5'"}},
-
-		{"MetaLessOrEqual with values", FilterRule{Type: utils.MetaLessOrEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"15"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') <= '15'"}},
-
-		{"MetaPrefix with values", FilterRule{Type: utils.MetaPrefix, Element: "~*req.answer_time", Values: []string{"pre"}}, []string{"answer_time LIKE 'pre%'"}},
-
-		{"MetaNotPrefix with values", FilterRule{Type: utils.MetaNotPrefix, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"pre"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT LIKE 'pre%'"}},
-
-		{"MetaSuffix with values", FilterRule{Type: utils.MetaSuffix, Element: "~*req.answer_time", Values: []string{"suf"}}, []string{"answer_time LIKE '%suf'"}},
-
-		{"MetaNotSuffix with values", FilterRule{Type: utils.MetaNotSuffix, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"suf"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT LIKE '%suf'"}},
-
-		{"MetaGreaterOrEqual with JSON field", FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"100"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') >= '100'"}},
-
-		{"MetaRegex with values", FilterRule{Type: utils.MetaRegex, Element: "~*req.answer_time", Values: []string{"pattern1", "pattern2"}}, []string{"answer_time REGEXP 'pattern1'", "answer_time REGEXP 'pattern2'"}},
-
-		{"MetaNotRegex with values", FilterRule{Type: utils.MetaNotRegex, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"pattern"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT REGEXP 'pattern'"}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.fltrRule.FilterToSQLQuery()
-			if len(got) != len(tt.expected) {
-				t.Errorf("expected %v, got %v", tt.expected, got)
-				return
-			}
-			for i, cond := range got {
-				if cond != tt.expected[i] {
-					t.Errorf("expected %v, got %v", tt.expected[i], cond)
-				}
-			}
-		})
-	}
-}
-
 func TestFilterToSQLQueryValidations(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -3331,7 +3264,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*name",
 				Values:  []string{"prefix"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"') LIKE 'prefix%')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"')) LIKE 'prefix%'`},
 		},
 		{
 			name: "Suffix NOT LIKE with empty beforeSep",
@@ -3358,7 +3291,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*name",
 				Values:  []string{"suffix"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"') LIKE '%suffix')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*name"')) LIKE '%suffix'`},
 		},
 		{
 			name: "Regex NOT REGEXP with empty beforeSep",
@@ -3385,7 +3318,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*pattern",
 				Values:  []string{"[0-9]+"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*pattern"') REGEXP '[0-9]+')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*pattern"')) REGEXP '[0-9]+'`},
 		},
 		{
 			name: "Not equal with empty beforeSep",
@@ -3412,7 +3345,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*status",
 				Values:  []string{"active"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*status"') = 'active')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*status"')) = 'active'`},
 		},
 		{
 			name: "Greater than condition with JSON_VALUE",
@@ -3430,7 +3363,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*score",
 				Values:  []string{"50"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') > '50')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"')) > '50'`},
 		},
 		{
 			name: "Less than or equal condition with JSON_VALUE",
@@ -3448,7 +3381,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*score",
 				Values:  []string{"30"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') <= '30')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"')) <= '30'`},
 		},
 		{
 			name: "Less than condition with JSON_VALUE",
@@ -3466,7 +3399,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.data.*score",
 				Values:  []string{"20"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"') < '20')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(data, '$."*score"')) < '20'`},
 		},
 		{
 			name: "MetaExists with no values",
@@ -3484,7 +3417,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.json_field.key",
 				Values:  nil,
 			},
-			expected: []string{"JSON_VALUE(json_field, '$.key') IS NULL"},
+			expected: []string{"JSON_UNQUOTE(JSON_EXTRACT(json_field, '$.key')) IS NULL"},
 		},
 		{
 			name: "MetaNotExists with *column with no values",
@@ -3493,7 +3426,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.json_field.*key",
 				Values:  nil,
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(json_field, '$."*key"') IS NULL)`},
+			expected: []string{`JSON_UNQUOTE(JSON_EXTRACT(json_field, '$."*key"')) IS NULL`},
 		},
 		{
 			name: "MetaString with values",
@@ -3520,7 +3453,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.json_field.*key",
 				Values:  []string{"prefix1"},
 			},
-			expected: []string{`JSON_UNQUOTE(JSON_VALUE(json_field, '$."*key"') NOT LIKE 'prefix1%')`},
+			expected: []string{`JSON_UNQUOTE(JSON_VALUE(json_field, '$."*key"')) NOT LIKE 'prefix1%'`},
 		},
 		{
 			name: "MetaRegex with multiple values",
@@ -4022,6 +3955,267 @@ func TestFilterClone(t *testing.T) {
 
 			if result != nil && result == tt.fltr {
 				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestFilterToSQLQuery(t *testing.T) {
+	tests := []struct {
+		name     string
+		fltr     FilterRule
+		expected []string
+	}{
+		{
+			name: "*eq with *-prefixed JSON path uses UNQUOTE only around JSON_VALUE",
+			fltr: FilterRule{
+				Type:    utils.MetaEqual,
+				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+				Values:  []string{"RateID2"},
+			},
+			expected: []string{
+				`JSON_UNQUOTE(JSON_VALUE(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) = 'RateID2'`,
+			},
+		},
+		{
+			name: "*notexists with *-prefixed path",
+			fltr: FilterRule{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+			},
+			expected: []string{
+				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) IS NULL`,
+			},
+		},
+		{
+			name: "*empty with *-prefixed path uses JSON_EXTRACT for MariaDB compat",
+			fltr: FilterRule{
+				Type:    utils.MetaEmpty,
+				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+			},
+			expected: []string{
+				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) = ''`,
+			},
+		},
+		{
+			name: "plain column without JSON nesting",
+			fltr: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.tenant",
+				Values:  []string{"cgrates.org"},
+			},
+			expected: []string{
+				`tenant = 'cgrates.org'`,
+			},
+		},
+		{
+			name: "JSON nesting without * prefix skips UNQUOTE",
+			fltr: FilterRule{
+				Type:    utils.MetaEqual,
+				Element: "~*req.event.Category",
+				Values:  []string{"call"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Category') = 'call'`,
+			},
+		},
+		{
+			name: "*notstring",
+			fltr: FilterRule{
+				Type:    utils.MetaNotString,
+				Element: "~*req.tenant",
+				Values:  []string{"cgrates.org"},
+			},
+			expected: []string{
+				`tenant != 'cgrates.org'`,
+			},
+		},
+		{
+			name: "*notequal with JSON path",
+			fltr: FilterRule{
+				Type:    utils.MetaNotEqual,
+				Element: "~*req.event.Category",
+				Values:  []string{"sms"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Category') != 'sms'`,
+			},
+		},
+		{
+			name: "*prefix",
+			fltr: FilterRule{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.tenant",
+				Values:  []string{"cgrates"},
+			},
+			expected: []string{
+				`tenant LIKE 'cgrates%'`,
+			},
+		},
+		{
+			name: "*notprefix",
+			fltr: FilterRule{
+				Type:    utils.MetaNotPrefix,
+				Element: "~*req.tenant",
+				Values:  []string{"cgrates"},
+			},
+			expected: []string{
+				`tenant NOT LIKE 'cgrates%'`,
+			},
+		},
+		{
+			name: "*suffix",
+			fltr: FilterRule{
+				Type:    utils.MetaSuffix,
+				Element: "~*req.tenant",
+				Values:  []string{".org"},
+			},
+			expected: []string{
+				`tenant LIKE '%.org'`,
+			},
+		},
+		{
+			name: "*notsuffix",
+			fltr: FilterRule{
+				Type:    utils.MetaNotSuffix,
+				Element: "~*req.tenant",
+				Values:  []string{".org"},
+			},
+			expected: []string{
+				`tenant NOT LIKE '%.org'`,
+			},
+		},
+		{
+			name: "*regex",
+			fltr: FilterRule{
+				Type:    utils.MetaRegex,
+				Element: "~*req.tenant",
+				Values:  []string{"^cgrates"},
+			},
+			expected: []string{
+				`tenant REGEXP '^cgrates'`,
+			},
+		},
+		{
+			name: "*notregex",
+			fltr: FilterRule{
+				Type:    utils.MetaNotRegex,
+				Element: "~*req.tenant",
+				Values:  []string{"^cgrates"},
+			},
+			expected: []string{
+				`tenant NOT REGEXP '^cgrates'`,
+			},
+		},
+		{
+			name: "*gt",
+			fltr: FilterRule{
+				Type:    utils.MetaGreaterThan,
+				Element: "~*req.event.Usage",
+				Values:  []string{"5"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Usage') > '5'`,
+			},
+		},
+		{
+			name: "*gte",
+			fltr: FilterRule{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.event.Usage",
+				Values:  []string{"10"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Usage') >= '10'`,
+			},
+		},
+		{
+			name: "*lt",
+			fltr: FilterRule{
+				Type:    utils.MetaLessThan,
+				Element: "~*req.event.Usage",
+				Values:  []string{"100"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Usage') < '100'`,
+			},
+		},
+		{
+			name: "*lte",
+			fltr: FilterRule{
+				Type:    utils.MetaLessOrEqual,
+				Element: "~*req.event.Usage",
+				Values:  []string{"100"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Usage') <= '100'`,
+			},
+		},
+		{
+			name: "*notempty",
+			fltr: FilterRule{
+				Type:    utils.MetaNotEmpty,
+				Element: "~*req.tenant",
+			},
+			expected: []string{
+				`tenant != ''`,
+			},
+		},
+		{
+			name: "*exists with JSON path",
+			fltr: FilterRule{
+				Type:    utils.MetaExists,
+				Element: "~*req.event.Category",
+			},
+			expected: []string{
+				`JSON_UNQUOTE(JSON_EXTRACT(event, '$.Category')) IS NOT NULL`,
+			},
+		},
+		{
+			name: "boolean true converts to 1",
+			fltr: FilterRule{
+				Type:    utils.MetaEqual,
+				Element: "~*req.event.Active",
+				Values:  []string{"true"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Active') = '1'`,
+			},
+		},
+		{
+			name: "boolean false converts to 0",
+			fltr: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.event.Active",
+				Values:  []string{"false"},
+			},
+			expected: []string{
+				`JSON_VALUE(event, '$.Active') = '0'`,
+			},
+		},
+		{
+			name: "multiple values",
+			fltr: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.tenant",
+				Values:  []string{"cgrates.org", "itsyscom.com"},
+			},
+			expected: []string{
+				`tenant = 'cgrates.org'`,
+				`tenant = 'itsyscom.com'`,
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := tc.fltr.FilterToSQLQuery()
+			if len(got) != len(tc.expected) {
+				t.Fatalf("expected %d conditions, got %d: %v", len(tc.expected), len(got), got)
+			}
+			for i, want := range tc.expected {
+				if got[i] != want {
+					t.Errorf("condition[%d]\n got: %s\nwant: %s", i, got[i], want)
+				}
 			}
 		})
 	}
