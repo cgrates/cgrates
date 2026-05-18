@@ -89,6 +89,9 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 			}, &rply); err != nil {
 			t.Fatal(err)
 		}
@@ -105,6 +108,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 				ID:     "resourcesOnly",
 				APIOpts: map[string]any{
 					utils.MetaResources: true,
+					utils.MetaOriginID:  "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -127,6 +131,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 					utils.MetaAuthorize:        true,
 					utils.MetaResources:        true,
 					utils.OptsResourcesUsageID: "usage1",
+					utils.MetaOriginID:         "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -149,6 +154,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 					utils.MetaResourcesAuthorizeCfg: true,
 					utils.OptsResourcesUsageID:      "2",
 					utils.OptsResourcesUnits:        1,
+					utils.MetaOriginID:              "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -169,6 +175,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 				ID:     "missingUsageID",
 				APIOpts: map[string]any{
 					utils.MetaResourcesAuthorizeCfg: true,
+					utils.MetaOriginID:              "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -190,6 +197,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaResourcesAuthorizeCfg: true,
 					utils.OptsResourcesUsageID:      "usage-nomatch",
+					utils.MetaOriginID:              "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
@@ -211,6 +219,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 				APIOpts: map[string]any{
 					utils.MetaAuthorize:        true,
 					utils.OptsResourcesUsageID: "usage3",
+					utils.MetaOriginID:         "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -234,6 +243,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 						utils.MetaResourcesAuthorizeCfg: true,
 						utils.OptsResourcesUsageID:      utils.ConcatenatedKey("usage-multi", strconv.Itoa(i)),
 						utils.OptsResourcesUnits:        1,
+						utils.MetaOriginID:              "OriginID",
 					},
 					Event: map[string]any{
 						utils.AccountField: "1001",
@@ -257,6 +267,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 					utils.MetaResourcesAuthorizeCfg: true,
 					utils.OptsResourcesUsageID:      "usage-zero",
 					utils.OptsResourcesUnits:        0,
+					utils.MetaOriginID:              "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -279,6 +290,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 					utils.MetaAuthorize:             true,
 					utils.MetaResourcesAuthorizeCfg: true,
 					utils.OptsResourcesUsageID:      "usage-both-flags",
+					utils.MetaOriginID:              "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",

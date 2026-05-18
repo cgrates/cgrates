@@ -79,9 +79,11 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 		var rply V1ProcessEventReply
 		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noFlags",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "2001",
@@ -106,7 +108,8 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 				Tenant: "cgrates.org",
 				ID:     "NoAuthMatchingProfile",
 				APIOpts: map[string]any{
-					utils.MetaIPs: true,
+					utils.MetaIPs:      true,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -135,6 +138,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 					utils.MetaIPs:             true,
 					utils.MetaAuthorize:       true,
 					utils.OptsIPsAllocationID: "testallocid11",
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -176,6 +180,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 				APIOpts: map[string]any{
 					utils.MetaIPsAuthorizeCfg: true,
 					utils.OptsIPsAllocationID: "testallocid101",
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -217,6 +222,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 				APIOpts: map[string]any{
 					utils.MetaIPsAuthorizeCfg: true,
 					utils.OptsIPsAllocationID: "testallocid21",
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -260,6 +266,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 				APIOpts: map[string]any{
 					utils.MetaIPsAuthorizeCfg: true,
 					utils.OptsIPsAllocationID: "testallocid212",
+					utils.MetaOriginID:        "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",

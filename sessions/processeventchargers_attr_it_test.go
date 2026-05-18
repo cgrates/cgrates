@@ -129,6 +129,7 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 				ID:     "withAttr",
 				APIOpts: map[string]any{
 					utils.MetaChargers: true,
+					utils.MetaOriginID: "withAttr",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -158,9 +159,11 @@ func TestSessionSv1ProcessEventChargerAttributes(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "noChrgFlag",
-				APIOpts: map[string]any{},
+				Tenant: "cgrates.org",
+				ID:     "noChrgFlag",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "noChrgFlag",
+				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",

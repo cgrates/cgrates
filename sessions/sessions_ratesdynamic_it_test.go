@@ -84,7 +84,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "dynMatch",
 				APIOpts: map[string]any{
-					utils.MetaUsage: 1 * time.Minute,
+					utils.MetaUsage:    1 * time.Minute,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -117,7 +118,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 				Tenant: "cgrates.org",
 				ID:     "dynNoMatch",
 				APIOpts: map[string]any{
-					utils.MetaUsage: 1 * time.Minute,
+					utils.MetaUsage:    1 * time.Minute,
+					utils.MetaOriginID: "OriginID",
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
