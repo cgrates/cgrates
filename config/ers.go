@@ -143,6 +143,7 @@ type EventReaderOpts struct {
 	PartialCacheAction       *string
 	PartialOrderField        *string
 	PartialCSVFieldSeparator *string
+	IgnoreErroredItems       *bool
 	CSVRowLength             *int
 	CSVFieldSeparator        *string
 	CSVHeaderDefineChar      *string
@@ -231,6 +232,9 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	}
 	if jsnCfg.PartialCSVFieldSeparator != nil {
 		erOpts.PartialCSVFieldSeparator = jsnCfg.PartialCSVFieldSeparator
+	}
+	if jsnCfg.IgnoreErroredItems != nil {
+		erOpts.IgnoreErroredItems = jsnCfg.IgnoreErroredItems
 	}
 	if jsnCfg.CSVRowLength != nil {
 		erOpts.CSVRowLength = jsnCfg.CSVRowLength
@@ -482,6 +486,10 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		cln.PartialCSVFieldSeparator = new(string)
 		*cln.PartialCSVFieldSeparator = *erOpts.PartialCSVFieldSeparator
 	}
+	if erOpts.IgnoreErroredItems != nil {
+		cln.IgnoreErroredItems = new(bool)
+		*cln.IgnoreErroredItems = *erOpts.IgnoreErroredItems
+	}
 	if erOpts.CSVRowLength != nil {
 		cln.CSVRowLength = new(int)
 		*cln.CSVRowLength = *erOpts.CSVRowLength
@@ -704,6 +712,9 @@ func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 	if er.Opts.PartialCSVFieldSeparator != nil {
 		opts[utils.PartialCSVFieldSepartorOpt] = *er.Opts.PartialCSVFieldSeparator
 	}
+	if er.Opts.IgnoreErroredItems != nil {
+		opts[utils.IgnoreErroredItemsOpt] = *er.Opts.IgnoreErroredItems
+	}
 	if er.Opts.CSVRowLength != nil {
 		opts[utils.CSVRowLengthOpt] = *er.Opts.CSVRowLength
 	}
@@ -897,6 +908,7 @@ type EventReaderOptsJson struct {
 	PartialCacheAction       *string   `json:"partialCacheAction"`
 	PartialOrderField        *string   `json:"partialOrderField"`
 	PartialCSVFieldSeparator *string   `json:"partialcsvFieldSeparator"`
+	IgnoreErroredItems       *bool     `json:"ignoreErroredItems"`
 	CSVRowLength             *int      `json:"csvRowLength"`
 	CSVFieldSeparator        *string   `json:"csvFieldSeparator"`
 	CSVHeaderDefineChar      *string   `json:"csvHeaderDefineChar"`
@@ -998,6 +1010,14 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 		}
 	} else {
 		d.PartialCSVFieldSeparator = nil
+	}
+	if v2.IgnoreErroredItems != nil {
+		if v1.IgnoreErroredItems == nil ||
+			*v1.IgnoreErroredItems != *v2.IgnoreErroredItems {
+			d.IgnoreErroredItems = v2.IgnoreErroredItems
+		}
+	} else {
+		d.IgnoreErroredItems = nil
 	}
 	if v2.CSVRowLength != nil {
 		if v1.CSVRowLength == nil ||

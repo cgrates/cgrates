@@ -150,6 +150,11 @@ func (rdr *FWVFileER) processFile(fName string) (err error) {
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName), utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 
+	var ignoreErroredItems bool
+	if rdr.Config().Opts.IgnoreErroredItems != nil {
+		ignoreErroredItems = *rdr.Config().Opts.IgnoreErroredItems
+	}
+
 	for {
 		var hasHeader, hasTrailer bool
 		var headerFields, trailerFields []*config.FCTemplate
@@ -222,6 +227,9 @@ func (rdr *FWVFileER) processFile(fName string) (err error) {
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
 			rdr.offset += rdr.lineLen // increase the offset when exit
+			if ignoreErroredItems {
+				continue
+			}
 			return
 		}
 		rdr.offset += rdr.lineLen // increase the offset
