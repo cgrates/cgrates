@@ -13,6 +13,7 @@ Available Agents
 .. toctree::
    :maxdepth: 2
 
+   ers
    prometheus
    diameter
    radius
