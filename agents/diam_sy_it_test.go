@@ -938,6 +938,9 @@ RP_1001,DR_DATA,*any,10`,
 	ng.PreserveDataDB = true
 	client, cfg = ng.Run(t)
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	engine.WaitForService(t, ctx, client, utils.SessionSv1)
 
 	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
@@ -1554,6 +1557,7 @@ RP_1001,DR_DATA,*any,10`,
 		Tenant: "cgrates.org",
 		ID:     utils.MetaSy + utils.Underline + syOriginID,
 		FilterIDs: []string{
+			"*lte:~*asm.BalanceSummaries.balance_data.Value:0",
 			"*string:~*asm.BalanceSummaries.*default.ID:balance_data",
 			"*string:~*req.AccountID:1001",
 		},

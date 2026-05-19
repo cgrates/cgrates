@@ -41,7 +41,7 @@ const (
 	SSN = 8388636 // Spending Status Notification Command Code
 )
 
-func loadDictionaries(dictsDir, componentID string) error {
+func loadDictionaries(dictionary *dict.Parser, dictsDir, componentID string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "no such file or directory") {
@@ -64,7 +64,7 @@ func loadDictionaries(dictsDir, componentID string) error {
 		}
 		for _, filePath := range cfgFiles {
 			utils.Logger.Info(fmt.Sprintf("<%s> Loading dictionary out of file %s", componentID, filePath))
-			if err := dict.Default.LoadFile(filePath); err != nil {
+			if err := dictionary.LoadFile(filePath); err != nil {
 				return err
 			}
 		}

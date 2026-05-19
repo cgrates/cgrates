@@ -60,6 +60,7 @@
     ],
     "sessions_conns": ["*bijson_localhost"],
     "slr_template": "*slr",
+    "str_template": "*str",
     "request_processors": [
       {
         "id": "Sy_Initial_SLR",
@@ -70,38 +71,9 @@
         "flags": ["*log", "*initiate"],
         "request_fields": [
           {
-            "tag": "OriginID",
-            "path": "*cgreq.OriginID",
-            "type": "*variable",
-            "value": "~*req.Session-Id",
-            "mandatory": true
-          },
-          {
-            "tag": "OriginHost",
-            "path": "*cgreq.OriginHost",
-            "type": "*variable",
-            "value": "~*req.Origin-Host",
-            "mandatory": true
-          },
-          {
-            "tag": "OriginRealm",
-            "path": "*cgreq.OriginRealm",
-            "type": "*variable",
-            "value": "~*req.Origin-Realm",
-            "mandatory": true
-          },
-          {
-            "tag": "Account",
-            "path": "*cgreq.Account",
-            "type": "*variable",
-            "mandatory": true,
-            "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
-          },
-          {
-            "tag": "RequestType",
-            "path": "*cgreq.RequestType",
-            "type": "*constant",
-            "value": "*sy"
+            "tag": "SLRTemplate",
+            "type": "*template",
+            "value": "*slr"
           }
         ],
         "reply_fields": [
@@ -187,31 +159,9 @@
         "flags": ["*log", "*terminate"],
         "request_fields": [
           {
-            "tag": "OriginID",
-            "path": "*cgreq.OriginID",
-            "type": "*variable",
-            "value": "~*req.Session-Id",
-            "mandatory": true
-          },
-          {
-            "tag": "OriginHost",
-            "path": "*cgreq.OriginHost",
-            "type": "*variable",
-            "value": "~*req.Origin-Host",
-            "mandatory": true
-          },
-          {
-            "tag": "OriginRealm",
-            "path": "*cgreq.OriginRealm",
-            "type": "*variable",
-            "value": "~*req.Origin-Realm",
-            "mandatory": true
-          },
-          {
-            "tag": "RequestType",
-            "path": "*cgreq.RequestType",
-            "type": "*constant",
-            "value": "*sy"
+            "tag": "STRTemplate",
+            "type": "*template",
+            "value": "*str"
           }
         ],
         "reply_fields": [

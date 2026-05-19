@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/go-diameter/diam"
 	"github.com/cgrates/go-diameter/diam/avp"
 	"github.com/cgrates/go-diameter/diam/datatype"
+	"github.com/cgrates/go-diameter/diam/dict"
 )
 
 func TestLibDiamDPFieldAsInterface(t *testing.T) {
@@ -1370,7 +1371,7 @@ func TestLibDiamLoadDictionaries(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := loadDictionaries(tc.dictsDir, "testComponent")
+			err := loadDictionaries(dict.Default, tc.dictsDir, "testComponent")
 			if tc.expectedErrorMsg == "" && err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
