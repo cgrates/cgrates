@@ -157,7 +157,8 @@ internalDBDumpPath
     Defines the path to the folder where the memory-stored **DataDB** will be dumped. This path is also used for recovery during engine startup. Ensure the folder exists before launching the engine.
 
 internalDBBackupPath
-    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupDataDBDump <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.BackupDataDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, simply transfer the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring.
+    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.BackupDataDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, you can do so manualy by simply transfering the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring.
+    Or automatically using `APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreDataDB>`_ API call
 
 internalDBStartTimeout
     Specifies the maximum amount of time the engine will wait to recover the in-memory **DataDB** state from the dump files during startup. If this duration is exceeded, the engine will timeout and an error will be returned.
@@ -180,7 +181,35 @@ internalDBRewriteInterval
     Rewriting should be used sparingly, as the process temporarily loads the entire ``internalDBDumpPath`` folder into memory for optimization, and then writes it back to the dump folder once done. This results in a surge of memory usage, which could amount to the size of the dump file itself during the rewrite. As a rule of thumb, expect the engine's memory usage to approximately double while the rewrite process is running. Manual rewriting can be triggered at any time via the `APIerSv1.RewriteDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RewriteDataDB>`_ API.
 
 internalDBFileSizeLimit
-    Specifies the maximum size a single dump file can reach. Upon reaching the limit, a new dump file is created. Limiting file size improves recovery time and allows for limit reached files to be rewritten.
+    Specifies the maximum size a single dump file can reach. Upon reaching the limit, a new dump file is created. Limiting file size improves recovery time and allows for limit reached files to be rewritten. It is recommended to have this limit to at most half of the machines memory, since the file will be put in memory while being read.
+
+The internal database also provides APIs for creating snapshots and restoring from backups.
+
+`APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreDataDB>`_
+      Restores the internal **DataDB** from the path to the zip file or folder provided. If more than 1 backups are found in the path, it will select the latest generated one.
+
+      - If no backup path is provided in the API call, the configured ``internalDBBackupPath`` is used.
+      - Before restoring, all live data and currently dumped data from the internal database is cleared.
+      - The restore process replaces the existing dump state with the selected backup contents.
+
+`APIerSv1.SnapshotDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.SnapshotDataDB>`_
+      Creates a backup of the currently active dump state after which, it rebuilds the live dump files from the current in-memory **DataDB**.
+
+      The snapshot process performs the following steps:
+
+      - Copies the current live dump folder to the specified backup location (or ``internalDBBackupPath`` if none is provided).
+      - Optionally compresses the backup into a ZIP archive when the ``zip`` parameter is enabled.
+      - Clears the current live dump folder.
+      - Recreates fresh dump files directly from the current in-memory **DataDB** state.
+
+      Snapshotting is useful for:
+
+      - Creating compact and consistent recovery points.
+      - Cleaning up fragmented or heavily appended dump files.
+      - Reducing recovery time by rebuilding optimized dump files.
+      - Preparing backups before maintenance operations.
+
+    
 
 Redis-Specific Options
 ~~~~~~~~~~~~~~~~~~~~~~
