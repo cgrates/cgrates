@@ -60,7 +60,8 @@ func TestDynThdIT(t *testing.T) {
 	// t.Cleanup(func() {
 	// 	t.Log(ng.LogBuffer)
 	// })
-	client, _ := ng.Run(t)
+	client, cfg := ng.Run(t)
+	engine.WaitForServiceStart(t, client, utils.AdminS, cfg.GeneralCfg().ConnectTimeout)
 
 	t.Run("SetBalance", func(t *testing.T) {
 		actPrf := &utils.ActionProfileWithAPIOpts{
