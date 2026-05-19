@@ -194,7 +194,7 @@ type EventExporterOpts struct {
 	SQLUpdateIndexedFields   *[]string
 	PgSSLMode                *string
 	KafkaTopic               *string
-	KafkaBatchSize           *int
+	KafkaLinger              *time.Duration
 	KafkaDeliveryTimeout     *time.Duration
 	KafkaTLS                 *bool
 	KafkaCAPath              *string
@@ -394,8 +394,12 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.KafkaTopic != nil {
 		eeOpts.KafkaTopic = jsnCfg.KafkaTopic
 	}
-	if jsnCfg.KafkaBatchSize != nil {
-		eeOpts.KafkaBatchSize = jsnCfg.KafkaBatchSize
+	if jsnCfg.KafkaLinger != nil {
+		var kafkaLinger time.Duration
+		if kafkaLinger, err = utils.ParseDurationWithNanosecs(*jsnCfg.KafkaLinger); err != nil {
+			return
+		}
+		eeOpts.KafkaLinger = utils.DurationPointer(kafkaLinger)
 	}
 	if jsnCfg.KafkaDeliveryTimeout != nil {
 		var kafkaDeliveryTimeout time.Duration
@@ -768,9 +772,9 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.KafkaTopic = new(string)
 		*cln.KafkaTopic = *eeOpts.KafkaTopic
 	}
-	if eeOpts.KafkaBatchSize != nil {
-		cln.KafkaBatchSize = new(int)
-		*cln.KafkaBatchSize = *eeOpts.KafkaBatchSize
+	if eeOpts.KafkaLinger != nil {
+		cln.KafkaLinger = new(time.Duration)
+		*cln.KafkaLinger = *eeOpts.KafkaLinger
 	}
 	if eeOpts.KafkaDeliveryTimeout != nil {
 		cln.KafkaDeliveryTimeout = new(time.Duration)
@@ -1113,8 +1117,8 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *optsEes.KafkaTopic
 	}
-	if optsEes.KafkaBatchSize != nil {
-		opts[utils.KafkaBatchSize] = *optsEes.KafkaBatchSize
+	if optsEes.KafkaLinger != nil {
+		opts[utils.KafkaLinger] = optsEes.KafkaLinger.String()
 	}
 	if optsEes.KafkaDeliveryTimeout != nil {
 		opts[utils.KafkaDeliveryTimeout] = optsEes.KafkaDeliveryTimeout.String()
@@ -1270,7 +1274,7 @@ type EventExporterOptsJson struct {
 	SQLUpdateIndexedFields      *[]string         `json:"sqlUpdateIndexedFields"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
-	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
+	KafkaLinger                 *string           `json:"kafkaLinger"`
 	KafkaDeliveryTimeout        *string           `json:"kafkaDeliveryTimeout"`
 	KafkaTLS                    *bool             `json:"kafkaTLS"`
 	KafkaCAPath                 *string           `json:"kafkaCAPath"`
@@ -1478,13 +1482,13 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 	} else {
 		d.KafkaTopic = nil
 	}
-	if v2.KafkaBatchSize != nil {
-		if v1.KafkaBatchSize == nil ||
-			*v1.KafkaBatchSize != *v2.KafkaBatchSize {
-			d.KafkaBatchSize = v2.KafkaBatchSize
+	if v2.KafkaLinger != nil {
+		if v1.KafkaLinger == nil ||
+			*v1.KafkaLinger != *v2.KafkaLinger {
+			d.KafkaLinger = utils.StringPointer(v2.KafkaLinger.String())
 		}
 	} else {
-		d.KafkaBatchSize = nil
+		d.KafkaLinger = nil
 	}
 	if v2.KafkaDeliveryTimeout != nil {
 		if v1.KafkaDeliveryTimeout == nil ||
