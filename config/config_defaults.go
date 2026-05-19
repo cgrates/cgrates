@@ -797,6 +797,7 @@ const CGRATES_CFG_JSON = `
 	"rar_template": "",						// template used to build the Re-Auth-Request
 	"slr_template": "",						// default SLR template 
 	"snr_template": "",						// template used to build the Spending-Status-Notification-Request
+	"str_template": "",						// default STR template 
 	"forced_disconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
 	"conn_status_stat_queue_ids": [],				// StatQueue IDs for connection status events
 	"conn_status_threshold_ids": [],				// Threshold IDs for connection status events
@@ -1240,7 +1241,9 @@ const CGRATES_CFG_JSON = `
 		{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
 			"value": "*sy"},
 		{"tag": "BalanceIDPolicyFilter", "path": "*opts.*syPolicyFilters", "type": "*group",
-			"value": "*string:~*asm.BalanceSummaries.*default.ID:balance_data", "mandatory": true}
+			"value": "*string:~*asm.BalanceSummaries.*default.ID:balance_data", "mandatory": true},
+		{"tag": "BalanceIDPolicyFilter2", "path": "*opts.*syPolicyFilters", "type": "*group",
+			"value": "*lte:~*asm.BalanceSummaries.balance_data.Value:0", "mandatory": true}
 	],
 	"*snr": [
 		{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
@@ -1263,6 +1266,16 @@ const CGRATES_CFG_JSON = `
 			"value": "30GB"},
         {"tag": "Pending-Policy-Counter-Information-Status-Change-Time", "path": "*diamreq.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time", "type": "*datetime", 
 			"value": "*now"}
+	],
+	"*str": [
+		{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+			"value": "~*req.Session-Id", "mandatory": true},
+		{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+			"value": "~*req.Origin-Host", "mandatory": true},
+		{"tag": "OriginRealm", "path": "*cgreq.OriginRealm", "type": "*variable",
+			"value": "~*req.Origin-Realm", "mandatory": true},
+		{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
+			"value": "*sy"}
 	],
 	"*dmr": [  // used by RadiusAgent when sending Disconnect message towards the client
 		{"tag": "User-Name", "path": "*radDAReq.User-Name", "type": "*variable", 

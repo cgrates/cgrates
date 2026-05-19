@@ -360,8 +360,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		if slices.Contains(reqProcessor.Filters, utils.ConcatenatedKey(utils.MetaString,
 			utils.DynamicDataPrefix+utils.MetaVars+utils.NestingSep+utils.MetaCmd,
 			utils.SLR)) { // check if request process is made for SLR requests by looking for filter: "*string:~*vars.*cmd:SLR"
-			// set default request if no *syPolicyFilters are found in original request
-			if _, has := agReq.Opts[utils.OptsSyPolicyFilters]; !has {
+			var hasSyPolicy bool // set default request if no *syPolicyFilters are found in original request
+			for _, reqFields := range reqProcessor.RequestFields {
+				if strings.HasPrefix(reqFields.Path, utils.MetaOpts+utils.NestingSep+utils.OptsSyPolicyFilters) {
+					hasSyPolicy = true
+					break
+				}
+			}
+			if !hasSyPolicy {
 				if err = agReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().SLRTemplate]); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> cannot process SLR, err: %s",
