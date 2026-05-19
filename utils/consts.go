@@ -761,6 +761,8 @@ const (
 	MetaDuration            = "*duration"
 	MetaLibPhoneNumber      = "*libphonenumber"
 	MetaTimeString          = "*time_string"
+	MetaTimeDesc            = "*time_desc"
+	MetaTimeAsc             = "*time_asc"
 	MetaIP2Hex              = "*ip2hex"
 	MetaString2Hex          = "*string2hex"
 	MetaUnixTime            = "*unixtime"

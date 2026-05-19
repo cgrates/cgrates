@@ -22,10 +22,23 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // NewDynamicWeightsFromString creates a DynamicWeight list based on the string received from .csv
-func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs DynamicWeights, err error) {
+func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (DynamicWeights, error) {
+	return newDynamicWeightsFromString(s, dWSep, fltrSep, parseWeightFloat)
+}
+
+// NewBalanceDynamicWeightsFromString is the same as NewDynamicWeightsFromString but
+// can also resolve the predefined balance weight *time_desc and
+// *time_asc
+func NewBalanceDynamicWeightsFromString(s, dWSep, fltrSep string) (DynamicWeights, error) {
+	return newDynamicWeightsFromString(s, dWSep, fltrSep, balanceWeightAsFloat64)
+}
+
+func newDynamicWeightsFromString(s, dWSep, fltrSep string,
+	parseWeight func(string) (float64, error)) (dWs DynamicWeights, err error) {
 	if len(s) == 0 {
 		return DynamicWeights{{}}, nil
 	}
@@ -42,13 +55,27 @@ func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs DynamicWeights, 
 		}
 		var weight float64
 		if len(dwStrs[i+1]) != 0 {
-			if weight, err = strconv.ParseFloat(dwStrs[i+1], 64); err != nil {
+			if weight, err = parseWeight(dwStrs[i+1]); err != nil {
 				return nil, fmt.Errorf("invalid Weight <%s> in string: <%s>", dwStrs[i+1], s)
 			}
 		}
 		dWs = append(dWs, &DynamicWeight{FilterIDs: fltrIDs, Weight: weight})
 	}
 	return
+}
+
+func parseWeightFloat(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
+}
+
+func balanceWeightAsFloat64(s string) (float64, error) {
+	switch s {
+	case MetaTimeDesc:
+		return float64(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC).Unix() - time.Now().Unix()), nil
+	case MetaTimeAsc:
+		return float64(time.Now().Unix()), nil
+	}
+	return strconv.ParseFloat(s, 64)
 }
 
 type DynamicWeights []*DynamicWeight

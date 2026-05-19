@@ -120,7 +120,7 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 		}
 	case utils.Weights:
 		if value != utils.EmptyString {
-			bal.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
+			bal.Weights, err = utils.NewBalanceDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
 		}
 	case utils.Type:
 		bal.Type = value

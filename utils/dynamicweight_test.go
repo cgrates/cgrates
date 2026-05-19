@@ -18,8 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestNewDynamicWeightsFromString(t *testing.T) {
@@ -168,5 +171,46 @@ func TestDynamicWeightEquals(t *testing.T) {
 	dW.FilterIDs = []string{"fltr1", "fltr3"}
 	if rcv := dW.Equals(dnWg); rcv {
 		t.Error("FilterIDs should not match")
+	}
+}
+
+func TestNewBalanceDynamicWeightsFromString(t *testing.T) {
+	dwsStr := "fltr1&fltr2;20;fltr3;30"
+	eDws := DynamicWeights{
+		{FilterIDs: []string{"fltr1", "fltr2"}, Weight: 20.0},
+		{FilterIDs: []string{"fltr3"}, Weight: 30.0},
+	}
+	if dws, err := NewBalanceDynamicWeightsFromString(dwsStr, ";", "&"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDws, dws) {
+		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
+	}
+
+	if dws, err := NewBalanceDynamicWeightsFromString("", "", ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(DynamicWeights{{}}, dws) {
+		t.Errorf("expecting: %+v, received: %+v", DynamicWeights{{}}, dws)
+	}
+
+	wantAsc := float64(time.Now().Unix())
+	if dws, err := NewBalanceDynamicWeightsFromString("fltr1;"+MetaTimeAsc, ";", "&"); err != nil {
+		t.Error(err)
+	} else if len(dws) != 1 || !reflect.DeepEqual([]string{"fltr1"}, dws[0].FilterIDs) {
+		t.Errorf("unexpected DynamicWeights: %+v", dws)
+	} else if dws[0].Weight-wantAsc > 2 {
+		t.Errorf("Weight = %v, want ~%v", dws[0].Weight, wantAsc)
+	}
+
+	wantDesc := float64(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC).Unix() - time.Now().Unix())
+	if dws, err := NewBalanceDynamicWeightsFromString(";"+MetaTimeDesc, ";", "&"); err != nil {
+		t.Error(err)
+	} else if len(dws) != 1 || dws[0].FilterIDs != nil {
+		t.Errorf("unexpected DynamicWeights: %+v", dws)
+	} else if math.Abs(dws[0].Weight-wantDesc) > 2 {
+		t.Errorf("Weight = %v, want ~%v", dws[0].Weight, wantDesc)
+	}
+	expErr := "invalid Weight "
+	if _, err := NewBalanceDynamicWeightsFromString(";abc", ";", "&"); err == nil || !strings.HasPrefix(err.Error(), expErr) {
+		t.Errorf("expected to receive %s, got %v", expErr, err)
 	}
 }

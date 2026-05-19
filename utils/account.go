@@ -885,7 +885,7 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 			bL.Units = &Decimal{valB}
 		case Weights:
 			if val != EmptyString {
-				bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+				bL.Weights, err = NewBalanceDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
 		case Blockers:
 			if val != EmptyString {
