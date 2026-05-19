@@ -242,13 +242,13 @@ func testDNSitClntSRVDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 		}
 		if answr.Weight != uint16(50) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 		}
 		if answr.Port != uint16(5060) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 		}
 		if answr.Target != "opensips.org." {
 			t.Errorf("Expected :<%q> , received: <%q>", "opensips.org.", answr.Target)
@@ -267,13 +267,13 @@ func testDNSitClntSRVDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 		}
 		if answr.Weight != uint16(50) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 		}
 		if answr.Port != uint16(5060) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 		}
 		if answr.Target != "opensips.org." {
 			t.Errorf("Expected :<%q> , received: <%q>", "opensips.org.", answr.Target)
@@ -292,13 +292,13 @@ func testDNSitClntSRVDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 		}
 		if answr.Weight != uint16(50) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 		}
 		if answr.Port != uint16(5060) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 		}
 		if answr.Target != "opensips.org." {
 			t.Errorf("Expected :<%q> , received: <%q>", "opensips.org.", answr.Target)
@@ -320,7 +320,7 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -337,7 +337,7 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -354,7 +354,7 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -441,13 +441,13 @@ func testDNSitClntSRVAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(5) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Priority)
 		}
 		if answr.Weight != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Weight)
 		}
 		if answr.Port != uint16(389) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(389), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(389), answr.Port)
 		}
 		if answr.Target != "ldap.google.com." {
 			t.Errorf("Expected :<%q> , received: <%q>", "ldap.google.com.", answr.Target)
@@ -464,13 +464,13 @@ func testDNSitClntSRVAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(5) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Priority)
 		}
 		if answr.Weight != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Weight)
 		}
 		if answr.Port != uint16(389) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(389), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(389), answr.Port)
 		}
 		if answr.Target != "ldap.google.com." {
 			t.Errorf("Expected :<%q> , received: <%q>", "ldap.google.com.", answr.Target)
@@ -487,13 +487,13 @@ func testDNSitClntSRVAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.SRV)
 		if answr.Priority != uint16(5) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Priority)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Priority)
 		}
 		if answr.Weight != uint16(0) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Weight)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Weight)
 		}
 		if answr.Port != uint16(389) {
-			t.Errorf("Expected :<%q> , received: <%q>", uint16(389), answr.Port)
+			t.Errorf("Expected :<%v> , received: <%v>", uint16(389), answr.Port)
 		}
 		if answr.Target != "ldap.google.com." {
 			t.Errorf("Expected :<%q> , received: <%q>", "ldap.google.com.", answr.Target)
@@ -515,7 +515,7 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -532,7 +532,7 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -549,7 +549,7 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
@@ -643,26 +643,26 @@ func testDNSitClntSRVSuppliers(t *testing.T) {
 	}
 	answr := rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Priority)
 	}
 	if answr.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Weight)
 	}
 	if answr.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr.Port)
 	}
 	if answr.Target != "xmpp.xmpp.org." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.org.", answr.Target)
 	}
 	answr2 := rply.Answer[1].(*dns.SRV)
 	if answr2.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Priority)
 	}
 	if answr2.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Weight)
 	}
 	if answr2.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr2.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr2.Port)
 	}
 	if answr2.Target != "xmpp.xmpp.com." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.com.", answr2.Target)
@@ -681,26 +681,26 @@ func testDNSitClntSRVSuppliers(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Priority)
 	}
 	if answr.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Weight)
 	}
 	if answr.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr.Port)
 	}
 	if answr.Target != "xmpp.xmpp.org." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.org.", answr.Target)
 	}
 	answr2 = rply.Answer[1].(*dns.SRV)
 	if answr2.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Priority)
 	}
 	if answr2.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Weight)
 	}
 	if answr2.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr2.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr2.Port)
 	}
 	if answr2.Target != "xmpp.xmpp.com." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.com.", answr2.Target)
@@ -719,26 +719,26 @@ func testDNSitClntSRVSuppliers(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Priority)
 	}
 	if answr.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr.Weight)
 	}
 	if answr.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr.Port)
 	}
 	if answr.Target != "xmpp.xmpp.org." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.org.", answr.Target)
 	}
 	answr2 = rply.Answer[1].(*dns.SRV)
 	if answr2.Priority != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Priority)
 	}
 	if answr2.Weight != uint16(1) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(1), answr2.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(1), answr2.Weight)
 	}
 	if answr2.Port != uint16(9222) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(9222), answr2.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(9222), answr2.Port)
 	}
 	if answr2.Target != "xmpp.xmpp.com." {
 		t.Errorf("Expected :<%q> , received: <%q>", "xmpp.xmpp.com.", answr2.Target)
@@ -934,13 +934,13 @@ func testDNSitClntSRVOpts(t *testing.T) {
 	}
 	answr := rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(10) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(10), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(10), answr.Priority)
 	}
 	if answr.Weight != uint16(5) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Weight)
 	}
 	if answr.Port != uint16(8443) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(8443), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(8443), answr.Port)
 	}
 	if answr.Target != "matrix-federation.matrix.org.cdn.cloudflare.net." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -973,13 +973,13 @@ func testDNSitClntSRVOpts(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(10) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(10), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(10), answr.Priority)
 	}
 	if answr.Weight != uint16(5) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Weight)
 	}
 	if answr.Port != uint16(8443) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(8443), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(8443), answr.Port)
 	}
 	if answr.Target != "matrix-federation.matrix.org.cdn.cloudflare.net." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -1012,13 +1012,13 @@ func testDNSitClntSRVOpts(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(10) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(10), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(10), answr.Priority)
 	}
 	if answr.Weight != uint16(5) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5), answr.Weight)
 	}
 	if answr.Port != uint16(8443) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(8443), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(8443), answr.Port)
 	}
 	if answr.Target != "matrix-federation.matrix.org.cdn.cloudflare.net." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -1058,10 +1058,10 @@ func testDNSitClntNAPTROpts(t *testing.T) {
 	}
 	answr := rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
@@ -1103,10 +1103,10 @@ func testDNSitClntNAPTROpts(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
@@ -1148,10 +1148,10 @@ func testDNSitClntNAPTROpts(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
@@ -1283,13 +1283,13 @@ func testDNSitClntSRVOptsWithAttributes(t *testing.T) {
 	}
 	answr := rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(0) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 	}
 	if answr.Weight != uint16(50) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 	}
 	if answr.Port != uint16(5060) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 	}
 	if answr.Target != "opensips.org." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -1318,13 +1318,13 @@ func testDNSitClntSRVOptsWithAttributes(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(0) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 	}
 	if answr.Weight != uint16(50) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 	}
 	if answr.Port != uint16(5060) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 	}
 	if answr.Target != "opensips.org." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -1353,13 +1353,13 @@ func testDNSitClntSRVOptsWithAttributes(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.SRV)
 	if answr.Priority != uint16(0) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(0), answr.Priority)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(0), answr.Priority)
 	}
 	if answr.Weight != uint16(50) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(50), answr.Weight)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(50), answr.Weight)
 	}
 	if answr.Port != uint16(5060) {
-		t.Errorf("Expected :<%q> , received: <%q>", uint16(5060), answr.Port)
+		t.Errorf("Expected :<%v> , received: <%v>", uint16(5060), answr.Port)
 	}
 	if answr.Target != "opensips.org." {
 		t.Errorf("Expected :<%q> , received: <%q>",
@@ -1396,10 +1396,10 @@ func testDNSitClntNAPTROptsWithAttributes(t *testing.T) {
 	}
 	answr := rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
@@ -1437,10 +1437,10 @@ func testDNSitClntNAPTROptsWithAttributes(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
@@ -1477,10 +1477,10 @@ func testDNSitClntNAPTROptsWithAttributes(t *testing.T) {
 	}
 	answr = rply.Answer[0].(*dns.NAPTR)
 	if answr.Order != 100 {
-		t.Errorf("received: <%q>", answr.Order)
+		t.Errorf("received: <%v>", answr.Order)
 	}
 	if answr.Preference != 10 {
-		t.Errorf("received: <%q>", answr.Preference)
+		t.Errorf("received: <%v>", answr.Preference)
 	}
 	if answr.Flags != "U" {
 		t.Errorf("received: <%q>", answr.Flags)
