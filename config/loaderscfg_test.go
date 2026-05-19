@@ -1947,7 +1947,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					},
 				},
 				{
-					utils.TypeCfg:     "*rate_profiles",
+					utils.TypeCfg:     "*rateProfiles",
 					utils.FilenameCfg: "Rates.csv",
 					utils.FlagsCfg:    flags,
 					utils.FieldsCfg: []map[string]any{
@@ -2062,7 +2062,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					},
 				},
 				{
-					utils.TypeCfg:     "*action_profiles",
+					utils.TypeCfg:     "*actionProfiles",
 					utils.FilenameCfg: "Actions.csv",
 					utils.FlagsCfg:    flags,
 					utils.FieldsCfg: []map[string]any{

@@ -78,8 +78,8 @@ func TestReplicateMultipleDB(t *testing.T) {
 		
 	},
 	"items":{
-		"*threshold_profiles": {"remote":false,"replicate":true},
-		"*attribute_profiles":{"remote":false,"replicate":true,"dbConn": "*redis"},
+		"*thresholdProfiles": {"remote":false,"replicate":true},
+		"*attributeProfiles":{"remote":false,"replicate":true,"dbConn": "*redis"},
 	},
 },
 
@@ -127,7 +127,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 		},
 	},
 	"items":{
-		"*attribute_profiles":{"dbConn": "*redis"},
+		"*attributeProfiles":{"dbConn": "*redis"},
 	},
 },
 

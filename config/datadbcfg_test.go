@@ -506,7 +506,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				},
 			},
 			"items":{ 
-				"*load_ids":{"remote":true, "replicate":true}, 
+				"*loadIds":{"remote":true, "replicate":true}, 
 			
 			  }	
 			}
@@ -561,9 +561,9 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				},
 			},
 			"items":{
-				"*resource_profiles":{"remote":false, "replicate":false}, 
+				"*resourceProfiles":{"remote":false, "replicate":false}, 
 				"*resources":{"remote":false, "replicate":false}, 
-				"*statqueue_profiles": {"remote":false, "replicate":false}, 
+				"*statQueueProfiles": {"remote":false, "replicate":false}, 
 			  }	
 			}
 		}`
