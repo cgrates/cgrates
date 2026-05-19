@@ -713,7 +713,7 @@ func testConsoleItCacheStats(t *testing.T) {
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := map[string]any{
-		"*account_filter_indexes": map[string]any{
+		"*accountFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -721,11 +721,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*action_profile_filter_indexes": map[string]any{
+		"*actionProfileFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*action_profiles": map[string]any{
+		"*actionProfiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -733,11 +733,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*attribute_filter_indexes": map[string]any{
+		"*attributeFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*attribute_profiles": map[string]any{
+		"*attributeProfiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -753,11 +753,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*charger_filter_indexes": map[string]any{
+		"*chargerFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*charger_profiles": map[string]any{
+		"*chargerProfiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -785,19 +785,19 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  3.,
 			"Groups": 0.,
 		},
-		"*load_ids": map[string]any{
+		"*loadIds": map[string]any{
 			"Items":  13.,
 			"Groups": 0.,
 		},
-		"*rate_filter_indexes": map[string]any{
+		"*rateFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*rate_profile_filter_indexes": map[string]any{
+		"*rateProfileFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*rate_profiles": map[string]any{
+		"*rateProfiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -805,11 +805,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*resource_filter_indexes": map[string]any{
+		"*resourceFilterIndexes": map[string]any{
 			"Items":  2.,
 			"Groups": 1.,
 		},
-		"*resource_profiles": map[string]any{
+		"*resourceProfiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
@@ -817,15 +817,15 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*reverse_filter_indexes": map[string]any{
+		"*reverseFilterIndexes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*route_filter_indexes": map[string]any{
+		"*routeFilterIndexes": map[string]any{
 			"Items":  3.,
 			"Groups": 1.,
 		},
-		"*route_profiles": map[string]any{
+		"*routeProfiles": map[string]any{
 			"Items":  1.,
 			"Groups": 0.,
 		},
@@ -841,15 +841,15 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*stat_filter_indexes": map[string]any{
+		"*statFilterIndexes": map[string]any{
 			"Items":  2.,
 			"Groups": 1.,
 		},
-		"*statqueue_profiles": map[string]any{
+		"*statQueueProfiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*statqueues": map[string]any{
+		"*statQueues": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
@@ -857,11 +857,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*threshold_filter_indexes": map[string]any{
+		"*thresholdFilterIndexes": map[string]any{
 			"Items":  9.,
 			"Groups": 1.,
 		},
-		"*threshold_profiles": map[string]any{
+		"*thresholdProfiles": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},

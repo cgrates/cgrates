@@ -124,7 +124,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 		"*string:*req.RouteID:supplier3:RP_SUPPLIER3",
 		"*string:*req.RouteID:supplier4:RP_SUPPLIER4",
 	}
-	//get indexes *rate_profiles
+	//get indexes *rateProfiles
 	var reply []string
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{

@@ -39,16 +39,16 @@
 
 "caches":{
 	"partitions": {
-		"*resource_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
+		"*resourceProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
 		// control resources caching
-		"*statqueue_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// statqueue profiles
-		"*threshold_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
+		"*statQueueProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// statqueue profiles
+		"*thresholdProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
 		"*filters": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control filters caching
-		"*route_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
-		"*attribute_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
-		"*charger_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
-		"*rate_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
-		"*action_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
+		"*routeProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
+		"*attributeProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
+		"*chargerProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
+		"*rateProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
+		"*actionProfiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
 		"*accounts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
 	},
 	"replicationConns": [],

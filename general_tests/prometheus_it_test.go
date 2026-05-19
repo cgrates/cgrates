@@ -72,9 +72,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*caches": [{"ConnIDs": ["*localhost", "external"]}]
 	},
 	"cache_ids": [
-		"*statqueue_profiles",
-		"*statqueues",
-		"*stat_filter_indexes",
+		"*statQueueProfiles",
+		"*statQueues",
+		"*statFilterIndexes",
 		"*rpc_connections"
 	],
 	// "apiers_conns": ["*internal", "external"],

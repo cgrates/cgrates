@@ -53,10 +53,10 @@
     "items":{
       "*accounts":{"remote":true, "dbConn": "*default"},
       "*filters": {"remote":true, "dbConn": "*default"},
-      "*route_profiles":{"remote":true, "dbConn": "*default"},
-      "*attribute_profiles":{"remote":true, "dbConn": "*default"},
-      "*charger_profiles": {"remote":true, "dbConn": "*default"},
-      "*load_ids":{"remote":true, "dbConn": "*default"},
+      "*routeProfiles":{"remote":true, "dbConn": "*default"},
+      "*attributeProfiles":{"remote":true, "dbConn": "*default"},
+      "*chargerProfiles": {"remote":true, "dbConn": "*default"},
+      "*loadIds":{"remote":true, "dbConn": "*default"},
       "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
     }
   },
