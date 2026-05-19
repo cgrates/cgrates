@@ -65,7 +65,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()

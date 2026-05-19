@@ -624,7 +624,7 @@ func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 	return cfg.migratorCgrCfg
 }
 
-// DataDbCfg returns the config for DataDb
+// DbCfg returns the config for Db
 func (cfg *CGRConfig) DbCfg() *DbCfg {
 	cfg.lks[DBJSON].Lock()
 	defer cfg.lks[DBJSON].Unlock()
@@ -1020,7 +1020,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	for _, section := range sections {
 		if !needsDB && subsystemsThatNeedDB.Has(section) {
 			needsDB = true
-			cfg.rldCh <- SectionToService[DBJSON] // reload datadb before
+			cfg.rldCh <- SectionToService[DBJSON] // reload db before
 		}
 		if needsDB {
 			break

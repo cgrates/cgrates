@@ -109,7 +109,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
@@ -144,7 +144,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
@@ -219,7 +219,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
@@ -338,7 +338,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
@@ -378,7 +378,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
@@ -406,7 +406,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfilesCountErrMock(t *testing.T) {
@@ -673,7 +673,7 @@ func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
@@ -719,7 +719,7 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
@@ -767,5 +767,5 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

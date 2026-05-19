@@ -106,7 +106,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
@@ -141,7 +141,7 @@ func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
@@ -217,7 +217,7 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
@@ -337,7 +337,7 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
@@ -377,7 +377,7 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
@@ -405,7 +405,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
@@ -451,7 +451,7 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
@@ -499,7 +499,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
@@ -985,5 +985,5 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

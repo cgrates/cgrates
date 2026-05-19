@@ -80,7 +80,7 @@ func (s *IPService) Shutdown(ctx *context.Context) {
 	s.storeIPAllocationsList(ctx)
 }
 
-// backup will regularly store IP allocations changed to dataDB
+// backup will regularly store IP allocations changed to DB
 func (s *IPService) runBackup(ctx *context.Context) {
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -196,7 +196,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 				}
 			}
 		}()
-	} else { // select the IP allocation IDs out of dataDB
+	} else { // select the IP allocation IDs out of DB
 		matchedItemIDs, err := engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.IPsCfg().StringIndexedFields,
 			s.cfg.IPsCfg().PrefixIndexedFields,

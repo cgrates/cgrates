@@ -104,7 +104,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileCheckErrors(t *testing.T) {
@@ -139,7 +139,7 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsSetActionProfileCheckErrors(t *testing.T) {
@@ -216,7 +216,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
@@ -331,7 +331,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
@@ -371,7 +371,7 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
@@ -399,7 +399,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
@@ -678,7 +678,7 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
@@ -724,7 +724,7 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
@@ -772,5 +772,5 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }

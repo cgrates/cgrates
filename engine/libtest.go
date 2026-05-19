@@ -47,7 +47,7 @@ import (
 
 func InitDB(cfg *config.CGRConfig) error {
 	for _, dbConn := range cfg.DbCfg().DBConns {
-		dataDB, err := NewDataDBConn(dbConn.Type,
+		dataDB, err := NewDBConn(dbConn.Type,
 			dbConn.Host, dbConn.Port,
 			dbConn.Name, dbConn.User,
 			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
@@ -81,7 +81,7 @@ func InitDB(cfg *config.CGRConfig) error {
 }
 
 func InitConfigDB(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.ConfigDBCfg().Type,
+	d, err := NewDBConn(cfg.ConfigDBCfg().Type,
 		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
 		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
@@ -171,8 +171,8 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableR
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	dataDBs := make(map[string]DataDB, len(dm.DataDB()))
-	for connID, dataDB := range dm.DataDB() {
+	dataDBs := make(map[string]DataDB, len(dm.DB()))
+	for connID, dataDB := range dm.DB() {
 		dataDBs[connID] = dataDB
 	}
 	dbcManager := NewDBConnManager(dataDBs, dm.cfg.DbCfg())
@@ -344,7 +344,7 @@ type TestEngine struct {
 	DBCfg            DBCfg             // custom db settings for dynamic setup (overrides static config)
 	Encoding         string            // data encoding type (e.g. JSON, GOB)
 	LogBuffer        io.Writer         // captures log output of the test environment
-	PreserveDataDB   bool              // prevents automatic data_db flush when set
+	PreserveDB       bool              // prevents automatic data_db flush when set
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
@@ -367,7 +367,7 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 	t.Helper()
 	ng.extraFlags = extraFlags
 	ng.cfg = parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg, ng.Persist)
-	FlushDBs(t, ng.cfg, !ng.PreserveDataDB)
+	FlushDBs(t, ng.cfg, !ng.PreserveDB)
 	loadData := ng.TpPath != "" || len(ng.TpFiles) != 0
 	if loadData {
 		if ng.TpPath == "" {
@@ -505,19 +505,22 @@ type DBConnOpts struct {
 
 // DBConn contains database connection parameters.
 type DBConn struct {
-	Type     *string    `json:"db_type,omitempty"`
-	Host     *string    `json:"db_host,omitempty"`
-	Port     *int       `json:"db_port,omitempty"`
-	Name     *string    `json:"db_name,omitempty"`
-	User     *string    `json:"db_user,omitempty"`
-	Password *string    `json:"db_password,omitempty"`
-	Opts     DBConnOpts `json:"opts"`
+	Type                *string    `json:"db_type,omitempty"`
+	Host                *string    `json:"db_host,omitempty"`
+	Port                *int       `json:"db_port,omitempty"`
+	Name                *string    `json:"db_name,omitempty"`
+	User                *string    `json:"db_user,omitempty"`
+	Password            *string    `json:"db_password,omitempty"`
+	ReplicationConns    *[]string  `json:"replication_conns"`
+	ReplicationInterval *string    `json:"replication_interval,omitempty"`
+	Opts                DBConnOpts `json:"opts"`
 }
 
 // Item contains db item parameters
 type Item struct {
-	Limit  *int    `json:"limit,omitempty"`
-	DbConn *string `json:"dbConn,omitempty"`
+	Limit     *int    `json:"limit,omitempty"`
+	Replicate *bool   `json:"replicate,omitempty"`
+	DbConn    *string `json:"dbConn,omitempty"`
 }
 
 // DBParams contains database connection parameters.

@@ -40,7 +40,7 @@ type StatsOpts struct {
 type StatSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
-	StoreInterval          time.Duration // Dump regularly from cache into dataDB
+	StoreInterval          time.Duration // Dump regularly from cache into DB
 	StoreUncompressedLimit int
 	Conns                  map[string][]*DynamicConns
 	StringIndexedFields    *[]string

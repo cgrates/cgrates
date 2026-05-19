@@ -323,7 +323,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	return
 }
 
-// restoreAccounts will restore the accounts in DataDB out of their backups if present
+// restoreAccounts will restore the accounts in DB out of their backups if present
 func restoreAccounts(ctx *context.Context, dm *engine.DataManager,
 	acnts []*utils.AccountWithLock, bkps []utils.AccountBalancesBackup) {
 	for i, bkp := range bkps {

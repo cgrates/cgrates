@@ -65,7 +65,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DBService)
 
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()

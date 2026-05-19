@@ -39,7 +39,7 @@ type TrendProfile struct {
 	MinItems        int     // minimum number of items for building Trends
 	CorrelationType string  // *last, *average
 	Tolerance       float64 // allow this deviation margin for *constant trend
-	Stored          bool    // store the Trend in dataDB
+	Stored          bool    // store the Trend in DB
 	ThresholdIDs    []string
 }
 

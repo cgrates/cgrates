@@ -50,11 +50,11 @@ enabled
     Enables/disables the IPs component. Values: <true|false>
 
 store_interval
-    How often to dump allocations to dataDB. Values: <""|duration>
+    How often to dump allocations to DB. Values: <""|duration>
 
-    - `"-1"`: Always sync IPs from cache and dataDB in real-time
+    - `"-1"`: Always sync IPs from cache and DB in real-time
     - `""`: Disabled
-    - Valid duration (e.g., "10s", "1h", "15m"): Updates IPs from dataDB with cached version at specified intervals
+    - Valid duration (e.g., "10s", "1h", "15m"): Updates IPs from DB with cached version at specified intervals
 
 indexed_selects
     Enable profile matching exclusively on indexes for better performance. Values: <true|false>

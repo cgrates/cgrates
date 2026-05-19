@@ -60,7 +60,7 @@ func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanage
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dm := srvDeps[utils.DB].(*DataDBService).DataManager()
+	dm := srvDeps[utils.DB].(*DBService).DataManager()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

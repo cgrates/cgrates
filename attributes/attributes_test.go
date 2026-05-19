@@ -1607,11 +1607,11 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 
 func TestAttributeIndexer(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -1685,10 +1685,10 @@ func TestAttributeIndexer(t *testing.T) {
 
 func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -1812,11 +1812,11 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 
 func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -1933,11 +1933,11 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 
 func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2048,11 +2048,11 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 
 func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2150,11 +2150,11 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 
 func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2269,11 +2269,11 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 
 func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2382,11 +2382,11 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 
 func TestAttributeProcessValue(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2456,11 +2456,11 @@ func TestAttributeProcessValue(t *testing.T) {
 
 func TestAttributeAttributeFilterIDs(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2536,11 +2536,11 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 
 func TestAttributeProcessEventConstant(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2611,11 +2611,11 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 
 func TestAttributeProcessEventVariable(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2693,11 +2693,11 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 
 func TestAttributeProcessEventComposed(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2780,11 +2780,11 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 
 func TestAttributeProcessEventSum(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2859,11 +2859,11 @@ func TestAttributeProcessEventSum(t *testing.T) {
 
 func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -2940,11 +2940,11 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 
 func TestAttributeProcessEventValueExponent(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -3030,11 +3030,11 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		b.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
 		b.Errorf("Expecting: true got :%+v", test)
@@ -3096,11 +3096,11 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		b.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
 		b.Errorf("Expecting: true got :%+v", test)
@@ -3152,11 +3152,11 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 
 func TestGetAttributeProfileFromInline(t *testing.T) {
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)
@@ -4058,10 +4058,10 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
 	//refresh the DM
-	if err := dmAtr.DataDB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if test, err := dmAtr.DataDB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("Expecting: true got :%+v", test)

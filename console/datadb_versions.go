@@ -23,46 +23,46 @@ import (
 )
 
 func init() {
-	c := &CmdGetDataDBVersions{
-		name: "datadb_versions",
-		// rpcMethod: utils.APIerSv1GetDataDBVersions,
+	c := &CmdGetDBVersions{
+		name: "db_versions",
+		// rpcMethod: utils.APIerSv1GetDBVersions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetDataDBVersions struct {
+type CmdGetDBVersions struct {
 	name      string
 	rpcMethod string
 	rpcParams *EmptyWrapper
 	*CommandExecuter
 }
 
-func (self *CmdGetDataDBVersions) Name() string {
+func (self *CmdGetDBVersions) Name() string {
 	return self.name
 }
 
-func (self *CmdGetDataDBVersions) RpcMethod() string {
+func (self *CmdGetDBVersions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDataDBVersions) RpcParams(reset bool) any {
+func (self *CmdGetDBVersions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &EmptyWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetDataDBVersions) PostprocessRpcParams() error {
+func (self *CmdGetDBVersions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDataDBVersions) RpcResult() any {
+func (self *CmdGetDBVersions) RpcResult() any {
 	var s engine.Versions
 	return &s
 }
 
-func (self *CmdGetDataDBVersions) ClientArgs() (args []string) {
+func (self *CmdGetDBVersions) ClientArgs() (args []string) {
 	return
 }

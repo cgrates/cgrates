@@ -265,7 +265,7 @@ func (t *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error)
 	return
 }
 
-// storeTrends stores modified trends from cache in dataDB
+// storeTrends stores modified trends from cache in DB
 // Reschedules failed trend IDs for next storage cycle.
 // This function is safe for concurrent use.
 func (t *TrendS) storeTrends(ctx *context.Context) {
