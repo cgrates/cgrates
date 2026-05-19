@@ -63,7 +63,7 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	},
 	"items": {
 		"*accounts": {"replicate": true},
-		"*attribute_profiles": {"replicate": true}
+		"*attributeProfiles": {"replicate": true}
 	}
 },
 "rpcConns": {

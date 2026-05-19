@@ -105,38 +105,38 @@
 // 	"items":{
 // 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*resourceProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*ipProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*ipAllocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*statQueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*routeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*attributeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*rateProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*actionProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*loadIds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*ipFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rankingProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*trendProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
 // 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
 // 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"} // Compatible only for Internal, MySQL, Mongo and PostgresSQL databases
 // 	},
 // 	"opts":{
@@ -218,41 +218,41 @@
 
 // "caches":{
 // 	"partitions": {
-// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
+// 		"*resourceProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
 // 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
 // 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
-// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
-// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
-// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
+// 		"*statQueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statQueues with metrics
+// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 // 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
-// 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+// 		"*trendProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 // 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
 // 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control filters caching
-// 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
-// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
-// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
-// 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rate profile caching
-// 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
+// 		"*routeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
+// 		"*attributeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
+// 		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
+// 		"*rateProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rate profile caching
+// 		"*actionProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
 // 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
-// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
-// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
-// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
-// 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
-// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
-// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ranking profile caching
+// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
+// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
+// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
+// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
+// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
+// 		"*rankingProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ranking profile caching
 // 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rankings caching
-// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
-// 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control rate profile filter indexes caching
-// 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate filter indexes caching
-// 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control action profile filter indexes caching
-// 		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
-// 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
+// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
+// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control rate profile filter indexes caching
+// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate filter indexes caching
+// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control action profile filter indexes caching
+// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
+// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
 // 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},			// diameter messages caching
 // 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},				// RPC responses caching
 // 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
 // 		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
 // 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
-// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
+// 		"*loadIds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
 // 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// RPC connections caching
 // 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// User cache
 // 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// stirShaken cache keys
@@ -1259,8 +1259,8 @@
 // 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
 // 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
 // 			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*rateProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*actionProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 // 			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
 // 			"*trends":{"limit": -1, "ttl": "5s", "static_ttl": false},
 // 			"*rankings":{"limit": -1, "ttl": "5s", "static_ttl": false}
@@ -1413,7 +1413,7 @@
 // 				]
 // 			},
 // 			{
-// 				"type": "*rate_profiles",	// data source type
+// 				"type": "*rateProfiles",	// data source type
 // 				"file_name": "Rates.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -1436,7 +1436,7 @@
 // 				]
 // 			},
 // 			{
-// 				"type": "*action_profiles",	// data source type
+// 				"type": "*actionProfiles",	// data source type
 // 				"file_name": "Actions.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -1536,10 +1536,10 @@
 // 	"users_filters":[],
 // 	"fromItems":{
 // 		"*accounts": {"dbConn": "*default"},
-// 		"*statqueue_profiles": {"dbConn": "*default"},
+// 		"*statQueueProfiles": {"dbConn": "*default"},
 // 		"*filters": {"dbConn": "*default"},
-// 		"*charger_profiles": {"dbConn": "*default"},
-// 		"*load_ids": {"dbConn": "*default"},
+// 		"*chargerProfiles": {"dbConn": "*default"},
+// 		"*loadIds": {"dbConn": "*default"},
 // 		"*versions": {"dbConn": "*default"}
 // 	},
 // 	"out_db_opts":{

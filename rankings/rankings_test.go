@@ -84,9 +84,9 @@ func TestRankingProfileLockKey(t *testing.T) {
 		id       string
 		expected string
 	}{
-		{"cgrates.org", "01", "*ranking_profiles:cgrates.org:01"},
-		{"cgrates.org", "02", "*ranking_profiles:cgrates.org:02"},
-		{"cgrates.org", "03", "*ranking_profiles:cgrates.org:03"},
+		{"cgrates.org", "01", "*rankingProfiles:cgrates.org:01"},
+		{"cgrates.org", "02", "*rankingProfiles:cgrates.org:02"},
+		{"cgrates.org", "03", "*rankingProfiles:cgrates.org:03"},
 	}
 
 	for _, test := range tests {

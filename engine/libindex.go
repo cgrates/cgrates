@@ -174,7 +174,7 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 }
 
 // updatedIndexes will compare the old filtersIDs with the new ones and only update the filters indexes that are added/removed
-// idxItmType - the index object type(e.g.*attribute_filter_indexes, *rate_filter_indexes, *threshold_filter_indexes)
+// idxItmType - the index object type(e.g.*attributeFilterIndexes, *rateFilterIndexes, *thresholdFilterIndexes)
 // tnt - the tenant of the object
 // grp - the rate profile id for rate from RateProfile(sub indexes); for all the rest the grp is "" (DispatcherPrf have a separate function)
 // itemID - the object id

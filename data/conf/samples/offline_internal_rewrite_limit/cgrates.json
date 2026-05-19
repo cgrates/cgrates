@@ -19,7 +19,7 @@
 			}
 		},
         "items":{
-            "*charger_profiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
+            "*chargerProfiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
         }
     },
 	"config_db": {

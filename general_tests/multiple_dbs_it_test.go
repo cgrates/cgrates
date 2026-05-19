@@ -363,7 +363,7 @@ func TestMultipleDBs(t *testing.T) {
 			if info.IsDir() {
 				dirs++
 			} else {
-				if !strings.HasPrefix(root, "/tmp/internal_db/db/*charger_filter_indexes") &&
+				if !strings.HasPrefix(root, "/tmp/internal_db/db/*chargerFilterIndexes") &&
 					!strings.HasPrefix(root, "/tmp/internal_db/db/*versions") {
 					t.Fatalf("got unexpected folder <%s>", root)
 				}
@@ -706,7 +706,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 			if info.IsDir() {
 				dirs++
 			} else {
-				if !strings.HasPrefix(root, "/tmp/internal_db/db/*charger_filter_indexes") &&
+				if !strings.HasPrefix(root, "/tmp/internal_db/db/*chargerFilterIndexes") &&
 					!strings.HasPrefix(root, "/tmp/internal_db/db/*versions") {
 					t.Fatalf("got unexpected folder <%s>", root)
 				}
@@ -744,7 +744,7 @@ func TestMultipleDBsInternalFail(t *testing.T) {
 		},
 	},
 	"items":{
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
+		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
 	},
 	"opts": {
 		"internalDBDumpPath": "/tmp/internal_db/db",

@@ -30,7 +30,7 @@
 		"data":[	
 			{
 				"id": "Timings",
-				"type": "*rate_profiles",						
+				"type": "*rateProfiles",						
 				"file_name": "Timings.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -50,7 +50,7 @@
 			},
 			{
 				"id": "Destinations",
-				"type": "*rate_profiles",						
+				"type": "*rateProfiles",						
 				"file_name": "Destinations.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -61,7 +61,7 @@
 			},
 			{
 				"id": "Rates",
-				"type": "*rate_profiles",						
+				"type": "*rateProfiles",						
 				"file_name": "Rates.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -81,7 +81,7 @@
 			},
 			{
 				"id": "DestinationRates",
-				"type": "*rate_profiles",						
+				"type": "*rateProfiles",						
 				"file_name": "DestinationRates.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -93,7 +93,7 @@
 			},
 			{
 				"id": "RatingPlans",
-				"type": "*rate_profiles",						
+				"type": "*rateProfiles",						
 				"file_name": "RatingPlans.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -122,7 +122,7 @@
 		"data":[
 			{
 				"id": "RatingProfiles",
-				"type": "*rate_profiles",
+				"type": "*rateProfiles",
 				"file_name": "RatingProfiles.csv",
 				"fields": [
 					{"path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},

@@ -614,7 +614,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 
 	eIdxes = map[string]utils.StringSet{
-		"*attribute_filter_indexes": {
+		"*attributeFilterIndexes": {
 			"AttrPrf": struct{}{},
 		},
 	}
@@ -765,7 +765,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	}
 
 	eIdxes = map[string]utils.StringSet{
-		"*attribute_filter_indexes": {
+		"*attributeFilterIndexes": {
 			"AttrPrf": struct{}{},
 		},
 	}

@@ -28,12 +28,12 @@ import (
 const (
 	v2AccountsCol          = "accounts"
 	v1ActionTriggersCol    = "action_triggers"
-	v1AttributeProfilesCol = "attribute_profiles"
-	v2ThresholdProfileCol  = "threshold_profiles"
+	v1AttributeProfilesCol = "attributeProfiles"
+	v2ThresholdProfileCol  = "thresholdProfiles"
 	v1AliasCol             = "aliases"
 	v1UserCol              = "users"
 	v1DerivedChargersCol   = "derived_chargers"
-	v2StatsCol             = "statqueues"
+	v2StatsCol             = "statQueues"
 )
 
 type mongoMigrator struct {

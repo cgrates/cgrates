@@ -67,12 +67,12 @@
             "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
         },
         {
-            "type": "*rate_profiles",						
+            "type": "*rateProfiles",						
             "file_name": "Rates.csv",				
             "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
         },
         {
-            "type": "*action_profiles",						
+            "type": "*actionProfiles",						
             "file_name": "Actions.csv",				
             "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
         },

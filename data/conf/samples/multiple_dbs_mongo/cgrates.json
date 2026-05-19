@@ -38,8 +38,8 @@
 		}
 	},
 	"items":{
-		"*charger_profiles": {"dbConn": "mongoDBConn"},
-		"*charger_filter_indexes" : {"dbConn": "internalDBConn"},
+		"*chargerProfiles": {"dbConn": "mongoDBConn"},
+		"*chargerFilterIndexes" : {"dbConn": "internalDBConn"},
 		"*cdrs": {"dbConn": "mongoDBConn"}
 	}
 },

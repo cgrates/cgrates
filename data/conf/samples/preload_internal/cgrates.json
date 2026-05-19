@@ -34,7 +34,7 @@
       "tp_out_path": "/tmp/RatesOut",
       "data":[
         {
-          "type": "*rate_profiles",
+          "type": "*rateProfiles",
           "file_name": "Rates.csv",
           "fields": [
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -113,7 +113,7 @@
       "tp_out_path": "/tmp/ActionsOut",
       "data":[
         {
-          "type": "*action_profiles",
+          "type": "*actionProfiles",
           "file_name": "Actions.csv",
           "fields": [
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
