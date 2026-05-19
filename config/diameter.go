@@ -50,6 +50,7 @@ type DiameterAgentCfg struct {
 	RARTemplate                string
 	SNRTemplate                string
 	SLRTemplate                string
+	STRTemplate                string
 	ForcedDisconnect           string
 	ConnStatusStatQueueIDs     []string
 	ConnStatusThresholdIDs     []string
@@ -131,6 +132,9 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg, separator 
 	if jc.SLRTemplate != nil {
 		da.SLRTemplate = *jc.SLRTemplate
 	}
+	if jc.STRTemplate != nil {
+		da.STRTemplate = *jc.STRTemplate
+	}
 	if jc.ForcedDisconnect != nil {
 		da.ForcedDisconnect = *jc.ForcedDisconnect
 	}
@@ -197,6 +201,7 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) map[string]any {
 		utils.RARTemplateCfg:                da.RARTemplate,
 		utils.SNRTemplateCfg:                da.SNRTemplate,
 		utils.SLRTemplateCfg:                da.SLRTemplate,
+		utils.STRTemplateCfg:                da.STRTemplate,
 		utils.ForcedDisconnectCfg:           da.ForcedDisconnect,
 		utils.ConnHealthCheckIntervalCfg:    da.ConnHealthCheckInterval.String(),
 		utils.StatSConnsCfg:                 stripInternalConns(da.StatSConns),
@@ -255,6 +260,7 @@ func (da *DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		RARTemplate:                da.RARTemplate,
 		SNRTemplate:                da.SNRTemplate,
 		SLRTemplate:                da.SLRTemplate,
+		STRTemplate:                da.STRTemplate,
 		ForcedDisconnect:           da.ForcedDisconnect,
 		ConnStatusStatQueueIDs:     slices.Clone(da.ConnStatusStatQueueIDs),
 		ConnStatusThresholdIDs:     slices.Clone(da.ConnStatusThresholdIDs),

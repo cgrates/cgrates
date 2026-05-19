@@ -1180,6 +1180,7 @@ const (
 	MetaASR      = "*asr"
 	MetaSNR      = "*snr" // diameter Sy Spending Status Notification Request
 	MetaSLR      = "*slr" // diameter Sy Spending Limit Request
+	MetaSTR      = "*str" // diameter Sy Session Termination Request
 	MetaACD      = "*acd"
 	MetaTCD      = "*tcd"
 	MetaACC      = "*acc"
@@ -2633,6 +2634,7 @@ const (
 	RARTemplateCfg                = "rar_template"
 	SNRTemplateCfg                = "snr_template"
 	SLRTemplateCfg                = "slr_template"
+	STRTemplateCfg                = "str_template"
 	ForcedDisconnectCfg           = "forced_disconnect"
 	ConnStatusStatQueueIDsCfg     = "conn_status_stat_queue_ids"
 	ConnStatusThresholdIDsCfg     = "conn_status_threshold_ids"

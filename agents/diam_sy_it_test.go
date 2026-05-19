@@ -1557,6 +1557,7 @@ RP_1001,DR_DATA,*any,10`,
 		Tenant: "cgrates.org",
 		ID:     utils.MetaSy + utils.Underline + syOriginID,
 		FilterIDs: []string{
+			"*lte:~*asm.BalanceSummaries.balance_data.Value:0",
 			"*string:~*asm.BalanceSummaries.*default.ID:balance_data",
 			"*string:~*req.AccountID:1001",
 		},

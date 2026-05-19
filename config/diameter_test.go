@@ -48,6 +48,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		RARTemplate:                utils.StringPointer("randomTemplate"),
 		SNRTemplate:                utils.StringPointer("randomTemplate"),
 		SLRTemplate:                utils.StringPointer("randomTemplate"),
+		STRTemplate:                utils.StringPointer("randomTemplate"),
 		ForcedDisconnect:           utils.StringPointer("forced"),
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
@@ -82,6 +83,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		RARTemplate:                "randomTemplate",
 		SNRTemplate:                "randomTemplate",
 		SLRTemplate:                "randomTemplate",
+		STRTemplate:                "randomTemplate",
 		ForcedDisconnect:           "forced",
 		RequestProcessors: []*RequestProcessor{
 			{
@@ -181,6 +183,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.ASRTemplateCfg:                "",
 		utils.SLRTemplateCfg:                "",
 		utils.SNRTemplateCfg:                "",
+		utils.STRTemplateCfg:                "",
 		utils.CeApplicationsCfg:             []string{"Base"},
 		utils.DictionariesPathCfg:           "/usr/share/cgrates/diameter/dict/",
 		utils.DictionariesAppendDefaultsCfg: true,
@@ -259,6 +262,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ASRTemplateCfg:                "",
 		utils.SLRTemplateCfg:                "",
 		utils.SNRTemplateCfg:                "",
+		utils.STRTemplateCfg:                "",
 		utils.CeApplicationsCfg:             []string{"Nokia.4"},
 		utils.DictionariesPathCfg:           "/usr/share/cgrates/diameter",
 		utils.DictionariesAppendDefaultsCfg: true,
