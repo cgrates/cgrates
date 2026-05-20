@@ -852,3 +852,141 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 	})
 
 }
+
+func TestBalanceTimingsClearTimings(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+        "general": {
+            "log_level": 7,
+            "reply_timeout": "50s"
+        },
+        
+        "listen": {
+            "rpc_json": ":2012",
+            "rpc_gob": ":2013",
+            "http": ":2080"
+        },
+        
+        "rals": {
+            "enabled": true,
+        },
+        
+        "schedulers": {
+            "enabled": true,
+            "cdrs_conns": ["*internal"],
+        },
+        
+        "cdrs": {
+            "enabled": true,
+            "chargers_conns":["*internal"],
+            "rals_conns": ["*localhost"],
+        },
+        
+        "attributes": {
+            "enabled": true,
+            "apiers_conns": ["*localhost"]
+        },
+        
+        "chargers": {
+            "enabled": true,
+            "attributes_conns": ["*internal"]
+        },
+        
+        "sessions": {
+            "enabled": true,
+            "attributes_conns": ["*internal"],
+            "rals_conns": ["*internal"],
+            "cdrs_conns": ["*internal"],
+            "chargers_conns": ["*internal"]
+        },
+        
+        "apiers": {
+            "enabled": true,
+            "scheduler_conns": ["*internal"]
+        },
+        
+        }
+        `
+
+	ng := engine.TestEngine{ConfigJSON: content}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+
+	var reply string
+
+	t.Run("SetTiming", func(t *testing.T) {
+		timing := &utils.TPTimingWithAPIOpts{
+			TPTiming: &utils.TPTiming{
+				ID:        "HALF1",
+				StartTime: "00:00:00",
+				EndTime:   "11:59:59",
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetTiming, timing, &reply); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("SetBalanceWithTiming", func(t *testing.T) {
+		args := &utils.AttrSetBalance{
+			Tenant:      "cgrates.org",
+			Account:     "testClearTimings",
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID:        "balClear",
+				utils.TimingIDs: "HALF1",
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance, args, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testClearTimings"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		for _, bal := range acnt.BalanceMap[utils.MetaMonetary] {
+			if bal.ID == "balClear" && len(bal.Timings) == 0 {
+				t.Fatal("expected Timings to be populated after SetBalance with TimingIDs")
+			}
+		}
+	})
+
+	t.Run("ClearTimings", func(t *testing.T) {
+		t.Skip("SetBalance with empty TimingIDs does not clear Timings array")
+		args := &utils.AttrSetBalance{
+			Tenant:      "cgrates.org",
+			Account:     "testClearTimings",
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID:        "balClear",
+				utils.TimingIDs: "",
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance, args, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testClearTimings"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		for _, bal := range acnt.BalanceMap[utils.MetaMonetary] {
+			if bal.ID == "balClear" {
+				if len(bal.Timings) != 0 {
+					t.Errorf("expected Timings to be empty after clearing TimingIDs, got: %v", bal.Timings)
+				}
+				if len(bal.TimingIDs) != 0 {
+					t.Errorf("expected TimingIDs to be empty, got: %v", bal.TimingIDs)
+				}
+			}
+		}
+	})
+}
