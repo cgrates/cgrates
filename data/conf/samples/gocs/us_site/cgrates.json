@@ -59,8 +59,8 @@
       "*routeProfiles":{"replicate":false, "dbConn": "*default"},
       "*attributeProfiles":{"replicate":false, "dbConn": "*default"},
       "*chargerProfiles": {"replicate":false, "dbConn": "*default"},
-      "*loadIds":{"replicate":false, "dbConn": "*default"},
-      "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+      "*loadIDs":{"replicate":false, "dbConn": "*default"},
+      "*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
     }
   },
 

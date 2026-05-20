@@ -676,7 +676,7 @@ func (iI *ItemOpts) Equals(itm2 *ItemOpts) bool {
 type ItemOptsJson struct {
 	Limit      *int
 	Ttl        *string
-	Static_ttl *bool
+	Static_ttl *bool `json:"staticTTL"`
 	Remote     *bool
 	Replicate  *bool
 	DbConn     *string

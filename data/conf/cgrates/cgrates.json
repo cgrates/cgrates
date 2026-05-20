@@ -103,41 +103,41 @@
 // 		},
 // 	},
 // 	"items":{
-// 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*resourceProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*ipProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*ipAllocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*statQueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*routeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*attributeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*rateProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*actionProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*loadIds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*ipFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*rankingProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*trendProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
-// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
-// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"} // Compatible only for Internal, MySQL, Mongo and PostgresSQL databases
+// 		"*accounts": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*actions": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*resourceProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*resources": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*ipProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*ipAllocations": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*statQueues": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*thresholds": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*filters": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*routeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*attributeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*rateProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*actionProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*loadIDs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*versions": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*ipFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rankingProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*rankings": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*trendProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*trends": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
+// 		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"} // Compatible only for Internal, MySQL, Mongo and PostgresSQL databases
 // 	},
 // 	"opts":{
 // 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
@@ -218,48 +218,48 @@
 
 // "caches":{
 // 	"partitions": {
-// 		"*resourceProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
-// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
-// 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
-// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
-// 		"*statQueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statQueues with metrics
-// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
-// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
-// 		"*trendProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
-// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
-// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control filters caching
-// 		"*routeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
-// 		"*attributeProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
-// 		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
-// 		"*rateProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rate profile caching
-// 		"*actionProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
-// 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
-// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
-// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
-// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
-// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
-// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
-// 		"*rankingProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ranking profile caching
-// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rankings caching
-// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
-// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control rate profile filter indexes caching
-// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate filter indexes caching
-// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control action profile filter indexes caching
-// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
-// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
-// 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},			// diameter messages caching
-// 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},				// RPC responses caching
-// 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
-// 		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
-// 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
-// 		"*loadIds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
-// 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// RPC connections caching
-// 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// User cache
-// 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// stirShaken cache keys
-// 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false},
-// 		"*sentrypeer":{"limit": -1, "ttl": "24h", "static_ttl": true, "remote":false, "replicate": false},
-// 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// caps cached samples
-// 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
+// 		"*resourceProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
+// 		"*resources": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
+// 		"*eventResources": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// matching resources to events
+// 		"*statQueueProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
+// 		"*statQueues": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// statQueues with metrics
+// 		"*thresholdProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+// 		"*thresholds": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
+// 		"*trendProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+// 		"*trends": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
+// 		"*filters": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control filters caching
+// 		"*routeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
+// 		"*attributeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
+// 		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
+// 		"*rateProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control rate profile caching
+// 		"*actionProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
+// 		"*accounts": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
+// 		"*resourceFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
+// 		"*statFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
+// 		"*thresholdFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
+// 		"*routeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
+// 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
+// 		"*rankingProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control ranking profile caching
+// 		"*rankings": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control rankings caching
+// 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
+// 		"*rateProfileFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control rate profile filter indexes caching
+// 		"*rateFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control rate filter indexes caching
+// 		"*actionProfileFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control action profile filter indexes caching
+// 		"*accountFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
+// 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
+// 		"*diameterMessages": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},			// diameter messages caching
+// 		"*rpcResponses": {"limit": 0, "ttl": "2s", "staticTTL": false, "remote":false, "replicate": false},				// RPC responses caching
+// 		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
+// 		"*eventCharges": {"limit": 0, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
+// 		"*cdrIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
+// 		"*loadIDs": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
+// 		"*rpcConnections": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// RPC connections caching
+// 		"*uch": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},					// User cache
+// 		"*stir": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},					// stirShaken cache keys
+// 		"*apiban":{"limit": -1, "ttl": "2m", "staticTTL": false, "remote":false, "replicate": false},
+// 		"*sentrypeer":{"limit": -1, "ttl": "24h", "staticTTL": true, "remote":false, "replicate": false},
+// 		"*capsEvents": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// caps cached samples
+// 		"*replicationHosts": {"limit": 0, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
 // 	},
 // 	"replicationConns": [],
 // 	"remoteConns": []	// the conns that are queried when the items are not found in cache
@@ -479,7 +479,7 @@
 // 	"enabled": false,		// starts the EventReader service: <true|false>
 // 	"attributes_conns":[],		// RPC Connections IDs
 // 	"cache": {
-// 		"*fileCSV": {"limit": -1, "ttl": "5s", "static_ttl": false}
+// 		"*fileCSV": {"limit": -1, "ttl": "5s", "staticTTL": false}
 // 	},
 // 	"exporters": [
 // 		{
@@ -1251,18 +1251,18 @@
 // 			// "*stopOnError": false
 // 		},
 // 		"cache":{
-// 			"*filters":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*attributes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*resources":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*stats":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*rateProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*actionProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*trends":{"limit": -1, "ttl": "5s", "static_ttl": false},
-// 			"*rankings":{"limit": -1, "ttl": "5s", "static_ttl": false}
+// 			"*filters":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*attributes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*resources":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*stats":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*thresholds":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*routes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*chargers":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*rateProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*actionProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*accounts":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*trends":{"limit": -1, "ttl": "5s", "staticTTL": false},
+// 			"*rankings":{"limit": -1, "ttl": "5s", "staticTTL": false}
 // 		},
 // 		"data":[					// data profiles to load
 // 			{
@@ -1538,7 +1538,7 @@
 // 		"*statQueueProfiles": {"dbConn": "*default"},
 // 		"*filters": {"dbConn": "*default"},
 // 		"*chargerProfiles": {"dbConn": "*default"},
-// 		"*loadIds": {"dbConn": "*default"},
+// 		"*loadIDs": {"dbConn": "*default"},
 // 		"*versions": {"dbConn": "*default"}
 // 	},
 // 	"out_db_opts":{

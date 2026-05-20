@@ -52,9 +52,9 @@
 		"*attributeProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
 		"*chargerProfiles": {"remote":true,"replicate":false, "dbConn": "*default"},
 		"*rateProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*loadIds":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*loadIDs":{"remote":true,"replicate":false, "dbConn": "*default"},
 		"*actionProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 

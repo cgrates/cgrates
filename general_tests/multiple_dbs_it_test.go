@@ -742,7 +742,7 @@ func TestMultipleDBsInternalFail(t *testing.T) {
 		},
 	},
 	"items":{
-		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
+		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
 	},
 	"opts": {
 		"internalDBDumpPath": "/tmp/internal_db/db",

@@ -75,7 +75,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*statQueueProfiles",
 		"*statQueues",
 		"*statFilterIndexes",
-		"*rpc_connections"
+		"*rpcConnections"
 	],
 	// "apiers_conns": ["*internal", "external"],
 	"conns": {
