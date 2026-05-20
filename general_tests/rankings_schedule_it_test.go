@@ -46,25 +46,25 @@ func TestRankingSchedule(t *testing.T) {
 		"level": 7
 	},
 	"db": {
-		"db_conns": {
+		"dbConns": {
 			"*default": {
-				"db_type": "redis",
-				"db_host": "127.0.0.1",
-				"db_port": 6379,
-				"db_name": "10",
-				"db_user": "cgrates"
+				"dbType": "redis",
+				"dbHost": "127.0.0.1",
+				"dbPort": 6379,
+				"dbName": "10",
+				"dbUser": "cgrates"
 			},
 			"StorDB": {
-				"db_type": "mysql",
-				"db_host": "127.0.0.1",
-				"db_port": 3306,
-				"db_name": "cgrates",
-				"db_user": "cgrates",
-				"db_password": "CGRateS.org"
+				"dbType": "mysql",
+				"dbHost": "127.0.0.1",
+				"dbPort": 3306,
+				"dbName": "cgrates",
+				"dbUser": "cgrates",
+				"dbPassword": "CGRateS.org"
 			}
 		},
 		"items": {
-			"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+			"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 		}
 	},
     "rankings": {

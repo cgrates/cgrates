@@ -12,25 +12,25 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",
-			"db_host": "127.0.0.1",	
-			"db_port": 6379,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "redis",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 6379,
+			"dbName": "10",
+			"dbUser": "cgrates"
     	},
 		"StorDB": {
-			"db_type": "postgres",
-			"db_host": "127.0.0.1",
-			"db_port": 5432,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "postgres",
+			"dbHost": "127.0.0.1",
+			"dbPort": 5432,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -141,9 +141,9 @@
 "tls": {
 	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
 	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
-	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
-	"client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
-	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+	"clientCertificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
+	"clientKey":"/usr/share/cgrates/tls/client.key",					// path to client key
+	"caCertificate":"/usr/share/cgrates/tls/ca.crt",
 },
 
 "dns_agent": {

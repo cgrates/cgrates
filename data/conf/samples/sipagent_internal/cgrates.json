@@ -12,7 +12,7 @@
 },
 
 
-"rpc_conns": {
+"rpcConns": {
 	"*jsonbirpc": {
 		"conns": [{"address": "127.0.0.1:2014", "transport":"*birpc_json"}],
 	},
@@ -20,9 +20,9 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

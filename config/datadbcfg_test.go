@@ -228,9 +228,9 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	dbcfg.DBConns = DBConns{}
 	cfgJSONStr := `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "mongo",
+			"dbType": "mongo",
 			},
 		},
 	}
@@ -252,10 +252,10 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	cfgJSONStr = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "mongo",
-			"db_port": -1,
+			"dbType": "mongo",
+			"dbPort": -1,
 			},
 		},
 	}
@@ -277,10 +277,10 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	cfgJSONStr = `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "*internal",
-			"db_port": -1,
+			"dbType": "*internal",
+			"dbPort": -1,
 				"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
@@ -314,15 +314,15 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	var dbcfg, expected DbCfg
 	cfgJSONStr := `{
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-			"db_host": "127.0.0.1",					// data_db host address
-			"db_port": -1,	 						// data_db port to reach the database
-			"db_name": "10", 						// data_db database name to connect to
-			"db_user": "cgrates", 					// username to use when connecting to data_db
-			"db_password": "password",				// password to use when connecting to data_db
-			"remote_conns":["Conn1"],
+			"dbType": "*redis",					// data_db type: <*redis|*mongo|*internal>
+			"dbHost": "127.0.0.1",					// data_db host address
+			"dbPort": -1,	 						// data_db port to reach the database
+			"dbName": "10", 						// data_db database name to connect to
+			"dbUser": "cgrates", 					// username to use when connecting to data_db
+			"dbPassword": "password",				// password to use when connecting to data_db
+			"remoteConns":["Conn1"],
 			"opts":{
 			"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 	      	},
@@ -357,11 +357,11 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	}
 	cfgJSONStr = `{
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
-			"remote_conns":["Conn1"],
-			"replication_conns":["Conn2"],
+			"dbType": "*internal",					// data_db type: <*redis|*mongo|*internal>
+			"remoteConns":["Conn1"],
+			"replicationConns":["Conn2"],
 			"opts":{
 	        	"internalDBRewriteInterval": "0s",
 	         	"internalDBDumpInterval": "0s"
@@ -397,11 +397,11 @@ func TestDataDBRemoteReplication(t *testing.T) {
 
 	cfgJSONStr = `{
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
-			"remote_conns":["Conn1","Conn2","Conn3"],
-			"replication_conns":["Conn4","Conn5"],
+			"dbType": "*internal",					// data_db type: <*redis|*mongo|*internal>
+			"remoteConns":["Conn1","Conn2","Conn3"],
+			"replicationConns":["Conn4","Conn5"],
 				"opts":{
 					"internalDBRewriteInterval": "0s",
 					"internalDBDumpInterval": "0s"
@@ -437,15 +437,15 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	var dbcfg, expected DbCfg
 	cfgJSONStr := `{
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {	
-			"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-			"db_host": "127.0.0.1",					// data_db host address
-			"db_port": -1,	 						// data_db port to reach the database
-			"db_name": "10", 						// data_db database name to connect to
-			"db_user": "cgrates", 					// username to use when connecting to data_db
-			"db_password": "password",				// password to use when connecting to data_db
-			"remote_conns":["Conn1"],
+			"dbType": "*redis",					// data_db type: <*redis|*mongo|*internal>
+			"dbHost": "127.0.0.1",					// data_db host address
+			"dbPort": -1,	 						// data_db port to reach the database
+			"dbName": "10", 						// data_db database name to connect to
+			"dbUser": "cgrates", 					// username to use when connecting to data_db
+			"dbPassword": "password",				// password to use when connecting to data_db
+			"remoteConns":["Conn1"],
 			"opts": {
 				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 	  		}
@@ -491,22 +491,22 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 
 	cfgJSONStr = `{
 		"db": {								// database used to store runtime data (eg: accounts, cdr stats)
-			"db_conns": {
+			"dbConns": {
 				"*default": {	
-					"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-					"db_host": "127.0.0.1",					// data_db host address
-					"db_port": -1,	 						// data_db port to reach the database
-					"db_name": "10", 						// data_db database name to connect to
-					"db_user": "cgrates", 					// username to use when connecting to data_db
-					"db_password": "password",				// password to use when connecting to data_db
-					"remote_conns":["Conn1"],
+					"dbType": "*redis",					// data_db type: <*redis|*mongo|*internal>
+					"dbHost": "127.0.0.1",					// data_db host address
+					"dbPort": -1,	 						// data_db port to reach the database
+					"dbName": "10", 						// data_db database name to connect to
+					"dbUser": "cgrates", 					// username to use when connecting to data_db
+					"dbPassword": "password",				// password to use when connecting to data_db
+					"remoteConns":["Conn1"],
 					"opts": {
 				    "redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 		            },
 				},
 			},
 			"items":{ 
-				"*load_ids":{"remote":true, "replicate":true}, 
+				"*loadIDs":{"remote":true, "replicate":true}, 
 			
 			  }	
 			}
@@ -546,24 +546,24 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 
 	cfgJSONStr = `{
 		"db": {								// database used to store runtime data (eg: accounts, cdr stats)
-			"db_conns": {
+			"dbConns": {
 				"*default": {	
-					"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-					"db_host": "127.0.0.1",					// data_db host address
-					"db_port": -1,	 						// data_db port to reach the database
-					"db_name": "10", 						// data_db database name to connect to
-					"db_user": "cgrates", 					// username to use when connecting to data_db
-					"db_password": "password",				// password to use when connecting to data_db
-					"remote_conns":["Conn1"],
+					"dbType": "*redis",					// data_db type: <*redis|*mongo|*internal>
+					"dbHost": "127.0.0.1",					// data_db host address
+					"dbPort": -1,	 						// data_db port to reach the database
+					"dbName": "10", 						// data_db database name to connect to
+					"dbUser": "cgrates", 					// username to use when connecting to data_db
+					"dbPassword": "password",				// password to use when connecting to data_db
+					"remoteConns":["Conn1"],
 					"opts": {
 						"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 					},
 				},
 			},
 			"items":{
-				"*resource_profiles":{"remote":false, "replicate":false}, 
+				"*resourceProfiles":{"remote":false, "replicate":false}, 
 				"*resources":{"remote":false, "replicate":false}, 
-				"*statqueue_profiles": {"remote":false, "replicate":false}, 
+				"*statQueueProfiles": {"remote":false, "replicate":false}, 
 			  }	
 			}
 		}`
@@ -602,16 +602,16 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 func TestDataDbCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"db": {			
-		"db_conns": {
+		"dbConns": {
 			"*default": {	
-				"db_type": "*redis",					
-				"db_host": "127.0.0.1",					
-				"db_port": 6379, 						
-				"db_name": "10", 						
-				"db_user": "cgrates", 					
-				"db_password": "", 						
-				"remote_conns":[],
-				"replication_conns":[],
+				"dbType": "*redis",					
+				"dbHost": "127.0.0.1",					
+				"dbPort": 6379, 						
+				"dbName": "10", 						
+				"dbUser": "cgrates", 					
+				"dbPassword": "", 						
+				"remoteConns":[],
+				"replicationConns":[],
 				"opts": {
 					"redisSentinel":"",					
 					"mongoQueryTimeout":"10s",
@@ -1053,12 +1053,12 @@ func TestItemOptsAsMapInterface(t *testing.T) {
 	}
 
 	exp := map[string]any{
-		"dbConn":     "",
-		"limit":      0,
-		"remote":     false,
-		"replicate":  false,
-		"static_ttl": false,
-		"ttl":        "1ns",
+		"dbConn":    "",
+		"limit":     0,
+		"remote":    false,
+		"replicate": false,
+		"staticTTL": false,
+		"ttl":       "1ns",
 	}
 
 	if rcv := itm.AsMapInterface(); !reflect.DeepEqual(rcv, exp) {

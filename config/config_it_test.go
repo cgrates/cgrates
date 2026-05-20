@@ -714,24 +714,24 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		"partial_cache_ttl": "1s",
 		"readers": []any{
 			map[string]any{
-				"id":                     utils.MetaDefault,
-				"cache_dump_fields":      []any{},
-				"concurrent_requests":    1024,
-				"fields":                 content,
-				"filters":                []string{},
-				"flags":                  []string{},
-				"run_delay":              "0",
-				"start_delay":            "0",
-				"source_path":            "/var/spool/cgrates/ers/in",
-				"processed_path":         "/var/spool/cgrates/ers/out",
-				"tenant":                 "",
-				"timezone":               "",
-				utils.EEsIDsCfg:          []string{},
-				utils.EEsSuccessIDsCfg:   []string{},
-				utils.EEsFailedIDsCfg:    []string{},
-				"type":                   utils.MetaNone,
-				"reconnects":             -1,
-				"max_reconnect_interval": "5m0s",
+				"id":                   utils.MetaDefault,
+				"cache_dump_fields":    []any{},
+				"concurrent_requests":  1024,
+				"fields":               content,
+				"filters":              []string{},
+				"flags":                []string{},
+				"run_delay":            "0",
+				"start_delay":          "0",
+				"source_path":          "/var/spool/cgrates/ers/in",
+				"processed_path":       "/var/spool/cgrates/ers/out",
+				"tenant":               "",
+				"timezone":             "",
+				utils.EEsIDsCfg:        []string{},
+				utils.EEsSuccessIDsCfg: []string{},
+				utils.EEsFailedIDsCfg:  []string{},
+				"type":                 utils.MetaNone,
+				"reconnects":           -1,
+				"maxReconnectInterval": "5m0s",
 				"opts": map[string]any{
 					"csvFieldSeparator":         ",",
 					"csvHeaderDefineChar":       ":",
@@ -743,24 +743,24 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"partial_commit_fields": []any{},
 			},
 			map[string]any{
-				"cache_dump_fields":      []any{},
-				"concurrent_requests":    1024,
-				"filters":                []string{},
-				"flags":                  []string{"*dryRun"},
-				"id":                     "file_reader1",
-				"processed_path":         "/tmp/ers/out",
-				"run_delay":              "-1",
-				"start_delay":            "0",
-				"source_path":            "/tmp/ers/in",
-				"tenant":                 "",
-				"timezone":               "",
-				utils.EEsIDsCfg:          []string{},
-				utils.EEsSuccessIDsCfg:   []string{},
-				utils.EEsFailedIDsCfg:    []string{},
-				"type":                   "*fileCSV",
-				"fields":                 content,
-				"reconnects":             -1,
-				"max_reconnect_interval": "5m0s",
+				"cache_dump_fields":    []any{},
+				"concurrent_requests":  1024,
+				"filters":              []string{},
+				"flags":                []string{"*dryRun"},
+				"id":                   "file_reader1",
+				"processed_path":       "/tmp/ers/out",
+				"run_delay":            "-1",
+				"start_delay":          "0",
+				"source_path":          "/tmp/ers/in",
+				"tenant":               "",
+				"timezone":             "",
+				utils.EEsIDsCfg:        []string{},
+				utils.EEsSuccessIDsCfg: []string{},
+				utils.EEsFailedIDsCfg:  []string{},
+				"type":                 "*fileCSV",
+				"fields":               content,
+				"reconnects":           -1,
+				"maxReconnectInterval": "5m0s",
 				"opts": map[string]any{
 					"csvFieldSeparator":         ",",
 					"csvHeaderDefineChar":       ":",
@@ -1320,7 +1320,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		
 		"general": {
-			"reply_timeout": "50s"
+			"replyTimeout": "50s"
 		},
 		
 		"logger": {
@@ -1335,9 +1335,9 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		
 		"db": {
-			"db_conns": {
+			"dbConns": {
 				"*default": {	
-					"db_type": "*internal",
+					"dbType": "*internal",
 					"opts":{
 				      "internalDBRewriteInterval": "0s",
 				      "internalDBDumpInterval": "0s"
@@ -1419,7 +1419,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"routes": {
 			"enabled": true,
-			"prefix_indexed_fields":["*req.Destination"],
+			"prefixIndexedFields":["*req.Destination"],
 			"conns": {
 				"*stats": [{"ConnIDs": ["*internal"]}],
 				"*resources": [{"ConnIDs": ["*internal"]}]

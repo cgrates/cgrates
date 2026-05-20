@@ -2,7 +2,7 @@
 
 
 "general": {
-	"reply_timeout": "50s"
+	"replyTimeout": "50s"
 },
 
 "logger": {
@@ -16,30 +16,30 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": { // using redis a default to see which files are dumped in internal
-			"db_type": "*redis",		
-			"db_port": 6379, 	
-			"db_name": "10"
+			"dbType": "*redis",		
+			"dbPort": 6379, 	
+			"dbName": "10"
 		},
 		"internalDBConn": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 	     	"opts": {
 		      "internalDBDumpPath": "/tmp/internal_db/db",
 		    	"internalDBRewriteInterval": "0s"
 	}
 		},
 		"mongoDBConn": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items":{
-		"*charger_profiles": {"dbConn": "mongoDBConn"},
-		"*charger_filter_indexes" : {"dbConn": "internalDBConn"},
+		"*chargerProfiles": {"dbConn": "mongoDBConn"},
+		"*chargerFilterIndexes" : {"dbConn": "internalDBConn"},
 		"*cdrs": {"dbConn": "mongoDBConn"}
 	}
 },
@@ -96,7 +96,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],

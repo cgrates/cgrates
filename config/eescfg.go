@@ -1328,7 +1328,7 @@ type EventExporterJsonCfg struct {
 	Attempts             *int                       `json:"attempts"`
 	ConcurrentRequests   *int                       `json:"concurrent_requests"`
 	MetricsResetSchedule *string                    `json:"metrics_reset_schedule"`
-	FailedPostsDir       *string                    `json:"failed_posts_dir"`
+	FailedPostsDir       *string                    `json:"failedPostsDir"`
 	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`
 	Fields               *[]*FcTemplateJsonCfg      `json:"fields"`
 }

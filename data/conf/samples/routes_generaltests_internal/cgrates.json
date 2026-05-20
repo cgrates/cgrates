@@ -1,7 +1,7 @@
 
 {
 "general": {
-    "reply_timeout": "50s"
+    "replyTimeout": "50s"
 },
 
 "logger": {
@@ -15,9 +15,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
             	"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

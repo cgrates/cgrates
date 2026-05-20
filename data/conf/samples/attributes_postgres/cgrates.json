@@ -7,33 +7,33 @@
   },
 
   "db": {
-    "db_conns": {
+    "dbConns": {
       "*default": {
-        "db_type": "redis",
-        "db_host": "127.0.0.1",
-        "db_port": 6379,
-        "db_name": "10",
-        "db_user": "cgrates"
+        "dbType": "redis",
+        "dbHost": "127.0.0.1",
+        "dbPort": 6379,
+        "dbName": "10",
+        "dbUser": "cgrates"
       },
       "StorDB": {						 // The id of the DB connection
-        "db_type": "postgres",			 // db type: <internal|redis|mysql|mongo|postgres>
-        "db_host": "127.0.0.1",	
-        "db_port": 5432, 			 // db port to reach the database
-        "db_name": "cgrates",		 // the host to connect to
-        "db_user": "cgrates",
-        "db_password": "CGRateS.org" // password to use when connecting to the database
+        "dbType": "postgres",			 // db type: <internal|redis|mysql|mongo|postgres>
+        "dbHost": "127.0.0.1",	
+        "dbPort": 5432, 			 // db port to reach the database
+        "dbName": "cgrates",		 // the host to connect to
+        "dbUser": "cgrates",
+        "dbPassword": "CGRateS.org" // password to use when connecting to the database
       }
     },
     "items": {
-      "*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
-      "*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, 
+      "*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+      "*attributeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, 
       "replicate":false, "dbConn": "StorDB"}
     }
   },
 
   "attributes": {
    "enabled": true,
-   "prefix_indexed_fields": ["*req.Destination"],
+   "prefixIndexedFields": ["*req.Destination"],
    "exists_indexed_fields": ["*opts.*usage"], 
    "notexists_indexed_fields": ["*req.ToR"], 
   },

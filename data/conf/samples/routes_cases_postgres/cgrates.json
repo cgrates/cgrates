@@ -1,6 +1,6 @@
 {
 "general": {
-    "reply_timeout": "50s"
+    "replyTimeout": "50s"
 },
 
 "logger": {
@@ -8,28 +8,28 @@
 },
     
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",
-			"db_host": "127.0.0.1",
-			"db_port": 6379,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 	    "StorDB": {
-		    "db_type": "postgres",
-			"db_host": "127.0.0.1",	
-			"db_port": 5432,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+		    "dbType": "postgres",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 5432,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
-        "*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+        "*statQueueProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*statQueues": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"},
+		"*routeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -85,7 +85,7 @@
 
 "routes": {
     "enabled": true,
-    "prefix_indexed_fields":["*req.Destination"],
+    "prefixIndexedFields":["*req.Destination"],
     "conns": {
     	"*stats": [{"ConnIDs": ["*internal"]}],
     	"*resources": [{"ConnIDs": ["*internal"]}],

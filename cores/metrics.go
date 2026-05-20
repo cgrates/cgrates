@@ -48,7 +48,7 @@ const (
 type StatusMetrics struct {
 	PID        float64 `json:"pid"`
 	GoVersion  string  `json:"go_version"`
-	NodeID     string  `json:"node_id"`
+	NodeID     string  `json:"nodeID"`
 	Version    string  `json:"version"`
 	Goroutines float64 `json:"goroutines"`
 	Threads    float64 `json:"threads"`

@@ -676,7 +676,7 @@ func (iI *ItemOpts) Equals(itm2 *ItemOpts) bool {
 type ItemOptsJson struct {
 	Limit      *int
 	Ttl        *string
-	Static_ttl *bool
+	Static_ttl *bool `json:"staticTTL"`
 	Remote     *bool
 	Replicate  *bool
 	DbConn     *string
@@ -770,30 +770,30 @@ type DBOptsJson struct {
 }
 
 type DbConnJson struct {
-	Db_type               *string
-	Db_host               *string
-	Db_port               *int
-	Db_name               *string
-	Db_user               *string
-	Db_password           *string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Remote_conns          *[]string
-	Remote_conn_id        *string
-	Replication_conns     *[]string
-	Replication_filtered  *bool
-	Replication_cache     *string
-	RplFailedDir          *string `json:"replication_failed_dir"`
-	RplInterval           *string `json:"replication_interval"`
-	Opts                  *DBOptsJson
+	Db_type               *string     `json:"dbType"`
+	Db_host               *string     `json:"dbHost"`
+	Db_port               *int        `json:"dbPort"`
+	Db_name               *string     `json:"dbName"`
+	Db_user               *string     `json:"dbUser"`
+	Db_password           *string     `json:"dbPassword"`
+	String_indexed_fields *[]string   `json:"stringIndexedFields"`
+	Prefix_indexed_fields *[]string   `json:"prefixIndexedFields"`
+	Remote_conns          *[]string   `json:"remoteConns"`
+	Remote_conn_id        *string     `json:"remoteConnID"`
+	Replication_conns     *[]string   `json:"replicationConns"`
+	Replication_filtered  *bool       `json:"replicationFiltered"`
+	Replication_cache     *string     `json:"replicationCache"`
+	RplFailedDir          *string     `json:"replicationFailedDir"`
+	RplInterval           *string     `json:"replicationInterval"`
+	Opts                  *DBOptsJson `json:"opts"`
 }
 
 type DbConnsJson map[string]*DbConnJson
 
 // Database config
 type DbJsonCfg struct {
-	Db_conns DbConnsJson
-	Items    map[string]*ItemOptsJson
+	Db_conns DbConnsJson              `json:"dbConns"`
+	Items    map[string]*ItemOptsJson `json:"items"`
 }
 
 func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {

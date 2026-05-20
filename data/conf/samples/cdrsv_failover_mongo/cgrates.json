@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id": "TestFailCDRS"
+	"nodeID": "TestFailCDRS"
 },
 
 "logger": {
@@ -11,30 +11,30 @@
 "efs": {                                                    
 	"enabled": true,						                
 	"poster_attempts": 1,									
-	"failed_posts_dir": "/tmp/failed_posts",	
+	"failedPostsDir": "/tmp/failed_posts",	
 	"failed_posts_ttl": "1s"								
 },
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -97,7 +97,7 @@
 				"s3BucketID": "cgrates-cdrs"
 			},
 			"attempts": 1,
-			"failed_posts_dir": "/tmp/failed_posts",
+			"failedPostsDir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
 			]

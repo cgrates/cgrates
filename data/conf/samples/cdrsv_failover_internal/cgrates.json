@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id": "TestFailCDRS"
+	"nodeID": "TestFailCDRS"
 },
 
 "logger": {
@@ -9,9 +9,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -27,7 +27,7 @@
 "efs": {                                                    
 	"enabled": true,						                
 	"poster_attempts": 1,									
-	"failed_posts_dir": "/tmp/failed_posts",	
+	"failedPostsDir": "/tmp/failed_posts",	
 	"failed_posts_ttl": "1s"							
 },
 
@@ -89,7 +89,7 @@
 				"s3BucketID": "cgrates-cdrs"
 			},
 			"attempts": 1,
-			"failed_posts_dir": "/tmp/failed_posts",
+			"failedPostsDir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
 			]

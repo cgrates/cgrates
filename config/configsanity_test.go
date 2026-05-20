@@ -210,7 +210,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.TerminateAttempts = 1
 
 	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 0
-	expected = "<CacheS> *closed_sessions needs to be != 0, received: 0"
+	expected = "<CacheS> *closedSessions needs to be != 0, received: 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1865,7 +1865,7 @@ func TestCGRConfigcheckConfigSanityCacheSPartitionErr(t *testing.T) {
 		},
 	}
 
-	expErr := "<CacheS> partition <*rpc_connections> does not support replication"
+	expErr := "<CacheS> partition <*rpcConnections> does not support replication"
 	if err := cfg.checkConfigSanity(); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}

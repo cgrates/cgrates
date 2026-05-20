@@ -5,13 +5,13 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
-			"db_host": "127.0.0.1",
-			"db_port": 6379, 	// db port to reach the database
-			"db_name": "10", 	// db database name to connect to
-			"string_indexed_fields": ["*opts.*accounts"]
+			"dbType": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379, 	// db port to reach the database
+			"dbName": "10", 	// db database name to connect to
+			"stringIndexedFields": ["*opts.*accounts"]
 		},
 	}
 },

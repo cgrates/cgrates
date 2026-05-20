@@ -68,7 +68,7 @@ const (
 	EEsJSON             = "ees"
 	RateSJSON           = "rates"
 	ActionSJSON         = "actions"
-	RPCConnsJSON        = "rpc_conns"
+	RPCConnsJSON        = "rpcConns"
 	SIPAgentJSON        = "sip_agent"
 	TemplatesJSON       = "templates"
 	ConfigSJSON         = "configs"

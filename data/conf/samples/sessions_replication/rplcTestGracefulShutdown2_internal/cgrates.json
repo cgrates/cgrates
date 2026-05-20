@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id":"MasterReplication"
+	"nodeID":"MasterReplication"
 },
 
 "logger": {
@@ -14,7 +14,7 @@
 	"http": "127.0.0.1:2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"rplConn": {
 		"strategy": "*broadcast_sync",
 		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}]
@@ -22,9 +22,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

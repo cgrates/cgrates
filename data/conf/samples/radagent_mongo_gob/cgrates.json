@@ -13,7 +13,7 @@
 	"http": ":2080",					// HTTP listening address
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
@@ -22,12 +22,12 @@
 
 
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-			"db_port": 27017, 						// the port to reach the datadb
-			"db_name": "datadb",
-			"db_password": "",
+			"dbType": "mongo",					// stor database type to use: <mysql|postgres>
+			"dbPort": 27017, 						// the port to reach the datadb
+			"dbName": "datadb",
+			"dbPassword": "",
 		},
 	},
 },

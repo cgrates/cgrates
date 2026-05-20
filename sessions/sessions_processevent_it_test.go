@@ -65,7 +65,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
             "routes": {
                 "enabled": true,
                 "indexed_selects": true,
-                "string_indexed_fields": ["*req.Account"]
+                "stringIndexedFields": ["*req.Account"]
             },
             "chargers": {
                 "enabled": true
@@ -352,7 +352,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1",
 	"indexed_selects": true,
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 "chargers": {
 	"enabled": true
@@ -765,7 +765,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1",
 	"indexed_selects": true,
-	"string_indexed_fields": ["*req.Account"]
+	"stringIndexedFields": ["*req.Account"]
 },
 "chargers": {
 	"enabled": true

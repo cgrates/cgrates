@@ -1,7 +1,7 @@
 {
 	
 "general": {
-	"node_id": "InternalEngine"
+	"nodeID": "InternalEngine"
 },
 
 "logger": {
@@ -14,7 +14,7 @@
 	"http": ":2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [
@@ -25,11 +25,11 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
-			"replication_conns": ["conn2"],
-			"replication_filtered": true,
+			"dbType": "*internal",
+			"replicationConns": ["conn2"],
+			"replicationFiltered": true,
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
@@ -38,19 +38,19 @@
 	},
 	"items":{
 		"*accounts":{"remote":false,"replicate":true},
-		"*resource_profiles":{"remote":false,"replicate":true},
+		"*resourceProfiles":{"remote":false,"replicate":true},
 		"*resources":{"remote":false,"replicate":true},
-		"*statqueue_profiles": {"remote":false,"replicate":true},
-		"*statqueues": {"remote":false,"replicate":true},
-		"*threshold_profiles": {"remote":false,"replicate":true},
+		"*statQueueProfiles": {"remote":false,"replicate":true},
+		"*statQueues": {"remote":false,"replicate":true},
+		"*thresholdProfiles": {"remote":false,"replicate":true},
 		"*thresholds": {"remote":false,"replicate":true},
 		"*filters": {"remote":false,"replicate":true},
-		"*route_profiles":{"remote":false,"replicate":true},
-		"*attribute_profiles":{"remote":false,"replicate":true},
-		"*charger_profiles": {"remote":false,"replicate":true},
-		"*rate_profiles":{"remote":false,"replicate":true},
-		"*load_ids":{"remote":false,"replicate":true},
-		"*action_profiles":{"remote":false,"replicate":true},
+		"*routeProfiles":{"remote":false,"replicate":true},
+		"*attributeProfiles":{"remote":false,"replicate":true},
+		"*chargerProfiles": {"remote":false,"replicate":true},
+		"*rateProfiles":{"remote":false,"replicate":true},
+		"*loadIDs":{"remote":false,"replicate":true},
+		"*actionProfiles":{"remote":false,"replicate":true},
 	},
 },
 
@@ -58,7 +58,7 @@
 
 "caches":{
 	"partitions": {
-		"*replication_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}
+		"*replicationHosts": {"limit": -1, "ttl": "", "staticTTL": false, "replicate": false}
 	}
 },
 

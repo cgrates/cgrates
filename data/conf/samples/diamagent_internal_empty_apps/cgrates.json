@@ -5,7 +5,7 @@
 // Starts rater, scheduler
 
 "general": {
-	"default_tenant": "cgrates.com",
+	"defaultTenant": "cgrates.com",
 },
 
 "logger": {
@@ -19,9 +19,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBRewriteInterval": "0",
 				"internalDBDumpInterval": "0"

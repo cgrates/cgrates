@@ -5,9 +5,9 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -118,9 +118,9 @@
 "tls": {
 	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			
 	"server_key":"/usr/share/cgrates/tls/server.key",			
-	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			
-	"client_key":"/usr/share/cgrates/tls/client.key",					
-	"ca_certificate":"/usr/share/cgrates/tls/ca.crt"
+	"clientCertificate" : "/usr/share/cgrates/tls/client.crt",			
+	"clientKey":"/usr/share/cgrates/tls/client.key",					
+	"caCertificate":"/usr/share/cgrates/tls/ca.crt"
 },
 
 "dns_agent": {

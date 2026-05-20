@@ -5,7 +5,7 @@
 // Starts rater, scheduler
 
 "general": {
-	"default_tenant": "cgrates.com",
+	"defaultTenant": "cgrates.com",
 },
 
 "logger": {
@@ -19,18 +19,18 @@
 },
 
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",						// data_db type: <redis|mongo>
-			"db_port": 6379, 						// data_db port to reach the database
-			"db_name": "10", 						// data_db database name to connect to
+			"dbType": "redis",						// data_db type: <redis|mongo>
+			"dbPort": 6379, 						// data_db port to reach the database
+			"dbName": "10", 						// data_db database name to connect to
 		},
 	},
 },
 
 
 
-"rpc_conns": {
+"rpcConns": {
 	"*jsonbirpc": {
 		"conns": [{"address": "127.0.0.1:2014", "transport":"*birpc_json"}],
 	},

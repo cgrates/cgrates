@@ -4,8 +4,8 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-	"node_id":"CGRAsterisk",
-	"reply_timeout": "5s",
+	"nodeID":"CGRAsterisk",
+	"replyTimeout": "5s",
 },
 
 "logger": {
@@ -117,8 +117,9 @@
 	"enabled": true,
 	"asterisk_conns":[							
 		{"address": "127.0.0.1:8088", "user": "cgrates",
-			"password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10,
-		    "ari_websocket": false }
+			"password": "CGRateS.org", "connectAttempts": 3,"reconnects": 10,
+		    "ariWebsocket": false }
+		
 	],
 	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": true,
@@ -127,25 +128,25 @@
 
 "attributes": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],			
+	"stringIndexedFields": ["*req.Account"],			
 },
 
 
 "resources": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
 "stats": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account","*req.RunID","*req.Destination"],
+	"stringIndexedFields": ["*req.Account","*req.RunID","*req.Destination"],
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 
@@ -154,7 +155,7 @@
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
 	"rals_conns": ["*internal"],	
-	"string_indexed_fields": ["*req.Account"],
+	"stringIndexedFields": ["*req.Account"],
 },
 
 

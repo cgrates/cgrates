@@ -15,9 +15,9 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -59,7 +59,7 @@
 		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 	"cache": {
-		"*fileCSV": {"limit": -1, "ttl": "1s", "static_ttl": false},
+		"*fileCSV": {"limit": -1, "ttl": "1s", "staticTTL": false},
 	},
 	"exporters": [
 		{

@@ -141,8 +141,8 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		"routes": {
 			"enabled": true,
 			"indexed_selects":false,
-			"string_indexed_fields": ["*req.string"],
-			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
+			"stringIndexedFields": ["*req.string"],
+			"prefixIndexedFields": ["*req.prefix","*req.indexed","*req.fields"],
 			"suffix_indexed_fields": ["*req.prefix","*req.indexed"],
 			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
 			"notexists_indexed_fields": ["*req.prefix","*req.indexed"],

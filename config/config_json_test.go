@@ -2791,7 +2791,7 @@ func TestSetSection(t *testing.T) {
 	jsn := `
 		{
 			"general": {
-				"Node_id":2,
+				"nodeID":2,
 			},
 		}
 	`

@@ -4,7 +4,7 @@
 
 
 "general": {
-	"reply_timeout": "50s",
+	"replyTimeout": "50s",
 },
 
 "logger": {
@@ -20,7 +20,7 @@
 	"http_tls": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "*env:DOCKER_IP:2012", "transport":"*json"}],
@@ -29,12 +29,12 @@
 
 
 "db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*redis",					// data_db type: <redis|mongo>
-			"db_host": "redis",						// data_db host address
-			"db_port": 6379, 						// data_db port to reach the database
-			"db_name": "10", 						// data_db database name to connect to
+			"dbType": "*redis",					// data_db type: <redis|mongo>
+			"dbHost": "redis",						// data_db host address
+			"dbPort": 6379, 						// data_db port to reach the database
+			"dbName": "10", 						// data_db database name to connect to
 		},
 	},
 },
@@ -91,7 +91,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],

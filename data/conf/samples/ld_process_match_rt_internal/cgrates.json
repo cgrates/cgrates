@@ -4,7 +4,7 @@
 	
 	
 	"general": {
-		"reply_timeout": "50s",
+		"replyTimeout": "50s",
 	},
 	
 	"logger": {
@@ -18,9 +18,9 @@
 	},
 	
 	"db": {
-		"db_conns": {
+		"dbConns": {
 			"*default": {
-				"db_type": "*internal",
+				"dbType": "*internal",
 					"opts":{
 					"internalDBRewriteInterval": "0s",
 					"internalDBDumpInterval": "0s"
@@ -78,7 +78,7 @@
 		},
 	},
 
-	"rpc_conns": {
+	"rpcConns": {
 		"conn1": {
 			"strategy": "*first",
 			"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],

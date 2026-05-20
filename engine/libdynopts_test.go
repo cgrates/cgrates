@@ -1899,8 +1899,8 @@ func TestAttrDynamicOptsFromJson(t *testing.T) {
 			"stats_conns": ["*internal"],			
 			"resources_conns": ["*internal"],		
 			"accounts_conns": ["*internal"],			
-			"prefix_indexed_fields": ["*req.index1","*req.index2"],		
-			"string_indexed_fields": ["*req.index1"],
+			"prefixIndexedFields": ["*req.index1","*req.index2"],		
+			"stringIndexedFields": ["*req.index1"],
 			"exists_indexed_fields": ["*req.index1","*req.index2"],		
 			"notexists_indexed_fields": ["*req.index1"],
 			"opts": {
@@ -2011,7 +2011,7 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 		"sessions": {
 			"enabled": true,
 			"listen_bijson": "127.0.0.1:2018",
-			"replication_conns": ["*localhost"],
+			"replicationConns": ["*localhost"],
 			"store_session_costs": true,
             "min_dur_low_balance": "1s",
 			"client_protocol": 2.0,

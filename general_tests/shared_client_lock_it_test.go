@@ -73,16 +73,16 @@ func TestSharedClientLockIT(t *testing.T) {
 func testSharedClientLockLoadConfig(t *testing.T) {
 	content := `{
 "general": {
-	"node_id": "shared_client_lock",
-	"reply_timeout": "10m",
+	"nodeID": "shared_client_lock",
+	"replyTimeout": "10m",
 },
 "logger": {
 	"level": 7
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

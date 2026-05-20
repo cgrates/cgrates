@@ -491,7 +491,7 @@ func TestIPProfileFieldAsInterface(t *testing.T) {
 func TestIPAllocationsLockKey(t *testing.T) {
 	tnt := "cgrates.org"
 	id := "1001"
-	expected := "*ip_allocations:cgrates.org:1001"
+	expected := "*ipAllocations:cgrates.org:1001"
 
 	got := IPAllocationsLockKey(tnt, id)
 	if got != expected {
@@ -536,7 +536,7 @@ func TestIPAllocationsCacheClone(t *testing.T) {
 func TestIPProfileLockKey(t *testing.T) {
 	tnt := "cgrates.org"
 	id := "profile123"
-	expected := "*ip_profiles:cgrates.org:profile123"
+	expected := "*ipProfiles:cgrates.org:profile123"
 
 	got := IPProfileLockKey(tnt, id)
 	if got != expected {

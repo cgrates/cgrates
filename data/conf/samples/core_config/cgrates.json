@@ -1,7 +1,7 @@
 {
 
 "general": {
-  "node_id": "Cores_apis_test",
+  "nodeID": "Cores_apis_test",
 },
 
 "logger": {
@@ -9,9 +9,9 @@
 },
 
 "db": {
-  "db_conns": {
+  "dbConns": {
 		"*default": {
-      "db_type": "*internal",
+      "dbType": "*internal",
 	    "opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

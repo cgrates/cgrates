@@ -3,7 +3,7 @@
 
 
 "general": {
-	"reply_timeout": "30s",
+	"replyTimeout": "30s",
 },
 
 "logger": {
@@ -18,24 +18,24 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -95,7 +95,7 @@
 
 "routes": {
 	"enabled": true,
-	"prefix_indexed_fields":["*req.Destination"],
+	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*resources": [{"ConnIDs": ["*internal"]}],
@@ -222,16 +222,16 @@
 			// "*stopOnError": false,
 		},
 		"cache":{
-			"*filters":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*attributes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*resources":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*stats":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
+			"*filters":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*attributes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*resources":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*stats":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*thresholds":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*routes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*chargers":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*rateProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*actionProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*accounts":{"limit": -1, "ttl": "5s", "staticTTL": false},
 		},
 		"data":[											// data profiles to load
 			{
@@ -350,7 +350,7 @@
 				],
 			},
 			{
-				"type": "*rate_profiles",						// data source type
+				"type": "*rateProfiles",						// data source type
 				"file_name": "Rates.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -373,7 +373,7 @@
 				],
 			},
 			{
-				"type": "*action_profiles",						// data source type
+				"type": "*actionProfiles",						// data source type
 				"file_name": "Actions.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},

@@ -43,9 +43,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"http_tls": ":2280"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"
@@ -57,7 +57,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1"
 },
-"rpc_conns": {
+"rpcConns": {
 	"external": {
 		"conns": [{
 			"address": "127.0.0.1:22012",
@@ -72,10 +72,10 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*caches": [{"ConnIDs": ["*localhost", "external"]}]
 	},
 	"cache_ids": [
-		"*statqueue_profiles",
-		"*statqueues",
-		"*stat_filter_indexes",
-		"*rpc_connections"
+		"*statQueueProfiles",
+		"*statQueues",
+		"*statFilterIndexes",
+		"*rpcConnections"
 	],
 	// "apiers_conns": ["*internal", "external"],
 	"conns": {
@@ -95,9 +95,9 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"http_tls": "127.0.0.1:22280"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 				"opts":{
 		"internalDBRewriteInterval": "0s",
 		"internalDBDumpInterval": "0s"

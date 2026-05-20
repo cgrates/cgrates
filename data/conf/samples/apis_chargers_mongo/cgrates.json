@@ -1,6 +1,6 @@
 {
 "general": {
-	"reply_timeout": "30s"
+	"replyTimeout": "30s"
 },
 
 "logger": {
@@ -14,24 +14,24 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {		// The id of the DB connection
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates",
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates",
 		},
 		"StorDB": {						 // The id of the DB connection
-			"db_type": "mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,			 // db port to reach the database
-			"db_name": "cgrates",		 // the host to connect to
-			"db_user": "cgrates",
+			"dbType": "mongo",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,			 // db port to reach the database
+			"dbName": "cgrates",		 // the host to connect to
+			"dbUser": "cgrates",
 		},
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 

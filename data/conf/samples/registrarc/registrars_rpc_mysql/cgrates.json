@@ -11,27 +11,27 @@
 },
 
 "db": {								
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",						
-			"db_port": 6379, 						
-			"db_name": "10"						
+			"dbType": "redis",						
+			"dbPort": 6379, 						
+			"dbName": "10"						
 		},
 		"StorDB": {						 // The id of the DB connection
-			"db_type": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
-			"db_host": "127.0.0.1",		 // the host to connect to
-			"db_port": 3306, 			 // db port to reach the database
-			"db_name": "cgrates", 		 // db database name to connect to
-			"db_user": "cgrates", 		 // username to use when connecting to the database
-			"db_password": "CGRateS.org" // password to use when connecting to the database
+			"dbType": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",		 // the host to connect to
+			"dbPort": 3306, 			 // db port to reach the database
+			"dbName": "cgrates", 		 // db database name to connect to
+			"dbUser": "cgrates", 		 // username to use when connecting to the database
+			"dbPassword": "CGRateS.org" // password to use when connecting to the database
 		},
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"id": "attributes"}]

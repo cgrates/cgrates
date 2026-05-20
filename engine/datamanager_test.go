@@ -3763,7 +3763,7 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 		},
 	}
 
-	if err := dm.RemoveIndexes(context.Background(), "*ip_filter_indexes", "cgrates.org", "indxkey"); err != utils.ErrNotImplemented {
+	if err := dm.RemoveIndexes(context.Background(), "*ipFilterIndexes", "cgrates.org", "indxkey"); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 

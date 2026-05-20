@@ -36,7 +36,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	cfg1 := `
 {
 "general": {
-	"node_id": "InternalEngine"
+	"nodeID": "InternalEngine"
 },
 
 "logger": {
@@ -49,7 +49,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	"http": ":2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [
@@ -59,17 +59,17 @@ func TestReplicateMultipleDB(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*redis": {
-			"db_type": "redis",						
-			"db_port": 6379, 						
-			"db_name": "10", 
-			"replication_interval": "-1",
-			"replication_conns": ["conn2"],
+			"dbType": "redis",						
+			"dbPort": 6379, 						
+			"dbName": "10", 
+			"replicationInterval": "-1",
+			"replicationConns": ["conn2"],
 		},
 		 "*default": {
-		 	"replication_conns": ["conn2"],
-			"replication_interval": "-1",
+		 	"replicationConns": ["conn2"],
+			"replicationInterval": "-1",
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
@@ -78,8 +78,8 @@ func TestReplicateMultipleDB(t *testing.T) {
 		
 	},
 	"items":{
-		"*threshold_profiles": {"remote":false,"replicate":true},
-		"*attribute_profiles":{"remote":false,"replicate":true,"dbConn": "*redis"},
+		"*thresholdProfiles": {"remote":false,"replicate":true},
+		"*attributeProfiles":{"remote":false,"replicate":true,"dbConn": "*redis"},
 	},
 },
 
@@ -98,7 +98,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 	cfg2 := `
 {
 "general": {
-	"node_id": "InternalEngine2"
+	"nodeID": "InternalEngine2"
 },
 
 "logger": {
@@ -112,22 +112,22 @@ func TestReplicateMultipleDB(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 				"internalDBRewriteInterval": "0s",
 				"internalDBDumpInterval": "0s"
 			}
 		},
 		"*redis": {
-			"db_type": "redis",					
-			"db_port": 6379, 						
-			"db_name": "13", 
+			"dbType": "redis",					
+			"dbPort": 6379, 						
+			"dbName": "13", 
 		},
 	},
 	"items":{
-		"*attribute_profiles":{"dbConn": "*redis"},
+		"*attributeProfiles":{"dbConn": "*redis"},
 	},
 },
 

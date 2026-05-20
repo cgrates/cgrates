@@ -64,9 +64,9 @@ func TestSessionBasics(t *testing.T) {
 	"type": "*stdout"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"
@@ -647,9 +647,9 @@ func TestSessionLifecycle(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts":{
 			"internalDBRewriteInterval": "0s",
 			"internalDBDumpInterval": "0s"

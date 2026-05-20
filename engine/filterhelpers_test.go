@@ -264,7 +264,7 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 			matchedItemsWarningThreshold, len(ids))
 	}
 
-	expectedLog := "Matched 105 *attribute_filter_indexes items. Performance may be affected."
+	expectedLog := "Matched 105 *attributeFilterIndexes items. Performance may be affected."
 	logContent := buf.String()
 	if !strings.Contains(logContent, expectedLog) {
 		t.Errorf("Expected warning not found in logs:\n%s", logContent)

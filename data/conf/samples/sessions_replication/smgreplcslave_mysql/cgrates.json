@@ -2,7 +2,7 @@
 // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
 "general": {
-	"node_id":"SlaveReplication",
+	"nodeID":"SlaveReplication",
 },
 
 "logger": {
@@ -16,7 +16,7 @@
 },
 
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],

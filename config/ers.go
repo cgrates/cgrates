@@ -956,7 +956,7 @@ type EventReaderJsonCfg struct {
 	Filters              *[]string             `json:"filters"`
 	Flags                *[]string             `json:"flags"`
 	Reconnects           *int                  `json:"reconnects"`
-	MaxReconnectInterval *string               `json:"max_reconnect_interval"`
+	MaxReconnectInterval *string               `json:"maxReconnectInterval"`
 	Opts                 *EventReaderOptsJson  `json:"opts"`
 	Fields               *[]*FcTemplateJsonCfg `json:"fields"`
 	PartialCommitFields  *[]*FcTemplateJsonCfg `json:"partial_commit_fields"`

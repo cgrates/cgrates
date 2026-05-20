@@ -140,17 +140,17 @@ func (loggerOpts *LoggerOptsCfg) Clone() *LoggerOptsCfg {
 }
 
 type LoggerJsonCfg struct {
-	Type      *string
-	Level     *int
-	Efs_conns *[]string
-	Opts      *LoggerOptsJson
+	Type      *string         `json:"type"`
+	Level     *int            `json:"level"`
+	Efs_conns *[]string       `json:"efsConns"`
+	Opts      *LoggerOptsJson `json:"opts"`
 }
 
 type LoggerOptsJson struct {
-	Kafka_conn       *string `json:"kafka_conn"`
-	Kafka_topic      *string `json:"kafka_topic"`
-	Kafka_attempts   *int    `json:"kafka_attempts"`
-	Failed_posts_dir *string `json:"failed_posts_dir"`
+	Kafka_conn       *string `json:"kafkaConn"`
+	Kafka_topic      *string `json:"kafkaTopic"`
+	Kafka_attempts   *int    `json:"kafkaAttempts"`
+	Failed_posts_dir *string `json:"failedPostsDir"`
 }
 
 func diffLoggerJsonCfg(d *LoggerJsonCfg, v1, v2 *LoggerCfg) *LoggerJsonCfg {

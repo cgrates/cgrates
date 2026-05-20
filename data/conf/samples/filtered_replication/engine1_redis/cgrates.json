@@ -1,7 +1,7 @@
 {
 
 "general": {
-	"node_id" : "EngineMongo1"
+	"nodeID" : "EngineMongo1"
 },
 
 "logger": {
@@ -14,7 +14,7 @@
 	"http": ":2280"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
@@ -22,39 +22,39 @@
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "redis",
-			"db_port": 6379,
-			"db_name": "10",
-			"remote_conns": ["conn1"],
-			"remote_conn_id": "engine1",
+			"dbType": "redis",
+			"dbPort": 6379,
+			"dbName": "10",
+			"remoteConns": ["conn1"],
+			"remoteConnID": "engine1",
 		},
 		"StorDB": {
-			"db_type": "mysql",
-			"db_host": "127.0.0.1",
-			"db_port": 3306,
-			"db_name": "cgrates",
-			"db_user": "cgrates",
-			"db_password": "CGRateS.org"
+			"dbType": "mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
 		}
 	},
 	"items": {
 		"*accounts":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*resource_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*resourceProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
 		"*resources":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*statqueue_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
-		"*statqueues": {"remote":true,"replicate":false, "dbConn": "*default"},
-		"*threshold_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*statQueueProfiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*statQueues": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*thresholdProfiles": {"remote":true,"replicate":false, "dbConn": "*default"},
 		"*thresholds": {"remote":true,"replicate":false, "dbConn": "*default"},
 		"*filters": {"remote":true,"replicate":false, "dbConn": "*default"},
-		"*route_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*attribute_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*charger_profiles": {"remote":true,"replicate":false, "dbConn": "*default"},
-		"*rate_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*load_ids":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*action_profiles":{"remote":true,"replicate":false, "dbConn": "*default"},
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*routeProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*attributeProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*chargerProfiles": {"remote":true,"replicate":false, "dbConn": "*default"},
+		"*rateProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*loadIDs":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*actionProfiles":{"remote":true,"replicate":false, "dbConn": "*default"},
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 

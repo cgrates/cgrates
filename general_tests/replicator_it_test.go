@@ -54,19 +54,19 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	"http": ":4080"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"replication_conns": ["rpl"],
-			"replication_failed_dir": %q,
-			"replication_interval": "100ms",
+			"replicationConns": ["rpl"],
+			"replicationFailedDir": %q,
+			"replicationInterval": "100ms",
 		}
 	},
 	"items": {
 		"*accounts": {"replicate": true},
-		"*attribute_profiles": {"replicate": true}
+		"*attributeProfiles": {"replicate": true}
 	}
 },
-"rpc_conns": {
+"rpcConns": {
 	"rpl": {
 		"conns": [
 			{
@@ -134,9 +134,9 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	"http": ":4090"
 },
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "*internal",
+			"dbType": "*internal",
 			"opts": {
 				"internalDBDumpInterval": "0s",
 				"internalDBRewriteInterval": "0s"

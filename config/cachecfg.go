@@ -187,7 +187,7 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 type CacheParamJsonCfg struct {
 	Limit      *int
 	Ttl        *string
-	Static_ttl *bool
+	Static_ttl *bool `json:"staticTTL"`
 	Precache   *bool
 	Remote     *bool
 	Replicate  *bool
@@ -212,8 +212,8 @@ func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v2 map[string]*Cach
 
 type CacheJsonCfg struct {
 	Partitions        map[string]*CacheParamJsonCfg
-	Replication_conns *[]string
-	Remote_conns      *[]string
+	Replication_conns *[]string `json:"replicationConns"`
+	Remote_conns      *[]string `json:"remoteConns"`
 }
 
 func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {

@@ -352,17 +352,17 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
 	Id                     *string
-	Address                *string
-	Transport              *string
-	Connect_attempts       *int
-	Reconnects             *int
-	Max_reconnect_interval *string
-	Connect_timeout        *string
-	Reply_timeout          *string
-	Tls                    *bool
-	Client_certificate     *string
-	Client_key             *string
-	Ca_certificate         *string
+	Address                *string `json:"address"`
+	Transport              *string `json:"transport"`
+	Connect_attempts       *int    `json:"connectAttempts"`
+	Reconnects             *int    `json:"reconnects"`
+	Max_reconnect_interval *string `json:"maxReconnectInterval"`
+	Connect_timeout        *string `json:"connectTimeout"`
+	Reply_timeout          *string `json:"replyTimeout"`
+	Tls                    *bool   `json:"tls"`
+	Client_certificate     *string `json:"clientCertificate"`
+	Client_key             *string `json:"clientKey"`
+	Ca_certificate         *string `json:"caCertificate"`
 }
 
 func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {

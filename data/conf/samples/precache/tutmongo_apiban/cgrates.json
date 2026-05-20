@@ -3,7 +3,7 @@
 
 
 "general": {
-	"reply_timeout": "30s",
+	"replyTimeout": "30s",
 },
 
 "logger": {
@@ -18,44 +18,44 @@
 
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "10",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "10",
+			"dbUser": "cgrates"
 		},
 		"StorDB": {
-			"db_type": "mongo",
-			"db_host": "127.0.0.1",	
-			"db_port": 27017,
-			"db_name": "cgrates",
-			"db_user": "cgrates"
+			"dbType": "mongo",
+			"dbHost": "127.0.0.1",	
+			"dbPort": 27017,
+			"dbName": "cgrates",
+			"dbUser": "cgrates"
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
 "caches":{
 	"partitions": {
-		"*resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*resourceProfiles": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*resources": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*statQueues": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*statQueueProfiles": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*thresholdProfiles": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*filters": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*route_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*resource_filter_indexes" :{"limit": 10000, "ttl":"0s", "precache": true},
-		"*stat_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
-		"*threshold_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
-		"*route_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
-		"*attribute_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
-		"*charger_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
+		"*routeProfiles": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*attributeProfiles": {"limit": 10000, "ttl":"0s", "precache": true},
+		"*resourceFilterIndexes" :{"limit": 10000, "ttl":"0s", "precache": true},
+		"*statFilterIndexes" : {"limit": 10000, "ttl":"0s", "precache": true},
+		"*thresholdFilterIndexes" : {"limit": 10000, "ttl":"0s", "precache": true},
+		"*routeFilterIndexes" : {"limit": 10000, "ttl":"0s", "precache": true},
+		"*attributeFilterIndexes" : {"limit": 10000, "ttl":"0s", "precache": true},
+		"*chargerFilterIndexes" : {"limit": 10000, "ttl":"0s", "precache": true},
 		"*apiban" : {"limit": 254, "ttl":"0s", "precache": true}
 	},
 },

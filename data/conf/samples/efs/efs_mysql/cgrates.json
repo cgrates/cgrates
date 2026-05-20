@@ -3,18 +3,18 @@
         "type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
         "level": 6,               // system level precision for floats 
         "opts": {
-            "kafka_conn": "unavailable_conn:9092",    // the connection trough kafka
-            "kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-            "kafka_attempts": 1,                     // number of attempts of connecting
+            "kafkaConn": "unavailable_conn:9092",    // the connection trough kafka
+            "kafkaTopic": "TutorialTopic",    // the topic from where the events are exported
+            "kafkaAttempts": 1,                     // number of attempts of connecting
         },
     },
 
     "db": {
-        "db_conns": {
+        "dbConns": {
 		"*default": {
-            "db_type": "redis",
-            "db_port": 6379,
-            "db_name": "10",
+            "dbType": "redis",
+            "dbPort": 6379,
+            "dbName": "10",
 	        },
 	    },
     },

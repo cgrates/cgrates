@@ -102,13 +102,13 @@ func (tls TLSCfg) Clone() *TLSCfg {
 }
 
 type TlsJsonCfg struct {
-	Server_certificate *string
-	Server_key         *string
-	Server_policy      *int
-	Server_name        *string
-	Client_certificate *string
-	Client_key         *string
-	Ca_certificate     *string
+	Server_certificate *string `json:"server_certificate"`
+	Server_key         *string `json:"server_key"`
+	Server_policy      *int    `json:"server_policy"`
+	Server_name        *string `json:"server_name"`
+	Client_certificate *string `json:"clientCertificate"`
+	Client_key         *string `json:"clientKey"`
+	Ca_certificate     *string `json:"caCertificate"`
 }
 
 func diffTlsJsonCfg(d *TlsJsonCfg, v1, v2 *TLSCfg) *TlsJsonCfg {
