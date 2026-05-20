@@ -35,7 +35,7 @@
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -222,16 +222,16 @@
 			// "*stopOnError": false,
 		},
 		"cache":{
-			"*filters":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*attributes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*resources":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*stats":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*rateProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*actionProfiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
+			"*filters":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*attributes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*resources":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*stats":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*thresholds":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*routes":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*chargers":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*rateProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*actionProfiles":{"limit": -1, "ttl": "5s", "staticTTL": false},
+			"*accounts":{"limit": -1, "ttl": "5s", "staticTTL": false},
 		},
 		"data":[											// data profiles to load
 			{

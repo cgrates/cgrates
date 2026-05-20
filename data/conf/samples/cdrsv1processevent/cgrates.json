@@ -88,7 +88,7 @@
 
 "caches":{
 	"partitions": {
-		"*rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false}
+		"*rpcResponses": {"limit": -1, "ttl": "2s", "staticTTL": false}
 	},
 },
 

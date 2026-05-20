@@ -25,7 +25,7 @@
 "ees": {
     "enabled": true,
     "cache": {
-        "*fileCSV": {"limit": -1, "ttl": "500ms", "static_ttl": false}
+        "*fileCSV": {"limit": -1, "ttl": "500ms", "staticTTL": false}
     },
     "exporters": [
         {

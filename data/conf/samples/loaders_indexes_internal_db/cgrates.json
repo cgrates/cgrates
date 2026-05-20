@@ -44,7 +44,7 @@
         "*routeProfiles": {"remote":true, "replicate":true},
         "*attributeProfiles": {"remote":true, "replicate":true},
         "*chargerProfiles": {"remote":true, "replicate":true},
-        "*loadIds": {"remote":true, "replicate":true},
+        "*loadIDs": {"remote":true, "replicate":true},
         "*versions": {"remote":true, "replicate":true},
         "*rateProfiles": {"remote":true, "replicate":true},
         "*actionProfiles": {"remote":true, "replicate":true},

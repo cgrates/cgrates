@@ -31,7 +31,7 @@
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -69,7 +69,7 @@
 		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},
 	"cache": {
-		"*fileCSV": {"limit": -1, "ttl": "1s", "static_ttl": false},
+		"*fileCSV": {"limit": -1, "ttl": "1s", "staticTTL": false},
 	},
 	"exporters": [
 		{
