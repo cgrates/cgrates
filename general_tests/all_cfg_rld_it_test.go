@@ -262,7 +262,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl16 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl16)
 	}
-	cfgStr = `{"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionaries_append_defaults":true,"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0}}`
+	cfgStr = `{"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionaries_append_defaults":true,"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listeners":[{"Address":"127.0.0.1:3868","Network":"tcp}],"origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0}}`
 	var rpl17 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
