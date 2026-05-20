@@ -98,8 +98,12 @@
 
 "diameter_agent": {
 	"enabled": true,
-	"listen_net":"sctp",
-	"listen": "127.0.0.1:3869",									// address where to listen for diameter requests <x.y.z.y:1234>
+	"listeners": [
+		{
+			"address": "127.0.0.1:3869",			// address where to listen for diameter requests <x.y.z.y:1234>
+			"network": "sctp"				// transport type for diameter <tcp|sctp>
+		}
+	],
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
 	},

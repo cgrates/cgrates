@@ -246,6 +246,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// DAgent checks
 	if cfg.diameterAgentCfg.Enabled {
+		if len(cfg.diameterAgentCfg.Listeners) == 0 {
+			return fmt.Errorf("<%s> no listeners defined", utils.DiameterAgent)
+		}
 		if len(cfg.diameterAgentCfg.Conns[utils.MetaSessionS]) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DiameterAgent, utils.SessionS)

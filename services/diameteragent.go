@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
@@ -44,8 +45,7 @@ type DiameterAgent struct {
 
 	da *agents.DiameterAgent
 
-	lnet  string
-	laddr string
+	lstnrs []config.DiameterListener // snapshot of listeners
 }
 
 // Start should handle the sercive start
@@ -76,8 +76,7 @@ func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, c
 	if err != nil {
 		return err
 	}
-	s.lnet = s.cfg.DiameterAgentCfg().ListenNet
-	s.laddr = s.cfg.DiameterAgentCfg().Listen
+	s.lstnrs = slices.Clone(s.cfg.DiameterAgentCfg().Listeners)
 	s.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
 		if err := d.ListenAndServe(s.stopChan); err != nil {
@@ -93,8 +92,7 @@ func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, c
 func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.lnet == s.cfg.DiameterAgentCfg().ListenNet &&
-		s.laddr == s.cfg.DiameterAgentCfg().Listen {
+	if slices.Equal(s.lstnrs, s.cfg.DiameterAgentCfg().Listeners) {
 		return
 	}
 	close(s.stopChan)

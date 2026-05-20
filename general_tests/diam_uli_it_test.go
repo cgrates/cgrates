@@ -141,10 +141,11 @@ func TestDiamULI(t *testing.T) {
 	_, cfg := ng.Run(t)
 	time.Sleep(20 * time.Millisecond)
 
-	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	lstnr := cfg.DiameterAgentCfg().Listeners[0]
+	diamClient, err := agents.NewDiameterClient(lstnr.Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, lstnr.Network)
 	if err != nil {
 		t.Fatal(err)
 	}

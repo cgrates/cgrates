@@ -26,11 +26,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type DiameterListener struct {
+	Network string // sctp or tcp
+	Address string // address where to listen for diameter requests <x.y.z.y:1234>
+}
+
 // DiameterAgentCfg the config section that describes the Diameter Agent
 type DiameterAgentCfg struct {
-	Enabled                    bool   // enables the diameter agent: <true|false>
-	ListenNet                  string // sctp or tcp
-	Listen                     string // address where to listen for diameter requests <x.y.z.y:1234>
+	Enabled                    bool // enables the diameter agent: <true|false>
+	Listeners                  []DiameterListener
 	DictionariesPath           string
 	DictionariesAppendDefaults bool
 	CEApplications             []string
@@ -65,11 +69,21 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 	if jc.Enabled != nil {
 		da.Enabled = *jc.Enabled
 	}
-	if jc.Listen != nil {
-		da.Listen = *jc.Listen
-	}
-	if jc.ListenNet != nil {
-		da.ListenNet = *jc.ListenNet
+	if jc.Listeners != nil {
+		da.Listeners = make([]DiameterListener, 0, len(*jc.Listeners))
+		for _, listnr := range *jc.Listeners {
+			if listnr == nil {
+				continue
+			}
+			var ls DiameterListener
+			if listnr.Address != nil {
+				ls.Address = *listnr.Address
+			}
+			if listnr.Network != nil {
+				ls.Network = *listnr.Network
+			}
+			da.Listeners = append(da.Listeners, ls)
+		}
 	}
 	if jc.DictionariesPath != nil {
 		da.DictionariesPath = *jc.DictionariesPath
@@ -127,16 +141,28 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 	return
 }
 
+// AsMapInterface returns the config as a map[string]any
+func (lstn *DiameterListener) AsMapInterface() map[string]any {
+	return map[string]any{
+		utils.NetworkCfg: lstn.Network,
+		utils.AddressCfg: lstn.Address,
+	}
+
+}
+
 // AsMapInterface returns the config as a map[string]any.
 func (da DiameterAgentCfg) AsMapInterface() any {
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
 	}
+	listeners := make([]map[string]any, len(da.Listeners))
+	for i, item := range da.Listeners {
+		listeners[i] = item.AsMapInterface()
+	}
 	mp := map[string]any{
 		utils.EnabledCfg:                    da.Enabled,
-		utils.ListenNetCfg:                  da.ListenNet,
-		utils.ListenCfg:                     da.Listen,
+		utils.ListenersCfg:                  listeners,
 		utils.DictionariesPathCfg:           da.DictionariesPath,
 		utils.DictionariesAppendDefaultsCfg: da.DictionariesAppendDefaults,
 		utils.ConnsCfg:                      stripConns(da.Conns),
@@ -168,8 +194,7 @@ func (da DiameterAgentCfg) CloneSection() Section { return da.Clone() }
 func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 	clone := &DiameterAgentCfg{
 		Enabled:                    da.Enabled,
-		ListenNet:                  da.ListenNet,
-		Listen:                     da.Listen,
+		Listeners:                  slices.Clone(da.Listeners),
 		DictionariesPath:           da.DictionariesPath,
 		DictionariesAppendDefaults: da.DictionariesAppendDefaults,
 		CEApplications:             slices.Clone(da.CEApplications),
@@ -199,11 +224,15 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 	return clone
 }
 
+type DiamListenerJsnCfg struct {
+	Address *string `json:"address"`
+	Network *string `json:"network"`
+}
+
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
 	Enabled                    *bool                      `json:"enabled"`
-	Listen                     *string                    `json:"listen"`
-	ListenNet                  *string                    `json:"listen_net"`
+	Listeners                  *[]*DiamListenerJsnCfg     `json:"listeners"`
 	DictionariesPath           *string                    `json:"dictionaries_path"`
 	DictionariesAppendDefaults *bool                      `json:"dictionaries_append_defaults"`
 	CEApplications             *[]string                  `json:"ce_applications"`
@@ -229,11 +258,15 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if v1.ListenNet != v2.ListenNet {
-		d.ListenNet = utils.StringPointer(v2.ListenNet)
-	}
-	if v1.Listen != v2.Listen {
-		d.Listen = utils.StringPointer(v2.Listen)
+	if !slices.Equal(v1.Listeners, v2.Listeners) {
+		listeners := make([]*DiamListenerJsnCfg, len(v2.Listeners))
+		for i, listener := range v2.Listeners {
+			listeners[i] = &DiamListenerJsnCfg{
+				Network: utils.StringPointer(listener.Network),
+				Address: utils.StringPointer(listener.Address),
+			}
+		}
+		d.Listeners = &listeners
 	}
 	if v1.DictionariesPath != v2.DictionariesPath {
 		d.DictionariesPath = utils.StringPointer(v2.DictionariesPath)

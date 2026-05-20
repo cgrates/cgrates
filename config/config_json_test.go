@@ -788,9 +788,13 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:                    utils.BoolPointer(false),
-		Listen:                     utils.StringPointer("127.0.0.1:3868"),
-		ListenNet:                  utils.StringPointer(utils.TCP),
+		Enabled: utils.BoolPointer(false),
+		Listeners: &[]*DiamListenerJsnCfg{
+			{
+				Address: utils.StringPointer("127.0.0.1:3868"),
+				Network: utils.StringPointer(utils.TCP),
+			},
+		},
 		DictionariesPath:           utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		DictionariesAppendDefaults: utils.BoolPointer(true),
 		CEApplications:             nil,

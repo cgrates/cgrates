@@ -284,10 +284,11 @@ func TestDiamPrometheus(t *testing.T) {
 	}
 
 	time.Sleep(500 * time.Millisecond)
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	lstnr := cfg.DiameterAgentCfg().Listeners[0]
+	diamClient, err := NewDiameterClient(lstnr.Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, lstnr.Network)
 	if err != nil {
 		t.Fatal(err)
 	}

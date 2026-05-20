@@ -94,10 +94,11 @@ func BenchmarkDiameterCaps(b *testing.B) {
 	}
 	_, cfg := ng.Run(b)
 	time.Sleep(10 * time.Millisecond) // wait for DiameterAgent service to start
-	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
+	lstnr := cfg.DiameterAgentCfg().Listeners[0]
+	diamClient, err := NewDiameterClient(lstnr.Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
+		cfg.DiameterAgentCfg().DictionariesPath, lstnr.Network)
 	if err != nil {
 		b.Fatal(err)
 	}

@@ -301,8 +301,9 @@ func TestConfigSanityDAgent(t *testing.T) {
 		},
 	}
 	cfg.diameterAgentCfg = &DiameterAgentCfg{
-		Enabled: true,
-		Conns:   map[string][]*DynamicConns{},
+		Enabled:   true,
+		Listeners: []DiameterListener{{Network: "tcp", Address: "127.0.0.1:3868"}},
+		Conns:     map[string][]*DynamicConns{},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",

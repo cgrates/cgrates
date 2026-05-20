@@ -110,33 +110,67 @@ type DiameterAgent struct {
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
 func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> Start listening on <%s>", utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().Listen))
-	srv := &diam.Server{
-		Network: da.cgrCfg.DiameterAgentCfg().ListenNet,
-		Addr:    da.cgrCfg.DiameterAgentCfg().Listen,
-		Handler: da.handlers(),
-		Dict:    nil,
+	listeners := da.cgrCfg.DiameterAgentCfg().Listeners
+	dSM := da.handlers()
+	errChan := make(chan error, len(listeners))
+	var activeListeners []net.Listener
+	for _, lstnrCfg := range listeners {
+		network := utils.FirstNonEmpty(lstnrCfg.Network, utils.TCP)
+		addr := utils.FirstNonEmpty(lstnrCfg.Address, ":3868")
+		utils.Logger.Info(fmt.Sprintf("<%s> Start listening on <%s>", utils.DiameterAgent, addr))
+		lsn, err := diam.MultistreamListen(network, addr)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to bind listener %s: %v",
+				utils.DiameterAgent, addr, err))
+			for _, l := range activeListeners {
+				l.Close()
+			}
+			return err
+		}
+		activeListeners = append(activeListeners, lsn)
+		srv := &diam.Server{
+			Network: network,
+			Addr:    addr,
+			Handler: dSM,
+			Dict:    nil,
+		}
+		go func(s *diam.Server, l net.Listener) {
+			errChan <- s.Serve(l)
+		}(srv, lsn)
 	}
-	// used to control the server state
-	var lsn net.Listener
-	if lsn, err = diam.MultistreamListen(utils.FirstNonEmpty(srv.Network, utils.TCP),
-		utils.FirstNonEmpty(srv.Addr, ":3868")); err != nil {
-		return
-	}
-	errChan := make(chan error)
+
+	go da.handleConns(dSM.HandshakeNotify())
+
 	go func() {
-		errChan <- srv.Serve(lsn)
+		errCh := dSM.ErrorReports()
+		for {
+			select {
+			case e, ok := <-errCh:
+				if !ok {
+					return
+				}
+				utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, e))
+			case <-stopChan:
+				return
+			}
+		}
 	}()
+
 	select {
 	case err = <-errChan:
-		return
+		utils.Logger.Err(fmt.Sprintf("<%s> listener error: %v", utils.DiameterAgent, err))
 	case <-stopChan:
-		return lsn.Close()
+		utils.Logger.Info(fmt.Sprintf("<%s> received stop signal", utils.DiameterAgent))
 	}
+
+	for _, lsn := range activeListeners {
+		lsn.Close()
+	}
+	return err
 }
 
 // Creates the message handlers
-func (da *DiameterAgent) handlers() diam.Handler {
+func (da *DiameterAgent) handlers() *sm.StateMachine {
 	settings := &sm.Settings{
 		SupportedApps:    da.cgrCfg.DiameterAgentCfg().CEApplications,
 		OriginHost:       datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost),
@@ -145,16 +179,29 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		ProductName:      datatype.UTF8String(da.cgrCfg.DiameterAgentCfg().ProductName),
 		FirmwareRevision: datatype.Unsigned32(utils.DiameterFirmwareRevision),
 	}
-	hosts := disectDiamListen(da.cgrCfg.DiameterAgentCfg().Listen)
+	var hosts []net.IP
+	for _, l := range da.cgrCfg.DiameterAgentCfg().Listeners {
+		host, _, splitErr := net.SplitHostPort(l.Address)
+		if splitErr != nil {
+			host = l.Address
+		}
+		if host == "" {
+			continue
+		}
+		if ip := net.ParseIP(host); ip != nil {
+			hosts = append(hosts, ip)
+		}
+	}
 	if len(hosts) == 0 {
 		interfaces, err := net.Interfaces()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error : %v, when quering interfaces for address", utils.DiameterAgent, err))
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %v, when querying interfaces for address",
+				utils.DiameterAgent, err))
 		}
 		for _, inter := range interfaces {
 			addrs, err := inter.Addrs()
 			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> error: %+v, when taking address from interface: %+v",
+				utils.Logger.Err(fmt.Sprintf("<%s> error: %v, when taking address from interface: %s",
 					utils.DiameterAgent, err, inter.Name))
 				continue
 			}
@@ -178,12 +225,6 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		dSM.HandleFunc(raa, func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
 		dSM.HandleFunc(dpa, func(c diam.Conn, m *diam.Message) { go da.handleDPA(c, m) })
 	}
-	go da.handleConns(dSM.HandshakeNotify())
-	go func() {
-		for err := range dSM.ErrorReports() {
-			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, err))
-		}
-	}()
 	return dSM
 }
 
