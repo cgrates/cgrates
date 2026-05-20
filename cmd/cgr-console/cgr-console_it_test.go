@@ -741,11 +741,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*caps_events": map[string]any{
+		"*capsEvents": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*cdr_ids": map[string]any{
+		"*cdrIDs": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -761,7 +761,7 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*closed_sessions": map[string]any{
+		"*closedSessions": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -769,15 +769,15 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*diameter_messages": map[string]any{
+		"*diameterMessages": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*event_charges": map[string]any{
+		"*eventCharges": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*event_resources": map[string]any{
+		"*eventResources": map[string]any{
 			"Items":  1.,
 			"Groups": 0.,
 		},
@@ -785,7 +785,7 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  3.,
 			"Groups": 0.,
 		},
-		"*loadIds": map[string]any{
+		"*loadIDs": map[string]any{
 			"Items":  13.,
 			"Groups": 0.,
 		},
@@ -801,7 +801,7 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*replication_hosts": map[string]any{
+		"*replicationHosts": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},
@@ -829,11 +829,11 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  1.,
 			"Groups": 0.,
 		},
-		"*rpc_connections": map[string]any{
+		"*rpcConnections": map[string]any{
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*rpc_responses": map[string]any{
+		"*rpcResponses": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},

@@ -174,7 +174,7 @@ func TestStressIPsAuthorize(t *testing.T) {
 				}
 			},
 			"items": {
-				"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+				"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 			},
 
 		},

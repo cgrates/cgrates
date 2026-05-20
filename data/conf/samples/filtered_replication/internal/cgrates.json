@@ -49,7 +49,7 @@
 		"*attributeProfiles":{"remote":false,"replicate":true},
 		"*chargerProfiles": {"remote":false,"replicate":true},
 		"*rateProfiles":{"remote":false,"replicate":true},
-		"*loadIds":{"remote":false,"replicate":true},
+		"*loadIDs":{"remote":false,"replicate":true},
 		"*actionProfiles":{"remote":false,"replicate":true},
 	},
 },
@@ -58,7 +58,7 @@
 
 "caches":{
 	"partitions": {
-		"*replication_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}
+		"*replicationHosts": {"limit": -1, "ttl": "", "staticTTL": false, "replicate": false}
 	}
 },
 

@@ -32,7 +32,7 @@ func TestEESClone(t *testing.T) {
      "enabled": true,
 	"conns": {"*attributes": [{"ConnIDs": ["*internal","*conn1"]}]},
 	"cache": {
-		"*fileCSV": {"limit": -2, "ttl": "3s", "static_ttl": true},
+		"*fileCSV": {"limit": -2, "ttl": "3s", "staticTTL": true},
 	},
 	"exporters": [
 		{
@@ -635,7 +635,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	        "enabled": true,						
             "conns": {"*attributes": [{"ConnIDs": ["*internal","*conn2"]}]},					
             "cache": {
-		          "*fileCSV": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "static_ttl": false}
+		          "*fileCSV": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "staticTTL": false}
             },
             "exporters": [
             {

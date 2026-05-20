@@ -30,7 +30,7 @@
 		}
 	},
 	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -95,7 +95,7 @@
 
 "caches":{
 	"partitions": {
-		"*rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false}
+		"*rpcResponses": {"limit": -1, "ttl": "2s", "staticTTL": false}
 	},
 },
 

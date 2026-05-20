@@ -187,7 +187,7 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 type CacheParamJsonCfg struct {
 	Limit      *int
 	Ttl        *string
-	Static_ttl *bool
+	Static_ttl *bool `json:"staticTTL"`
 	Precache   *bool
 	Remote     *bool
 	Replicate  *bool

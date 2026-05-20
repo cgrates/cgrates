@@ -51,7 +51,7 @@ func TestExporterMetricsIT(t *testing.T) {
 "ees": {
 "enabled": true,
 "cache": {
-  "*fileCSV": { "limit": -1, "ttl": "2s", "static_ttl": false }
+  "*fileCSV": { "limit": -1, "ttl": "2s", "staticTTL": false }
 },
 "exporters": [
   {

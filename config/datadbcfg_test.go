@@ -506,7 +506,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				},
 			},
 			"items":{ 
-				"*loadIds":{"remote":true, "replicate":true}, 
+				"*loadIDs":{"remote":true, "replicate":true}, 
 			
 			  }	
 			}
@@ -1053,12 +1053,12 @@ func TestItemOptsAsMapInterface(t *testing.T) {
 	}
 
 	exp := map[string]any{
-		"dbConn":     "",
-		"limit":      0,
-		"remote":     false,
-		"replicate":  false,
-		"static_ttl": false,
-		"ttl":        "1ns",
+		"dbConn":    "",
+		"limit":     0,
+		"remote":    false,
+		"replicate": false,
+		"staticTTL": false,
+		"ttl":       "1ns",
 	}
 
 	if rcv := itm.AsMapInterface(); !reflect.DeepEqual(rcv, exp) {

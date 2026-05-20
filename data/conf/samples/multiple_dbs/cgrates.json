@@ -44,9 +44,9 @@
 		}
 	},
 	"items":{
-		"*chargerProfiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "redis2"},
-		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "intrnl"},
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "redis2"},
+		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "intrnl"},
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 

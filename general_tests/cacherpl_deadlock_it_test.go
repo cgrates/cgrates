@@ -55,7 +55,7 @@ func TestCacheRplDeadlock(t *testing.T) {
 },
 "caches": {
 	"partitions": {
-		"*event_resources": {
+		"*eventResources": {
 			"limit": -1,
 			"replicate": true
 		}
