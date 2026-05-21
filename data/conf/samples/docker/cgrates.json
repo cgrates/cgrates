@@ -12,12 +12,12 @@
 },
 
 "listen": {
-	"rpc_json": "*env:DOCKER_IP:2012",			// RPC JSON listening address
-	"rpc_gob": "*env:DOCKER_IP:2013",			// RPC GOB listening address
+	"rpcJSON": "*env:DOCKER_IP:2012",			// RPC JSON listening address
+	"rpcGOB": "*env:DOCKER_IP:2013",			// RPC GOB listening address
 	"http": "*env:DOCKER_IP:2080",				// HTTP listening address
-	"rpc_json_tls" : "*env:DOCKER_IP:2022",		// RPC JSON TLS listening address
-	"rpc_gob_tls": "*env:DOCKER_IP:2023",		// RPC GOB TLS listening address
-	"http_tls": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
+	"rpcJSONtls" : "*env:DOCKER_IP:2022",		// RPC JSON TLS listening address
+	"rpcGOBtls": "*env:DOCKER_IP:2023",		// RPC GOB TLS listening address
+	"httpTLS": "*env:DOCKER_IP:2280",			// HTTP TLS listening address
 },
 
 "rpcConns": {

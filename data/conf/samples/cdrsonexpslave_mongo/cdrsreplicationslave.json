@@ -5,8 +5,8 @@
 // Starts rater, cdrs and mediator connecting over internal channel
 
 "listen": {
-	"rpc_json": "127.0.0.1:12012",			// RPC JSON listening address
-	"rpc_gob": "127.0.0.1:12013",			// RPC GOB listening address
+	"rpcJSON": "127.0.0.1:12012",			// RPC JSON listening address
+	"rpcGOB": "127.0.0.1:12013",			// RPC GOB listening address
 	"http": "127.0.0.1:12080",				// HTTP listening address
 },
 

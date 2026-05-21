@@ -45,12 +45,12 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	// reconnects: 1 so ConnManager gives up quickly and flush writes .gob files
 	primaryCfg := fmt.Sprintf(`{
 "general": {
-	"node_id": "primary",
+	"nodeID": "primary",
 	"reconnects": 1
 },
 "listen": {
-	"rpc_json": ":4012",
-	"rpc_gob": ":4013",
+	"rpcJSON": ":4012",
+	"rpcGOB": ":4013",
 	"http": ":4080"
 },
 "db": {
@@ -125,12 +125,12 @@ func TestReplicatorFailedPosts(t *testing.T) {
 
 	targetCfg := `{
 "general": {
-	"node_id": "target",
+	"nodeID": "target",
 	"reconnects": 1
 },
 "listen": {
-	"rpc_json": ":4022",
-	"rpc_gob": ":4023",
+	"rpcJSON": ":4022",
+	"rpcGOB": ":4023",
 	"http": ":4090"
 },
 "db": {

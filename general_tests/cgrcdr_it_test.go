@@ -57,7 +57,7 @@ func TestCgrCdrEventExporter(t *testing.T) {
 			"synchronous": true,
 			"blocker": false,
 			"attempts": 1,
-			"failed_posts_dir": "*none"
+			"failedPostsDir": "*none"
 		},
 	]
 },

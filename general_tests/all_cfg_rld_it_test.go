@@ -122,7 +122,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl)
 	}
 
-	cfgStr = `{"listen":{"http":":2080","http_tls":"127.0.0.1:2280","rpc_gob":":2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":":2012","rpc_json_tls":"127.0.0.1:2022"}}`
+	cfgStr = `{"listen":{"http":":2080","httpTLS":"127.0.0.1:2280","rpcGOB":":2013","rpcGOBtls":"127.0.0.1:2023","rpcJSON":":2012","rpcJSONtls":"127.0.0.1:2022"}}`
 	var rpl3 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -133,7 +133,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl3)
 	}
 
-	cfgStr = `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`
+	cfgStr = `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","serverCertificate":"","serverKey":"","serverName":"","serverPolicy":4}}`
 	var rpl4 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

@@ -102,10 +102,10 @@ func (tls TLSCfg) Clone() *TLSCfg {
 }
 
 type TlsJsonCfg struct {
-	Server_certificate *string `json:"server_certificate"`
-	Server_key         *string `json:"server_key"`
-	Server_policy      *int    `json:"server_policy"`
-	Server_name        *string `json:"server_name"`
+	Server_certificate *string `json:"serverCertificate"`
+	Server_key         *string `json:"serverKey"`
+	Server_policy      *int    `json:"serverPolicy"`
+	Server_name        *string `json:"serverName"`
 	Client_certificate *string `json:"clientCertificate"`
 	Client_key         *string `json:"clientKey"`
 	Ca_certificate     *string `json:"caCertificate"`

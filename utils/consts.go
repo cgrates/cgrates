@@ -2230,10 +2230,10 @@ const (
 
 // Tls
 const (
-	ServerCerificateCfg = "server_certificate"
-	ServerKeyCfg        = "server_key"
-	ServerPolicyCfg     = "server_policy"
-	ServerNameCfg       = "server_name"
+	ServerCerificateCfg = "serverCertificate"
+	ServerKeyCfg        = "serverKey"
+	ServerPolicyCfg     = "serverPolicy"
+	ServerNameCfg       = "serverName"
 	ClientCerificateCfg = "clientCertificate"
 	ClientKeyCfg        = "clientKey"
 	CaCertificateCfg    = "caCertificate"
@@ -2241,12 +2241,12 @@ const (
 
 // ListenCfg
 const (
-	RPCJSONListenCfg    = "rpc_json"
-	RPCGOBListenCfg     = "rpc_gob"
+	RPCJSONListenCfg    = "rpcJSON"
+	RPCGOBListenCfg     = "rpcGOB"
 	HTTPListenCfg       = "http"
-	RPCJSONTLSListenCfg = "rpc_json_tls"
-	RPCGOBTLSListenCfg  = "rpc_gob_tls"
-	HTTPTLSListenCfg    = "http_tls"
+	RPCJSONTLSListenCfg = "rpcJSONtls"
+	RPCGOBTLSListenCfg  = "rpcGOBtls"
+	HTTPTLSListenCfg    = "httpTLS"
 )
 
 // HTTPCfg
