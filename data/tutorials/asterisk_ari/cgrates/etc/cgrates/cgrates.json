@@ -18,10 +18,19 @@
 	"http": ":2080",
 },
 
-
+"accounts": {
+	"enabled": true,
+	"conns": {
+		"*rates": [{"connIDs": ["*localhost"]}]
+	},
+},
 
 
 "schedulers": {
+	"enabled": true,
+},
+
+"rates": {
 	"enabled": true,
 },
 
@@ -57,6 +66,13 @@
 	"channelSyncInterval":"7s",
 	"conns":{
 	"*rals": [
+		 {
+			"tenant": "",
+			"filterIDs": [],
+			"connIDs": ["*localhost"]
+		 }
+	],
+	"*accounts": [
 		 {
 			"tenant": "",
 			"filterIDs": [],
@@ -114,20 +130,84 @@
 	]
 			},
 },
+"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"dbConns": {
+		"*default": {			// The id of the DB connection
+			"dbType": "redis",	// db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379, 	// db port to reach the database
+			"dbName": "10", 	// db database name to connect to
+			"dbUser": "cgrates", 
+		},
+		"StorDB": {						 // The id of the DB connection
+			"dbType": "mysql",			 // db type: <internal|redis|mysql|mongo|postgres>
+			"dbHost": "127.0.0.1",		 // the host to connect to
+			"dbPort": 3306, 			 // db port to reach the database
+			"dbName": "cgrates", 		 // db database name to connect to
+			"dbUser": "cgrates", 		 // username to use when connecting to the database
+			"dbPassword": "CGRateS.org" // password to use when connecting to the database
+		},
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
+},
 
+  
 
 "asteriskAgent": {
 	"enabled": true,
-	"asteriskConns":[							
+	"asteriskConns":[
 		{"address": "127.0.0.1:8088", "user": "cgrates",
 			"password": "CGRateS.org", "connectAttempts": 3,"reconnects": 10,
 		    "ariWebsocket": false}
-		
+
 	],
 	"conns": {
-		"*sessions":[{"connIDs":["*birpc_internal"]}]
-	},	
-	"createCDR": true,
+		"*sessions":[{"connIDs":["*bijson_localhost"]}]
+	},
+	"requestProcessors": [
+		{
+			"id": "Authorize",
+			"filters": ["*string:~*req.type:StasisStart"],
+			"flags": ["*authorize","*accounts","*attributes"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
+			],
+			"replyFields":[
+				{"tag": "CGR_Reqtype", "path": "*rep.cgr_reqtype", "type": "*constant", "value": "*prepaid"}
+			]
+		},
+		{
+			"id": "Initiate",
+			"filters": [
+				"*string:~*req.type:ChannelStateChange",
+				"*string:~*req.channel.state:Up",
+				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
+			],
+			"flags": ["*initiate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.timestamp"}
+			]
+		},
+		{
+			"id": "Terminate",
+			"filters": [
+				"*string:~*req.type:ChannelDestroyed",
+				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
+			],
+			"flags": ["*terminate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
+			]
+		},
+		{
+			"id": "IgnoreOutbound",
+			"filters": ["*empty:~*req.channel.channelvars.cgr_reqtype:"],
+			"flags": ["*none"]
+		}
+	]
 },
 
 

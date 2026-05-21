@@ -61,6 +61,13 @@
 			"connIDs": ["*localhost"]
 		 }
 	],
+	"*accounts": [
+		 {
+			"tenant": "",
+			"filterIDs": [],
+			"connIDs": ["*localhost"]
+		 }
+	],
 	"*cdrs": [
 		 {
 			"tenant": "",
@@ -116,25 +123,45 @@
 
 "freeswitchAgent": {
 	"enabled": true,
+	"subscribePark": true,
 	"eventSocketConns":[
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"conns": {
-		"*sessions":[{"connIDs":["*birpc_internal"]}]
+		"*sessions":[{"connIDs":["*bijson_localhost"]}]
 	},
-	"createCDR": true,
 	"requestProcessors": [
 		{
-			"id": "FSEvent",
+			"id": "Authorize",
+			"filters": ["*string:~*req.Event-Name:CHANNEL_PARK"],
+			"flags": ["*authorize","*accounts","*resources:false","*routes","*attributes"],
 			"requestFields":[
-				{
-					"tag": "BaseTmpl",
-					"type": "*template",
-					"value": "*fsa"
-				}
-	
+				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
+			],
+			"replyFields":[
+				{"tag": "ResourceAllocation", "path": "*rep.cgr_resource_allocation", "type": "*variable", "value": "~*cgrep.ResourceAllocation.*primary"}
 			]
-		}
+		},
+		{
+			"id": "Initiate",
+			"filters": ["*string:~*req.Event-Name:CHANNEL_ANSWER"],
+			"flags": ["*initiate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
+				{"tag": "FsConnID", "path": "*cgreq.FsConnID", "type": "*variable", "value": "~*vars.FsConnID"}
+			],
+			"replyields":[
+				{"tag": "OriginHost", "path": "*rep.cgr_originhost", "type": "*variable", "value": "~*vars.OriginHost"}
+			]
+		},
+		{
+			"id": "TerminateAndCDR",
+			"filters": ["*string:~*req.Event-Name:CHANNEL_HANGUP_COMPLETE"],
+			"flags": ["*terminate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
+			]
+		 },
 	]
 },
 
@@ -151,9 +178,44 @@
 },
 
 
+"rates": {
+	"enabled": true,
+},
+
+"accounts": {
+	"enabled": true,
+	"conns": {
+		"*rates": [{"connIDs": ["*internal"]}]
+	},
+},
+
+
 "stats": {
 	"enabled": true,
 	"stringIndexedFields": ["*req.Account","*req.RunID","*req.Destination"],
+},
+
+"db": {
+	"dbConns": {
+		"*default": {
+			"dbType": "redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10",
+			"dbUser": "cgrates"
+		},
+		"StorDB": {
+			"dbType": "mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 

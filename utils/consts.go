@@ -2307,7 +2307,6 @@ const (
 	UserCf = "user"
 
 	// AsteriskAgentCfg
-	CreateCDRCfg     = "createCDR"
 	AsteriskConnsCfg = "asteriskConns"
 
 	// DiameterAgentCfg

@@ -88,7 +88,6 @@ func (fS *FreeswitchAgent) connect(shutdown *utils.SyncedChan) {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 		shutdown.CloseOnce() // stop the engine here
 	}
-	return
 }
 
 // Shutdown stops the service

@@ -49,6 +49,31 @@ type RWDataProvider interface {
 	Remove(fldPath []string) (err error)
 }
 
+type MapStringDP map[string]string
+
+func (me MapStringDP) String() string {
+	return ToJSON(me)
+}
+
+func (me MapStringDP) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	val, has := me[fldPath[0]]
+	if !has {
+		return nil, ErrNotFound
+	}
+	return val, nil
+}
+
+func (me MapStringDP) FieldAsString(fldPath []string) (string, error) {
+	val, err := me.FieldAsInterface(fldPath)
+	if err != nil {
+		return EmptyString, err
+	}
+	return IfaceAsString(val), nil
+}
+
 // NavigableMapper is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
 	AsNavigableMap() map[string]*DataNode

@@ -687,7 +687,6 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		},
 
 		SubscribePark:          utils.BoolPointer(true),
-		CreateCDR:              utils.BoolPointer(false),
 		ExtraFields:            &[]string{},
 		LowBalanceAnnFile:      utils.StringPointer(""),
 		EmptyBalanceContext:    utils.StringPointer(""),
@@ -760,8 +759,6 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 				},
 			},
 		},
-
-		Create_cdr: utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8088"),
@@ -2343,7 +2340,7 @@ func TestDfRateSJsonCfg(t *testing.T) {
 
 func TestDfTemplateSJsonCfg(t *testing.T) {
 	eCfg := FcTemplatesJsonCfg{
-		"*fsa": {
+		"*fsr": {
 			{
 				Tag:   utils.StringPointer("ToR"),
 				Path:  utils.StringPointer("*cgreq.ToR"),
@@ -2562,6 +2559,68 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Type:      utils.StringPointer(utils.MetaVariable),
 				Value:     utils.StringPointer("~*vars.*appid"),
 				Mandatory: utils.BoolPointer(true)},
+		},
+		"*astr": {
+			{
+				Tag:   utils.StringPointer("ToR"),
+				Path:  utils.StringPointer("*cgreq.ToR"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer(utils.MetaVoice)},
+			{
+				Tag:   utils.StringPointer("OriginID"),
+				Path:  utils.StringPointer("*cgreq.OriginID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.id")},
+			{
+				Tag:   utils.StringPointer("OriginIDOpt"),
+				Path:  utils.StringPointer("*opts.*originID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.id")},
+			{
+				Tag:   utils.StringPointer("OriginHost"),
+				Path:  utils.StringPointer("*cgreq.OriginHost"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*vars.OriginHost")},
+			{
+				Tag:   utils.StringPointer("RequestType"),
+				Path:  utils.StringPointer("*cgreq.RequestType"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.cgr_reqtype")},
+			{
+				Tag:   utils.StringPointer("Tenant"),
+				Path:  utils.StringPointer("*cgreq.Tenant"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("cgrates.org")},
+			{
+				Tag:   utils.StringPointer("Category"),
+				Path:  utils.StringPointer("*cgreq.Category"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("call")},
+			{
+				Tag:   utils.StringPointer("Account"),
+				Path:  utils.StringPointer("*cgreq.Account"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.caller.number")},
+			{
+				Tag:   utils.StringPointer("Subject"),
+				Path:  utils.StringPointer("*cgreq.Subject"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.caller.number")},
+			{
+				Tag:   utils.StringPointer("Destination"),
+				Path:  utils.StringPointer("*cgreq.Destination"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.dialplan.exten")},
+			{
+				Tag:   utils.StringPointer("SetupTime"),
+				Path:  utils.StringPointer("*cgreq.SetupTime"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.channel.creationtime")},
+			{
+				Tag:   utils.StringPointer("Cost"),
+				Path:  utils.StringPointer("*cgreq.Cost"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("-1.0")},
 		},
 		utils.MetaRAR: {
 			{
