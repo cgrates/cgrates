@@ -108,7 +108,7 @@ internalDBDumpPath
     Defines the path to the folder where the memory-stored **StorDB** will be dumped. This path is also used for recovery during engine startup. Ensure the folder exists before launching the engine.
 
 internalDBBackupPath
-    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.BackupStorDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, simply transfer the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring.
+    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.BackupStorDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, you can do so manualy by simply transfering the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring. Or automatically using `APIerSv1.RestoreStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreStorDB>`_ API call
 
 internalDBStartTimeout
     Specifies the time interval at which **StorDB** will be dumped to disk. This duration should be chosen based on the machine's capacity and data load. If the interval is set too long and a lot of data changes during that period, the dumping process will take longer, and in the event of an engine crash, any data not dumped will be lost. Conversely, if the interval is too short, and a high number of queries are done often to **StorDB**, some of the needed processing power for the queries will be used by the dump process. Since machine resources and data loads vary, it is recommended to simulate the load on your system and determine the optimal "sweet spot" for this interval. At engine shutdown, any remaining undumped data will automatically be written to disk, regardless of the interval setting.
@@ -136,7 +136,35 @@ internalDBRewriteInterval
     Rewriting should be used sparingly, as the process temporarily loads the entire ``internalDBDumpPath`` folder into memory for optimization, and then writes it back to the dump folder once done. This results in a surge of memory usage, which could amount to the size of the dump file itself during the rewrite. As a rule of thumb, expect the engine's memory usage to approximately double while the rewrite process is running. Manual rewriting can be triggered at any time via the `APIerSv1.RewriteStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RewriteStorDB>`_ API.
 
 internalDBFileSizeLimit
-    Specifies the maximum size a single dump file can reach. Upon reaching the limit, a new dump file is created. Limiting file size improves recovery time and allows for limit reached files to be rewritten.
+    Specifies the maximum size a single dump file can reach. Upon reaching the limit, a new dump file is created. Limiting file size improves recovery time and allows for limit reached files to be rewritten. It is recommended to have this limit to at most half of the machines memory, since the file will be put in memory while being read.
+
+The internal database also provides APIs for creating snapshots and restoring from backups.
+
+`APIerSv1.RestoreStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreStorDB>`_
+      Restores the internal **StorDB** from the path to the zip file or folder provided. If more than 1 backups are found in the path, it will select the latest generated one.
+
+      - If no backup path is provided in the API call, the configured ``internalDBBackupPath`` is used.
+      - Before restoring, all live data and currently dumped data from the internal database is cleared.
+      - The restore process replaces the existing dump state with the selected backup contents.
+
+`APIerSv1.SnapshotStorDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.SnapshotStorDB>`_
+      Creates a backup of the currently active dump state after which, it rebuilds the live dump files from the current in-memory **StorDB**.
+
+      The snapshot process performs the following steps:
+
+      - Copies the current live dump folder to the specified backup location (or ``internalDBBackupPath`` if none is provided).
+      - Optionally compresses the backup into a ZIP archive when the ``zip`` parameter is enabled.
+      - Clears the current live dump folder.
+      - Recreates fresh dump files directly from the current in-memory **StorDB** state.
+
+      Snapshotting is useful for:
+
+      - Creating compact and consistent recovery points.
+      - Cleaning up fragmented or heavily appended dump files.
+      - Reducing recovery time by rebuilding optimized dump files.
+      - Preparing backups before maintenance operations.
+
+    
 
 Configuration Example: Internal Storage
 ---------------------------------------
