@@ -39,7 +39,7 @@ func TestOfflineInternalReplication(t *testing.T) {
 	cfg1 := `
 {
 "general": {
-	"node_id": "InternalEngine"
+	"nodeID": "InternalEngine"
 },
 
 "logger": {
@@ -62,7 +62,7 @@ func TestOfflineInternalReplication(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		 "*default": {
 		 	"replicationConns": ["conn2"],
 			"replicationInterval": "-1",
@@ -76,8 +76,8 @@ func TestOfflineInternalReplication(t *testing.T) {
 		 }
 	},
 	"items":{
-		"*threshold_profiles": {"remote":false,"replicate":true},
-		"*attribute_profiles":{"remote":false,"replicate":true},
+		"*thresholdProfiles": {"remote":false,"replicate":true},
+		"*attributeProfiles":{"remote":false,"replicate":true},
 	},
 },
 
@@ -96,7 +96,7 @@ func TestOfflineInternalReplication(t *testing.T) {
 	cfg2 := `
 {
 "general": {
-	"node_id": "InternalEngine2"
+	"nodeID": "InternalEngine2"
 },
 
 "logger": {
@@ -110,7 +110,7 @@ func TestOfflineInternalReplication(t *testing.T) {
 },
 
 "db": {
-	"db_conns": {
+	"dbConns": {
 		"*default": {
 			"dbType": "*internal",
 			"opts":{
