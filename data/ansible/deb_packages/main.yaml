@@ -217,9 +217,16 @@
             chdir: "{{ reprepro_basedir }}"
           with_items: "{{ changes_files.results }}"
 
-        - name: Copy the file to PKG server
-          ansible.builtin.command: "scp {{ reprepro_basedir }}/incoming/{{ item.path | basename }} {{ pkgAddr }}:/tmp/"
-          with_items: "{{ package_files.files }}"
+        - name: Find debs for PKG server
+          ansible.builtin.find:
+            paths: "{{ reprepro_basedir }}/incoming"
+            patterns: "cgrates_*~deb*u1_amd64.deb"
+            file_type: file
+          register: pkg_debs
+
+        - name: Copy debs to PKG server
+          ansible.builtin.command: "scp {{ item.path }} {{ pkgAddr }}:/tmp/"
+          with_items: "{{ pkg_debs.files }}"
 
       rescue:
         - name: Find all files in incoming directory
