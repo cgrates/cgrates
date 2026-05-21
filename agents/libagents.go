@@ -38,7 +38,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	if pass, err := filterS.Pass(ctx, agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
+
 	}
+
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
@@ -49,7 +51,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
-		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
+		if reqProcessor.Flags.Has(typ) {
 			reqType = typ
 			break
 		}

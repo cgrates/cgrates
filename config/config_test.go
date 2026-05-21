@@ -542,7 +542,6 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
-		CreateCDR:              false,
 		ExtraFields:            utils.RSRParsers{},
 		EmptyBalanceContext:    "",
 		EmptyBalanceAnnFile:    "",
@@ -586,7 +585,6 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
-		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{Address: "127.0.0.1:8088",
 				User: "cgrates", Password: "CGRateS.org",
@@ -1850,7 +1848,6 @@ func TestFsAgentConfig(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
-		CreateCDR:              false,
 		LowBalanceAnnFile:      "",
 		EmptyBalanceAnnFile:    "",
 		EmptyBalanceContext:    "",
@@ -1897,7 +1894,6 @@ func TestAsteriskAgentConfig(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
-		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "",
 			Address:         "127.0.0.1:8088",
@@ -2224,8 +2220,9 @@ func TestTemplatesConfig(t *testing.T) {
 		},
 		"*cca":           nil,
 		"*asr":           nil,
+		"*astr":          nil,
 		"*rar":           nil,
-		"*fsa":           nil,
+		"*fsr":           nil,
 		utils.MetaCdrLog: nil,
 		utils.MetaDMR:    nil,
 		utils.MetaCoA:    nil,
@@ -2239,8 +2236,9 @@ func TestTemplatesConfig(t *testing.T) {
 	newConfig := cgrConfig.TemplatesCfg()
 	newConfig["*cca"] = nil
 	newConfig["*asr"] = nil
+	newConfig["*astr"] = nil
 	newConfig["*rar"] = nil
-	newConfig["*fsa"] = nil
+	newConfig["*fsr"] = nil
 	newConfig[utils.MetaCdrLog] = nil
 	newConfig[utils.MetaDMR] = nil
 	newConfig[utils.MetaCoA] = nil
@@ -3970,7 +3968,6 @@ func TestV1GetConfigFsAgent(t *testing.T) {
 				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
 			utils.SubscribeParkCfg:          true,
-			utils.CreateCdrCfg:              false,
 			utils.ExtraFieldsCfg:            []string{},
 			utils.LowBalanceAnnFileCfg:      "",
 			utils.EmptyBalanceContextCfg:    "",
@@ -4034,7 +4031,6 @@ func TestV1GetConfigAsteriskAgent(t *testing.T) {
 			utils.ConnsCfg: map[string][]*DynamicConns{
 				utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}},
 			},
-			utils.CreateCdrCfg: false,
 			utils.AsteriskConnsCfg: []map[string]any{
 				{
 					utils.AliasCfg:                "",
@@ -4047,6 +4043,7 @@ func TestV1GetConfigAsteriskAgent(t *testing.T) {
 					utils.MaxReconnectIntervalCfg: "0s",
 				},
 			},
+			utils.RequestProcessorsCfg: []map[string]any{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -4680,11 +4677,12 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 				{utils.TagCfg: "AuthApplicationId", utils.PathCfg: "*diamreq.Auth-Application-Id", utils.TypeCfg: "*variable",
 					utils.ValueCfg: "~*vars.*appid", utils.MandatoryCfg: true},
 			},
+			"*astr":          {},
 			utils.MetaCCA:    {},
 			utils.MetaRAR:    {},
 			"*errSip":        {},
 			utils.MetaCdrLog: {},
-			"*fsa":           {},
+			"*fsr":           {},
 			utils.MetaDMR: {
 				{utils.TagCfg: "User-Name", utils.PathCfg: "*radDAReq.User-Name", utils.TypeCfg: "*variable", utils.ValueCfg: "~*oreq.User-Name"},
 				{utils.TagCfg: "NAS-IP-Address", utils.PathCfg: "*radDAReq.NAS-IP-Address", utils.TypeCfg: "*variable", utils.ValueCfg: "~*oreq.NAS-IP-Address"},
@@ -4705,10 +4703,11 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 	} else if mp, can := reply[TemplatesJSON].(map[string][]map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[TemplatesJSON])
 	} else {
+		mp["*astr"] = []map[string]any{}
 		mp[utils.MetaCCA] = []map[string]any{}
 		mp[utils.MetaRAR] = []map[string]any{}
 		mp["*errSip"] = []map[string]any{}
-		mp["*fsa"] = []map[string]any{}
+		mp["*fsr"] = []map[string]any{}
 		mp[utils.MetaCdrLog] = []map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4999,7 +4998,7 @@ func TestV1GetConfigAsJSONSessionS(t *testing.T) {
 
 func TestV1GetConfigAsJSONFreeSwitchAgent(t *testing.T) {
 	var reply string
-	expected := `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
+	expected := `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{FreeSWITCHAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5021,7 +5020,7 @@ func TestV1GetConfigAsJSONFKamailioAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONAsteriskAgent(t *testing.T) {
 	var reply string
-	expected := `{"asteriskAgent":{"asteriskConns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false}}`
+	expected := `{"asteriskAgent":{"asteriskConns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"enabled":false,"requestProcessors":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AsteriskAgentJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5254,7 +5253,7 @@ func TestV1GetConfigAsJSONRPCConns(t *testing.T) {
 
 func TestV1GetConfigAsJSONTemplates(t *testing.T) {
 	var reply string
-	expected := `{"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*coa":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Filter-Id","tag":"Filter-Id","type":"*variable","value":"~*req.CustomFilter"}],"*dmr":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Reply-Message","tag":"Reply-Message","type":"*variable","value":"~*req.DisconnectCause"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*fsa":[{"path":"*cgreq.ToR","tag":"ToR","type":"*constant","value":"*voice"},{"path":"*cgreq.PDD","tag":"PDD","type":"*composed","value":"~*req.variable_progress_mediamsec;ms"},{"path":"*cgreq.ACD","tag":"ACD","type":"*composed","value":"~*req.variable_cdr_acd;s"},{"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*opts.*originID","tag":"*originID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*cgreq.OriginHost","tag":"OriginHost","type":"*variable","value":"~*req.variable_cgr_originhost"},{"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Source","tag":"Source","type":"*composed","value":"FS_;~*req.Event-Name"},{"filters":["*string:*req.variable_process_cdr:false"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*string:*req.Caller-Dialplan:inline"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*exists:*cgreq.RequestType:"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*prepaid"},{"path":"*cgreq.Tenant","tag":"Tenant","type":"*constant","value":"cgrates.org"},{"path":"*cgreq.Category","tag":"Category","type":"*constant","value":"call"},{"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.Caller-Destination-Number"},{"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.Caller-Channel-Created-Time"},{"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.Caller-Channel-Answered-Time"},{"path":"*cgreq.Usage","tag":"Usage","type":"*composed","value":"~*req.variable_billsec;s"},{"path":"*cgreq.Route","tag":"Route","type":"*variable","value":"~*req.variable_cgr_route"},{"path":"*cgreq.Cost","tag":"Cost","type":"*constant","value":"-1.0"},{"filters":["*notempty:*req.Hangup-Cause:"],"path":"*cgreq.DisconnectCause","tag":"DisconnectCause","type":"*variable","value":"~*req.Hangup-Cause"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]}}`
+	expected := `{"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*astr":[{"path":"*cgreq.ToR","tag":"ToR","type":"*constant","value":"*voice"},{"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.channel.id"},{"path":"*opts.*originID","tag":"OriginIDOpt","type":"*variable","value":"~*req.channel.id"},{"path":"*cgreq.OriginHost","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.cgr_reqtype"},{"path":"*cgreq.Tenant","tag":"Tenant","type":"*constant","value":"cgrates.org"},{"path":"*cgreq.Category","tag":"Category","type":"*constant","value":"call"},{"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.channel.caller.number"},{"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.channel.caller.number"},{"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.channel.dialplan.exten"},{"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.channel.creationtime"},{"path":"*cgreq.Cost","tag":"Cost","type":"*constant","value":"-1.0"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*coa":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Filter-Id","tag":"Filter-Id","type":"*variable","value":"~*req.CustomFilter"}],"*dmr":[{"path":"*radDAReq.User-Name","tag":"User-Name","type":"*variable","value":"~*oreq.User-Name"},{"path":"*radDAReq.NAS-IP-Address","tag":"NAS-IP-Address","type":"*variable","value":"~*oreq.NAS-IP-Address"},{"path":"*radDAReq.Acct-Session-Id","tag":"Acct-Session-Id","type":"*variable","value":"~*oreq.Acct-Session-Id"},{"path":"*radDAReq.Reply-Message","tag":"Reply-Message","type":"*variable","value":"~*req.DisconnectCause"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*fsr":[{"path":"*cgreq.ToR","tag":"ToR","type":"*constant","value":"*voice"},{"path":"*cgreq.PDD","tag":"PDD","type":"*composed","value":"~*req.variable_progress_mediamsec;ms"},{"path":"*cgreq.ACD","tag":"ACD","type":"*composed","value":"~*req.variable_cdr_acd;s"},{"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*opts.*originID","tag":"*originID","type":"*variable","value":"~*req.Unique-ID"},{"path":"*cgreq.OriginHost","tag":"OriginHost","type":"*variable","value":"~*req.variable_cgr_originhost"},{"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Source","tag":"Source","type":"*composed","value":"FS_;~*req.Event-Name"},{"filters":["*string:*req.variable_process_cdr:false"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*string:*req.Caller-Dialplan:inline"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"filters":["*exists:*cgreq.RequestType:"],"path":"*cgreq.RequestType","tag":"RequestType","type":"*constant","value":"*prepaid"},{"path":"*cgreq.Tenant","tag":"Tenant","type":"*constant","value":"cgrates.org"},{"path":"*cgreq.Category","tag":"Category","type":"*constant","value":"call"},{"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.Caller-Username"},{"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.Caller-Destination-Number"},{"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.Caller-Channel-Created-Time"},{"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.Caller-Channel-Answered-Time"},{"path":"*cgreq.Usage","tag":"Usage","type":"*composed","value":"~*req.variable_billsec;s"},{"path":"*cgreq.Route","tag":"Route","type":"*variable","value":"~*req.variable_cgr_route"},{"path":"*cgreq.Cost","tag":"Cost","type":"*constant","value":"-1.0"},{"filters":["*notempty:*req.Hangup-Cause:"],"path":"*cgreq.DisconnectCause","tag":"DisconnectCause","type":"*variable","value":"~*req.Hangup-Cause"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{TemplatesJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -6018,7 +6017,6 @@ func TestAsteriskAgentCloneSection(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*internal"}}},
 		},
-		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "asterisk",
@@ -6036,7 +6034,6 @@ func TestAsteriskAgentCloneSection(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*internal"}}},
 		},
-		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "asterisk",
@@ -6143,7 +6140,6 @@ func TestFreeSwitchAgentCloneSection(t *testing.T) {
 		Enabled:             true,
 		Conns:               map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{"*json"}}}},
 		SubscribePark:       true,
-		CreateCDR:           false,
 		ExtraFields:         nil,
 		LowBalanceAnnFile:   "lwb_file",
 		EmptyBalanceContext: "eb_ctx",
@@ -6154,7 +6150,6 @@ func TestFreeSwitchAgentCloneSection(t *testing.T) {
 		Enabled:             true,
 		Conns:               map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{"*json"}}}},
 		SubscribePark:       true,
-		CreateCDR:           false,
 		ExtraFields:         nil,
 		LowBalanceAnnFile:   "lwb_file",
 		EmptyBalanceContext: "eb_ctx",

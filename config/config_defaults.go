@@ -1176,7 +1176,6 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 	},			
-	"createCDR": false,			// create CDR out of events and sends it to CDRS component
 	"asteriskConns":[			// instantiate connections to multiple Asterisk servers
 		{
 			"address": "127.0.0.1:8088",
@@ -1197,7 +1196,6 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 	},
 	"subscribePark": true,				// subscribe via fsock to receive park events
-	"createCDR": false,				// creates CDR out of events and sends them to CDRS component
 	"extraFields": [],				// extra fields to store in auth/CDRs when creating them
 	"lowBalanceAnnFile": "",			// file to be played when low balance is reached for prepaid calls
 	"emptyBalanceContext": "",			// if defined, prepaid calls will be transferred to this context on empty balance
@@ -2450,7 +2448,31 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true}
 	],
-    "*fsa": [
+	"*astr": [
+		{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant",
+			"value": "*voice"},
+		{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", 
+			"value": "~*req.channel.id"},
+		{"tag": "originID", "path": "*opts.*originID", "type": "*variable", 
+			"value": "~*req.channel.id"},
+		{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable", 
+			"value": "~*vars.OriginHost"},
+		{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", 
+			"value": "*prepaid"},
+		{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*constant", 
+			"value": "cgrates.org"},
+		{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", 
+			"value": "~*req.channel.caller.number"},
+		{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+			 "value": "~*req.channel.caller.number"},
+		{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", 
+			"value": "~*req.channel.dialplan.exten"},
+		{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", 
+			"value": "~*req.channel.creationtime"},
+		{"tag":"Cost","path":"*cgreq.Cost","type":"*constant",
+			"value":"-1.0"},
+	],
+    "*fsr": [
 		{ "tag": "ToR", "path": "*cgreq.ToR","type": "*constant",
 		   "value": "*voice"},
 		{"tag":"PDD","path":"*cgreq.PDD","type":"*composed",

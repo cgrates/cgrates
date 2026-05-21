@@ -123,12 +123,53 @@
 		{"address": "127.0.0.1:8088", "user": "cgrates",
 			"password": "CGRateS.org", "connectAttempts": 3,"reconnects": 10,
 		    "ariWebsocket": false }
-		
+
 	],
 	"conns": {
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
-	},		
-	"createCDR": true,
+	},
+	"requestProcessors": [
+		{
+			"id": "Authorize",
+			"filters": ["*string:~*req.type:StasisStart"],
+			"flags": ["*authorize","*accounts","*attributes"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
+			],
+			"replyFields":[
+				{"tag": "CGR_Reqtype", "path": "*rep.cgr_reqtype", "type": "*constant", "value": "*prepaid"}
+			]
+		},
+		{
+			"id": "Initiate",
+			"filters": [
+				"*string:~*req.type:ChannelStateChange",
+				"*string:~*req.channel.state:Up",
+				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
+			],
+			"flags": ["*initiate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.timestamp"}
+			]
+		},
+		{
+			"id": "Terminate",
+			"filters": [
+				"*string:~*req.type:ChannelDestroyed",
+				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
+			],
+			"flags": ["*terminate","*accounts"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
+			]
+		},
+		{
+			"id": "IgnoreOutbound",
+			"filters": ["*empty:~*req.channel.channelvars.cgr_reqtype:"],
+			"flags": ["*none"]
+		}
+	]
 },
 
 
@@ -170,4 +211,15 @@
 "admins": {
 	"enabled": true,
 },
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfilePath": ".cgr.lck",
+		"tpInPath": "/usr/share/cgrates/tariffplans/tutorial",
+		"tpOutPath": "",
+	},
+],
 }

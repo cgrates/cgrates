@@ -23,8 +23,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/birpc"
@@ -37,38 +35,41 @@ import (
 
 // constants used by AsteriskAgent
 const (
-	CGRAuthAPP               = "cgratesAuth"
-	CGRMaxSessionTime        = "CGRMaxSessionTime"
-	CGRRoute                 = "CGRRoute"
-	ARIStasisStart           = "StasisStart"
-	ARIChannelStateChange    = "ChannelStateChange"
-	ARIChannelDestroyed      = "ChannelDestroyed"
-	ARIRESTResponse          = "RESTResponse"
-	eventType                = "eventType"
-	channelID                = "channelID"
-	channelState             = "channelState"
-	channelUp                = "Up"
-	timestamp                = "timestamp"
-	SMAAuthorization         = "SMA_AUTHORIZATION"
-	SMASessionStart          = "SMA_SESSION_START"
-	SMASessionTerminate      = "SMA_SESSION_TERMINATE"
-	ARICGRResourceAllocation = "CGRResourceAllocation"
+	CGRAuthAPP            = "cgratesAuth"
+	CGRMaxSessionTime     = "CGRMaxSessionTime"
+	CGRRoute              = "CGRRoute"
+	ARIStasisStart        = "StasisStart"
+	ARIChannelStateChange = "ChannelStateChange"
+	ARIChannelDestroyed   = "ChannelDestroyed"
+	ARIRESTResponse       = "RESTResponse"
 )
 
 // NewAsteriskAgent constructs a new Asterisk Agent
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	connMgr *engine.ConnManager, caps *engine.Caps, fltrS *engine.FilterS) *AsteriskAgent {
+	connMgr *engine.ConnManager, caps *engine.Caps, fltrS *engine.FilterS) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
-		cgrCfg:      cgrCfg,
-		astConnIdx:  astConnIdx,
-		connMgr:     connMgr,
-		caps:        caps,
-		fltrS:       fltrS,
-		eventsCache: make(map[string]*utils.CGREvent),
+		cgrCfg:     cgrCfg,
+		astConnIdx: astConnIdx,
+		connMgr:    connMgr,
+		caps:       caps,
+		fltrS:      fltrS,
 	}
 	srv, _ := birpc.NewService(sma, "", false)
 	sma.ctx = context.WithClient(context.TODO(), srv)
-	return sma
+	msgTemplates := cgrCfg.TemplatesCfg()
+	for _, procsr := range cgrCfg.AsteriskAgentCfg().RequestProcessors {
+		if tpls, err := config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.RequestFields = tpls
+		}
+		if tpls, err := config.InflateTemplates(procsr.ReplyFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.ReplyFields = tpls
+		}
+	}
+	return sma, nil
 }
 
 // ARIConnector abstracts the transport layer (HTTP or WebSocket) for sending ARI commands.
@@ -78,17 +79,15 @@ type ARIConnector interface {
 
 // AsteriskAgent used to cominicate with asterisk
 type AsteriskAgent struct {
-	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
-	connMgr     *engine.ConnManager
-	caps        *engine.Caps
-	fltrS       *engine.FilterS
-	astConnIdx  int
-	astConn     ARIConnector
-	astEvChan   chan map[string]any
-	astErrChan  chan error
-	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex               // Protect eventsCache
-	ctx         *context.Context
+	cgrCfg     *config.CGRConfig // Separate from smCfg since there can be multiple
+	connMgr    *engine.ConnManager
+	caps       *engine.Caps
+	fltrS      *engine.FilterS
+	astConnIdx int
+	astConn    ARIConnector
+	astEvChan  chan map[string]any
+	astErrChan chan error
+	ctx        *context.Context
 }
 
 func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
@@ -96,13 +95,13 @@ func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) 
 	sma.astEvChan = make(chan map[string]any)
 	sma.astErrChan = make(chan error)
 	if connCfg.AriWebSocket {
-		sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
+		sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s&subscribeAll=true",
 			connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 			connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version),
 			sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects,
 			connCfg.MaxReconnectInterval, utils.FibDuration)
 	} else {
-		sma.astConn, err = aringo.NewARInGOV1(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
+		sma.astConn, err = aringo.NewARInGOV1(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s&subscribeAll=true",
 			connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 			connCfg.User, connCfg.Password, connCfg.Address, fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version),
 			sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects,
@@ -146,20 +145,106 @@ func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 		case err = <-sma.astErrChan:
 			return
 		case astRawEv := <-sma.astEvChan:
-			smAsteriskEvent := NewSMAsteriskEvent(astRawEv,
-				strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],
-				sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Alias)
+			ev := NewSMAsteriskEvent(astRawEv)
+			go sma.handleSMAsteriskEvent(ev)
 
-			switch smAsteriskEvent.EventType() {
-			case ARIStasisStart:
-				go sma.handleStasisStart(smAsteriskEvent)
-			case ARIChannelStateChange:
-				go sma.handleChannelStateChange(smAsteriskEvent)
-			case ARIChannelDestroyed:
-				go sma.handleChannelDestroyed(smAsteriskEvent)
-			}
 		}
 	}
+}
+func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
+	if sma.caps.IsLimited() {
+		if err := sma.caps.Allocate(); err != nil {
+			sma.hangupChannel(ev.ChannelID(),
+				fmt.Sprintf("<%s> caps limit reached, rejecting %s for channel %s: %v",
+					utils.AsteriskAgent, ev.EventType(), ev.ChannelID(), err))
+			return
+		}
+		defer sma.caps.Deallocate()
+	}
+	evType := ev.EventType()
+	chID := ev.ChannelID()
+	reqVars := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.OriginHost: utils.NewLeafNode(
+				strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0]),
+		},
+	}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+	opts := utils.MapStorage{}
+	rply := utils.NewOrderedNavigableMap()
+	sessConns, _ := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS],
+		sma.cgrCfg.GeneralCfg().DefaultTenant, ev, sma.fltrS)
+
+	var processed bool
+	var err error
+	for _, reqProcessor := range sma.cgrCfg.AsteriskAgentCfg().RequestProcessors {
+		var lclProcessed bool
+		lclProcessed, err = processRequest(
+			sma.ctx, reqProcessor,
+			NewAgentRequest(
+				ev, reqVars, cgrRplyNM, rply, opts,
+				reqProcessor.Tenant, sma.cgrCfg.GeneralCfg().DefaultTenant,
+				utils.FirstNonEmpty(reqProcessor.Timezone,
+					sma.cgrCfg.GeneralCfg().DefaultTimezone),
+				sma.fltrS, nil),
+			utils.AsteriskAgent, sma.connMgr,
+			sessConns, nil, nil, sma.fltrS)
+		if lclProcessed {
+			processed = lclProcessed
+		}
+		if err != nil ||
+			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+			break
+		}
+	}
+
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %v processing event %s for channelID: %s",
+				utils.AsteriskAgent, err, evType, chID))
+		sma.dispatchErr(chID, evType)
+		return
+	}
+	if !processed {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> no request processor enabled, ignoring event %s for channelID: %s",
+				utils.AsteriskAgent, evType, chID))
+		sma.dispatchErr(chID, evType)
+		return
+	}
+	if err = sma.applyReplyFields(chID, rply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %v applying reply variables for event %s for channelID: %s",
+				utils.AsteriskAgent, err, evType, chID))
+		sma.dispatchErr(chID, evType)
+		return
+	}
+	if evType == ARIStasisStart {
+		sma.authorizeStasis(chID, cgrRplyNM)
+	}
+}
+
+func (sma *AsteriskAgent) dispatchErr(chID, evType string) {
+	switch evType {
+	case ARIStasisStart, ARIChannelStateChange:
+		sma.hangupChannel(chID, "")
+	}
+}
+
+func (sma *AsteriskAgent) authorizeStasis(chID string, cgrRply *utils.DataNode) {
+	maxDur, hasUsage := minAccountUsage(cgrRply)
+	if hasUsage && maxDur == 0 {
+		sma.hangupChannel(chID, "")
+		return
+	}
+	if hasUsage {
+		if !sma.setChannelVar(chID, CGRMaxSessionTime,
+			strconv.Itoa(int(maxDur.Milliseconds()))) {
+			return
+		}
+	}
+	sma.continueChannel(chID)
 }
 
 // setChannelVar will set the value of a variable
@@ -189,211 +274,13 @@ func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
 	}
 }
 
-func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
-	if sma.caps.IsLimited() {
-		if err := sma.caps.Allocate(); err != nil {
-			sma.hangupChannel(ev.ChannelID(),
-				fmt.Sprintf("<%s> caps limit reached, rejecting channel %s: %v",
-					utils.AsteriskAgent, ev.ChannelID(), err))
-			return
-		}
-		defer sma.caps.Deallocate()
-	}
-	// Subscribe for channel updates even after we leave Stasis
+func (sma *AsteriskAgent) continueChannel(chID string) {
 	if _, err := sma.astConn.Call(aringo.HTTP_POST,
-		fmt.Sprintf("applications/%s/subscription", CGRAuthAPP),
-		map[string]string{"eventSource": fmt.Sprintf("channel:%s", ev.ChannelID())}, nil); err != nil {
-		// Since we got error, disconnect channel
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> error: %s subscribing for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		return
-	}
-	// authorize Session
-	authArgs := ev.AsCGREvent()
-	if authArgs == nil {
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
-				utils.AsteriskAgent, ev.ChannelID()))
-		return
-	}
-	sessionConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, sma.fltrS)
-	if err != nil {
-		return
-	}
-	var authReply sessions.V1AuthorizeReply
-	if err := sma.connMgr.Call(sma.ctx, sessionConns,
-		utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> error: %s authorizing session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		return
-	}
-	if authReply.Attributes != nil {
-		for fldName := range authReply.Attributes.UniqueAlteredFields() {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
-				continue //maybe removed
-			}
-			fldVal, err := authReply.Attributes.CGREvent.FieldAsString(fldName)
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> extracting attribute field: <%s>",
-						utils.AsteriskAgent, err.Error(), fldName))
-			}
-			if !sma.setChannelVar(ev.ChannelID(), fldName, fldVal) {
-				return
-			}
-		}
-	}
-
-	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
-		if authReply.MaxUsage == nil ||
-			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
-			sma.hangupChannel(ev.ChannelID(), "")
-			return
-		}
-		maxDur, _ := authReply.MaxUsage.Duration()
-		//  Set absolute timeout for non-postpaid calls
-		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
-			strconv.Itoa(int(maxDur.Milliseconds()))) {
-			return
-		}
-	}
-
-	if authReply.ResourceAllocation != nil {
-		if !sma.setChannelVar(ev.ChannelID(),
-			ARICGRResourceAllocation, *authReply.ResourceAllocation) {
-			return
-		}
-	}
-
-	if authReply.RouteProfiles != nil {
-		for i, route := range authReply.RouteProfiles.RouteIDs() {
-			if !sma.setChannelVar(ev.ChannelID(),
-				CGRRoute+strconv.Itoa(i+1), route) {
-				return
-			}
-		}
-	}
-	// Exit channel from stasis
-	if _, err := sma.astConn.Call(
-		aringo.HTTP_POST,
-		fmt.Sprintf("channels/%s/continue", ev.ChannelID()), nil, nil); err != nil {
-	}
-	// Done with processing event, cache it for later use
-	sma.evCacheMux.Lock()
-	sma.eventsCache[ev.ChannelID()] = authArgs
-	sma.evCacheMux.Unlock()
-}
-
-// Ussually channelUP
-func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
-	if ev.ChannelState() != channelUp {
-		return
-	}
-	if sma.caps.IsLimited() {
-		if err := sma.caps.Allocate(); err != nil {
-			sma.hangupChannel(ev.ChannelID(),
-				fmt.Sprintf("<%s> caps limit reached, rejecting state change for channel %s: %v",
-					utils.AsteriskAgent, ev.ChannelID(), err))
-			return
-		}
-		defer sma.caps.Deallocate()
-	}
-	sma.evCacheMux.RLock()
-	cgrEvDisp, hasIt := sma.eventsCache[ev.ChannelID()]
-	sma.evCacheMux.RUnlock()
-	if !hasIt { // Not handled by us
-		return
-	}
-	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
-	sma.evCacheMux.Unlock()
-	if err != nil {
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		return
-	}
-	var initS bool
-	if cgrEvDisp.APIOpts == nil {
-		initS = true
-		cgrEvDisp.APIOpts = map[string]any{utils.MetaInitiate: true}
-	} else {
-		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.MetaInitiate)
-	}
-	//initit Session
-	var initReply sessions.V1InitSessionReply
-	var sessionConns []string
-	sessionConns, err = engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, cgrEvDisp.Tenant, ev.AsCGREvent().AsDataProvider(), nil, sma.fltrS)
-	if err != nil {
-		return
-	}
-	if err := sma.connMgr.Call(sma.ctx, sessionConns,
-		utils.SessionSv1InitiateSession,
-		cgrEvDisp, &initReply); err != nil {
-		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		return
-	}
-	if initS && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
-		sma.hangupChannel(ev.ChannelID(), "")
-		return
-	}
-}
-
-// Channel disconnect
-func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
-	if sma.caps.IsLimited() {
-		if err := sma.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting destroy for channel %s: %v",
-					utils.AsteriskAgent, ev.ChannelID(), err))
-			return
-		}
-		defer sma.caps.Deallocate()
-	}
-	chID := ev.ChannelID()
-	sma.evCacheMux.RLock()
-	cgrEvDisp, hasIt := sma.eventsCache[chID]
-	sma.evCacheMux.RUnlock()
-	if !hasIt { // Not handled by us
-		return
-	}
-	sma.evCacheMux.Lock()
-	delete(sma.eventsCache, chID)       // delete the event from cache as we do not need to keep it here forever
-	err := ev.UpdateCGREvent(cgrEvDisp) // Updates the event directly in the cache
-	sma.evCacheMux.Unlock()
-	if err != nil {
+		fmt.Sprintf("channels/%s/continue", chID), nil, nil); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
+			fmt.Sprintf("<%s> error: %s exiting stasis for channelID: %s",
 				utils.AsteriskAgent, err.Error(), chID))
-		return
 	}
-	// populate terminate session args
-	if cgrEvDisp.APIOpts == nil {
-		cgrEvDisp.APIOpts = map[string]any{utils.MetaTerminate: true}
-	}
-
-	var reply string
-	sessConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, cgrEvDisp.Tenant, cgrEvDisp.AsDataProvider(), nil, sma.fltrS)
-	if err := sma.connMgr.Call(sma.ctx, sessConns,
-		utils.SessionSv1TerminateSession,
-		cgrEvDisp, &reply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
-			utils.AsteriskAgent, err.Error(), chID))
-	}
-	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
-		if err := sma.connMgr.Call(sma.ctx, sessConns,
-			utils.SessionSv1ProcessCDR,
-			cgrEvDisp, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
-				utils.AsteriskAgent, err.Error(), chID))
-		}
-	}
-
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk
@@ -443,4 +330,24 @@ func (*AsteriskAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
 func (sma *AsteriskAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
+}
+
+// applyReplyFields runs the processor's ReplyFields template against the agent
+func (sma *AsteriskAgent) applyReplyFields(chID string, rply *utils.OrderedNavigableMap) error {
+	for el := rply.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		itm, _ := rply.Field(path)
+		if itm == nil {
+			continue
+		}
+		val := utils.IfaceAsString(itm.Data)
+		if val == utils.EmptyString {
+			continue
+		}
+		vrbl := strings.Join(utils.StripTrailingIndex(path), utils.NestingSep)
+		if !sma.setChannelVar(chID, vrbl, val) {
+			return fmt.Errorf("setChannelVar failed for %s", vrbl)
+		}
+	}
+	return nil
 }

@@ -33,6 +33,18 @@ import (
 	"github.com/cgrates/fsock"
 )
 
+const (
+	FsParkEvent   = "CHANNEL_PARK"
+	FsAnswerEvent = "CHANNEL_ANSWER"
+	FsHangupEvent = "CHANNEL_HANGUP_COMPLETE"
+	EventName     = "Event-Name"
+	UUID          = "Unique-ID" // unique ID for this call leg
+	CALL_DEST_NR  = "Caller-Destination-Number"
+	SIP_REQ_USER  = "variable_sip_req_user"
+	AUTH_OK       = "AUTH_OK"
+	FsConnID      = "FsConnID" // used to share connID info in event for remote disconnects
+)
+
 func NewFSsessions(cgrcfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	timezone string, connMgr *engine.ConnManager, caps *engine.Caps) (*FSsessions, error) {
 	fsAgentConfig := cgrcfg.FsAgentCfg()
@@ -83,41 +95,168 @@ type FSsessions struct {
 }
 
 func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
-	ca := func(body string, connIdx int) {
-		fsa.onChannelAnswer(
-
-			NewFSEvent(body), connIdx)
-	}
-	ch := func(body string, connIdx int) {
-		fsa.onChannelHangupComplete(
-			NewFSEvent(body), connIdx)
+	hdlr := func(body string, connIdx int) {
+		fsa.handleFSEvent(fsock.EventToMap(body), connIdx)
 	}
 	handlers := map[string][]func(string, int){
-		"CHANNEL_ANSWER":          {ca},
-		"CHANNEL_HANGUP_COMPLETE": {ch},
+		FsAnswerEvent: {hdlr},
+		FsHangupEvent: {hdlr},
 	}
 	if fsa.cfg.SubscribePark {
-		cp := func(body string, connIdx int) {
-			fsa.onChannelPark(
-				NewFSEvent(body), connIdx)
-		}
-		handlers["CHANNEL_PARK"] = []func(string, int){cp}
+		handlers[FsParkEvent] = []func(string, int){hdlr}
 	}
 	return handlers
+}
+
+func (fsa *FSsessions) handleFSEvent(fsev map[string]string, connIdx int) {
+	eventName := fsev[EventName]
+	uuid := fsev[UUID]
+	if fsa.caps.IsLimited() {
+		if err := fsa.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting %s for channel %s: %v",
+					utils.FreeSWITCHAgent, fsev[EventName], fsev[UUID], err))
+			if eventName == FsParkEvent {
+				fsa.unparkCall(uuid, connIdx, utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER]), err.Error())
+			}
+			return
+		}
+		defer fsa.caps.Deallocate()
+	}
+	if connIdx >= len(fsa.conns) {
+		utils.Logger.Err(fmt.Sprintf("<%s> Index %v out of range",
+			utils.FreeSWITCHAgent, connIdx))
+		return
+	}
+
+	reqVars := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			FsConnID:  utils.NewLeafNode(connIdx),
+			EventName: utils.NewLeafNode(eventName),
+			utils.OriginHost: utils.NewLeafNode(utils.FirstNonEmpty(
+				fsa.cfg.EventSocketConns[connIdx].Alias,
+				fsa.cfg.EventSocketConns[connIdx].Address)),
+		},
+	}
+	dP := utils.MapStringDP(fsev)
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+	opts := utils.MapStorage{}
+	rply := utils.NewOrderedNavigableMap()
+	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], utils.MetaAny, dP, fsa.fltrS)
+
+	var processed bool
+	var err error
+	for _, reqProcessor := range fsa.cfg.RequestProcessors {
+		var lclProcessed bool
+		lclProcessed, err = processRequest(
+			fsa.ctx, reqProcessor,
+			NewAgentRequest(
+				dP, reqVars, cgrRplyNM, rply, opts,
+				reqProcessor.Tenant, fsa.cgrcfg.GeneralCfg().DefaultTenant,
+				utils.FirstNonEmpty(reqProcessor.Timezone,
+					fsa.cgrcfg.GeneralCfg().DefaultTimezone),
+				fsa.fltrS, nil),
+			utils.FreeSWITCHAgent, fsa.connMgr,
+			sessConns, nil, nil, fsa.fltrS)
+		if lclProcessed {
+			processed = lclProcessed
+		}
+		if err != nil ||
+			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+			break
+		}
+	}
+
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %v processing event %s",
+				utils.FreeSWITCHAgent, err, eventName))
+		fsa.dispatchErr(uuid, connIdx, eventName, fsev, err)
+		return
+	}
+	if !processed {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> no request processor enabled, ignoring event %s",
+				utils.FreeSWITCHAgent, eventName))
+		fsa.dispatchErr(uuid, connIdx, eventName, fsev, utils.ErrNotFound)
+		return
+	}
+	if err = fsa.setReplyVars(uuid, connIdx, rply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %v applying reply variables for event %s",
+				utils.FreeSWITCHAgent, err, eventName))
+		fsa.dispatchErr(uuid, connIdx, eventName, fsev, err)
+		return
+	}
+	if eventName == FsParkEvent {
+		fsa.authorizePark(uuid, connIdx,
+			utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER]), cgrRplyNM)
+	}
+}
+
+func (fsa *FSsessions) dispatchErr(uuid string, connIdx int, eventName string, fsev map[string]string, err error) {
+	switch eventName {
+	case FsParkEvent:
+		fsa.unparkCall(uuid, connIdx,
+			utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER]), err.Error())
+	case FsAnswerEvent:
+		fsa.disconnectSession(connIdx, uuid, utils.EmptyString, err.Error())
+	}
+}
+
+func (fsa *FSsessions) setReplyVars(uuid string, connIdx int, rply *utils.OrderedNavigableMap) error {
+	for el := rply.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		itm, _ := rply.Field(path)
+		if itm == nil {
+			continue
+		}
+		val := utils.IfaceAsString(itm.Data)
+		vrbl := strings.Join(utils.StripTrailingIndex(path), utils.NestingSep)
+		if _, err := fsa.conns[connIdx].SendApiCmd(
+			fmt.Sprintf("uuid_setvar %s %s %s\n\n", uuid, vrbl, val)); err != nil {
+			return fmt.Errorf("uuid_setvar failed for %s: %w", vrbl, err)
+		}
+	}
+	return nil
+}
+
+func (fsa *FSsessions) authorizePark(uuid string, connIdx int, destNr string, cgrRply *utils.DataNode) {
+	maxDur, hasUsage := minAccountUsage(cgrRply)
+	if hasUsage && maxDur == 0 {
+		fsa.unparkCall(uuid, connIdx, destNr, utils.ErrInsufficientCredit.Error())
+		return
+	}
+	if hasUsage {
+		fsa.setMaxCallDuration(uuid, connIdx, maxDur, destNr)
+	}
+	fsa.unparkCall(uuid, connIdx, destNr, AUTH_OK)
+}
+
+func minAccountUsage(cgrRply *utils.DataNode) (min time.Duration, found bool) {
+	node, has := cgrRply.Map[utils.CapMaxUsage]
+	if !has || node == nil {
+		return
+	}
+	for _, dataNode := range node.Map {
+		if dataNode == nil || dataNode.Value == nil {
+			continue
+		}
+		d, ok := dataNode.Value.Data.(time.Duration)
+		if !ok {
+			continue
+		}
+		if !found || d < min {
+			min, found = d, true
+		}
+	}
+	return
 }
 
 // Sets the call timeout valid of starting of the call
 func (fsa *FSsessions) setMaxCallDuration(uuid string, connIdx int,
 	maxDur time.Duration, destNr string) (err error) {
-	// set variable cgr_max_usage to the fs channel
-	if _, err = fsa.conns[connIdx].SendApiCmd(
-		fmt.Sprintf("uuid_setvar %s %s %d \n\n",
-			uuid, VarCGRMaxUsage, int(maxDur.Seconds()))); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> Could not set %s variable to freeswitch channel, error: <%s>, connIdx: %v",
-				utils.FreeSWITCHAgent, VarCGRMaxUsage, err.Error(), connIdx))
-		return
-	}
 	if len(fsa.cfg.EmptyBalanceContext) != 0 {
 		if _, err = fsa.conns[connIdx].SendApiCmd(
 			fmt.Sprintf("uuid_setvar %s execute_on_answer sched_transfer +%d %s XML %s\n\n",
@@ -167,6 +306,7 @@ func (fsa *FSsessions) unparkCall(uuid string, connIdx int, callDestNb, notify s
 	return
 }
 
+<<<<<<< HEAD
 func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	if fsa.caps.IsLimited() {
 		if err := fsa.caps.Allocate(); err != nil {
@@ -379,6 +519,8 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 	}
 }
 
+=======
+>>>>>>> a537ade20 (asterisk & freeswitch agent updated to use requestprocessors)
 // Connect connects to the freeswitch mod_event_socket server and starts
 // listening for events.
 func (fsa *FSsessions) Connect() error {
@@ -580,31 +722,4 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 	}
 	*reply = utils.OK
 	return
-}
-
-// processRequest processes the FreeSWITCH event by iterating through request processors,
-// applying filters, and setting the required fields.
-func (fsa *FSsessions) processRequest(fsev FSEvent) (*utils.CGREvent, error) {
-	for _, reqProcessor := range fsa.cfg.RequestProcessors {
-		agReq := NewAgentRequest(
-			engine.MapStringDP(fsev),
-			nil, nil, nil, nil,
-			reqProcessor.Tenant,
-			fsa.cgrcfg.GeneralCfg().DefaultTenant,
-			fsa.cgrcfg.GeneralCfg().DefaultTimezone,
-			fsa.cache, fsa.fltrS, nil,
-		)
-		pass, err := fsa.fltrS.Pass(context.TODO(), agReq.Tenant, reqProcessor.Filters, agReq)
-		if err != nil {
-			return nil, err
-		}
-		if !pass {
-			continue
-		}
-		if err := agReq.SetFields(reqProcessor.RequestFields); err != nil {
-			return nil, err
-		}
-		return utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts), nil
-	}
-	return nil, utils.ErrNotFound
 }

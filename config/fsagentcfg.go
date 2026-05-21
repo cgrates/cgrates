@@ -96,7 +96,6 @@ type FsAgentCfg struct {
 	Enabled                bool
 	Conns                  map[string][]*DynamicConns
 	SubscribePark          bool
-	CreateCDR              bool
 	ExtraFields            utils.RSRParsers
 	LowBalanceAnnFile      string
 	EmptyBalanceContext    string
@@ -132,9 +131,6 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	}
 	if jsnCfg.SubscribePark != nil {
 		fscfg.SubscribePark = *jsnCfg.SubscribePark
-	}
-	if jsnCfg.CreateCDR != nil {
-		fscfg.CreateCDR = *jsnCfg.CreateCDR
 	}
 	if jsnCfg.ExtraFields != nil {
 		if fscfg.ExtraFields, err = utils.NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
@@ -175,7 +171,6 @@ func (fscfg FsAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:                fscfg.Enabled,
 		utils.SubscribeParkCfg:          fscfg.SubscribePark,
-		utils.CreateCdrCfg:              fscfg.CreateCDR,
 		utils.LowBalanceAnnFileCfg:      fscfg.LowBalanceAnnFile,
 		utils.EmptyBalanceContextCfg:    fscfg.EmptyBalanceContext,
 		utils.EmptyBalanceAnnFileCfg:    fscfg.EmptyBalanceAnnFile,
@@ -213,7 +208,6 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 	cln = &FsAgentCfg{
 		Enabled:                fscfg.Enabled,
 		SubscribePark:          fscfg.SubscribePark,
-		CreateCDR:              fscfg.CreateCDR,
 		ExtraFields:            fscfg.ExtraFields.Clone(),
 		LowBalanceAnnFile:      fscfg.LowBalanceAnnFile,
 		EmptyBalanceContext:    fscfg.EmptyBalanceContext,
@@ -242,7 +236,6 @@ type FreeswitchAgentJsonCfg struct {
 	Enabled                *bool                      `json:"enabled"`
 	Conns                  map[string][]*DynamicConns `json:"conns,omitempty"`
 	SubscribePark          *bool                      `json:"subscribePark"`
-	CreateCDR              *bool                      `json:"createCDR"`
 	ExtraFields            *[]string                  `json:"extraFields"`
 	LowBalanceAnnFile      *string                    `json:"lowBalanceAnnFile"`
 	EmptyBalanceContext    *string                    `json:"emptyBalanceContext"`
@@ -315,9 +308,6 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 	}
 	if v1.SubscribePark != v2.SubscribePark {
 		d.SubscribePark = utils.BoolPointer(v2.SubscribePark)
-	}
-	if v1.CreateCDR != v2.CreateCDR {
-		d.CreateCDR = utils.BoolPointer(v2.CreateCDR)
 	}
 	extra1 := v1.ExtraFields.AsStringSlice()
 	extra2 := v2.ExtraFields.AsStringSlice()

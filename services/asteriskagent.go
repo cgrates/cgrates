@@ -71,7 +71,9 @@ func (ast *AsteriskAgent) Start(shutdown *utils.SyncedChan, registry *servmanage
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, cm, caps, fs)
+		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, cm, caps, fs); err != nil {
+			return
+		}
 		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
 	return

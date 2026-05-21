@@ -30,7 +30,6 @@ import (
 func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
 		Enabled:       utils.BoolPointer(true),
-		CreateCDR:     utils.BoolPointer(true),
 		SubscribePark: utils.BoolPointer(true),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
@@ -47,7 +46,6 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	}
 	eFsAgentConfig := &FsAgentCfg{
 		Enabled:       true,
-		CreateCDR:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: time.Minute, Alias: "1.2.3.4:8021"},
@@ -1645,7 +1643,6 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
-		CreateCDR:              utils.BoolPointer(true),
 		SubscribePark:          utils.BoolPointer(true),
 		LowBalanceAnnFile:      utils.StringPointer("randomFile"),
 		EmptyBalanceAnnFile:    utils.StringPointer("randomEmptyFile"),
@@ -1671,7 +1668,6 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 		SubscribePark:          true,
-		CreateCDR:              true,
 		LowBalanceAnnFile:      "randomFile",
 		EmptyBalanceAnnFile:    "randomEmptyFile",
 		EmptyBalanceContext:    "randomEmptyContext",
@@ -1726,7 +1722,6 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EnabledCfg:                false,
 		utils.ConnsCfg:                  map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
 		utils.SubscribeParkCfg:          true,
-		utils.CreateCdrCfg:              false,
 		utils.ExtraFieldsCfg:            []string{},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -1760,7 +1755,6 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 	},
 	"subscribePark": false,
-	"createCDR": true,
 	"maxWaitConnection": "7s",
 	"activeSessionDelimiter": "//",
 	"eventSocketConns": [
@@ -1773,7 +1767,6 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 			{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}},
 		}},
 		utils.SubscribeParkCfg:          false,
-		utils.CreateCdrCfg:              true,
 		utils.ExtraFieldsCfg:            []string{},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -1815,7 +1808,6 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 			{ConnIDs: []string{utils.MetaInternal}},
 		}},
 		utils.SubscribeParkCfg:          true,
-		utils.CreateCdrCfg:              false,
 		utils.ExtraFieldsCfg:            []string{"randomFields"},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -1901,7 +1893,6 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.MetaInternal}}},
 		},
-		Create_cdr: utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:                  utils.StringPointer("127.0.0.1:8448"),
@@ -1921,7 +1912,6 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
 			},
 		},
-		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:                "127.0.0.1:8448",
 			Address:              "127.0.0.1:8088",
@@ -1953,7 +1943,6 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		utils.ConnsCfg: map[string][]*DynamicConns{utils.MetaSessionS: {
 			{ConnIDs: []string{utils.MetaInternal}},
 		}},
-		utils.CreateCdrCfg: false,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
@@ -1966,6 +1955,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 				utils.MaxReconnectIntervalCfg: "0s",
 			},
 		},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -1981,7 +1971,6 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		"conns": {
 			"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 		},
-		"createCDR": true,
 		"asteriskConns":[
 			{"address": "127.0.0.1:8089","connectAttempts": 5,"reconnects": 8, "maxReconnectInterval": "5m"}
 		],
@@ -1992,7 +1981,6 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ConnsCfg: map[string][]*DynamicConns{utils.MetaSessionS: {
 			{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}},
 		}},
-		utils.CreateCdrCfg: true,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
@@ -2005,6 +1993,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 				utils.MaxReconnectIntervalCfg: "5m0s",
 			},
 		},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -2052,7 +2041,6 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
 		},
-		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "127.0.0.1:8448",
 			Address:         "127.0.0.1:8088",
@@ -2193,7 +2181,6 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
-		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "",
@@ -2211,7 +2198,6 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*birpc"}}},
 		},
-		CreateCDR: true,
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           "AsteriskAlias",
@@ -2229,7 +2215,6 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*birpc"}}},
 		},
-		Create_cdr: utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:            utils.StringPointer("AsteriskAlias"),
@@ -2240,6 +2225,7 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 				Reconnects:       utils.IntPointer(2),
 			},
 		},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv := diffAsteriskAgentJsonCfg(d, v1, v2)
@@ -2251,7 +2237,6 @@ func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
 func TestFsAgentCfgClone(t *testing.T) {
 	ban := &FsAgentCfg{
 		Enabled:             true,
-		CreateCDR:           true,
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",
@@ -2363,7 +2348,6 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 			},
 		},
 		SubscribePark:       false,
-		CreateCDR:           false,
 		LowBalanceAnnFile:   "LBAF",
 		EmptyBalanceContext: "EBC",
 		EmptyBalanceAnnFile: "EBAF",
@@ -2377,7 +2361,6 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
 		SubscribePark: true,
-		CreateCDR:     true,
 		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "ExtraField2",
@@ -2404,7 +2387,6 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
 		SubscribePark:       utils.BoolPointer(true),
-		CreateCDR:           utils.BoolPointer(true),
 		ExtraFields:         &[]string{"ExtraField2"},
 		LowBalanceAnnFile:   utils.StringPointer("LBAF2"),
 		EmptyBalanceContext: utils.StringPointer("EBC2"),

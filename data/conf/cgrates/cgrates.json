@@ -863,7 +863,6 @@
 // "asteriskAgent": {
 // 	"enabled": false,			// starts the Asterisk agent: <true|false>
 // 	"sessions_conns": ["*birpc_internal"],
-// 	"createCDR": false,			// create CDR out of events and sends it to CDRS component
 // 	"asteriskConns":[			// instantiate connections to multiple Asterisk servers
 // 		{
 // 			"address": "127.0.0.1:8088",
@@ -871,9 +870,11 @@
 // 			"password": "CGRateS.org",
 // 			"connectAttempts": 3,
 // 			"reconnects": 5,
+// 			"ariWebsocket": false,
 // 			"maxReconnectInterval": ""
 // 		}
-// 	]
+// 	],
+// 	"request_processors": []				// processors that map ARI events to/from CGREvents
 // },
 
 
@@ -881,7 +882,6 @@
 // 	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
 // 	"sessions_conns": ["*birpc_internal"],
 // 	"subscribePark": true,				// subscribe via fsock to receive park events
-// 	"createCDR": false,				// creates CDR out of events and sends them to CDRS component
 // 	"extraFields": [],				// extra fields to store in auth/CDRs when creating them
 // 	"lowBalanceAnnFile": "",			// file to be played when low balance is reached for prepaid calls
 // 	"emptyBalanceContext": "",			// if defined, prepaid calls will be transferred to this context on empty balance

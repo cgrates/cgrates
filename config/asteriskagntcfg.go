@@ -100,10 +100,10 @@ func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 
 // AsteriskAgentCfg the config section that describes the Asterisk Agent
 type AsteriskAgentCfg struct {
-	Enabled       bool
-	Conns         map[string][]*DynamicConns
-	CreateCDR     bool
-	AsteriskConns []*AsteriskConnCfg
+	Enabled           bool
+	Conns             map[string][]*DynamicConns
+	AsteriskConns     []*AsteriskConnCfg
+	RequestProcessors []*RequestProcessor
 }
 
 // loadAsteriskAgentCfg loads the AsteriskAgent section of the configuration
@@ -128,9 +128,6 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 			aCfg.Conns[connType] = opts
 		}
 	}
-	if jsnCfg.Create_cdr != nil {
-		aCfg.CreateCDR = *jsnCfg.Create_cdr
-	}
 
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
@@ -139,15 +136,15 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 			aCfg.AsteriskConns[i].loadFromJSONCfg(jsnAConn)
 		}
 	}
-	return nil
+	aCfg.RequestProcessors, err = appendRequestProcessors(aCfg.RequestProcessors, jsnCfg.Request_processors)
+	return
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
-		utils.EnabledCfg:   aCfg.Enabled,
-		utils.CreateCDRCfg: aCfg.CreateCDR,
-		utils.ConnsCfg:     stripConns(aCfg.Conns),
+		utils.EnabledCfg: aCfg.Enabled,
+		utils.ConnsCfg:   stripConns(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]any, len(aCfg.AsteriskConns))
@@ -156,6 +153,11 @@ func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 		}
 		mp[utils.AsteriskConnsCfg] = conns
 	}
+	requestProcessors := make([]map[string]any, len(aCfg.RequestProcessors))
+	for i, item := range aCfg.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 	return mp
 }
 
@@ -165,14 +167,19 @@ func (aCfg AsteriskAgentCfg) CloneSection() Section { return aCfg.Clone() }
 // Clone returns a deep copy of AsteriskAgentCfg
 func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 	cln = &AsteriskAgentCfg{
-		Enabled:   aCfg.Enabled,
-		CreateCDR: aCfg.CreateCDR,
-		Conns:     CloneConnsMap(aCfg.Conns),
+		Enabled: aCfg.Enabled,
+		Conns:   CloneConnsMap(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))
 		for i, req := range aCfg.AsteriskConns {
 			cln.AsteriskConns[i] = req.Clone()
+		}
+	}
+	if aCfg.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(aCfg.RequestProcessors))
+		for i, req := range aCfg.RequestProcessors {
+			cln.RequestProcessors[i] = req.Clone()
 		}
 	}
 	return
@@ -190,10 +197,10 @@ type AstConnJsonCfg struct {
 }
 
 type AsteriskAgentJsonCfg struct {
-	Enabled        *bool
-	Conns          map[string][]*DynamicConns `json:"conns,omitempty"`
-	Create_cdr     *bool                      `json:"createCDR"`
-	Asterisk_conns *[]*AstConnJsonCfg         `json:"asteriskConns"`
+	Enabled            *bool
+	Conns              map[string][]*DynamicConns `json:"conns,omitempty"`
+	Asterisk_conns     *[]*AstConnJsonCfg         `json:"asteriskConns"`
+	Request_processors *[]*ReqProcessorJsnCfg
 }
 
 func diffAstConnJsonCfg(v1, v2 *AsteriskConnCfg) (d *AstConnJsonCfg) {
@@ -254,9 +261,6 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}
-	if v1.CreateCDR != v2.CreateCDR {
-		d.Create_cdr = utils.BoolPointer(v2.CreateCDR)
-	}
 
 	if !equalsAstConnJsonCfg(v1.AsteriskConns, v2.AsteriskConns) {
 		v := make([]*AstConnJsonCfg, len(v2.AsteriskConns))
@@ -266,5 +270,6 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 		}
 		d.Asterisk_conns = &v
 	}
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }
