@@ -53,17 +53,17 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal_ms_rewrite_ms_limit"), // dump ms and rewrite ms and limit passed
 	}
 	for i, pth := range paths {
-		dirNames := []string{"db", "*default", "*accounts", "*ip_profiles", "*ip_allocations",
-			"*action_profiles", "*versions", "*charger_profiles", "*attribute_profiles",
-			"*resource_profiles", "*resources", "*statqueue_profiles", "*statqueues",
-			"*threshold_profiles", "*thresholds", "*filters", "*route_profiles",
-			"*rate_profiles", "*ranking_profiles", "*rankings", "*trend_profiles",
-			"*trends", "*load_ids", "*resource_filter_indexes", "*ip_filter_indexes",
-			"*stat_filter_indexes", "*threshold_filter_indexes",
-			"*route_filter_indexes", "*attribute_filter_indexes",
-			"*charger_filter_indexes", "*rate_profile_filter_indexes",
-			"*rate_filter_indexes", "*action_profile_filter_indexes",
-			"*account_filter_indexes", "*reverse_filter_indexes", "*cdrs",
+		dirNames := []string{"db", "*default", "*accounts", "*ipProfiles", "*ipAllocations",
+			"*actionProfiles", "*versions", "*chargerProfiles", "*attributeProfiles",
+			"*resourceProfiles", "*resources", "*statQueueProfiles", "*statQueues",
+			"*thresholdProfiles", "*thresholds", "*filters", "*routeProfiles",
+			"*rateProfiles", "*rankingProfiles", "*rankings", "*trendProfiles",
+			"*trends", "*loadIDs", "*resourceFilterIndexes", "*ipFilterIndexes",
+			"*statFilterIndexes", "*thresholdFilterIndexes",
+			"*routeFilterIndexes", "*attributeFilterIndexes",
+			"*chargerFilterIndexes", "*rateProfileFilterIndexes",
+			"*rateFilterIndexes", "*actionProfileFilterIndexes",
+			"*accountFilterIndexes", "*reverseFilterIndexes", "*cdrs",
 		}
 		slices.Sort(dirNames)
 		dfltCfg := config.NewDefaultCGRConfig()
