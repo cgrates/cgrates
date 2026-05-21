@@ -40,7 +40,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 	cfgNg1 := `{
 "listen": {
 	"http": ":2080",
-	"http_tls": ":2280"
+	"httpTLS": ":2280"
 },
 "db": {
 	"dbConns": {
@@ -87,12 +87,12 @@ func TestPrometheusAgentIT(t *testing.T) {
 
 	cfgNg2 := `{
 "listen": {
-	"rpc_json": "127.0.0.1:22012",
-	"rpc_gob": "",
+	"rpcJSON": "127.0.0.1:22012",
+	"rpcGOB": "",
 	"http": "127.0.0.1:22080",
-	"rpc_json_tls" : "",
-	"rpc_gob_tls": "",
-	"http_tls": "127.0.0.1:22280"
+	"rpcJSONtls" : "",
+	"rpcGOBtls": "",
+	"httpTLS": "127.0.0.1:22280"
 },
 "db": {
 	"dbConns": {

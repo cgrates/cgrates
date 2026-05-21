@@ -210,22 +210,22 @@ const CGRATES_CFG_JSON = `
 },
 
 "listen": {
-	"rpc_json": "127.0.0.1:2012",		// RPC JSON listening address
-	"rpc_gob": "127.0.0.1:2013",		// RPC GOB listening address
+	"rpcJSON": "127.0.0.1:2012",		// RPC JSON listening address
+	"rpcGOB": "127.0.0.1:2013",		// RPC GOB listening address
 	"http": "127.0.0.1:2080",		// HTTP listening address
-	"rpc_json_tls" : "127.0.0.1:2022",	// RPC JSON TLS listening address
-	"rpc_gob_tls": "127.0.0.1:2023",	// RPC GOB TLS listening address
-	"http_tls": "127.0.0.1:2280"		// HTTP TLS listening address
+	"rpcJSONtls" : "127.0.0.1:2022",	// RPC JSON TLS listening address
+	"rpcGOBtls": "127.0.0.1:2023",	// RPC GOB TLS listening address
+	"httpTLS": "127.0.0.1:2280"		// HTTP TLS listening address
 },
 
 "tls": {
-	"server_certificate" : "",	// path to server certificate
-	"server_key":"",		// path to server key
+	"serverCertificate" : "",	// path to server certificate
+	"serverKey":"",		// path to server key
 	"clientCertificate" : "",	// path to client certificate
 	"clientKey":"",		// path to client key
 	"caCertificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-	"server_policy":4,		// server_policy determines the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
-	"server_name":""
+	"serverPolicy":4,		// serverPolicy determines the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
+	"serverName":""
 },
 
 

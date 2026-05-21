@@ -47,12 +47,12 @@ func TestOfflineInternalReplication(t *testing.T) {
 },
 
 "listen": {
-	"rpc_json": ":2012",
-	"rpc_gob": ":2013",
+	"rpcJSON": ":2012",
+	"rpcGOB": ":2013",
 	"http": ":2080"
 },
 
-"rpc_conns": {
+"rpcConns": {
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [
@@ -104,8 +104,8 @@ func TestOfflineInternalReplication(t *testing.T) {
 },
 
 "listen": {
-	"rpc_json": ":2022",
-	"rpc_gob": ":2023",
+	"rpcJSON": ":2022",
+	"rpcGOB": ":2023",
 	"http": ":2280"
 },
 

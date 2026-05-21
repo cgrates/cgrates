@@ -79,13 +79,13 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 func TestTlsCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `	{
 	"tls":{
-		"server_certificate" : "path/To/Server/Cert",			
-		"server_key":"path/To/Server/Key",					
+		"serverCertificate" : "path/To/Server/Cert",			
+		"serverKey":"path/To/Server/Key",					
 		"clientCertificate" : "path/To/Client/Cert",			
 		"clientKey":"path/To/Client/Key",					
 		"caCertificate":"path/To/CA/Cert",							
-		"server_name":"TestServerName",
-		"server_policy":3,					
+		"serverName":"TestServerName",
+		"serverPolicy":3,					
 	},
 }`
 	eMap := map[string]any{
@@ -127,10 +127,10 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 	var d *TlsJsonCfg
 
 	v1 := &TLSCfg{
-		ServerCerificate: "server_certificate",
-		ServerKey:        "server_key",
+		ServerCerificate: "serverCertificate",
+		ServerKey:        "serverKey",
 		ServerPolicy:     1,
-		ServerName:       "server_name",
+		ServerName:       "serverName",
 		ClientCerificate: "clientCertificate",
 		ClientKey:        "clientKey",
 		CaCertificate:    "caCertificate",
@@ -171,20 +171,20 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 
 func TestTlsCloneSection(t *testing.T) {
 	tlsCfg := &TLSCfg{
-		ServerCerificate: "server_certificate",
-		ServerKey:        "server_key",
+		ServerCerificate: "serverCertificate",
+		ServerKey:        "serverKey",
 		ServerPolicy:     1,
-		ServerName:       "server_name",
+		ServerName:       "serverName",
 		ClientCerificate: "clientCertificate",
 		ClientKey:        "clientKey",
 		CaCertificate:    "caCertificate",
 	}
 
 	exp := &TLSCfg{
-		ServerCerificate: "server_certificate",
-		ServerKey:        "server_key",
+		ServerCerificate: "serverCertificate",
+		ServerKey:        "serverKey",
 		ServerPolicy:     1,
-		ServerName:       "server_name",
+		ServerName:       "serverName",
 		ClientCerificate: "clientCertificate",
 		ClientKey:        "clientKey",
 		CaCertificate:    "caCertificate",

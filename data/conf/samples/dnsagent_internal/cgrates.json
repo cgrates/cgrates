@@ -116,8 +116,8 @@
 },
 
 "tls": {
-	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			
-	"server_key":"/usr/share/cgrates/tls/server.key",			
+	"serverCertificate" : "/usr/share/cgrates/tls/server.crt",			
+	"serverKey":"/usr/share/cgrates/tls/server.key",			
 	"clientCertificate" : "/usr/share/cgrates/tls/client.crt",			
 	"clientKey":"/usr/share/cgrates/tls/client.key",					
 	"caCertificate":"/usr/share/cgrates/tls/ca.crt"

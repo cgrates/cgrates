@@ -125,8 +125,8 @@ func TestRPCExpIT(t *testing.T) {
 	},
 },
 "listen": {
-	"rpc_json": ":22012",
-	"rpc_gob": ":22013",
+	"rpcJSON": ":22012",
+	"rpcGOB": ":22013",
 	"http": ":22080"
 },
 "thresholds": {

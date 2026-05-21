@@ -229,13 +229,13 @@ func testSectConfigSReloadListen(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"listen":{"http":":2080","http_tls":"127.0.0.1:2280","rpc_gob":":2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":":2012","rpc_json_tls":"127.0.0.1:2022"}}`,
+		Config: `{"listen":{"http":":2080","httpTLS":"127.0.0.1:2280","rpcGOB":":2013","rpcGOBtls":"127.0.0.1:2023","rpcJSON":":2012","rpcJSONtls":"127.0.0.1:2022"}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"listen":{"http":":2080","http_tls":"127.0.0.1:2280","rpc_gob":":2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":":2012","rpc_json_tls":"127.0.0.1:2022"}}`
+	cfgStr := `{"listen":{"http":":2080","httpTLS":"127.0.0.1:2280","rpcGOB":":2013","rpcGOBtls":"127.0.0.1:2023","rpcJSON":":2012","rpcJSONtls":"127.0.0.1:2022"}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -251,13 +251,13 @@ func testSectConfigSReloadTLS(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`,
+		Config: `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","serverCertificate":"","serverKey":"","serverName":"","serverPolicy":4}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`
+	cfgStr := `{"tls":{"caCertificate":"","clientCertificate":"","clientKey":"","serverCertificate":"","serverKey":"","serverName":"","serverPolicy":4}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -464,7 +464,7 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
+	cfgStr := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -487,7 +487,7 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
 
-	cfgStr := `{"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true}}`
+	cfgStr := `{"freeswitch_agent":{"active_session_delimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","request_processors":[],"subscribe_park":true}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -509,7 +509,7 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"timezone":""}}`
+	cfgStr := `{"kamailio_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

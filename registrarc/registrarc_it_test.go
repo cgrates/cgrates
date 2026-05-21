@@ -72,8 +72,8 @@ package registrarc
 //         "nodeID": "%s"
 // },
 // "listen": {
-//         "rpc_json": ":%[2]d12",
-//         "rpc_gob": ":%[2]d13",
+//         "rpcJSON": ":%[2]d12",
+//         "rpcGOB": ":%[2]d13",
 //         "http": ":%[2]d80"
 // },
 // "rpcConns": {

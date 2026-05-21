@@ -23,8 +23,8 @@
 
 
 "listen": {
-	"rpc_json": ":3012",
-	"rpc_gob": ":3013",
+	"rpcJSON": ":3012",
+	"rpcGOB": ":3013",
 	"http": ":3080",
 },
 

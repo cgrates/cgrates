@@ -97,12 +97,12 @@ func (lstcfg ListenCfg) Clone() *ListenCfg {
 
 // Listen config section
 type ListenJsonCfg struct {
-	Rpc_json     *string
-	Rpc_gob      *string
-	Http         *string
-	Rpc_json_tls *string
-	Rpc_gob_tls  *string
-	Http_tls     *string
+	Rpc_json     *string `json:"rpcJSON"`
+	Rpc_gob      *string `json:"rpcGOB"`
+	Http         *string `json:"http"`
+	Rpc_json_tls *string `json:"rpcJSONtls"`
+	Rpc_gob_tls  *string `json:"rpcGOBtls"`
+	Http_tls     *string `json:"httpTLS"`
 }
 
 func diffListenJsonCfg(d *ListenJsonCfg, v1, v2 *ListenCfg) *ListenJsonCfg {

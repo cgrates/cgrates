@@ -9,8 +9,8 @@
 },
 
 "listen": {
-	"rpc_json": ":2032",
-	"rpc_gob": ":2033",
+	"rpcJSON": ":2032",
+	"rpcGOB": ":2033",
 	"http": ":2380"
 },
 

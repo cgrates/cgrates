@@ -75,11 +75,11 @@ func TestListenCfgAsMapInterface(t *testing.T) {
 func TestListenCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"listen": {
-		"rpc_json": "127.0.0.1:2010",			
-        "rpc_gob": "127.0.0.1:2018",			
-        "rpc_json_tls" : "127.0.0.1:2025",		
-        "rpc_gob_tls": "127.0.0.1:2001",		
-        "http_tls": "127.0.0.1:2288",			
+		"rpcJSON": "127.0.0.1:2010",			
+        "rpcGOB": "127.0.0.1:2018",			
+        "rpcJSONtls" : "127.0.0.1:2025",		
+        "rpcGOBtls": "127.0.0.1:2001",		
+        "httpTLS": "127.0.0.1:2288",			
 	}
 }`
 	eMap := map[string]any{
