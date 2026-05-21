@@ -26,6 +26,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -2346,6 +2347,16 @@ type clMock func(_ *context.Context, _ string, _ any, _ any) error
 func (c clMock) Call(ctx *context.Context, m string, a any, r any) error {
 	return c(ctx, m, a, r)
 }
+
+// like clMock, but a struct so it can be a map key.
+type biJClientMock struct {
+	call func(ctx *context.Context, method string, args any, reply any) error
+}
+
+func (c *biJClientMock) Call(ctx *context.Context, method string, args any, reply any) error {
+	return c.call(ctx, method, args, reply)
+}
+
 func TestInitSession(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
@@ -3042,6 +3053,65 @@ func TestSyncSessionsSync(t *testing.T) {
 	}
 
 	engine.Cache = tmp
+}
+
+func TestSyncSessionsClientTimeoutsRunInParallel(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		cfg, err := config.NewDefaultCGRConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfg.GeneralCfg().ReplyTimeout = 5 * time.Second
+		sS := NewSessionS(cfg, nil, nil)
+		sessionID := &SessionID{
+			OriginID:   "session-keep",
+			OriginHost: "127.0.0.1",
+		}
+		cgrID := sessionID.CGRID()
+		sS.aSessions[cgrID] = &Session{CGRID: cgrID}
+
+		const clientCount = 3
+		calls := make(chan struct{}, clientCount)
+		newClient := func(call func(*context.Context, *[]*SessionID) error) *biJClientMock {
+			t.Helper()
+			return &biJClientMock{
+				call: func(ctx *context.Context, method string, _ any, reply any) error {
+					if method != utils.SessionSv1GetActiveSessionIDs {
+						t.Errorf("method = %s, want %s", method, utils.SessionSv1GetActiveSessionIDs)
+					}
+					sessionIDs, ok := reply.(*[]*SessionID)
+					if !ok {
+						t.Errorf("reply type = %T, want *[]*SessionID", reply)
+						return nil
+					}
+					calls <- struct{}{}
+					return call(ctx, sessionIDs)
+				},
+			}
+		}
+		sS.OnBiJSONConnect(newClient(func(_ *context.Context, reply *[]*SessionID) error {
+			*reply = []*SessionID{sessionID}
+			return nil
+		}))
+		timeoutCall := func(ctx *context.Context, _ *[]*SessionID) error {
+			<-ctx.Done()
+			return ctx.Err()
+		}
+		sS.OnBiJSONConnect(newClient(timeoutCall))
+		sS.OnBiJSONConnect(newClient(timeoutCall))
+
+		start := time.Now()
+		sS.syncSessions()
+		if elapsed := time.Since(start); elapsed != cfg.GeneralCfg().ReplyTimeout {
+			t.Fatalf("syncSessions took %v, want %v", elapsed, cfg.GeneralCfg().ReplyTimeout)
+		}
+		if got := len(calls); got != clientCount {
+			t.Fatalf("called %d clients, want %d", got, clientCount)
+		}
+		if sessions := sS.getSessions(cgrID, false); len(sessions) != 1 {
+			t.Fatalf("kept sessions = %d, want 1", len(sessions))
+		}
+	})
 }
 
 func TestBiRPCv1GetPassiveSessionsCount(t *testing.T) {
