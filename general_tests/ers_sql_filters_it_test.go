@@ -421,7 +421,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "processed_path": "*delete",
+      "processedPath": "*delete",
       "opts": {
         "sqlBatchSize": 2,
         "sqlDeleteIndexedFields": ["id"]
@@ -464,7 +464,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "processed_path": "*delete",
+      "processedPath": "*delete",
       "opts": {
         "sqlBatchSize": 1
       }
@@ -544,8 +544,8 @@ func TestERSSQLFiltersMove(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "ees_success_ids": ["SQLExporter"],
-      "processed_path": "*delete",
+      "eesSuccessIDs": ["SQLExporter"],
+      "processedPath": "*delete",
       "opts": {
         "sqlBatchSize": 0,
         "sqlDeleteIndexedFields": ["id"]
@@ -726,7 +726,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "ees_success_ids": ["SQLExporter"]
+      "eesSuccessIDs": ["SQLExporter"]
     }
   ]
 }
@@ -781,16 +781,16 @@ func TestERSSQLFiltersErr(t *testing.T) {
     {
       "id": "mysql",
       "type": "*sql",
-      "run_delay": "1m",
-      "start_delay": "100ms",
-      "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "runDelay": "1m",
+      "startDelay": "100ms",
+      "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
         "sqlTableName": "cdrs",
         "sqlBatchSize": 2,
         "sqlDeleteIndexedFields": ["id"]
       },
-      "processed_path": "*delete",
+      "processedPath": "*delete",
       "tenant": "cgrates.org",
       "filters": [
         "*gt:~*req.event.AnswerTime:-168h",
@@ -857,9 +857,9 @@ func TestERSSQLFilterUnquote(t *testing.T) {
     {
       "id": "mysql",
       "type": "*sql",
-      "run_delay": "1m",
-      "start_delay": "100ms",
-      "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "runDelay": "1m",
+      "startDelay": "100ms",
+      "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
         "sqlTableName": "cdrs",
@@ -944,9 +944,9 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
     {
       "id": "mysql",
       "type": "*sql",
-      "run_delay": "1m",
-      "start_delay": "100ms",
-      "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "runDelay": "1m",
+      "startDelay": "100ms",
+      "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
         "sqlTableName": "cdrs",

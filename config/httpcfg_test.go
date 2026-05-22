@@ -127,10 +127,10 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"http": {
-       "json_rpc_url": "/rpc",					
-	   "ws_url": "",	
-	   "use_basic_auth": true,					
-	   "auth_users": {"user1": "authenticated", "user2": "authenticated"},
+       "jsonRPCurl": "/rpc",					
+	   "wsURL": "",	
+	   "useBasicAuth": true,					
+	   "authUsers": {"user1": "authenticated", "user2": "authenticated"},
      },
 }`
 	eMap := map[string]any{

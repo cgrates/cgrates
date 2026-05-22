@@ -25,7 +25,7 @@
 		"enabled": true,									
 		"tp_in_path": "/tmp/In",		
 		"tp_out_path": "/tmp/parsed",	
-		"run_delay": "-1", 
+		"runDelay": "-1", 
 		"action": "*parse",
 		"data":[	
 			{
@@ -117,7 +117,7 @@
 		"enabled": true,
 		"tp_in_path": "/tmp/parsed",
 		"tp_out_path": "/tmp/Out",
-		"run_delay": "-1",
+		"runDelay": "-1",
 		"action": "*store",
 		"data":[
 			{

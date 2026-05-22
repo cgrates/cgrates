@@ -1330,7 +1330,7 @@ type EventExporterJsonCfg struct {
 	Synchronous          *bool                      `json:"synchronous"`
 	Blocker              *bool                      `json:"blocker"`
 	Attempts             *int                       `json:"attempts"`
-	ConcurrentRequests   *int                       `json:"concurrent_requests"`
+	ConcurrentRequests   *int                       `json:"concurrentRequests"`
 	MetricsResetSchedule *string                    `json:"metrics_reset_schedule"`
 	FailedPostsDir       *string                    `json:"failedPostsDir"`
 	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`

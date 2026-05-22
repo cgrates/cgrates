@@ -1198,7 +1198,7 @@ func TestLoaderCfgloadFromJsonCfg(t *testing.T) {
 			"loaders": [												
 	{
 		"enabled": true,
-		"run_delay": "1sa",										
+		"runDelay": "1sa",										
 	},
 	],	
 }`
@@ -1215,7 +1215,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		"id": "*default",									
 		"enabled": false,									
 		"tenant": "cgrates.org",										
-		"run_delay": "0",										
+		"runDelay": "0",										
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*internal:*caches"],
 		"field_separator": ",",								
@@ -2348,7 +2348,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		"id": "*default",									
 		"enabled": false,									
 		"tenant": "~*req.Destination1",										
-		"run_delay": "1",										
+		"runDelay": "1",										
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*conn1"],
 		"field_separator": ",",								

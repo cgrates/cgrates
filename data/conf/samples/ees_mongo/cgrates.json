@@ -46,7 +46,7 @@
 		"*chargers": [{"ConnIDs": ["*localhost"]}],
 		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
-	"session_cost_retries": 0,
+	"sessionCostRetries": 0,
 },
 
 

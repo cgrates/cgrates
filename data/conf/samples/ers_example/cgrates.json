@@ -97,11 +97,11 @@
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay": "-1",
+			"runDelay": "-1",
 			"type": "*fileCSV",
 			"flags": ["*dryRun"],
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 			"fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value							
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},

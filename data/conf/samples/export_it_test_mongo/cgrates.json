@@ -206,7 +206,7 @@
 		"id": "exported_ldr",									// identifier of the Loader
 		"enabled": true,									// starts as service: <true|false>.
 		"tenant": "cgrates.org",										// tenant used in filterS.Pass
-		"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+		"runDelay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 		"lockfile_path": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]

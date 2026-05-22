@@ -24,7 +24,7 @@
       "enabled": true,
       "dry_run": false,
       "tenant": "cgrates.org",
-      "run_delay": "0",
+      "runDelay": "0",
       "lockfile_path": ".cgr.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]
@@ -63,7 +63,7 @@
       "enabled": true,
       "dry_run": false,
       "tenant": "cgrates.org",
-      "run_delay": "0",
+      "runDelay": "0",
       "lockfile_path": ".cgr2.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]
@@ -103,7 +103,7 @@
       "enabled": true,
       "dry_run": false,
       "tenant": "cgrates.org",
-      "run_delay": "0",
+      "runDelay": "0",
       "lockfile_path": ".cgr3.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]

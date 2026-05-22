@@ -104,12 +104,12 @@ func TestErsStartDelay(t *testing.T) {
 			"readers": [
 				{
 					"id": "file_csv_reader",
-					"run_delay":  "-1",
-					"start_delay":"1s",
+					"runDelay":  "-1",
+					"startDelay":"1s",
 					"type": "*fileCSV",
-					"source_path": "%s",
+					"sourcePath": "%s",
 					"flags": ["*cdrs"],
-					"processed_path": "%s",
+					"processedPath": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
                         {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -125,12 +125,12 @@ func TestErsStartDelay(t *testing.T) {
 				},
 				{
 					"id": "file_csv_reader2",
-					"run_delay":  "-1",
-					"start_delay":"2s",
+					"runDelay":  "-1",
+					"startDelay":"2s",
 					"type": "*fileCSV",
-					"source_path": "%s",
+					"sourcePath": "%s",
 					"flags": ["*cdrs"],
-					"processed_path": "%s",
+					"processedPath": "%s",
 					"fields":[
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
                         {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},

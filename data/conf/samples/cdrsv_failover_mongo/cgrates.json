@@ -48,7 +48,7 @@
 		"*thresholds": [{"ConnIDs": ["*localhost"]}],
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
-	"online_cdr_exports": ["s3_test_file"],
+	"onlineCDRExports": ["s3_test_file"],
 },
 
 "attributes": {

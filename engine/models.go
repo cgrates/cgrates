@@ -221,7 +221,7 @@ func (t CDRsql) AsMapStringInterface() (out map[string]any) {
 	out["setup_time"] = t.SetupTime
 	out["answer_time"] = t.AnswerTime
 	out["usage"] = t.Usage
-	out["extra_fields"] = t.ExtraFields
+	out["extraFields"] = t.ExtraFields
 	out["cost_source"] = t.CostSource
 	out["cost"] = t.Cost
 	out["cost_details"] = t.CostDetails

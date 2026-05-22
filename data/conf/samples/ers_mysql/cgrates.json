@@ -63,7 +63,7 @@
 		"*chargers": [{"ConnIDs": ["*localhost"]}],
 		"*rates": [{"ConnIDs": ["*internal"]}]
 	},
-	"session_cost_retries": 0
+	"sessionCostRetries": 0
 },
 
 "sessions": {
@@ -112,26 +112,26 @@
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*internal"]}]
 	},
-	"partial_cache_ttl": "500ms",
+	"partialCacheTTL": "500ms",
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"flags": ["*dryRun"],
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out"
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out"
 		},
 		{
 			"id": "file_reader2",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"opts": {
 				"csvFieldSeparator":";"
 			},
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers2/in",
+			"sourcePath": "/tmp/ers2/in",
 			"flags": ["*dryRun"],
-			"processed_path": "/tmp/ers2/out",
+			"processedPath": "/tmp/ers2/out",
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -151,11 +151,11 @@
 		},
 		{
 			"id": "init_session",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/init_session/in",
+			"sourcePath": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
-			"processed_path": "/tmp/init_session/out",
+			"processedPath": "/tmp/init_session/out",
 			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.Tenant", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -172,11 +172,11 @@
 		},
 		{
 			"id": "terminate_session",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/terminate_session/in",
+			"sourcePath": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
-			"processed_path": "/tmp/terminate_session/out",
+			"processedPath": "/tmp/terminate_session/out",
 			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -186,11 +186,11 @@
 		},
 		{
 			"id": "create_cdr",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/cdrs/in",
+			"sourcePath": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
-			"processed_path": "/tmp/cdrs/out",
+			"processedPath": "/tmp/cdrs/out",
 			"fields":[									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -209,13 +209,13 @@
 		},
 		{
 			"id": "file_reader_with_filters",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":";"
 			},
-			"source_path": "/tmp/ers_with_filters/in",
-			"processed_path": "/tmp/ers_with_filters/out",
+			"sourcePath": "/tmp/ers_with_filters/in",
+			"processedPath": "/tmp/ers_with_filters/out",
 			"flags": ["*cdrs","*log"],
 			"filters":["*string:~*req.3:1002"],
 			"fields":[
@@ -239,11 +239,11 @@
 		},
 		{
 			"id": "XmlDryRun",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileXML",
-			"source_path": "/tmp/xmlErs/in",
+			"sourcePath": "/tmp/xmlErs/in",
 			"flags": ["*cdrs","*log"],
-			"processed_path": "/tmp/xmlErs/out",
+			"processedPath": "/tmp/xmlErs/out",
 			"opts": {
 				"xmlRootPath": "broadWorksCDR.cdrData"
 			},
@@ -263,11 +263,11 @@
 		},
 		{
 			"id": "XML_EmptyRoot",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileXML",
-			"source_path": "/tmp/xmlErs2/in",
+			"sourcePath": "/tmp/xmlErs2/in",
 			"flags": ["*dryRun"],
-			"processed_path": "/tmp/xmlErs2/out",
+			"processedPath": "/tmp/xmlErs2/out",
 			"opts": {
 				"xmlRootPath": ""
 			},
@@ -288,11 +288,11 @@
 		},
 		{
 			"id": "FWV1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileFWV",
-			"source_path": "/tmp/fwvErs/in",
+			"sourcePath": "/tmp/fwvErs/in",
 			"flags": ["*cdrs"],
-			"processed_path": "/tmp/fwvErs/out",
+			"processedPath": "/tmp/fwvErs/out",
 			"fields": [
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "FileName", "path": "*cgreq.CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"*right"},
@@ -322,11 +322,11 @@
 		{
 			"id": "PartialCSV1",
 			"enabled": true,
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/partErs1/in",
+			"sourcePath": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
-			"processed_path": "",
+			"processedPath": "",
 			"opts": {
 				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*req.AnswerTime",
@@ -353,7 +353,7 @@
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
 			],
-			"cache_dump_fields": [
+			"cacheDumpFields": [
 				{"tag": "OriginID", "path":"*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
 				{"tag": "OrderID", "path":"*exp.OrderID", "type": "*variable", "value": "~*req.OrderID"},
 				{"tag": "RequestType", "path":"*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
@@ -367,10 +367,10 @@
 		{
 			"id": "PartialCSV_PostExpiry",
 			"enabled": true,
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/partErs2/in",
-			"processed_path": "",
+			"sourcePath": "/tmp/partErs2/in",
+			"processedPath": "",
 			"flags": ["*cdrs"],
 			"opts": {
 				"partialCacheAction": "*post_cdr",
@@ -402,7 +402,7 @@
 		{
 			"id": "FlatstoreOsips",
 			"enabled": true,
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":"|",
@@ -411,8 +411,8 @@
 				"partialOrderField": "~*opts.order",
 				"partialPath": "/tmp/flatstoreErs/out"
 			},
-			"source_path": "/tmp/flatstoreErs/in",
-			"processed_path": "/tmp/flatstoreErs/out",
+			"sourcePath": "/tmp/flatstoreErs/in",
+			"processedPath": "/tmp/flatstoreErs/out",
 			"flags": ["*cdrs"],
 			"fields":[
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStore", "mandatory": true},
@@ -433,12 +433,12 @@
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "0", "filters":["*string:~*req.0:INVITE"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:BYE"]}
 			],
-			"partial_commit_fields": [
+			"partialCommitFields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.*fileName:missed_calls"]},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.*fileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:"]}
 			],
-			"cache_dump_fields": [
+			"cacheDumpFields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
 				{"tag": "OriginID",			"path": "*exp.OriginID", 		"type": "*variable", "value":"~*req.OriginID"},
 				{"tag": "RequestType",		"path": "*exp.RequestType", 	"type": "*variable", "value":"~*req.RequestType"},
@@ -455,7 +455,7 @@
 		{
 			"id": "FlatstoreOsipsWithACK",
 			"enabled": true,
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":"|",
@@ -465,8 +465,8 @@
 				"partialPath": "/tmp/flatstoreACKErs/out",
 				"csvLazyQuotes": true
 			},
-			"source_path": "/tmp/flatstoreACKErs/in",
-			"processed_path": "/tmp/flatstoreACKErs/out",
+			"sourcePath": "/tmp/flatstoreACKErs/in",
+			"processedPath": "/tmp/flatstoreACKErs/out",
 			"flags": ["*cdrs"],
 			"fields":[
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStoreACK", "mandatory": true},
@@ -489,12 +489,12 @@
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:ACK"]},
 				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "2", "filters":["*string:~*req.0:BYE"]}
 			],
-			"partial_commit_fields": [
+			"partialCommitFields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.*fileName:missed_calls"]},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.*fileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}
 			],
-			"cache_dump_fields": [
+			"cacheDumpFields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
 				{"tag": "OriginID",			"path": "*exp.OriginID", 		"type": "*variable", "value":"~*req.OriginID"},
 				{"tag": "RequestType",		"path": "*exp.RequestType", 	"type": "*variable", "value":"~*req.RequestType"},
@@ -511,11 +511,11 @@
 		},
 		{
 			"id": "JSONReader",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileJSON",
-			"source_path": "/tmp/ErsJSON/in",
+			"sourcePath": "/tmp/ErsJSON/in",
 			"flags": ["*cdrs"],
-			"processed_path": "/tmp/ErsJSON/out",
+			"processedPath": "/tmp/ErsJSON/out",
 			"fields":[
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -533,11 +533,11 @@
 		},
 		{
 			"id": "readerWithTemplate",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/readerWithTemplate/in",
+			"sourcePath": "/tmp/readerWithTemplate/in",
 			"flags": ["*cdrs","*log"],
-			"processed_path": "/tmp/readerWithTemplate/out",
+			"processedPath": "/tmp/readerWithTemplate/out",
 			"fields":[
 				{"tag": "reqFields","type": "*template", "value": "reqFields"},
 				{"tag": "ExtraInfo1", "path": "*cgreq.ExtraInfo1", "type": "*constant", "value": "ExtraInfo1"},
@@ -547,7 +547,7 @@
 		{
 			"id": "PartialWithMultipleMethods",
 			"enabled": true,
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":",",
@@ -557,8 +557,8 @@
 				"partialPath": "/tmp/flatstoreMMErs/out",
 				"csvLazyQuotes": true
 			},
-			"source_path": "/tmp/flatstoreMMErs/in",
-			"processed_path": "/tmp/flatstoreMMErs/out",
+			"sourcePath": "/tmp/flatstoreMMErs/in",
+			"processedPath": "/tmp/flatstoreMMErs/out",
 			"flags": ["*cdrs"],
 			"fields":[
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatstoreMMErs", "mandatory": true},
@@ -579,11 +579,11 @@
 				{"tag": "Order", "path": "*opts.orderID", "type": "*variable", "value": "~*req.0"},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*string:~*req.1:CANCEL"]}
 			],
-			"partial_commit_fields": [
+			"partialCommitFields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}
 			],
-			"cache_dump_fields": [
+			"cacheDumpFields": [
 				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
 				{"tag": "OriginID",			"path": "*exp.OriginID", 		"type": "*variable", "value":"~*req.OriginID"},
 				{"tag": "RequestType",		"path": "*exp.RequestType", 	"type": "*variable", "value":"~*req.RequestType"},

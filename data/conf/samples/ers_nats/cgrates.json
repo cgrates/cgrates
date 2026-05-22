@@ -37,9 +37,9 @@
         {
             "id": "nats_reader1",
             "type": "*natsJSONMap",
-            "source_path": "nats://127.0.0.1:4222",
-            "processed_path": "nats://127.0.0.1:4222",
-            "ees_success_ids": ["nats_processed"],
+            "sourcePath": "nats://127.0.0.1:4222",
+            "processedPath": "nats://127.0.0.1:4222",
+            "eesSuccessIDs": ["nats_processed"],
             "opts": {
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",
@@ -56,9 +56,9 @@
         {
             "id": "nats_reader2",
             "type": "*natsJSONMap",
-            "source_path": "nats://127.0.0.1:4222",
-            "processed_path": "nats://127.0.0.1:4222",
-            "ees_success_ids": ["nats_processed"],
+            "sourcePath": "nats://127.0.0.1:4222",
+            "processedPath": "nats://127.0.0.1:4222",
+            "eesSuccessIDs": ["nats_processed"],
             "opts": {
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",

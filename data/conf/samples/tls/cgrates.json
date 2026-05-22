@@ -27,12 +27,12 @@
 
 
 "http": {										// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
-	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
-	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
-	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
-	"use_basic_auth": false,					// use basic authentication
-	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+	"jsonRPCurl": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
+	"wsURL": "/ws",							// WebSockets relative URL ("" to disable)
+	"freeswitchCDRsURL": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
+	"httpCDRs": "/cdr_http",					// CDRS relative URL ("" to disable)
+	"useBasicAuth": false,					// use basic authentication
+	"authUsers": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 },
 
 

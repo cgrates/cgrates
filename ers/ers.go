@@ -623,7 +623,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 }
 
 // exportRawEvent exports the given event. If the processing of the event failed,
-// it uses ees_failed_ids; otherwise, it uses ees_success_ids.
+// it uses eesFailedIDs; otherwise, it uses eesSuccessIDs.
 func (erS *ERService) exportRawEvent(event *erEvent, processingFailed bool) error {
 	var exporterIDs []string
 	if processingFailed {

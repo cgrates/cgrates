@@ -45,9 +45,9 @@ func TestAMQPER(t *testing.T) {
 		{
 			"id": "amqp",										// identifier of the EventReader profile
 			"type": "*amqpJSONMap",							// reader type <*fileCSV>
-			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "amqp://guest:guest@localhost:5672/",// read data from this path
+			"runDelay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"concurrentRequests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
+			"sourcePath": "amqp://guest:guest@localhost:5672/",// read data from this path
 			"opts": {
 				"amqpQueueID": "cdrs3",
 				"amqpConsumerTag": "test-key",
@@ -55,7 +55,7 @@ func TestAMQPER(t *testing.T) {
 				"amqpExchangeType": "direct",
 				"amqpRoutingKey": "test-key",
 			},
-			"processed_path": "",								// move processed data here
+			"processedPath": "",								// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing

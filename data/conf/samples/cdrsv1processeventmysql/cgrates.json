@@ -86,7 +86,7 @@
 		"*thresholds": [{"ConnIDs": ["*internal"]}],
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
-	"online_cdr_exports": ["amqp_test_file"],
+	"onlineCDRExports": ["amqp_test_file"],
 },
 
 

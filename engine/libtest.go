@@ -599,7 +599,7 @@ func setupLoader(t testing.TB, tpPath, cfgPath string) {
 "loaders": [{
 	"id": "*default",
 	"enabled": true,
-	"run_delay": "0",
+	"runDelay": "0",
 	"tp_in_path": "%s",
 	"tp_out_path": "",
 	"action": "*store",

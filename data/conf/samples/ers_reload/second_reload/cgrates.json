@@ -97,19 +97,19 @@
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"flags": ["*dryRun"],
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 		},
 		{
 			"id": "file_reader2",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers2/in",
+			"sourcePath": "/tmp/ers2/in",
 			"flags": ["*dryRun"],
-			"processed_path": "/tmp/ers2/out",
+			"processedPath": "/tmp/ers2/out",
 			"opts": {
 				"csvFieldSeparator":";"
 			},
@@ -132,11 +132,11 @@
 		},
 		{
 			"id": "init_session",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/init_session/in",
+			"sourcePath": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
-			"processed_path": "/tmp/init_session/out",
+			"processedPath": "/tmp/init_session/out",
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
@@ -153,11 +153,11 @@
 		},
 		{
 			"id": "terminate_session",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/terminate_session/in",
+			"sourcePath": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
-			"processed_path": "/tmp/terminate_session/out",
+			"processedPath": "/tmp/terminate_session/out",
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -167,11 +167,11 @@
 		},
 		{
 			"id": "create_cdr",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/cdrs/in",
+			"sourcePath": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
-			"processed_path": "/tmp/cdrs/out",
+			"processedPath": "/tmp/cdrs/out",
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
@@ -190,10 +190,10 @@
 		},
 		{
 			"id": "file_reader_with_filters",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers_with_filters/in",
-			"processed_path": "/tmp/ers_with_filters/out",
+			"sourcePath": "/tmp/ers_with_filters/in",
+			"processedPath": "/tmp/ers_with_filters/out",
 			"flags": ["*cdrs","*log"],
 			"filters":["*string:~*req.3:1002"],
 			"opts": {
