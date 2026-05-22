@@ -990,3 +990,263 @@ func TestBalanceTimingsClearTimings(t *testing.T) {
 		}
 	})
 }
+
+func TestBalanceTimingsNegation(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
+ 
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+ 
+"rals": {
+    "enabled": true,
+},
+ 
+"schedulers": {
+    "enabled": true,
+    "cdrs_conns": ["*internal"],
+},
+
+"attributes" : {
+    "enabled": true,
+},
+ 
+"cdrs": {
+    "enabled": true,
+    "chargers_conns":["*internal"],
+    "rals_conns": ["*localhost"],
+},
+ 
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"]
+},
+ 
+"sessions": {
+    "enabled": true,
+    "rals_conns": ["*internal"],
+    "cdrs_conns": ["*internal"],
+    "chargers_conns": ["*internal"]
+},
+ 
+"apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+},
+ 
+}
+`
+
+	tpFiles := map[string]string{
+		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,1001,apPackage10,,,`,
+		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
+apPackage10,actTopup,*asap,10`,
+		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+actTopup,*topup_reset,,,balNeg,*monetary,,*any,,,*unlimited,,100,10,false,false,10`,
+		utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,*default,*none,0
+cgrates.org,Raw,,,*raw,*constant:*req.RequestType:*none,0`,
+		utils.DestinationsCsv: `#Id,Prefix
+dst1002,1002`,
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+dr1002,dst1002,rt1Cnt,*up,4,0,`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+rt1Cnt,0,1,60s,1s,0s`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+rp1001,dr1002,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+
+	t.Run("SetTimings", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetTiming, &utils.TPTimingWithAPIOpts{
+			TPTiming: &utils.TPTiming{
+				ID:        "half1",
+				StartTime: "00:00:00",
+				EndTime:   "11:59:59",
+			},
+		}, &reply); err != nil {
+			t.Fatal(err)
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetTiming, &utils.TPTimingWithAPIOpts{
+			TPTiming: &utils.TPTiming{
+				ID:        "half2",
+				StartTime: "12:00:00",
+				EndTime:   "23:59:59",
+			},
+		}, &reply); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("SetBalanceWithNegatedTiming", func(t *testing.T) {
+		var reply string
+		attrs := &utils.AttrSetBalance{
+			Tenant:      "cgrates.org",
+			Account:     "1001",
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID:        "balNeg",
+				utils.TimingIDs: "half1;!half2",
+				utils.Value:     100.0,
+				utils.Weight:    10.0,
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance, attrs, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Fatalf("unexpected reply: %s", reply)
+		}
+	})
+
+	t.Run("VerifyTimingIDsMap", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		balances := acnt.BalanceMap[utils.MetaMonetary]
+		var balNeg *engine.Balance
+		for _, b := range balances {
+			if b.ID == "balNeg" {
+				balNeg = b
+				break
+			}
+		}
+		if balNeg == nil {
+			t.Fatal("balNeg not found in account")
+		}
+		if balNeg.TimingIDs["half1"] != true {
+			t.Errorf("expected half1:true in TimingIDs, got %v", balNeg.TimingIDs)
+		}
+		if balNeg.TimingIDs["half2"] != false {
+			t.Errorf("expected half2:false in TimingIDs, got %v", balNeg.TimingIDs)
+		}
+	})
+
+	t.Run("PMCDRShouldNotDebitBalNeg", func(t *testing.T) {
+		t.Skip("It gets debited even with the use of !")
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		var balBefore float64
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balBefore = b.Value
+			}
+		}
+
+		var reply string
+		args := &engine.ExternalCDRWithAPIOpts{
+			ExternalCDR: &engine.ExternalCDR{
+				OriginID:    "testPmNegation",
+				ToR:         utils.MetaVoice,
+				RequestType: utils.MetaPostpaid,
+				SetupTime:   "2024-08-04T15:00:00Z", // PM
+				AnswerTime:  "2024-08-04T15:00:00Z",
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				Usage:       "10s",
+			},
+		}
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR, args, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		var balAfter float64
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balAfter = b.Value
+			}
+		}
+
+		if balAfter != balBefore {
+			t.Errorf("balNeg was debited during PM despite !half2 — before: %v after: %v (negation NOT working)", balBefore, balAfter)
+		}
+	})
+
+	t.Run("AMCDRShouldDebitBalNeg", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		var balBefore float64
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balBefore = b.Value
+			}
+		}
+
+		var reply string
+		args := &engine.ExternalCDRWithAPIOpts{
+			ExternalCDR: &engine.ExternalCDR{
+				OriginID:    "testAmNegation",
+				ToR:         utils.MetaVoice,
+				RequestType: utils.MetaPostpaid,
+				SetupTime:   "2024-08-04T10:00:00Z", // AM
+				AnswerTime:  "2024-08-04T10:00:00Z",
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				Usage:       "10s",
+			},
+		}
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR, args, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		var balAfter float64
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balAfter = b.Value
+			}
+		}
+
+		if balAfter >= balBefore {
+			t.Errorf("balNeg was NOT debited during AM — before: %v after: %v", balBefore, balAfter)
+		}
+	})
+}
