@@ -61,12 +61,12 @@
 
 "cdrs": {
 	"enabled": true,
-	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
+	"extraFields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"conns": {
 		"*chargers": [{"ConnIDs": ["*localhost"]}],
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
-	"online_cdr_exports": [],
+	"onlineCDRExports": [],
 },
 
 

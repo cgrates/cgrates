@@ -96,19 +96,19 @@
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"flags": ["*cdrs","*log"],
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 		},
 		{
 			"id": "file_reader2",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers2/in",
+			"sourcePath": "/tmp/ers2/in",
 			"flags": ["*cdrs","*log"],
-			"processed_path": "/tmp/ers2/out",
+			"processedPath": "/tmp/ers2/out",
 			"opts": {
 				"csvFieldSeparator":";"
 			},

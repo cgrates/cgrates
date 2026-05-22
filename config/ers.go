@@ -955,24 +955,24 @@ type EventReaderOptsJson struct {
 type EventReaderJsonCfg struct {
 	ID                   *string               `json:"id"`
 	Type                 *string               `json:"type"`
-	RunDelay             *string               `json:"run_delay"`
-	StartDelay           *string               `json:"start_delay"`
-	ConcurrentRequests   *int                  `json:"concurrent_requests"`
-	SourcePath           *string               `json:"source_path"`
-	ProcessedPath        *string               `json:"processed_path"`
+	RunDelay             *string               `json:"runDelay"`
+	StartDelay           *string               `json:"startDelay"`
+	ConcurrentRequests   *int                  `json:"concurrentRequests"`
+	SourcePath           *string               `json:"sourcePath"`
+	ProcessedPath        *string               `json:"processedPath"`
 	Tenant               *string               `json:"tenant"`
 	Timezone             *string               `json:"timezone"`
-	EEsIds               *[]string             `json:"ees_ids"`
-	EEsSuccessIDs        *[]string             `json:"ees_success_ids"`
-	EEsFailedIDs         *[]string             `json:"ees_failed_ids"`
+	EEsIds               *[]string             `json:"eesIDs"`
+	EEsSuccessIDs        *[]string             `json:"eesSuccessIDs"`
+	EEsFailedIDs         *[]string             `json:"eesFailedIDs"`
 	Filters              *[]string             `json:"filters"`
 	Flags                *[]string             `json:"flags"`
 	Reconnects           *int                  `json:"reconnects"`
 	MaxReconnectInterval *string               `json:"maxReconnectInterval"`
 	Opts                 *EventReaderOptsJson  `json:"opts"`
 	Fields               *[]*FcTemplateJsonCfg `json:"fields"`
-	PartialCommitFields  *[]*FcTemplateJsonCfg `json:"partial_commit_fields"`
-	CacheDumpFields      *[]*FcTemplateJsonCfg `json:"cache_dump_fields"`
+	PartialCommitFields  *[]*FcTemplateJsonCfg `json:"partialCommitFields"`
+	CacheDumpFields      *[]*FcTemplateJsonCfg `json:"cacheDumpFields"`
 }
 
 func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts) *EventReaderOptsJson {
@@ -1477,7 +1477,7 @@ type ERsJsonCfg struct {
 	Enabled         *bool                      `json:"enabled"`
 	Conns           map[string][]*DynamicConns `json:"conns,omitempty"`
 	Readers         *[]*EventReaderJsonCfg     `json:"readers"`
-	PartialCacheTTL *string                    `json:"partial_cache_ttl"`
+	PartialCacheTTL *string                    `json:"partialCacheTTL"`
 }
 
 func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {

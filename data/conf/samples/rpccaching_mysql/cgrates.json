@@ -49,7 +49,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"session_cost_retries": 2			
+	"sessionCostRetries": 2			
 },
 
 "attributes": {

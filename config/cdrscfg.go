@@ -302,12 +302,12 @@ type CdrsOptsJson struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled              *bool
-	Extra_fields         *[]string
-	Session_cost_retries *int
+	Enabled              *bool                      `json:"enabled"`
+	Extra_fields         *[]string                  `json:"extraFields"`
+	Session_cost_retries *int                       `json:"sessionCostRetries"`
 	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`
-	Online_cdr_exports   *[]string
-	Opts                 *CdrsOptsJson
+	Online_cdr_exports   *[]string                  `json:"onlineCDRExports"`
+	Opts                 *CdrsOptsJson              `json:"opts"`
 }
 
 func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {

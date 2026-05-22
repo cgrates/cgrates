@@ -69,7 +69,7 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 		"setup_time":   testCdrSql.SetupTime,
 		"answer_time":  testCdrSql.AnswerTime,
 		"usage":        testCdrSql.Usage,
-		"extra_fields": testCdrSql.ExtraFields,
+		"extraFields":  testCdrSql.ExtraFields,
 		"cost_source":  testCdrSql.CostSource,
 		"cost":         testCdrSql.Cost,
 		"cost_details": testCdrSql.CostDetails,

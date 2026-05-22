@@ -100,7 +100,7 @@
 		"id": "CustomLoader",								
 		"enabled": true,								
 		"tenant": "cgrates.org",
-		"run_delay": "0",									
+		"runDelay": "0",									
 		"lockfile_path": ".cgr.lock",					
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
@@ -122,7 +122,7 @@
 		"id": "WithoutMoveToOut",			
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"run_delay": "0",
+		"runDelay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
@@ -145,7 +145,7 @@
 		"id": "SubpathLoaderWithoutMove",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"run_delay": "0",
+		"runDelay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
@@ -168,7 +168,7 @@
 		"id": "SubpathLoaderWithMove",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"run_delay": "0",
+		"runDelay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
@@ -191,7 +191,7 @@
 		"id": "LoaderWithTemplate",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"run_delay": "0",
+		"runDelay": "0",
 		"lockfile_path": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
@@ -213,7 +213,7 @@
 		"id": "CustomSep",								
 		"enabled": true,									
 		"tenant": "cgrates.org",
-		"run_delay": "-1",										
+		"runDelay": "-1",										
 		"lockfile_path": ".cgr.lock",						
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]

@@ -243,15 +243,15 @@ type HTTPClientOptsJson struct {
 
 // HTTP config section
 type HTTPJsonCfg struct {
-	JSONRPCURL        *string             `json:"json_rpc_url"`
-	RegistrarsURL     *string             `json:"registrars_url"`
-	WSURL             *string             `json:"ws_url"`
-	FreeswitchCDRsURL *string             `json:"freeswitch_cdrs_url"`
-	HTTPCDRs          *string             `json:"http_cdrs"`
-	PprofPath         *string             `json:"pprof_path"`
-	UseBasicAuth      *bool               `json:"use_basic_auth"`
-	AuthUsers         *map[string]string  `json:"auth_users"`
-	ClientOpts        *HTTPClientOptsJson `json:"client_opts"`
+	JSONRPCURL        *string             `json:"jsonRPCurl"`
+	RegistrarsURL     *string             `json:"registrarsURL"`
+	WSURL             *string             `json:"wsURL"`
+	FreeswitchCDRsURL *string             `json:"freeswitchCDRsURL"`
+	HTTPCDRs          *string             `json:"httpCDRs"`
+	PprofPath         *string             `json:"pprofPath"`
+	UseBasicAuth      *bool               `json:"useBasicAuth"`
+	AuthUsers         *map[string]string  `json:"authUsers"`
+	ClientOpts        *HTTPClientOptsJson `json:"clientOpts"`
 }
 
 func diffHTTPClientOptsJsonCfgDialer(d *HTTPClientOptsJson, v1, v2 *net.Dialer) *HTTPClientOptsJson {

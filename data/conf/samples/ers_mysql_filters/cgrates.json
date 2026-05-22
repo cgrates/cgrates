@@ -30,14 +30,14 @@
 	"readers": [
 		{
 			"id": "mysql",
-			"run_delay": "1m",
+			"runDelay": "1m",
 			"type": "*sql",
-			"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"opts": {
 				"sqlDBName":"cgrates2",
 				"sqlTableName":"cdrs"
 			},
-			"start_delay": "100ms",
+			"startDelay": "100ms",
 			"flags": ["*dryRun"],
 			"tenant": "cgrates.org",
 			"filters": [

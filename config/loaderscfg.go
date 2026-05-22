@@ -379,7 +379,7 @@ type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
 	Tenant          *string
-	Run_delay       *string
+	Run_delay       *string `json:"runDelay"`
 	Lockfile_path   *string
 	Caches_conns    *[]string
 	Field_separator *string

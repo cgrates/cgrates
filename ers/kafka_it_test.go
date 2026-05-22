@@ -64,11 +64,11 @@ func TestKafkaER(t *testing.T) {
 	},
 	"readers": [
 		{
-			"id": "kafka",
-			"type": "*kafkaJSONMap",
-			"run_delay":  "-1",
-			"concurrent_requests": 1024,
-			"source_path": "localhost:9092",
+			"id": "kafka",										
+			"type": "*kafkaJSONMap",							
+			"runDelay":  "-1",									
+			"concurrentRequests": 1024,						
+			"sourcePath": "localhost:9092",
 			"tenant": "cgrates.org",
 			"filters": [],
 			"flags": [],

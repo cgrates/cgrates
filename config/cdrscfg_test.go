@@ -179,8 +179,8 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"cdrs": {
 		"enabled": true,
-		"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
-		"session_cost_retries": 5,
+		"extraFields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
+		"sessionCostRetries": 5,
 		"conns": {
 			"*chargers": [{"ConnIDs": ["*internal:*chargers","*conn1"]}],
 			"*attributes": [{"ConnIDs": ["*internal:*attributes","*conn1"]}],
@@ -191,7 +191,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 			"*rates": [{"ConnIDs": ["*internal:*rates","*conn1"]}],
 			"*accounts": [{"ConnIDs": ["*internal:*accounts","*conn1"]}]
 		},
-		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
+		"onlineCDRExports":["http_localhost", "amqp_localhost", "http_test_file"],
 	},
 }`
 	eMap := map[string]any{

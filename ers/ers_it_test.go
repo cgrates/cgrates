@@ -1556,11 +1556,11 @@ func TestERsLineNr(t *testing.T) {
 	"readers": [
 		{
 			"id": "file_csv_reader",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "%s",
+			"sourcePath": "%s",
 			"flags": ["*dryRun"],
-			"processed_path": "%s",
+			"processedPath": "%s",
 			"fields":[
 				{"tag": "FileName", "path": "*cgreq.FileName", "type": "*variable", "value": "~*vars.*fileName"},
 				{"tag": "LineNumber", "path": "*cgreq.LineNumber", "type": "*variable", "value": "~*vars.*fileLineNumber"},
@@ -1569,11 +1569,11 @@ func TestERsLineNr(t *testing.T) {
 		},
 		{
 			"id": "file_fwv_reader",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileFWV",
-			"source_path": "%s",
+			"sourcePath": "%s",
 			"flags": ["*dryRun"],
-			"processed_path": "%s",
+			"processedPath": "%s",
 			"fields":[
 				{"tag": "FileName2", "path": "*cgreq.FileName", "type": "*variable", "value": "~*vars.*fileName"},
 				{"tag": "LineNumber", "path": "*cgreq.LineNumber", "type": "*variable", "value": "~*vars.*fileLineNumber"},
@@ -1584,11 +1584,11 @@ func TestERsLineNr(t *testing.T) {
 		},
 		{
 			"id": "file_xml_reader",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileXML",
-			"source_path": "%s",
+			"sourcePath": "%s",
 			"flags": ["*dryRun"],
-			"processed_path": "%s",
+			"processedPath": "%s",
 			"opts": {
 				"xmlRootPath": "root.field"
 			},

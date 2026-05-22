@@ -1143,7 +1143,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Path = "~Field1.Field3[0]"
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaUnixTimestamp
-	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Values of cache_dump_fields"
+	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Values of cacheDumpFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1156,7 +1156,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		},
 	}
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<ERs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at cache_dump_fields"
+	expected = "<ERs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at cacheDumpFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1918,8 +1918,8 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 		{
 			"id": "*default",
 			"type": "*fileXML",
-			"source_path": "/tmp",
-			"processed_path": "/tmp",
+			"sourcePath": "/tmp",
+			"processedPath": "/tmp",
 			"flags": ["*dryRun"],
 			"opts": {
 				"xmlRootPath": "A.B"

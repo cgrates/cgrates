@@ -42,7 +42,7 @@
 		"*rates": [{"ConnIDs": ["*internal"]}],
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},
-	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "kafka_localhost", "eventcost_filter"],
+	"onlineCDRExports": ["http_localhost", "amqp_localhost", "http_test_file", "kafka_localhost", "eventcost_filter"],
 },
 
 "chargers": {

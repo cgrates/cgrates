@@ -55,10 +55,10 @@ func TestSQSER(t *testing.T) {
 		{
 			"id": "sqs",										// identifier of the EventReader profile
 			"type": "*sqsJSONMap",							// reader type <*fileCSV>
-			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "sqs.us-east-2.amazonaws.com",		// read data from this path
-			// "processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
+			"runDelay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"concurrentRequests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
+			"sourcePath": "sqs.us-east-2.amazonaws.com",		// read data from this path
+			// "processedPath": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing

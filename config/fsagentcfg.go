@@ -243,7 +243,7 @@ type FreeswitchAgentJsonCfg struct {
 	Conns                  map[string][]*DynamicConns `json:"conns,omitempty"`
 	SubscribePark          *bool                      `json:"subscribe_park"`
 	CreateCDR              *bool                      `json:"create_cdr"`
-	ExtraFields            *[]string                  `json:"extra_fields"`
+	ExtraFields            *[]string                  `json:"extraFields"`
 	LowBalanceAnnFile      *string                    `json:"low_balance_ann_file"`
 	EmptyBalanceContext    *string                    `json:"empty_balance_context"`
 	EmptyBalanceAnnFile    *string                    `json:"empty_balance_ann_file"`

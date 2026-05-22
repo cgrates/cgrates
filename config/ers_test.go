@@ -38,11 +38,11 @@ func TestERSClone(t *testing.T) {
 	"readers": [
          {
             "id": "file_reader1",
-			"run_delay": "-1",
+			"runDelay": "-1",
 			"type": "*fileCSV",
 			"flags": ["*dryRun"],
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 			"opts": {
               "*default": "randomVal"
              },
@@ -54,10 +54,10 @@ func TestERSClone(t *testing.T) {
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 			],
-			"cache_dump_fields": [
+			"cacheDumpFields": [
                {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
             ],
-			"partial_commit_fields": [{
+			"partialCommitFields": [{
 				"mandatory": true,
 				"path": "*cgreq.ToR",
 				"tag": "ToR",
@@ -382,11 +382,11 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
-			"cache_dump_fields": [],
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
+			"cacheDumpFields": [],
 		},
 	],
 }
@@ -977,26 +977,26 @@ func TestEventReaderSameID(t *testing.T) {
 	"readers": [
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"row_length" : 5,
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 			"fields":[
 				{"tag": "CustomTag1", "path": "CustomPath1", "type": "*variable", "value": "CustomValue1", "mandatory": true},
 			],
-			"cache_dump_fields": [],
+			"cacheDumpFields": [],
 		},
 		{
 			"id": "file_reader1",
-			"run_delay":  "-1",
+			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"source_path": "/tmp/ers/in",
-			"processed_path": "/tmp/ers/out",
+			"sourcePath": "/tmp/ers/in",
+			"processedPath": "/tmp/ers/out",
 			"fields":[
 				{"tag": "CustomTag2", "path": "CustomPath2", "type": "*variable", "value": "CustomValue2", "mandatory": true},
 			],
-			"cache_dump_fields": [],
+			"cacheDumpFields": [],
 		},
 	],
 }
@@ -1023,12 +1023,12 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 		"readers": [
 			{
 				"id": "file_reader1",
-				"run_delay":  "-1",
+				"runDelay":  "-1",
 				"tenant": "~*req.Destination1",
 				"type": "*fileCSV",
-				"source_path": "/tmp/ers/in",
-				"processed_path": "/tmp/ers/out",
-				"cache_dump_fields": []
+				"sourcePath": "/tmp/ers/in",
+				"processedPath": "/tmp/ers/out",
+				"cacheDumpFields": []
 			}
 		]
 	}
@@ -1147,24 +1147,24 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 		"readers": [
 			{
 				"id": "file_reader1",
-				"run_delay":  "10s",
+				"runDelay":  "10s",
 				"tenant": "~*req.Destination1",
 				"type": "*fileCSV",
 				"flags": ["randomFlag"],
 				"filters": ["randomFilter"],
-				"ees_ids": ["eesID"],
-				"ees_success_ids": ["conn1", "conn2"],
-				"ees_failed_ids": ["conn1"],
+				"eesIDs": ["eesID"],
+				"eesSuccessIDs": ["conn1", "conn2"],
+				"eesFailedIDs": ["conn1"],
 				"filters": ["randomFilter"],
-				"source_path": "/tmp/ers/in",
+				"sourcePath": "/tmp/ers/in",
 				"partial_record_cache": "1s",
-				"processed_path": "/tmp/ers/out",
+				"processedPath": "/tmp/ers/out",
 				"reconnects": 10,
 				"maxReconnectInterval": "2m",
-				"cache_dump_fields": [
+				"cacheDumpFields": [
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}
 				],
-				"partial_commit_fields": [{
+				"partialCommitFields": [{
 					"mandatory": true,
 					"path": "*cgreq.ToR",
 					"tag": "ToR",

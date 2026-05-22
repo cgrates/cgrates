@@ -920,7 +920,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {
-          "extra_fields": ["randomFields"],
+          "extraFields": ["randomFields"],
           "max_wait_connection": "0",
 		  "conns": {
 		  	"*sessions": [{"ConnIDs": ["*internal"]}]

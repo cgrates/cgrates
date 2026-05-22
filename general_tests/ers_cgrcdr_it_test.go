@@ -62,10 +62,10 @@ func TestERSCgrCDRFilters(t *testing.T) {
   "readers": [
     {
       "id": "cgrcdr",
-		"run_delay": "1m",
+		"runDelay": "1m",
 	   "type": "*cgrcdr",
-	   "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
-		"start_delay": "100ms",
+	   "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+		"startDelay": "100ms",
 		"flags": ["*dryRun"],
 		"tenant": "cgrates.org",
 	  	"opts": {
@@ -113,11 +113,11 @@ func TestERSCgrCDRFiltersDelete(t *testing.T) {
   "readers": [
 	   {
       "id": "cgrcdr",
-	  "run_delay": "1m",
+	  "runDelay": "1m",
 	  "type": "*cgrcdr",
-	  "source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
-	  "processed_path": "*delete",
-	  "start_delay": "250ms",
+	  "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+	  "processedPath": "*delete",
+	  "startDelay": "250ms",
 	  "flags": ["*dryRun"],
 	  "tenant": "cgrates.org",
 	  "opts": {
