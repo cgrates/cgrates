@@ -54,7 +54,7 @@ var (
 		testHttpSsRPC,
 		testHttpSsLoadTPFromFolder,
 		testHttpSsAuth,
-		//testHttpSsSession,
+		testHttpSsSession,
 		//testHttpSsStopEngine,
 		//testHttpSsTerminate,
 	}

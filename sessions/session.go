@@ -68,7 +68,7 @@ func NewSession(origCGREv *utils.CGREvent, clientConnID string, runEvents []*uti
 
 // Session is the main structure to describe a call
 type Session struct {
-	ID             string          // Unique identifier per Session, defaults to APIOpts[*originID]
+	ID             string          // Unique identifier per Session, defaults to APIOpts[*cgrID]
 	OriginCGREvent *utils.CGREvent // initial CGREvent received
 	ClientConnID   string          // connection ID towards the client so we can recover from passive
 	DebitInterval  *time.Duration  // execute debits for *prepaid runs

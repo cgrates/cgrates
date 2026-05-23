@@ -603,14 +603,14 @@ func (sS *SessionS) isSessionRegistered(sID string, passive bool) (has bool) {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	_, has = sMp[utils.IfaceAsString(sID)]
+	_, has = sMp[sID]
 	sMux.Unlock()
 	return
 }
 
 // uregisterSession will unregister an active or passive session based on it's originID
 // called on session terminate or relocate
-func (sS *SessionS) unregisterSession(originID string, passive bool) bool {
+func (sS *SessionS) unregisterSession(sID string, passive bool) bool {
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -618,13 +618,13 @@ func (sS *SessionS) unregisterSession(originID string, passive bool) bool {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	if _, has := sMp[originID]; !has {
+	if _, has := sMp[sID]; !has {
 		sMux.Unlock()
 		return false
 	}
-	delete(sMp, originID)
+	delete(sMp, sID)
 	sMux.Unlock()
-	sS.unindexSession(originID, passive)
+	sS.unindexSession(sID, passive)
 	return true
 }
 
@@ -928,6 +928,20 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	return
 }
 
+// setSession is called on each processEvent with *session flag to either create or update a session
+func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
+	cgrID, clientConnID string) (s *Session, err error) {
+	if cgrID == utils.EmptyString {
+		return nil, utils.NewErrMandatoryIeMissing(utils.MetaCGRid)
+	}
+	if s = sS.getActivateSession(cgrID); s == nil {
+		if s, err = sS.newSession(ctx, cgrEv, clientConnID); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // ipsAuthorize will authorize the event with the IPs subsystem
 func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	var conns []string
@@ -1076,14 +1090,14 @@ func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string
 }
 
 // transitSState will transit the sessions from one state (active/passive) to another (passive/active)
-func (sS *SessionS) transitSState(originID string, psv bool) (s *Session) {
-	ss := sS.getSessions(originID, !psv)
+func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
+	ss := sS.getSessions(sID, !psv)
 	if len(ss) == 0 {
 		return
 	}
 	s = ss[0]
 	s.lk.Lock()
-	sS.unregisterSession(originID, !psv)
+	sS.unregisterSession(sID, !psv)
 	sS.registerSession(s, psv)
 	if !psv {
 		sS.initSessionDebitLoops(s)
@@ -1096,12 +1110,12 @@ func (sS *SessionS) transitSState(originID string, psv bool) (s *Session) {
 }
 
 // getActivateSession returns the session from active list or moves from passive
-func (sS *SessionS) getActivateSession(originID string) (s *Session) {
-	ss := sS.getSessions(originID, false)
+func (sS *SessionS) getActivateSession(sID string) (s *Session) {
+	ss := sS.getSessions(sID, false)
 	if len(ss) != 0 {
 		return ss[0]
 	}
-	return sS.transitSState(originID, false)
+	return sS.transitSState(sID, false)
 }
 
 // relocateSession will change the originID of a session (ie: prefix based session group)

@@ -907,6 +907,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaSession] = sesBool
 	}
 
+	if cch[utils.MetaSession].(bool) {
+		if _, err = sS.setSession(ctx, apiArgs, cch[utils.MetaCGRid].(string), ""); err != nil {
+			return
+		}
+
+	}
+
 	// extracting *terminate informs if the event should be attached to a session so we do not fork later
 	if terminateBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.Terminate,
