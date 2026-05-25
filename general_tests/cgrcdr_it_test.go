@@ -21,6 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,19 +34,17 @@ import (
 func TestCgrCdrEventExporter(t *testing.T) {
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
-	case utils.MetaInternal:
-		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 		dbCfg = engine.MySQLDBCfg
-	case utils.MetaRedis:
-		dbCfg = engine.RedisDBCfg
-	case utils.MetaMongo:
-		dbCfg = engine.MongoDBCfg
-	case utils.MetaPostgres:
+	case utils.MetaInternal, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
+	conn := dbCfg.DB.DBConns[utils.MetaDefault]
+	exportPath := fmt.Sprintf("%s://%s:%s@%s:%d",
+		strings.TrimPrefix(*conn.Type, utils.Meta),
+		*conn.User, *conn.Password, *conn.Host, *conn.Port)
 	time.Sleep(100 * time.Millisecond)
 
 	content := `{
@@ -53,7 +53,11 @@ func TestCgrCdrEventExporter(t *testing.T) {
 	"exporters": [{
 			"id": "cdr_exporter",
 			"type": "*cgrcdr",
-			"export_path": "",
+			"export_path": "` + exportPath + `",
+			"opts": {
+				"sqlDBName": "` + *conn.Name + `",
+				"sqlTableName": "cdrs"
+			},
 			"synchronous": true,
 			"blocker": false,
 			"attempts": 1,
