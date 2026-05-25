@@ -659,8 +659,8 @@ func TestSessionLifecycle(t *testing.T) {
 },
 "sessions": {
 	"enabled": true,
-	"alterable_fields": ["AlterableField"],
-	"terminate_attempts": 1,
+	"alterableFields": ["AlterableField"],
+	"terminateAttempts": 1,
 	"conns": {
 		"*chargers": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
 	},

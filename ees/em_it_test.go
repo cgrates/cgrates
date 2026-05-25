@@ -57,9 +57,9 @@ func TestExporterMetricsIT(t *testing.T) {
   {
 	"id": "csv_exporter",
 	"type": "*fileCSV",
-	"export_path": "%s",
+	"exportPath": "%s",
 	"synchronous": true,
-	"metrics_reset_schedule": "@every 5s",
+	"metricsResetSchedule": "@every 5s",
 	"fields": [
 	  { "tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*em.NumberOfEvents" },
 	  { "tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*opts.*originID" },

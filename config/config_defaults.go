@@ -631,10 +631,10 @@ const CGRATES_CFG_JSON = `
 
 "efs": {
 	"enabled": false,					// starts the EventReader service: <true|false>
-	"poster_attempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
+	"posterAttempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
 	"failedPostsDir": "/var/spool/cgrates/failed_posts",	// directory where failed export requests are stored
-	"failed_posts_ttl": "5s",				// cache ttl for batching failed posts before writing to disk
-	"failed_posts_static_ttl": true				// if false, ttl resets on every cache access
+	"failedPostsTTL": "5s",				// cache ttl for batching failed posts before writing to disk
+	"failedPostsStaticTTL": true				// if false, ttl resets on every cache access
 },
 
 "ees": {
@@ -655,7 +655,7 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",					// identifier of the EventReader profile
 			"type": "*none",					// exporter type 
-			"export_path": "/var/spool/cgrates/ees",		// path where the exported events will be placed
+			"exportPath": "/var/spool/cgrates/ees",		// path where the exported events will be placed
 			"failedPostsDir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 			"concurrentRequests": 0,				// maximum simultaneous requests to process, 0 for unlimited
 			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -664,12 +664,12 @@ const CGRATES_CFG_JSON = `
 					},		
 			"filters": [],						// limit parsing based on the filters
 			"flags": [],						// flags to influence the event processing
-			"attribute_ids": [],					// select Attribute profiles instead of discovering them
-			"attribute_context": "",				// context used to discover matching Attribute profiles
+			"attributeIDs": [],					// select Attribute profiles instead of discovering them
+			"attributeContext": "",				// context used to discover matching Attribute profiles
 			"synchronous": false,					// block processing until export has a result
 			"blocker": false,					// stops the processing of the following exporters
 			"attempts": 1,						// export attempts
-			"metrics_reset_schedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
+			"metricsResetSchedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
 			"opts": {						// extra options for exporter
 
 				// CSV
@@ -777,33 +777,33 @@ const CGRATES_CFG_JSON = `
 
 "sessions": {
 	"enabled": false,			// starts the session service: <true|false>
-	"listen_bijson": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
-	"listen_bigob": "",			// address where to listen for bidirectional GOB-RPC requests
-	"debit_interval": "0s",			// interval to perform debits on.
-	"store_session_costs": false,		// enable storing of the session costs within CDRs
-	"default_usage":{			// the usage if the event is missing the usage field
+	"listenBiJSON": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
+	"listenBiGob": "",			// address where to listen for bidirectional GOB-RPC requests
+	"debitInterval": "0s",			// interval to perform debits on.
+	"storeSessionCosts": false,		// enable storing of the session costs within CDRs
+	"defaultUsage":{			// the usage if the event is missing the usage field
 			"*any": "3h",
 			"*voice": "3h",
 			"*data": "1048576",
 			"*sms": "1"
 	},
-	"session_ttl": "0s",			// time after a session with no updates is terminated, not defined by default
-	//"session_ttl_max_delay": "",		// activates session_ttl randomization and limits the maximum possible delay
-	//"session_ttl_last_used": "",		// tweak LastUsed for sessions timing-out, not defined by default
-	//"session_ttl_usage": "",		// tweak Usage for sessions timing-out, not defined by default
-	//"session_last_usage": "",		// tweak LastUsage for session timing-out, not defined by default
-	"session_indexes": [],			// index sessions based on these fields for GetActiveSessions API
-	"client_protocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
-	"channel_sync_interval": "0",		// sync channels to detect stale sessions (0 to disable)
-	"terminate_attempts": 5,		// attempts to get the session before terminating it
-	"alterable_fields": [],			// the session fields that can be updated
-	//"min_dur_low_balance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	"sessionTTL": "0s",			// time after a session with no updates is terminated, not defined by default
+	//"sessionTTLMaxDelay": "",		// activates sessionTTL randomization and limits the maximum possible delay
+	//"sessionTTLLastUsed": "",		// tweak LastUsed for sessions timing-out, not defined by default
+	//"sessionTTLUsage": "",		// tweak Usage for sessions timing-out, not defined by default
+	//"sessionLastUsage": "",		// tweak LastUsage for session timing-out, not defined by default
+	"sessionIndexes": [],			// index sessions based on these fields for GetActiveSessions API
+	"clientProtocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
+	"terminateAttempts": 5,		// attempts to get the session before terminating it
+	"alterableFields": [],			// the session fields that can be updated
+	//"minDurLowBalance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debitInterval)
 	"stir": {
-		"allowed_attest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
-		"payload_maxduration": "-1", 	// the duration that stir header is valid after it was created
-		"default_attest": "A",		// the default attest level if not mentioned in API
-		"publickey_path": "",		// the path to the public key 
-		"privatekey_path": "",		// the path to the private key
+		"allowedAttest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
+		"payloadMaxduration": "-1", 	// the duration that stir header is valid after it was created
+		"defaultAttest": "A",		// the default attest level if not mentioned in API
+		"publicKeyPath": "",		// the path to the public key 
+		"privateKeyPath": "",		// the path to the private key
 	},																		
 	"opts": {
 		// "*accounts": [

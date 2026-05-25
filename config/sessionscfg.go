@@ -710,11 +710,11 @@ func (stirCfg STIRcfg) Clone() *STIRcfg {
 }
 
 type STIRJsonCfg struct {
-	Allowed_attest      *[]string
-	Payload_maxduration *string
-	Default_attest      *string
-	Publickey_path      *string
-	Privatekey_path     *string
+	Allowed_attest      *[]string `json:"allowedAttest"`
+	Payload_maxduration *string   `json:"payloadMaxduration"`
+	Default_attest      *string   `json:"defaultAttest"`
+	Publickey_path      *string   `json:"publicKeyPath"`
+	Privatekey_path     *string   `json:"privateKeyPath"`
 }
 
 func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
@@ -788,17 +788,17 @@ type SessionsOptsJson struct {
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled             *bool                      `json:"enabled"`
-	ListenBiJSON        *string                    `json:"listen_bijson"`
-	ListenBiGob         *string                    `json:"listen_bigob"`
-	StoreSCosts         *bool                      `json:"store_session_costs"`
-	SessionIndexes      *[]string                  `json:"session_indexes"`
-	ClientProtocol      *float64                   `json:"client_protocol"`
-	ChannelSyncInterval *string                    `json:"channel_sync_interval"`
-	TerminateAttempts   *int                       `json:"terminate_attempts"`
-	AlterableFields     *[]string                  `json:"alterable_fields"`
-	MinDurLowBalance    *string                    `json:"min_dur_low_balance"`
+	ListenBiJSON        *string                    `json:"listenBiJSON"`
+	ListenBiGob         *string                    `json:"listenBiGob"`
+	StoreSCosts         *bool                      `json:"storeSessionCosts"`
+	SessionIndexes      *[]string                  `json:"sessionIndexes"`
+	ClientProtocol      *float64                   `json:"clientProtocol"`
+	ChannelSyncInterval *string                    `json:"channelSyncInterval"`
+	TerminateAttempts   *int                       `json:"terminateAttempts"`
+	AlterableFields     *[]string                  `json:"alterableFields"`
+	MinDurLowBalance    *string                    `json:"minDurLowBalance"`
 	Stir                *STIRJsonCfg               `json:"stir"`
-	DefaultUsage        map[string]string          `json:"default_usage"`
+	DefaultUsage        map[string]string          `json:"defaultUsage"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Opts                *SessionsOptsJson          `json:"opts"`
 }

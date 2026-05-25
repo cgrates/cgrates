@@ -2010,12 +2010,12 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 	cfgJSONStr := `{
 		"sessions": {
 			"enabled": true,
-			"listen_bijson": "127.0.0.1:2018",
+			"listenBiJSON": "127.0.0.1:2018",
 			"replicationConns": ["*localhost"],
-			"store_session_costs": true,
-            "min_dur_low_balance": "1s",
-			"client_protocol": 2.0,
-			"terminate_attempts": 10,
+			"storeSessionCosts": true,
+            "minDurLowBalance": "1s",
+			"clientProtocol": 2.0,
+			"terminateAttempts": 10,
 			"opts": {
 			  "*accounts": [
 		      	{

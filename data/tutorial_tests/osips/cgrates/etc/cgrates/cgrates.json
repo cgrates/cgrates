@@ -44,9 +44,9 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"debit_interval": "5s",
-	"channel_sync_interval":"7s",
+	"listenBiJSON": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"debitInterval": "5s",
+	"channelSyncInterval":"7s",
 	"conns":{
 	"*chargers": [
 		 {

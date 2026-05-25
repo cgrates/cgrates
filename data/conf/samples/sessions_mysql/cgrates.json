@@ -91,8 +91,8 @@
 
 	"sessions": {
 		"enabled": true,
-		"session_ttl": "50ms",
-		"alterable_fields": ["Extra1"],
+		"sessionTTL": "50ms",
+		"alterableFields": ["Extra1"],
 		"conns":{
 		"*chargers": [
 				 {

@@ -27,10 +27,10 @@ import (
 
 type EfsJsonCfg struct {
 	Enabled              *bool   `json:"enabled"`
-	PosterAttempts       *int    `json:"poster_attempts"`
+	PosterAttempts       *int    `json:"posterAttempts"`
 	FailedPostsDir       *string `json:"failedPostsDir"`
-	FailedPostsTTL       *string `json:"failed_posts_ttl"`
-	FailedPostsStaticTTL *bool   `json:"failed_posts_static_ttl"`
+	FailedPostsTTL       *string `json:"failedPostsTTL"`
+	FailedPostsStaticTTL *bool   `json:"failedPostsStaticTTL"`
 }
 
 type EFsCfg struct {

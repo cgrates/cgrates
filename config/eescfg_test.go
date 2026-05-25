@@ -38,15 +38,15 @@ func TestEESClone(t *testing.T) {
 		{
 			"id": "cgrates",									
 			"type": "*none",									
-			"export_path": "/var/spool/cgrates/ees",			
+			"exportPath": "/var/spool/cgrates/ees",			
 			"opts": {
               "csvFieldSeparator": ";"
              },											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
 			"flags": [],										
-			"attribute_ids": ["randomID"],								
-			"attribute_context": "",							
+			"attributeIDs": ["randomID"],								
+			"attributeContext": "",							
 			"synchronous": false,								
 			"attempts": 2,										
 			"field_separator": ",",								
@@ -641,7 +641,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
             {
                   "id": "CSVExporter",									
 			      "type": "*fileCSV",									
-                  "export_path": "/tmp/testCSV",			
+                  "exportPath": "/tmp/testCSV",			
 			      "opts": {
 					"awsSecret": "test",
 					"mysqlDSNParams": {
@@ -652,12 +652,12 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "timezone": "UTC",										
 			      "filters": [],										
 			      "flags": ["randomFlag"],										
-			      "attribute_ids": [],								
-			      "attribute_context": "",							
+			      "attributeIDs": [],								
+			      "attributeContext": "",							
 			      "synchronous": false,								
 			      "attempts": 1,										
 			      "field_separator": ",",								
-				  "metrics_reset_schedule": "@every 1s",
+				  "metricsResetSchedule": "@every 1s",
 			      "fields":[
                       {"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
                   ]

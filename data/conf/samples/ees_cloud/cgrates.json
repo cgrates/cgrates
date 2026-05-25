@@ -1,8 +1,8 @@
 {
 
 "general": {
-    "poster_attempts": 2,
-    "failed_posts_ttl": "1s"
+    "posterAttempts": 2,
+    "failedPostsTTL": "1s"
 },
 
 "logger": {
@@ -27,7 +27,7 @@
         {
             "id": "sqs_test_file",
             "type": "*sqsJSONMap",
-            "export_path": "sqs.eu-central-1.amazonaws.com",
+            "exportPath": "sqs.eu-central-1.amazonaws.com",
             "opts": {
                 "awsRegion": "eu-central-1",
                 "awsKey": "access key ID",
@@ -44,7 +44,7 @@
         {
             "id": "s3_test_file",
             "type": "*s3JSONMap",
-            "export_path": "s3.eu-central-1.amazonaws.com",
+            "exportPath": "s3.eu-central-1.amazonaws.com",
             "opts": {
                 "awsRegion": "eu-central-1",
                 "awsKey": "access key ID",
@@ -61,7 +61,7 @@
         {
             "id": "s3_nuantix_test_file",
             "type": "*s3JSONMap",
-            "export_path": "s3.eu-central-1.amazonaws.com",
+            "exportPath": "s3.eu-central-1.amazonaws.com",
             "opts": {
                 "awsRegion": "eu-central-1",
                 "awsKey": "access key ID",
@@ -83,7 +83,7 @@
             // connection string from Azure Portal can be found here: Home > [Service Bus namespace] > 
             // > Shared access policies > RootManageSharedAccessKey > Primary Connection String where
             // access-key-name is RootManageSharedAccessKey and access-key is the primary connection string
-            "export_path": "amqps://name-space.servicebus.windows.net",
+            "exportPath": "amqps://name-space.servicebus.windows.net",
             "opts": {
 				"amqpQueueID": "cgrates_cdrs",
                 "amqpUsername": "access-key-name",

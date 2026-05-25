@@ -17,7 +17,7 @@
 		{
 			"id": "nats_processed",
 			"type": "*natsJSONMap",
-			"export_path": "nats://localhost:4222",
+			"exportPath": "nats://localhost:4222",
 			"attempts": 1,
 			"opts": {
 				"natsJetStream": true,

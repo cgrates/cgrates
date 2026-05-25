@@ -41,7 +41,7 @@
             {
                 "id": "CSVExporter1",
                 "type": "*fileCSV",
-                "export_path": "/tmp/CSVFile1",
+                "exportPath": "/tmp/CSVFile1",
                 "attempts": 1,
                 "blocker": true,
                 "field_separator": ","
@@ -49,7 +49,7 @@
             {
                 "id": "CSVExporter2",
                 "type": "*fileCSV",
-                "export_path": "/tmp/CSVFile2",
+                "exportPath": "/tmp/CSVFile2",
                 "attempts": 1,
                 "field_separator": ","
             }

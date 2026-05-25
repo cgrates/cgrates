@@ -765,7 +765,7 @@ func TestEEsHTTPJsonMapNestedExport(t *testing.T) {
 		{
 			"id": "nested_json",
 			"type": "*httpJSONMap",
-			"export_path": "%s/",
+			"exportPath": "%s/",
 			"attempts": 1,
 			"synchronous": true,
 			"fields": [

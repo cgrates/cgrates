@@ -34,8 +34,8 @@
 
 "sessions": {
 	"enabled": true,						
-	"debit_interval": "5ms",					
-	"listen_bijson": "127.0.0.1:22014"		
+	"debitInterval": "5ms",					
+	"listenBiJSON": "127.0.0.1:22014"		
 },
 
 "admins": {
