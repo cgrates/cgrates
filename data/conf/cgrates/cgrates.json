@@ -470,9 +470,9 @@
 
 // "efs": {
 // 	"enabled": false,					// starts the EventReader service: <true|false>
-// 	"poster_attempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
+// 	"posterAttempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
 // 	"failedPostsDir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
-// 	"failed_posts_ttl": "5s"				// time to wait before writing the failed posts in a single file
+// 	"failedPostsTTL": "5s"				// time to wait before writing the failed posts in a single file
 // },
 
 // "ees": {
@@ -485,15 +485,15 @@
 // 		{
 // 			"id": "*default",					// identifier of the EventReader profile
 // 			"type": "*none",					// exporter type 
-// 			"export_path": "/var/spool/cgrates/ees",		// path where the exported events will be placed
+// 			"exportPath": "/var/spool/cgrates/ees",		// path where the exported events will be placed
 // 			"failedPostsDir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 // 			"concurrentRequests": 0,				// maximum simultaneous requests to process, 0 for unlimited
 // 			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"efsConns": ["*internal"],				// connID to efs service
 // 			"filters": [],						// limit parsing based on the filters
 // 			"flags": [],						// flags to influence the event processing
-// 			"attribute_ids": [],					// select Attribute profiles instead of discovering them
-// 			"attribute_context": "",				// context used to discover matching Attribute profiles
+// 			"attributeIDs": [],					// select Attribute profiles instead of discovering them
+// 			"attributeContext": "",				// context used to discover matching Attribute profiles
 // 			"synchronous": false,					// block processing until export has a result
 // 			"blocker": false,					// stops the processing of the following exporters
 // 			"attempts": 1,						// export attempts
@@ -600,8 +600,8 @@
 
 // "sessions": {
 // 	"enabled": false,			// starts the session service: <true|false>
-// 	"listen_bijson": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
-// 	"listen_bigob": "",			// address where to listen for bidirectional GOB-RPC requests
+// 	"listenBiJSON": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
+// 	"listenBiGob": "",			// address where to listen for bidirectional GOB-RPC requests
 // 	"chargers_conns": [],			// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 // 	"cdrs_conns": [],			// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],			// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
@@ -610,31 +610,31 @@
 // 	"routes_conns": [],			// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 // 	"attributes_conns": [],			// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 // 	"replicationConns": [],		// replicate sessions towards these session services
-// 	"debit_interval": "0s",			// interval to perform debits on.
-// 	"store_session_costs": false,		// enable storing of the session costs within CDRs
-// 	"default_usage":{			// the usage if the event is missing the usage field
+// 	"debitInterval": "0s",			// interval to perform debits on.
+// 	"storeSessionCosts": false,		// enable storing of the session costs within CDRs
+// 	"defaultUsage":{			// the usage if the event is missing the usage field
 // 			"*any": "3h",
 // 			"*voice": "3h",
 // 			"*data": "1048576",
 // 			"*sms": "1"
 // 	},
-// 	"session_ttl": "0s",			// time after a session with no updates is terminated, not defined by default
-// 	//"session_ttl_max_delay": "",		// activates session_ttl randomization and limits the maximum possible delay
-// 	//"session_ttl_last_used": "",		// tweak LastUsed for sessions timing-out, not defined by default
-// 	//"session_ttl_usage": "",		// tweak Usage for sessions timing-out, not defined by default
-// 	//"session_last_usage": "",		// tweak LastUsage for session timing-out, not defined by default
-// 	"session_indexes": [],			// index sessions based on these fields for GetActiveSessions API
-// 	"client_protocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
-// 	"channel_sync_interval": "0",		// sync channels to detect stale sessions (0 to disable)
-// 	"terminate_attempts": 5,		// attempts to get the session before terminating it
-// 	"alterable_fields": [],			// the session fields that can be updated
-// 	//"min_dur_low_balance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+// 	"sessionTTL": "0s",			// time after a session with no updates is terminated, not defined by default
+// 	//"sessionTTLMaxDelay": "",		// activates sessionTTL randomization and limits the maximum possible delay
+// 	//"sessionTTLLastUsed": "",		// tweak LastUsed for sessions timing-out, not defined by default
+// 	//"sessionTTLUsage": "",		// tweak Usage for sessions timing-out, not defined by default
+// 	//"sessionLastUsage": "",		// tweak LastUsage for session timing-out, not defined by default
+// 	"sessionIndexes": [],			// index sessions based on these fields for GetActiveSessions API
+// 	"clientProtocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+// 	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
+// 	"terminateAttempts": 5,		// attempts to get the session before terminating it
+// 	"alterableFields": [],			// the session fields that can be updated
+// 	//"minDurLowBalance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debitInterval)
 // 	"stir": {
-// 		"allowed_attest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
-// 		"payload_maxduration": "-1", 	// the duration that stir header is valid after it was created
-// 		"default_attest": "A",		// the default attest level if not mentioned in API
-// 		"publickey_path": "",		// the path to the public key 
-// 		"privatekey_path": "",		// the path to the private key
+// 		"allowedAttest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
+// 		"payloadMaxduration": "-1", 	// the duration that stir header is valid after it was created
+// 		"defaultAttest": "A",		// the default attest level if not mentioned in API
+// 		"publicKeyPath": "",		// the path to the public key 
+// 		"privateKeyPath": "",		// the path to the private key
 // 	},
 // 	"actions_conns": [],			// connections to SchedulerS in case of *dynaprepaid request
 // 	"rates_conns": [], 			// connections to RateS

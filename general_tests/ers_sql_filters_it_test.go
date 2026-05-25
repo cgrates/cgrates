@@ -527,7 +527,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
     {
       "id": "SQLExporter",
       "type": "*sql",
-      "export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "attempts": 1,
       "opts": {
         "sqlDBName": "cgrates2",
@@ -612,7 +612,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
     {
       "id": "SQLExporter",
       "type": "*sql",
-      "export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "attempts": 1,
       "opts": {
         "sqlDBName": "cgrates2",
@@ -702,7 +702,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
     {
       "id": "SQLExporter",
       "type": "*sql",
-      "export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+      "exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "attempts": 1,
       "opts": {
         "sqlConnMaxLifetime": "5s",

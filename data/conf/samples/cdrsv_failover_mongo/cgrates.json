@@ -10,9 +10,9 @@
 
 "efs": {                                                    
 	"enabled": true,						                
-	"poster_attempts": 1,									
+	"posterAttempts": 1,									
 	"failedPostsDir": "/tmp/failed_posts",	
-	"failed_posts_ttl": "1s"								
+	"failedPostsTTL": "1s"								
 },
 
 
@@ -89,7 +89,7 @@
 		{
 			"id": "s3_test_file",
 			"type": "*s3JSONMap",
-			"export_path": "http://s3.us-east-2.amazonaws.com/",
+			"exportPath": "http://s3.us-east-2.amazonaws.com/",
 			"opts": {
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",

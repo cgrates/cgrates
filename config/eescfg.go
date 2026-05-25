@@ -1320,18 +1320,18 @@ type EventExporterOptsJson struct {
 type EventExporterJsonCfg struct {
 	ID                   *string                    `json:"id"`
 	Type                 *string                    `json:"type"`
-	ExportPath           *string                    `json:"export_path"`
+	ExportPath           *string                    `json:"exportPath"`
 	Opts                 *EventExporterOptsJson     `json:"opts"`
 	Timezone             *string                    `json:"timezone"`
 	Filters              *[]string                  `json:"filters"`
 	Flags                *[]string                  `json:"flags"`
-	AttributeIDs         *[]string                  `json:"attribute_ids"`
-	AttributeContext     *string                    `json:"attribute_context"`
+	AttributeIDs         *[]string                  `json:"attributeIDs"`
+	AttributeContext     *string                    `json:"attributeContext"`
 	Synchronous          *bool                      `json:"synchronous"`
 	Blocker              *bool                      `json:"blocker"`
 	Attempts             *int                       `json:"attempts"`
 	ConcurrentRequests   *int                       `json:"concurrentRequests"`
-	MetricsResetSchedule *string                    `json:"metrics_reset_schedule"`
+	MetricsResetSchedule *string                    `json:"metricsResetSchedule"`
 	FailedPostsDir       *string                    `json:"failedPostsDir"`
 	Conns                map[string][]*DynamicConns `json:"conns,omitempty"`
 	Fields               *[]*FcTemplateJsonCfg      `json:"fields"`

@@ -51,7 +51,7 @@
 
 "sessions": {
 	"enabled": true,
-	"debit_interval": "5ms",					// interval to perform debits on.
+	"debitInterval": "5ms",					// interval to perform debits on.
 	"conns":{
 	"*replication": [
 		 {

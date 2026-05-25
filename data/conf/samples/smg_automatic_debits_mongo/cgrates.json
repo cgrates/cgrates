@@ -50,7 +50,7 @@
 
 "sessions": {
 	"enabled": true,
-	"debit_interval": "1ms",					// interval to perform debits on.
+	"debitInterval": "1ms",					// interval to perform debits on.
 	"conns":{
 	"*rates": [
 		 {

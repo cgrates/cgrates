@@ -495,14 +495,14 @@ func TestGetDefaultUsage(t *testing.T) {
 func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
-          "channel_sync_interval": "1s",
-          "session_ttl_max_delay": "3h0m0s",
-          "session_ttl_last_used": "0s",
-          "session_ttl_usage": "1s",
+          "channelSyncInterval": "1s",
+          "sessionTTLMaxDelay": "3h0m0s",
+          "sessionTTLLastUsed": "0s",
+          "sessionTTLUsage": "1s",
           "session_ttl_last_usage": "10s",
            "sessions": {
 			"stir": {
-				"payload_maxduration": "-1",
+				"payloadMaxduration": "-1",
 			},
 		},
     },
@@ -586,7 +586,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 		"sessions": {
 			"enabled": true,
-			"listen_bijson": "127.0.0.1:2018",
+			"listenBiJSON": "127.0.0.1:2018",
 			"conns": {
 				"*chargers": [{"ConnIDs": ["*internal", "*conn1"]}],
 				"*cdrs": [{"ConnIDs": ["*internal", "*conn1"]}],
@@ -601,16 +601,16 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"*accounts": [{"ConnIDs": ["*internal", "*conn1"]}],
 				"*replication": [{"ConnIDs": ["*localhost"]}]
 			},
-			"store_session_costs": true,
-            "min_dur_low_balance": "1s",
-			"client_protocol": 2.0,
-			"terminate_attempts": 10,
+			"storeSessionCosts": true,
+            "minDurLowBalance": "1s",
+			"clientProtocol": 2.0,
+			"terminateAttempts": 10,
 			"stir": {
-				"allowed_attest": ["any1","any2"],
-				"payload_maxduration": "1s",
-				"default_attest": "B",
-				"publickey_path": "",
-				"privatekey_path": ""
+				"allowedAttest": ["any1","any2"],
+				"payloadMaxduration": "1s",
+				"defaultAttest": "B",
+				"publicKeyPath": "",
+				"privateKeyPath": ""
 			},
 			"opts": {
 				"*ttl": [
@@ -736,7 +736,7 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
 			"stir": {
-				"payload_maxduration": "0",
+				"payloadMaxduration": "0",
 			},
 		},
     },
@@ -1672,7 +1672,7 @@ func TestDiffSTIRJsonCfg(t *testing.T) {
 			"A_TEST1": {},
 		},
 		PayloadMaxduration: 2 * time.Second,
-		DefaultAttest:      "default_attest",
+		DefaultAttest:      "defaultAttest",
 		PublicKeyPath:      "/public/key/path",
 		PrivateKeyPath:     "/private/key/path",
 	}
@@ -1728,7 +1728,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 				"A_TEST1": {},
 			},
 			PayloadMaxduration: 2 * time.Second,
-			DefaultAttest:      "default_attest",
+			DefaultAttest:      "defaultAttest",
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
@@ -1921,7 +1921,7 @@ func TestSessionSCloneSection(t *testing.T) {
 				"A_TEST1": {},
 			},
 			PayloadMaxduration: 2 * time.Second,
-			DefaultAttest:      "default_attest",
+			DefaultAttest:      "defaultAttest",
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
@@ -1973,7 +1973,7 @@ func TestSessionSCloneSection(t *testing.T) {
 				"A_TEST1": {},
 			},
 			PayloadMaxduration: 2 * time.Second,
-			DefaultAttest:      "default_attest",
+			DefaultAttest:      "defaultAttest",
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},

@@ -75,7 +75,7 @@
 		{
 			"id": "CSVExporter",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSV",
+			"exportPath": "/tmp/testCSV",
 			"timezone": "UTC",
 			"synchronous": true,
 			"attempts": 1,
@@ -100,7 +100,7 @@
 		{
 			"id": "CSVExporter2",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSV2",
+			"exportPath": "/tmp/testCSV2",
 			"timezone": "UTC",
 			"synchronous": true,
 			"attempts": 1,
@@ -126,7 +126,7 @@
 		{
 			"id": "CSVExporter3",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSV3",
+			"exportPath": "/tmp/testCSV3",
 			"timezone": "UTC",
 			"synchronous": false,
 			"attempts": 1,

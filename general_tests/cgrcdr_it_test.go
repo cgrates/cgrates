@@ -53,7 +53,7 @@ func TestCgrCdrEventExporter(t *testing.T) {
 	"exporters": [{
 			"id": "cdr_exporter",
 			"type": "*cgrcdr",
-			"export_path": "` + exportPath + `",
+			"exportPath": "` + exportPath + `",
 			"opts": {
 				"sqlDBName": "` + *conn.Name + `",
 				"sqlTableName": "cdrs"

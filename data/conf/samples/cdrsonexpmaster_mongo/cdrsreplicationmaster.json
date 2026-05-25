@@ -5,8 +5,8 @@
 // Starts rater, cdrs and mediator connecting over internal channel
 
 "general": {
-    "poster_attempts": 1,
-	"failed_posts_ttl": "1",
+    "posterAttempts": 1,
+	"failedPostsTTL": "1",
 },
 
 "logger": {
@@ -60,7 +60,7 @@
 		{
 			"id": "http_localhost",
 			"type": "*httpPost",
-			"export_path": "http://127.0.0.1:12080/cdr_http",
+			"exportPath": "http://127.0.0.1:12080/cdr_http",
 			"synchronous": true,
 			"attempts": 1,
 			"filters":["*string:~*opts.ExporterID:http_localhost"],
@@ -84,7 +84,7 @@
 		{
 			"id": "amqp_localhost",
 			"type": "*amqpJSONMap",
-			"export_path": "amqp://guest:guest@localhost:5672/",
+			"exportPath": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
 				"amqpExchange": "exchangename",
@@ -112,7 +112,7 @@
 		{
 			"id": "http_test_file",
 			"type": "*httpPost",
-			"export_path": "http://127.0.0.1:12080/invalid",
+			"exportPath": "http://127.0.0.1:12080/invalid",
 			"synchronous": true,
 			"attempts": 1,
 			"fields":[
@@ -122,7 +122,7 @@
 		{
 			"id": "kafka_localhost",
 			"type": "*kafkaJSONMap",
-			"export_path": "localhost:9092",
+			"exportPath": "localhost:9092",
 			"opts": {
 				"kafkaTopic": "cgrates_cdrs",
 			},
@@ -135,7 +135,7 @@
 		{
 			"id": "eventcost_filter",
 			"type": "*amqpJSONMap",
-			"export_path": "amqp://guest:guest@wrongurl:25672/",
+			"exportPath": "amqp://guest:guest@wrongurl:25672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
 			},

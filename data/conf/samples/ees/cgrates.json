@@ -69,18 +69,18 @@
 		{
 			"id": "CSVExporter",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSV",
+			"exportPath": "/tmp/testCSV",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
 		},		
 		{
 			"id": "CSVExporterComposed",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testComposedCSV",
+			"exportPath": "/tmp/testComposedCSV",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
@@ -126,7 +126,7 @@
 		{
 			"id": "CSVExporterBuffered",
 			"type": "*fileCSV",
-			"export_path": "*buffer",
+			"exportPath": "*buffer",
 			"filters": ["*string:~*req.Account:1005"],
 			"attempts": 1,
 			"field_separator": ",",
@@ -177,9 +177,9 @@
 		{
 			"id": "FwvExporter",
 			"type": "*fileFWV",
-			"export_path": "/tmp/testFWV",
+			"exportPath": "/tmp/testFWV",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"fields":[
 				{"tag": "TypeOfRecord", "path": "*hdr.TypeOfRecord", "type": "*constant",
@@ -250,9 +250,9 @@
 		{
 			"id": "HTTPPostExporter",
 			"type": "*httpPost",
-			"export_path": "http://127.0.0.1:12080/event_http",
+			"exportPath": "http://127.0.0.1:12080/event_http",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
@@ -275,9 +275,9 @@
 		{
 			"id": "HTTPJsonMapExporter",
 			"type": "*httpJSONMap",
-			"export_path": "http://127.0.0.1:12081/event_json_map_http",
+			"exportPath": "http://127.0.0.1:12081/event_json_map_http",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
@@ -301,9 +301,9 @@
 		{
 			"id": "CSVMaskedDestination",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSVMasked",
+			"exportPath": "/tmp/testCSVMasked",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
@@ -340,9 +340,9 @@
 		{
 			"id": "CSVExporterFromVirt",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSVfromVirt",
+			"exportPath": "/tmp/testCSVfromVirt",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
@@ -363,9 +363,9 @@
 		{
 			"id": "CSVExporterWIthTemplate",
 			"type": "*fileCSV",
-			"export_path": "/tmp/testCSVExpTemp",
+			"exportPath": "/tmp/testCSVExpTemp",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
@@ -375,23 +375,23 @@
 		{
 			"id": "HTTPJsonMapExporterWithNoFields",
 			"type": "*httpJSONMap",
-			"export_path": "http://127.0.0.1:12081/event_json_map_http",
+			"exportPath": "http://127.0.0.1:12081/event_json_map_http",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 		},		
 		{
 			"id": "HTTPPostExporterWithNoFields",
 			"type": "*httpPost",
-			"export_path": "http://127.0.0.1:12080/event_http",
+			"exportPath": "http://127.0.0.1:12080/event_http",
 			"flags": ["*attributes"],
-			"attribute_context": "customContext",
+			"attributeContext": "customContext",
 			"attempts": 1,
 		},
 		{
 			"id": "SQLExporterFull",
 			"type": "*sql",
-			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
 				"sqlDBName": "cgrates2", // if dbName is not present "cgrates" will be used as default
@@ -415,7 +415,7 @@
 		{
 			"id": "SQLExporterPartial",
 			"type": "*sql",
-			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
 				"sqlDBName": "cgrates2",
@@ -435,7 +435,7 @@
 		{
 			"id": "NatsJsonMapExporter",
 			"type": "*natsJSONMap",
-			"export_path": "nats://localhost:4222",
+			"exportPath": "nats://localhost:4222",
 			"attempts": 1,
 			"opts": {
 				"natsJetStream": true,
@@ -445,7 +445,7 @@
 		{
 			"id": "NatsJsonMapExporter2",										
 			"type": "*natsJSONMap",													
-			"export_path": "nats://localhost:4222",		
+			"exportPath": "nats://localhost:4222",		
 			"attempts": 1,		
 			"opts": {
 				"natsSubject": "processed_cdrs",
@@ -454,7 +454,7 @@
 		{
 			"id": "SQLExportCDR",
 			"type": "*sql",
-			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
 				"sqlTableName": "cdrs", // tableName is mandatory in opts for sql exporter
@@ -492,7 +492,7 @@
 		{
 			"id": "KafkaExporter",								
 			"type": "*kafkaJSONMap",									
-			"export_path": "localhost:9092",			
+			"exportPath": "localhost:9092",			
 			"opts": {
 				"kafkaTopic": "cgrates",
 				// "kafkaCAPath": "/home/kafka/kafka/ssl/ca-cert.pem"
@@ -501,7 +501,7 @@
 		{
 			"id": "AMQPExporter",								
 			"type": "*amqpJSONMap",									
-			"export_path": "amqp://guest:guest@localhost:5672",			
+			"exportPath": "amqp://guest:guest@localhost:5672",			
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
 				"amqpRoutingKey": "cgrates_cdrs"

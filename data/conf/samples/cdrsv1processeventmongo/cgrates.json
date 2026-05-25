@@ -4,8 +4,8 @@
 // Used in general_tests
 
 "general": {
-    "poster_attempts": 1,
-	"failed_posts_ttl": "1",
+    "posterAttempts": 1,
+	"failedPostsTTL": "1",
 },
 
 "logger": {
@@ -54,7 +54,7 @@
 		{
 			"id": "amqp_test_file",
 			"type": "*amqpJSONMap",
-			"export_path": "amqps://guest:guest@localhost:256733/",
+			"exportPath": "amqps://guest:guest@localhost:256733/",
 			"attempts": 1,
 			"synchronous": true,
 			"fields":[

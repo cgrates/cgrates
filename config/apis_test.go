@@ -980,7 +980,7 @@ func TestV1SetConfigErr2(t *testing.T) {
 	var reply string
 	cfg.sessionSCfg.Enabled = true
 	cfg.sessionSCfg.TerminateAttempts = 0
-	expected := "<SessionS> 'terminate_attempts' should be at least 1"
+	expected := "<SessionS> 'terminateAttempts' should be at least 1"
 	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %v \n but received \n %v", expected, err)
 	}

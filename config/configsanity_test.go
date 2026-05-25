@@ -203,7 +203,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		TerminateAttempts: 0,
 		Opts:              &SessionsOpts{},
 	}
-	expected := "<SessionS> 'terminate_attempts' should be at least 1"
+	expected := "<SessionS> 'terminateAttempts' should be at least 1"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

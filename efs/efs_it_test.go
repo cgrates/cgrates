@@ -186,8 +186,8 @@ func TestEFsReplayEvents(t *testing.T) {
 },
 "efs": {
 	"enabled": true,
-	"failed_posts_ttl": "3ms",
-	"poster_attempts": 1
+	"failedPostsTTL": "3ms",
+	"posterAttempts": 1
 },
 "ees": {
 	"enabled": true,
@@ -197,7 +197,7 @@ func TestEFsReplayEvents(t *testing.T) {
 			"type": "*natsJSONMap",
 			"flags": ["*log"],
 			"efsConns": ["*localhost"],
-			"export_path": "nats://localhost:4222",
+			"exportPath": "nats://localhost:4222",
 			"attempts": 1,
 			"failedPostsDir": "%s",
 			"synchronous": true,

@@ -122,7 +122,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// SessionS checks
 	if cfg.sessionSCfg.Enabled {
 		if cfg.sessionSCfg.TerminateAttempts < 1 {
-			return fmt.Errorf("<%s> 'terminate_attempts' should be at least 1", utils.SessionS)
+			return fmt.Errorf("<%s> 'terminateAttempts' should be at least 1", utils.SessionS)
 		}
 		connEnabledMap := map[string]struct {
 			name    string
@@ -952,7 +952,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
 				)
 				if _, err := parser.Parse(exp.MetricsResetSchedule); err != nil {
-					return fmt.Errorf("<%s> invalid cron expression %q in metrics_reset_schedule for exporter %q: %v",
+					return fmt.Errorf("<%s> invalid cron expression %q in metricsResetSchedule for exporter %q: %v",
 						utils.EEs, exp.MetricsResetSchedule, exp.ID, err)
 				}
 			}

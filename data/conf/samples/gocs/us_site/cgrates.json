@@ -86,7 +86,7 @@
 
   "sessions": {
     "enabled": true,
-    "listen_bijson": ":4014",
+    "listenBiJSON": ":4014",
     "conns":{
     "*rates": [
          {

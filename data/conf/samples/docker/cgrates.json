@@ -102,7 +102,7 @@
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": "*env:DOCKER_IP:2014",
+	"listenBiJSON": "*env:DOCKER_IP:2014",
 	"conns":{
 	"*routes": [
 		 {
