@@ -989,6 +989,51 @@ func TestBalanceTimingsClearTimings(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("BalanceActiveAfterClear", func(t *testing.T) {
+		t.Skip("Balance does not get active after clearing")
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testClearTimings"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		for _, bal := range acnt.BalanceMap[utils.MetaMonetary] {
+			if bal.ID == "balClear" {
+				pmTime := time.Date(2026, 5, 22, 14, 0, 0, 0, time.UTC)
+				if !bal.IsActiveAt(pmTime) {
+					t.Error("expected balance to be active at PM after clearing Timings[]")
+				}
+			}
+		}
+	})
+
+	t.Run("SetTimingAfterClear", func(t *testing.T) {
+		t.Skip("Resetting timing does not gets current listing")
+		args := &utils.AttrSetBalance{
+			Tenant:      "cgrates.org",
+			Account:     "testClearTimings",
+			BalanceType: utils.MetaMonetary,
+			Balance: map[string]any{
+				utils.ID:        "balClear",
+				utils.TimingIDs: "HALF1",
+			},
+		}
+		if err := client.Call(context.Background(), utils.APIerSv1SetBalance, args, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testClearTimings"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		for _, bal := range acnt.BalanceMap[utils.MetaMonetary] {
+			if bal.ID == "balClear" {
+				if len(bal.Timings) != 1 {
+					t.Errorf("expected 1 timing after re-assign, got %d", len(bal.Timings))
+				}
+			}
+		}
+	})
 }
 
 func TestBalanceTimingsNegation(t *testing.T) {
