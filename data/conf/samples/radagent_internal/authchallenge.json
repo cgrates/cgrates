@@ -1,6 +1,6 @@
 {
   "radius_agent": {
-    "request_processors": [
+    "requestProcessors": [
       {
         "id": "Challenge",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:12345678",

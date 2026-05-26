@@ -68,7 +68,7 @@
 	},
 	"rals_conns": ["*internal"]
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	"listeners": [
 		{"address": "0.0.0.0:3868", "network": "tcp"}
@@ -76,7 +76,7 @@
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
 	},
-	"request_processors": [{
+	"requestProcessors": [{
 		"id": "message",
 		"filters": [
 			"*string:~*vars.*cmd:CCR",

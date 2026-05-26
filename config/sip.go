@@ -124,7 +124,7 @@ type SIPAgentJsonCfg struct {
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Timezone            *string                    `json:"timezone"`
 	RetransmissionTimer *string                    `json:"retransmission_timer"`
-	RequestProcessors   *[]*ReqProcessorJsnCfg     `json:"request_processors"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonCfg {

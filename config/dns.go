@@ -139,7 +139,7 @@ type DNSAgentJsonCfg struct {
 	Listeners         *[]*ListenerJsnCfg         `json:"listeners"`
 	Conns             map[string][]*DynamicConns `json:"conns,omitempty"`
 	Timezone          *string                    `json:"timezone"`
-	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
+	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonCfg {

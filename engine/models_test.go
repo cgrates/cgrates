@@ -56,7 +56,7 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 	expected := map[string]any{
 		// "cgrid":        testCdrSql.Cgrid,
 		"run_id":       testCdrSql.RunID,
-		"origin_host":  testCdrSql.OriginHost,
+		"originHost":   testCdrSql.OriginHost,
 		"source":       testCdrSql.Source,
 		"origin_id":    testCdrSql.OriginID,
 		"tor":          testCdrSql.TOR,

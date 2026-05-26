@@ -112,13 +112,13 @@
 },
 
 
-"kamailio_agent": {
+"kamailioAgent": {
 	"enabled": true,
-	"evapi_conns":[
+	"evapiConns":[
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
 	"sessions_conns": ["*birpc_internal"],
-	"create_cdr": true,
+	"createCDR": true,
 },
 
 

@@ -1,7 +1,7 @@
 {
 	"sip_agent": {
 	"listen_net": "tcp",				// network to listen on <udp|tcp|tcp-tls>
-	"request_processors": [
+	"requestProcessors": [
 			{
 				"id": "Register",
 				"filters": ["*notstring:~*vars.Method:INVITE"],

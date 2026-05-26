@@ -2345,15 +2345,15 @@ const (
 // FsAgentCfg
 const (
 	SessionSConnsCfg          = "sessions_conns"
-	SubscribeParkCfg          = "subscribe_park"
-	CreateCdrCfg              = "create_cdr"
-	LowBalanceAnnFileCfg      = "low_balance_ann_file"
-	EmptyBalanceContextCfg    = "empty_balance_context"
-	EmptyBalanceAnnFileCfg    = "empty_balance_ann_file"
-	MaxWaitConnectionCfg      = "max_wait_connection"
-	ActiveSessionDelimiterCfg = "active_session_delimiter"
-	EventSocketConnsCfg       = "event_socket_conns"
-	EmptyBalanceContext       = "empty_balance_context"
+	SubscribeParkCfg          = "subscribePark"
+	CreateCdrCfg              = "createCDR"
+	LowBalanceAnnFileCfg      = "lowBalanceAnnFile"
+	EmptyBalanceContextCfg    = "emptyBalanceContext"
+	EmptyBalanceAnnFileCfg    = "emptyBalanceAnnFile"
+	MaxWaitConnectionCfg      = "maxWaitConnection"
+	ActiveSessionDelimiterCfg = "activeSessionDelimiter"
+	EventSocketConnsCfg       = "eventSocketConns"
+	EmptyBalanceContext       = "emptyBalanceContext"
 )
 
 // From Config
@@ -2364,37 +2364,37 @@ const (
 	AccountSConnsCfg = "accounts_conns"
 
 	// KamAgentCfg
-	EvapiConnsCfg = "evapi_conns"
+	EvapiConnsCfg = "evapiConns"
 	TimezoneCfg   = "timezone"
 
 	// AsteriskConnCfg
 	UserCf = "user"
 
 	// AsteriskAgentCfg
-	CreateCDRCfg     = "create_cdr"
-	AsteriskConnsCfg = "asterisk_conns"
+	CreateCDRCfg     = "createCDR"
+	AsteriskConnsCfg = "asteriskConns"
 
 	// DiameterAgentCfg
 	ListenNetCfg                  = "listen_net"
 	NetworkCfg                    = "network"
 	ListenersCfg                  = "listeners"
 	ListenCfg                     = "listen"
-	DictionariesPathCfg           = "dictionaries_path"
-	DictionariesAppendDefaultsCfg = "dictionaries_append_defaults"
-	CEApplicationsCfg             = "ce_applications"
-	OriginHostCfg                 = "origin_host"
-	OriginRealmCfg                = "origin_realm"
-	VendorIDCfg                   = "vendor_id"
-	ProductNameCfg                = "product_name"
-	SyncedConnReqsCfg             = "synced_conn_requests"
-	ASRTemplateCfg                = "asr_template"
-	RARTemplateCfg                = "rar_template"
-	ForcedDisconnectCfg           = "forced_disconnect"
-	ConnStatusStatQueueIDsCfg     = "conn_status_stat_queue_ids"
-	ConnStatusThresholdIDsCfg     = "conn_status_threshold_ids"
-	ConnHealthCheckIntervalCfg    = "conn_health_check_interval"
+	DictionariesPathCfg           = "dictionariesPath"
+	DictionariesAppendDefaultsCfg = "dictionariesAppendDefaults"
+	CEApplicationsCfg             = "ceApplications"
+	OriginHostCfg                 = "originHost"
+	OriginRealmCfg                = "originRealm"
+	VendorIDCfg                   = "vendorID"
+	ProductNameCfg                = "productName"
+	SyncedConnReqsCfg             = "syncedConnRequests"
+	ASRTemplateCfg                = "asrTemplate"
+	RARTemplateCfg                = "rarTemplate"
+	ForcedDisconnectCfg           = "forcedDisconnect"
+	ConnStatusStatQueueIDsCfg     = "connStatusStatQueueIDs"
+	ConnStatusThresholdIDsCfg     = "connStatusThresholdIDs"
+	ConnHealthCheckIntervalCfg    = "connHealthCheckInterval"
 	TemplatesCfg                  = "templates"
-	RequestProcessorsCfg          = "request_processors"
+	RequestProcessorsCfg          = "requestProcessors"
 
 	// RequestProcessor
 	RequestFieldsCfg = "request_fields"

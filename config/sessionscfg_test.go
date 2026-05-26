@@ -838,7 +838,7 @@ func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 
 func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
-	"freeswitch_agent": {},
+	"freeswitchAgent": {},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:                false,
@@ -872,16 +872,16 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 
 func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
-"freeswitch_agent": {
+"freeswitchAgent": {
 	"enabled": true,
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 	},
-	"subscribe_park": false,
-	"create_cdr": true,
-	"max_wait_connection": "7s",
-	"active_session_delimiter": "//",
-	"event_socket_conns": [
+	"subscribePark": false,
+	"createCDR": true,
+	"maxWaitConnection": "7s",
+	"activeSessionDelimiter": "//",
+	"eventSocketConns": [
 	{"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "maxReconnectInterval": "5m", "replyTimeout": "2m", "alias": "127.0.0.1:8000"}
 ],}
 }`
@@ -919,9 +919,9 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 
 func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	cfgJSONStr := `{
-	"freeswitch_agent": {
+	"freeswitchAgent": {
           "extraFields": ["randomFields"],
-          "max_wait_connection": "0",
+          "maxWaitConnection": "0",
 		  "conns": {
 		  	"*sessions": [{"ConnIDs": ["*internal"]}]
 		  }
@@ -1060,7 +1060,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"asterisk_agent": {
+	"asteriskAgent": {
 		"conns": {
 			"*sessions": [{"ConnIDs": ["*internal"]}]
 		},
@@ -1094,13 +1094,13 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 
 func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-	"asterisk_agent": {
+	"asteriskAgent": {
 		"enabled": true,
 		"conns": {
 			"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 		},
-		"create_cdr": true,
-		"asterisk_conns":[
+		"createCDR": true,
+		"asteriskConns":[
 			{"address": "127.0.0.1:8089","connectAttempts": 5,"reconnects": 8, "maxReconnectInterval": "5m"}
 		],
 	},

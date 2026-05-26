@@ -74,9 +74,9 @@ func TestAgentCapsIT(t *testing.T) {
 "sessions":{
 	"enabled": true
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
-	"synced_conn_requests": true
+	"syncedConnRequests": true
 },
 "http_agent": [
 	{
@@ -87,7 +87,7 @@ func TestAgentCapsIT(t *testing.T) {
 		},
 		"request_payload": "*url",
 		"reply_payload": "*xml",
-		"request_processors": []
+		"requestProcessors": []
 	}
 ],
 "radius_agent": {
@@ -109,7 +109,7 @@ func TestAgentCapsIT(t *testing.T) {
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*internal"]}]
 	},
-	"request_processors": []
+	"requestProcessors": []
 }
 }`
 

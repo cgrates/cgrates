@@ -11,9 +11,9 @@
         "enabled": true,						// enable Rater service: <true|false>
     },
     
-    "freeswitch_agent": {
+    "freeswitchAgent": {
         "enabled": true,				// starts SessionManager service: <true|false>
-        "event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+        "eventSocketConns":[					// instantiate connections to multiple FreeSWITCH servers
             {"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 5},
         ],
     },

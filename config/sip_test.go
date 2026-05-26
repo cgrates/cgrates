@@ -114,7 +114,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	cfgJSONStr := `{
 	"sip_agent": {
-		"request_processors": [
+		"requestProcessors": [
              {
                "id": "randomID",
              },
@@ -168,7 +168,7 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		},
 		"timezone": "",
         "retransmission_timer": "2s",
-		"request_processors": [
+		"requestProcessors": [
 		],
 	},
 }`
@@ -205,7 +205,7 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 			},
 			"timezone": "UTC",
             "retransmission_timer": "5s",
-			"request_processors": [
+			"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
@@ -276,7 +276,7 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 			"*stats": [{"ConnIDs": ["*conn1", "*conn2"]}],
 			"*thresholds": [{"ConnIDs": ["*conn1", "*conn2"]}]
 		},
-		"request_processors": [
+		"requestProcessors": [
          {
 			"id": "Register",
 			"filters": ["*notstring:~*vars.Method:INVITE"],

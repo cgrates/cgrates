@@ -1,6 +1,6 @@
 {
   "radius_agent": {
-    "request_processors": [
+    "requestProcessors": [
       {
         "id": "IPSAccountingStart",
         "filters": [

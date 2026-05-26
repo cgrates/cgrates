@@ -444,7 +444,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],

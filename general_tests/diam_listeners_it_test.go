@@ -53,13 +53,13 @@ func TestDiamMultipleListeners(t *testing.T) {
 "sessions": {
 	"enabled": true
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	"listeners": [
 		{"address": "127.0.0.1:13868", "network": "tcp"},
 		{"address": "127.0.0.1:13869", "network": "tcp"}
 	],
-	"request_processors": [{
+	"requestProcessors": [{
 		"id": "multilistener",
 		"flags": ["*dryRun"],
 		"request_fields": [{
@@ -152,13 +152,13 @@ func TestDiamMultipleListenersSessionID(t *testing.T) {
 "sessions": {
 	"enabled": true
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	"listeners": [
 		{"address": "127.0.0.1:13870", "network": "tcp"},
 		{"address": "127.0.0.1:13871", "network": "tcp"}
 	],
-	"request_processors": [{
+	"requestProcessors": [{
 		"id": "shared_sessionid",
 		"flags": ["*dryRun"],
 		"request_fields": [{

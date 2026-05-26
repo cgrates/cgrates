@@ -232,7 +232,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl13 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl13)
 	}
-	cfgStr = `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*birpc_internal"]}}`
+	cfgStr = `{"asteriskAgent":{"asteriskConns":[{"address":"127.0.0.1:8088","alias":"","connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"createCDR":false,"enabled":false,"sessions_conns":["*birpc_internal"]}}`
 	var rpl14 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -242,7 +242,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl14 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl14)
 	}
-	cfgStr = `{"freeswitch_agent":{"active_session_delimiter":",","create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*birpc_internal"],"subscribe_park":true}}`
+	cfgStr = `{"freeswitchAgent":{"activeSessionDelimiter":",","createCDR":false,"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","sessions_conns":["*birpc_internal"],"subscribePark":true}}`
 	var rpl15 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -252,7 +252,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl15 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl15)
 	}
-	cfgStr = `{"kamailio_agent":{"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""}}`
+	cfgStr = `{"kamailioAgent":{"createCDR":false,"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""}}`
 	var rpl16 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -262,7 +262,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl16 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl16)
 	}
-	cfgStr = `{"diameter_agent":{"asr_template":"","conn_health_check_interval":"0s","conn_status_stat_queue_ids":[],"conn_status_threshold_ids":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionaries_append_defaults":true,"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listeners":[{"Address":"127.0.0.1:3868","Network":"tcp}],"origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"synced_conn_requests":false,"vendor_id":0}}`
+	cfgStr = `{"diameterAgent":{"asrTemplate":"","connHealthCheckInterval":"0s","connStatusStatQueueIDs":[],"connStatusThresholdIDs":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"dictionariesAppendDefaults":true,"dictionariesPath":"/usr/share/cgrates/diameter/dict/","enabled":false,"forcedDisconnect":"*none","listeners":[{"Address":"127.0.0.1:3868","Network":"tcp}],"originHost":"CGR-DA","originRealm":"cgrates.org","productName":"CGRateS","rarTemplate":"","requestProcessors":[],"syncedConnRequests":false,"vendorID":0}}`
 	var rpl17 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -284,7 +284,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl18)
 	}
 
-	cfgStr = `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"timezone":""}}`
+	cfgStr = `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"requestProcessors":[],"timezone":""}}`
 	var rpl19 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -489,7 +489,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl33)
 	}
 
-	cfgStr = `{"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","timezone":""}}`
+	cfgStr = `{"sip_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","requestProcessors":[],"retransmission_timer":"1s","timezone":""}}`
 	var rpl35 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

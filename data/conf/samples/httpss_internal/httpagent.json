@@ -1,7 +1,7 @@
 {
 
 
-"http_agent": [
+"httpAgent": [
 	{
 		"id": "httpss",
 		"url": "/httpss",
@@ -10,7 +10,7 @@
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*text",
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "Authorization",
 				"filters": ["*string:~*req.requestType:Authorization"],

@@ -135,8 +135,8 @@ func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 
 func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
 	cfgJSONStr := `{ 
-      "diameter_agent": {
-        "request_processors": [
+      "diameterAgent": {
+        "requestProcessors": [
 	        {
 		       "id": "random",
             },
@@ -159,22 +159,22 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
 
 func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"diameter_agent": {
+	"diameterAgent": {
 		"enabled": false,
 		"listeners": [{"address": "127.0.0.1:3868", "network": "tcp"}],
-		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
-		"ce_applications": ["Base"],
+		"dictionariesPath": "/usr/share/cgrates/diameter/dict/",
+		"ceApplications": ["Base"],
 		"conns": {
 			"*sessions": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
 			"*stats": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
 			"*thresholds": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}]
 		},
-		"origin_host": "CGR-DA",
-		"origin_realm": "cgrates.org",
-		"vendor_id": 0,
-		"product_name": "CGRateS",
-		"synced_conn_requests": true,
-		"request_processors": [
+		"originHost": "CGR-DA",
+		"originRealm": "cgrates.org",
+		"vendorID": 0,
+		"productName": "CGRateS",
+		"syncedConnRequests": true,
+		"requestProcessors": [
                         {
                          "id": "cgrates",
                          "tenant": "1",
@@ -257,10 +257,10 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 
 func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-	"diameter_agent": {
+	"diameterAgent": {
 		"enabled": true,
-		"dictionaries_path": "/usr/share/cgrates/diameter",
-		"synced_conn_requests": false,
+		"dictionariesPath": "/usr/share/cgrates/diameter",
+		"syncedConnRequests": false,
 	},
 }`
 	eMap := map[string]any{

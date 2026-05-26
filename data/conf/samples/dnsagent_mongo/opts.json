@@ -1,6 +1,6 @@
 {
     "dns_agent": {
-        "request_processors": [
+        "requestProcessors": [
             {
                 "id": "OptsNAPTR",
                 "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174965", "*string:~*req.Option[0].Uri:sip:cgrates@cgrates.org"],

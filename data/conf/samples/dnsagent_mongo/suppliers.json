@@ -1,7 +1,7 @@
 {
 
 	"dns_agent": {
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "NAPTRRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:NAPTR",

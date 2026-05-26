@@ -208,7 +208,7 @@ func (t CDRsql) AsMapStringInterface() (out map[string]any) {
 	// out["id"] = t.ID // ignore ID
 
 	out["run_id"] = t.RunID
-	out["origin_host"] = t.OriginHost
+	out["originHost"] = t.OriginHost
 	out["source"] = t.Source
 	out["origin_id"] = t.OriginID
 	out["tor"] = t.TOR

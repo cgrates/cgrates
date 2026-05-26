@@ -156,7 +156,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 	cfgJSONStr := `{ 
       "dns_agent": {
-        "request_processors": [
+        "requestProcessors": [
 	        {
 		       "id": "random",
             },
@@ -232,7 +232,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			"*thresholds": [{"ConnIDs": ["*internal"]}]
 		},
 		"timezone": "",
-		"request_processors": [],
+		"requestProcessors": [],
 	},
 }`
 	eMap := map[string]any{
@@ -272,7 +272,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"timezone": "UTC",
-			"request_processors": [
+			"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
