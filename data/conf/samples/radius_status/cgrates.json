@@ -111,7 +111,7 @@
         "client_dictionaries": {
             "*default": [ "/usr/share/cgrates/radius/dict/"]
         },
-        "request_processors": [
+        "requestProcessors": [
             {
               "id": "Status",
               "filters": [

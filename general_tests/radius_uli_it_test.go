@@ -77,7 +77,7 @@ END-VENDOR 3GPP
         "client_dictionaries": {
             "*default": [%q]
         },
-        "request_processors": [
+        "requestProcessors": [
             {
                 "id": "uli_extract",
                 "flags": ["*dryRun"],

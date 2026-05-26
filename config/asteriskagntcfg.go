@@ -192,8 +192,8 @@ type AstConnJsonCfg struct {
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
 	Conns          map[string][]*DynamicConns `json:"conns,omitempty"`
-	Create_cdr     *bool
-	Asterisk_conns *[]*AstConnJsonCfg
+	Create_cdr     *bool                      `json:"createCDR"`
+	Asterisk_conns *[]*AstConnJsonCfg         `json:"asteriskConns"`
 }
 
 func diffAstConnJsonCfg(v1, v2 *AsteriskConnCfg) (d *AstConnJsonCfg) {

@@ -1,7 +1,7 @@
 {
 
   "radius_agent": {
-    "request_processors": [
+    "requestProcessors": [
       {
         "id": "CGRCHAPAuth",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585362"],

@@ -120,7 +120,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSONStr := `{
 	"radius_agent": {
-         "request_processors": [
+         "requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
 			},
@@ -190,7 +190,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	"dmr_template": "*dmr",
 	"coa_template": "*coa",
 	"requests_cache_key": "~*req.Acc-Session-Id",
-	"request_processors": [
+	"requestProcessors": [
 		{
 			"id": "OutboundAUTHDryRun",
 			"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],

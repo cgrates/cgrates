@@ -95,13 +95,13 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 
 func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-		"kamailio_agent": {
+		"kamailioAgent": {
 			"conns": {
 				"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2", "*internal"]}]
 			},
-			"create_cdr": true,
+			"createCDR": true,
 			"timezone": "UTC",
-			"evapi_conns":[
+			"evapiConns":[
 				{"address": "127.0.0.1:8448", "reconnects": 5, "maxReconnectInterval": "5m", "alias": ""}
 			],
 		},
@@ -130,7 +130,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 
 func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-	"kamailio_agent": {},
+	"kamailioAgent": {},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg:   false,

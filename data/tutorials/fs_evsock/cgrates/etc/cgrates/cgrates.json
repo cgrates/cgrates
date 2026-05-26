@@ -110,14 +110,14 @@
 },
 
 
-"freeswitch_agent": {
+"freeswitchAgent": {
 	"enabled": true,
-	"event_socket_conns":[
+	"eventSocketConns":[
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"sessions_conns": ["*birpc_internal"],
-	"create_cdr": true,
-	"request_processors": [
+	"createCDR": true,
+	"requestProcessors": [
 		{
 			"id": "FSEvent",
 			"request_fields":[

@@ -1,7 +1,7 @@
 {
 
 "dns_agent": {
-	"request_processors": [
+	"requestProcessors": [
 		{
 			"id": "DryRunNAPTR",
 			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174963"],

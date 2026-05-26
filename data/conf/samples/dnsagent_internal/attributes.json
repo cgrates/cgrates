@@ -1,6 +1,6 @@
 {
 	"dns_agent": {
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "NAPTRAttributes",
 				"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174964"],

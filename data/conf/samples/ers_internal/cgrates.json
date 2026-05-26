@@ -175,7 +175,7 @@
 			]
 		},
 		{
-			"id": "create_cdr",
+			"id": "createCDR",
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/cdrs/in",

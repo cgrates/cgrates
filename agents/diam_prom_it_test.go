@@ -94,14 +94,14 @@ func TestDiamPrometheus(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1"
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*birpc_internal"]}],
 		"*stats": [{"ConnIDs": ["*internal"]}],
 		"*thresholds": [{"ConnIDs": ["*internal"]}]
 	},
-	"request_processors": [{
+	"requestProcessors": [{
 		"id": "message",
 		"filters": [
 			"*string:~*vars.*cmd:CCR",

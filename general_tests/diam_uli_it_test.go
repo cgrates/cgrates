@@ -49,9 +49,9 @@ func TestDiamULI(t *testing.T) {
     "sessions": {
         "enabled": true
     },
-    "diameter_agent": {
+    "diameterAgent": {
         "enabled": true,
-        "request_processors": [
+        "requestProcessors": [
             {
                 "id": "tgpp_loc_info",
                 "flags": [

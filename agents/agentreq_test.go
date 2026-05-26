@@ -2822,8 +2822,8 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 	var gigawordMultiplier int64 = 4294967296
 	configTemplate := `
 {
-    "diameter_agent": {
-        "request_processors": [
+    "diameterAgent": {
+        "requestProcessors": [
             {
                 "id": "test_proc",
                 "filters": [],

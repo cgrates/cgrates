@@ -158,7 +158,7 @@ type HttpAgentJsonCfg struct {
 	Conns             map[string][]*DynamicConns `json:"conns"`
 	RequestPayload    *string                    `json:"request_payload"`
 	ReplyPayload      *string                    `json:"reply_payload"`
-	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
+	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJsonCfg {

@@ -169,7 +169,7 @@ type JanusAgentJsonCfg struct {
 	Url                *string                    `json:"url"`
 	Conns              map[string][]*DynamicConns `json:"conns"`
 	Janus_conns        *[]*JanusConnJsonCfg       `json:"janus_conns"`
-	Request_processors *[]*ReqProcessorJsnCfg     `json:"request_processors"`
+	Request_processors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 type JanusConnJsonCfg struct {

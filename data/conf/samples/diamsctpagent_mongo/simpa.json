@@ -1,8 +1,8 @@
 
 {
 
-"diameter_agent": {
-	"request_processors": [
+"diameterAgent": {
+	"requestProcessors": [
 		{
 			"id": "simpa_event",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:4",

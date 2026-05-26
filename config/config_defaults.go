@@ -1176,13 +1176,13 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"asterisk_agent": {
+"asteriskAgent": {
 	"enabled": false,			// starts the Asterisk agent: <true|false>
 	"conns": {
 		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},			
-	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
-	"asterisk_conns":[			// instantiate connections to multiple Asterisk servers
+	"createCDR": false,			// create CDR out of events and sends it to CDRS component
+	"asteriskConns":[			// instantiate connections to multiple Asterisk servers
 		{
 			"address": "127.0.0.1:8088",
 			"user": "cgrates",
@@ -1196,20 +1196,20 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"freeswitch_agent": {
+"freeswitchAgent": {
 	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
 	"conns": {
 		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},
-	"subscribe_park": true,				// subscribe via fsock to receive park events
-	"create_cdr": false,				// creates CDR out of events and sends them to CDRS component
+	"subscribePark": true,				// subscribe via fsock to receive park events
+	"createCDR": false,				// creates CDR out of events and sends them to CDRS component
 	"extraFields": [],				// extra fields to store in auth/CDRs when creating them
-	"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
-	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
-	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
-	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
-	"event_socket_conns":[				// instantiate connections to multiple FreeSWITCH servers
+	"lowBalanceAnnFile": "",			// file to be played when low balance is reached for prepaid calls
+	"emptyBalanceContext": "",			// if defined, prepaid calls will be transferred to this context on empty balance
+	"emptyBalanceAnnFile": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+	"maxWaitConnection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
+	"activeSessionDelimiter": ",",		// delimiter for 'show channels' responses and requests
+	"eventSocketConns":[				// instantiate connections to multiple FreeSWITCH servers
 		{
 			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
 			"password": "ClueCon",  	// authentication password for FreeSWITCH
@@ -1222,14 +1222,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"kamailio_agent": {
+"kamailioAgent": {
 	"enabled": false,			// starts Kamailio agent: <true|false>
 	"conns": {
 		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 	},
-	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
+	"createCDR": false,			// create CDR out of events and sends them to CDRS component
 	"timezone": "",				// timezone of the Kamailio server
-	"evapi_conns":[				// instantiate connections to multiple Kamailio servers
+	"evapiConns":[				// instantiate connections to multiple Kamailio servers
 		{
 			"address": "127.0.0.1:8448",
 			"reconnects": 5,
@@ -1239,7 +1239,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": false,						// enables the diameter agent: <true|false>
 	"listeners": [
 		{
@@ -1247,9 +1247,9 @@ const CGRATES_CFG_JSON = `
 			"network": "tcp"				// transport type for diameter <tcp|sctp>
 		}
 	],
-	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"dictionaries_append_defaults": true,       // if true, dictionaries from the provided path will be appended to the default dictionaries from the go-diameter library
-	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
+	"dictionariesPath": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+	"dictionariesAppendDefaults": true,       // if true, dictionaries from the provided path will be appended to the default dictionaries from the go-diameter library
+	// "ceApplications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 	"conns": {
 		"*sessions":[{"ConnIDs":["*birpc_internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
@@ -1267,18 +1267,18 @@ const CGRATES_CFG_JSON = `
 	     // 	}
 	     // ],
 	},
-	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
-	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
-	"vendor_id": 0,							// diameter Vendor-Id AVP used in replies
-	"product_name": "CGRateS",					// diameter Product-Name AVP used in replies
-	"synced_conn_requests": false,					// process one request at the time per connection
-	"asr_template": "",						// enable AbortSession message being sent to client on DisconnectSession
-	"rar_template": "",						// template used to build the Re-Auth-Request
-	"forced_disconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
-	"conn_status_stat_queue_ids": [],				// StatQueue IDs for connection status events
-	"conn_status_threshold_ids": [],				// Threshold IDs for connection status events
-	"conn_health_check_interval": "0",				// peer connection health check interval (0 to disable)
-	"request_processors": []					// list of processors to be applied to diameter messages
+	"originHost": "CGR-DA",					// diameter Origin-Host AVP used in replies
+	"originRealm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
+	"vendorID": 0,							// diameter Vendor-Id AVP used in replies
+	"productName": "CGRateS",					// diameter Product-Name AVP used in replies
+	"syncedConnRequests": false,					// process one request at the time per connection
+	"asrTemplate": "",						// enable AbortSession message being sent to client on DisconnectSession
+	"rarTemplate": "",						// template used to build the Re-Auth-Request
+	"forcedDisconnect": "*none",					// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
+	"connStatusStatQueueIDs": [],				// StatQueue IDs for connection status events
+	"connStatusThresholdIDs": [],				// Threshold IDs for connection status events
+	"connHealthCheckInterval": "0",				// peer connection health check interval (0 to disable)
+	"requestProcessors": []					// list of processors to be applied to diameter messages
 },
 
 
@@ -1327,7 +1327,7 @@ const CGRATES_CFG_JSON = `
 	},	
 	"dmr_template": "*dmr",					// template used to build the Disconnect-Request packet
 	"coa_template": "*coa",					// template used to build the CoA-Request packet
-	"request_processors": []				// request processors to be applied to Radius messages
+	"requestProcessors": []				// request processors to be applied to Radius messages
 },
 
 
@@ -1360,7 +1360,7 @@ const CGRATES_CFG_JSON = `
 	     // ],
 	},
 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-	"request_processors": []			// request processors to be applied to DNS messages
+	"requestProcessors": []			// request processors to be applied to DNS messages
 },
 
 
@@ -2338,7 +2338,7 @@ const CGRATES_CFG_JSON = `
 	},
 	"timezone": "",			// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"retransmission_timer": "1s",	// the duration to wait to receive an ACK before resending the reply
-	"request_processors": []	// request processors to be applied to SIP messages
+	"requestProcessors": []	// request processors to be applied to SIP messages
 },
 
 "janus_agent": {
@@ -2351,7 +2351,7 @@ const CGRATES_CFG_JSON = `
 		"admin_address": "localhost:7188",	// janus admin address used to retrive more information for sessions and handles
 		"admin_password": ""			// secret to pass restriction to communicate to the endpoint
 	}],
-	"request_processors": []			// request processors to be applied to Janus messages
+	"requestProcessors": []			// request processors to be applied to Janus messages
 },
 
 "templates": {

@@ -233,22 +233,22 @@ type DiamListenerJsnCfg struct {
 type DiameterAgentJsonCfg struct {
 	Enabled                    *bool                      `json:"enabled"`
 	Listeners                  *[]*DiamListenerJsnCfg     `json:"listeners"`
-	DictionariesPath           *string                    `json:"dictionaries_path"`
-	DictionariesAppendDefaults *bool                      `json:"dictionaries_append_defaults"`
-	CEApplications             *[]string                  `json:"ce_applications"`
+	DictionariesPath           *string                    `json:"dictionariesPath"`
+	DictionariesAppendDefaults *bool                      `json:"dictionariesAppendDefaults"`
+	CEApplications             *[]string                  `json:"ceApplications"`
 	Conns                      map[string][]*DynamicConns `json:"conns,omitempty"`
-	OriginHost                 *string                    `json:"origin_host"`
-	OriginRealm                *string                    `json:"origin_realm"`
-	VendorID                   *int                       `json:"vendor_id"`
-	ProductName                *string                    `json:"product_name"`
-	SyncedConnRequests         *bool                      `json:"synced_conn_requests"`
-	ASRTemplate                *string                    `json:"asr_template"`
-	RARTemplate                *string                    `json:"rar_template"`
-	ForcedDisconnect           *string                    `json:"forced_disconnect"`
-	ConnStatusStatQueueIDs     *[]string                  `json:"conn_status_stat_queue_ids"`
-	ConnStatusThresholdIDs     *[]string                  `json:"conn_status_threshold_ids"`
-	ConnHealthCheckInterval    *string                    `json:"conn_health_check_interval"`
-	RequestProcessors          *[]*ReqProcessorJsnCfg     `json:"request_processors"`
+	OriginHost                 *string                    `json:"originHost"`
+	OriginRealm                *string                    `json:"originRealm"`
+	VendorID                   *int                       `json:"vendorID"`
+	ProductName                *string                    `json:"productName"`
+	SyncedConnRequests         *bool                      `json:"syncedConnRequests"`
+	ASRTemplate                *string                    `json:"asrTemplate"`
+	RARTemplate                *string                    `json:"rarTemplate"`
+	ForcedDisconnect           *string                    `json:"forcedDisconnect"`
+	ConnStatusStatQueueIDs     *[]string                  `json:"connStatusStatQueueIDs"`
+	ConnStatusThresholdIDs     *[]string                  `json:"connStatusThresholdIDs"`
+	ConnHealthCheckInterval    *string                    `json:"connHealthCheckInterval"`
+	RequestProcessors          *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg) *DiameterAgentJsonCfg {

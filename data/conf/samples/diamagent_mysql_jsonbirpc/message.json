@@ -1,7 +1,7 @@
 {
 
-"diameter_agent": {
-	"request_processors": [
+"diameterAgent": {
+	"requestProcessors": [
 
 		{
 			"id": "message",

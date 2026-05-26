@@ -421,7 +421,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
 
 	cfg.diameterAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req..Field"}
-	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at request_processors"
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at requestProcessors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -523,7 +523,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
 
 	cfg.radiusAgentCfg.RequestProcessors[0].Filters = []string{"*empty:*ec"}
-	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_processors"
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at requestProcessors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -624,7 +624,7 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
 
 	cfg.dnsAgentCfg.RequestProcessors[0].Filters = []string{"*empty:*ec"}
-	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_processors"
+	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at requestProcessors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -755,7 +755,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Filters = nil
 
 	cfg.httpAgentCfg[0].RequestProcessors[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_processors"
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at requestProcessors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -876,7 +876,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = nil
 
 	cfg.sipAgentCfg.RequestProcessors[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_processors"
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at requestProcessors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

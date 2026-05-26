@@ -1,7 +1,7 @@
 {
 
 "radius_agent": {
-    "request_processors": [
+    "requestProcessors": [
       {
         "id": "KamailioAccountingStart",
         "filters": ["*string:~*req.Acct-Status-Type:Start"],

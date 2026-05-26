@@ -1,8 +1,8 @@
 
 {
 
-"diameter_agent": {
-	"request_processors": [
+"diameterAgent": {
+	"requestProcessors": [
 		{
 			"id": "simpa_event",
 			"filters": [

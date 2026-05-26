@@ -1,7 +1,7 @@
 {
 
 
-"http_agent": [
+"httpAgent": [
 	{
 		"id": "conecto1",
 		"url": "/conecto",
@@ -10,7 +10,7 @@
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
@@ -98,7 +98,7 @@
 		},
 		"request_payload":	"*xml",
 		"reply_payload":	"*xml",
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "cdr_from_xml",
 				"tenant": "cgrates.org",
@@ -133,7 +133,7 @@
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*text",
-		"request_processors": [
+		"requestProcessors": [
 			{
 				"id": "TextPlainDryRun",
 				"filters": ["*string:~*req.request_type:TextPlainDryRun","*string:~*req.Msisdn:497700056231"],

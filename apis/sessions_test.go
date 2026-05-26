@@ -498,8 +498,8 @@ func TestDisconnectPeer(t *testing.T) {
 	var reply string
 
 	args := &utils.DPRArgs{
-		OriginHost:      "origin_host",
-		OriginRealm:     "origin_realm",
+		OriginHost:      "originHost",
+		OriginRealm:     "originRealm",
 		DisconnectCause: 2,
 	}
 

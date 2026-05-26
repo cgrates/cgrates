@@ -188,8 +188,8 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 type KamAgentJsonCfg struct {
 	Enabled     *bool
 	Conns       map[string][]*DynamicConns `json:"conns,omitempty"`
-	Create_cdr  *bool
-	Evapi_conns *[]*KamConnJsonCfg
+	Create_cdr  *bool                      `json:"createCDR"`
+	Evapi_conns *[]*KamConnJsonCfg         `json:"evapiConns"`
 	Timezone    *string
 }
 

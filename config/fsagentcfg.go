@@ -241,15 +241,15 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 type FreeswitchAgentJsonCfg struct {
 	Enabled                *bool                      `json:"enabled"`
 	Conns                  map[string][]*DynamicConns `json:"conns,omitempty"`
-	SubscribePark          *bool                      `json:"subscribe_park"`
-	CreateCDR              *bool                      `json:"create_cdr"`
+	SubscribePark          *bool                      `json:"subscribePark"`
+	CreateCDR              *bool                      `json:"createCDR"`
 	ExtraFields            *[]string                  `json:"extraFields"`
-	LowBalanceAnnFile      *string                    `json:"low_balance_ann_file"`
-	EmptyBalanceContext    *string                    `json:"empty_balance_context"`
-	EmptyBalanceAnnFile    *string                    `json:"empty_balance_ann_file"`
-	MaxWaitConnection      *string                    `json:"max_wait_connection"`
-	ActiveSessionDelimiter *string                    `json:"active_session_delimiter"`
-	EventSocketConns       *[]*FsConnJsonCfg          `json:"event_socket_conns"`
+	LowBalanceAnnFile      *string                    `json:"lowBalanceAnnFile"`
+	EmptyBalanceContext    *string                    `json:"emptyBalanceContext"`
+	EmptyBalanceAnnFile    *string                    `json:"emptyBalanceAnnFile"`
+	MaxWaitConnection      *string                    `json:"maxWaitConnection"`
+	ActiveSessionDelimiter *string                    `json:"activeSessionDelimiter"`
+	EventSocketConns       *[]*FsConnJsonCfg          `json:"eventSocketConns"`
 	Request_processors     *[]*ReqProcessorJsnCfg
 }
 

@@ -95,7 +95,7 @@
 			},
 },
 
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	"listeners": [
 		{
@@ -106,7 +106,7 @@
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
 	},
-	"rar_template": "*rar",
+	"rarTemplate": "*rar",
 },
 
 "admins": {

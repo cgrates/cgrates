@@ -38,7 +38,7 @@ type RadiusAgentJsonCfg struct {
 	RequestsCacheKey   *string                     `json:"requests_cache_key"`
 	DMRTemplate        *string                     `json:"dmr_template"`
 	CoATemplate        *string                     `json:"coa_template"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"request_processors"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"requestProcessors"`
 }
 
 type RadiusListenerJsonCfg struct {

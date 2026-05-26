@@ -69,15 +69,15 @@ func TestDiamConnStats(t *testing.T) {
 "sessions": {
 	"enabled": true
 },
-"diameter_agent": {
+"diameterAgent": {
 	"enabled": true,
 	 "conns":{
 	 "*stats": [{"ConnIDs":["*localhost"]}]
 	 },
 	// "thresholds_conns": ["*localhost"],
-	// "conn_status_stat_queue_ids": ["SQ_CONN_1", "SQ_CONN_2", "SQ_CONN_3"],
-	// "conn_status_threshold_ids": [],
-	"conn_health_check_interval": "100ms"
+	// "connStatusStatQueueIDs": ["SQ_CONN_1", "SQ_CONN_2", "SQ_CONN_3"],
+	// "connStatusThresholdIDs": [],
+	"connHealthCheckInterval": "100ms"
 }
 }`,
 		DBCfg:    engine.InternalDBCfg,

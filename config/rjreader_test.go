@@ -239,9 +239,9 @@ func TestEnvReaderRead2(t *testing.T) {
 	if err := os.Setenv("TESTVARNoZero", "cgr1"); err != nil {
 		t.Error(err)
 	}
-	envR := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
-        "origin_realm": "*env:TESTVARNoZero",}`))
-	expected := []byte(`{"origin_host":"cgr1","origin_realm":"cgr1"}`)
+	envR := NewRjReaderFromBytes([]byte(`{"originHost": "*env:TESTVARNoZero",
+        "originRealm": "*env:TESTVARNoZero",}`))
+	expected := []byte(`{"originHost":"cgr1","originRealm":"cgr1"}`)
 	var reply []byte
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
@@ -378,8 +378,8 @@ func TestReadRJReader(t *testing.T) {
 	if err := os.Setenv("TESTVARNoZero", utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	rjr := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
-        "origin_realm": "*env:TESTVARNoZero",}`))
+	rjr := NewRjReaderFromBytes([]byte(`{"originHost": "*env:TESTVARNoZero",
+        "originRealm": "*env:TESTVARNoZero",}`))
 	expected := "NOT_FOUND:ENV_VAR:TESTVARNoZero"
 	buf := make([]byte, 20)
 	rjr.indx = 1
