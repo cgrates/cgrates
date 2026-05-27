@@ -69,7 +69,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 			return cachedResp.Error
 		}
 		defer func() {
-			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -140,7 +140,7 @@ func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREv
 			return cachedResp.Error
 		}
 		defer func() {
-			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -218,7 +218,7 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 			return cachedResp.Error
 		}
 		defer func() {
-			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -292,7 +292,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 			return cachedResp.Error
 		}
 		defer func() {
-			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -320,7 +320,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 	return nil
 }
 
-// V1GetResource returns a resource configuration
+// V1GetResource returns a resource.
 func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
