@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,6 +60,6 @@ func (self *CmdGetResourceForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetResourceForEvent) RpcResult() any {
-	var atr resources.Resources
+	var atr []*utils.Resource
 	return &atr
 }

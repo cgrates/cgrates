@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -173,7 +172,7 @@ func testV1RsAllocate(t *testing.T) {
 }
 
 func testV1RsAuthorize(t *testing.T) {
-	var reply *resources.Resources
+	var reply []*utils.Resource
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -196,14 +195,14 @@ func testV1RsAuthorize(t *testing.T) {
 		// if this happens try to run this test manualy
 		return
 	}
-	if len(*reply) != 1 {
-		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
+	if len(reply) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, len(reply))
 	}
-	if (*reply)[0].Resource.ID != "RES_GR_TEST" {
-		t.Errorf("Expecting: %+v, received: %+v", "RES_GR_TEST", (*reply)[0].Resource.ID)
+	if reply[0].ID != "RES_GR_TEST" {
+		t.Errorf("Expecting: %+v, received: %+v", "RES_GR_TEST", reply[0].ID)
 	}
-	if len((*reply)[0].Resource.Usages) != 2 {
-		t.Errorf("Expecting: %+v, received: %+v", 2, len((*reply)[0].Resource.Usages))
+	if len(reply[0].Usages) != 2 {
+		t.Errorf("Expecting: %+v, received: %+v", 2, len(reply[0].Usages))
 	}
 
 	var reply2 string

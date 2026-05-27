@@ -530,7 +530,7 @@ func TestResourceRecordUsages(t *testing.T) {
 		totalUsage: utils.Float64Pointer(2),
 	}
 
-	rs := Resources{r2, r1}
+	rs := matchedResources{r2, r1}
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
@@ -619,7 +619,7 @@ func TestResourceAllocateResource(t *testing.T) {
 		totalUsage: utils.Float64Pointer(2),
 	}
 
-	rs := Resources{r1, r2}
+	rs := matchedResources{r1, r2}
 	r1.Resource.Usages = map[string]*utils.ResourceUsage{
 		ru1.ID: ru1,
 	}
@@ -847,7 +847,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 }
 
-func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, Resources, []*utils.CGREvent) {
+func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, matchedResources, []*utils.CGREvent) {
 	t.Helper()
 	rS, dm := newTestResourceS(t)
 	engine.Cache.Clear(nil)
@@ -914,7 +914,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, R
 		},
 	}
 
-	resources := Resources{
+	resources := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Tenant: tenant,
@@ -1140,7 +1140,7 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	resources := Resources{
+	resources := matchedResources{
 		{
 			Resource: res,
 			profile:  resProf,
@@ -1340,7 +1340,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
-	rs := Resources{
+	rs := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
@@ -1380,7 +1380,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 		ID:     "RU_4",
 	}
 
-	exp := Resources{
+	exp := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
@@ -1453,7 +1453,7 @@ func TestResourceClearUsageErr(t *testing.T) {
 	}()
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
-	rs := Resources{
+	rs := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
@@ -1489,7 +1489,7 @@ func TestResourceClearUsageErr(t *testing.T) {
 }
 
 func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
-	rs := Resources{}
+	rs := matchedResources{}
 	ru := &utils.ResourceUsage{}
 
 	experr := utils.ErrResourceUnavailable
@@ -1505,7 +1505,7 @@ func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
 }
 
 func TestResourcesAllocateResourceDryRun(t *testing.T) {
-	rs := Resources{
+	rs := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
@@ -1659,7 +1659,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	}
 }
 func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
-	rs := Resources{
+	rs := matchedResources{
 		{
 			Resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
@@ -1700,7 +1700,7 @@ func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	}
 	opts := map[string]any{}
 
-	err := rS.processThresholds(context.TODO(), Resources{r}, opts)
+	err := rS.processThresholds(context.TODO(), matchedResources{r}, opts)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -1760,7 +1760,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		},
 	}
 
-	err := rS.processThresholds(context.TODO(), Resources{r}, nil)
+	err := rS.processThresholds(context.TODO(), matchedResources{r}, nil)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -1827,7 +1827,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	}
 
 	experr := utils.ErrPartiallyExecuted
-	err := rS.processThresholds(context.TODO(), Resources{r}, nil)
+	err := rS.processThresholds(context.TODO(), matchedResources{r}, nil)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -1855,7 +1855,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	}
 	opts := map[string]any{}
 
-	err := rS.processThresholds(context.TODO(), Resources{r}, opts)
+	err := rS.processThresholds(context.TODO(), matchedResources{r}, opts)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received: %+v", err)
@@ -2366,7 +2366,7 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("store interval zero is a no-op", func(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 0)
-		res := Resources{{
+		res := matchedResources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
@@ -2381,7 +2381,7 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("positive interval queues to storedResources", func(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 10*time.Second)
-		res := Resources{
+		res := matchedResources{
 			{
 				Resource: &utils.Resource{
 					Tenant: "cgrates.org",
@@ -2412,7 +2412,7 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("negative interval stores to DB", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
-		res := Resources{{
+		res := matchedResources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
@@ -2434,7 +2434,7 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("Stored false skips store", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
-		res := Resources{{
+		res := matchedResources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
@@ -2453,7 +2453,7 @@ func TestStoreMatchedResources(t *testing.T) {
 
 	t.Run("stores resource with usages", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
-		res := Resources{{
+		res := matchedResources{{
 			Resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",

@@ -117,11 +117,10 @@ func (r *matchedResource) clearUsage(ruID string) error {
 	return nil
 }
 
-// Resources is a collection of matchedResource objects.
-type Resources []*matchedResource
+type matchedResources []*matchedResource
 
 // recordUsage will record the usage in all the resource limits, failing back on errors
-func (rs Resources) recordUsage(ru *utils.ResourceUsage) error {
+func (rs matchedResources) recordUsage(ru *utils.ResourceUsage) error {
 	var nonReservedIdx int // index of first resource not reserved
 	var err error
 	for _, r := range rs {
@@ -142,7 +141,7 @@ func (rs Resources) recordUsage(ru *utils.ResourceUsage) error {
 }
 
 // clearUsage gives back the units to the pool
-func (rs Resources) clearUsage(ruTntID string) error {
+func (rs matchedResources) clearUsage(ruTntID string) error {
 	var err error
 	for _, r := range rs {
 		if errClear := r.clearUsage(ruTntID); errClear != nil &&
@@ -157,7 +156,7 @@ func (rs Resources) clearUsage(ruTntID string) error {
 // allocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
-func (rs Resources) allocateResource(ru *utils.ResourceUsage, dryRun bool) (allocMsg string, err error) {
+func (rs matchedResources) allocateResource(ru *utils.ResourceUsage, dryRun bool) (allocMsg string, err error) {
 	if len(rs) == 0 {
 		return "", utils.ErrResourceUnavailable
 	}
@@ -316,7 +315,7 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 }
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
-func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources) error {
+func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedResources) error {
 	if s.cfg.ResourceSCfg().StoreInterval == 0 {
 		return nil
 	}
@@ -340,7 +339,7 @@ func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs Resources
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (s *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts map[string]any) error {
+func (s *ResourceS) processThresholds(ctx *context.Context, rs matchedResources, opts map[string]any) error {
 	threshConns, err := engine.GetConnIDs(ctx, s.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, s.filters)
 	if err != nil {
 		return err
@@ -389,7 +388,7 @@ func (s *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts m
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
-	evUUID string, usageTTL *time.Duration) (rs Resources, unlock func(), err error) {
+	evUUID string, usageTTL *time.Duration) (rs matchedResources, unlock func(), err error) {
 
 	unlockAll := func() {
 		for _, r := range rs {
@@ -442,7 +441,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		itemIDs = slices.Sorted(maps.Keys(rIDs))
 	}
 
-	rs = make(Resources, 0, len(itemIDs))
+	rs = make(matchedResources, 0, len(itemIDs))
 	weights := make(map[string]float64) // stores sorting weights by resource ID
 	for _, id := range itemIDs {
 		lkID := guardian.Guardian.GuardIDs("",

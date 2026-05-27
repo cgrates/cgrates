@@ -176,33 +176,26 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		},
 	}
 
-	exp := Resources{
+	exp := []*utils.Resource{
 		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES1",
-				TTLIdx: []string{},
-				Usages: map[string]*utils.ResourceUsage{
-					"RU1": {
-						Tenant: "cgrates.org",
-						ID:     "RU1",
-						Units:  10,
-					},
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			TTLIdx: []string{},
+			Usages: map[string]*utils.ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
 				},
 			},
-			profile: rsPrf,
-			ttl:     utils.DurationPointer(72 * time.Hour),
 		},
 	}
-	var reply Resources
+	var reply []*utils.Resource
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else {
-		exp[0].lockID = reply[0].lockID
-		if !reflect.DeepEqual(reply, exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(exp), utils.ToJSON(reply))
-		}
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 }
 
@@ -250,7 +243,7 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 		},
 	}
 
-	var reply Resources
+	var reply []*utils.Resource
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -274,7 +267,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var reply Resources
+	var reply []*utils.Resource
 
 	// missing UsageID
 	args := &utils.CGREvent{
@@ -391,29 +384,24 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 		},
 	}
 
-	cacheReply := Resources{
+	cacheReply := []*utils.Resource{
 		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES1",
-				Usages: map[string]*utils.ResourceUsage{
-					"RU1": {
-						Tenant: "cgrates.org",
-						ID:     "RU1",
-						Units:  10,
-					},
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			Usages: map[string]*utils.ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
 				},
-				TTLIdx: []string{},
 			},
-			profile:    rsPrf,
-			totalUsage: utils.Float64Pointer(10),
-			ttl:        utils.DurationPointer(time.Minute),
+			TTLIdx: []string{},
 		},
 	}
 	engine.Cache.Set(context.Background(), utils.CacheRPCResponses, cacheKey,
 		&utils.CachedRPCResponse{Result: &cacheReply, Error: nil},
 		nil, true, utils.NonTransactional)
-	var reply Resources
+	var reply []*utils.Resource
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, cacheReply) {
@@ -426,7 +414,10 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 
 func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	tmp := engine.Cache
-	t.Cleanup(func() { engine.Cache = tmp })
+	t.Cleanup(func() {
+		engine.Cache = tmp
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	})
 
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -486,42 +477,35 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		},
 	}
 
-	exp := &Resources{
+	exp := []*utils.Resource{
 		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "RES1",
-				Usages: map[string]*utils.ResourceUsage{
-					"RU1": {
-						Tenant: "cgrates.org",
-						ID:     "RU1",
-						Units:  10,
-					},
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			Usages: map[string]*utils.ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
 				},
-				TTLIdx: []string{},
 			},
-			ttl:     utils.DurationPointer(72 * time.Hour),
-			profile: rsPrf,
+			TTLIdx: []string{},
 		},
 	}
-	var reply Resources
+	var reply []*utils.Resource
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else {
-		(*exp)[0].lockID = reply[0].lockID
-		if !reflect.DeepEqual(reply, *exp) {
-			t.Errorf("expected: <%v>, received: <%v>", exp, reply)
-		}
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%v>, received: <%v>", exp, reply)
 	}
 
-	if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-		resp := itm.(*utils.CachedRPCResponse)
-		if !reflect.DeepEqual(resp.Result, exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(resp.Result))
-		}
+	itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey)
+	if !has {
+		t.Fatal("expected cached RPC response")
 	}
-
-	config.SetCgrConfig(config.NewDefaultCGRConfig())
+	cachedReply := itm.(*utils.CachedRPCResponse).Result.(*[]*utils.Resource)
+	if !reflect.DeepEqual(*cachedReply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(*cachedReply))
+	}
 }
 
 func TestResourcesV1GetResource(t *testing.T) {
@@ -1492,7 +1476,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 		},
 	}
 	var reply string
-	var resources Resources
+	var resources matchedResources
 	resources = append(resources, rs)
 	if _, err := resources.allocateResource(&utils.ResourceUsage{
 		Tenant: "cgrates.org",
@@ -1608,11 +1592,11 @@ func TestErrRetrieveOpts(t *testing.T) {
 		call   func(*ResourceS) error
 	}{
 		{"ResourcesForEvent/UsageID", setUsageID, func(rS *ResourceS) error {
-			var reply Resources
+			var reply []*utils.Resource
 			return rS.V1GetResourcesForEvent(context.Background(), args, &reply)
 		}},
 		{"ResourcesForEvent/UsageTTL", setUsageTTL, func(rS *ResourceS) error {
-			var reply Resources
+			var reply []*utils.Resource
 			return rS.V1GetResourcesForEvent(context.Background(), args, &reply)
 		}},
 		{"AuthorizeResources/UsageID", setUsageID, func(rS *ResourceS) error {
