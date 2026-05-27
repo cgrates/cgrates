@@ -41,7 +41,7 @@ func (s *IPService) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.
 	var allocID string
 	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
 		utils.OptsIPsAllocationID); err != nil {
-		return
+		return err
 	}
 
 	if allocID == utils.EmptyString {
@@ -65,9 +65,11 @@ func (s *IPService) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
+		defer func() {
+			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+				&utils.CachedRPCResponse{Result: reply, Error: err},
+				nil, true, utils.NonTransactional)
+		}()
 	}
 	// end of RPC caching
 
@@ -77,7 +79,7 @@ func (s *IPService) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.
 	}
 	defer allocs.Unlock()
 	*reply = *allocs
-	return
+	return err
 }
 
 // V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
@@ -116,9 +118,11 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
+		defer func() {
+			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+				&utils.CachedRPCResponse{Result: reply, Error: err},
+				nil, true, utils.NonTransactional)
+		}()
 	}
 	// end of RPC caching
 
@@ -182,9 +186,11 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
+		defer func() {
+			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+				&utils.CachedRPCResponse{Result: reply, Error: err},
+				nil, true, utils.NonTransactional)
+		}()
 	}
 	// end of RPC caching
 
@@ -249,9 +255,11 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: reply, Error: err},
-			nil, true, utils.NonTransactional)
+		defer func() {
+			engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+				&utils.CachedRPCResponse{Result: reply, Error: err},
+				nil, true, utils.NonTransactional)
+		}()
 	}
 	// end of RPC caching
 
