@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"testing/synctest"
 	"time"
@@ -5987,14 +5988,25 @@ func TestResourcesReload(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-		rS := &ResourceService{
-			stopBackup: make(chan struct{}),
-			cgrcfg:     cfg,
-		}
+		rS := NewResourceService(nil, cfg, nil, nil)
 		rS.StartLoop()
 		rS.Reload()
-		close(rS.stopBackup)
-		rS.backupLoop.Wait()
+		rS.Shutdown()
+		rS.Shutdown()
+		rS.Reload()
+	})
+}
+
+func TestResourcesReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+		rS := NewResourceService(nil, cfg, nil, nil)
+		rS.StartLoop()
+		var wg sync.WaitGroup
+		wg.Go(func() { rS.Reload() })
+		wg.Go(func() { rS.Shutdown() })
+		wg.Wait()
 	})
 }
 

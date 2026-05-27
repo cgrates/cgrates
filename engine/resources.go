@@ -432,18 +432,26 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm              *DataManager // So we can load the data in cache and index it
-	filterS         *FilterS
-	storedResources utils.StringSet // keep a record of resources which need saving, map[resID]bool
-	srMux           sync.RWMutex    // protects storedResources
-	cgrcfg          *config.CGRConfig
-	stopBackup      chan struct{} // control storing process
-	backupLoop      sync.WaitGroup
-	connMgr         *ConnManager
+	cgrcfg  *config.CGRConfig
+	dm      *DataManager
+	filterS *FilterS
+	connMgr *ConnManager
+
+	storedMu        sync.Mutex
+	storedResources utils.StringSet // resources that need saving
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
 }
 
-// Reload stops the backupLoop and restarts it
+// Reload restarts the backup loop. No-op after Shutdown.
 func (rS *ResourceService) Reload() {
+	rS.stateMu.Lock()
+	defer rS.stateMu.Unlock()
+	if rS.stopBackup == nil {
+		return
+	}
 	close(rS.stopBackup)
 	rS.backupLoop.Wait()
 	rS.stopBackup = make(chan struct{})
@@ -458,9 +466,15 @@ func (rS *ResourceService) StartLoop() {
 
 // Shutdown is called to shutdown the service
 func (rS *ResourceService) Shutdown() {
+	rS.stateMu.Lock()
+	defer rS.stateMu.Unlock()
+	if rS.stopBackup == nil {
+		return
+	}
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
 	rS.backupLoop.Wait()
+	rS.stopBackup = nil
 	rS.storeResources()
 	utils.Logger.Info("<ResourceS> service shutdown complete")
 }
@@ -486,12 +500,12 @@ func (rS *ResourceService) runBackup() {
 func (rS *ResourceService) storeResources() {
 	var failedRIDs []string
 	for { // don't stop until we store all dirty resources
-		rS.srMux.Lock()
+		rS.storedMu.Lock()
 		rID := rS.storedResources.GetOne()
 		if rID != "" {
 			rS.storedResources.Remove(rID)
 		}
-		rS.srMux.Unlock()
+		rS.storedMu.Unlock()
 		if rID == "" {
 			break // no more keys, backup completed
 		}
@@ -510,9 +524,9 @@ func (rS *ResourceService) storeResources() {
 		runtime.Gosched()
 	}
 	if len(failedRIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		rS.srMux.Lock()
+		rS.storedMu.Lock()
 		rS.storedResources.AddSlice(failedRIDs)
-		rS.srMux.Unlock()
+		rS.storedMu.Unlock()
 	}
 }
 
@@ -547,8 +561,8 @@ func (rS *ResourceService) storeMatchedResources(mtcRLs Resources) (err error) {
 		return
 	}
 	if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
-		rS.srMux.Lock()
-		defer rS.srMux.Unlock()
+		rS.storedMu.Lock()
+		defer rS.storedMu.Unlock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
