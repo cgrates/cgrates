@@ -40,6 +40,7 @@ type matchedResource struct {
 	ttl        *time.Duration
 	totalUsage *float64
 	profile    *utils.ResourceProfile
+	lockID     string
 }
 
 // removeExpiredUnits removes units which are expired from the resource
@@ -376,10 +377,9 @@ func (s *ResourceS) processThresholds(ctx *context.Context, rs Resources, opts m
 func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, unlock func(), err error) {
 
-	var lockIDs []string
 	unlockAll := func() {
-		for _, lkID := range lockIDs {
-			guardian.Guardian.UnguardIDs(lkID)
+		for _, r := range rs {
+			guardian.Guardian.UnguardIDs(r.lockID)
 		}
 	}
 
@@ -471,11 +471,10 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			return nil, nil, err
 		}
 
-		lockIDs = append(lockIDs, lkID)
-
 		r := &matchedResource{
 			Resource: res,
 			profile:  rp,
+			lockID:   lkID,
 		}
 		if usageTTL != nil {
 			if *usageTTL != 0 {
@@ -500,10 +499,9 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 
 	for i, r := range rs {
 		if r.profile.Blocker && i != len(rs)-1 { // blocker will stop processing and we are not at last index
-			for _, lkID := range lockIDs[i+1:] {
-				guardian.Guardian.UnguardIDs(lkID)
+			for _, dropped := range rs[i+1:] {
+				guardian.Guardian.UnguardIDs(dropped.lockID)
 			}
-			lockIDs = lockIDs[:i+1]
 			rs = rs[:i+1]
 			break
 		}

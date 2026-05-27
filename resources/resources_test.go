@@ -2309,6 +2309,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		t.Fatalf("expected no error, received: %+v", err)
 	}
 	defer unlock()
+	exp.lockID = rcv[0].lockID
 	if !reflect.DeepEqual(rcv[0], exp) {
 		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv[0])
 	}

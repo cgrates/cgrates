@@ -197,9 +197,12 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 	var reply Resources
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(exp), utils.ToJSON(reply))
+	} else {
+		exp[0].lockID = reply[0].lockID
+		if !reflect.DeepEqual(reply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(reply))
+		}
 	}
 }
 
@@ -504,8 +507,11 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	var reply Resources
 	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, *exp) {
-		t.Errorf("expected: <%v>, received: <%v>", exp, reply)
+	} else {
+		(*exp)[0].lockID = reply[0].lockID
+		if !reflect.DeepEqual(reply, *exp) {
+			t.Errorf("expected: <%v>, received: <%v>", exp, reply)
+		}
 	}
 
 	if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
