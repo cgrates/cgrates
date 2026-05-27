@@ -1462,54 +1462,62 @@ func (sS *SessionS) getRelocateSession(cgrID string, initOriginID,
 // it will force-disconnect the one found in SessionS but not in clients
 func (sS *SessionS) syncSessions() {
 	sS.aSsMux.RLock()
-	asCount := len(sS.aSessions)
+	activeCGRIDs := make([]string, 0, len(sS.aSessions))
+	for cgrID := range sS.aSessions {
+		activeCGRIDs = append(activeCGRIDs, cgrID)
+	}
 	sS.aSsMux.RUnlock()
-	if asCount == 0 { // no need to sync the sessions if none is active
+	if len(activeCGRIDs) == 0 {
 		return
 	}
-	queriedCGRIDs := engine.NewSafEvent(nil) // will populate from all goroutines at once
-	var wg sync.WaitGroup
 
-	for _, clnt := range sS.sBiRPCClients.BiJClients() {
-		wg.Add(1)
-		go func() {
-			// query all connections at once
+	biJClnts := sS.sBiRPCClients.BiJClients()
+	if len(biJClnts) == 0 {
+		utils.Logger.Notice(fmt.Sprintf(
+			"<%s> no bidirectional clients connected - proceeding to terminate %d active sessions",
+			utils.SessionS, len(activeCGRIDs)))
+	}
+	results := make(chan []*SessionID, len(biJClnts))
+	timeout := sS.cgrCfg.GeneralCfg().ReplyTimeout
+	for _, clnt := range biJClnts {
+		go func(clnt *utils.BiJClient) {
+			ctx, cancel := context.WithTimeout(context.TODO(), timeout)
+			defer cancel()
 			servMethod := utils.AgentV1GetActiveSessionIDs
 			if clnt.Proto() < 2.0 {
 				// ensure compatibility with OpenSIPS
 				servMethod = "SessionSv1.GetActiveSessionIDs"
 			}
-
-			var queriedSessionIDs []*SessionID
-			if err := clnt.Conn().Call(context.TODO(), servMethod, utils.EmptyString,
-				&queriedSessionIDs); err != nil &&
+			var sessionIDs []*SessionID
+			if err := clnt.Conn().Call(ctx, servMethod, "",
+				&sessionIDs); err != nil &&
 				err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(fmt.Sprintf(
-					"<%s> error <%v> querying session ids", utils.SessionS, err))
+					"<%s> failed to retrieve active session IDs: %v", utils.SessionS, err))
+				sessionIDs = nil
 			}
-
-			for _, sessionID := range queriedSessionIDs {
-				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
-			}
-			wg.Done()
-		}()
+			results <- sessionIDs
+		}(clnt)
 	}
-
-	wg.Wait() // wait for all clients to finish in one way or another
-	var toBeRemoved []string
-	sS.aSsMux.RLock()
-	for cgrid := range sS.aSessions {
-		if !queriedCGRIDs.HasField(cgrid) {
-			toBeRemoved = append(toBeRemoved, cgrid)
+	queriedCGRIDs := utils.StringSet{}
+	for range biJClnts {
+		for _, sessionID := range <-results {
+			queriedCGRIDs.Add(sessionID.CGRID())
 		}
 	}
-	sS.aSsMux.RUnlock()
-	sS.terminateSyncSessions(toBeRemoved)
+
+	var missingCGRIDs []string
+	for _, cgrID := range activeCGRIDs {
+		if !queriedCGRIDs.Has(cgrID) {
+			missingCGRIDs = append(missingCGRIDs, cgrID)
+		}
+	}
+	sS.terminateSyncSessions(missingCGRIDs)
 }
 
 // Extracted from syncSessions in order to test all cases
-func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
-	for _, cgrID := range toBeRemoved {
+func (sS *SessionS) terminateSyncSessions(missingCGRIDs []string) {
+	for _, cgrID := range missingCGRIDs {
 		ss := sS.getSessions(cgrID, false)
 		if len(ss) == 0 {
 			continue
@@ -1523,7 +1531,7 @@ func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
 		if err := sS.forceSTerminate(ss[0], eUsage, nil, nil, nil,
 			map[string]any{utils.DisconnectCause: utils.ForcedDisconnect}); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%v>",
+				fmt.Sprintf("<%s> failed to force-terminate session <%s>: %v",
 					utils.SessionS, cgrID, err))
 		}
 		ss[0].Unlock()
