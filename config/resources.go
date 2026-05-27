@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -54,42 +55,46 @@ type ResourceSCfg struct {
 }
 
 // Load loads the ResourceS section of the configuration
-func (c *ResourceSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (c *ResourceSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnRLSCfg := new(ResourceSJsonCfg)
-	if err = jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
-		return
+	if err := jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
+		return err
 	}
 	return c.loadFromJSONCfg(jsnRLSCfg)
 }
 
-func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err error) {
+func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.UsageID != nil {
-		var usageID []*DynamicStringOpt
-		usageID, err = InterfaceToDynamicStringOpts(jsnCfg.UsageID)
+		usageID, err := InterfaceToDynamicStringOpts(jsnCfg.UsageID)
+		if err != nil {
+			return err
+		}
 		rsOpts.UsageID = append(usageID, rsOpts.UsageID...)
 	}
 	if jsnCfg.UsageTTL != nil {
-		var usageTTL []*DynamicDurationOpt
-		if usageTTL, err = IfaceToDurationDynamicOpts(jsnCfg.UsageTTL); err != nil {
-			return
+		usageTTL, err := IfaceToDurationDynamicOpts(jsnCfg.UsageTTL)
+		if err != nil {
+			return err
 		}
 		rsOpts.UsageTTL = append(usageTTL, rsOpts.UsageTTL...)
 	}
 
 	if jsnCfg.Units != nil {
-		var units []*DynamicFloat64Opt
-		units, err = InterfaceToFloat64DynamicOpts(jsnCfg.Units)
+		units, err := InterfaceToFloat64DynamicOpts(jsnCfg.Units)
+		if err != nil {
+			return err
+		}
 		rsOpts.Units = append(units, rsOpts.Units...)
 	}
-	return
+	return nil
 }
 
-func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
+func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.Enabled != nil {
 		c.Enabled = *jsnCfg.Enabled
@@ -98,15 +103,14 @@ func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 		c.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
-		for connType, opts := range tagged {
-			c.Conns[connType] = opts
-		}
+		maps.Copy(c.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Store_interval != nil {
-		if c.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
-			return
+		ivl, err := utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval)
+		if err != nil {
+			return err
 		}
+		c.StoreInterval = ivl
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		c.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
@@ -127,9 +131,9 @@ func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 		c.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		err = c.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		return c.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
-	return
+	return nil
 }
 
 // AsMapInterface returns the config as a map[string]any
@@ -171,7 +175,7 @@ func (c ResourceSCfg) AsMapInterface() any {
 func (ResourceSCfg) SName() string           { return ResourceSJSON }
 func (c ResourceSCfg) CloneSection() Section { return c.Clone() }
 
-func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
+func (rsOpts *ResourcesOpts) Clone() *ResourcesOpts {
 	var usageID []*DynamicStringOpt
 	if rsOpts.UsageID != nil {
 		usageID = CloneDynamicStringOpt(rsOpts.UsageID)
@@ -184,17 +188,16 @@ func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	if rsOpts.Units != nil {
 		units = CloneDynamicFloat64Opt(rsOpts.Units)
 	}
-	cln = &ResourcesOpts{
+	return &ResourcesOpts{
 		UsageID:  usageID,
 		UsageTTL: usageTTL,
 		Units:    units,
 	}
-	return
 }
 
 // Clone returns a deep copy of ResourceSCfg
-func (c ResourceSCfg) Clone() (cln *ResourceSCfg) {
-	cln = &ResourceSCfg{
+func (c ResourceSCfg) Clone() *ResourceSCfg {
+	cln := &ResourceSCfg{
 		Enabled:        c.Enabled,
 		IndexedSelects: c.IndexedSelects,
 		Conns:          CloneConnsMap(c.Conns),
@@ -218,7 +221,7 @@ func (c ResourceSCfg) Clone() (cln *ResourceSCfg) {
 	if c.NotExistsIndexedFields != nil {
 		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*c.NotExistsIndexedFields))
 	}
-	return
+	return cln
 }
 
 type ResourcesOptsJson struct {
