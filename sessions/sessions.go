@@ -4290,7 +4290,9 @@ func (sS *SessionS) BiRPCv1GetCost(ctx *context.Context,
 	return
 }
 
-// BiRPCv1SyncSessions will sync sessions on demand
+// BiRPCv1SyncSessions runs a manual sync. Only to be used when
+// channel_sync_interval is 0, otherwise it can race with the
+// periodic sync and drop live sessions.
 func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,
 	ignParam *utils.TenantWithAPIOpts, reply *string) error {
 	sS.syncSessions()
