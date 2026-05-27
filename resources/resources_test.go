@@ -67,6 +67,66 @@ func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
 	return rS, dm
 }
 
+func newTestMatchedResources() (ru1, ru2 *utils.ResourceUsage, r1, r2 *matchedResource) {
+	ru1 = &utils.ResourceUsage{
+		Tenant:     "cgrates.org",
+		ID:         "RU1",
+		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Units:      1,
+	}
+	ru2 = &utils.ResourceUsage{
+		Tenant:     "cgrates.org",
+		ID:         "RU2",
+		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Units:      2,
+	}
+	r1 = &matchedResource{
+		Resource: &utils.Resource{
+			Tenant: "cgrates.org",
+			ID:     "RL1",
+			Usages: map[string]*utils.ResourceUsage{
+				ru1.ID: ru1,
+			},
+			TTLIdx: []string{ru1.ID},
+		},
+		profile: &utils.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+
+			UsageTTL:          time.Millisecond,
+			AllocationMessage: "ALLOC",
+		},
+	}
+	r2 = &matchedResource{
+		Resource: &utils.Resource{
+			Tenant: "cgrates.org",
+			ID:     "RL2",
+			Usages: map[string]*utils.ResourceUsage{
+				ru2.ID: ru2,
+			},
+		},
+		profile: &utils.ResourceProfile{
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Millisecond,
+		},
+	}
+	return ru1, ru2, r1, r2
+}
+
 func TestResourcesRecordUsage(t *testing.T) {
 	testStruct := &matchedResource{
 		Resource: &utils.Resource{
@@ -162,47 +222,7 @@ func TestResourcesClearUsage(t *testing.T) {
 }
 
 func TestResourceRecordUsage(t *testing.T) {
-	var r1 *matchedResource
-	var ru1 *utils.ResourceUsage
-	var ru2 *utils.ResourceUsage
-	ru1 = &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU1",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      1,
-	}
-
-	ru2 = &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
-	}
-
-	r1 = &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RL1",
-			Usages: map[string]*utils.ResourceUsage{
-				ru1.ID: ru1,
-			},
-			TTLIdx: []string{ru1.ID},
-		},
-		profile: &utils.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
-	}
+	ru1, ru2, r1, _ := newTestMatchedResources()
 
 	if err := r1.recordUsage(ru2); err != nil {
 		t.Error(err.Error())
@@ -271,66 +291,7 @@ func TestResourceUsedUnits(t *testing.T) {
 }
 
 func TestResourceClearUsage(t *testing.T) {
-	ru1 := &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU1",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      1,
-	}
-
-	ru2 := &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
-	}
-
-	r1 := &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RL1",
-			Usages: map[string]*utils.ResourceUsage{
-				ru1.ID: ru1,
-			},
-			TTLIdx: []string{ru1.ID},
-		},
-		profile: &utils.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
-	}
-
-	r2 := &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RL2",
-			// AllocationMessage: "ALLOC2",
-			Usages: map[string]*utils.ResourceUsage{
-				ru2.ID: ru2,
-			},
-		},
-		profile: &utils.ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 50,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-			UsageTTL:     time.Millisecond,
-		},
-	}
+	ru1, ru2, r1, r2 := newTestMatchedResources()
 
 	r1.clearUsage(ru1.ID)
 	if len(r1.Resource.Usages) != 0 {
@@ -346,66 +307,7 @@ func TestResourceClearUsage(t *testing.T) {
 	}
 }
 func TestResourceRecordUsages(t *testing.T) {
-	ru1 := &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU1",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      1,
-	}
-
-	ru2 := &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
-	}
-
-	r1 := &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RL1",
-			Usages: map[string]*utils.ResourceUsage{
-				ru1.ID: ru1,
-			},
-			TTLIdx: []string{ru1.ID},
-		},
-		profile: &utils.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
-	}
-
-	r2 := &matchedResource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "RL2",
-			// AllocationMessage: "ALLOC2",
-			Usages: map[string]*utils.ResourceUsage{
-				ru2.ID: ru2,
-			},
-		},
-		profile: &utils.ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 50,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-			UsageTTL:     time.Millisecond,
-		},
-	}
+	ru1, _, r1, r2 := newTestMatchedResources()
 
 	rs := matchedResources{r2, r1}
 	if err := rs.recordUsage(ru1); err == nil {
