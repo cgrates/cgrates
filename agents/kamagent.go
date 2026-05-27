@@ -44,24 +44,23 @@ var (
 	kamProcessCDRRegex     = regexp.MustCompile(CGR_PROCESS_CDR)
 )
 
-func NewKamailioAgent(kaCfg *config.KamAgentCfg,
-	connMgr *engine.ConnManager, timezone string) (ka *KamailioAgent) {
-	ka = &KamailioAgent{
-		cfg:              kaCfg,
-		connMgr:          connMgr,
-		timezone:         timezone,
-		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
-		activeSessionIDs: make(chan []*sessions.SessionID),
+func NewKamailioAgent(kaCfg *config.KamAgentCfg, connMgr *engine.ConnManager,
+	timezone string) *KamailioAgent {
+	return &KamailioAgent{
+		cfg:      kaCfg,
+		connMgr:  connMgr,
+		timezone: timezone,
+		conns:    make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
+		replyCh:  make(chan []*sessions.SessionID, len(kaCfg.EvapiConns)),
 	}
-	return
 }
 
 type KamailioAgent struct {
-	cfg              *config.KamAgentCfg
-	connMgr          *engine.ConnManager
-	timezone         string
-	conns            []*kamevapi.KamEvapi
-	activeSessionIDs chan []*sessions.SessionID
+	cfg      *config.KamAgentCfg
+	connMgr  *engine.ConnManager
+	timezone string
+	conns    []*kamevapi.KamEvapi
+	replyCh  chan []*sessions.SessionID
 }
 
 func (self *KamailioAgent) Connect() (err error) {
@@ -261,7 +260,12 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 			OriginID:   dlgInfo.CallId + ";" + dlgInfo.Caller.Tag,
 		})
 	}
-	ka.activeSessionIDs <- sIDs
+	// kamevapi runs onDlgList in its own goroutine, so a blocking send
+	// would leak it.
+	select {
+	case ka.replyCh <- sIDs:
+	default:
+	}
 }
 
 func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
@@ -402,28 +406,43 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 }
 
 // V1GetActiveSessionIDs returns a list of CGRIDs based on active sessions from agent
-func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
-	for _, evapi := range ka.conns {
-		kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
-		if err = evapi.Send(string(kamEv)); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event, error %s",
-				utils.KamailioAgent, err.Error()))
-			return
-		}
+func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) error {
+	// drop stale replies from a previous sync
+	for len(ka.replyCh) > 0 {
+		<-ka.replyCh
 	}
-	for range ka.conns {
+	kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
+	var sent int
+	for i, evapi := range ka.conns {
+		if err := evapi.Send(string(kamEv)); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event to connIdx<%v>: %v",
+				utils.KamailioAgent, i, err))
+			continue
+		}
+		sent++
+	}
+	if sent == 0 {
+		return errors.New("failed sending dialog list to any connection")
+	}
+	tm := time.NewTimer(config.CgrConfig().GeneralCfg().ReplyTimeout)
+	defer tm.Stop()
+	for range sent {
 		select {
-		case sIDs := <-ka.activeSessionIDs:
+		case sIDs := <-ka.replyCh:
 			*sessionIDs = append(*sessionIDs, sIDs...)
-		case <-time.After(5 * time.Second):
+		case <-tm.C:
 			return errors.New("timeout executing dialog list")
 		}
 	}
-	return
+	if len(*sessionIDs) == 0 {
+		return utils.ErrNoActiveSession
+	}
+	return nil
 }
 
 // Reload recreates the connection buffers
 // only used on reload
 func (ka *KamailioAgent) Reload() {
 	ka.conns = make([]*kamevapi.KamEvapi, len(ka.cfg.EvapiConns))
+	ka.replyCh = make(chan []*sessions.SessionID, len(ka.cfg.EvapiConns))
 }
