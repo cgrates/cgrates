@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// V1GetResourcesForEvent returns active resource configs matching the event
+// V1GetResourcesForEvent returns active resources matching the event
 func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
@@ -344,6 +344,7 @@ func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithA
 	return nil
 }
 
+// V1GetResourceWithConfig returns a resource alongside its profile.
 func (s *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

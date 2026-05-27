@@ -195,32 +195,32 @@ type ResourceSv1 struct {
 	rsS *resources.ResourceS
 }
 
-// V1GetResourcesForEvent returns active resource configs matching the event
+// GetResourcesForEvent returns active resources matching the event.
 func (rS *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
 	return rS.rsS.V1GetResourcesForEvent(ctx, args, reply)
 }
 
-// V1AuthorizeResources queries service to find if an Usage is allowed
+// AuthorizeResources queries service to find if an Usage is allowed.
 func (rS *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1AuthorizeResources(ctx, args, reply)
 }
 
-// V1AllocateResources is called when a resource requires allocation
+// AllocateResources is called when a resource requires allocation.
 func (rS *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1AllocateResources(ctx, args, reply)
 }
 
-// V1ReleaseResources is called when we need to clear an allocation
+// ReleaseResources is called when we need to clear an allocation.
 func (rS *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	return rS.rsS.V1ReleaseResources(ctx, args, reply)
 }
 
-// V1GetResource returns a resource
+// GetResource returns a resource.
 func (rS *ResourceSv1) GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	return rS.rsS.V1GetResource(ctx, arg, reply)
 }
 
-// V1GetResource returns a resource configuration
+// GetResourceWithConfig returns a resource alongside its profile.
 func (rS *ResourceSv1) GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
 	return rS.rsS.V1GetResourceWithConfig(ctx, arg, reply)
 }
