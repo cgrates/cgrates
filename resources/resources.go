@@ -109,7 +109,7 @@ func (rs matchedResources) recordUsage(ru *utils.ResourceUsage) error {
 	var err error
 	for _, r := range rs {
 		if err = r.recordUsage(ru); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s>cannot record usage, err: %s", utils.ResourceS, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s>cannot record usage, err: %v", utils.ResourceS, err))
 			break
 		}
 		nonReservedIdx++
@@ -117,7 +117,7 @@ func (rs matchedResources) recordUsage(ru *utils.ResourceUsage) error {
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
 			if errClear := r.clearUsage(ru.ID); errClear != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot clear usage, err: %s", utils.ResourceS, errClear.Error()))
+				utils.Logger.Warning(fmt.Sprintf("<%s> cannot clear usage, err: %v", utils.ResourceS, errClear))
 			} // best effort
 		}
 	}
@@ -130,7 +130,7 @@ func (rs matchedResources) clearUsage(ruTntID string) error {
 	for _, r := range rs {
 		if errClear := r.clearUsage(ruTntID); errClear != nil &&
 			r.ttl != nil && *r.ttl != 0 { // we only consider not found error in case of ttl different than 0
-			utils.Logger.Warning(fmt.Sprintf("<%s>, clear ruID: %s, err: %s", utils.ResourceS, ruTntID, errClear.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s>, clear ruID: %s, err: %v", utils.ResourceS, ruTntID, errClear))
 			err = errClear
 		}
 	}
@@ -281,8 +281,8 @@ func (s *ResourceS) storeResources(ctx *context.Context) {
 func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
 	if err := s.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> failed saving Resource with ID: %s, error: %s",
-				utils.ResourceS, r.ID, err.Error()))
+			fmt.Sprintf("<%s> failed saving Resource with ID: %s, error: %v",
+				utils.ResourceS, r.ID, err))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
@@ -290,8 +290,8 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> failed caching Resource with ID: %s, error: %s",
-					utils.ResourceS, tntID, err.Error()))
+				fmt.Sprintf("<%s> failed caching Resource with ID: %s, error: %v",
+					utils.ResourceS, tntID, err))
 			return err
 		}
 	}
@@ -361,8 +361,8 @@ func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *util
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(r.profile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event %+v with %s.",
-					utils.ResourceS, err.Error(), thEv, utils.ThresholdS))
+				fmt.Sprintf("<%s> error: %v processing event %+v with %s",
+					utils.ResourceS, err, thEv, utils.ThresholdS))
 			withErrs = true
 		}
 	}
@@ -505,7 +505,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		}
 	}
 	if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, itemIDs, nil, true, ""); errCh != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> failed caching event resources: %s", utils.ResourceS, errCh.Error()))
+		utils.Logger.Warning(fmt.Sprintf("<%s> failed caching event resources: %v", utils.ResourceS, errCh))
 	}
 	return rs, unlockAll, nil
 }
