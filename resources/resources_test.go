@@ -2284,6 +2284,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		},
 		ttl:     utils.DurationPointer(10 * time.Second),
 		profile: rsPrf,
+		weight:  10,
 	}
 
 	rcv, unlock, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
