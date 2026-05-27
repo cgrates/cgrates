@@ -69,13 +69,14 @@ func (reS *ResourceService) Start() error {
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
-	reS.reS.StartLoop()
-	srv, err := engine.NewService(v1.NewResourceSv1(reS.reS))
+	rs := engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
+	srv, err := engine.NewService(v1.NewResourceSv1(rs))
 	if err != nil {
 		return err
 	}
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
+	rs.StartLoop()
+	reS.reS = rs
 	if !reS.cfg.DispatcherSCfg().Enabled {
 		reS.server.RpcRegister(srv)
 	}
