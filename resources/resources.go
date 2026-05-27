@@ -190,7 +190,6 @@ func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
 		filters:         filters,
 		cm:              cm,
 		storedResources: make(utils.StringSet),
-		loopStopped:     make(chan struct{}),
 		stopBackup:      make(chan struct{}),
 	}
 }
@@ -204,40 +203,41 @@ type ResourceS struct {
 	storedResources utils.StringSet // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
 	stopBackup      chan struct{}   // control storing process
-	loopStopped     chan struct{}
+	backupLoop      sync.WaitGroup
 }
 
 // Reload stops the backupLoop and restarts it
 func (s *ResourceS) Reload(ctx *context.Context) {
 	close(s.stopBackup)
-	<-s.loopStopped // wait until the loop is done
+	s.backupLoop.Wait()
 	s.stopBackup = make(chan struct{})
-	go s.runBackup(ctx)
+	s.StartLoop(ctx)
 }
 
-// StartLoop starts the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (s *ResourceS) StartLoop(ctx *context.Context) {
+	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
 func (s *ResourceS) Shutdown(ctx *context.Context) {
 	close(s.stopBackup)
+	s.backupLoop.Wait()
 	s.storeResources(ctx)
 }
 
 // backup will regularly store resources changed to DB
 func (s *ResourceS) runBackup(ctx *context.Context) {
+	defer s.backupLoop.Done()
 	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
-		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		s.storeResources(ctx)
 		select {
 		case <-s.stopBackup:
-			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}

@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -2053,21 +2054,6 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	}
 }
 
-func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = -1
-	rS := &ResourceS{
-		cfg:         cfg,
-		loopStopped: make(chan struct{}, 1),
-	}
-	rS.runBackup(context.Background())
-	select {
-	case <-rS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
-}
-
 func TestResourcesRunBackupStop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
@@ -2081,9 +2067,8 @@ func TestResourcesRunBackupStop(t *testing.T) {
 		storedResources: utils.StringSet{
 			resID: struct{}{},
 		},
-		cfg:         cfg,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cfg:        cfg,
+		stopBackup: make(chan struct{}),
 	}
 	value := &utils.Resource{
 		Tenant: tnt,
@@ -2095,7 +2080,8 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	// channel after storing the resource. Channel can be
 	// safely closed beforehand.
 	close(rS.stopBackup)
-	rS.runBackup(context.Background())
+	rS.StartLoop(context.Background())
+	rS.backupLoop.Wait()
 
 	want := &utils.Resource{
 		Tenant: tnt,
@@ -2106,45 +2092,30 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	} else if !reflect.DeepEqual(got, want) {
 		t.Errorf("dm.GetResource(%q,%q) = %v, want %v", tnt, resID, got, want)
 	}
-
-	select {
-	case <-rS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
 }
 
 func TestResourcesReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-	rS := &ResourceS{
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cfg:         cfg,
-	}
-	rS.loopStopped <- struct{}{}
-	rS.Reload(context.Background())
-	close(rS.stopBackup)
-	select {
-	case <-rS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+		rS := &ResourceS{
+			stopBackup: make(chan struct{}),
+			cfg:        cfg,
+		}
+		rS.StartLoop(context.Background())
+		rS.Reload(context.Background())
+		close(rS.stopBackup)
+		rS.backupLoop.Wait()
+	})
 }
 
 func TestResourcesStartLoop(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().StoreInterval = -1
-	rS := &ResourceS{
-		loopStopped: make(chan struct{}),
-		cfg:         cfg,
-	}
-	rS.StartLoop(context.Background())
-	select {
-	case <-rS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		rS := NewResourceService(cfg, nil, nil, nil)
+		rS.StartLoop(context.Background())
+		rS.backupLoop.Wait()
+	})
 }
 
 // func TestResourcesMatchingResourcesForEvent2(t *testing.T) {
