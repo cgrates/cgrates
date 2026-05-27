@@ -2079,61 +2079,6 @@ func TestResourcesStartLoop(t *testing.T) {
 	})
 }
 
-// func TestResourcesMatchingResourcesForEvent2(t *testing.T) {
-// 	tmp := engine.Cache
-// 	tmpC := config.CgrConfig()
-// 	defer func() {
-// 		engine.Cache = tmp
-// 		config.SetCgrConfig(tmpC)
-// 	}()
-
-// 	engine.Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.CacheCfg().ReplicationConns = []string{"test"}
-// 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
-// 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-// 	config.SetCgrConfig(cfg)
-// 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-// 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-// dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
-// 	connMgr = engine.NewConnManager(cfg)
-// 	engine.Cache = engine.NewCacheS(cfg, dm, nil,nil)
-
-// 	fltrs := engine.NewFilterS(cfg, nil, dm)
-
-// 	rsPrf := &utils.ResourceProfile{
-// 		Tenant:            "cgrates.org",
-// 		ID:                "RES1",
-// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
-// 		ThresholdIDs:      []string{utils.MetaNone},
-// 		AllocationMessage: "Approved",
-// 		Weight:            10,
-// 		Limit:             10,
-// 		UsageTTL:          time.Minute,
-// 		Stored:            true,
-// 	}
-
-// 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	rS := NewResourceService(cfg, dm, fltrs, connMgr)
-// 	ev := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TestMatchingResourcesForEvent",
-// 		Event: map[string]any{
-// 			utils.AccountField: "1001",
-// 		},
-// 		APIOpts: map[string]any{},
-// 	}
-
-// 	engine.Cache.SetWithoutReplicate(utils.CacheEventResources, ev.ID, utils.StringSet{
-// 		"RES1": struct{}{},
-// 	}, nil, true, utils.NonTransactional)
-// 	_, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID, utils.DurationPointer(10*time.Second))
-// }
-
 func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	tmp := engine.Cache
 	tmpC := config.CgrConfig()
