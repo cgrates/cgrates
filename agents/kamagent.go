@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -47,12 +48,12 @@ var (
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 	connMgr *engine.ConnManager, timezone string, caps *engine.Caps) (*KamailioAgent, error) {
 	ka := &KamailioAgent{
-		cfg:              kaCfg,
-		connMgr:          connMgr,
-		timezone:         timezone,
-		caps:             caps,
-		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
-		activeSessionIDs: make(chan []*sessions.SessionID),
+		cfg:      kaCfg,
+		connMgr:  connMgr,
+		timezone: timezone,
+		caps:     caps,
+		conns:    make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
+		replyCh:  make(chan []*sessions.SessionID, len(kaCfg.EvapiConns)),
 	}
 	srv, err := birpc.NewServiceWithMethodsRename(ka, utils.AgentV1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
@@ -65,13 +66,13 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 }
 
 type KamailioAgent struct {
-	cfg              *config.KamAgentCfg
-	connMgr          *engine.ConnManager
-	timezone         string
-	caps             *engine.Caps
-	conns            []*kamevapi.KamEvapi
-	activeSessionIDs chan []*sessions.SessionID
-	ctx              *context.Context
+	cfg      *config.KamAgentCfg
+	connMgr  *engine.ConnManager
+	timezone string
+	caps     *engine.Caps
+	conns    []*kamevapi.KamEvapi
+	replyCh  chan []*sessions.SessionID
+	ctx      *context.Context
 }
 
 func (self *KamailioAgent) Connect() (err error) {
@@ -306,7 +307,12 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 			OriginID:   originID,
 		})
 	}
-	ka.activeSessionIDs <- sIDs
+	// kamevapi runs onDlgList in its own goroutine, so a blocking send
+	// would leak it.
+	select {
+	case ka.replyCh <- sIDs:
+	default:
+	}
 }
 
 func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
@@ -469,24 +475,29 @@ func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.C
 }
 
 // V1GetActiveSessionIDs returns a list of CGRIDs based on active sessions from agent
-func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
-	kamEv := utils.ToJSON(map[string]string{utils.Event: CGR_DLG_LIST})
-	var sentDLG int
+func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam string, sessionIDs *[]*sessions.SessionID) error {
+	// drop stale replies from a previous sync
+	for len(ka.replyCh) > 0 {
+		<-ka.replyCh
+	}
+	kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
+	var sent int
 	for i, evapi := range ka.conns {
-		if err := evapi.Send(kamEv); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event to connIdx<%v>, error %s",
-				utils.KamailioAgent, i, err.Error()))
+		if err := evapi.Send(string(kamEv)); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event to connIdx<%v>: %v",
+				utils.KamailioAgent, i, err))
 			continue
 		}
-		sentDLG++
+		sent++
 	}
-	if sentDLG == 0 {
-		return
+	if sent == 0 {
+		return errors.New("failed sending dialog list to any connection")
 	}
 	tm := time.NewTimer(config.CgrConfig().GeneralCfg().ReplyTimeout)
-	for i := 0; i < sentDLG; i++ {
+	defer tm.Stop()
+	for range sent {
 		select {
-		case sIDs := <-ka.activeSessionIDs:
+		case sIDs := <-ka.replyCh:
 			*sessionIDs = append(*sessionIDs, sIDs...)
 		case <-tm.C:
 			return errors.New("timeout executing dialog list")
@@ -495,14 +506,14 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam st
 	if len(*sessionIDs) == 0 {
 		return utils.ErrNoActiveSession
 	}
-	tm.Stop()
-	return
+	return nil
 }
 
 // Reload recreates the connection buffers
 // only used on reload
 func (ka *KamailioAgent) Reload() {
 	ka.conns = make([]*kamevapi.KamEvapi, len(ka.cfg.EvapiConns))
+	ka.replyCh = make(chan []*sessions.SessionID, len(ka.cfg.EvapiConns))
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
