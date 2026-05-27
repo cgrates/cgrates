@@ -316,10 +316,11 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
 func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedResources) error {
-	if s.cfg.ResourceSCfg().StoreInterval == 0 {
+	storeInterval := s.cfg.ResourceSCfg().StoreInterval
+	if storeInterval == 0 {
 		return nil
 	}
-	if s.cfg.ResourceSCfg().StoreInterval > 0 {
+	if storeInterval > 0 {
 		s.storedMu.Lock()
 		defer s.storedMu.Unlock()
 	}
@@ -327,7 +328,7 @@ func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedRe
 		if !r.profile.Stored {
 			continue
 		}
-		if s.cfg.ResourceSCfg().StoreInterval > 0 {
+		if storeInterval > 0 {
 			s.storedResources.Add(r.Resource.TenantID())
 			continue
 		}
