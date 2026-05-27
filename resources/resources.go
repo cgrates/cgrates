@@ -36,12 +36,11 @@ import (
 
 // matchedResource holds a resource together with state set during matching.
 type matchedResource struct {
-	Resource   *utils.Resource
-	ttl        *time.Duration
-	totalUsage *float64
-	profile    *utils.ResourceProfile
-	weight     float64
-	lockID     string
+	Resource *utils.Resource
+	ttl      *time.Duration
+	profile  *utils.ResourceProfile
+	weight   float64
+	lockID   string
 }
 
 // removeExpiredUnits removes units which are expired from the resource
@@ -57,22 +56,12 @@ func (r *matchedResource) removeExpiredUnits() {
 		return
 	}
 	for _, rID := range r.Resource.TTLIdx[:firstActive] {
-		ru, has := r.Resource.Usages[rID]
-		if !has {
+		if _, has := r.Resource.Usages[rID]; !has {
 			continue
 		}
 		delete(r.Resource.Usages, rID)
-		if r.totalUsage != nil { //  total usage was not yet calculated so we do not need to update it
-			*r.totalUsage -= ru.Units
-			if *r.totalUsage < 0 { // something went wrong
-				utils.Logger.Warning(
-					fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.Resource.ID, *r.totalUsage))
-				r.totalUsage = nil
-			}
-		}
 	}
 	r.Resource.TTLIdx = r.Resource.TTLIdx[firstActive:]
-	r.totalUsage = nil
 }
 
 // recordUsage records a new usage
@@ -88,9 +77,6 @@ func (r *matchedResource) recordUsage(ru *utils.ResourceUsage) error {
 		ru.ExpiryTime = time.Now().Add(*r.ttl)
 	}
 	r.Resource.Usages[ru.ID] = ru
-	if r.totalUsage != nil {
-		*r.totalUsage += ru.Units
-	}
 	if !ru.ExpiryTime.IsZero() {
 		r.Resource.TTLIdx = append(r.Resource.TTLIdx, ru.ID)
 	}
@@ -110,9 +96,6 @@ func (r *matchedResource) clearUsage(ruID string) error {
 				break
 			}
 		}
-	}
-	if r.totalUsage != nil {
-		*r.totalUsage -= ru.Units
 	}
 	delete(r.Resource.Usages, ruID)
 	return nil
