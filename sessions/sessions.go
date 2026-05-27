@@ -1287,7 +1287,8 @@ func (sS *SessionS) syncSessions() {
 			defer cancel()
 			var sessionIDs []*SessionID
 			if err := clnt.conn.Call(ctx, utils.SessionSv1GetActiveSessionIDs,
-				"", &sessionIDs); err != nil {
+				"", &sessionIDs); err != nil &&
+				err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> failed to retrieve active session IDs: %v", utils.SessionS, err))
 				sessionIDs = nil
