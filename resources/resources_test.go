@@ -81,7 +81,7 @@ func newTestMatchedResources() (ru1, ru2 *utils.ResourceUsage, r1, r2 *matchedRe
 		Units:      2,
 	}
 	r1 = &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
 			Usages: map[string]*utils.ResourceUsage{
@@ -105,7 +105,7 @@ func newTestMatchedResources() (ru1, ru2 *utils.ResourceUsage, r1, r2 *matchedRe
 		},
 	}
 	r2 = &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL2",
 			Usages: map[string]*utils.ResourceUsage{
@@ -129,7 +129,7 @@ func newTestMatchedResources() (ru1, ru2 *utils.ResourceUsage, r1, r2 *matchedRe
 
 func TestResourcesRecordUsage(t *testing.T) {
 	testStruct := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
 			Usages: map[string]*utils.ResourceUsage{
@@ -149,7 +149,7 @@ func TestResourcesRecordUsage(t *testing.T) {
 		Units:      1,
 	}
 	expStruct := matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
 			Usages: map[string]*utils.ResourceUsage{
@@ -179,7 +179,7 @@ func TestResourcesRecordUsage(t *testing.T) {
 
 func TestResourcesClearUsage(t *testing.T) {
 	testStruct := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
 			Usages: map[string]*utils.ResourceUsage{
@@ -199,7 +199,7 @@ func TestResourcesClearUsage(t *testing.T) {
 		},
 	}
 	expStruct := matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "test_tenant",
 			ID:     "test_id",
 			Usages: map[string]*utils.ResourceUsage{
@@ -230,7 +230,7 @@ func TestResourceRecordUsage(t *testing.T) {
 		if err := r1.recordUsage(ru1); err == nil {
 			t.Error("duplicate ResourceUsage id should not be allowed")
 		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
+		if _, found := r1.resource.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
 	}
@@ -247,7 +247,7 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 	}
 
 	r1 = &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
 			Usages: map[string]*utils.ResourceUsage{
@@ -259,11 +259,11 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 
 	r1.removeExpiredUnits()
 
-	if len(r1.Resource.Usages) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.Usages))
+	if len(r1.resource.Usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.resource.Usages))
 	}
-	if len(r1.Resource.TTLIdx) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.TTLIdx))
+	if len(r1.resource.TTLIdx) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.resource.TTLIdx))
 	}
 }
 func TestResourceUsedUnits(t *testing.T) {
@@ -275,7 +275,7 @@ func TestResourceUsedUnits(t *testing.T) {
 	}
 
 	r1 := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
 			Usages: map[string]*utils.ResourceUsage{
@@ -285,7 +285,7 @@ func TestResourceUsedUnits(t *testing.T) {
 		},
 	}
 
-	if usedUnits := r1.Resource.TotalUsage(); usedUnits != 1 {
+	if usedUnits := r1.resource.TotalUsage(); usedUnits != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, usedUnits)
 	}
 }
@@ -294,16 +294,16 @@ func TestResourceClearUsage(t *testing.T) {
 	ru1, ru2, r1, r2 := newTestMatchedResources()
 
 	r1.clearUsage(ru1.ID)
-	if len(r1.Resource.Usages) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.Usages))
+	if len(r1.resource.Usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.resource.Usages))
 	}
-	if r1.Resource.TotalUsage() != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, r1.Resource.TotalUsage())
+	if r1.resource.TotalUsage() != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, r1.resource.TotalUsage())
 	}
 	if err := r2.clearUsage(ru2.ID); err != nil {
 		t.Error(err)
-	} else if len(r2.Resource.Usages) != 0 {
-		t.Errorf("Unexpected usages %+v", r2.Resource.Usages)
+	} else if len(r2.resource.Usages) != 0 {
+		t.Errorf("Unexpected usages %+v", r2.resource.Usages)
 	}
 }
 func TestResourceRecordUsages(t *testing.T) {
@@ -330,7 +330,7 @@ func TestResourceAllocateResource(t *testing.T) {
 	}
 
 	r1 := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
 			Usages: map[string]*utils.ResourceUsage{
@@ -355,7 +355,7 @@ func TestResourceAllocateResource(t *testing.T) {
 	}
 
 	r2 := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RL2",
 			// AllocationMessage: "ALLOC2",
@@ -666,7 +666,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, m
 
 	resources := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: tenant,
 				ID:     "ResourceProfile1",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -675,7 +675,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, m
 			profile: prfs[0],
 		},
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: tenant,
 				ID:     "ResourceProfile2",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -684,7 +684,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, m
 			profile: prfs[1],
 		},
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: tenant,
 				ID:     "ResourceProfile3",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -734,7 +734,7 @@ func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, m
 		dm.SetResourceProfile(context.TODO(), prf, true)
 	}
 	for _, res := range resources {
-		dm.SetResource(context.TODO(), res.Resource)
+		dm.SetResource(context.TODO(), res.resource)
 	}
 	return rS, prfs, resources, events
 }
@@ -750,10 +750,10 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			continue
 		}
 		unlock()
-		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
-			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
-		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
-			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
+		if !reflect.DeepEqual(resources[i].resource.Tenant, mres[0].resource.Tenant) {
+			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].resource.Tenant, mres[0].resource.Tenant)
+		} else if !reflect.DeepEqual(resources[i].resource.ID, mres[0].resource.ID) {
+			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].resource.ID, mres[0].resource.ID)
 		} else if !reflect.DeepEqual(resources[i].profile, mres[0].profile) {
 			t.Errorf("Event %d profile: expecting %+v, received %+v", i, resources[i].profile, mres[0].profile)
 		}
@@ -804,11 +804,11 @@ func TestResourceUsageTTL(t *testing.T) {
 				t.Fatalf("Error: %+v", err)
 			}
 			unlock()
-			if mres[0].Resource.Tenant != prfs[0].Tenant {
-				t.Errorf("Tenant: expecting %+v, received %+v", prfs[0].Tenant, mres[0].Resource.Tenant)
+			if mres[0].resource.Tenant != prfs[0].Tenant {
+				t.Errorf("Tenant: expecting %+v, received %+v", prfs[0].Tenant, mres[0].resource.Tenant)
 			}
-			if mres[0].Resource.ID != prfs[0].ID {
-				t.Errorf("ID: expecting %+v, received %+v", prfs[0].ID, mres[0].Resource.ID)
+			if mres[0].resource.ID != prfs[0].ID {
+				t.Errorf("ID: expecting %+v, received %+v", prfs[0].ID, mres[0].resource.ID)
 			}
 			if !reflect.DeepEqual(mres[0].profile, prfs[0]) {
 				t.Errorf("profile: expecting %+v, received %+v", prfs[0], mres[0].profile)
@@ -832,10 +832,10 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			continue
 		}
 		unlock()
-		if !reflect.DeepEqual(resources[i].Resource.Tenant, mres[0].Resource.Tenant) {
-			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].Resource.Tenant, mres[0].Resource.Tenant)
-		} else if !reflect.DeepEqual(resources[i].Resource.ID, mres[0].Resource.ID) {
-			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].Resource.ID, mres[0].Resource.ID)
+		if !reflect.DeepEqual(resources[i].resource.Tenant, mres[0].resource.Tenant) {
+			t.Errorf("Event %d tenant: expecting %+v, received %+v", i, resources[i].resource.Tenant, mres[0].resource.Tenant)
+		} else if !reflect.DeepEqual(resources[i].resource.ID, mres[0].resource.ID) {
+			t.Errorf("Event %d ID: expecting %+v, received %+v", i, resources[i].resource.ID, mres[0].resource.ID)
 		} else if !reflect.DeepEqual(resources[i].profile, mres[0].profile) {
 			t.Errorf("Event %d profile: expecting %+v, received %+v", i, resources[i].profile, mres[0].profile)
 		}
@@ -876,7 +876,7 @@ func TestResourceCaching(t *testing.T) {
 
 	resources := matchedResources{
 		{
-			Resource: res,
+			resource: res,
 			profile:  resProf,
 		},
 	}
@@ -898,10 +898,10 @@ func TestResourceCaching(t *testing.T) {
 		t.Fatal(err)
 	}
 	unlock()
-	if !reflect.DeepEqual(resources[0].Resource.Tenant, mres[0].Resource.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", resources[0].Resource.Tenant, mres[0].Resource.Tenant)
-	} else if !reflect.DeepEqual(resources[0].Resource.ID, mres[0].Resource.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", resources[0].Resource.ID, mres[0].Resource.ID)
+	if !reflect.DeepEqual(resources[0].resource.Tenant, mres[0].resource.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].resource.Tenant, mres[0].resource.Tenant)
+	} else if !reflect.DeepEqual(resources[0].resource.ID, mres[0].resource.ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].resource.ID, mres[0].resource.ID)
 	} else if !reflect.DeepEqual(resources[0].profile, mres[0].profile) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].profile, mres[0].profile)
 	} else if !reflect.DeepEqual(resources[0].ttl, mres[0].ttl) {
@@ -911,7 +911,7 @@ func TestResourceCaching(t *testing.T) {
 
 func TestResourceRemoveExpiredUnitsKeepsActive(t *testing.T) {
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			TTLIdx: []string{"ResGroup1", "ResGroup2", "ResGroup3"},
 			Usages: map[string]*utils.ResourceUsage{
 				"ResGroup2": {
@@ -929,7 +929,7 @@ func TestResourceRemoveExpiredUnitsKeepsActive(t *testing.T) {
 	}
 
 	exp := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			TTLIdx: []string{"ResGroup3"},
 			Usages: map[string]*utils.ResourceUsage{
 				"ResGroup3": {
@@ -974,7 +974,7 @@ func TestResourcesAvailable(t *testing.T) {
 
 func TestResourcesRecordUsageZeroTTL(t *testing.T) {
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
 					Tenant: "cgrates.org",
@@ -997,7 +997,7 @@ func TestResourcesRecordUsageZeroTTL(t *testing.T) {
 
 func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
 					Tenant: "cgrates.org",
@@ -1014,7 +1014,7 @@ func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
 	}
 
 	exp := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Usages: map[string]*utils.ResourceUsage{
 				"RU_1": {
 					Tenant: "cgrates.org",
@@ -1030,7 +1030,7 @@ func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
 		ttl: utils.DurationPointer(1 * time.Second),
 	}
 	err := r.recordUsage(ru)
-	exp.Resource.Usages[ru.ID].ExpiryTime = r.Resource.Usages[ru.ID].ExpiryTime
+	exp.resource.Usages[ru.ID].ExpiryTime = r.resource.Usages[ru.ID].ExpiryTime
 
 	if err != nil {
 		t.Error(err)
@@ -1062,7 +1062,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 
 	rs := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"RU_1": {
 						Tenant: "cgrates.org",
@@ -1078,7 +1078,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 			ttl: utils.DurationPointer(1 * time.Second),
 		},
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"RU_3": {
 						Tenant: "cgrates.org",
@@ -1102,7 +1102,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 
 	exp := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"RU_1": {
 						Tenant: "cgrates.org",
@@ -1118,7 +1118,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 			ttl: utils.DurationPointer(1 * time.Second),
 		},
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"RU_3": {
 						Tenant: "cgrates.org",
@@ -1143,7 +1143,7 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 
 	utils.Logger = utils.NewStdLoggerWithWriter(&mockWriter{
 		WriteF: func(p []byte) (n int, err error) {
-			delete(rs[0].Resource.Usages, "RU_4")
+			delete(rs[0].resource.Usages, "RU_4")
 			return buf.Write(p)
 		},
 	}, "", 4)
@@ -1175,7 +1175,7 @@ func TestResourceClearUsageErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 	rs := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"RU_1": {
 						Tenant: "cgrates.org",
@@ -1227,7 +1227,7 @@ func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
 func TestResourcesAllocateResourceDryRun(t *testing.T) {
 	rs := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "Res_1",
 				Usages: map[string]*utils.ResourceUsage{
@@ -1381,7 +1381,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 	rs := matchedResources{
 		{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Usages: map[string]*utils.ResourceUsage{
 					"": {},
 				},
@@ -1413,7 +1413,7 @@ func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 		cfg: cfg,
 	}
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
@@ -1469,7 +1469,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	}
 	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
@@ -1535,7 +1535,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	}
 	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
@@ -1565,7 +1565,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 		cfg: cfg,
 	}
 	r := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES_1",
 		},
@@ -1915,7 +1915,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	exp := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES1",
 			Usages: make(map[string]*utils.ResourceUsage),
@@ -1997,7 +1997,7 @@ func TestStoreMatchedResources(t *testing.T) {
 	t.Run("store interval zero is a no-op", func(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 0)
 		res := matchedResources{{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -2013,7 +2013,7 @@ func TestStoreMatchedResources(t *testing.T) {
 		rS, _ := newRSWithInterval(t, 10*time.Second)
 		res := matchedResources{
 			{
-				Resource: &utils.Resource{
+				resource: &utils.Resource{
 					Tenant: "cgrates.org",
 					ID:     "RES1",
 					Usages: map[string]*utils.ResourceUsage{},
@@ -2021,7 +2021,7 @@ func TestStoreMatchedResources(t *testing.T) {
 				profile: resPrf,
 			},
 			{
-				Resource: &utils.Resource{
+				resource: &utils.Resource{
 					Tenant: "cgrates.org",
 					ID:     "RES2",
 					Usages: map[string]*utils.ResourceUsage{},
@@ -2043,7 +2043,7 @@ func TestStoreMatchedResources(t *testing.T) {
 	t.Run("negative interval stores to DB", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
 		res := matchedResources{{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -2065,7 +2065,7 @@ func TestStoreMatchedResources(t *testing.T) {
 	t.Run("Stored false skips store", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
 		res := matchedResources{{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{},
@@ -2084,7 +2084,7 @@ func TestStoreMatchedResources(t *testing.T) {
 	t.Run("stores resource with usages", func(t *testing.T) {
 		rS, dm := newRSWithInterval(t, -1)
 		res := matchedResources{{
-			Resource: &utils.Resource{
+			resource: &utils.Resource{
 				Tenant: "cgrates.org",
 				ID:     "RES1",
 				Usages: map[string]*utils.ResourceUsage{

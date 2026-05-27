@@ -36,7 +36,7 @@ import (
 
 // matchedResource holds a resource together with state set during matching.
 type matchedResource struct {
-	Resource *utils.Resource
+	resource *utils.Resource
 	ttl      *time.Duration
 	profile  *utils.ResourceProfile
 	weight   float64
@@ -46,8 +46,8 @@ type matchedResource struct {
 // removeExpiredUnits removes units which are expired from the resource
 func (r *matchedResource) removeExpiredUnits() {
 	var firstActive int
-	for _, rID := range r.Resource.TTLIdx {
-		if ru, has := r.Resource.Usages[rID]; has && ru.IsActive(time.Now()) {
+	for _, rID := range r.resource.TTLIdx {
+		if ru, has := r.resource.Usages[rID]; has && ru.IsActive(time.Now()) {
 			break
 		}
 		firstActive++
@@ -55,18 +55,18 @@ func (r *matchedResource) removeExpiredUnits() {
 	if firstActive == 0 {
 		return
 	}
-	for _, rID := range r.Resource.TTLIdx[:firstActive] {
-		if _, has := r.Resource.Usages[rID]; !has {
+	for _, rID := range r.resource.TTLIdx[:firstActive] {
+		if _, has := r.resource.Usages[rID]; !has {
 			continue
 		}
-		delete(r.Resource.Usages, rID)
+		delete(r.resource.Usages, rID)
 	}
-	r.Resource.TTLIdx = r.Resource.TTLIdx[firstActive:]
+	r.resource.TTLIdx = r.resource.TTLIdx[firstActive:]
 }
 
 // recordUsage records a new usage
 func (r *matchedResource) recordUsage(ru *utils.ResourceUsage) error {
-	if _, hasID := r.Resource.Usages[ru.ID]; hasID {
+	if _, hasID := r.resource.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
 	if r.ttl != nil && *r.ttl != -1 {
@@ -76,28 +76,28 @@ func (r *matchedResource) recordUsage(ru *utils.ResourceUsage) error {
 		ru = ru.Clone() // don't influence the initial ru
 		ru.ExpiryTime = time.Now().Add(*r.ttl)
 	}
-	r.Resource.Usages[ru.ID] = ru
+	r.resource.Usages[ru.ID] = ru
 	if !ru.ExpiryTime.IsZero() {
-		r.Resource.TTLIdx = append(r.Resource.TTLIdx, ru.ID)
+		r.resource.TTLIdx = append(r.resource.TTLIdx, ru.ID)
 	}
 	return nil
 }
 
 // clearUsage clears the usage for an ID
 func (r *matchedResource) clearUsage(ruID string) error {
-	ru, hasIt := r.Resource.Usages[ruID]
+	ru, hasIt := r.resource.Usages[ruID]
 	if !hasIt {
 		return fmt.Errorf("cannot find usage record with id: %s", ruID)
 	}
 	if !ru.ExpiryTime.IsZero() {
-		for i, ruIDIdx := range r.Resource.TTLIdx {
+		for i, ruIDIdx := range r.resource.TTLIdx {
 			if ruIDIdx == ruID {
-				r.Resource.TTLIdx = append(r.Resource.TTLIdx[:i], r.Resource.TTLIdx[i+1:]...)
+				r.resource.TTLIdx = append(r.resource.TTLIdx[:i], r.resource.TTLIdx[i+1:]...)
 				break
 			}
 		}
 	}
-	delete(r.Resource.Usages, ruID)
+	delete(r.resource.Usages, ruID)
 	return nil
 }
 
@@ -146,11 +146,11 @@ func (rs matchedResources) allocateResource(ru *utils.ResourceUsage, dryRun bool
 	}
 	for _, r := range rs {
 		r.removeExpiredUnits()
-		if _, hasID := r.Resource.Usages[ru.ID]; hasID && !dryRun { // update
+		if _, hasID := r.resource.Usages[ru.ID]; hasID && !dryRun { // update
 			_ = r.clearUsage(ru.ID) // can't fail: we just checked hasID
 		}
 		if allocMsg == "" &&
-			(r.profile.Limit >= r.Resource.TotalUsage()+ru.Units || r.profile.Limit == -1) {
+			(r.profile.Limit >= r.resource.TotalUsage()+ru.Units || r.profile.Limit == -1) {
 			allocMsg = utils.FirstNonEmpty(r.profile.AllocationMessage, r.profile.ID)
 		}
 	}
@@ -313,10 +313,10 @@ func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedRe
 			continue
 		}
 		if storeInterval > 0 {
-			s.storedResources.Add(r.Resource.TenantID())
+			s.storedResources.Add(r.resource.TenantID())
 			continue
 		}
-		if err := s.storeResource(ctx, r.Resource); err != nil {
+		if err := s.storeResource(ctx, r.resource); err != nil {
 			return err
 		}
 	}
@@ -347,12 +347,12 @@ func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *util
 		opts[utils.OptsThresholdsProfileIDs] = r.profile.ThresholdIDs
 
 		thEv := &utils.CGREvent{
-			Tenant: r.Resource.Tenant,
+			Tenant: r.resource.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				utils.EventType:  utils.ResourceUpdate,
-				utils.ResourceID: r.Resource.ID,
-				utils.Usage:      r.Resource.TotalUsage(),
+				utils.ResourceID: r.resource.ID,
+				utils.Usage:      r.resource.TotalUsage(),
 			},
 			APIOpts: opts,
 		}
@@ -470,7 +470,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		}
 
 		r := &matchedResource{
-			Resource: res,
+			resource: res,
 			profile:  rp,
 			weight:   weight,
 			lockID:   lkID,

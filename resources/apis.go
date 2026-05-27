@@ -83,7 +83,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 	defer unlock()
 	out := make([]*utils.Resource, len(mtcRLs))
 	for i, mr := range mtcRLs {
-		out[i] = mr.Resource
+		out[i] = mr.resource
 	}
 	*reply = out
 	return nil

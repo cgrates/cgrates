@@ -1435,7 +1435,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 		UsageTTL: time.Minute,
 	}
 	rs := &matchedResource{
-		Resource: &utils.Resource{
+		resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "RES1",
 			Usages: map[string]*utils.ResourceUsage{
@@ -1455,7 +1455,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = dm.SetResource(context.Background(), rs.Resource)
+	err = dm.SetResource(context.Background(), rs.resource)
 	if err != nil {
 		t.Error(err)
 	}
