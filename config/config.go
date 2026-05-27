@@ -211,7 +211,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
 		}},
 		chargerSCfg: &ChargerSCfg{Conns: make(map[string][]*DynamicConns)},
-		resourceSCfg: &ResourceSConfig{Conns: make(map[string][]*DynamicConns), Opts: &ResourcesOpts{
+		resourceSCfg: &ResourceSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ResourcesOpts{
 			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
 			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
 			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
@@ -374,7 +374,7 @@ type CGRConfig struct {
 	janusAgentCfg      *JanusAgentCfg      // JanusAgent config
 	attributeSCfg      *AttributeSCfg      // AttributeS config
 	chargerSCfg        *ChargerSCfg        // ChargerS config
-	resourceSCfg       *ResourceSConfig    // ResourceS config
+	resourceSCfg       *ResourceSCfg       // ResourceS config
 	ipsCfg             *IPsCfg             // IPs config
 	statsCfg           *StatSCfg           // StatS config
 	thresholdSCfg      *ThresholdSCfg      // ThresholdS config
@@ -492,7 +492,7 @@ func (cfg *CGRConfig) ChargerSCfg() *ChargerSCfg {
 }
 
 // ResourceSCfg returns the config for ResourceS
-func (cfg *CGRConfig) ResourceSCfg() *ResourceSConfig { // not done
+func (cfg *CGRConfig) ResourceSCfg() *ResourceSCfg {
 	cfg.lks[ResourceSJSON].Lock()
 	defer cfg.lks[ResourceSJSON].Unlock()
 	return cfg.resourceSCfg

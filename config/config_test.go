@@ -620,7 +620,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
-	eResLiCfg := &ResourceSConfig{
+	eResLiCfg := &ResourceSCfg{
 		Enabled:                false,
 		IndexedSelects:         true,
 		Conns:                  map[string][]*DynamicConns{},
@@ -1659,8 +1659,8 @@ func TestChargersConfig(t *testing.T) {
 	}
 }
 
-func TestResourceSConfig(t *testing.T) {
-	expected := &ResourceSConfig{
+func TestResourceSCfg(t *testing.T) {
+	expected := &ResourceSCfg{
 		Enabled:                false,
 		IndexedSelects:         true,
 		StoreInterval:          0,
