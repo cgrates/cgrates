@@ -557,17 +557,18 @@ func (rS *ResourceService) storeResource(r *Resource) (err error) {
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
 func (rS *ResourceService) storeMatchedResources(mtcRLs Resources) (err error) {
-	if rS.cgrcfg.ResourceSCfg().StoreInterval == 0 {
+	storeInterval := rS.cgrcfg.ResourceSCfg().StoreInterval
+	if storeInterval == 0 {
 		return
 	}
-	if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+	if storeInterval > 0 {
 		rS.storedMu.Lock()
 		defer rS.storedMu.Unlock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
 			*r.dirty = true // mark it to be saved
-			if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+			if storeInterval > 0 {
 				rS.storedResources.Add(r.TenantID())
 				continue
 			}
