@@ -219,19 +219,11 @@ func TestResourceRecordUsage(t *testing.T) {
 func TestResourceRemoveExpiredUnits(t *testing.T) {
 	var r1 *matchedResource
 	var ru1 *utils.ResourceUsage
-	var ru2 *utils.ResourceUsage
 	ru1 = &utils.ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      1,
-	}
-
-	ru2 = &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
 	}
 
 	r1 = &matchedResource{
@@ -243,34 +235,6 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		profile: &utils.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
-	}
-
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-	}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
 	}
 
 	r1.removeExpiredUnits()
@@ -290,13 +254,6 @@ func TestResourceUsedUnits(t *testing.T) {
 		Units:      1,
 	}
 
-	ru2 := &utils.ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
-	}
-
 	r1 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -306,35 +263,8 @@ func TestResourceUsedUnits(t *testing.T) {
 			},
 			TTLIdx: []string{ru1.ID},
 		},
-		profile: &utils.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
 	}
 
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-	}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
 	if usedUnits := r1.Resource.TotalUsage(); usedUnits != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, usedUnits)
 	}
@@ -380,16 +310,6 @@ func TestResourceClearUsage(t *testing.T) {
 		},
 	}
 
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-	}
 	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -412,9 +332,6 @@ func TestResourceClearUsage(t *testing.T) {
 		},
 	}
 
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
 	r1.clearUsage(ru1.ID)
 	if len(r1.Resource.Usages) != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Resource.Usages))
@@ -468,16 +385,6 @@ func TestResourceRecordUsages(t *testing.T) {
 		},
 	}
 
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-	}
 	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -501,12 +408,6 @@ func TestResourceRecordUsages(t *testing.T) {
 	}
 
 	rs := matchedResources{r2, r1}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
 	if err := rs.recordUsage(ru1); err == nil {
 		t.Error("should get duplicated error")
 	}
@@ -551,16 +452,6 @@ func TestResourceAllocateResource(t *testing.T) {
 		},
 	}
 
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Resource.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-	}
 	r2 := &matchedResource{
 		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
@@ -584,12 +475,6 @@ func TestResourceAllocateResource(t *testing.T) {
 	}
 
 	rs := matchedResources{r1, r2}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
-	r1.Resource.Usages = map[string]*utils.ResourceUsage{
-		ru1.ID: ru1,
-	}
 	if err := rs.recordUsage(ru1); err == nil {
 		t.Error("should get duplicated error")
 	}
