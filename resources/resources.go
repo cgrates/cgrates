@@ -281,8 +281,8 @@ func (s *ResourceS) storeResources(ctx *context.Context) {
 func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
 	if err := s.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
-				r.ID, err.Error()))
+			fmt.Sprintf("<%s> failed saving Resource with ID: %s, error: %s",
+				utils.ResourceS, r.ID, err.Error()))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
@@ -290,8 +290,8 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<ResourceS> failed caching Resource with ID: %s, error: %s",
-					tntID, err.Error()))
+				fmt.Sprintf("<%s> failed caching Resource with ID: %s, error: %s",
+					utils.ResourceS, tntID, err.Error()))
 			return err
 		}
 	}
