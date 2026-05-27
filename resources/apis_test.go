@@ -1447,9 +1447,8 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 			},
 			TTLIdx: []string{},
 		},
-		totalUsage: utils.Float64Pointer(10),
-		ttl:        utils.DurationPointer(time.Minute),
-		profile:    rsPrf,
+		ttl:     utils.DurationPointer(time.Minute),
+		profile: rsPrf,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
