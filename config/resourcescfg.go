@@ -38,7 +38,7 @@ type ResourcesOpts struct {
 	Units    []*DynamicFloat64Opt
 }
 
-// ResourceSConfig is resorces section config
+// ResourceSConfig is resources section config
 type ResourceSConfig struct {
 	Enabled                bool
 	IndexedSelects         bool
@@ -53,13 +53,13 @@ type ResourceSConfig struct {
 	Opts                   *ResourcesOpts
 }
 
-// loadResourceSCfg loads the ResourceS section of the configuration
-func (rlcfg *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+// Load loads the ResourceS section of the configuration
+func (c *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRLSCfg := new(ResourceSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
 		return
 	}
-	return rlcfg.loadFromJSONCfg(jsnRLSCfg)
+	return c.loadFromJSONCfg(jsnRLSCfg)
 }
 
 func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err error) {
@@ -87,89 +87,89 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 	return
 }
 
-func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
+func (c *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
 	if jsnCfg.Enabled != nil {
-		rlcfg.Enabled = *jsnCfg.Enabled
+		c.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Indexed_selects != nil {
-		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
+		c.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Conns != nil {
 		tagged := tagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
-			rlcfg.Conns[connType] = opts
+			c.Conns[connType] = opts
 		}
 	}
 	if jsnCfg.Store_interval != nil {
-		if rlcfg.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
+		if c.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		rlcfg.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
+		c.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		rlcfg.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
+		c.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		rlcfg.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
+		c.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Exists_indexed_fields != nil {
-		rlcfg.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
+		c.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Exists_indexed_fields))
 	}
 	if jsnCfg.Notexists_indexed_fields != nil {
-		rlcfg.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
+		c.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
-		rlcfg.NestedFields = *jsnCfg.Nested_fields
+		c.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		err = rlcfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = c.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (rlcfg ResourceSConfig) AsMapInterface() any {
+func (c ResourceSConfig) AsMapInterface() any {
 	opts := map[string]any{
-		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
-		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
-		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+		utils.MetaUsageIDCfg:  c.Opts.UsageID,
+		utils.MetaUsageTTLCfg: c.Opts.UsageTTL,
+		utils.MetaUnitsCfg:    c.Opts.Units,
 	}
 	mp := map[string]any{
-		utils.EnabledCfg:        rlcfg.Enabled,
-		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
-		utils.ConnsCfg:          stripConns(rlcfg.Conns),
-		utils.NestedFieldsCfg:   rlcfg.NestedFields,
+		utils.EnabledCfg:        c.Enabled,
+		utils.IndexedSelectsCfg: c.IndexedSelects,
+		utils.ConnsCfg:          stripConns(c.Conns),
+		utils.NestedFieldsCfg:   c.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
 		utils.OptsCfg:           opts,
 	}
-	if rlcfg.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rlcfg.StringIndexedFields)
+	if c.StringIndexedFields != nil {
+		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*c.StringIndexedFields)
 	}
-	if rlcfg.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*rlcfg.PrefixIndexedFields)
+	if c.PrefixIndexedFields != nil {
+		mp[utils.PrefixIndexedFieldsCfg] = slices.Clone(*c.PrefixIndexedFields)
 	}
-	if rlcfg.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*rlcfg.SuffixIndexedFields)
+	if c.SuffixIndexedFields != nil {
+		mp[utils.SuffixIndexedFieldsCfg] = slices.Clone(*c.SuffixIndexedFields)
 	}
-	if rlcfg.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*rlcfg.ExistsIndexedFields)
+	if c.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = slices.Clone(*c.ExistsIndexedFields)
 	}
-	if rlcfg.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rlcfg.NotExistsIndexedFields)
+	if c.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*c.NotExistsIndexedFields)
 	}
-	if rlcfg.StoreInterval != 0 {
-		mp[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
+	if c.StoreInterval != 0 {
+		mp[utils.StoreIntervalCfg] = c.StoreInterval.String()
 	}
 	return mp
 }
 
-func (ResourceSConfig) SName() string               { return ResourceSJSON }
-func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
+func (ResourceSConfig) SName() string           { return ResourceSJSON }
+func (c ResourceSConfig) CloneSection() Section { return c.Clone() }
 
 func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	var usageID []*DynamicStringOpt
@@ -193,30 +193,30 @@ func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 }
 
 // Clone returns a deep copy of ResourceSConfig
-func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
+func (c ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	cln = &ResourceSConfig{
-		Enabled:        rlcfg.Enabled,
-		IndexedSelects: rlcfg.IndexedSelects,
-		Conns:          CloneConnsMap(rlcfg.Conns),
-		StoreInterval:  rlcfg.StoreInterval,
-		NestedFields:   rlcfg.NestedFields,
-		Opts:           rlcfg.Opts.Clone(),
+		Enabled:        c.Enabled,
+		IndexedSelects: c.IndexedSelects,
+		Conns:          CloneConnsMap(c.Conns),
+		StoreInterval:  c.StoreInterval,
+		NestedFields:   c.NestedFields,
+		Opts:           c.Opts.Clone(),
 	}
 
-	if rlcfg.StringIndexedFields != nil {
-		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.StringIndexedFields))
+	if c.StringIndexedFields != nil {
+		cln.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*c.StringIndexedFields))
 	}
-	if rlcfg.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.PrefixIndexedFields))
+	if c.PrefixIndexedFields != nil {
+		cln.PrefixIndexedFields = utils.SliceStringPointer(slices.Clone(*c.PrefixIndexedFields))
 	}
-	if rlcfg.SuffixIndexedFields != nil {
-		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.SuffixIndexedFields))
+	if c.SuffixIndexedFields != nil {
+		cln.SuffixIndexedFields = utils.SliceStringPointer(slices.Clone(*c.SuffixIndexedFields))
 	}
-	if rlcfg.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.ExistsIndexedFields))
+	if c.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*c.ExistsIndexedFields))
 	}
-	if rlcfg.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*rlcfg.NotExistsIndexedFields))
+	if c.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*c.NotExistsIndexedFields))
 	}
 	return
 }
@@ -227,7 +227,7 @@ type ResourcesOptsJson struct {
 	Units    []*DynamicInterfaceOpt `json:"*units"`
 }
 
-// ResourceLimiter service config section
+// ResourceSJsonCfg is the resources section JSON config
 type ResourceSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
