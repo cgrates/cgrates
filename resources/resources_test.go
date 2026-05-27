@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"testing/synctest"
 	"time"
@@ -2098,14 +2099,25 @@ func TestResourcesReload(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-		rS := &ResourceS{
-			stopBackup: make(chan struct{}),
-			cfg:        cfg,
-		}
+		rS := NewResourceService(cfg, nil, nil, nil)
 		rS.StartLoop(context.Background())
 		rS.Reload(context.Background())
-		close(rS.stopBackup)
-		rS.backupLoop.Wait()
+		rS.Shutdown(context.Background())
+		rS.Shutdown(context.Background())
+		rS.Reload(context.Background())
+	})
+}
+
+func TestResourcesReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+		rS := NewResourceService(cfg, nil, nil, nil)
+		rS.StartLoop(context.Background())
+		var wg sync.WaitGroup
+		wg.Go(func() { rS.Reload(context.Background()) })
+		wg.Go(func() { rS.Shutdown(context.Background()) })
+		wg.Wait()
 	})
 }
 

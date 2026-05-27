@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,13 +36,12 @@ func NewResourceService(cfg *config.CGRConfig) *ResourceService {
 
 // ResourceService implements Service interface
 type ResourceService struct {
-	mu  sync.RWMutex
-	cfg *config.CGRConfig
-	reS *resources.ResourceS
+	cfg       *config.CGRConfig
+	resources *resources.ResourceS
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+func (s *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -53,7 +50,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.FilterS,
 			utils.DB,
 		},
-		reS.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -64,49 +61,46 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
 		utils.CacheResourceFilterIndexes); err != nil {
-		return
+		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	reS.mu.Lock()
-	defer reS.mu.Unlock()
-	reS.reS = resources.NewResourceService(reS.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
-	reS.reS.StartLoop(context.TODO())
-	srv, _ := engine.NewService(reS.reS)
-	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	rs := resources.NewResourceService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	srv, err := engine.NewService(rs)
+	if err != nil {
+		return err
+	}
+	rs.StartLoop(context.TODO())
+	s.resources = rs
+	// srv, _ := birpc.NewService(apis.NewResourceSv1(s.resources), "", false)
+	for _, svc := range srv {
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.ResourceS, srv)
-	return
+	return nil
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
-	reS.mu.Lock()
-	reS.reS.Reload(context.TODO())
-	reS.mu.Unlock()
-	return
+func (s *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	s.resources.Reload(context.TODO())
+	return nil
 }
 
 // Shutdown stops the service
-func (reS *ResourceService) Shutdown(registry *servmanager.Registry) (err error) {
-	reS.mu.Lock()
-	defer reS.mu.Unlock()
-	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
-	reS.reS = nil
+func (s *ResourceService) Shutdown(registry *servmanager.Registry) error {
+	s.resources.Shutdown(context.TODO())
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.ResourceSv1)
-	return
+	return nil
 }
 
 // ServiceName returns the service name
-func (reS *ResourceService) ServiceName() string {
+func (s *ResourceService) ServiceName() string {
 	return utils.ResourceS
 }
 
 // ShouldRun returns if the service should be running
-func (reS *ResourceService) ShouldRun() bool {
-	return reS.cfg.ResourceSCfg().Enabled
+func (s *ResourceService) ShouldRun() bool {
+	return s.cfg.ResourceSCfg().Enabled
 }
