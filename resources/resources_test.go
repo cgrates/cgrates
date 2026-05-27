@@ -1700,7 +1700,7 @@ func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	}
 	opts := map[string]any{}
 
-	err := rS.processThresholds(context.TODO(), matchedResources{r}, opts)
+	err := rS.processThresholds(context.TODO(), "cgrates.org", &utils.CGREvent{Tenant: "cgrates.org", APIOpts: opts}, matchedResources{r})
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -1760,7 +1760,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		},
 	}
 
-	err := rS.processThresholds(context.TODO(), matchedResources{r}, nil)
+	err := rS.processThresholds(context.TODO(), "cgrates.org", &utils.CGREvent{Tenant: "cgrates.org"}, matchedResources{r})
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -1827,7 +1827,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	}
 
 	experr := utils.ErrPartiallyExecuted
-	err := rS.processThresholds(context.TODO(), matchedResources{r}, nil)
+	err := rS.processThresholds(context.TODO(), "cgrates.org", &utils.CGREvent{Tenant: "cgrates.org"}, matchedResources{r})
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -1855,7 +1855,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	}
 	opts := map[string]any{}
 
-	err := rS.processThresholds(context.TODO(), matchedResources{r}, opts)
+	err := rS.processThresholds(context.TODO(), "cgrates.org", &utils.CGREvent{Tenant: "cgrates.org", APIOpts: opts}, matchedResources{r})
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received: %+v", err)
