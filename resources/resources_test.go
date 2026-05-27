@@ -238,8 +238,7 @@ func TestResourceRecordUsage(t *testing.T) {
 
 func TestResourceRemoveExpiredUnits(t *testing.T) {
 	var r1 *matchedResource
-	var ru1 *utils.ResourceUsage
-	ru1 = &utils.ResourceUsage{
+	ru1 := &utils.ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
@@ -1608,7 +1607,6 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 	rS, dm := newTestResourceS(t)
 	engine.Cache.Clear(nil)
 
-	prfs := make([]*utils.ResourceProfile, 0)
 	ids := make([]string, 0, 10)
 	for i := range 10 {
 		rPrf := &utils.ResourceProfile{
@@ -1624,7 +1622,6 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
-		prfs = append(prfs, rPrf)
 		ids = append(ids, rPrf.ID)
 	}
 	dm.RemoveResource(context.Background(), "cgrates.org", "RES1")
@@ -1649,7 +1646,6 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
-	prfs := make([]*utils.ResourceProfile, 0)
 	ids := make([]string, 0, 11)
 	for i := range 10 {
 		rPrf := &utils.ResourceProfile{
@@ -1665,7 +1661,6 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
-		prfs = append(prfs, rPrf)
 		ids = append(ids, rPrf.ID)
 	}
 	rPrf := &utils.ResourceProfile{
@@ -1685,7 +1680,6 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	prfs = append(prfs, rPrf)
 	ids = append(ids, rPrf.ID)
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
 	_, _, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
