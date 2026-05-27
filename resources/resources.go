@@ -40,6 +40,7 @@ type matchedResource struct {
 	ttl        *time.Duration
 	totalUsage *float64
 	profile    *utils.ResourceProfile
+	weight     float64
 	lockID     string
 }
 
@@ -443,7 +444,6 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 	}
 
 	rs = make(matchedResources, 0, len(itemIDs))
-	weights := make(map[string]float64) // stores sorting weights by resource ID
 	for _, id := range itemIDs {
 		lkID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
@@ -488,6 +488,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		r := &matchedResource{
 			Resource: res,
 			profile:  rp,
+			weight:   weight,
 			lockID:   lkID,
 		}
 		if usageTTL != nil {
@@ -497,7 +498,6 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		} else if rp.UsageTTL >= 0 {
 			r.ttl = utils.DurationPointer(rp.UsageTTL)
 		}
-		weights[r.Resource.ID] = weight
 		rs = append(rs, r)
 	}
 
@@ -508,7 +508,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 
 	// Sort by weight (higher values first).
 	slices.SortFunc(rs, func(a, b *matchedResource) int {
-		return cmp.Compare(weights[b.Resource.ID], weights[a.Resource.ID])
+		return cmp.Compare(b.weight, a.weight)
 	})
 
 	for i, r := range rs {
