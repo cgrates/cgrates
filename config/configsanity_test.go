@@ -924,7 +924,7 @@ func TestConfigSanityChargerS(t *testing.T) {
 
 func TestConfigSanityResourceLimiter(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	cfg.resourceSCfg = &ResourceSConfig{
+	cfg.resourceSCfg = &ResourceSCfg{
 		Enabled: true,
 		Conns: map[string][]*DynamicConns{
 			utils.MetaThresholds: {{ConnIDs: []string{utils.MetaInternal}}},
@@ -1653,7 +1653,7 @@ func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 		chargerSCfg: &ChargerSCfg{
 			Enabled: false,
 		},
-		resourceSCfg: &ResourceSConfig{
+		resourceSCfg: &ResourceSCfg{
 			Enabled: false,
 		},
 		ipsCfg: &IPsCfg{

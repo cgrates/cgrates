@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
+func TestResourceSCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &ResourceSJsonCfg{
 		Enabled:         utils.BoolPointer(true),
 		Indexed_selects: utils.BoolPointer(true),
@@ -40,7 +40,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		Notexists_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:            utils.BoolPointer(true),
 	}
-	expected := &ResourceSConfig{
+	expected := &ResourceSCfg{
 		Enabled:        true,
 		IndexedSelects: true,
 		StoreInterval:  2 * time.Second,
@@ -120,7 +120,7 @@ func TestResourceSLoadFromJSONOpts(t *testing.T) {
 	}
 }
 
-func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
+func TestResourceSCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &ResourceSJsonCfg{
 		Store_interval: utils.StringPointer("2ss"),
 	}
@@ -131,7 +131,7 @@ func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
 	}
 }
 
-func TestResourceSConfigAsMapInterface(t *testing.T) {
+func TestResourceSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"resources": {},	
 }`
@@ -158,7 +158,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 	}
 }
 
-func TestResourceSConfigAsMapInterface1(t *testing.T) {
+func TestResourceSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"resources": {								
 			"enabled": true,						
@@ -199,8 +199,8 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 	}
 }
 
-func TestResourceSConfigClone(t *testing.T) {
-	ban := &ResourceSConfig{
+func TestResourceSCfgClone(t *testing.T) {
+	ban := &ResourceSCfg{
 		Enabled:        true,
 		IndexedSelects: true,
 		StoreInterval:  2 * time.Second,
@@ -234,7 +234,7 @@ func TestResourceSConfigClone(t *testing.T) {
 func TestDiffResourceSJsonCfg(t *testing.T) {
 	var d *ResourceSJsonCfg
 
-	v1 := &ResourceSConfig{
+	v1 := &ResourceSCfg{
 		Enabled:        false,
 		IndexedSelects: false,
 		Conns: map[string][]*DynamicConns{
@@ -264,7 +264,7 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		},
 	}
 
-	v2 := &ResourceSConfig{
+	v2 := &ResourceSCfg{
 		Enabled:        true,
 		IndexedSelects: true,
 		Conns: map[string][]*DynamicConns{
@@ -340,7 +340,7 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 }
 
 func TestResourcesCloneSection(t *testing.T) {
-	rsrCfg := &ResourceSConfig{
+	rsrCfg := &ResourceSCfg{
 		Enabled:        false,
 		IndexedSelects: false,
 		Conns: map[string][]*DynamicConns{
@@ -370,7 +370,7 @@ func TestResourcesCloneSection(t *testing.T) {
 		},
 	}
 
-	exp := &ResourceSConfig{
+	exp := &ResourceSCfg{
 		Enabled:        false,
 		IndexedSelects: false,
 		Conns: map[string][]*DynamicConns{

@@ -340,7 +340,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	expAttr := &ResourceSConfig{
+	expAttr := &ResourceSCfg{
 		Enabled:                true,
 		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields:    &[]string{},

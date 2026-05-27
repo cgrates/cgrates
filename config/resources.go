@@ -38,8 +38,8 @@ type ResourcesOpts struct {
 	Units    []*DynamicFloat64Opt
 }
 
-// ResourceSConfig is resources section config
-type ResourceSConfig struct {
+// ResourceSCfg is resources section config
+type ResourceSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
 	Conns                  map[string][]*DynamicConns
@@ -54,7 +54,7 @@ type ResourceSConfig struct {
 }
 
 // Load loads the ResourceS section of the configuration
-func (c *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (c *ResourceSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRLSCfg := new(ResourceSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
 		return
@@ -87,7 +87,7 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 	return
 }
 
-func (c *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
+func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -133,7 +133,7 @@ func (c *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) 
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (c ResourceSConfig) AsMapInterface() any {
+func (c ResourceSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaUsageIDCfg:  c.Opts.UsageID,
 		utils.MetaUsageTTLCfg: c.Opts.UsageTTL,
@@ -168,8 +168,8 @@ func (c ResourceSConfig) AsMapInterface() any {
 	return mp
 }
 
-func (ResourceSConfig) SName() string           { return ResourceSJSON }
-func (c ResourceSConfig) CloneSection() Section { return c.Clone() }
+func (ResourceSCfg) SName() string           { return ResourceSJSON }
+func (c ResourceSCfg) CloneSection() Section { return c.Clone() }
 
 func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	var usageID []*DynamicStringOpt
@@ -192,9 +192,9 @@ func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	return
 }
 
-// Clone returns a deep copy of ResourceSConfig
-func (c ResourceSConfig) Clone() (cln *ResourceSConfig) {
-	cln = &ResourceSConfig{
+// Clone returns a deep copy of ResourceSCfg
+func (c ResourceSCfg) Clone() (cln *ResourceSCfg) {
+	cln = &ResourceSCfg{
 		Enabled:        c.Enabled,
 		IndexedSelects: c.IndexedSelects,
 		Conns:          CloneConnsMap(c.Conns),
@@ -258,7 +258,7 @@ func diffResourcesOptsJsonCfg(d *ResourcesOptsJson, v1, v2 *ResourcesOpts) *Reso
 	return d
 }
 
-func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *ResourceSJsonCfg {
+func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSCfg) *ResourceSJsonCfg {
 	if d == nil {
 		d = new(ResourceSJsonCfg)
 	}

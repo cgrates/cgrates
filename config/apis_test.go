@@ -661,10 +661,10 @@ func TestStoreDiffSectionResourceS(t *testing.T) {
 	section := ResourceSJSON
 
 	cgrCfgV1 := NewDefaultCGRConfig()
-	cgrCfgV1.resourceSCfg = &ResourceSConfig{}
+	cgrCfgV1.resourceSCfg = &ResourceSCfg{}
 
 	cgrCfgV2 := NewDefaultCGRConfig()
-	cgrCfgV2.resourceSCfg = &ResourceSConfig{}
+	cgrCfgV2.resourceSCfg = &ResourceSCfg{}
 
 	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
