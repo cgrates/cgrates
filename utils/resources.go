@@ -28,7 +28,7 @@ type ResourceProfile struct {
 	ID                string // identifier of this resource
 	FilterIDs         []string
 	UsageTTL          time.Duration // auto-expire the usage after this duration
-	Limit             float64       // limixt value
+	Limit             float64       // -1 for unlimited
 	AllocationMessage string        // message returned by the winning resource on allocation
 	Blocker           bool          // blocker flag to stop processing on filters matched
 	Stored            bool
@@ -36,7 +36,7 @@ type ResourceProfile struct {
 	ThresholdIDs      []string       // Thresholds to check after changing Limit
 }
 
-// Clone clones *ResourceProfile (lkID excluded)
+// Clone clones *ResourceProfile
 func (rp *ResourceProfile) Clone() *ResourceProfile {
 	if rp == nil {
 		return nil
@@ -70,15 +70,189 @@ func (rp *ResourceProfile) CacheClone() any {
 	return rp.Clone()
 }
 
+// TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
+func (rp *ResourceProfile) TenantID() string {
+	return ConcatenatedKey(rp.Tenant, rp.ID)
+}
+
+func (rp *ResourceProfile) Set(path []string, val any, _ bool) error {
+	if len(path) != 1 {
+		return ErrWrongPath
+	}
+	var err error
+	switch path[0] {
+	default:
+		return ErrWrongPath
+	case Tenant:
+		rp.Tenant = IfaceAsString(val)
+	case ID:
+		rp.ID = IfaceAsString(val)
+	case FilterIDs:
+		var valA []string
+		valA, err = IfaceAsStringSlice(val)
+		rp.FilterIDs = append(rp.FilterIDs, valA...)
+	case UsageTTL:
+		rp.UsageTTL, err = IfaceAsDuration(val)
+	case Limit:
+		if val != EmptyString {
+			rp.Limit, err = IfaceAsFloat64(val)
+		}
+	case AllocationMessage:
+		rp.AllocationMessage = IfaceAsString(val)
+	case Blocker:
+		rp.Blocker, err = IfaceAsBool(val)
+	case Stored:
+		rp.Stored, err = IfaceAsBool(val)
+	case Weights:
+		if val != EmptyString {
+			rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		}
+	case ThresholdIDs:
+		var valA []string
+		valA, err = IfaceAsStringSlice(val)
+		rp.ThresholdIDs = append(rp.ThresholdIDs, valA...)
+	}
+	return err
+}
+
+func (rp *ResourceProfile) Merge(v2 any) {
+	vi := v2.(*ResourceProfile)
+	if len(vi.Tenant) != 0 {
+		rp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		rp.ID = vi.ID
+	}
+	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
+	rp.ThresholdIDs = append(rp.ThresholdIDs, vi.ThresholdIDs...)
+	if len(vi.AllocationMessage) != 0 {
+		rp.AllocationMessage = vi.AllocationMessage
+	}
+	if vi.UsageTTL != 0 {
+		rp.UsageTTL = vi.UsageTTL
+	}
+	if vi.Limit != 0 {
+		rp.Limit = vi.Limit
+	}
+	if vi.Blocker {
+		rp.Blocker = vi.Blocker
+	}
+	if vi.Stored {
+		rp.Stored = vi.Stored
+	}
+	rp.Weights = append(rp.Weights, vi.Weights...)
+}
+
+func (rp *ResourceProfile) String() string { return ToJSON(rp) }
+func (rp *ResourceProfile) FieldAsString(fldPath []string) (string, error) {
+	val, err := rp.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", err
+	}
+	return IfaceAsString(val), nil
+}
+func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case ThresholdIDs:
+				if *idx < len(rp.ThresholdIDs) {
+					return rp.ThresholdIDs[*idx], nil
+				}
+			case FilterIDs:
+				if *idx < len(rp.FilterIDs) {
+					return rp.FilterIDs[*idx], nil
+				}
+			}
+		}
+		return nil, ErrNotFound
+	case Tenant:
+		return rp.Tenant, nil
+	case ID:
+		return rp.ID, nil
+	case FilterIDs:
+		return rp.FilterIDs, nil
+	case UsageTTL:
+		return rp.UsageTTL, nil
+	case Limit:
+		return rp.Limit, nil
+	case AllocationMessage:
+		return rp.AllocationMessage, nil
+	case Blocker:
+		return rp.Blocker, nil
+	case Stored:
+		return rp.Stored, nil
+	case Weights:
+		return rp.Weights, nil
+	case ThresholdIDs:
+		return rp.ThresholdIDs, nil
+	}
+}
+
+// AsMapStringInterface converts ResourceProfile struct to map[string]any
+func (rp *ResourceProfile) AsMapStringInterface() map[string]any {
+	if rp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		FilterIDs:         rp.FilterIDs,
+		UsageTTL:          rp.UsageTTL,
+		Limit:             rp.Limit,
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+		Weights:           rp.Weights,
+		ThresholdIDs:      rp.ThresholdIDs,
+	}
+}
+
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
 	APIOpts map[string]any
 }
 
-// TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
-func (rp *ResourceProfile) TenantID() string {
-	return ConcatenatedKey(rp.Tenant, rp.ID)
+// MapStringInterfaceToResourceProfile converts map[string]any to ResourceProfile struct
+func MapStringInterfaceToResourceProfile(m map[string]any) (*ResourceProfile, error) {
+	rp := &ResourceProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	if v, ok := m[UsageTTL].(string); ok {
+		dur, err := time.ParseDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		rp.UsageTTL = dur
+	} else if v, ok := m[UsageTTL].(float64); ok { // for -1 cases
+		rp.UsageTTL = time.Duration(v)
+	}
+	if v, ok := m[Limit].(float64); ok {
+		rp.Limit = v
+	}
+	if v, ok := m[AllocationMessage].(string); ok {
+		rp.AllocationMessage = v
+	}
+	if v, ok := m[Blocker].(bool); ok {
+		rp.Blocker = v
+	}
+	if v, ok := m[Stored].(bool); ok {
+		rp.Stored = v
+	}
+	rp.Weights = InterfaceToDynamicWeights(m[Weights])
+	rp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	return rp, nil
 }
 
 // ResourceUsage represents an usage counted
@@ -94,100 +268,16 @@ func (ru *ResourceUsage) TenantID() string {
 	return ConcatenatedKey(ru.Tenant, ru.ID)
 }
 
-// isActive checks ExpiryTime at some time
+// IsActive checks ExpiryTime at some time
 func (ru *ResourceUsage) IsActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
 }
 
 // Clone duplicates ru
-func (ru *ResourceUsage) Clone() (cln *ResourceUsage) {
-	cln = new(ResourceUsage)
+func (ru *ResourceUsage) Clone() *ResourceUsage {
+	cln := new(ResourceUsage)
 	*cln = *ru
-	return
-}
-
-// Resource represents a resource in the system
-// not thread safe, needs locking at process level
-type Resource struct {
-	Tenant string
-	ID     string
-	Usages map[string]*ResourceUsage
-	TTLIdx []string // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
-}
-
-// Clone clones *Resource (lkID excluded)
-func (r *Resource) Clone() *Resource {
-	if r == nil {
-		return nil
-	}
-	clone := &Resource{
-		Tenant: r.Tenant,
-		ID:     r.ID,
-	}
-	if r.Usages != nil {
-		clone.Usages = make(map[string]*ResourceUsage, len(r.Usages))
-		for key, usage := range r.Usages {
-			clone.Usages[key] = usage.Clone()
-		}
-	}
-	if r.TTLIdx != nil {
-		clone.TTLIdx = make([]string, len(r.TTLIdx))
-		copy(clone.TTLIdx, r.TTLIdx)
-	}
-	return clone
-}
-
-// CacheClone returns a clone of Resource used by ltcache CacheCloner
-func (r *Resource) CacheClone() any {
-	return r.Clone()
-}
-
-// ResourceWithAPIOpts is used in replicatorV1 for dispatcher
-type ResourceWithAPIOpts struct {
-	*Resource
-	APIOpts map[string]any
-}
-
-// TenantID returns the unique ID in a multi-tenant environment
-func (r *Resource) TenantID() string {
-	return ConcatenatedKey(r.Tenant, r.ID)
-}
-
-// TotalUsage returns the sum of all usage units
-// Exported to be used in FilterS
-func (r *Resource) TotalUsage() float64 {
-	var tu float64
-	for _, ru := range r.Usages {
-		tu += ru.Units
-	}
-	return tu
-}
-
-// AsMapStringInterface converts Resource struct to map[string]any
-func (rp *Resource) AsMapStringInterface() map[string]any {
-	if rp == nil {
-		return nil
-	}
-	return map[string]any{
-		Tenant: rp.Tenant,
-		ID:     rp.ID,
-		Usages: rp.Usages,
-		TTLIdx: rp.TTLIdx,
-	}
-}
-
-// MapStringInterfaceToResource converts map[string]any to Resource struct
-func MapStringInterfaceToResource(m map[string]any) *Resource {
-	rp := &Resource{}
-	if v, ok := m[Tenant].(string); ok {
-		rp.Tenant = v
-	}
-	if v, ok := m[ID].(string); ok {
-		rp.ID = v
-	}
-	rp.Usages = InterfaceToMapStringResourceUsage(m[Usages])
-	rp.TTLIdx = InterfaceToStringSlice(m[TTLIdx])
-	return rp
+	return cln
 }
 
 // InterfaceToMapStringResourceUsage converts any to map[string]*ResourceUsage
@@ -232,10 +322,88 @@ func MapStringInterfaceToResourceUsage(m map[string]any) *ResourceUsage {
 	return resUsage
 }
 
-// Available returns the available number of units
-// Exported method to be used by filterS
-func (r *ResourceWithConfig) Available() float64 {
-	return r.Config.Limit - r.TotalUsage()
+// Resource represents a resource in the system
+// not thread safe, needs locking at process level
+type Resource struct {
+	Tenant string
+	ID     string
+	Usages map[string]*ResourceUsage
+	TTLIdx []string // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+}
+
+// Clone clones *Resource
+func (r *Resource) Clone() *Resource {
+	if r == nil {
+		return nil
+	}
+	clone := &Resource{
+		Tenant: r.Tenant,
+		ID:     r.ID,
+	}
+	if r.Usages != nil {
+		clone.Usages = make(map[string]*ResourceUsage, len(r.Usages))
+		for key, usage := range r.Usages {
+			clone.Usages[key] = usage.Clone()
+		}
+	}
+	if r.TTLIdx != nil {
+		clone.TTLIdx = make([]string, len(r.TTLIdx))
+		copy(clone.TTLIdx, r.TTLIdx)
+	}
+	return clone
+}
+
+// CacheClone returns a clone of Resource used by ltcache CacheCloner
+func (r *Resource) CacheClone() any {
+	return r.Clone()
+}
+
+// TenantID returns the unique ID in a multi-tenant environment
+func (r *Resource) TenantID() string {
+	return ConcatenatedKey(r.Tenant, r.ID)
+}
+
+// TotalUsage returns the sum of all usage units
+// Exported to be used in FilterS
+func (r *Resource) TotalUsage() float64 {
+	var tu float64
+	for _, ru := range r.Usages {
+		tu += ru.Units
+	}
+	return tu
+}
+
+// AsMapStringInterface converts Resource struct to map[string]any
+func (r *Resource) AsMapStringInterface() map[string]any {
+	if r == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant: r.Tenant,
+		ID:     r.ID,
+		Usages: r.Usages,
+		TTLIdx: r.TTLIdx,
+	}
+}
+
+// ResourceWithAPIOpts is used in replicatorV1 for dispatcher
+type ResourceWithAPIOpts struct {
+	*Resource
+	APIOpts map[string]any
+}
+
+// MapStringInterfaceToResource converts map[string]any to Resource struct
+func MapStringInterfaceToResource(m map[string]any) *Resource {
+	rp := &Resource{}
+	if v, ok := m[Tenant].(string); ok {
+		rp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		rp.ID = v
+	}
+	rp.Usages = InterfaceToMapStringResourceUsage(m[Usages])
+	rp.TTLIdx = InterfaceToStringSlice(m[TTLIdx])
+	return rp
 }
 
 type ResourceWithConfig struct {
@@ -243,180 +411,13 @@ type ResourceWithConfig struct {
 	Config *ResourceProfile
 }
 
-func (rp *ResourceProfile) Set(path []string, val any, _ bool) (err error) {
-	if len(path) != 1 {
-		return ErrWrongPath
-	}
-	switch path[0] {
-	default:
-		return ErrWrongPath
-	case Tenant:
-		rp.Tenant = IfaceAsString(val)
-	case ID:
-		rp.ID = IfaceAsString(val)
-	case FilterIDs:
-		var valA []string
-		valA, err = IfaceAsStringSlice(val)
-		rp.FilterIDs = append(rp.FilterIDs, valA...)
-	case UsageTTL:
-		rp.UsageTTL, err = IfaceAsDuration(val)
-	case Limit:
-		if val != EmptyString {
-			rp.Limit, err = IfaceAsFloat64(val)
-		}
-	case AllocationMessage:
-		rp.AllocationMessage = IfaceAsString(val)
-	case Blocker:
-		rp.Blocker, err = IfaceAsBool(val)
-	case Stored:
-		rp.Stored, err = IfaceAsBool(val)
-	case Weights:
-		if val != EmptyString {
-			rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
-		}
-	case ThresholdIDs:
-		var valA []string
-		valA, err = IfaceAsStringSlice(val)
-		rp.ThresholdIDs = append(rp.ThresholdIDs, valA...)
-	}
-	return
-}
-
-func (rp *ResourceProfile) Merge(v2 any) {
-	vi := v2.(*ResourceProfile)
-	if len(vi.Tenant) != 0 {
-		rp.Tenant = vi.Tenant
-	}
-	if len(vi.ID) != 0 {
-		rp.ID = vi.ID
-	}
-	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
-	rp.ThresholdIDs = append(rp.ThresholdIDs, vi.ThresholdIDs...)
-	if len(vi.AllocationMessage) != 0 {
-		rp.AllocationMessage = vi.AllocationMessage
-	}
-	if vi.UsageTTL != 0 {
-		rp.UsageTTL = vi.UsageTTL
-	}
-	if vi.Limit != 0 {
-		rp.Limit = vi.Limit
-	}
-	if vi.Blocker {
-		rp.Blocker = vi.Blocker
-	}
-	if vi.Stored {
-		rp.Stored = vi.Stored
-	}
-	rp.Weights = append(rp.Weights, vi.Weights...)
-}
-
-func (rp *ResourceProfile) String() string { return ToJSON(rp) }
-func (rp *ResourceProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val any
-	if val, err = rp.FieldAsInterface(fldPath); err != nil {
-		return
-	}
-	return IfaceAsString(val), nil
-}
-func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
-	if len(fldPath) != 1 {
-		return nil, ErrNotFound
-	}
-	switch fldPath[0] {
-	default:
-		fld, idx := GetPathIndex(fldPath[0])
-		if idx != nil {
-			switch fld {
-			case ThresholdIDs:
-				if *idx < len(rp.ThresholdIDs) {
-					return rp.ThresholdIDs[*idx], nil
-				}
-			case FilterIDs:
-				if *idx < len(rp.FilterIDs) {
-					return rp.FilterIDs[*idx], nil
-				}
-			}
-		}
-		return nil, ErrNotFound
-	case Tenant:
-		return rp.Tenant, nil
-	case ID:
-		return rp.ID, nil
-	case FilterIDs:
-		return rp.FilterIDs, nil
-	case UsageTTL:
-		return rp.UsageTTL, nil
-	case Limit:
-		return rp.Limit, nil
-	case AllocationMessage:
-		return rp.AllocationMessage, nil
-	case Blocker:
-		return rp.Blocker, nil
-	case Stored:
-		return rp.Stored, nil
-	case Weights:
-		return rp.Weights, nil
-	case ThresholdIDs:
-		return rp.ThresholdIDs, nil
-	}
+// Available returns the available number of units
+// Exported method to be used by filterS
+func (r *ResourceWithConfig) Available() float64 {
+	return r.Config.Limit - r.TotalUsage()
 }
 
 // ResourceLockKey returns the ID used to lock a resource with guardian
 func ResourceLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheResources, tnt, id)
-}
-
-// AsMapStringInterface converts ResourceProfile struct to map[string]any
-func (rp *ResourceProfile) AsMapStringInterface() map[string]any {
-	if rp == nil {
-		return nil
-	}
-	return map[string]any{
-		Tenant:            rp.Tenant,
-		ID:                rp.ID,
-		FilterIDs:         rp.FilterIDs,
-		UsageTTL:          rp.UsageTTL,
-		Limit:             rp.Limit,
-		AllocationMessage: rp.AllocationMessage,
-		Blocker:           rp.Blocker,
-		Stored:            rp.Stored,
-		Weights:           rp.Weights,
-		ThresholdIDs:      rp.ThresholdIDs,
-	}
-}
-
-// MapStringInterfaceToResourceProfile converts map[string]any to ResourceProfile struct
-func MapStringInterfaceToResourceProfile(m map[string]any) (rp *ResourceProfile, err error) {
-	rp = &ResourceProfile{}
-	if v, ok := m[Tenant].(string); ok {
-		rp.Tenant = v
-	}
-	if v, ok := m[ID].(string); ok {
-		rp.ID = v
-	}
-	rp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
-	if v, ok := m[UsageTTL].(string); ok {
-		if dur, err := time.ParseDuration(v); err != nil {
-			return nil, err
-		} else {
-			rp.UsageTTL = dur
-		}
-	} else if v, ok := m[UsageTTL].(float64); ok { // for -1 cases
-		rp.UsageTTL = time.Duration(v)
-	}
-	if v, ok := m[Limit].(float64); ok {
-		rp.Limit = v
-	}
-	if v, ok := m[AllocationMessage].(string); ok {
-		rp.AllocationMessage = v
-	}
-	if v, ok := m[Blocker].(bool); ok {
-		rp.Blocker = v
-	}
-	if v, ok := m[Stored].(bool); ok {
-		rp.Stored = v
-	}
-	rp.Weights = InterfaceToDynamicWeights(m[Weights])
-	rp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
-	return
 }
