@@ -341,14 +341,15 @@ func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedRe
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (s *ResourceS) processThresholds(ctx *context.Context, rs matchedResources, opts map[string]any) error {
-	threshConns, err := engine.GetConnIDs(ctx, s.cfg.ResourceSCfg().Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, s.filters)
+func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *utils.CGREvent, rs matchedResources) error {
+	threshConns, err := engine.GetConnIDs(ctx, s.cfg.ResourceSCfg().Conns[utils.MetaThresholds], tnt, ev.AsDataProvider(), s.filters)
 	if err != nil {
 		return err
 	}
 	if len(threshConns) == 0 {
 		return nil
 	}
+	opts := ev.APIOpts
 	if opts == nil {
 		opts = make(map[string]any)
 	}

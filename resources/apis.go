@@ -240,7 +240,7 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 	if err := s.storeMatchedResources(ctx, mtcRLs); err != nil {
 		return err
 	}
-	if err := s.processThresholds(ctx, mtcRLs, args.APIOpts); err != nil {
+	if err := s.processThresholds(ctx, tnt, args, mtcRLs); err != nil {
 		return err
 	}
 	*reply = allocMsg
@@ -312,7 +312,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 	if err := s.storeMatchedResources(ctx, mtcRLs); err != nil {
 		return err
 	}
-	if err := s.processThresholds(ctx, mtcRLs, args.APIOpts); err != nil {
+	if err := s.processThresholds(ctx, tnt, args, mtcRLs); err != nil {
 		return err
 	}
 
