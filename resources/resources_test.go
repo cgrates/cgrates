@@ -843,24 +843,8 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 }
 
 func TestResourceCaching(t *testing.T) {
-	//clear the cache
 	engine.Cache.Clear(nil)
-
-	// start fresh with new dataManager
-	cfg := config.NewDefaultCGRConfig()
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm,
-		fltrs, nil)
+	rS, _ := newTestResourceS(t)
 
 	resProf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -1599,16 +1583,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 }
 
 func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dmRES := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	rS := NewResourceService(cfg, dmRES,
-		fltrs, nil)
+	rS, _ := newTestResourceS(t)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
 	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
@@ -1619,16 +1594,7 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 }
 
 func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dmRES := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	rS := NewResourceService(cfg, dmRES,
-		fltrs, nil)
+	rS, _ := newTestResourceS(t)
 
 	engine.Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", []string{"Res2"}, nil, true, utils.NonTransactional)
 	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
@@ -1639,16 +1605,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 }
 
 func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm,
-		fltrs, nil)
+	rS, dm := newTestResourceS(t)
 	engine.Cache.Clear(nil)
 
 	prfs := make([]*utils.ResourceProfile, 0)
@@ -1985,16 +1942,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cfg.ResourceSCfg().StoreInterval = 1
-	cfg.ResourceSCfg().StringIndexedFields = nil
-	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm,
-		fltrs, nil)
+	rS, dm := newTestResourceS(t)
 
 	ids := make([]string, 0, 10)
 	for i := range 10 {
