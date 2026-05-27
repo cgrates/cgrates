@@ -186,41 +186,41 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 }
 
 // NewResourceSv1 initializes the ResourceSv1 object.
-func NewResourceSv1(rsS *resources.ResourceS) *ResourceSv1 {
-	return &ResourceSv1{rsS: rsS}
+func NewResourceSv1(rs *resources.ResourceS) *ResourceSv1 {
+	return &ResourceSv1{rs: rs}
 }
 
 // ResourceSv1 represents the RPC object to register for resources v1 APIs.
 type ResourceSv1 struct {
-	rsS *resources.ResourceS
+	rs *resources.ResourceS
 }
 
 // GetResourcesForEvent returns active resources matching the event.
-func (rS *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
-	return rS.rsS.V1GetResourcesForEvent(ctx, args, reply)
+func (s *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) error {
+	return s.rs.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources queries service to find if an Usage is allowed.
-func (rS *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	return rS.rsS.V1AuthorizeResources(ctx, args, reply)
+func (s *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return s.rs.V1AuthorizeResources(ctx, args, reply)
 }
 
 // AllocateResources is called when a resource requires allocation.
-func (rS *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	return rS.rsS.V1AllocateResources(ctx, args, reply)
+func (s *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return s.rs.V1AllocateResources(ctx, args, reply)
 }
 
 // ReleaseResources is called when we need to clear an allocation.
-func (rS *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	return rS.rsS.V1ReleaseResources(ctx, args, reply)
+func (s *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return s.rs.V1ReleaseResources(ctx, args, reply)
 }
 
 // GetResource returns a resource.
-func (rS *ResourceSv1) GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
-	return rS.rsS.V1GetResource(ctx, arg, reply)
+func (s *ResourceSv1) GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
+	return s.rs.V1GetResource(ctx, arg, reply)
 }
 
 // GetResourceWithConfig returns a resource alongside its profile.
-func (rS *ResourceSv1) GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
-	return rS.rsS.V1GetResourceWithConfig(ctx, arg, reply)
+func (s *ResourceSv1) GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) error {
+	return s.rs.V1GetResourceWithConfig(ctx, arg, reply)
 }
