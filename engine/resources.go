@@ -424,7 +424,6 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 		storedResources: make(utils.StringSet),
 		cgrcfg:          cgrcfg,
 		filterS:         filterS,
-		loopStopped:     make(chan struct{}),
 		stopBackup:      make(chan struct{}),
 		connMgr:         connMgr,
 	}
@@ -439,20 +438,21 @@ type ResourceService struct {
 	srMux           sync.RWMutex    // protects storedResources
 	cgrcfg          *config.CGRConfig
 	stopBackup      chan struct{} // control storing process
-	loopStopped     chan struct{}
+	backupLoop      sync.WaitGroup
 	connMgr         *ConnManager
 }
 
 // Reload stops the backupLoop and restarts it
 func (rS *ResourceService) Reload() {
 	close(rS.stopBackup)
-	<-rS.loopStopped // wait until the loop is done
+	rS.backupLoop.Wait()
 	rS.stopBackup = make(chan struct{})
-	go rS.runBackup()
+	rS.StartLoop()
 }
 
-// StartLoop starts the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (rS *ResourceService) StartLoop() {
+	rS.backupLoop.Add(1)
 	go rS.runBackup()
 }
 
@@ -460,22 +460,22 @@ func (rS *ResourceService) StartLoop() {
 func (rS *ResourceService) Shutdown() {
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
+	rS.backupLoop.Wait()
 	rS.storeResources()
 	utils.Logger.Info("<ResourceS> service shutdown complete")
 }
 
 // backup will regularly store resources changed to dataDB
 func (rS *ResourceService) runBackup() {
+	defer rS.backupLoop.Done()
 	storeInterval := rS.cgrcfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
-		rS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		rS.storeResources()
 		select {
 		case <-rS.stopBackup:
-			rS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
