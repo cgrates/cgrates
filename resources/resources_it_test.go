@@ -414,23 +414,19 @@ func testResourceSGetResourcesForEvent(t *testing.T) {
 		},
 	}
 
-	exp := Resources{
+	exp := []*utils.Resource{
 		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "ResGroup1",
-				Usages: make(map[string]*utils.ResourceUsage),
-			},
+			Tenant: "cgrates.org",
+			ID:     "ResGroup1",
+			Usages: make(map[string]*utils.ResourceUsage),
 		},
 		{
-			Resource: &utils.Resource{
-				Tenant: "cgrates.org",
-				ID:     "ResGroup2",
-				Usages: make(map[string]*utils.ResourceUsage),
-			},
+			Tenant: "cgrates.org",
+			ID:     "ResGroup2",
+			Usages: make(map[string]*utils.ResourceUsage),
 		},
 	}
-	var reply Resources
+	var reply []*utils.Resource
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent,
 		args, &reply); err != nil {
 		t.Error(err)

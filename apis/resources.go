@@ -196,7 +196,7 @@ type ResourceSv1 struct {
 }
 
 // V1GetResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *resources.Resources) (err error) {
+func (rS *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
 	return rS.rsS.V1GetResourcesForEvent(ctx, args, reply)
 }
 

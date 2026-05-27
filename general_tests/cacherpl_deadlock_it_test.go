@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -104,7 +103,7 @@ func TestCacheRplDeadlock(t *testing.T) {
 		},
 	}
 
-	var rs *resources.Resources
+	var rs []*utils.Resource
 	if err := client.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Fatalf("ResourceSv1.GetResourcesForEvent unexpected err: %v", err)
 	}

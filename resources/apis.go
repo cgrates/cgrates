@@ -26,7 +26,7 @@ import (
 )
 
 // V1GetResourcesForEvent returns active resource configs matching the event
-func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *Resources) (err error) {
+func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -64,7 +64,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*Resources)
+				*reply = *cachedResp.Result.(*[]*utils.Resource)
 			}
 			return cachedResp.Error
 		}
@@ -81,7 +81,11 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 		return err
 	}
 	defer unlock()
-	*reply = mtcRLs
+	out := make([]*utils.Resource, len(mtcRLs))
+	for i, mr := range mtcRLs {
+		out[i] = mr.Resource
+	}
+	*reply = out
 	return nil
 }
 
