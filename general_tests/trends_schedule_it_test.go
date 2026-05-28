@@ -66,7 +66,7 @@ func TestTrendSchedule(t *testing.T) {
 
 "trends": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 	"conns": {
 		"*stats": [{"ConnIDs": ["*localhost"]}],
 		"*thresholds": [],
@@ -76,7 +76,7 @@ func TestTrendSchedule(t *testing.T) {
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 "admins": {
@@ -85,7 +85,7 @@ func TestTrendSchedule(t *testing.T) {
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 
 "ees": {
@@ -273,10 +273,10 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,,tr
 				"trends": map[string]any{
 					"enabled":          true,
 					"stats_conns":      []string{"*localhost"},
-					"store_interval":   "-1",
+					"storeInterval":    "-1",
 					"thresholds_conns": []string{"*localhost"},
 					"ees_conns":        []string{"*localhost"},
-					"ees_exporter_ids": []string{"exporter1"},
+					"eesExporterIDs":   []string{"exporter1"},
 				},
 			},
 		}, &reply); err != nil {

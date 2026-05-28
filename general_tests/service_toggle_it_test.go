@@ -95,18 +95,18 @@ func TestServiceToggle(t *testing.T) {
 },
 // "rankings": {
 // 	"enabled": %[1]v,
-// 	"store_interval": "-1"
+// 	"storeInterval": "-1"
 // },
 "rates": {
 	"enabled": %[1]v
 },
 "resources": {
 	"enabled": %[1]v,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "ips": {
 	"enabled": %[1]v,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "routes": {
 	"enabled": %[1]v
@@ -116,18 +116,18 @@ func TestServiceToggle(t *testing.T) {
 },
 "stats": {
 	"enabled": %[1]v,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "thresholds": {
 	"enabled": %[1]v,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "tpes": {
 	"enabled": %[1]v
 },
 // "trends": {
 // 	"enabled": %[1]v,
-// 	"store_interval": "-1"
+// 	"storeInterval": "-1"
 // }
 }`
 

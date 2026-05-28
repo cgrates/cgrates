@@ -128,14 +128,14 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		"*admins":     [{"ConnIDs": ["*internal"]}]
 	},
 	"tenants": ["itsyscom.com"],
-	"indexed_selects": false,
+	"indexedSelects": false,
 	"stringIndexedFields": ["*req.index1"],
 	"prefixIndexedFields": ["*req.index1","*req.index2"],
-    "suffix_indexed_fields": ["*req.index1"],
-	"exists_indexed_fields": ["*req.index1","*req.index2"],
-    "notexists_indexed_fields": ["*req.index1"],
-	"nested_fields": true,
-    "dynaprepaid_actionprofile": [],
+    "suffixIndexedFields": ["*req.index1"],
+	"existsIndexedFields": ["*req.index1","*req.index2"],
+    "notExistsIndexedFields": ["*req.index1"],
+	"nestedFields": true,
+    "dynaprepaidActionProfile": [],
 	},
 }`
 

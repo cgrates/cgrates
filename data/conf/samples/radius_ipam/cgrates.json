@@ -27,7 +27,7 @@
   },
   "ips": {
     "enabled": true,
-    "store_interval": "-1"
+    "storeInterval": "-1"
   },
   "cdrs": {
     "enabled": true

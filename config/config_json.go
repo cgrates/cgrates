@@ -46,7 +46,7 @@ const (
 	AttributeSJSON      = "attributes"
 	ResourceSJSON       = "resources"
 	IPsJSON             = "ips"
-	JanusAgentJSON      = "janus_agent"
+	JanusAgentJSON      = "janusAgent"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
 	TrendSJSON          = "trends"
@@ -76,7 +76,7 @@ const (
 	SentryPeerJSON      = "sentrypeer"
 	CoreSJSON           = "cores"
 	AccountSJSON        = "accounts"
-	ConfigDBJSON        = "config_db"
+	ConfigDBJSON        = "configDB"
 )
 
 var (

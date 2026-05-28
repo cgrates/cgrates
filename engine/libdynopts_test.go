@@ -1901,8 +1901,8 @@ func TestAttrDynamicOptsFromJson(t *testing.T) {
 			"accounts_conns": ["*internal"],			
 			"prefixIndexedFields": ["*req.index1","*req.index2"],		
 			"stringIndexedFields": ["*req.index1"],
-			"exists_indexed_fields": ["*req.index1","*req.index2"],		
-			"notexists_indexed_fields": ["*req.index1"],
+			"existsIndexedFields": ["*req.index1","*req.index2"],		
+			"notExistsIndexedFields": ["*req.index1"],
 			"opts": {
 				"*processRuns": [
 						{
@@ -2125,10 +2125,10 @@ func TestResDynamicOptsFromJson(t *testing.T) {
 	cfgJSONStr := `{
 		"resources": {								
 			"enabled": true,						
-			"store_interval": "7m",					
+			"storeInterval": "7m",					
 			"thresholds_conns": ["*internal:*thresholds", "*conn1"],					
-			"indexed_selects":true,		
-			"nested_fields": true,
+			"indexedSelects":true,		
+			"nestedFields": true,
 				"opts":{
 		          "*usageID": [
 		          	{
@@ -2219,7 +2219,7 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
 	routeJsnStr := `{
 		"routes": {
 			"enabled": true,
-			"indexed_selects":false,
+			"indexedSelects":false,
              "opts":{
 		         "*usage": [
 		         	{

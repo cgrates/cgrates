@@ -65,7 +65,7 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "1s"
+	"storeInterval": "1s"
 },
 
 "sessions": {

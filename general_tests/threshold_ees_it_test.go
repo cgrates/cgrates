@@ -85,9 +85,9 @@ func TestThresholdEES(t *testing.T) {
 },
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
-	"scheduled_ids": {},
-	"indexed_selects": false,
+	"storeInterval": "-1",
+	"scheduledIDs": {},
+	"indexedSelects": false,
 	"conns": {
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	},

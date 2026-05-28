@@ -15,8 +15,8 @@
 "rates": {
   "enabled": true,
   "prefixIndexedFields": ["*req.Destination"],
-  "exists_indexed_fields": ["*req.Destination"],
-  "rate_prefix_indexed_fields": ["*req.Destination"]
+  "existsIndexedFields": ["*req.Destination"],
+  "ratePrefixIndexedFields": ["*req.Destination"]
 },
 
 "admins": {

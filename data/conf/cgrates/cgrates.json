@@ -978,13 +978,13 @@
 // 	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],				// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"accounts_conns": [],				// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
-// 	"indexed_selects": true,			// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,			// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],			// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],			// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"nested_fields": false,				// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],			// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],			// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],			// query indexes based on these fields for faster processing
+// 	"nestedFields": false,				// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
@@ -1021,27 +1021,27 @@
 // "chargers": {
 // 	"enabled": false,		// starts charger service: <true|false>
 // 	"attributes_conns": [],		// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
 
 // "resources": {
 // 	"enabled": false,		// starts ResourceLimiter service: <true|false>
-// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
+// 	"storeInterval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"thresholds_conns": [],		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts":{
 // 		// "*usageID": [
 // 		// 	{
@@ -1070,18 +1070,18 @@
 
 // "stats": {
 // 	"enabled": false,		// starts Stat service: <true|false>
-// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
-// 	"store_uncompressed_limit": 0,	// used to compress data
+// 	"storeInterval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
+// 	"storeUncompressedLimit": 0,	// used to compress data
 // 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"eesExporterIDs": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts": {
 // 		// "*profileIDs": [
 // 		// 	{
@@ -1110,14 +1110,14 @@
 
 // "thresholds": {
 // 	"enabled": false,			// starts ThresholdS service: <true|false>
-// 	"store_interval": "",			// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
-// 	"indexed_selects": true,		// enable profile matching exclusively on indexes
+// 	"storeInterval": "",			// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
+// 	"indexedSelects": true,		// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"nestedFields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"actions_conns": [],			// connections to ActionS to execute the actions
 // 	"opts":{
 // 		// "*thresholdsIDs": [
@@ -1140,42 +1140,42 @@
 
 // "trends":{
 // 	"enabled": false,		// starts TrendS service: <true|false>.
-// 	"store_interval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
-// 	"store_uncompressed_limit": 0,	// used to compress metrics
+// 	"storeInterval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
+// 	"storeUncompressedLimit": 0,	// used to compress metrics
 // 	"stats_conns": [],		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"scheduled_ids": {},		// autoload these trend ids on start
+// 	"scheduledIDs": {},		// autoload these trend ids on start
 // 	"thresholds_conns": [],		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"ees_conns": [],		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_exporter_ids": []		// list of EventExporter profiles to use for real-time trendSummary exports
+// 	"eesExporterIDs": []		// list of EventExporter profiles to use for real-time trendSummary exports
 // },
 
 
 // "rankings":{
 // 	"enabled": false,	// starts RankingS service: <true|false>.
-// 	"store_interval": "",	// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
+// 	"storeInterval": "",	// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"scheduled_ids": {},	// autoload these ranking ids on start
+// 	"scheduledIDs": {},	// autoload these ranking ids on start
 // 	"thresholds_conns": [],	// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"ees_conns": [],	// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_exporter_ids": []	// list of EventExporter profiles to use for real-time rankingSummary exports
+// 	"eesExporterIDs": []	// list of EventExporter profiles to use for real-time rankingSummary exports
 // },
 
 
 // "routes": {
 // 	"enabled": false,		// starts RouteS service: <true|false>.
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"rates_conns": [],		// connections to RateS
 // 	"accounts_conns": [],		// connections to AccountS
-// 	"default_ratio":1,		// default ratio used in case of *load strategy
+// 	"defaultRatio":1,		// default ratio used in case of *load strategy
 // 	"opts":{
 // 		// "*context": [
 // 		// 	{
@@ -1608,20 +1608,20 @@
 
 // "rates": {
 // 	"enabled": false,
-// 	"indexed_selects": true,		// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,		// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"rate_indexed_selects": true,		// enable profile matching exclusively on indexes
-// 	//"rate_string_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"rate_prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"rate_suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"rate_exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"rate_notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"rate_nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"suffixIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],		// query indexes based on these fields for faster processing
+// 	"nestedFields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"rateIndexedSelects": true,		// enable profile matching exclusively on indexes
+// 	//"rateStringIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"ratePrefixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"rateSuffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"rateExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"rateNotExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"rateNestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"verbosity": 1000,			// number of increment iterations allowed
 // 	"opts":{
 // 		// "*profileIDs": [		// select the rate profiles used for cost calculation
@@ -1673,15 +1673,15 @@
 // 	"requestProcessors": []	// request processors to be applied to SIP messages
 // },
 
-// "janus_agent": {
+// "janusAgent": {
 // 	"enabled": false,				// enables the Janus agent: <true|false>
 // 	"url": "/janus",
 // 	"sessions_conns": ["*internal"],
-// 	"janus_conns": [{				// instantiate connections to multiple Janus Servers
+// 	"janusConns": [{				// instantiate connections to multiple Janus Servers
 // 		"address": "127.0.0.1:8088",		// janus API address 
 // 		"type": "*ws",				// type of the transport to interact via janus API
-// 		"admin_address": "localhost:7188",	// janus admin address used to retrive more information for sessions and handles
-// 		"admin_password": ""			// secret to pass restriction to communicate to the endpoint
+// 		"adminAddress": "localhost:7188",	// janus admin address used to retrive more information for sessions and handles
+// 		"adminPassword": ""			// secret to pass restriction to communicate to the endpoint
 // 	}],
 // 	"requestProcessors": []			// request processors to be applied to Janus messages
 // },
@@ -1779,7 +1779,7 @@
 // "configs": {
 // 	"enabled": false,
 // 	"url": "/configs/",				// configs url
-// 	"root_dir": "/var/spool/cgrates/configs"	// root directory in case of calling /configs request
+// 	"rootDir": "/var/spool/cgrates/configs"	// root directory in case of calling /configs request
 // },
 
 
@@ -1807,14 +1807,14 @@
 // 	"stats_conns": [],		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
 // 	"accounts_conns": [],		// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
 // 	"tenants":[],			// List of tenants to operate on
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"dynaprepaid_actionprofile": [],
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"dynaprepaidActionProfile": [],
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
@@ -1843,18 +1843,18 @@
 
 // "accounts": {
 // 	"enabled": false,		// starts service: <true|false>
-// 	"indexed_selects": true,	// enable profile matching exclusively on indexes
+// 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	"attributes_conns": [],		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 // 	"rates_conns": [],		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
 // 	"thresholds_conns": [],		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 // 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-// 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-// 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"max_iterations": 1000,		// maximum number of iterations
-// 	"max_usage": "72h",		// maximum time of usage
+// 	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+// 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"maxIterations": 1000,		// maximum number of iterations
+// 	"maxUsage": "72h",		// maximum time of usage
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
@@ -1881,7 +1881,7 @@
 // },
 
 
-// "config_db": {					// database used to store runtime data (eg: accounts)
+// "configDB": {					// database used to store runtime data (eg: accounts)
 // 	"dbType": "*internal",			// db type: <*internal|*redis|*mongo>
 // 	"dbHost": "",				// db host address
 // 	"dbPort": 0,	 			// db port to reach the database

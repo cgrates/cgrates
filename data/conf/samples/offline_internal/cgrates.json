@@ -22,7 +22,7 @@
             {"limit": -1,"ttl": "1s","staticTTL": false,"remote": false,"replicate": false}
 		}
 	},
-	"config_db": {
+	"configDB": {
         "dbType": "*internal",
 		"opts": {
 			"internalDBStartTimeout": "1m",
@@ -53,21 +53,21 @@
 	},
 	"resources": {
 		"enabled": true,
-		"store_interval": "-1",
+		"storeInterval": "-1",
 		"conns": {
 			"*thresholds": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"stats": {
 		"enabled": true,
-		"store_interval": "-1",
+		"storeInterval": "-1",
 		"conns": {
 			"*thresholds": [{"ConnIDs": ["*localhost"]}]
 		},
 	},
 	"thresholds": {
 		"enabled": true,
-		"store_interval": "-1"
+		"storeInterval": "-1"
 	},
 	"routes": {
 		"enabled": true,

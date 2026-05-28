@@ -249,7 +249,7 @@ func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 	return
 }
 
-// storeTrend stores or schedules the trend for storage based on "store_interval".
+// storeTrend stores or schedules the trend for storage based on "storeInterval".
 func (t *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error) {
 	if t.cfg.TrendSCfg().StoreInterval == 0 {
 		return

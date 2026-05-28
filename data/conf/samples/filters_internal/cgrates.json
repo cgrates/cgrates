@@ -49,25 +49,25 @@
 
 "resources": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "-1"
+	"indexedSelects":false,					
+	"storeInterval": "-1"
 },
 
 
 "stats": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "-1"
+	"indexedSelects":false,					
+	"storeInterval": "-1"
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"indexed_selects":false,					
+	"indexedSelects":false,					
 	"conns": {
 		"*actions": [{"ConnIDs": ["*localhost"]}]
 	},
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 
 "actions": {
@@ -83,7 +83,7 @@
 
 "chargers": {
 	"enabled": true,
-	"suffix_indexed_fields": ["*req.Subject"],
+	"suffixIndexedFields": ["*req.Subject"],
 	"conns": {
 		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},

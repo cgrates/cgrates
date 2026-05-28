@@ -96,7 +96,7 @@
 
 "attributes": {
 	"enabled": true,
-	"indexed_selects": false,				// enable profile matching exclusively on indexes
+	"indexedSelects": false,				// enable profile matching exclusively on indexes
 },
 
 

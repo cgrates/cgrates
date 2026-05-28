@@ -67,7 +67,7 @@
 
 "resources": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 	"conns": {
 		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
@@ -76,7 +76,7 @@
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 	"conns": {
 		"*thresholds": [{"ConnIDs": ["conn1"]}]
 	},
@@ -84,7 +84,7 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 

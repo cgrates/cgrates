@@ -15,8 +15,8 @@
 "attributes": {
   "enabled": true,
   "prefixIndexedFields": ["*req.Destination"],
-  "exists_indexed_fields": ["*opts.*usage"], 
-  "notexists_indexed_fields": ["*req.ToR"]
+  "existsIndexedFields": ["*opts.*usage"], 
+  "notExistsIndexedFields": ["*req.ToR"]
 },
 
 "admins": {

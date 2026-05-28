@@ -43,7 +43,7 @@
 
     "stats": {
         "enabled": true,
-        "store_interval": "-1",
+        "storeInterval": "-1",
         "conns": {
         	"*thresholds": [{"ConnIDs": ["*internal"]}]
         },
@@ -51,7 +51,7 @@
 
     "thresholds": {	
         "enabled": true,
-        "store_interval": "-1",
+        "storeInterval": "-1",
         "conns": {
         	"*actions": [{"ConnIDs": ["*internal"]}]
         },

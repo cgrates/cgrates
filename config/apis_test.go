@@ -1111,7 +1111,7 @@ func TestApisLoadFromPathErr(t *testing.T) {
 func TestLoadCfgFromDBErr3(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
-	sections := []string{"config_db", "test"}
+	sections := []string{"configDB", "test"}
 	expected := "Invalid section: <test>"
 
 	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, true); err == nil || err.Error() != expected {
@@ -1122,8 +1122,8 @@ func TestLoadCfgFromDBErr3(t *testing.T) {
 
 func TestLoadCfgFromDBErr4(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	sections := []string{"config_db"}
-	expected := "Invalid section: <config_db>"
+	sections := []string{"configDB"}
+	expected := "Invalid section: <configDB>"
 	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected <%v> \n but received \n <%v><%T>", expected, err, err)
 	}
@@ -1131,7 +1131,7 @@ func TestLoadCfgFromDBErr4(t *testing.T) {
 
 func TestLoadCfgFromDBErr5(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	sections := []string{"config_db"}
+	sections := []string{"configDB"}
 
 	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, true); err != nil {
 		t.Errorf("Expected <nil> \n but received \n <%v>", err)

@@ -154,18 +154,18 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"stats": {
 			"enabled": true,
-			"store_interval": "72h",
-			"store_uncompressed_limit": 1,
+			"storeInterval": "72h",
+			"storeUncompressedLimit": 1,
 			"conns": {
 				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
-			"indexed_selects":false,
+			"indexedSelects":false,
             "stringIndexedFields": ["*req.string"],
 			"prefixIndexedFields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
-            "suffix_indexed_fields":["*req.suffix_indexed_fields"],
-			"exists_indexed_fields":["*req.exists_indexed_fields"],
-			"notexists_indexed_fields":["*req.notexists_indexed_fields"],
-			"nested_fields": true,
+            "suffixIndexedFields":["*req.suffix_indexed_fields"],
+			"existsIndexedFields":["*req.exists_indexed_fields"],
+			"notExistsIndexedFields":["*req.notexists_indexed_fields"],
+			"nestedFields": true,
 		},
 }`
 	eMap := map[string]any{

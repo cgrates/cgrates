@@ -32,12 +32,12 @@
     "conns": {
     	"*stats": [{"ConnIDs": ["*localhost"]}]
     },
-    "scheduled_ids": {}    
+    "scheduledIDs": {}    
 },
 
 "stats": {
     "enabled": true,
-    "store_interval": "-1",
+    "storeInterval": "-1",
 },
 
 "apiers": {

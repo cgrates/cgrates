@@ -295,7 +295,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl19)
 	}
 
-	cfgStr = `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
+	cfgStr = `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var rpl20 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -306,7 +306,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl20)
 	}
 
-	cfgStr = `{"chargers":{"conns":{"*attributes":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
+	cfgStr = `{"chargers":{"conns":{"*attributes":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var rpl21 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -317,7 +317,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl21)
 	}
 	if testCfgDir == "tutredis" || testCfgDir == "tutmysql" || testCfgDir == "tutmongo" {
-		cfgStr = `{"resources":{"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefixIndexedFields":[],"store_interval":"1s","suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
+		cfgStr = `{"resources":{"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefixIndexedFields":[],"storeInterval":"1s","suffixIndexedFields":[],"thresholds_conns":["*internal"]}}`
 		var rpl22 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -328,7 +328,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl22)
 		}
 	} else if testCfgDir == "tutinternal" {
-		cfgStr = `{"resources":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[]}}`
+		cfgStr = `{"resources":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 		var rpl22 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -340,7 +340,7 @@ func testConfigSReload(t *testing.T) {
 		}
 	}
 	if testCfgDir == "tutredis" || testCfgDir == "tutmysql" || testCfgDir == "tutmongo" {
-		cfgStr = `{"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*roundingDecimals":[]},"prefixIndexedFields":[],"store_interval":"1s","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`
+		cfgStr = `{"stats":{"ees_conns":[],"eesExporterIDs":null,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"1s","storeUncompressedLimit":0,"suffixIndexedFields":[],"thresholds_conns":["*internal"]}}`
 		var rpl23 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -351,7 +351,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl23)
 		}
 	} else if testCfgDir == "tutinternal" {
-		cfgStr = `{"stats":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"ees_exporter_ids":null,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"store_interval":"-1ns","store_uncompressed_limit":0,"suffix_indexed_fields":[]}}`
+		cfgStr = `{"stats":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"eesExporterIDs":null,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","storeUncompressedLimit":0,"suffixIndexedFields":[]}}`
 		var rpl23 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -363,7 +363,7 @@ func testConfigSReload(t *testing.T) {
 		}
 	}
 	if testCfgDir == "tutredis" || testCfgDir == "tutmysql" || testCfgDir == "tutmongo" {
-		cfgStr = `{"thresholds":{"actions_conns":[],"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefixIndexedFields":[],"store_interval":"1s","suffix_indexed_fields":[]}}`
+		cfgStr = `{"thresholds":{"actions_conns":[],"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefixIndexedFields":[],"storeInterval":"1s","suffixIndexedFields":[]}}`
 		var rpl24 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -374,7 +374,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl24)
 		}
 	} else if testCfgDir == "tutinternal" {
-		cfgStr = `{"thresholds":{"conns":{"*actions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"ees_exporter_ids":[],"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[]}}`
+		cfgStr = `{"thresholds":{"conns":{"*actions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"eesExporterIDs":[],"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 		var rpl24 string
 		if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 			Tenant:   "cgrates.org",
@@ -385,7 +385,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl24)
 		}
 	}
-	cfgStr = `{"routes":{"conns":{"*rates":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"default_ratio":1,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffix_indexed_fields":[]}}`
+	cfgStr = `{"routes":{"conns":{"*rates":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"defaultRatio":1,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffixIndexedFields":[]}}`
 	var rpl25 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -510,7 +510,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl36 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl36)
 	}
-	cfgStr = `{"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"}}`
+	cfgStr = `{"configs":{"enabled":false,"rootDir":"/var/spool/cgrates/configs","url":"/configs/"}}`
 	var rpl37 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

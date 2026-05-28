@@ -238,18 +238,18 @@ type StatsOptsJson struct {
 // Stat service config section
 type StatServJsonCfg struct {
 	Enabled                  *bool
-	Indexed_selects          *bool
-	Store_interval           *string
-	Store_uncompressed_limit *int
+	Indexed_selects          *bool                      `json:"indexedSelects"`
+	Store_interval           *string                    `json:"storeInterval"`
+	Store_uncompressed_limit *int                       `json:"storeUncompressedLimit"`
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
 	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
 	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
-	Suffix_indexed_fields    *[]string
-	Exists_indexed_fields    *[]string
-	Notexists_indexed_fields *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
+	Suffix_indexed_fields    *[]string                  `json:"suffixIndexedFields"`
+	Exists_indexed_fields    *[]string                  `json:"existsIndexedFields"`
+	Notexists_indexed_fields *[]string                  `json:"notExistsIndexedFields"`
+	Nested_fields            *bool                      `json:"nestedFields"` // applies when indexed fields is not defined
 	Opts                     *StatsOptsJson
-	Ees_exporter_ids         *[]string
+	Ees_exporter_ids         *[]string `json:"eesExporterIDs"`
 }
 
 func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {

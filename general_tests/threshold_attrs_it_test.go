@@ -48,8 +48,8 @@ func TestThresholdProcessEventWithAttributes(t *testing.T) {
 },
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
-	"indexed_selects": false,
+	"storeInterval": "-1",
+	"indexedSelects": false,
 	"conns": {
 		"*attributes": [{"ConnIDs": ["*localhost"]}],
 		"*actions": [{"ConnIDs": ["*localhost"]}]
@@ -57,11 +57,11 @@ func TestThresholdProcessEventWithAttributes(t *testing.T) {
 },
 "attributes": {
 	"enabled": true,
-	"indexed_selects": false
+	"indexedSelects": false
 },
 "actions": {
 	"enabled": true,
-	"indexed_selects": false,
+	"indexedSelects": false,
 	"conns": {
 		"*ees": [{"ConnIDs": ["*localhost"]}]
 	}

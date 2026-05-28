@@ -23,7 +23,7 @@ import (
 
 func TestConfigDBOptsInvalid(t *testing.T) {
 	cfgJSONStr := `{
-	"config_db": {                               
+	"configDB": {                               
         "opts":{
             "redisClusterSync": "invalid",              
         }

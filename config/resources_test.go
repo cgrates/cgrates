@@ -162,15 +162,15 @@ func TestResourceSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"resources": {								
 			"enabled": true,						
-			"store_interval": "7m",					
+			"storeInterval": "7m",					
 			"conns": {"*thresholds": [{"ConnIDs": ["*internal", "*conn1"]}]},					
-			"indexed_selects":true,		
+			"indexedSelects":true,		
             "stringIndexedFields": ["*req.index1"],
 			"prefixIndexedFields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
-            "suffix_indexed_fields": ["*req.prefix_indexed_fields1"],
-			"exists_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
-            "notexists_indexed_fields": ["*req.prefix_indexed_fields1"],
-			"nested_fields": true,					
+            "suffixIndexedFields": ["*req.prefix_indexed_fields1"],
+			"existsIndexedFields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
+            "notExistsIndexedFields": ["*req.prefix_indexed_fields1"],
+			"nestedFields": true,					
 		},	
 	}`
 	eMap := map[string]any{

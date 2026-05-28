@@ -32,12 +32,12 @@
     "conns": {
     	"*stats": [{"ConnIDs": ["*localhost"]}]
     },
-    "scheduled_ids": {"cgrates.org":["TR_1min"],"tenant1":["TR_5min"],"tenant2":[]}  
+    "scheduledIDs": {"cgrates.org":["TR_1min"],"tenant1":["TR_5min"],"tenant2":[]}  
 },
 
 "stats": {
     "enabled": true,
-    "store_interval": "-1",
+    "storeInterval": "-1",
 },
 
 "apiers": {

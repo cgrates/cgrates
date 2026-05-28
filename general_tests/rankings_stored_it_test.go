@@ -75,7 +75,7 @@ func TestRankingStore(t *testing.T) {
 },
 "rankings": {
 	"enabled": true,
-	"store_interval": "1500ms",
+	"storeInterval": "1500ms",
 	"conns": {
 		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
@@ -83,7 +83,7 @@ func TestRankingStore(t *testing.T) {
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 "admins": {
@@ -205,9 +205,9 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"rankings": map[string]any{
-					"enabled":        true,
-					"stats_conns":    []string{"*localhost"},
-					"store_interval": "0",
+					"enabled":       true,
+					"stats_conns":   []string{"*localhost"},
+					"storeInterval": "0",
 				},
 			},
 		}, &reply); err != nil {
@@ -266,9 +266,9 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"rankings": map[string]any{
-					"enabled":        true,
-					"stats_conns":    []string{"*localhost"},
-					"store_interval": "-1",
+					"enabled":       true,
+					"stats_conns":   []string{"*localhost"},
+					"storeInterval": "-1",
 				},
 			},
 		}, &reply); err != nil {

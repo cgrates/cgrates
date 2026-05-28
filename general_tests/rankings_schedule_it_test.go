@@ -69,15 +69,15 @@ func TestRankingSchedule(t *testing.T) {
 	},
     "rankings": {
         "enabled": true,
-        "store_interval": "-1",
-        "scheduled_ids": {},
+        "storeInterval": "-1",
+        "scheduledIDs": {},
         "conns": {
         	"*stats": [{"ConnIDs": ["*localhost"]}]
         },
     },
     "stats": {
         "enabled": true,
-        "store_interval": "-1",
+        "storeInterval": "-1",
     },
     "admins": {
         "enabled": true,

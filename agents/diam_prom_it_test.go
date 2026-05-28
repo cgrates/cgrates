@@ -88,11 +88,11 @@ func TestDiamPrometheus(t *testing.T) {
 },
 "stats": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "diameterAgent": {
 	"enabled": true,

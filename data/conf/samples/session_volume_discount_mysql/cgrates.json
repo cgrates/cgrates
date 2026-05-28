@@ -127,8 +127,8 @@
 "rates": {
     "enabled": true,
     "stringIndexedFields": ["*opts.*runID"],
-    "rate_string_indexed_fields": [],
-    "rate_prefix_indexed_fields": ["*req.Destination"],
+    "rateStringIndexedFields": [],
+    "ratePrefixIndexedFields": ["*req.Destination"],
     "opts":{
         "*profileIgnoreFilters": [
             {

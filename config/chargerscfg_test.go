@@ -65,9 +65,9 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 	"chargers": {
 		"enabled": false,
 		"conns": {},
-		"indexed_selects":true,
+		"indexedSelects":true,
 		"prefixIndexedFields": [],
-		"nested_fields": false,
+		"nestedFields": false,
 	},
 }`
 	eMap := map[string]any{
@@ -92,13 +92,13 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 		"chargers": {
 			"enabled": false,
 			"conns": {"*attributes": [{"ConnIDs": ["*internal", "*conn1"]}]},
-			"indexed_selects":true,
+			"indexedSelects":true,
             "stringIndexedFields": ["*req.Field1","*req.Field2","*req.Field3"],
 			"prefixIndexedFields": ["*req.DestinationPrefix"],
-            "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
-			"exists_indexed_fields": ["*req.DestinationPrefix"],
-            "notexists_indexed_fields": [],
-			"nested_fields": false,
+            "suffixIndexedFields": ["*req.Field1","*req.Field2","*req.Field3"],
+			"existsIndexedFields": ["*req.DestinationPrefix"],
+            "notExistsIndexedFields": [],
+			"nestedFields": false,
 		},
 	}`
 	eMap := map[string]any{
