@@ -80,8 +80,8 @@ VALUE	Acct-Terminate-Cause	User-Request	1
     	}
 	},
 },
-"radius_agent": {
-	"client_dictionaries": {
+"radiusAgent": {
+	"clientDictionaries": {
 		"*default": [
 			%q
 		]

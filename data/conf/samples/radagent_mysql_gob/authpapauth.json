@@ -1,6 +1,6 @@
 {
 
-  "radius_agent": {
+  "radiusAgent": {
     "requestProcessors": [
       {
         "id": "CGRPAPAuth",

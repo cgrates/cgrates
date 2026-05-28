@@ -32,8 +32,8 @@ type PrometheusAgentJsonCfg struct {
 	CollectGoMetrics      *bool                      `json:"collect_go_metrics"`
 	CollectProcessMetrics *bool                      `json:"collect_process_metrics"`
 	Conns                 map[string][]*DynamicConns `json:"conns,omitempty"`
-	CacheIDs              *[]string                  `json:"cache_ids"`
-	StatQueueIDs          *[]string                  `json:"stat_queue_ids"`
+	CacheIDs              *[]string                  `json:"cacheIDs"`
+	StatQueueIDs          *[]string                  `json:"statQueueIDs"`
 }
 
 // PrometheusAgentCfg represents the configuration of the Prometheus Agent.

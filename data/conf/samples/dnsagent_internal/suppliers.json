@@ -1,6 +1,6 @@
 {
 
-	"dns_agent": {
+	"dnsAgent": {
 		"requestProcessors": [
 			{
 				"id": "NAPTRRoutesQuery",

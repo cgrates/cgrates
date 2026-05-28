@@ -1,6 +1,6 @@
 {
 
-	"radius_agent": {
+	"radiusAgent": {
 		"requestProcessors": [{
 				"id": "RadiusMandatoryFail",
 				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10011"],

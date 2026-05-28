@@ -31,20 +31,20 @@ import (
 type RadiusAgentJsonCfg struct {
 	Enabled            *bool                       `json:"enabled"`
 	Listeners          *[]*RadiusListenerJsonCfg   `json:"listeners"`
-	ClientSecrets      map[string]string           `json:"client_secrets"`
-	ClientDictionaries map[string][]string         `json:"client_dictionaries"`
-	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
+	ClientSecrets      map[string]string           `json:"clientSecrets"`
+	ClientDictionaries map[string][]string         `json:"clientDictionaries"`
+	ClientDaAddresses  map[string]DAClientOptsJson `json:"clientDaAddresses"`
 	Conns              map[string][]*DynamicConns  `json:"conns,omitempty"`
-	RequestsCacheKey   *string                     `json:"requests_cache_key"`
-	DMRTemplate        *string                     `json:"dmr_template"`
-	CoATemplate        *string                     `json:"coa_template"`
+	RequestsCacheKey   *string                     `json:"requestsCacheKey"`
+	DMRTemplate        *string                     `json:"dmrTemplate"`
+	CoATemplate        *string                     `json:"coaTemplate"`
 	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"requestProcessors"`
 }
 
 type RadiusListenerJsonCfg struct {
 	Network     *string `json:"network"`
-	AuthAddress *string `json:"auth_address"`
-	AcctAddress *string `json:"acct_address"`
+	AuthAddress *string `json:"authAddress"`
+	AcctAddress *string `json:"acctAddress"`
 }
 
 type DAClientOptsJson struct {

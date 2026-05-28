@@ -940,15 +940,15 @@
 // },
 
 
-// "radius_agent": {
+// "radiusAgent": {
 // 	"enabled": false,					// enables the radius agent: <true|false>
 // 	"listen_net": "udp",					// network to listen on <udp|tcp>
 // 	"listen_auth": "127.0.0.1:1812",			// address where to listen for radius authentication requests <x.y.z.y:1234>
 // 	"listen_acct": "127.0.0.1:1813",			// address where to listen for radius accounting requests <x.y.z.y:1234>
-// 	"client_secrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
+// 	"clientSecrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
 // 		"*default": "CGRateS.org"
 // 	},
-// 	"client_dictionaries": {				// per client path towards directory holding additional dictionaries to load (extra to RFC)
+// 	"clientDictionaries": {				// per client path towards directory holding additional dictionaries to load (extra to RFC)
 // 		"*default": "/usr/share/cgrates/radius/dict/",	// key represents the client IP or catch-all <*default|$client_ip>
 // 	},
 // 	"sessions_conns": ["*internal"],
@@ -959,7 +959,7 @@
 // "httpAgent": [],	// HTTP Agents, ie towards cnc.to MVNE platform
 
 
-// "dns_agent": {
+// "dnsAgent": {
 // 	"enabled": false,				// enables the DNS agent: <true|false>
 // 	"listeners":[
 // 		{

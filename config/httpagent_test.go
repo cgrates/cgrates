@@ -400,7 +400,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase6(t *testing.T) {
 
 func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 	cfgJSONStr := `{
-"http_agent": [
+"httpAgent": [
 	{
 		"id": "RandomID",
 		},
@@ -433,7 +433,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 
 func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-"http_agent": [
+"httpAgent": [
 	{
 		"id": "conecto1",
 		"url": "/conecto",
@@ -705,7 +705,7 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	var d *HttpAgentJsonCfg
 
 	v1 := &HTTPAgentCfg{
-		ID:  "http_agent",
+		ID:  "httpAgent",
 		URL: "http_url",
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS:   {{ConnIDs: []string{"*localhost:*sessions"}}},
@@ -767,7 +767,7 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	v1 := HTTPAgentCfgs{
 		{
-			ID:  "http_agent",
+			ID:  "httpAgent",
 			URL: "http_url",
 			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
@@ -851,7 +851,7 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 func TestHttpAgentCloneSection(t *testing.T) {
 	httpCfg := HTTPAgentCfgs{
 		{
-			ID:  "http_agent",
+			ID:  "httpAgent",
 			URL: "http_url",
 			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},
@@ -865,7 +865,7 @@ func TestHttpAgentCloneSection(t *testing.T) {
 
 	exp := &HTTPAgentCfgs{
 		{
-			ID:  "http_agent",
+			ID:  "httpAgent",
 			URL: "http_url",
 			Conns: map[string][]*DynamicConns{
 				utils.MetaSessionS:   {{ConnIDs: []string{"*localhost"}}},

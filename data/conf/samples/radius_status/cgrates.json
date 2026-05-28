@@ -96,7 +96,7 @@
                         },
     },
     
-    "radius_agent": {
+    "radiusAgent": {
         "enabled": true,
         "conns": {
         	"*sessions": [{"ConnIDs": ["*bijson_localhost"]}]
@@ -104,11 +104,11 @@
         "listeners": [
       {
         "network": "udp",
-        "auth_address": "127.0.0.1:1812",
-        "acct_address": "127.0.0.1:1813"
+        "authAddress": "127.0.0.1:1812",
+        "acctAddress": "127.0.0.1:1813"
       }
     ],
-        "client_dictionaries": {
+        "clientDictionaries": {
             "*default": [ "/usr/share/cgrates/radius/dict/"]
         },
         "requestProcessors": [

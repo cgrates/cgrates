@@ -103,7 +103,7 @@
 			},
 },
 
-"radius_agent": {
+"radiusAgent": {
 	"enabled": true,
 	"conns": {
 		"*sessions": [{"ConnIDs": ["conn1"]}]

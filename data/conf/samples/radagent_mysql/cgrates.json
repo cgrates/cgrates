@@ -107,7 +107,7 @@
 			},
 },
 
-"radius_agent": {
+"radiusAgent": {
 	"enabled": true,
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*localhost"]}]

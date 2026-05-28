@@ -79,12 +79,12 @@ func TestDiamPrometheus(t *testing.T) {
 	"enabled": true,
 	"store_cdrs": false
 },
-"prometheus_agent": {
+"prometheusAgent": {
 	"enabled": true,
 	"conns": {
 		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
-	"stat_queue_ids": ["SQ_1","SQ_2"]
+	"statQueueIDs": ["SQ_1","SQ_2"]
 },
 "stats": {
 	"enabled": true,

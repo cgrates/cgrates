@@ -65,13 +65,13 @@ func TestPrometheusAgentIT(t *testing.T) {
 		}]
 	}
 },
-"prometheus_agent": {
+"prometheusAgent": {
 	"enabled": true,
 	"path": "/metrics",
 	"conns": {
 		"*caches": [{"ConnIDs": ["*localhost", "external"]}]
 	},
-	"cache_ids": [
+	"cacheIDs": [
 		"*statQueueProfiles",
 		"*statQueues",
 		"*statFilterIndexes",
@@ -81,7 +81,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"conns": {
 		"*stats": [{"ConnIDs": ["*internal", "external"]}]
 	},
-	"stat_queue_ids": ["cgrates.org:SQ_1","SQ_2"]
+	"statQueueIDs": ["cgrates.org:SQ_1","SQ_2"]
 }
 }`
 
