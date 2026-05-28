@@ -234,13 +234,13 @@ type AttributesOptsJson struct {
 type AttributeSJsonCfg struct {
 	Enabled                  *bool
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	Indexed_selects          *bool                      `json:"indexed_selects"`
+	Indexed_selects          *bool                      `json:"indexedSelects"`
 	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
 	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
-	Suffix_indexed_fields    *[]string                  `json:"suffix_indexed_fields"`
-	Exists_indexed_fields    *[]string                  `json:"exists_indexed_fields"`
-	Notexists_indexed_fields *[]string                  `json:"notexists_indexed_fields"`
-	Nested_fields            *bool                      `json:"nested_fields"` // applies when indexed fields is not defined
+	Suffix_indexed_fields    *[]string                  `json:"suffixIndexedFields"`
+	Exists_indexed_fields    *[]string                  `json:"existsIndexedFields"`
+	Notexists_indexed_fields *[]string                  `json:"notExistsIndexedFields"`
+	Nested_fields            *bool                      `json:"nestedFields"` // applies when indexed fields is not defined
 	Opts                     *AttributesOptsJson        `json:"opts"`
 }
 

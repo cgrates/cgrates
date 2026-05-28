@@ -1216,7 +1216,7 @@ const (
 	MetaAddBalance            = "*addBalance"
 	MetaSetBalance            = "*setBalance"
 	MetaRemBalance            = "*remBalance"
-	DynaprepaidActionplansCfg = "dynaprepaid_actionprofile"
+	DynaprepaidActionplansCfg = "dynaprepaidActionProfile"
 	MetaDynamicThreshold      = "*dynamicThreshold"
 	MetaDynamicStats          = "*dynamicStats"
 	MetaDynamicAttribute      = "*dynamicAttribute"
@@ -2160,9 +2160,9 @@ const (
 	SQLConnMaxLifetimeCfg     = "sqlConnMaxLifetime"
 	StringIndexedFieldsCfg    = "stringIndexedFields"
 	PrefixIndexedFieldsCfg    = "prefixIndexedFields"
-	SuffixIndexedFieldsCfg    = "suffix_indexed_fields"
-	ExistsIndexedFieldsCfg    = "exists_indexed_fields"
-	NotExistsIndexedFieldsCfg = "notexists_indexed_fields"
+	SuffixIndexedFieldsCfg    = "suffixIndexedFields"
+	ExistsIndexedFieldsCfg    = "existsIndexedFields"
+	NotExistsIndexedFieldsCfg = "notExistsIndexedFields"
 	MongoQueryTimeoutCfg      = "mongoQueryTimeout"
 	MongoConnSchemeCfg        = "mongoConnScheme"
 	PgSSLModeCfg              = "pgSSLMode"
@@ -2289,7 +2289,7 @@ const (
 	EnabledCfg         = "enabled"
 	ThresholdSConnsCfg = "thresholds_conns"
 	CacheSConnsCfg     = "caches_conns"
-	ScheduledIDsCfg    = "scheduled_ids"
+	ScheduledIDsCfg    = "scheduledIDs"
 )
 
 // Efs
@@ -2413,9 +2413,9 @@ const (
 	PortCfg               = "port"
 
 	// JanusAgentCfg
-	JanusConnsCfg    = "janus_conns"
-	AdminAddressCfg  = "admin_address"
-	AdminPasswordCfg = "admin_password"
+	JanusConnsCfg    = "janusConns"
+	AdminAddressCfg  = "adminAddress"
+	AdminPasswordCfg = "adminPassword"
 
 	// PrometheusAgentCfg
 	CoreSConnsCfg            = "cores_conns"
@@ -2425,18 +2425,18 @@ const (
 	StatQueueIDsCfg          = "statQueueIDs"
 
 	// AttributeSCfg
-	IndexedSelectsCfg  = "indexed_selects"
-	ProfileRunsCfg     = "profile_runs"
-	NestedFieldsCfg    = "nested_fields"
+	IndexedSelectsCfg  = "indexedSelects"
+	ProfileRunsCfg     = "profileRuns"
+	NestedFieldsCfg    = "nestedFields"
 	MetaProcessRunsCfg = "*processRuns"
 	MetaProfileRunsCfg = "*profileRuns"
 
 	// ChargerSCfg
-	StoreIntervalCfg = "store_interval"
+	StoreIntervalCfg = "storeInterval"
 
 	// StatSCfg
-	StoreUncompressedLimitCfg = "store_uncompressed_limit"
-	EEsExporterIDsCfg         = "ees_exporter_ids"
+	StoreUncompressedLimitCfg = "storeUncompressedLimit"
+	EEsExporterIDsCfg         = "eesExporterIDs"
 
 	// Cache
 	PartitionsCfg = "partitions"
@@ -2458,7 +2458,7 @@ const (
 	TpOutPathCfg    = "tp_out_path"
 	DataCfg         = "data"
 
-	DefaultRatioCfg   = "default_ratio"
+	DefaultRatioCfg   = "defaultRatio"
 	ReadersCfg        = "readers"
 	ExportersCfg      = "exporters"
 	PoolSize          = "poolSize"
@@ -2479,13 +2479,13 @@ const (
 
 	// RateSCfg
 	MetaIntervalStartCfg          = "*intervalStart"
-	RateIndexedSelectsCfg         = "rate_indexed_selects"
-	RateNestedFieldsCfg           = "rate_nested_fields"
-	RateStringIndexedFieldsCfg    = "rate_string_indexed_fields"
-	RatePrefixIndexedFieldsCfg    = "rate_prefix_indexed_fields"
-	RateSuffixIndexedFieldsCfg    = "rate_suffix_indexed_fields"
-	RateExistsIndexedFieldsCfg    = "rate_exists_indexed_fields"
-	RateNotExistsIndexedFieldsCfg = "rate_notexists_indexed_fields"
+	RateIndexedSelectsCfg         = "rateIndexedSelects"
+	RateNestedFieldsCfg           = "rateNestedFields"
+	RateStringIndexedFieldsCfg    = "rateStringIndexedFields"
+	RatePrefixIndexedFieldsCfg    = "ratePrefixIndexedFields"
+	RateSuffixIndexedFieldsCfg    = "rateSuffixIndexedFields"
+	RateExistsIndexedFieldsCfg    = "rateExistsIndexedFields"
+	RateNotExistsIndexedFieldsCfg = "rateNotExistsIndexedFields"
 	Verbosity                     = "verbosity"
 
 	// ResourceSCfg
@@ -2532,8 +2532,8 @@ const (
 	ShutdownTimeoutCfg   = "shutdownTimeout"
 
 	// AccountSCfg
-	MaxIterations = "max_iterations"
-	MaxUsage      = "max_usage"
+	MaxIterations = "maxIterations"
+	MaxUsage      = "maxUsage"
 
 	// AdminSCfg
 	AdminSConnsCfg = "admins_conns"
@@ -2560,7 +2560,7 @@ const (
 
 // SureTax
 const (
-	RootDirCfg              = "root_dir"
+	RootDirCfg              = "rootDir"
 	URLCfg                  = "url"
 	ClientNumberCfg         = "client_number"
 	ValidationKeyCfg        = "validation_key"

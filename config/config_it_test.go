@@ -1396,7 +1396,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"resources": {
 			"enabled": true,
-			"store_interval": "-1",
+			"storeInterval": "-1",
 			"conns": {
 				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
@@ -1405,7 +1405,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"stats": {
 			"enabled": true,
-			"store_interval": "-1",
+			"storeInterval": "-1",
 			"conns": {
 				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
@@ -1413,7 +1413,7 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"thresholds": {
 			"enabled": true,
-			"store_interval": "-1"
+			"storeInterval": "-1"
 		},
 		
 		

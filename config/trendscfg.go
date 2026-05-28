@@ -114,11 +114,11 @@ func (t *TrendSCfg) Clone() (cln *TrendSCfg) {
 
 type TrendSJsonCfg struct {
 	Enabled                  *bool
-	Store_interval           *string
-	Store_uncompressed_limit *int
+	Store_interval           *string                    `json:"storeInterval"`
+	Store_uncompressed_limit *int                       `json:"storeUncompressedLimit"`
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	Scheduled_ids            map[string][]string
-	Ees_exporter_ids         *[]string
+	Scheduled_ids            map[string][]string        `json:"scheduledIDs"`
+	Ees_exporter_ids         *[]string                  `json:"eesExporterIDs"`
 }
 
 func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {

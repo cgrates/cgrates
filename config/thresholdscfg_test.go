@@ -154,14 +154,14 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 		"thresholds": {
 			"enabled": true,
-			"store_interval": "96h",
-			"indexed_selects": false,
+			"storeInterval": "96h",
+			"indexedSelects": false,
             "stringIndexedFields": ["*req.string"],
 			"prefixIndexedFields": ["*req.prefix","*req.indexed","*req.fields"],
-            "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],
-			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
-            "notexists_indexed_fields": [],
-			"nested_fields": true,
+            "suffixIndexedFields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],
+			"existsIndexedFields": ["*req.prefix","*req.indexed","*req.fields"],
+            "notExistsIndexedFields": [],
+			"nestedFields": true,
 			"conns": {
 				"*actions": [{"ConnIDs": ["*internal"]}]
 			},

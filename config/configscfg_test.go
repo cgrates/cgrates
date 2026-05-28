@@ -56,7 +56,7 @@ func TestConfigsAsMapInterface(t *testing.T) {
       "configs": {
           "enabled": true,
           "url": "",
-          "root_dir": "/var/spool/cgrates/configs"
+          "rootDir": "/var/spool/cgrates/configs"
       },
 }`
 	eMap := map[string]any{

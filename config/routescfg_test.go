@@ -140,13 +140,13 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"routes": {
 			"enabled": true,
-			"indexed_selects":false,
+			"indexedSelects":false,
 			"stringIndexedFields": ["*req.string"],
 			"prefixIndexedFields": ["*req.prefix","*req.indexed","*req.fields"],
-			"suffix_indexed_fields": ["*req.prefix","*req.indexed"],
-			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
-			"notexists_indexed_fields": ["*req.prefix","*req.indexed"],
-			"nested_fields": true,
+			"suffixIndexedFields": ["*req.prefix","*req.indexed"],
+			"existsIndexedFields": ["*req.prefix","*req.indexed","*req.fields"],
+			"notExistsIndexedFields": ["*req.prefix","*req.indexed"],
+			"nestedFields": true,
 			"conns": {
 				"*attributes": [{"ConnIDs": ["*internal:*attributes", "conn1"]}],
 				"*resources": [{"ConnIDs": ["*internal:*resources", "conn1"]}],
@@ -154,7 +154,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 				"*rates": [{"ConnIDs": ["*internal:*rates", "conn1"]}],
 				"*accounts": [{"ConnIDs": ["*internal:*accounts", "conn1"]}]
 			},
-			"default_ratio":2,
+			"defaultRatio":2,
 		},
 	}`
 	eMap := map[string]any{

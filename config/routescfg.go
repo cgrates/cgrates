@@ -298,15 +298,15 @@ type RoutesOptsJson struct {
 // Route service config section
 type RouteSJsonCfg struct {
 	Enabled                  *bool
-	Indexed_selects          *bool
-	String_indexed_fields    *[]string `json:"stringIndexedFields"`
-	Prefix_indexed_fields    *[]string `json:"prefixIndexedFields"`
-	Suffix_indexed_fields    *[]string
-	Exists_indexed_fields    *[]string
-	Notexists_indexed_fields *[]string
-	Nested_fields            *bool                      // applies when indexed fields is not defined
+	Indexed_selects          *bool                      `json:"indexedSelects"`
+	String_indexed_fields    *[]string                  `json:"stringIndexedFields"`
+	Prefix_indexed_fields    *[]string                  `json:"prefixIndexedFields"`
+	Suffix_indexed_fields    *[]string                  `json:"suffixIndexedFields"`
+	Exists_indexed_fields    *[]string                  `json:"existsIndexedFields"`
+	Notexists_indexed_fields *[]string                  `json:"notExistsIndexedFields"`
+	Nested_fields            *bool                      `json:"nestedFields"` // applies when indexed fields is not defined
 	Conns                    map[string][]*DynamicConns `json:"conns,omitempty"`
-	Default_ratio            *int
+	Default_ratio            *int                       `json:"defaultRatio"`
 	Opts                     *RoutesOptsJson
 }
 

@@ -86,7 +86,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 
 "admins": {
@@ -133,7 +133,7 @@ func TestReplicateMultipleDB(t *testing.T) {
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 
 "admins": {

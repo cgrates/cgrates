@@ -1427,13 +1427,13 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},					
-	"indexed_selects": true,			// enable profile matching exclusively on indexes
+	"indexedSelects": true,			// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],			// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],			// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"nested_fields": false,				// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],			// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],			// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],			// query indexes based on these fields for faster processing
+	"nestedFields": false,				// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{
 		// "*profileIDs": [
 		// 	{
@@ -1478,19 +1478,19 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},			
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 },
 
 
 "resources": {
 	"enabled": false,		// starts ResourceLimiter service: <true|false>
-	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+	"storeInterval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"conns": {
 		// "*thresholds": [		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -1500,13 +1500,13 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},		
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{
 		// "*usageID": [
 		// 	{
@@ -1534,14 +1534,14 @@ const CGRATES_CFG_JSON = `
 
 "ips": {
     "enabled": false,			// enables the IPs service: <true|false>
-    "store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-    "indexed_selects": true,		// enable profile matching exclusively on indexes
+    "storeInterval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+    "indexedSelects": true,		// enable profile matching exclusively on indexes
     //"stringIndexedFields": [],	// query indexes based on these fields for faster processing
     "prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-    "suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-    "exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-    "notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-    "nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+    "suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+    "existsIndexedFields": [],	// query indexes based on these fields for faster processing
+    "notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+    "nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "opts":{
 	// "*allocationID": [
 	//     {
@@ -1570,8 +1570,8 @@ const CGRATES_CFG_JSON = `
 
 "stats": {
 	"enabled": false,		// starts Stat service: <true|false>
-	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-	"store_uncompressed_limit": 0,	// used to compress data
+	"storeInterval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+	"storeUncompressedLimit": 0,	// used to compress data
 	"conns": {
 	    // "*ees": [	// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -1588,14 +1588,14 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},		
-	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"eesExporterIDs": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {
 		// "*profileIDs": [
 		// 	{
@@ -1624,14 +1624,14 @@ const CGRATES_CFG_JSON = `
 
 "thresholds": {
 	"enabled": false,			// starts ThresholdS service: <true|false>
-	"store_interval": "",			// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-	"indexed_selects": true,		// enable profile matching exclusively on indexes
+	"storeInterval": "",			// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+	"indexedSelects": true,		// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],		// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],		// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],		// query indexes based on these fields for faster processing
+	"nestedFields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"conns": {
 	    // "*actions": [	// connections to ActionS to execute the actions
 		// 	{
@@ -1655,7 +1655,7 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},				
-	"ees_exporter_ids": [],			// list of EventExporter profiles to use for real-time threshold exports
+	"eesExporterIDs": [],			// list of EventExporter profiles to use for real-time threshold exports
 	"opts":{
 		// "*thresholdsIDs": [
 		// 	{
@@ -1677,8 +1677,8 @@ const CGRATES_CFG_JSON = `
 
 "trends":{
 	"enabled": false,		// starts TrendS service: <true|false>.
-	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
-	"store_uncompressed_limit": 0,	// used to compress metrics
+	"storeInterval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+	"storeUncompressedLimit": 0,	// used to compress metrics
 	"conns": {
 	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -1702,14 +1702,14 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},			
-	"scheduled_ids": {},		// autoload these trend ids on start
-	"ees_exporter_ids": []		// list of EventExporter profiles to use for real-time trendSummary exports
+	"scheduledIDs": {},		// autoload these trend ids on start
+	"eesExporterIDs": []		// list of EventExporter profiles to use for real-time trendSummary exports
 },
 
 
 "rankings":{
 	"enabled": false,	// starts RankingS service: <true|false>.
-	"store_interval": "",	// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
+	"storeInterval": "",	// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"conns": {
 	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -1733,20 +1733,20 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},		
-	"scheduled_ids": {},	// autoload these ranking ids on start
-	"ees_exporter_ids": []	// list of EventExporter profiles to use for real-time rankingSummary exports
+	"scheduledIDs": {},	// autoload these ranking ids on start
+	"eesExporterIDs": []	// list of EventExporter profiles to use for real-time rankingSummary exports
 },
 
 
 "routes": {
 	"enabled": false,		// starts RouteS service: <true|false>.
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"conns": {
 	    // "*attributes": [		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -1784,7 +1784,7 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 	},		
-	"default_ratio":1,		// default ratio used in case of *load strategy
+	"defaultRatio":1,		// default ratio used in case of *load strategy
 	"opts":{
 		// "*context": [
 		// 	{
@@ -2260,20 +2260,20 @@ const CGRATES_CFG_JSON = `
 
 "rates": {
 	"enabled": false,
-	"indexed_selects": true,		// enable profile matching exclusively on indexes
+	"indexedSelects": true,		// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],		// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],		// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"rate_indexed_selects": true,		// enable profile matching exclusively on indexes
-	//"rate_string_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"rate_prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"rate_suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"rate_exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"rate_notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"rate_nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"suffixIndexedFields": [],		// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],		// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],		// query indexes based on these fields for faster processing
+	"nestedFields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"rateIndexedSelects": true,		// enable profile matching exclusively on indexes
+	//"rateStringIndexedFields": [],	// query indexes based on these fields for faster processing
+	"ratePrefixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"rateSuffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"rateExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"rateNotExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"rateNestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"verbosity": 1000,			// number of increment iterations allowed
 	"opts":{
 		// "*profileIDs": [		// select the rate profiles used for cost calculation
@@ -2341,15 +2341,15 @@ const CGRATES_CFG_JSON = `
 	"requestProcessors": []	// request processors to be applied to SIP messages
 },
 
-"janus_agent": {
+"janusAgent": {
 	"enabled": false,				// enables the Janus agent: <true|false>
 	"url": "/janus",
 	"conns": {"*sessions": [{"ConnIDs": ["*internal"]}]},
-	"janus_conns": [{				// instantiate connections to multiple Janus Servers
+	"janusConns": [{				// instantiate connections to multiple Janus Servers
 		"address": "127.0.0.1:8088",		// janus API address 
 		"type": "*ws",				// type of the transport to interact via janus API
-		"admin_address": "localhost:7188",	// janus admin address used to retrive more information for sessions and handles
-		"admin_password": ""			// secret to pass restriction to communicate to the endpoint
+		"adminAddress": "localhost:7188",	// janus admin address used to retrive more information for sessions and handles
+		"adminPassword": ""			// secret to pass restriction to communicate to the endpoint
 	}],
 	"requestProcessors": []			// request processors to be applied to Janus messages
 },
@@ -2511,7 +2511,7 @@ const CGRATES_CFG_JSON = `
 "configs": {
 	"enabled": false,
 	"url": "/configs/",				// configs url
-	"root_dir": "/var/spool/cgrates/configs"	// root directory in case of calling /configs request
+	"rootDir": "/var/spool/cgrates/configs"	// root directory in case of calling /configs request
 },
 
 
@@ -2578,14 +2578,14 @@ const CGRATES_CFG_JSON = `
 		// ],
 	},		
 	"tenants":[],			// List of tenants to operate on
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"dynaprepaid_actionprofile": [],
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"dynaprepaidActionProfile": [],
 	"opts":{
 		// "*profileIDs": [
 		// 	{
@@ -2614,7 +2614,7 @@ const CGRATES_CFG_JSON = `
 
 "accounts": {
 	"enabled": false,		// starts service: <true|false>
-	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	"indexedSelects": true,	// enable profile matching exclusively on indexes
 	"conns": {
 		// "*attributes": [		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 		// 	{
@@ -2640,12 +2640,12 @@ const CGRATES_CFG_JSON = `
 	},			
 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
 	"prefixIndexedFields": [],	// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
-	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"max_iterations": 1000,		// maximum number of iterations
-	"max_usage": "72h",		// maximum time of usage
+	"suffixIndexedFields": [],	// query indexes based on these fields for faster processing
+	"existsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"notExistsIndexedFields": [],	// query indexes based on these fields for faster processing
+	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"maxIterations": 1000,		// maximum number of iterations
+	"maxUsage": "72h",		// maximum time of usage
 	"opts":{
 		// "*profileIDs": [
 		// 	{
@@ -2672,7 +2672,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"config_db": {					// database used to store runtime data (eg: accounts)
+"configDB": {					// database used to store runtime data (eg: accounts)
 	"dbType": "*internal",			// db type: <*internal|*redis|*mongo>
 	"dbHost": "",				// db host address
 	"dbPort": 0,	 			// db port to reach the database

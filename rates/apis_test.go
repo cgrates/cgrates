@@ -31,7 +31,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	jsonCfg := `{
 "rates": {
     "enabled": true,
-    "rate_indexed_selects": true,
+    "rateIndexedSelects": true,
   },
 }
 `
@@ -181,7 +181,7 @@ func TestV1RateProfilesForEvent(t *testing.T) {
 	jsonCfg := `{
         "rates": {
             "enabled": true,
-            "rate_indexed_selects": true,
+            "rateIndexedSelects": true,
           },
         }
         `
@@ -250,7 +250,7 @@ func TestV1RateProfileRatesForEvent(t *testing.T) {
 	jsonCfg := `{
         "rates": {
             "enabled": true,
-            "rate_indexed_selects": true
+            "rateIndexedSelects": true
         }
     }`
 

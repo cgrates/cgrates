@@ -234,14 +234,14 @@ type ActionSJsonCfg struct {
 	Enabled                   *bool
 	Conns                     map[string][]*DynamicConns `json:"conns,omitempty"`
 	Tenants                   *[]string
-	Indexed_selects           *bool
+	Indexed_selects           *bool     `json:"indexedSelects"`
 	String_indexed_fields     *[]string `json:"stringIndexedFields"`
 	Prefix_indexed_fields     *[]string `json:"prefixIndexedFields"`
-	Suffix_indexed_fields     *[]string
-	Exists_indexed_fields     *[]string
-	Notexists_indexed_fields  *[]string
-	Nested_fields             *bool // applies when indexed fields is not defined
-	Dynaprepaid_actionprofile *[]string
+	Suffix_indexed_fields     *[]string `json:"suffixIndexedFields"`
+	Exists_indexed_fields     *[]string `json:"existsIndexedFields"`
+	Notexists_indexed_fields  *[]string `json:"notExistsIndexedFields"`
+	Nested_fields             *bool     `json:"nestedFields"` // applies when indexed fields is not defined
+	Dynaprepaid_actionprofile *[]string `json:"dynaprepaidActionProfile"`
 	Opts                      *ActionsOptsJson
 }
 

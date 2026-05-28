@@ -68,12 +68,12 @@
 
 "stats": {									
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 "cdrs": {

@@ -52,13 +52,13 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "1s",
+	"storeInterval": "1s",
 },
 
 
 "stats": {
 	"enabled": true,
-	"store_interval": "1s",
+	"storeInterval": "1s",
 },
 
 

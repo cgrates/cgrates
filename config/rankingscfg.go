@@ -111,9 +111,9 @@ func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 type RankingSJsonCfg struct {
 	Enabled          *bool
 	Conns            map[string][]*DynamicConns `json:"conns,omitempty"`
-	Scheduled_ids    map[string][]string
-	Store_interval   *string
-	Ees_exporter_ids *[]string
+	Scheduled_ids    map[string][]string        `json:"scheduledIDs"`
+	Store_interval   *string                    `json:"storeInterval"`
+	Ees_exporter_ids *[]string                  `json:"eesExporterIDs"`
 }
 
 func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonCfg {

@@ -44,7 +44,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 },
 "resources": {
 	"enabled": true,
-	"store_interval": "-1"
+	"storeInterval": "-1"
 },
 "admins": { "enabled": true }
 }`,

@@ -56,7 +56,7 @@
     
     "resources": {
         "enabled": true,
-        "store_interval": "-1",
+        "storeInterval": "-1",
         "conns": {
         	"*thresholds": [{"ConnIDs": ["*internal"]}]
         },
@@ -65,7 +65,7 @@
     
     "stats": {
         "enabled": true,
-        "store_interval": "-1",
+        "storeInterval": "-1",
         "conns": {
         	"*thresholds": [{"ConnIDs": ["*internal"]}]
         },
@@ -73,7 +73,7 @@
     
     "thresholds": {
         "enabled": true,
-        "store_interval": "-1"
+        "storeInterval": "-1"
     },
     
 
@@ -159,16 +159,16 @@
     "accounts": {
         "enabled": true
     },
-    "janus_agent": {
+    "janusAgent": {
 	"enabled": true,
 	"url": "/janus",
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*bijson_localhost"]}]
 	},
-	"janus_conns": [{
+	"janusConns": [{
 		"address": "localhost:8188",
-		"admin_address": "localhost:7188",
-		"admin_password": "janusoverlord"
+		"adminAddress": "localhost:7188",
+		"adminPassword": "janusoverlord"
 	}]
 },
     

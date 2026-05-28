@@ -66,7 +66,7 @@ func TestTrendStore(t *testing.T) {
 },
 "trends": {
 	"enabled": true,
-	"store_interval": "1500ms",
+	"storeInterval": "1500ms",
 	"conns": {
 		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
@@ -74,7 +74,7 @@ func TestTrendStore(t *testing.T) {
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
+	"storeInterval": "-1",
 },
 
 "admins": {
@@ -169,9 +169,9 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"trends": map[string]any{
-					"enabled":        true,
-					"stats_conns":    []string{"*localhost"},
-					"store_interval": "0",
+					"enabled":       true,
+					"stats_conns":   []string{"*localhost"},
+					"storeInterval": "0",
 				},
 			},
 		}, &reply); err != nil {
@@ -231,9 +231,9 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"trends": map[string]any{
-					"enabled":        true,
-					"stats_conns":    []string{"*localhost"},
-					"store_interval": "-1",
+					"enabled":       true,
+					"stats_conns":   []string{"*localhost"},
+					"storeInterval": "-1",
 				},
 			},
 		}, &reply); err != nil {

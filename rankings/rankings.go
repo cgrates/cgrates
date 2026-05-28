@@ -233,7 +233,7 @@ func (r *RankingS) processEEs(rk *utils.Ranking) (err error) {
 	return
 }
 
-// storeRanking stores or schedules the ranking for storage based on "store_interval".
+// storeRanking stores or schedules the ranking for storage based on "storeInterval".
 func (r *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err error) {
 	if r.cgrcfg.RankingSCfg().StoreInterval == 0 {
 		return

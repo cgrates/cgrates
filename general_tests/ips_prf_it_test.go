@@ -55,7 +55,7 @@ func Benchmark10IPsAllocated(b *testing.B) {
         },
 		"ips": {
             "enabled": true,	
-			"store_interval": "-1",
+			"storeInterval": "-1",
             "stringIndexedFields": ["*req.Account"],
 		},
 	}`

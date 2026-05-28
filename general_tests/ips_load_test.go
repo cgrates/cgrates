@@ -69,7 +69,7 @@ func BenchmarkStressIPsAllocateIP(b *testing.B) {
 	},
   "ips": {
     "enabled": true,
-    "indexed_selects": false
+    "indexedSelects": false
   }
 }`
 
@@ -184,7 +184,7 @@ func TestStressIPsAuthorize(t *testing.T) {
         },
 		"ips": {
             "enabled": true,	
-			"indexed_selects":false,
+			"indexedSelects":false,
 		},
 	}`
 

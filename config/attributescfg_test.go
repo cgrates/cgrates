@@ -139,8 +139,8 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	},
 	"prefixIndexedFields": ["*req.index1","*req.index2"],
     "stringIndexedFields": ["*req.index1"],
-	"exists_indexed_fields": ["*req.index1","*req.index2"],
-    "notexists_indexed_fields": ["*req.index1"],
+	"existsIndexedFields": ["*req.index1","*req.index2"],
+    "notExistsIndexedFields": ["*req.index1"],
 	"opts": {
 		"*processRuns": [
 				{
@@ -188,9 +188,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
      "attributes": {
-           "suffix_indexed_fields": ["*req.index1","*req.index2"],
-		   "notexists_indexed_fields": ["*req.index1","*req.index2"],
-           "nested_fields": true,
+           "suffixIndexedFields": ["*req.index1","*req.index2"],
+		   "notExistsIndexedFields": ["*req.index1","*req.index2"],
+           "nestedFields": true,
            "enabled": true,
            "opts": {
 			"*processRuns": [

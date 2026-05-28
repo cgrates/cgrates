@@ -61,7 +61,7 @@
 
 "stats": {
 	"enabled": true,
-	"store_interval": "1s",
+	"storeInterval": "1s",
 	"conns": {
 		"*thresholds": [{"ConnIDs": ["*internal"]}]
 	},
@@ -69,7 +69,7 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "1s"
+	"storeInterval": "1s"
 },
 
 "chargers": {

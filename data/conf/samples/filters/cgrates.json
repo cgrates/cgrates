@@ -51,20 +51,20 @@
 
 "resources": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "1s"
+	"indexedSelects":false,					
+	"storeInterval": "1s"
 },
 
 "stats": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "1s"
+	"indexedSelects":false,					
+	"storeInterval": "1s"
 },
 
 "thresholds": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "1s"
+	"indexedSelects":false,					
+	"storeInterval": "1s"
 },
 
 "attributes": {
@@ -73,7 +73,7 @@
 
 "chargers": {
 	"enabled": true,
-	"suffix_indexed_fields": ["*req.Subject"],
+	"suffixIndexedFields": ["*req.Subject"],
 	"conns": {
 		"*attributes": [{"ConnIDs": ["*internal"]}]
 	},

@@ -139,7 +139,7 @@ func (cScfg ConfigSCfg) Clone() *ConfigSCfg {
 type ConfigSCfgJson struct {
 	Enabled  *bool
 	Url      *string
-	Root_dir *string
+	Root_dir *string `json:"rootDir"`
 }
 
 func diffConfigSCfgJson(d *ConfigSCfgJson, v1, v2 *ConfigSCfg) *ConfigSCfgJson {

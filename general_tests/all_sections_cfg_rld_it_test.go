@@ -598,13 +598,13 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefixIndexedFields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`,
+		Config: `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexedSelects":true,"nestedFields":false,"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefixIndexedFields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffixIndexedFields":[]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
+	cfgStr := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -635,13 +635,13 @@ func testSectConfigSReloadChargers(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"chargers":{"attributes_conns":["*internal"],"enabled":true,"indexed_selects":true,"nested_fields":false,"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`,
+		Config: `{"chargers":{"attributes_conns":["*internal"],"enabled":true,"indexedSelects":true,"nestedFields":false,"prefixIndexedFields":[],"suffixIndexedFields":[]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"chargers":{"conns":{"*attributes":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
+	cfgStr := `{"chargers":{"conns":{"*attributes":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -671,13 +671,13 @@ func testSectConfigSReloadResources(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"resources":{"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`,
+		Config: `{"resources":{"enabled":true,"indexedSelects":true,"nestedFields":false,"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[],"thresholds_conns":["*internal"]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"resources":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[]}}`
+	cfgStr := `{"resources":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -707,13 +707,13 @@ func testSectConfigSReloadStats(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"stats":{"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*roundingDecimals":[]},"prefixIndexedFields":[],"store_interval":"-1ns","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":["*internal"]}}`,
+		Config: `{"stats":{"enabled":true,"indexedSelects":true,"nestedFields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","storeUncompressedLimit":0,"suffixIndexedFields":[],"thresholds_conns":["*internal"]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"stats":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"ees_exporter_ids":null,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"store_interval":"-1ns","store_uncompressed_limit":0,"suffix_indexed_fields":[]}}`
+	cfgStr := `{"stats":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"eesExporterIDs":null,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","storeUncompressedLimit":0,"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -743,13 +743,13 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"thresholds":{"actions_conns":[],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[]}}`,
+		Config: `{"thresholds":{"actions_conns":[],"enabled":true,"indexedSelects":true,"nestedFields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"thresholds":{"conns":{"*actions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"ees_exporter_ids":[],"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"store_interval":"-1ns","suffix_indexed_fields":[]}}`
+	cfgStr := `{"thresholds":{"conns":{"*actions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"eesExporterIDs":[],"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -779,13 +779,13 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*context":[],"*ignoreErrors":[],"*limit":[],"*maxCost":[],"*offset":[],"*profileCount":[],"*usage":[]},"prefixIndexedFields":["*req.Destination"],"rates_conns":[],"resources_conns":["*internal"],"stats_conns":["*internal"],"suffix_indexed_fields":[]}}`,
+		Config: `{"routes":{"accounts_conns":[],"attributes_conns":[],"defaultRatio":1,"enabled":true,"indexedSelects":true,"nestedFields":false,"opts":{"*context":[],"*ignoreErrors":[],"*limit":[],"*maxCost":[],"*offset":[],"*profileCount":[],"*usage":[]},"prefixIndexedFields":["*req.Destination"],"rates_conns":[],"resources_conns":["*internal"],"stats_conns":["*internal"],"suffixIndexedFields":[]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"routes":{"conns":{"*rates":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"default_ratio":1,"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffix_indexed_fields":[]}}`
+	cfgStr := `{"routes":{"conns":{"*rates":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}]},"defaultRatio":1,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -985,13 +985,13 @@ func testSectConfigSReloadConfigs(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"configs":{"enabled":true,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"}}`,
+		Config: `{"configs":{"enabled":true,"rootDir":"/var/spool/cgrates/configs","url":"/configs/"}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"configs":{"enabled":true,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"}}`
+	cfgStr := `{"configs":{"enabled":true,"rootDir":"/var/spool/cgrates/configs","url":"/configs/"}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -1057,12 +1057,12 @@ func testSectConfigSReloadActions(t *testing.T) {
 				"*accounts": []
 			},
 			"tenants": [],
-			"indexed_selects": true,
+			"indexedSelects": true,
 			//"stringIndexedFields": [],
 			"prefixIndexedFields": [],
-			"suffix_indexed_fields": [],
-			"nested_fields": false,
-			"dynaprepaid_actionprofile": [],
+			"suffixIndexedFields": [],
+			"nestedFields": false,
+			"dynaprepaidActionProfile": [],
 		},`,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1079,12 +1079,12 @@ func testSectConfigSReloadActions(t *testing.T) {
 			"*accounts": []
 		},
 		"tenants": [],
-		"indexed_selects": true,
+		"indexedSelects": true,
 		//"stringIndexedFields": [],
 		"prefixIndexedFields": [],
-		"suffix_indexed_fields": [],
-		"nested_fields": false,
-		"dynaprepaid_actionprofile": [],
+		"suffixIndexedFields": [],
+		"nestedFields": false,
+		"dynaprepaidActionProfile": [],
 	},`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -1112,7 +1112,7 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 		Tenant: "cgrates.org",
 		Config: `"accounts": {
 			"enabled": false,
-			"indexed_selects": true,
+			"indexedSelects": true,
 			"conns": {
 				"*attributes": [],
 				"*rates": [],
@@ -1120,10 +1120,10 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 			},
 			//"stringIndexedFields": [],
 			"prefixIndexedFields": [],
-			"suffix_indexed_fields": [],
-			"nested_fields": false,
-			"max_iterations": 1000,
-			"max_usage": "72h",
+			"suffixIndexedFields": [],
+			"nestedFields": false,
+			"maxIterations": 1000,
+			"maxUsage": "72h",
 		},`,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1132,7 +1132,7 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 	}
 	cfgStr := `"accounts": {
 		"enabled": false,
-		"indexed_selects": true,
+		"indexedSelects": true,
 		"conns": {
 			"*attributes": [],
 			"*rates": [],
@@ -1140,10 +1140,10 @@ func testSectConfigSReloadAccounts(t *testing.T) {
 		},
 		//"stringIndexedFields": [],
 		"prefixIndexedFields": [],
-		"suffix_indexed_fields": [],
-		"nested_fields": false,
-		"max_iterations": 1000,
-		"max_usage": "72h",
+		"suffixIndexedFields": [],
+		"nestedFields": false,
+		"maxIterations": 1000,
+		"maxUsage": "72h",
 	},`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -1169,7 +1169,7 @@ func testSectConfigSReloadConfigDB(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `"config_db": {
+		Config: `"configDB": {
 			"dbType": "*internal",
 			"dbHost": "",
 			"dbPort": 0,
@@ -1193,7 +1193,7 @@ func testSectConfigSReloadConfigDB(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	cfgStr := `"config_db": {
+	cfgStr := `"configDB": {
 		"dbType": "*internal",
 		"dbHost": "",
 		"dbPort": 0,

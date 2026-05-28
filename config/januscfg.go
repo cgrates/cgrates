@@ -168,15 +168,15 @@ type JanusAgentJsonCfg struct {
 	Enabled            *bool                      `json:"enabled"`
 	Url                *string                    `json:"url"`
 	Conns              map[string][]*DynamicConns `json:"conns"`
-	Janus_conns        *[]*JanusConnJsonCfg       `json:"janus_conns"`
+	Janus_conns        *[]*JanusConnJsonCfg       `json:"janusConns"`
 	Request_processors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 type JanusConnJsonCfg struct {
 	Address       *string `json:"address"`
 	Type          *string `json:"type"`
-	AdminAddress  *string `json:"admin_address"`
-	AdminPassword *string `json:"admin_password"`
+	AdminAddress  *string `json:"adminAddress"`
+	AdminPassword *string `json:"adminPassword"`
 }
 
 func diffJanusConnJsonCfg(d *JanusConnJsonCfg, v1, v2 *JanusConn) *JanusConnJsonCfg {

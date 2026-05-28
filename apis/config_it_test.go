@@ -135,13 +135,13 @@ func testCfgGetConfig(t *testing.T) {
 	var reply map[string]any
 	expected := map[string]any{
 		"attributes": map[string]any{
-			"enabled":                  true,
-			"indexed_selects":          true,
-			"nested_fields":            false,
-			"prefixIndexedFields":      []string{},
-			"suffix_indexed_fields":    []string{},
-			"exists_indexed_fields":    []string{},
-			"notexists_indexed_fields": []string{},
+			"enabled":                true,
+			"indexedSelects":         true,
+			"nestedFields":           false,
+			"prefixIndexedFields":    []string{},
+			"suffixIndexedFields":    []string{},
+			"existsIndexedFields":    []string{},
+			"notExistsIndexedFields": []string{},
 			utils.ConnsCfg: map[string]any{
 				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
 				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
@@ -179,11 +179,11 @@ func testCfgSetGetConfig(t *testing.T) {
 			Config: map[string]any{
 				"attributes": map[string]any{
 					"enabled":             true,
-					"indexed_selects":     false,
-					"nested_fields":       false,
+					"indexedSelects":      false,
+					"nestedFields":        false,
 					"prefixIndexedFields": []string{},
 
-					"suffix_indexed_fields": []string{},
+					"suffixIndexedFields": []string{},
 					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
 							{
@@ -203,13 +203,13 @@ func testCfgSetGetConfig(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"enabled":                  true,
-			"indexed_selects":          false,
-			"nested_fields":            false,
-			"prefixIndexedFields":      []any{},
-			"suffix_indexed_fields":    []any{},
-			"exists_indexed_fields":    []any{},
-			"notexists_indexed_fields": []any{},
+			"enabled":                true,
+			"indexedSelects":         false,
+			"nestedFields":           false,
+			"prefixIndexedFields":    []any{},
+			"suffixIndexedFields":    []any{},
+			"existsIndexedFields":    []any{},
+			"notExistsIndexedFields": []any{},
 			utils.ConnsCfg: map[string]any{
 				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
 				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
@@ -265,8 +265,8 @@ func testCfgSetEmptyReload(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]any{
 				"rates": map[string]any{
-					"enabled":         true,
-					"indexed_selects": false,
+					"enabled":        true,
+					"indexedSelects": false,
 					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
 							{
@@ -300,20 +300,20 @@ func testCfgSetEmptyReload(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"rates": map[string]any{
-			"enabled":                       true,
-			"indexed_selects":               false,
-			"nested_fields":                 false,
-			"prefixIndexedFields":           []string{},
-			"exists_indexed_fields":         []string{},
-			"notexists_indexed_fields":      []string{},
-			"rate_indexed_selects":          true,
-			"rate_nested_fields":            false,
-			"rate_prefix_indexed_fields":    []string{},
-			"rate_suffix_indexed_fields":    []string{},
-			"suffix_indexed_fields":         []string{},
-			"rate_exists_indexed_fields":    []string{},
-			"rate_notexists_indexed_fields": []string{},
-			"verbosity":                     1000,
+			"enabled":                    true,
+			"indexedSelects":             false,
+			"nestedFields":               false,
+			"prefixIndexedFields":        []string{},
+			"existsIndexedFields":        []string{},
+			"notExistsIndexedFields":     []string{},
+			"rateIndexedSelects":         true,
+			"rateNestedFields":           false,
+			"ratePrefixIndexedFields":    []string{},
+			"rateSuffixIndexedFields":    []string{},
+			"suffixIndexedFields":        []string{},
+			"rateExistsIndexedFields":    []string{},
+			"rateNotExistsIndexedFields": []string{},
+			"verbosity":                  1000,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
 				utils.MetaStartTime:            []*config.DynamicStringOpt{config.NewDynamicStringOpt(nil, "", config.RatesStartTimeDftOpt, nil)},
@@ -353,10 +353,10 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		"*stats": [{"ConnIDs": ["*localhost"]}]
 	},
 	"enabled":true,
-	"indexed_selects":false,
-	"nested_fields":false,
+	"indexedSelects":false,
+	"nestedFields":false,
 	"prefixIndexedFields":[],
-	"suffix_indexed_fields":[],
+	"suffixIndexedFields":[],
 	"opts":{
 		"*processRuns": [
 			{
@@ -374,7 +374,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":false,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -513,12 +513,12 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]any{
 				"attributes": map[string]any{
-					"enabled":               true,
-					"indexed_selects":       false,
-					"nested_fields":         false,
-					"prefixIndexedFields":   []string{},
-					"profile_runs":          0.,
-					"suffix_indexed_fields": []string{},
+					"enabled":             true,
+					"indexedSelects":      false,
+					"nestedFields":        false,
+					"prefixIndexedFields": []string{},
+					"profileRuns":         0.,
+					"suffixIndexedFields": []string{},
 					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{},
 					},
@@ -534,13 +534,13 @@ func testCfgSetGetConfigStore(t *testing.T) {
 	}
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"enabled":                  true,
-			"indexed_selects":          false,
-			"nested_fields":            false,
-			"prefixIndexedFields":      []string{},
-			"suffix_indexed_fields":    []string{},
-			"exists_indexed_fields":    []string{},
-			"notexists_indexed_fields": []string{},
+			"enabled":                true,
+			"indexedSelects":         false,
+			"nestedFields":           false,
+			"prefixIndexedFields":    []string{},
+			"suffixIndexedFields":    []string{},
+			"existsIndexedFields":    []string{},
+			"notExistsIndexedFields": []string{},
 			utils.ConnsCfg: map[string]any{
 				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
 				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
@@ -665,13 +665,13 @@ func testCfgReloadConfigStore(t *testing.T) {
 func testCfgGetAfterReloadStore(t *testing.T) {
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			"enabled":                  true,
-			"indexed_selects":          true,
-			"nested_fields":            false,
-			"prefixIndexedFields":      []any{},
-			"suffix_indexed_fields":    []any{},
-			"exists_indexed_fields":    []any{},
-			"notexists_indexed_fields": []any{},
+			"enabled":                true,
+			"indexedSelects":         true,
+			"nestedFields":           false,
+			"prefixIndexedFields":    []any{},
+			"suffixIndexedFields":    []any{},
+			"existsIndexedFields":    []any{},
+			"notExistsIndexedFields": []any{},
 			utils.ConnsCfg: map[string]any{
 				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},
 				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "ConnIDs": []any{utils.MetaLocalHost}}},

@@ -143,7 +143,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "accounts": {
 	"enabled": true,
-	"indexed_selects": false,
+	"indexedSelects": false,
 	"conns": {
 		"*attributes": [{"ConnIDs": ["*internal:*attributes"]}],
 		"*rates":      [{"ConnIDs": ["*internal:*rates"]}],
@@ -151,12 +151,12 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	},
 	"stringIndexedFields": ["*req.index1"],
 	"prefixIndexedFields": ["*req.index1"],
-	"suffix_indexed_fields": ["*req.index1"],
-	"exists_indexed_fields": ["*req.index1"],
-	"notexists_indexed_fields": ["*req.index1"],
-	"nested_fields": true,
-    "max_iterations": 100,
-    "max_usage": "72h",
+	"suffixIndexedFields": ["*req.index1"],
+	"existsIndexedFields": ["*req.index1"],
+	"notExistsIndexedFields": ["*req.index1"],
+	"nestedFields": true,
+    "maxIterations": 100,
+    "maxUsage": "72h",
 },
 }`
 
