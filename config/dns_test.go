@@ -155,7 +155,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 	cfgJSONStr := `{ 
-      "dns_agent": {
+      "dnsAgent": {
         "requestProcessors": [
 	        {
 		       "id": "random",
@@ -218,7 +218,7 @@ func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
 
 func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"dns_agent": {
+	"dnsAgent": {
 		"enabled": false,
 		"listeners":[
 			{
@@ -258,7 +258,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 
 func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-		"dns_agent": {
+		"dnsAgent": {
 			"enabled": false,
 			"listeners":[
 				{

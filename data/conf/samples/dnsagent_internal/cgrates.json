@@ -123,7 +123,7 @@
 	"caCertificate":"/usr/share/cgrates/tls/ca.crt"
 },
 
-"dns_agent": {
+"dnsAgent": {
 	"enabled": true,
 	"listeners":[
 		{

@@ -115,8 +115,8 @@ func TestRadiusStat(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_status"),
 		ConfigJSON: fmt.Sprintf(`{
-			"radius_agent": {
-				"client_dictionaries": {
+			"radiusAgent": {
+				"clientDictionaries": {
 					"*default": [
 						%q
 					]

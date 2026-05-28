@@ -48,10 +48,10 @@ func TestDiamConnStats(t *testing.T) {
 "admins": {
 	"enabled": true,
 },
-// "prometheus_agent": {
+// "prometheusAgent": {
 // 	"enabled": true,
 // 	"stats_conns": ["*internal"],
-// 	"stat_queue_ids": [
+// 	"statQueueIDs": [
 // 		"SQ_CONN_1",
 // 		"SQ_CONN_2",
 // 		"SQ_CONN_3"

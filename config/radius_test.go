@@ -119,7 +119,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSONStr := `{
-	"radius_agent": {
+	"radiusAgent": {
          "requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -168,16 +168,16 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 
 func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-"radius_agent": {
+"radiusAgent": {
 	"enabled": true,
 	"listeners":[
 		{
 			"network": "udp",
-			"auth_address": "127.0.0.1:1816",
-			"acct_address": "127.0.0.1:1892"
+			"authAddress": "127.0.0.1:1816",
+			"acctAddress": "127.0.0.1:1892"
 		}
 	],
-	"client_dictionaries": {
+	"clientDictionaries": {
 		"*default": [
 			"/usr/share/cgrates/"
 		]
@@ -187,9 +187,9 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		"*stats": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}],
 		"*thresholds": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}]
 	},
-	"dmr_template": "*dmr",
-	"coa_template": "*coa",
-	"requests_cache_key": "~*req.Acc-Session-Id",
+	"dmrTemplate": "*dmr",
+	"coaTemplate": "*coa",
+	"requestsCacheKey": "~*req.Acc-Session-Id",
 	"requestProcessors": [
 		{
 			"id": "OutboundAUTHDryRun",
@@ -251,7 +251,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 
 func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-	"radius_agent": {},
+	"radiusAgent": {},
 }`
 	eMap := map[string]any{
 		utils.EnabledCfg: false,

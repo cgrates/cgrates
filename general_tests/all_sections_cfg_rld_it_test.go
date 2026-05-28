@@ -273,13 +273,13 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"http_agent":[]}`,
+		Config: `{"httpAgent":[]}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"http_agent":[]}`
+	cfgStr := `{"httpAgent":[]}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -547,13 +547,13 @@ func testSectConfigSReloadHTTPAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"http_agent":[]}`,
+		Config: `{"httpAgent":[]}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"http_agent":[]}`
+	cfgStr := `{"httpAgent":[]}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -569,13 +569,13 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"dns_agent":{"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"sessions_conns":["*internal"],"timezone":""}}`,
+		Config: `{"dnsAgent":{"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"sessions_conns":["*internal"],"timezone":""}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"timezone":""}}`
+	cfgStr := `{"dnsAgent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

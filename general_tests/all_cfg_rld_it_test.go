@@ -273,7 +273,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl17)
 	}
 
-	cfgStr = `{"http_agent":[]}`
+	cfgStr = `{"httpAgent":[]}`
 	var rpl18 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -284,7 +284,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl18)
 	}
 
-	cfgStr = `{"dns_agent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"requestProcessors":[],"timezone":""}}`
+	cfgStr = `{"dnsAgent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","ConnIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"requestProcessors":[],"timezone":""}}`
 	var rpl19 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

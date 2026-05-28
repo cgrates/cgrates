@@ -78,7 +78,7 @@ func TestAgentCapsIT(t *testing.T) {
 	"enabled": true,
 	"syncedConnRequests": true
 },
-"http_agent": [
+"httpAgent": [
 	{
 		"id": "caps_test",
 		"url": "/caps_test",
@@ -90,10 +90,10 @@ func TestAgentCapsIT(t *testing.T) {
 		"requestProcessors": []
 	}
 ],
-"radius_agent": {
+"radiusAgent": {
 	"enabled": true
 },
-"dns_agent": {
+"dnsAgent": {
 	"enabled": true,
 	"listeners":[
 		{

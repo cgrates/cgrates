@@ -1282,24 +1282,24 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"radius_agent": {
+"radiusAgent": {
 	"enabled": false,					// enables the radius agent: <true|false>
 	"listeners":[
 		{
 			"network": "udp",			// network to listen on <udp|tcp>
-			"auth_address": "127.0.0.1:1812",	// address where to listen for radius authentication requests <x.y.z.y:1234>
-			"acct_address": "127.0.0.1:1813"	// address where to listen for radius accounting requests <x.y.z.y:1234>
+			"authAddress": "127.0.0.1:1812",	// address where to listen for radius authentication requests <x.y.z.y:1234>
+			"acctAddress": "127.0.0.1:1813"	// address where to listen for radius accounting requests <x.y.z.y:1234>
 		}
 	],
-	"client_secrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
+	"clientSecrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
 		"*default": "CGRateS.org"
 	},
-	"client_dictionaries": {				// per client path towards directory holding additional dictionaries to load (extra to RFC)
+	"clientDictionaries": {				// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": [					// key represents the client IP or catch-all <*default|$client_ip>
 			"/usr/share/cgrates/radius/dict/"
 		]
 	},
-	"client_da_addresses": { 				// configuration for clients capable of handling Dynamic Authorization (CoA/DM) requests.
+	"clientDaAddresses": { 				// configuration for clients capable of handling Dynamic Authorization (CoA/DM) requests.
 		// "nasIdentifier": { 				// identifier for the NAS, typically the host from the initial RADIUS packet.
 		// 	"transport": "udp", 			// transport protocol for Dynamic Authorization requests, defaults to UDP.
 		// 	"host": "", 				// optionally specify an alternative host for DA requests. Defaults to the NAS identifier if empty.
@@ -1307,7 +1307,7 @@ const CGRATES_CFG_JSON = `
 		// 	"flags": [] 				// additional options, currently supports *log for logging DA requests before sending.
 		// }
 	},
-	"requests_cache_key": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
+	"requestsCacheKey": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
 	"conns": {
 		"*sessions":[{"ConnIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
@@ -1325,16 +1325,16 @@ const CGRATES_CFG_JSON = `
 	     // 	}
 	     // ],
 	},	
-	"dmr_template": "*dmr",					// template used to build the Disconnect-Request packet
-	"coa_template": "*coa",					// template used to build the CoA-Request packet
+	"dmrTemplate": "*dmr",					// template used to build the Disconnect-Request packet
+	"coaTemplate": "*coa",					// template used to build the CoA-Request packet
 	"requestProcessors": []				// request processors to be applied to Radius messages
 },
 
 
-"http_agent": [],	// HTTP Agents, ie towards cnc.to MVNE platform
+"httpAgent": [],	// HTTP Agents, ie towards cnc.to MVNE platform
 
 
-"dns_agent": {
+"dnsAgent": {
 	"enabled": false,				// enables the DNS agent: <true|false>
 	"listeners":[
 		{
@@ -1364,7 +1364,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"prometheus_agent": {
+"prometheusAgent": {
 	"enabled": false,			// enables the prometheus agent: <true|false>
 	"path": "/prometheus",			// endpoint for prometheus metrics
 	"conns": {
@@ -1397,8 +1397,8 @@ const CGRATES_CFG_JSON = `
 	// 	}
 	// ],
 	},				
-	"cache_ids": [],			// cache partition IDs to collect statistics for, empty for all partitions
-	"stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
+	"cacheIDs": [],			// cache partition IDs to collect statistics for, empty for all partitions
+	"statQueueIDs": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
 },
 
 

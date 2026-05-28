@@ -2401,14 +2401,14 @@ const (
 	ReplyFieldsCfg   = "reply_fields"
 
 	// RadiusAgentCfg
-	AuthAddrCfg           = "auth_address"
-	AcctAddrCfg           = "acct_address"
-	ClientSecretsCfg      = "client_secrets"
-	ClientDictionariesCfg = "client_dictionaries"
-	ClientDaAddressesCfg  = "client_da_addresses"
-	RequestsCacheKeyCfg   = "requests_cache_key"
-	DMRTemplateCfg        = "dmr_template"
-	CoATemplateCfg        = "coa_template"
+	AuthAddrCfg           = "authAddress"
+	AcctAddrCfg           = "acctAddress"
+	ClientSecretsCfg      = "clientSecrets"
+	ClientDictionariesCfg = "clientDictionaries"
+	ClientDaAddressesCfg  = "clientDaAddresses"
+	RequestsCacheKeyCfg   = "requestsCacheKey"
+	DMRTemplateCfg        = "dmrTemplate"
+	CoATemplateCfg        = "coaTemplate"
 	HostCfg               = "host"
 	PortCfg               = "port"
 
@@ -2421,8 +2421,8 @@ const (
 	CoreSConnsCfg            = "cores_conns"
 	CollectGoMetricsCfg      = "collect_go_metrics"
 	CollectProcessMetricsCfg = "collect_process_metrics"
-	CacheIDsCfg              = "cache_ids"
-	StatQueueIDsCfg          = "stat_queue_ids"
+	CacheIDsCfg              = "cacheIDs"
+	StatQueueIDsCfg          = "statQueueIDs"
 
 	// AttributeSCfg
 	IndexedSelectsCfg  = "indexed_selects"

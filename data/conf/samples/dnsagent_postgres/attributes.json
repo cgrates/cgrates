@@ -1,5 +1,5 @@
 {
-	"dns_agent": {
+	"dnsAgent": {
 		"requestProcessors": [
 			{
 				"id": "NAPTRAttributes",

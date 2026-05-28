@@ -82,7 +82,7 @@
     },
     
     
-    "dns_agent": {
+    "dnsAgent": {
         "enabled": true,
         "listeners":[
             {

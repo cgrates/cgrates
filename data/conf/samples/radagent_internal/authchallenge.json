@@ -1,5 +1,5 @@
 {
-  "radius_agent": {
+  "radiusAgent": {
     "requestProcessors": [
       {
         "id": "Challenge",

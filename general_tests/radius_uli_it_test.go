@@ -72,9 +72,9 @@ END-VENDOR 3GPP
     "sessions": {
         "enabled": true
     },
-    "radius_agent": {
+    "radiusAgent": {
         "enabled": true,
-        "client_dictionaries": {
+        "clientDictionaries": {
             "*default": [%q]
         },
         "requestProcessors": [
