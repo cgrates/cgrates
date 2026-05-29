@@ -145,11 +145,11 @@ type AnalyzerSOptsJson struct {
 // Analyzer service json config section
 type AnalyzerSJsonCfg struct {
 	Enabled          *bool
-	Db_path          *string
-	Index_type       *string
+	Db_path          *string `json:"dbPath"`
+	Index_type       *string `json:"indexType"`
 	Ttl              *string
-	Ees_conns        *[]string
-	Cleanup_interval *string
+	Ees_conns        *[]string `json:"eesConns"`
+	Cleanup_interval *string   `json:"cleanupInterval"`
 	Opts             *AnalyzerSOptsJson
 }
 

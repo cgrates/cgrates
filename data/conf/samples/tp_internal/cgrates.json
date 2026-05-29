@@ -175,9 +175,9 @@
 		"id": "*default",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"lockfile_path": ".cgr.lck",
-		"tp_in_path": "/usr/share/cgrates/tariffplans/testtp",
-		"tp_out_path": "",
+		"lockfilePath": ".cgr.lck",
+		"tpInPath": "/usr/share/cgrates/tariffplans/testtp",
+		"tpOutPath": "",
 	},
 ],
 

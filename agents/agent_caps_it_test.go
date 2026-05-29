@@ -102,10 +102,10 @@ func TestAgentCapsIT(t *testing.T) {
 		}
 	]
 },
-"sip_agent": {
+"sipAgent": {
 	"enabled": true,
 	"listen": "127.0.0.1:5099",
-	"listen_net": "udp",
+	"listenNet": "udp",
 	"conns": {
 		"*sessions": [{"ConnIDs": ["*internal"]}]
 	},

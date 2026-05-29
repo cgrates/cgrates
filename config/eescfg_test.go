@@ -49,7 +49,7 @@ func TestEESClone(t *testing.T) {
 			"attributeContext": "",							
 			"synchronous": false,								
 			"attempts": 2,										
-			"field_separator": ",",								
+			"fieldSeparator": ",",								
 			"fields":[											
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
                 {"tag": "*originID", "path": "*hdr.*originID", "type": "*variable", "value": "~*opts.*originID"},
@@ -656,7 +656,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "attributeContext": "",							
 			      "synchronous": false,								
 			      "attempts": 1,										
-			      "field_separator": ",",								
+			      "fieldSeparator": ",",								
 				  "metricsResetSchedule": "@every 1s",
 			      "fields":[
                       {"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}

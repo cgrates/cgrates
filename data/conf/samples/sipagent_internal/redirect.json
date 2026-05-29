@@ -1,6 +1,6 @@
 {
-	"sip_agent": {
-	"listen_net": "tcp",				// network to listen on <udp|tcp|tcp-tls>
+	"sipAgent": {
+	"listenNet": "tcp",				// network to listen on <udp|tcp|tcp-tls>
 	"requestProcessors": [
 			{
 				"id": "Register",

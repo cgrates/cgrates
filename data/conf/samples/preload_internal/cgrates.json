@@ -25,17 +25,17 @@
       "dry_run": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
-      "lockfile_path": ".cgr.lock",
+      "lockfilePath": ".cgr.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
-      "field_separator": ",",
-      "tp_in_path": "/tmp/RatesIn",
-      "tp_out_path": "/tmp/RatesOut",
+      "fieldSeparator": ",",
+      "tpInPath": "/tmp/RatesIn",
+      "tpOutPath": "/tmp/RatesOut",
       "data":[
         {
           "type": "*rateProfiles",
-          "file_name": "Rates.csv",
+          "fileName": "Rates.csv",
           "fields": [
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
             {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -64,17 +64,17 @@
       "dry_run": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
-      "lockfile_path": ".cgr2.lock",
+      "lockfilePath": ".cgr2.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
-      "field_separator": ",",
-      "tp_in_path": "/tmp/AccountsIn",
-      "tp_out_path": "/tmp/AccountsOut",
+      "fieldSeparator": ",",
+      "tpInPath": "/tmp/AccountsIn",
+      "tpOutPath": "/tmp/AccountsOut",
       "data":[
         {
           "type": "*accounts",
-          "file_name": "Accounts.csv",
+          "fileName": "Accounts.csv",
           "fields": [
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
             {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -104,17 +104,17 @@
       "dry_run": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
-      "lockfile_path": ".cgr3.lock",
+      "lockfilePath": ".cgr3.lock",
       "conns": {
       	"*caches": [{"ConnIDs": ["*internal"]}]
       },
-      "field_separator": ",",
-      "tp_in_path": "/tmp/ActionsIn",
-      "tp_out_path": "/tmp/ActionsOut",
+      "fieldSeparator": ",",
+      "tpInPath": "/tmp/ActionsIn",
+      "tpOutPath": "/tmp/ActionsOut",
       "data":[
         {
           "type": "*actionProfiles",
-          "file_name": "Actions.csv",
+          "fileName": "Actions.csv",
           "fields": [
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
             {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

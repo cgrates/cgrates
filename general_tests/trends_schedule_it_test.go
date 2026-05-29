@@ -275,7 +275,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,,tr
 					"stats_conns":      []string{"*localhost"},
 					"storeInterval":    "-1",
 					"thresholds_conns": []string{"*localhost"},
-					"ees_conns":        []string{"*localhost"},
+					"eesConns":         []string{"*localhost"},
 					"eesExporterIDs":   []string{"exporter1"},
 				},
 			},

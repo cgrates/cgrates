@@ -127,13 +127,13 @@ func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
 
 type LoaderCfgJson struct {
 	Tpid             *string
-	Data_path        *string
-	Disable_reverse  *bool
-	Field_separator  *string
-	Caches_conns     *[]string
-	Actions_conns    *[]string
-	Gapi_credentials *json.RawMessage
-	Gapi_token       *json.RawMessage
+	Data_path        *string          `json:"dataPath"`
+	Disable_reverse  *bool            `json:"disableReverse"`
+	Field_separator  *string          `json:"fieldSeparator"`
+	Caches_conns     *[]string        `json:"cachesConns"`
+	Actions_conns    *[]string        `json:"actionsConns"`
+	Gapi_credentials *json.RawMessage `json:"gapiCredentials"`
+	Gapi_token       *json.RawMessage `json:"gapiToken"`
 }
 
 func diffLoaderCfgJson(d *LoaderCfgJson, v1, v2 *LoaderCgrCfg) *LoaderCfgJson {

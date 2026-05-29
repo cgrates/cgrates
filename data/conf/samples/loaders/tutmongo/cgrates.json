@@ -101,17 +101,17 @@
 		"enabled": true,								
 		"tenant": "cgrates.org",
 		"runDelay": "0",									
-		"lockfile_path": ".cgr.lock",					
+		"lockfilePath": ".cgr.lock",					
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",
-		"tp_in_path": "/tmp/In",
-		"tp_out_path": "/tmp/Out",
+		"fieldSeparator": ",",
+		"tpInPath": "/tmp/In",
+		"tpOutPath": "/tmp/Out",
 		"data":[	
 			{
 				"type": "*attributes",						
-				"file_name": "Attributes.csv",				
+				"fileName": "Attributes.csv",				
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 				],
@@ -123,17 +123,17 @@
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"runDelay": "0",
-		"lockfile_path": ".cgr.lock",
+		"lockfilePath": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",
-		"tp_in_path": "/tmp/LoaderIn",
-		"tp_out_path": "",
+		"fieldSeparator": ",",
+		"tpInPath": "/tmp/LoaderIn",
+		"tpOutPath": "",
 		"data":[
 			{
 				"type": "*attributes",
-				"file_name": "Attributes.csv",
+				"fileName": "Attributes.csv",
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 
@@ -146,17 +146,17 @@
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"runDelay": "0",
-		"lockfile_path": ".cgr.lock",
+		"lockfilePath": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",
-		"tp_in_path": "/tmp/SubpathWithoutMove",
-		"tp_out_path": "",
+		"fieldSeparator": ",",
+		"tpInPath": "/tmp/SubpathWithoutMove",
+		"tpOutPath": "",
 		"data":[
 			{
 				"type": "*attributes",
-				"file_name": "folder1/Attributes.csv",
+				"fileName": "folder1/Attributes.csv",
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 
@@ -169,17 +169,17 @@
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"runDelay": "0",
-		"lockfile_path": ".cgr.lock",
+		"lockfilePath": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",
-		"tp_in_path": "/tmp/SubpathLoaderWithMove",
-		"tp_out_path": "/tmp/SubpathOut",
+		"fieldSeparator": ",",
+		"tpInPath": "/tmp/SubpathLoaderWithMove",
+		"tpOutPath": "/tmp/SubpathOut",
 		"data":[
 			{
 				"type": "*attributes",
-				"file_name": "folder1/Attributes.csv",
+				"fileName": "folder1/Attributes.csv",
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 
@@ -192,17 +192,17 @@
 		"enabled": true,
 		"tenant": "cgrates.org",
 		"runDelay": "0",
-		"lockfile_path": ".cgr.lock",
+		"lockfilePath": ".cgr.lock",
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",
-		"tp_in_path": "/tmp/templateLoaderIn",
-		"tp_out_path": "/tmp/templateLoaderOut",
+		"fieldSeparator": ",",
+		"tpInPath": "/tmp/templateLoaderIn",
+		"tpOutPath": "/tmp/templateLoaderOut",
 		"data":[
 			{
 				"type": "*attributes",
-				"file_name": "Attributes.csv",
+				"fileName": "Attributes.csv",
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 				],
@@ -214,17 +214,17 @@
 		"enabled": true,									
 		"tenant": "cgrates.org",
 		"runDelay": "-1",										
-		"lockfile_path": ".cgr.lock",						
+		"lockfilePath": ".cgr.lock",						
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": "\t",							
-		"tp_in_path": "/tmp/customSepLoaderIn",				
-		"tp_out_path": "/tmp/customSepLoaderOut",									
+		"fieldSeparator": "\t",							
+		"tpInPath": "/tmp/customSepLoaderIn",				
+		"tpOutPath": "/tmp/customSepLoaderOut",									
 		"data":[	
 			{
 				"type": "*attributes",				
-				"file_name": "Attributes",			
+				"fileName": "Attributes",			
 				"fields": [
 					{"path": "Tenant", "type": "*variable", "value": "cgrates.org", "mandatory": true},
 					{"path": "ID", "type": "*variable", "value": "ATTR_;~*req.0", "mandatory": true},
@@ -271,7 +271,7 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 

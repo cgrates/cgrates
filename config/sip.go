@@ -120,10 +120,10 @@ func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
 type SIPAgentJsonCfg struct {
 	Enabled             *bool                      `json:"enabled"`
 	Listen              *string                    `json:"listen"`
-	ListenNet           *string                    `json:"listen_net"`
+	ListenNet           *string                    `json:"listenNet"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Timezone            *string                    `json:"timezone"`
-	RetransmissionTimer *string                    `json:"retransmission_timer"`
+	RetransmissionTimer *string                    `json:"retransmissionTimer"`
 	RequestProcessors   *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 

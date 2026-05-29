@@ -35,13 +35,13 @@ func TestSentryPeerCfgloadFromJsonCfg(t *testing.T) {
 
 	cfgJSONStr := `{
 		"sentrypeer":{
-			"client_id":"SecretID",
-			"client_secret":"SecretKey",
-			"token_url":"https://authz.sentrypeer.com/oauth/token",
-			"ips_url":"https://sentrypeer.com/api/ip-addresses",
-			"numbers_url":"https://sentrypeer.com/api/phone-numbers",
+			"clientID":"SecretID",
+			"clientSecret":"SecretKey",
+			"tokenUrl":"https://authz.sentrypeer.com/oauth/token",
+			"ipsUrl":"https://sentrypeer.com/api/ip-addresses",
+			"numbersUrl":"https://sentrypeer.com/api/phone-numbers",
 			"audience":"https://sentrypeer.com/api",
-			"grant_type":"client_credentials",
+			"grantType":"clientCredentials",
 		}
 	}`
 	expected = SentryPeerCfg{
@@ -51,7 +51,7 @@ func TestSentryPeerCfgloadFromJsonCfg(t *testing.T) {
 		IpsUrl:       "https://sentrypeer.com/api/ip-addresses",
 		NumbersUrl:   "https://sentrypeer.com/api/phone-numbers",
 		Audience:     "https://sentrypeer.com/api",
-		GrantType:    "client_credentials",
+		GrantType:    "clientCredentials",
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -67,23 +67,23 @@ func TestSentryPeerCfgAsMapInterface(t *testing.T) {
 	var sp SentryPeerCfg
 	cfgJSONStr := `{
 		"sentrypeer":{
-			"client_id":"SecretID",
-			"client_secret":"Secretkey",
-			"token_url":"https://authz.sentrypeer.com/oauth/token",
-			"ips_url":"https://sentrypeer.com/api/ip-addresses",
-			"numbers_url":"https://sentrypeer.com/api/phone-numbers",
+			"clientID":"SecretID",
+			"clientSecret":"Secretkey",
+			"tokenUrl":"https://authz.sentrypeer.com/oauth/token",
+			"ipsUrl":"https://sentrypeer.com/api/ip-addresses",
+			"numbersUrl":"https://sentrypeer.com/api/phone-numbers",
 			"audience":"https://sentrypeer.com/api",
-			"grant_type":"client_credentials",
+			"grantType":"clientCredentials",
 		}
 	}`
 	eMap := map[string]any{
-		"client_id":     "SecretID",
-		"client_secret": "Secretkey",
-		"token_url":     "https://authz.sentrypeer.com/oauth/token",
-		"ips_url":       "https://sentrypeer.com/api/ip-addresses",
-		"numbers_url":   "https://sentrypeer.com/api/phone-numbers",
-		"audience":      "https://sentrypeer.com/api",
-		"grant_type":    "client_credentials",
+		"clientID":     "SecretID",
+		"clientSecret": "Secretkey",
+		"tokenUrl":     "https://authz.sentrypeer.com/oauth/token",
+		"ipsUrl":       "https://sentrypeer.com/api/ip-addresses",
+		"numbersUrl":   "https://sentrypeer.com/api/phone-numbers",
+		"audience":     "https://sentrypeer.com/api",
+		"grantType":    "clientCredentials",
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

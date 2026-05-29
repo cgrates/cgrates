@@ -64,7 +64,7 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 

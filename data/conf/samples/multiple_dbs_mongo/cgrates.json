@@ -156,7 +156,7 @@
 
 "migrator":{
 
-	"users_filters":["Account"]
+	"usersFilters":["Account"]
 },
 
 
@@ -200,9 +200,9 @@
 	{
 		"enabled":true,
 		"id": "*default",
-		"tp_in_path": "/usr/share/cgrates/tariffplans/testit",
-		"tp_out_path": "",
-		"lockfile_path": ".cgr.lck"
+		"tpInPath": "/usr/share/cgrates/tariffplans/testit",
+		"tpOutPath": "",
+		"lockfilePath": ".cgr.lck"
 	}
 ]
 

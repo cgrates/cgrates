@@ -32,8 +32,8 @@
         "id": "*default",
         "enabled": true,
         "tenant": "cgrates.org",
-        "tp_in_path": "/tmp/TestFltrSepIT/in",
-        "tp_out_path": ""
+        "tpInPath": "/tmp/TestFltrSepIT/in",
+        "tpOutPath": ""
     }
 ],
 

@@ -110,7 +110,7 @@
 },
 
 
-"sip_agent": {
+"sipAgent": {
 	"enabled": true,
 },
 

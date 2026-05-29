@@ -113,7 +113,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	cfgJSONStr := `{
-	"sip_agent": {
+	"sipAgent": {
 		"requestProcessors": [
              {
                "id": "randomID",
@@ -157,17 +157,17 @@ func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 
 func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"sip_agent": {
+	"sipAgent": {
 		"enabled": false,
 		"listen": "127.0.0.1:5060",
-		"listen_net": "udp",
+		"listenNet": "udp",
 		"conns": {
 			"*sessions": [{"ConnIDs": ["*internal:*sessions"]}],
 			"*stats": [{"ConnIDs": ["*internal:*stats"]}],
 			"*thresholds": [{"ConnIDs": ["*internal:*thresholds"]}]
 		},
 		"timezone": "",
-        "retransmission_timer": "2s",
+        "retransmissionTimer": "2s",
 		"requestProcessors": [
 		],
 	},
@@ -194,17 +194,17 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 
 func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-		"sip_agent": {
+		"sipAgent": {
 			"enabled": false,
 			"listen": "127.0.0.1:5060",
-			"listen_net": "udp",
+			"listenNet": "udp",
 			"conns": {
 				"*sessions": [{"ConnIDs": ["*internal"]}],
 				"*stats": [{"ConnIDs": ["*internal"]}],
 				"*thresholds": [{"ConnIDs": ["*internal"]}]
 			},
 			"timezone": "UTC",
-            "retransmission_timer": "5s",
+            "retransmissionTimer": "5s",
 			"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -268,7 +268,7 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 
 func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
-	"sip_agent": {
+	"sipAgent": {
 		"enabled": true,
 		"listen": "",
 		"conns": {

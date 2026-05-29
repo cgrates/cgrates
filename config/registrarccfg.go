@@ -146,9 +146,9 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 }
 
 type RegistrarCJsonCfg struct {
-	Registrars_conns *[]string
+	Registrars_conns *[]string `json:"registrarsConns"`
 	Hosts            []*RemoteHostJsonWithTenant
-	Refresh_interval *string
+	Refresh_interval *string `json:"refreshInterval"`
 }
 
 func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *RegistrarCJsonCfg {

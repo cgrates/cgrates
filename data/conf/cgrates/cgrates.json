@@ -59,7 +59,7 @@
 // 	"caps": 0,			// maximum concurrent request allowed ( 0 to disabled )
 // 	"capsStrategy": "*busy",	// strategy in case of concurrent requests reached	
 // 	"capsStatsInterval": "0",	// the interval duration we sample for caps stats ( 0 to disabled )
-// 	"ees_conns": [],		// connections to EventExporter
+// 	"eesConns": [],		// connections to EventExporter
 // 	"shutdownTimeout": "1s"	// the duration to wait until all services are stopped
 // },
 
@@ -285,8 +285,8 @@
 // 	"thresholds_conns": [],		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"onlineCDRExports":[],	// list of CDRE profiles to use for real-time CDR exports
-// 	"actions_conns": [],		// connections to SchedulerS in case of *dynaprepaid request
-// 	"ees_conns": [],		// connections to EventExporter
+// 	"actionsConns": [],		// connections to SchedulerS in case of *dynaprepaid request
+// 	"eesConns": [],		// connections to EventExporter
 // 	"rates_conns": [],		// connections to RateS
 // 	"accounts_conns": [],		// connections to AccountS
 // 	"opts": {
@@ -367,7 +367,7 @@
 // "ers": {				// EventReaderService
 // 	"enabled": false,		// starts the EventReader service: <true|false>
 // 	"sessions_conns":["*internal"],	// RPC Connections IDs
-// 	// "ees_conns": [],		// connection for routing processed and invalid messages through EEs
+// 	// "eesConns": [],		// connection for routing processed and invalid messages through EEs
 // 	"partialCacheTTL": "1s",	// the duration to cache partial records when not pairing	
 // 	"readers": [
 // 		{
@@ -636,7 +636,7 @@
 // 		"publicKeyPath": "",		// the path to the public key 
 // 		"privateKeyPath": "",		// the path to the private key
 // 	},
-// 	"actions_conns": [],			// connections to SchedulerS in case of *dynaprepaid request
+// 	"actionsConns": [],			// connections to SchedulerS in case of *dynaprepaid request
 // 	"rates_conns": [], 			// connections to RateS
 // 	"accounts_conns": [],			// connections to AccountS
 // 	"opts": {
@@ -942,7 +942,7 @@
 
 // "radiusAgent": {
 // 	"enabled": false,					// enables the radius agent: <true|false>
-// 	"listen_net": "udp",					// network to listen on <udp|tcp>
+// 	"listenNet": "udp",					// network to listen on <udp|tcp>
 // 	"listen_auth": "127.0.0.1:1812",			// address where to listen for radius authentication requests <x.y.z.y:1234>
 // 	"listen_acct": "127.0.0.1:1813",			// address where to listen for radius accounting requests <x.y.z.y:1234>
 // 	"clientSecrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
@@ -1073,7 +1073,7 @@
 // 	"storeInterval": "",		// dump cache regularly to DB, 0 - dump at start/shutdown: <""|$dur>
 // 	"storeUncompressedLimit": 0,	// used to compress data
 // 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"eesConns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 // 	"eesExporterIDs": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 // 	"indexedSelects": true,	// enable profile matching exclusively on indexes
 // 	//"stringIndexedFields": [],	// query indexes based on these fields for faster processing
@@ -1118,7 +1118,7 @@
 // 	"existsIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"notExistsIndexedFields": [],		// query indexes based on these fields for faster processing
 // 	"nestedFields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"actions_conns": [],			// connections to ActionS to execute the actions
+// 	"actionsConns": [],			// connections to ActionS to execute the actions
 // 	"opts":{
 // 		// "*thresholdsIDs": [
 // 		// 	{
@@ -1145,7 +1145,7 @@
 // 	"stats_conns": [],		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"scheduledIDs": {},		// autoload these trend ids on start
 // 	"thresholds_conns": [],		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_conns": [],		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"eesConns": [],		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 // 	"eesExporterIDs": []		// list of EventExporter profiles to use for real-time trendSummary exports
 // },
 
@@ -1156,7 +1156,7 @@
 // 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"scheduledIDs": {},	// autoload these ranking ids on start
 // 	"thresholds_conns": [],	// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-// 	"ees_conns": [],	// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"eesConns": [],	// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 // 	"eesExporterIDs": []	// list of EventExporter profiles to use for real-time rankingSummary exports
 // },
 
@@ -1243,11 +1243,11 @@
 // 		"enabled": false,				// starts as service: <true|false>.
 // 		"tenant": "",					// tenant used in filterS.Pass
 // 		"runDelay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-// 		"lockfile_path": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
-// 		"caches_conns": ["*internal"],
-// 		"field_separator": ",",				// separator used in case of csv files
-// 		"tp_in_path": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
-// 		"tp_out_path": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed TPs will be moved
+// 		"lockfilePath": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
+// 		"cachesConns": ["*internal"],
+// 		"fieldSeparator": ",",				// separator used in case of csv files
+// 		"tpInPath": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
+// 		"tpOutPath": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed TPs will be moved
 // 		"action": "*store", 				// what should the loader do<*store|*parse|*remove|*dryRun>
 // 		"opts": {
 // 			// "*cache": "*reload",
@@ -1272,7 +1272,7 @@
 // 		"data":[					// data profiles to load
 // 			{
 // 				"type": "*filters",		// data source type
-// 				"file_name": "Filters.csv",	// file name in the tp_in_path
+// 				"fileName": "Filters.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1283,7 +1283,7 @@
 // 			},
 // 			{
 // 				"type": "*attributes",		// data source type
-// 				"file_name": "Attributes.csv",	// file name in the tp_in_path
+// 				"fileName": "Attributes.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1299,7 +1299,7 @@
 // 			},
 // 			{
 // 				"type": "*resources",		// data source type
-// 				"file_name": "Resources.csv",	// file name in the tp_in_path
+// 				"fileName": "Resources.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1315,7 +1315,7 @@
 // 			},
 // 			{
 // 				"type": "*stats",		// data source type
-// 				"file_name": "Stats.csv",	// file name in the tp_in_path
+// 				"fileName": "Stats.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1334,7 +1334,7 @@
 // 			},
 // 			{
 // 				"type": "*thresholds",		// data source type
-// 				"file_name": "Thresholds.csv",	// file name in the tp_in_path
+// 				"fileName": "Thresholds.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1350,7 +1350,7 @@
 // 			},
 // 			{
 // 				"type": "*trends",		// data source type
-// 				"file_name": "Trends.csv",	// file name in the tp_in_path
+// 				"fileName": "Trends.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1368,7 +1368,7 @@
 // 			},
 // 			{
 // 				"type": "*rankings",		// data source type
-// 				"file_name": "Rankings.csv",	// file name in the tp_in_path
+// 				"fileName": "Rankings.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1383,7 +1383,7 @@
 // 			},
 // 			{
 // 				"type": "*routes",		// data source type
-// 				"file_name": "Routes.csv",	// file name in the tp_in_path
+// 				"fileName": "Routes.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1405,7 +1405,7 @@
 // 			},
 // 			{
 // 				"type": "*chargers",		// data source type
-// 				"file_name": "Chargers.csv",	// file name in the tp_in_path
+// 				"fileName": "Chargers.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1418,7 +1418,7 @@
 // 			},
 // 			{
 // 				"type": "*rateProfiles",	// data source type
-// 				"file_name": "Rates.csv",	// file name in the tp_in_path
+// 				"fileName": "Rates.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1441,7 +1441,7 @@
 // 			},
 // 			{
 // 				"type": "*actionProfiles",	// data source type
-// 				"file_name": "Actions.csv",	// file name in the tp_in_path
+// 				"fileName": "Actions.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1467,7 +1467,7 @@
 // 			},
 // 			{
 // 				"type": "*accounts",		// data source type
-// 				"file_name": "Accounts.csv",	// file name in the tp_in_path
+// 				"fileName": "Accounts.csv",	// file name in the tp_in_path
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1496,48 +1496,48 @@
 
 // "suretax": {
 // 	"url": "",				// API url
-// 	"client_number": "",			// client number, provided by SureTax
-// 	"validation_key": "",			// validation key provided by SureTax
-// 	"business_unit": "",			// client’s Business Unit
+// 	"clientNumber": "",			// client number, provided by SureTax
+// 	"validationKey": "",			// validation key provided by SureTax
+// 	"businessUnit": "",			// client’s Business Unit
 // 	"timezone": "Local",			// convert the time of the events to this timezone before sending request out <UTC|Local|$IANA_TZ_DB>
-// 	"include_local_cost": false,		// sum local calculated cost with tax one in final cost
-// 	"return_file_code": "0",		// default or Quote purposes <0|Q>
-// 	"response_group": "03",			// determines how taxes are grouped for the response <03|13>
-// 	"response_type": "D4",			// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
-// 	"regulatory_code": "03",		// provider type
-// 	"client_tracking": "~*opts.*originID",	// template extracting client information out of StoredCdr; <RSRParsers>
-// 	"customer_number": "~*req.Subject",	// template extracting customer number out of StoredCdr; <RSRParsers>
-// 	"orig_number":  "~*req.Subject", 	// template extracting origination number out of StoredCdr; <RSRParsers>
-// 	"term_number": "~*req.Destination",	// template extracting termination number out of StoredCdr; <RSRParsers>
-// 	"bill_to_number": "",			// template extracting billed to number out of StoredCdr; <RSRParsers>
+// 	"includeLocalCost": false,		// sum local calculated cost with tax one in final cost
+// 	"returnFileCode": "0",		// default or Quote purposes <0|Q>
+// 	"responseGroup": "03",			// determines how taxes are grouped for the response <03|13>
+// 	"responseType": "D4",			// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
+// 	"regulatoryCode": "03",		// provider type
+// 	"clientTracking": "~*opts.*originID",	// template extracting client information out of StoredCdr; <RSRParsers>
+// 	"customerNumber": "~*req.Subject",	// template extracting customer number out of StoredCdr; <RSRParsers>
+// 	"origNumber":  "~*req.Subject", 	// template extracting origination number out of StoredCdr; <RSRParsers>
+// 	"termNumber": "~*req.Destination",	// template extracting termination number out of StoredCdr; <RSRParsers>
+// 	"billToNumber": "",			// template extracting billed to number out of StoredCdr; <RSRParsers>
 // 	"zipcode": "",				// template extracting billing zip code out of StoredCdr; <RSRParsers>
 // 	"plus4": "",				// template extracting billing zip code extension out of StoredCdr; <RSRParsers>
 // 	"p2pzipcode": "",			// template extracting secondary zip code out of StoredCdr; <RSRParsers>
 // 	"p2pplus4": "",				// template extracting secondary zip code extension out of StoredCdr; <RSRParsers>
 // 	"units": "1",				// template extracting number of “lines” or unique charges contained within the revenue out of StoredCdr; <RSRParsers>
-// 	"unit_type": "00",			// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
-// 	"tax_included": "0",			// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
-// 	"tax_situs_rule": "04",			// template extracting tax situs rule out of StoredCdr; <RSRParsers>
-// 	"trans_type_code": "010101",		// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
-// 	"sales_type_code": "R",			// template extracting sales type code out of StoredCdr; <RSRParsers>
-// 	"tax_exemption_code_list": "",		// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
+// 	"unitType": "00",			// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
+// 	"taxIncluded": "0",			// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
+// 	"taxSitusRule": "04",			// template extracting tax situs rule out of StoredCdr; <RSRParsers>
+// 	"transTypeCode": "010101",		// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
+// 	"salesTypeCode": "R",			// template extracting sales type code out of StoredCdr; <RSRParsers>
+// 	"taxExemptionCodeList": "",		// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
 // },
 
 
 // "loader": {						// loader for tariff plans out of .csv files
 // 	"tpid": "",					// tariff plan identificator
-// 	"data_path": "./",				// path towards tariff plan files
-// 	"disable_reverse": false,			// disable reverse computing
-// 	"field_separator": ",",				// separator used in case of csv files
-// 	"caches_conns":["*localhost"],
-// 	"actions_conns": ["*localhost"],
-// 	"gapi_credentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
-// 	"gapi_token": ".gapi/token.json" 		// the path to the token for google API or the token.json file content
+// 	"dataPath": "./",				// path towards tariff plan files
+// 	"disableReverse": false,			// disable reverse computing
+// 	"fieldSeparator": ",",				// separator used in case of csv files
+// 	"cachesConns":["*localhost"],
+// 	"actionsConns": ["*localhost"],
+// 	"gapiCredentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
+// 	"gapiToken": ".gapi/token.json" 		// the path to the token for google API or the token.json file content
 // },
 
 
 // "migrator": {
-// 	"users_filters":[],
+// 	"usersFilters":[],
 // 	"fromItems":{
 // 		"*accounts": {"dbConn": "*default"},
 // 		"*statQueueProfiles": {"dbConn": "*default"},
@@ -1546,7 +1546,7 @@
 // 		"*loadIDs": {"dbConn": "*default"},
 // 		"*versions": {"dbConn": "*default"}
 // 	},
-// 	"out_db_opts":{
+// 	"outDBOpts":{
 // 		"redisMaxConns": 10,			// the connection pool size
 // 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 // 		"redisSentinel": "",
@@ -1571,20 +1571,20 @@
 // "registrarc":{
 //     "rpc":{
 //         "enabled": false,
-//         "registrars_conns": [],
+//         "registrarsConns": [],
 //         "hosts": [],  
-//         "refresh_interval": "5m"
+//         "refreshInterval": "5m"
 //     }
 // },
 
 
 // "analyzers":{
 // 	"enabled": false,				// starts AnalyzerS service: <true|false>.
-//  	"db_path": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
-// 	"index_type": "*scorch",			// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
+//  	"dbPath": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
+// 	"indexType": "*scorch",			// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
 // 	"ttl": "24h",					// time to wait before removing the API capture
-// 	"ees_conns": [],				// connections to EEs
-// 	"cleanup_interval": "1h",			// the interval we clean the db
+// 	"eesConns": [],				// connections to EEs
+// 	"cleanupInterval": "1h",			// the interval we clean the db
 // 	"opts":{
 // 		// "*exporterIDs": [
 // 		// 	{
@@ -1599,10 +1599,10 @@
 
 // "admins": {
 // 	"enabled": false,
-// 	"caches_conns":["*internal"],
-// 	"actions_conns": [],		// connections to ActionS for reloads
+// 	"cachesConns":["*internal"],
+// 	"actionsConns": [],		// connections to ActionS for reloads
 // 	"attributes_conns": [],		// connections to AttributeS for CDRExporter
-// 	"ees_conns": []			// connections to EEs
+// 	"eesConns": []			// connections to EEs
 // },
 
 
@@ -1663,13 +1663,13 @@
 // },
 
 
-// "sip_agent": {				// SIP Agents, only used for redirections
+// "sipAgent": {				// SIP Agents, only used for redirections
 // 	"enabled": false,		// enables the SIP agent: <true|false>
 // 	"listen": "127.0.0.1:5060",	// address where to listen for SIP requests <x.y.z.y:1234>
-// 	"listen_net": "udp",		// network to listen on <udp|tcp|tcp-tls>
+// 	"listenNet": "udp",		// network to listen on <udp|tcp|tcp-tls>
 // 	"sessions_conns": ["*internal"],
 // 	"timezone": "",			// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-// 	"retransmission_timer": "1s",	// the duration to wait to receive an ACK before resending the reply
+// 	"retransmissionTimer": "1s",	// the duration to wait to receive an ACK before resending the reply
 // 	"requestProcessors": []	// request processors to be applied to SIP messages
 // },
 
@@ -1789,20 +1789,20 @@
 // },
 
 // "sentrypeer": {
-// 	"client_id":"",
-// 	"client_secret":"",
-// 	"token_url":"https://authz.sentrypeer.com/oauth/token",
-// 	"ips_url":"https://sentrypeer.com/api/ip-addresses",
-// 	"numbers_url":"https://sentrypeer.com/api/phone-numbers",
+// 	"clientID":"",
+// 	"clientSecret":"",
+// 	"tokenUrl":"https://authz.sentrypeer.com/oauth/token",
+// 	"ipsUrl":"https://sentrypeer.com/api/ip-addresses",
+// 	"numbersUrl":"https://sentrypeer.com/api/phone-numbers",
 // 	"audience":"https://sentrypeer.com/api",
-// 	"grant_type":"client_credentials"
+// 	"grantType":"clientCredentials"
 // },
 
 
 // "actions": {
 // 	"enabled": false,		// starts attribute service: <true|false>
 // 	"cdrs_conns": [],		// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
-// 	"ees_conns": [],		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
+// 	"eesConns": [],		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
 // 	"thresholds_conns": [],		// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
 // 	"accounts_conns": [],		// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>

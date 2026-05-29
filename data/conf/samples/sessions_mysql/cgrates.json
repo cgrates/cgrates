@@ -163,9 +163,9 @@
 			"id": "*default",
 			"enabled": true,
 			"tenant": "cgrates.org",
-			"tp_in_path": "/usr/share/cgrates/tariffplans/testit",
-			"tp_out_path": "",
-			"lockfile_path": ""
+			"tpInPath": "/usr/share/cgrates/tariffplans/testit",
+			"tpOutPath": "",
+			"lockfilePath": ""
 		}
 	]
 }

@@ -363,7 +363,7 @@ func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 type LoaderJsonDataType struct {
 	Id        *string
 	Type      *string
-	File_name *string
+	File_name *string `json:"fileName"`
 	Flags     *[]string
 	Fields    *[]*FcTemplateJsonCfg
 }
@@ -379,12 +379,12 @@ type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
 	Tenant          *string
-	Run_delay       *string `json:"runDelay"`
-	Lockfile_path   *string
-	Caches_conns    *[]string
-	Field_separator *string
-	Tp_in_path      *string
-	Tp_out_path     *string
+	Run_delay       *string   `json:"runDelay"`
+	Lockfile_path   *string   `json:"lockfilePath"`
+	Caches_conns    *[]string `json:"cachesConns"`
+	Field_separator *string   `json:"fieldSeparator"`
+	Tp_in_path      *string   `json:"tpInPath"`
+	Tp_out_path     *string   `json:"tpOutPath"`
 	Data            *[]*LoaderJsonDataType
 
 	Action *string

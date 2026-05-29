@@ -2138,7 +2138,7 @@ const (
 	DigestSeparatorCfg      = "digestSeparator"
 	DigestEqualCfg          = "digestEqual"
 	MaxParallelConnsCfg     = "maxParallelConns"
-	EEsConnsCfg             = "ees_conns"
+	EEsConnsCfg             = "eesConns"
 	DecimalMaxScaleCfg      = "decimalMaxScale"
 	DecimalMinScaleCfg      = "decimalMinScale"
 	DecimalPrecisionCfg     = "decimalPrecision"
@@ -2288,7 +2288,7 @@ const (
 const (
 	EnabledCfg         = "enabled"
 	ThresholdSConnsCfg = "thresholds_conns"
-	CacheSConnsCfg     = "caches_conns"
+	CacheSConnsCfg     = "cachesConns"
 	ScheduledIDsCfg    = "scheduledIDs"
 )
 
@@ -2305,7 +2305,7 @@ const (
 	SMCostRetriesCfg       = "sessionCostRetries"
 	ChargerSConnsCfg       = "chargers_conns"
 	AttributeSConnsCfg     = "attributes_conns"
-	RetransmissionTimerCfg = "retransmission_timer"
+	RetransmissionTimerCfg = "retransmissionTimer"
 	OnlineCDRExportsCfg    = "onlineCDRExports"
 	SessionCostRetires     = "sessionCostRetries"
 	RateSConnsCfg          = "rates_conns"
@@ -2375,7 +2375,7 @@ const (
 	AsteriskConnsCfg = "asteriskConns"
 
 	// DiameterAgentCfg
-	ListenNetCfg                  = "listen_net"
+	ListenNetCfg                  = "listenNet"
 	NetworkCfg                    = "network"
 	ListenersCfg                  = "listeners"
 	ListenCfg                     = "listen"
@@ -2453,9 +2453,9 @@ const (
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
-	LockFilePathCfg = "lockfile_path"
-	TpInPathCfg     = "tp_in_path"
-	TpOutPathCfg    = "tp_out_path"
+	LockFilePathCfg = "lockfilePath"
+	TpInPathCfg     = "tpInPath"
+	TpOutPathCfg    = "tpOutPath"
 	DataCfg         = "data"
 
 	DefaultRatioCfg   = "defaultRatio"
@@ -2463,7 +2463,7 @@ const (
 	ExportersCfg      = "exporters"
 	PoolSize          = "poolSize"
 	Conns             = "conns"
-	FilenameCfg       = "file_name"
+	FilenameCfg       = "fileName"
 	RequestPayloadCfg = "request_payload"
 	ReplyPayloadCfg   = "reply_payload"
 	TransportCfg      = "transport"
@@ -2521,9 +2521,9 @@ const (
 	MetaAccountsForceUsage        = "*accountsForceUsage"
 
 	// AnalyzerSCfg
-	CleanupIntervalCfg = "cleanup_interval"
-	IndexTypeCfg       = "index_type"
-	DBPathCfg          = "db_path"
+	CleanupIntervalCfg = "cleanupInterval"
+	IndexTypeCfg       = "indexType"
+	DBPathCfg          = "dbPath"
 
 	// CoreSCfg
 	CapsCfg              = "caps"
@@ -2562,48 +2562,48 @@ const (
 const (
 	RootDirCfg              = "rootDir"
 	URLCfg                  = "url"
-	ClientNumberCfg         = "client_number"
-	ValidationKeyCfg        = "validation_key"
-	BusinessUnitCfg         = "business_unit"
-	IncludeLocalCostCfg     = "include_local_cost"
-	ReturnFileCodeCfg       = "return_file_code"
-	ResponseGroupCfg        = "response_group"
-	ResponseTypeCfg         = "response_type"
-	RegulatoryCodeCfg       = "regulatory_code"
-	ClientTrackingCfg       = "client_tracking"
-	CustomerNumberCfg       = "customer_number"
-	OrigNumberCfg           = "orig_number"
-	TermNumberCfg           = "term_number"
-	BillToNumberCfg         = "bill_to_number"
+	ClientNumberCfg         = "clientNumber"
+	ValidationKeyCfg        = "validationKey"
+	BusinessUnitCfg         = "businessUnit"
+	IncludeLocalCostCfg     = "includeLocalCost"
+	ReturnFileCodeCfg       = "returnFileCode"
+	ResponseGroupCfg        = "responseGroup"
+	ResponseTypeCfg         = "responseType"
+	RegulatoryCodeCfg       = "regulatoryCode"
+	ClientTrackingCfg       = "clientTracking"
+	CustomerNumberCfg       = "customerNumber"
+	OrigNumberCfg           = "origNumber"
+	TermNumberCfg           = "termNumber"
+	BillToNumberCfg         = "billToNumber"
 	ZipcodeCfg              = "zipcode"
 	Plus4Cfg                = "plus4"
 	P2PZipcodeCfg           = "p2pzipcode"
 	P2PPlus4Cfg             = "p2pplus4"
 	UnitsCfg                = "units"
-	UnitTypeCfg             = "unit_type"
-	TaxIncludedCfg          = "tax_included"
-	TaxSitusRuleCfg         = "tax_situs_rule"
-	TransTypeCodeCfg        = "trans_type_code"
-	SalesTypeCodeCfg        = "sales_type_code"
-	TaxExemptionCodeListCfg = "tax_exemption_code_list"
+	UnitTypeCfg             = "unitType"
+	TaxIncludedCfg          = "taxIncluded"
+	TaxSitusRuleCfg         = "taxSitusRule"
+	TransTypeCodeCfg        = "transTypeCode"
+	SalesTypeCodeCfg        = "salesTypeCode"
+	TaxExemptionCodeListCfg = "taxExemptionCodeList"
 )
 
 // LoaderCgrCfg
 const (
 	TpIDCfg            = "tpid"
-	DataPathCfg        = "data_path"
-	DisableReverseCfg  = "disable_reverse"
-	CachesConnsCfg     = "caches_conns"
-	ActionSConnsCfg    = "actions_conns"
-	GapiCredentialsCfg = "gapi_credentials"
-	GapiTokenCfg       = "gapi_token"
+	DataPathCfg        = "dataPath"
+	DisableReverseCfg  = "disableReverse"
+	CachesConnsCfg     = "cachesConns"
+	ActionSConnsCfg    = "actionsConns"
+	GapiCredentialsCfg = "gapiCredentials"
+	GapiTokenCfg       = "gapiToken"
 )
 
 // MigratorCgrCfg
 const (
 	OutDBRedisSentinel = "out_redis_sentinel"
-	OutDBOptsCfg       = "out_db_opts"
-	UsersFiltersCfg    = "users_filters"
+	OutDBOptsCfg       = "outDBOpts"
+	UsersFiltersCfg    = "usersFilters"
 	FromItemsCfg       = "fromItems"
 )
 
@@ -2619,7 +2619,7 @@ const (
 const (
 	IDCfg                  = "id"
 	CacheCfg               = "cache"
-	FieldSepCfg            = "field_separator"
+	FieldSepCfg            = "fieldSeparator"
 	RunDelayCfg            = "runDelay"
 	StartDelayCfg          = "startDelay"
 	SourcePathCfg          = "sourcePath"
@@ -2640,9 +2640,9 @@ const (
 const (
 	RPCCfg             = "rpc"
 	DispatcherCfg      = "dispatchers"
-	RegistrarsConnsCfg = "registrars_conns"
+	RegistrarsConnsCfg = "registrarsConns"
 	HostsCfg           = "hosts"
-	RefreshIntervalCfg = "refresh_interval"
+	RefreshIntervalCfg = "refreshInterval"
 )
 
 // APIBanCfg
@@ -2651,13 +2651,13 @@ const (
 )
 
 const (
-	ClientIDCfg     = "client_id"
-	ClientSecretCfg = "client_secret"
-	TokenUrlCfg     = "token_url"
-	IpsUrlCfg       = "ips_url"
-	NumbersUrlCfg   = "numbers_url"
+	ClientIDCfg     = "clientID"
+	ClientSecretCfg = "clientSecret"
+	TokenUrlCfg     = "tokenUrl"
+	IpsUrlCfg       = "ipsUrl"
+	NumbersUrlCfg   = "numbersUrl"
 	AudienceCfg     = "audience"
-	GrantTypeCfg    = "grant_type"
+	GrantTypeCfg    = "grantType"
 )
 
 // STIR/SHAKEN

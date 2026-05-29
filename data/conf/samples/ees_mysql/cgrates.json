@@ -80,7 +80,7 @@
 			"timezone": "UTC",
 			"synchronous": true,
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -105,7 +105,7 @@
 			"timezone": "UTC",
 			"synchronous": true,
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"filters": ["*string:~*req.RunID:*raw"],
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
@@ -131,7 +131,7 @@
 			"timezone": "UTC",
 			"synchronous": false,
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"filters": ["*string:~*opts.*originID:Cdr1|Cdr2"],
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},

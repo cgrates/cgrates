@@ -62,13 +62,13 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"loader": {
 		"tpid": "",
-		"data_path": "./",
-		"disable_reverse": false,
-		"field_separator": ",",
-		"caches_conns":["*internal","*localhost"],
-		"actions_conns": ["*internal","*localhost"],
-		"gapi_credentials": ".gapi/credentials.json",
-		"gapi_token": ".gapi/token.json"
+		"dataPath": "./",
+		"disableReverse": false,
+		"fieldSeparator": ",",
+		"cachesConns":["*internal","*localhost"],
+		"actionsConns": ["*internal","*localhost"],
+		"gapiCredentials": ".gapi/credentials.json",
+		"gapiToken": ".gapi/token.json"
 	},
 }`
 	eMap := map[string]any{

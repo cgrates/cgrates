@@ -45,14 +45,14 @@
                 "exportPath": "/tmp/CSVFile1",
                 "attempts": 1,
                 "blocker": true,
-                "field_separator": ","
+                "fieldSeparator": ","
             },
             {
                 "id": "CSVExporter2",
                 "type": "*fileCSV",
                 "exportPath": "/tmp/CSVFile2",
                 "attempts": 1,
-                "field_separator": ","
+                "fieldSeparator": ","
             }
         ]
     },

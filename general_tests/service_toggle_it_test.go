@@ -70,7 +70,7 @@ func TestServiceToggle(t *testing.T) {
 },
 "analyzers": {
 	"enabled": %[1]v,
- 	"db_path": "%[2]s",
+ 	"dbPath": "%[2]s",
 },
 "attributes": {
 	"enabled": %[1]v
