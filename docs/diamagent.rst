@@ -39,6 +39,10 @@ With explanations in the comments:
 	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
 	"synced_conn_requests": false,		// process one request at the time per connection
 	"asr_template": "*asr",				// enable AbortSession message being sent to client
+	"rar_template": "",						// template used to build the Re-Auth-Request
+	"slr_template": "",						// default SLR template 
+	"snr_template": "",						// template used to build the Spending-Status-Notification-Request
+	"str_template": "",						// default STR template 
 	"request_processors": [		// decision logic for message processing
 		{
 			"id": "SMSes",		// id is used for debug in logs (ie: using *log flag)
@@ -173,6 +177,15 @@ listen_net
 
 asr_template
 	The template (out of templates config section) used to build the AbortSession message. If not specified the ASR message is never sent out.
+
+slr_template
+	The template (out of templates config section) used to build an SLR request out of the event coming from diameter.
+
+snr_template
+	The template (out of templates config section) used to build an SNR request out of threshold event triggered.
+
+str_template
+	The template (out of templates config section) used to build an STR request out of the event coming from diameter.
 
 templates
 	Group fields based on their usability. Can be used in both processor templates as well as hardcoded within CGRateS functionality (ie *\*err* or *\*asr*). The IDs are unique, defining the same id in multiple configuration places/files will result into overwrite.
@@ -403,3 +416,442 @@ padding
 
 	**\*zeroleft**
 		Prefix with *0* chars.
+
+
+Spending limit reporting over Sy
+--------------------------------
+
+The Diameter agent is capable of receiving **SLR**, **STR** and **SNA** messages, as well as generating **SLA**, **SNR** and **STA** requests towards the PCRF. To enable these capabilities, several components must first be configured.
+
+ThresholdS connectivity
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A bidirectional connection between **SessionS** and **ThresholdS** is required. This connection can be either custom or internal.
+
+Custom connection
+"""""""""""""""""
+
+.. code-block:: json
+
+   "rpc_conns": {
+     "*bijson_localhost_thresholds": {
+       "conns": [
+         {
+           "address": "127.0.0.1:2014",
+           "transport": "*birpc_json"
+         }
+       ]
+     }
+   },
+
+   "sessions": {
+     "enabled": true,
+     "thresholds_conns": ["*bijson_localhost_thresholds"]
+   },
+
+Internal connection
+"""""""""""""""""""
+
+.. code-block:: json
+
+   "sessions": {
+     "enabled": true,
+     "thresholds_conns": ["*birpc_internal"]
+   },
+
+A connection between **RALs** and **ThresholdS** is also required.
+
+.. code-block:: json
+
+   "rals": {
+     "enabled": true,
+     "thresholds_conns": ["*internal"]
+   },
+
+Processing Sy requests
+^^^^^^^^^^^^^^^^^^^^^^
+
+Events received from the PCRF are processed through the configured ``request_processors``. Depending on the matching ``filters``, the request will be handled accordingly.
+
+Processing Initial SLR Requests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To process an initial **SLR** request, the processor must contain at least the following filters:
+
+.. code-block:: json
+
+   "filters": [
+     "*string:~*vars.*cmd:SLR",
+     "*string:~*req.SL-Request-Type:0"
+   ],
+
+The first filter checks whether the Diameter command is ``SLR``.
+The second filter verifies that ``SL-Request-Type`` is ``0`` (initial request).
+
+Since an initial SLR starts a new Sy session, the ``"*initiate"`` flag must also be enabled:
+
+.. code-block:: json
+
+   "flags": ["*initiate"],
+
+Required request fields
+"""""""""""""""""""""""
+
+Inside ``request_fields``, populate the fields required to build the CGRateS event used to initiate the session.
+
+The following fields are mandatory:
+
+.. code-block:: json
+
+   {
+     "tag": "OriginID",
+     "path": "*cgreq.OriginID",
+     "type": "*variable",
+     "value": "~*req.Session-Id",
+     "mandatory": true
+   },
+   {
+     "tag": "OriginHost",
+     "path": "*cgreq.OriginHost",
+     "type": "*variable",
+     "value": "~*req.Origin-Host",
+     "mandatory": true
+   },
+   {
+     "tag": "OriginRealm",
+     "path": "*cgreq.OriginRealm",
+     "type": "*variable",
+     "value": "~*req.Origin-Realm",
+     "mandatory": true
+   },
+   {
+     "tag": "Account",
+     "path": "*cgreq.Account",
+     "type": "*variable",
+     "mandatory": true,
+     "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+   },
+   {
+     "tag": "RequestType",
+     "path": "*cgreq.RequestType",
+     "type": "*constant",
+     "value": "*sy"
+   },
+
+.. important::
+
+   ``RequestType`` must be set to ``*sy``. Otherwise, the event will not be treated as a Sy session.
+
+Dynamic threshold generation
+""""""""""""""""""""""""""""
+
+One or more additional fields are required to dynamically generate thresholds that trigger SNR messages towards the PCRF.
+
+These fields should:
+
+- use the path ``"*opts.*syPolicyFilters"``
+- use the type ``"*group"``
+- contain raw filter expressions used for threshold generation
+
+Example:
+
+.. code-block:: json
+
+   {
+     "tag": "BalanceValuePolicyFilter",
+     "path": "*opts.*syPolicyFilters",
+     "type": "*group",
+     "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
+   }
+
+This filter triggers an SNR when the balance value of the balance with ID ``balance_data`` becomes less than or equal to ``1023``.
+
+Additional information about SNR generation is described later in this section.
+
+Building the SLA response
+"""""""""""""""""""""""""
+
+The ``reply_fields`` section defines the SLA response returned to the PCRF.
+
+Example:
+
+.. code-block:: json
+
+   "reply_fields": [
+     {
+       "tag": "FailedAVP",
+       "path": "*rep.Failed-AVP",
+       "filters": ["*string:~*cgrep.Error:EXISTS"],
+       "type": "*variable",
+       "value": "~*req.SL-Request-Type"
+     },
+     {
+       "tag": "ResultCode",
+       "path": "*rep.Result-Code",
+       "filters": ["*string:~*cgrep.Error:EXISTS"],
+       "type": "*constant",
+       "value": "5004",
+       "blocker": true
+     },
+     {
+       "tag": "Session-Id",
+       "path": "*rep.Session-Id",
+       "type": "*variable",
+       "value": "~*req.Session-Id",
+       "mandatory": true
+     },
+     {
+       "tag": "Auth-Application-Id",
+       "path": "*rep.Auth-Application-Id",
+       "type": "*variable",
+       "value": "~*req.Auth-Application-Id",
+       "mandatory": true
+     },
+     {
+       "tag": "Origin-Host",
+       "path": "*rep.Origin-Host",
+       "type": "*variable",
+       "value": "~*req.Origin-Host",
+       "mandatory": true
+     },
+     {
+       "tag": "Origin-Realm",
+       "path": "*rep.Origin-Realm",
+       "type": "*variable",
+       "value": "~*req.Origin-Realm",
+       "mandatory": true
+     },
+     {
+       "tag": "ResultCode",
+       "path": "*rep.Result-Code",
+       "type": "*constant",
+       "value": "2001"
+     },
+     {
+       "tag": "Policy-Counter-Identifier",
+       "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier",
+       "type": "*group",
+       "value": "Monthly",
+       "new_branch": true
+     },
+     {
+       "tag": "Policy-Counter-Status",
+       "path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status",
+       "type": "*group",
+       "value": "30GB"
+     },
+     {
+       "tag": "Pending-Policy-Counter-Information-Status",
+       "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status",
+       "type": "*group",
+       "value": "30GB"
+     },
+     {
+       "tag": "Pending-Policy-Counter-Information-Status-Change-Time",
+       "path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time",
+       "type": "*datetime",
+       "value": "*now"
+     }
+   ]
+
+Processing Intermediate SLR Requests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Intermediate SLR requests use the same flow as initial requests, with two differences:
+
+- ``SL-Request-Type`` must be ``1``
+- ``"*update"`` must be used instead of ``"*initiate"``
+
+Example:
+
+.. code-block:: json
+
+   "filters": [
+     "*string:~*vars.*cmd:SLR",
+     "*string:~*req.SL-Request-Type:1"
+   ],
+   "flags": ["*update"],
+
+The existing threshold associated with the live session will be updated using the new ``request_fields`` values.
+
+The ``"*update"`` flag is required to update the session previously created by the initial SLR.
+
+Processing STR Requests
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To process STR requests, the following filters and flags are required:
+
+.. code-block:: json
+
+   "filters": [
+     "*string:~*vars.*cmd:STR"
+   ],
+   "flags": ["*terminate"],
+
+The filter checks whether the Diameter command is ``STR``.
+The ``"*terminate"`` flag instructs CGRateS to terminate the live session.
+
+Required request fields for STR
+"""""""""""""""""""""""""""""""
+
+.. code-block:: json
+
+   "request_fields": [
+     {
+       "tag": "OriginID",
+       "path": "*cgreq.OriginID",
+       "type": "*variable",
+       "value": "~*req.Session-Id",
+       "mandatory": true
+     },
+     {
+       "tag": "OriginHost",
+       "path": "*cgreq.OriginHost",
+       "type": "*variable",
+       "value": "~*req.Origin-Host",
+       "mandatory": true
+     },
+     {
+       "tag": "OriginRealm",
+       "path": "*cgreq.OriginRealm",
+       "type": "*variable",
+       "value": "~*req.Origin-Realm",
+       "mandatory": true
+     },
+     {
+       "tag": "RequestType",
+       "path": "*cgreq.RequestType",
+       "type": "*constant",
+       "value": "*sy"
+     }
+   ],
+
+These fields are used to generate the event responsible for terminating the CGRateS session.
+
+Building the STA response
+"""""""""""""""""""""""""
+
+The STA returned to the PCRF is generated from the ``reply_fields`` section:
+
+.. code-block:: json
+
+   "reply_fields": [
+     {
+       "tag": "Session-Id",
+       "path": "*rep.Session-Id",
+       "type": "*variable",
+       "value": "~*req.Session-Id"
+     },
+     {
+       "tag": "Origin-Host",
+       "path": "*rep.Origin-Host",
+       "type": "*variable",
+       "value": "~*req.Origin-Host"
+     },
+     {
+       "tag": "Origin-Realm",
+       "path": "*rep.Origin-Realm",
+       "type": "*variable",
+       "value": "~*req.Origin-Realm"
+     },
+     {
+       "tag": "ResultCode",
+       "path": "*rep.Result-Code",
+       "type": "*constant",
+       "value": "2001"
+     }
+   ]
+
+Using SLR, STR, and SNR Templates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can define reusable templates in the ``templates`` configuration section and reference them through the following Diameter agent configuration fields:
+
+.. code-block:: json
+
+   "slr_template": "*slr",
+   "snr_template": "*snr",
+   "str_template": "*str",
+
+SNR Generation
+^^^^^^^^^^^^^^
+
+When a threshold is triggered, CGRateS generates an SNR request towards the PCRF.
+
+By default, the SNR message is built using the ``"*snr"`` template from the ``templates`` section:
+
+.. code-block:: json
+
+   "*snr": [
+     {
+       "tag": "SessionId",
+       "path": "*diamreq.Session-Id",
+       "type": "*variable",
+       "value": "~*req.Session-Id",
+       "mandatory": true
+     },
+     {
+       "tag": "OriginHost",
+       "path": "*diamreq.Origin-Host",
+       "type": "*variable",
+       "value": "~*req.Origin-Host",
+       "mandatory": true
+     },
+     {
+       "tag": "OriginRealm",
+       "path": "*diamreq.Origin-Realm",
+       "type": "*variable",
+       "value": "~*req.Origin-Realm",
+       "mandatory": true
+     },
+     {
+       "tag": "DestinationRealm",
+       "path": "*diamreq.Destination-Realm",
+       "type": "*variable",
+       "value": "~*req.Destination-Realm",
+       "mandatory": true
+     },
+     {
+       "tag": "DestinationHost",
+       "path": "*diamreq.Destination-Host",
+       "type": "*variable",
+       "value": "~*req.Destination-Host",
+       "mandatory": true
+     },
+     {
+       "tag": "AuthApplicationId",
+       "path": "*diamreq.Auth-Application-Id",
+       "type": "*variable",
+       "value": "~*vars.*appid",
+       "mandatory": true
+     },
+     {
+       "tag": "Policy-Counter-Identifier",
+       "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Identifier",
+       "type": "*group",
+       "value": "Monthly",
+       "new_branch": true
+     },
+     {
+       "tag": "Policy-Counter-Status",
+       "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Status",
+       "type": "*group",
+       "value": "512KBPS"
+     },
+     {
+       "tag": "Pending-Policy-Counter-Information-Status",
+       "path": "*diamreq.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status",
+       "type": "*group",
+       "value": "30GB"
+     },
+     {
+       "tag": "Pending-Policy-Counter-Information-Status-Change-Time",
+       "path": "*diamreq.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time",
+       "type": "*datetime",
+       "value": "*now"
+     }
+   ],
+
+When ``"snr_template"`` is configured, the fields in the SNR message are populated using data stored from the original PCRF events.
+
+You can customize the ``"*snr"`` template to control exactly which fields are included in the SNR sent to the PCRF.
