@@ -79,7 +79,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"analyzers":{
             "enabled": true,  
-			"ees_conns": ["*localhost"],
+			"eesConns": ["*localhost"],
         },
     }
 }`

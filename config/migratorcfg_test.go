@@ -75,8 +75,8 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		"fromItems": {
 			"*versions": {"dbConn": "someDBID"},
 		},
-        "users_filters":["users","filters","Account"],
-        "out_db_opts":{	
+        "usersFilters":["users","filters","Account"],
+        "outDBOpts":{	
 		   "redisCluster": true,
 		   "redisClusterSync": "2s",
 		   "redisClusterOndownDelay": "1",
@@ -126,11 +126,11 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"migrator": {
-			"users_filters":["users","filters","Account"],
+			"usersFilters":["users","filters","Account"],
 			"fromItems": {
 				"*versions": {"dbConn": "someDBID"},
 			},
-			"out_db_opts": {
+			"outDBOpts": {
 				"redisSentinel": "out_datadb_redis_sentinel",
 			},
 		},

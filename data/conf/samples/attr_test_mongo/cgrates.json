@@ -44,9 +44,9 @@
 		"id": "*default",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"lockfile_path": ".cgr.lck",
-		"tp_in_path": "/usr/share/cgrates/tariffplans/testit",
-		"tp_out_path": "",
+		"lockfilePath": ".cgr.lck",
+		"tpInPath": "/usr/share/cgrates/tariffplans/testit",
+		"tpOutPath": "",
 	},
 ],
 
@@ -164,7 +164,7 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 

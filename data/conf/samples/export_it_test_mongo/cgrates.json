@@ -158,7 +158,7 @@
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
 
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 
@@ -198,22 +198,22 @@
 		"id": "*default",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"lockfile_path": ".cgr.lck",
-		"tp_in_path": "/usr/share/cgrates/tariffplans/loadRateTest",
-		"tp_out_path": "",
+		"lockfilePath": ".cgr.lck",
+		"tpInPath": "/usr/share/cgrates/tariffplans/loadRateTest",
+		"tpOutPath": "",
 	},
 	{
 		"id": "exported_ldr",									// identifier of the Loader
 		"enabled": true,									// starts as service: <true|false>.
 		"tenant": "cgrates.org",										// tenant used in filterS.Pass
 		"runDelay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-		"lockfile_path": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
+		"lockfilePath": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
 		"conns": {
 			"*caches": [{"ConnIDs": ["*internal"]}]
 		},
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_path": "/tmp/archivesTP",		// absolute path towards the directory where the TPs are stored
-		"tp_out_path": "",		// absolute path towards the directory where processed TPs will be moved
+		"fieldSeparator": ",",								// separator used in case of csv files
+		"tpInPath": "/tmp/archivesTP",		// absolute path towards the directory where the TPs are stored
+		"tpOutPath": "",		// absolute path towards the directory where processed TPs will be moved
 		"action": "*store", 								// what should the loader do<*store|*parse|*remove|*dryRun>
 		"opts": {
 			// "*cache": "*reload",
@@ -236,7 +236,7 @@
 		"data":[											// data profiles to load
 			{
 				"type": "*filters",						// data source type
-				"file_name": "Filters.csv",				// file name in the tp_in_path
+				"fileName": "Filters.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -247,7 +247,7 @@
 			},
 			{
 				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv",				// file name in the tp_in_path
+				"fileName": "Attributes.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -263,7 +263,7 @@
 			},
 			{
 				"type": "*resources",						// data source type
-				"file_name": "Resources.csv",				// file name in the tp_in_path
+				"fileName": "Resources.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -279,7 +279,7 @@
 			},
 			{
 				"type": "*stats",						// data source type
-				"file_name": "Stats.csv",				// file name in the tp_in_path
+				"fileName": "Stats.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -298,7 +298,7 @@
 			},
 			{
 				"type": "*thresholds",						// data source type
-				"file_name": "Thresholds.csv",				// file name in the tp_in_path
+				"fileName": "Thresholds.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -316,7 +316,7 @@
 			},
 			{
 				"type": "*routes",						// data source type
-				"file_name": "Routes.csv",				// file name in the tp_in_path
+				"fileName": "Routes.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -338,7 +338,7 @@
 			},
 			{
 				"type": "*chargers",						// data source type
-				"file_name": "Chargers.csv",				// file name in the tp_in_path
+				"fileName": "Chargers.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -351,7 +351,7 @@
 			},
 			{
 				"type": "*rateProfiles",						// data source type
-				"file_name": "Rates.csv",				// file name in the tp_in_path
+				"fileName": "Rates.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -374,7 +374,7 @@
 			},
 			{
 				"type": "*actionProfiles",						// data source type
-				"file_name": "Actions.csv",				// file name in the tp_in_path
+				"fileName": "Actions.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -400,7 +400,7 @@
 			},
 			{
 				"type": "*accounts",						// data source type
-				"file_name": "Accounts.csv",				// file name in the tp_in_path
+				"fileName": "Accounts.csv",				// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

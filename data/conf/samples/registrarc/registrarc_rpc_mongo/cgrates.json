@@ -125,7 +125,7 @@
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
 
-	"users_filters":["Account"]
+	"usersFilters":["Account"]
 },
 
 "admins": {
@@ -156,7 +156,7 @@
 "registrarc":{
     "rpc":{
         "enabled": true,
-        "registrars_conns": ["regConn"],
+        "registrarsConns": ["regConn"],
         "hosts": [
 			{
 				"Tenant": "*default",
@@ -165,7 +165,7 @@
 				"tls": false
 			}
 		],
-        "refresh_interval": "1s"
+        "refreshInterval": "1s"
     }
 }
 

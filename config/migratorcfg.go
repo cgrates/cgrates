@@ -154,9 +154,9 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 }
 
 type MigratorCfgJson struct {
-	Users_filters *[]string
+	Users_filters *[]string `json:"usersFilters"`
 	FromItems     map[string]*FromItemJson
-	Out_db_opts   *DBOptsJson
+	Out_db_opts   *DBOptsJson `json:"outDBOpts"`
 }
 
 type FromItemJson struct {

@@ -33,15 +33,15 @@
 	{
 		"id": "ParseLoader",									
 		"enabled": true,									
-		"tp_in_path": "/tmp/In",		
-		"tp_out_path": "/tmp/parsed",	
+		"tpInPath": "/tmp/In",		
+		"tpOutPath": "/tmp/parsed",	
 		"runDelay": "-1", 
 		"action": "*parse",
 		"data":[	
 			{
 				"id": "Timings",
 				"type": "*rateProfiles",						
-				"file_name": "Timings.csv",				
+				"fileName": "Timings.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"path": "*tmp.Hour", "type": "*constant", "value": "*"},
@@ -61,7 +61,7 @@
 			{
 				"id": "Destinations",
 				"type": "*rateProfiles",						
-				"file_name": "Destinations.csv",				
+				"fileName": "Destinations.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 
@@ -72,7 +72,7 @@
 			{
 				"id": "Rates",
 				"type": "*rateProfiles",						
-				"file_name": "Rates.csv",				
+				"fileName": "Rates.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					
@@ -92,7 +92,7 @@
 			{
 				"id": "DestinationRates",
 				"type": "*rateProfiles",						
-				"file_name": "DestinationRates.csv",				
+				"fileName": "DestinationRates.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 
@@ -104,7 +104,7 @@
 			{
 				"id": "RatingPlans",
 				"type": "*rateProfiles",						
-				"file_name": "RatingPlans.csv",				
+				"fileName": "RatingPlans.csv",				
 				"fields": [
 					{"path": "*tmp.ID", "type": "*variable", "value": "~*req.0", "mandatory": true},
 
@@ -125,15 +125,15 @@
 	{
 		"id": "StoreLoader",
 		"enabled": true,
-		"tp_in_path": "/tmp/parsed",
-		"tp_out_path": "/tmp/Out",
+		"tpInPath": "/tmp/parsed",
+		"tpOutPath": "/tmp/Out",
 		"runDelay": "-1",
 		"action": "*store",
 		"data":[
 			{
 				"id": "RatingProfiles",
 				"type": "*rateProfiles",
-				"file_name": "RatingProfiles.csv",
+				"fileName": "RatingProfiles.csv",
 				"fields": [
 					{"path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"path": "ID", "type": "*variable", "value": "~*req.1;~*req.2", "mandatory": true},

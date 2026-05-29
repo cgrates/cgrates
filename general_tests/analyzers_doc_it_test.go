@@ -71,7 +71,7 @@ func TestAnzDocIT(t *testing.T) {
 },
 "analyzers": {
 	"enabled": true,
-	"db_path": "%s"
+	"dbPath": "%s"
 }
 }`, t.TempDir())
 	ng := engine.TestEngine{

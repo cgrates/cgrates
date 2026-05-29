@@ -129,7 +129,7 @@
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
 
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 
@@ -147,9 +147,9 @@
 		"enabled":true,
 		"id": "*default",
 		"tenant": "cgrates.org",
-		"tp_in_path": "/usr/share/cgrates/tariffplans/tutorial",
-		"tp_out_path": "",
-		"lockfile_path": "",
+		"tpInPath": "/usr/share/cgrates/tariffplans/tutorial",
+		"tpOutPath": "",
+		"lockfilePath": "",
 	},
 ],
 
@@ -166,7 +166,7 @@
 
 "analyzers":{									// AnalyzerS config
 	"enabled": true,							// starts AnalyzerS service: <true|false>.
- 	"db_path": "/tmp/analyzers",				// path to the folder where to store the information
+ 	"dbPath": "/tmp/analyzers",				// path to the folder where to store the information
 },
 
 

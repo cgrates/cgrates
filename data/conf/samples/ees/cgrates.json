@@ -73,7 +73,7 @@
 			"flags": ["*attributes"],
 			"attributeContext": "customContext",
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 		},		
 		{
 			"id": "CSVExporterComposed",
@@ -82,7 +82,7 @@
 			"flags": ["*attributes"],
 			"attributeContext": "customContext",
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"fields":[
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
 				{"tag": "*originID", "path": "*hdr.*originID", "type": "*constant", "value": "*originID"},
@@ -129,7 +129,7 @@
 			"exportPath": "*buffer",
 			"filters": ["*string:~*req.Account:1005"],
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"synchronous": true,
 			"fields":[		
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
@@ -305,7 +305,7 @@
 			"flags": ["*attributes"],
 			"attributeContext": "customContext",
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -344,7 +344,7 @@
 			"flags": ["*attributes"],
 			"attributeContext": "customContext",
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -367,7 +367,7 @@
 			"flags": ["*attributes"],
 			"attributeContext": "customContext",
 			"attempts": 1,
-			"field_separator": ",",
+			"fieldSeparator": ",",
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],

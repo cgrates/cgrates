@@ -97,13 +97,13 @@ func (sentrypeer SentryPeerCfg) Clone() (cln *SentryPeerCfg) {
 }
 
 type SentryPeerJsonCfg struct {
-	Client_id     *string
-	Client_secret *string
-	Token_url     *string
-	Ips_url       *string
-	Numbers_url   *string
-	Audience      *string
-	Grant_type    *string
+	Client_id     *string `json:"clientID"`
+	Client_secret *string `json:"clientSecret"`
+	Token_url     *string `json:"tokenUrl"`
+	Ips_url       *string `json:"ipsUrl"`
+	Numbers_url   *string `json:"numbersUrl"`
+	Audience      *string `json:"audience"`
+	Grant_type    *string `json:"grantType"`
 }
 
 func diffSentryPeerJsonCfg(d *SentryPeerJsonCfg, v1, v2 *SentryPeerCfg) *SentryPeerJsonCfg {

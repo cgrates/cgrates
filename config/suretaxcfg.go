@@ -259,32 +259,32 @@ func (st SureTaxCfg) Clone() *SureTaxCfg {
 
 // SureTax config section
 type SureTaxJsonCfg struct {
-	Url                     *string
-	Client_number           *string
-	Validation_key          *string
-	Business_unit           *string
-	Timezone                *string
-	Include_local_cost      *bool
-	Return_file_code        *string
-	Response_group          *string
-	Response_type           *string
-	Regulatory_code         *string
-	Client_tracking         *string
-	Customer_number         *string
-	Orig_number             *string
-	Term_number             *string
-	Bill_to_number          *string
-	Zipcode                 *string
-	Plus4                   *string
-	P2PZipcode              *string
-	P2PPlus4                *string
-	Units                   *string
-	Unit_type               *string
-	Tax_included            *string
-	Tax_situs_rule          *string
-	Trans_type_code         *string
-	Sales_type_code         *string
-	Tax_exemption_code_list *string
+	Url                     *string `json:"url"`
+	Client_number           *string `json:"clientNumber"`
+	Validation_key          *string `json:"validationKey"`
+	Business_unit           *string `json:"businessUnit"`
+	Timezone                *string `json:"timezone"`
+	Include_local_cost      *bool   `json:"includeLocalCost"`
+	Return_file_code        *string `json:"returnFileCode"`
+	Response_group          *string `json:"responseGroup"`
+	Response_type           *string `json:"responseType"`
+	Regulatory_code         *string `json:"regulatoryCode"`
+	Client_tracking         *string `json:"clientTracking"`
+	Customer_number         *string `json:"customerNumber"`
+	Orig_number             *string `json:"origNumber"`
+	Term_number             *string `json:"termNumber"`
+	Bill_to_number          *string `json:"billToNumber"`
+	Zipcode                 *string `json:"zipcode"`
+	Plus4                   *string `json:"plus4"`
+	P2PZipcode              *string `json:"p2pzipcode"`
+	P2PPlus4                *string `json:"p2pplus4"`
+	Units                   *string `json:"units"`
+	Unit_type               *string `json:"unitType"`
+	Tax_included            *string `json:"taxIncluded"`
+	Tax_situs_rule          *string `json:"taxSitusRule"`
+	Trans_type_code         *string `json:"transTypeCode"`
+	Sales_type_code         *string `json:"salesTypeCode"`
+	Tax_exemption_code_list *string `json:"taxExemptionCodeList"`
 }
 
 func diffSureTaxJsonCfg(d *SureTaxJsonCfg, v1, v2 *SureTaxCfg) *SureTaxJsonCfg {

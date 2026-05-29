@@ -88,14 +88,14 @@ package registrarc
 // "registrarc": {
 //         "dispatchers": {
 //                 "enabled": true,
-//                 "registrars_conns": ["dispConn"],
+//                 "registrarsConns": ["dispConn"],
 //                 "hosts": [{
 //                         "Tenant": "*default",
 //                         "ID": "hostB",
 //                         "transport": "*json",
 //                         "tls": false
 //                 }],
-//                 "refresh_interval": "1s"
+//                 "refreshInterval": "1s"
 //         }
 // }
 // }`

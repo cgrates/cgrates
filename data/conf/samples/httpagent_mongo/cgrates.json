@@ -40,10 +40,10 @@
         "dry_run": false,
         "runDelay": "0",
         "lock_filename": ".cgr.lck",
-        "caches_conns": ["*internal"],
-        "field_separator": ",",
-        "tp_in_path": "/tmp/TestHttpSessionsIt/loader/in",
-        "tp_out_path": "",
+        "cachesConns": ["*internal"],
+        "fieldSeparator": ",",
+        "tpInPath": "/tmp/TestHttpSessionsIt/loader/in",
+        "tpOutPath": "",
         "data": []
     }
 ],

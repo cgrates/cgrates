@@ -58,7 +58,7 @@
 },
 
 "migrator":{
-	"users_filters":["Account"],
+	"usersFilters":["Account"],
 },
 
 

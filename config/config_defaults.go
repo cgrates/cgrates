@@ -1852,11 +1852,11 @@ const CGRATES_CFG_JSON = `
 		"enabled": false,				// starts as service: <true|false>.
 		"tenant": "",					// tenant used in filterS.Pass
 		"runDelay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-		"lockfile_path": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": ["*internal"],
-		"field_separator": ",",				// separator used in case of csv files
-		"tp_in_path": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
-		"tp_out_path": "",	// absolute path towards the directory where processed TPs will be moved
+		"lockfilePath": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
+		"cachesConns": ["*internal"],
+		"fieldSeparator": ",",				// separator used in case of csv files
+		"tpInPath": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
+		"tpOutPath": "",	// absolute path towards the directory where processed TPs will be moved
 		"action": "*store", 				// what should the loader do<*store|*parse|*remove|*dryRun>
 		"opts": {
 			// "*cache": "*reload",
@@ -1882,7 +1882,7 @@ const CGRATES_CFG_JSON = `
 		"data":[					// data profiles to load
 			{
 				"type": "*filters",		// data source type
-				"file_name": "Filters.csv",	// file name in the tp_in_path
+				"fileName": "Filters.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1893,7 +1893,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*attributes",		// data source type
-				"file_name": "Attributes.csv",	// file name in the tp_in_path
+				"fileName": "Attributes.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1909,7 +1909,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*resources",		// data source type
-				"file_name": "Resources.csv",	// file name in the tp_in_path
+				"fileName": "Resources.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1925,7 +1925,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*ips",		// data source type
-				"file_name": "IPs.csv",	// file name in the tp_in_path
+				"fileName": "IPs.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1945,7 +1945,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*stats",		// data source type
-				"file_name": "Stats.csv",	// file name in the tp_in_path
+				"fileName": "Stats.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1964,7 +1964,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*thresholds",		// data source type
-				"file_name": "Thresholds.csv",	// file name in the tp_in_path
+				"fileName": "Thresholds.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1982,7 +1982,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*trends",		// data source type
-				"file_name": "Trends.csv",	// file name in the tp_in_path
+				"fileName": "Trends.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2000,7 +2000,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rankings",		// data source type
-				"file_name": "Rankings.csv",	// file name in the tp_in_path
+				"fileName": "Rankings.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2015,7 +2015,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*routes",		// data source type
-				"file_name": "Routes.csv",	// file name in the tp_in_path
+				"fileName": "Routes.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2037,7 +2037,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*chargers",		// data source type
-				"file_name": "Chargers.csv",	// file name in the tp_in_path
+				"fileName": "Chargers.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2050,7 +2050,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rateProfiles",	// data source type
-				"file_name": "Rates.csv",	// file name in the tp_in_path
+				"fileName": "Rates.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2073,7 +2073,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*actionProfiles",	// data source type
-				"file_name": "Actions.csv",	// file name in the tp_in_path
+				"fileName": "Actions.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2099,7 +2099,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*accounts",		// data source type
-				"file_name": "Accounts.csv",	// file name in the tp_in_path
+				"fileName": "Accounts.csv",	// file name in the tp_in_path
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2128,48 +2128,48 @@ const CGRATES_CFG_JSON = `
 
 "suretax": {
 	"url": "",				// API url
-	"client_number": "",			// client number, provided by SureTax
-	"validation_key": "",			// validation key provided by SureTax
-	"business_unit": "",			// client’s Business Unit
+	"clientNumber": "",			// client number, provided by SureTax
+	"validationKey": "",			// validation key provided by SureTax
+	"businessUnit": "",			// client’s Business Unit
 	"timezone": "Local",			// convert the time of the events to this timezone before sending request out <UTC|Local|$IANA_TZ_DB>
-	"include_local_cost": false,		// sum local calculated cost with tax one in final cost
-	"return_file_code": "0",		// default or Quote purposes <0|Q>
-	"response_group": "03",			// determines how taxes are grouped for the response <03|13>
-	"response_type": "D4",			// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
-	"regulatory_code": "03",		// provider type
-	"client_tracking": "~*opts.*originID",	// template extracting client information out of StoredCdr; <RSRParsers>
-	"customer_number": "~*req.Subject",	// template extracting customer number out of StoredCdr; <RSRParsers>
-	"orig_number":  "~*req.Subject", 	// template extracting origination number out of StoredCdr; <RSRParsers>
-	"term_number": "~*req.Destination",	// template extracting termination number out of StoredCdr; <RSRParsers>
-	"bill_to_number": "",			// template extracting billed to number out of StoredCdr; <RSRParsers>
+	"includeLocalCost": false,		// sum local calculated cost with tax one in final cost
+	"returnFileCode": "0",		// default or Quote purposes <0|Q>
+	"responseGroup": "03",			// determines how taxes are grouped for the response <03|13>
+	"responseType": "D4",			// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
+	"regulatoryCode": "03",		// provider type
+	"clientTracking": "~*opts.*originID",	// template extracting client information out of StoredCdr; <RSRParsers>
+	"customerNumber": "~*req.Subject",	// template extracting customer number out of StoredCdr; <RSRParsers>
+	"origNumber":  "~*req.Subject", 	// template extracting origination number out of StoredCdr; <RSRParsers>
+	"termNumber": "~*req.Destination",	// template extracting termination number out of StoredCdr; <RSRParsers>
+	"billToNumber": "",			// template extracting billed to number out of StoredCdr; <RSRParsers>
 	"zipcode": "",				// template extracting billing zip code out of StoredCdr; <RSRParsers>
 	"plus4": "",				// template extracting billing zip code extension out of StoredCdr; <RSRParsers>
 	"p2pzipcode": "",			// template extracting secondary zip code out of StoredCdr; <RSRParsers>
 	"p2pplus4": "",				// template extracting secondary zip code extension out of StoredCdr; <RSRParsers>
 	"units": "1",				// template extracting number of “lines” or unique charges contained within the revenue out of StoredCdr; <RSRParsers>
-	"unit_type": "00",			// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
-	"tax_included": "0",			// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
-	"tax_situs_rule": "04",			// template extracting tax situs rule out of StoredCdr; <RSRParsers>
-	"trans_type_code": "010101",		// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
-	"sales_type_code": "R",			// template extracting sales type code out of StoredCdr; <RSRParsers>
-	"tax_exemption_code_list": "",		// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
+	"unitType": "00",			// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
+	"taxIncluded": "0",			// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
+	"taxSitusRule": "04",			// template extracting tax situs rule out of StoredCdr; <RSRParsers>
+	"transTypeCode": "010101",		// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
+	"salesTypeCode": "R",			// template extracting sales type code out of StoredCdr; <RSRParsers>
+	"taxExemptionCodeList": "",		// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
 },
 
 
 "loader": {						// loader for tariff plans out of .csv files
 	"tpid": "",					// tariff plan identificator
-	"data_path": "./",				// path towards tariff plan files
-	"disable_reverse": false,			// disable reverse computing
-	"field_separator": ",",				// separator used in case of csv files
-	"caches_conns":["*localhost"],
-	"actions_conns": ["*localhost"],
-	"gapi_credentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
-	"gapi_token": ".gapi/token.json" 		// the path to the token for google API or the token.json file content
+	"dataPath": "./",				// path towards tariff plan files
+	"disableReverse": false,			// disable reverse computing
+	"fieldSeparator": ",",				// separator used in case of csv files
+	"cachesConns":["*localhost"],
+	"actionsConns": ["*localhost"],
+	"gapiCredentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
+	"gapiToken": ".gapi/token.json" 		// the path to the token for google API or the token.json file content
 },
 
 
 "migrator": {
-	"users_filters":[],
+	"usersFilters":[],
 	"fromItems":{
 		"*accounts": {"dbConn": "*default"},
 		"*statQueueProfiles": {"dbConn": "*default"},
@@ -2178,7 +2178,7 @@ const CGRATES_CFG_JSON = `
 		"*loadIDs": {"dbConn": "*default"},
 		"*versions": {"dbConn": "*default"}
 	},
-	"out_db_opts":{
+	"outDBOpts":{
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",
@@ -2203,20 +2203,20 @@ const CGRATES_CFG_JSON = `
 "registrarc":{
     "rpc":{
         "enabled": false,
-        "registrars_conns": [],
+        "registrarsConns": [],
         "hosts": [],  
-        "refresh_interval": "5m"
+        "refreshInterval": "5m"
     }
 },
 
 
 "analyzers":{
 	"enabled": false,				// starts AnalyzerS service: <true|false>.
- 	"db_path": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
-	"index_type": "*scorch",			// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
+ 	"dbPath": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
+	"indexType": "*scorch",			// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
 	"ttl": "24h",					// time to wait before removing the API capture
-	"ees_conns": [],				// connections to EEs
-	"cleanup_interval": "1h",			// the interval we clean the db
+	"eesConns": [],				// connections to EEs
+	"cleanupInterval": "1h",			// the interval we clean the db
 	"opts":{
 		// "*exporterIDs": [
 		// 	{
@@ -2315,10 +2315,10 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"sip_agent": {				// SIP Agents, only used for redirections
+"sipAgent": {				// SIP Agents, only used for redirections
 	"enabled": false,		// enables the SIP agent: <true|false>
 	"listen": "127.0.0.1:5060",	// address where to listen for SIP requests <x.y.z.y:1234>
-	"listen_net": "udp",		// network to listen on <udp|tcp|tcp-tls>
+	"listenNet": "udp",		// network to listen on <udp|tcp|tcp-tls>
 	"conns": {
 		"*sessions":[{"ConnIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
@@ -2337,7 +2337,7 @@ const CGRATES_CFG_JSON = `
 	     // ],
 	},
 	"timezone": "",			// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-	"retransmission_timer": "1s",	// the duration to wait to receive an ACK before resending the reply
+	"retransmissionTimer": "1s",	// the duration to wait to receive an ACK before resending the reply
 	"requestProcessors": []	// request processors to be applied to SIP messages
 },
 
@@ -2521,13 +2521,13 @@ const CGRATES_CFG_JSON = `
 },
 
 "sentrypeer": {
-	"client_id":"",
-	"client_secret":"",
-	"token_url":"https://authz.sentrypeer.com/oauth/token",
-	"ips_url":"https://sentrypeer.com/api/ip-addresses",
-	"numbers_url":"https://sentrypeer.com/api/phone-numbers",
+	"clientID":"",
+	"clientSecret":"",
+	"tokenUrl":"https://authz.sentrypeer.com/oauth/token",
+	"ipsUrl":"https://sentrypeer.com/api/ip-addresses",
+	"numbersUrl":"https://sentrypeer.com/api/phone-numbers",
 	"audience":"https://sentrypeer.com/api",
-	"grant_type":"client_credentials"
+	"grantType":"clientCredentials"
 },
 
 
