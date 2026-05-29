@@ -423,6 +423,9 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	}
 	if bf.TimingIDs != nil {
 		b.TimingIDs = *bf.TimingIDs
+		if len(b.TimingIDs) == 0 {
+			b.Timings = nil
+		}
 	}
 	if bf.Timings != nil && len(bf.Timings) != 0 {
 		b.Timings = make([]*RITiming, len(bf.Timings))
