@@ -960,7 +960,6 @@ func TestBalanceTimingsClearTimings(t *testing.T) {
 	})
 
 	t.Run("ClearTimings", func(t *testing.T) {
-		t.Skip("SetBalance with empty TimingIDs does not clear Timings array")
 		args := &utils.AttrSetBalance{
 			Tenant:      "cgrates.org",
 			Account:     "testClearTimings",
@@ -991,7 +990,6 @@ func TestBalanceTimingsClearTimings(t *testing.T) {
 	})
 
 	t.Run("BalanceActiveAfterClear", func(t *testing.T) {
-		t.Skip("Balance does not get active after clearing")
 		var acnt engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testClearTimings"}, &acnt); err != nil {
@@ -1008,7 +1006,6 @@ func TestBalanceTimingsClearTimings(t *testing.T) {
 	})
 
 	t.Run("SetTimingAfterClear", func(t *testing.T) {
-		t.Skip("Resetting timing does not gets current listing")
 		args := &utils.AttrSetBalance{
 			Tenant:      "cgrates.org",
 			Account:     "testClearTimings",

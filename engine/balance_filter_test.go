@@ -935,3 +935,94 @@ func TestBalanceFilterEmptyExpirationDate(t *testing.T) {
 		})
 	}
 }
+
+func TestModifyBalanceTimings(t *testing.T) {
+	t.Run("ClearTimingsWhenTimingIDsEmpty", func(t *testing.T) {
+		b := &Balance{
+			ID: "testBalance",
+			TimingIDs: utils.StringMap{
+				"HALF1": true,
+			},
+			Timings: []*RITiming{
+				{
+					ID:        "HALF1",
+					StartTime: "00:00:00",
+					EndTime:   "11:59:59",
+				},
+			},
+		}
+
+		emptyTimingIDs := utils.StringMap{}
+		bf := &BalanceFilter{
+			TimingIDs: &emptyTimingIDs,
+		}
+
+		bf.ModifyBalance(b)
+
+		if len(b.TimingIDs) != 0 {
+			t.Errorf("expected TimingIDs to be empty, got: %v", b.TimingIDs)
+		}
+		if b.Timings != nil {
+			t.Errorf("expected Timings to be nil after clearing TimingIDs, got: %v", b.Timings)
+		}
+	})
+
+	t.Run("SetTimingsWhenTimingIDsPopulated", func(t *testing.T) {
+		b := &Balance{
+			ID:        "testBalance",
+			TimingIDs: utils.StringMap{},
+			Timings:   nil,
+		}
+
+		timingIDs := utils.StringMap{"HALF1": true}
+		bf := &BalanceFilter{
+			TimingIDs: &timingIDs,
+			Timings: []*RITiming{
+				{
+					ID:        "HALF1",
+					StartTime: "00:00:00",
+					EndTime:   "11:59:59",
+				},
+			},
+		}
+
+		bf.ModifyBalance(b)
+
+		if len(b.TimingIDs) != 1 {
+			t.Errorf("expected 1 TimingID, got: %d", len(b.TimingIDs))
+		}
+		if len(b.Timings) != 1 {
+			t.Errorf("expected 1 Timing, got: %d", len(b.Timings))
+		}
+		if b.Timings[0].ID != "HALF1" {
+			t.Errorf("expected Timing ID to be HALF1, got: %s", b.Timings[0].ID)
+		}
+	})
+
+	t.Run("TimingsUnchangedWhenTimingIDsNil", func(t *testing.T) {
+		b := &Balance{
+			ID:        "testBalance",
+			TimingIDs: utils.StringMap{"HALF1": true},
+			Timings: []*RITiming{
+				{
+					ID:        "HALF1",
+					StartTime: "00:00:00",
+					EndTime:   "11:59:59",
+				},
+			},
+		}
+
+		bf := &BalanceFilter{
+			TimingIDs: nil,
+		}
+
+		bf.ModifyBalance(b)
+
+		if len(b.Timings) != 1 {
+			t.Errorf("expected Timings to be unchanged, got: %d", len(b.Timings))
+		}
+		if b.Timings[0].ID != "HALF1" {
+			t.Errorf("expected Timing ID to be HALF1, got: %s", b.Timings[0].ID)
+		}
+	})
+}
