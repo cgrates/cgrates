@@ -58,7 +58,7 @@ func BenchmarkKafkaExport(b *testing.B) {
         {
             "id": "kafka_bench",
             "type": "*kafkaJSONMap",
-            "export_path": "%s",
+            "exportPath": "%s",
             "synchronous": true,
             "opts": {
                 "kafkaTopic": "%s"

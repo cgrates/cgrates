@@ -72,7 +72,7 @@ func TestKafkaSSL(t *testing.T) {
         {
             "id": "kafka_ssl",
             "type": "*kafkaJSONMap",
-            "export_path": "%s",
+            "exportPath": "%s",
             "synchronous": true,
             "opts": {
                 "kafkaTopic": "%s",
@@ -85,7 +85,7 @@ func TestKafkaSSL(t *testing.T) {
         {
             "id": "kafka_processed",
             "type": "*kafkaJSONMap",
-            "export_path": "%s",
+            "exportPath": "%s",
             "synchronous": true,
             "opts": {
                 "kafkaTopic": "%s"
@@ -104,10 +104,10 @@ func TestKafkaSSL(t *testing.T) {
         {
             "id": "kafka_ssl",
             "type": "*kafkaJSONMap",
-            "run_delay": "-1",
+            "runDelay": "-1",
             "flags": ["*dryRun"],
-            "source_path": "%s",
-            "ees_success_ids": ["kafka_processed"],
+            "sourcePath": "%s",
+            "eesSuccessIDs": ["kafka_processed"],
             "opts": {
                 "kafkaTopic": "%s",
                 "kafkaGroupID": "",
