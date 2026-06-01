@@ -125,7 +125,7 @@ const CGRATES_CFG_JSON = `
 			"stringIndexedFields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 			"prefixIndexedFields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 			"remoteConns": [],		// the conns that are queried when the items are not found in local DB
-			"remoteConnID": "",		// the ID to be sent to remote_conns to identify the connection
+			"remoteConnID": "",		// the ID to be sent to remoteConns to identify the connection
 			"replicationConns": [],		// the conns the items are replicated
 			"replicationFiltered": false, 	// if this is enabled the replication will be made only to the conns that received a get
 			"replicationCache": "", 	// the caching action that is executed on the replicationConns when the items are replicated
@@ -299,14 +299,14 @@ const CGRATES_CFG_JSON = `
 		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
 		"*eventCharges": {"limit": 0, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
 		"*cdrIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
-		"*loadIDs": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
+		"*loadIDs": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control the loadIDs for items
 		"*rpcConnections": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// RPC connections caching
 		"*uch": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},					// User cache
 		"*stir": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},					// stirShaken cache keys
 		"*apiban":{"limit": -1, "ttl": "2m", "staticTTL": false, "remote":false, "replicate": false},
 		"*sentrypeer":{"limit": -1, "ttl": "24h", "staticTTL": true, "remote":false, "replicate": false},
 		"*capsEvents": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// caps cached samples
-		"*replicationHosts": {"limit": 0, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
+		"*replicationHosts": {"limit": 0, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replicationFiltered is enbled)
 	},
 	"replicationConns": [],
 	"remoteConns": []	// the conns that are queried when the items are not found in cache
@@ -1882,25 +1882,25 @@ const CGRATES_CFG_JSON = `
 		"data":[					// data profiles to load
 			{
 				"type": "*filters",		// data source type
-				"fileName": "Filters.csv",	// file name in the tp_in_path
+				"fileName": "Filters.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2", "new_branch":true},
+					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2", "newBranch":true},
 					{"tag": "Element", "path": "Rules.Element", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Values", "path": "Rules.Values", "type": "*variable", "value": "~*req.4"}
 				]
 			},
 			{
 				"type": "*attributes",		// data source type
-				"fileName": "Attributes.csv",	// file name in the tp_in_path
+				"fileName": "Attributes.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
-					{"tag": "AttributeFilterIDs", "path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","new_branch":true},
+					{"tag": "AttributeFilterIDs", "path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","newBranch":true},
 					{"tag": "AttributeBlockers", "path": "Attributes.Blockers", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Path", "path": "Attributes.Path", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Type", "path": "Attributes.Type", "type": "*variable", "value": "~*req.8"},
@@ -1909,7 +1909,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*resources",		// data source type
-				"fileName": "Resources.csv",	// file name in the tp_in_path
+				"fileName": "Resources.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1925,7 +1925,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*ips",		// data source type
-				"fileName": "IPs.csv",	// file name in the tp_in_path
+				"fileName": "IPs.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1933,7 +1933,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.4"},
 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.5"},
-					{"tag": "PoolID", "path": "Pools.ID", "type": "*variable", "value": "~*req.6","new_branch":true},
+					{"tag": "PoolID", "path": "Pools.ID", "type": "*variable", "value": "~*req.6","newBranch":true},
 					{"tag": "PoolFilterIDs", "path": "Pools.FilterIDs", "type": "*variable", "value": "~*req.7"},
 					{"tag": "PoolType", "path": "Pools.Type", "type": "*variable", "value": "~*req.8"},
 					{"tag": "PoolRange", "path": "Pools.Range", "type": "*variable", "value": "~*req.9"},
@@ -1945,7 +1945,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*stats",		// data source type
-				"fileName": "Stats.csv",	// file name in the tp_in_path
+				"fileName": "Stats.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1957,14 +1957,14 @@ const CGRATES_CFG_JSON = `
 					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.9"},
-					{"tag": "MetricIDs", "path": "Metrics.MetricID", "type": "*variable", "value": "~*req.10","new_branch":true},
+					{"tag": "MetricIDs", "path": "Metrics.MetricID", "type": "*variable", "value": "~*req.10","newBranch":true},
 					{"tag": "MetricFilterIDs", "path": "Metrics.FilterIDs", "type": "*variable", "value": "~*req.11"},
 					{"tag": "MetricBlockers", "path": "Metrics.Blockers", "type": "*variable", "value": "~*req.12"}
 				]
 			},
 			{
 				"type": "*thresholds",		// data source type
-				"fileName": "Thresholds.csv",	// file name in the tp_in_path
+				"fileName": "Thresholds.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1982,7 +1982,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*trends",		// data source type
-				"fileName": "Trends.csv",	// file name in the tp_in_path
+				"fileName": "Trends.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2000,7 +2000,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rankings",		// data source type
-				"fileName": "Rankings.csv",	// file name in the tp_in_path
+				"fileName": "Rankings.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2015,7 +2015,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*routes",		// data source type
-				"fileName": "Routes.csv",	// file name in the tp_in_path
+				"fileName": "Routes.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2024,7 +2024,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.5"},
 					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.6"},
-					{"tag": "RouteID", "path": "Routes.ID", "type": "*variable", "value": "~*req.7","new_branch":true},
+					{"tag": "RouteID", "path": "Routes.ID", "type": "*variable", "value": "~*req.7","newBranch":true},
 					{"tag": "RouteFilterIDs", "path": "Routes.FilterIDs", "type": "*variable", "value": "~*req.8"},
 					{"tag": "RouteAccountIDs", "path": "Routes.AccountIDs", "type": "*variable", "value": "~*req.9"},
 					{"tag": "RouteRateProfileIDs", "path": "Routes.RateProfileIDs", "type": "*variable", "value": "~*req.10"},
@@ -2037,7 +2037,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*chargers",		// data source type
-				"fileName": "Chargers.csv",	// file name in the tp_in_path
+				"fileName": "Chargers.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2050,7 +2050,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rateProfiles",	// data source type
-				"fileName": "Rates.csv",	// file name in the tp_in_path
+				"fileName": "Rates.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2064,7 +2064,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "RateActivationTimes", "path": "Rates[<~*req.7>].ActivationTimes", "type": "*variable", "value": "~*req.9", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateWeights", "path": "Rates[<~*req.7>].Weights", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateBlocker", "path": "Rates[<~*req.7>].Blocker", "type": "*variable", "value": "~*req.11", "filters": ["*notempty:~*req.7:"]},
-					{"tag": "RateIntervalStart", "path": "Rates[<~*req.7>].IntervalRates.IntervalStart", "type": "*variable", "value": "~*req.12","new_branch":true, "filters": ["*notempty:~*req.7:"]},
+					{"tag": "RateIntervalStart", "path": "Rates[<~*req.7>].IntervalRates.IntervalStart", "type": "*variable", "value": "~*req.12","newBranch":true, "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateFixedFee", "path": "Rates[<~*req.7>].IntervalRates.FixedFee", "type": "*variable", "value": "~*req.13", "filters": ["*notempty:~*req.7:"]},
                     {"tag": "RateRecurrentFee", "path": "Rates[<~*req.7>].IntervalRates.RecurrentFee", "type": "*variable", "value": "~*req.14", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateUnit", "path": "Rates[<~*req.7>].IntervalRates.Unit", "type": "*variable", "value": "~*req.15", "filters": ["*notempty:~*req.7:"]},
@@ -2073,7 +2073,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*actionProfiles",	// data source type
-				"fileName": "Actions.csv",	// file name in the tp_in_path
+				"fileName": "Actions.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -2083,14 +2083,14 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.5"},
 					// {"tag": "TargetType", "path": "TargetType", "type": "*variable", "value": "~*req.6"},
 					{"tag": "TargetIDs", "path": "Targets[<~*req.6>]", "type": "*variable", "value": "~*req.7"},
-					// {"tag": "ActionID", "path": "Actions.ID", "type": "*variable", "value": "~*req.8","new_branch":true},
+					// {"tag": "ActionID", "path": "Actions.ID", "type": "*variable", "value": "~*req.8","newBranch":true},
 					{"tag": "ActionFilterIDs", "path": "Actions[<~*req.8>].FilterIDs", "type": "*variable", "value": "~*req.9", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionTTL", "path": "Actions[<~*req.8>].TTL", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionType", "path": "Actions[<~*req.8>].Type", "type": "*variable", "value": "~*req.11", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionOpts", "path": "Actions[<~*req.8>].Opts", "type": "*variable", "value": "~*req.12", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionWeights", "path": "Actions[<~*req.8>].Weights", "type": "*variable", "value": "~*req.13", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionBlockers", "path": "Actions[<~*req.8>].Blockers", "type": "*variable", "value": "~*req.14", "filters": ["*notempty:~*req.8:"]},
-					{"tag": "ActionDiktatsID", "path": "Actions[<~*req.8>].Diktats.ID", "type": "*variable", "value": "~*req.15","new_branch":true, "filters": ["*notempty:~*req.8:"]},
+					{"tag": "ActionDiktatsID", "path": "Actions[<~*req.8>].Diktats.ID", "type": "*variable", "value": "~*req.15","newBranch":true, "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsFilterIDs", "path": "Actions[<~*req.8>].Diktats.FilterIDs", "type": "*variable", "value": "~*req.16", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsOpts", "path": "Actions[<~*req.8>].Diktats.Opts", "type": "*variable", "value": "~*req.17", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsWeights", "path": "Actions[<~*req.8>].Diktats.Weights", "type": "*variable", "value": "~*req.18", "filters": ["*notempty:~*req.8:"]},
@@ -2099,7 +2099,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*accounts",		// data source type
-				"fileName": "Accounts.csv",	// file name in the tp_in_path
+				"fileName": "Accounts.csv",	// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

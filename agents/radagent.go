@@ -118,7 +118,7 @@ type RadiusAgent struct {
 }
 
 // radiusDAClientCfg holds the dictionaries and secrets necessary for initializing Dynamic Authorization Clients in RADIUS (only for
-// the clients mentioned in the client_da_addresses map).
+// the clients mentioned in the clientDaAddresses map).
 // This configuration enables the RadiusAgent to send server-initiated actions, such as Disconnect Requests and CoA requests,
 // to manage ongoing user sessions dynamically.
 type radiusDAClientCfg struct {
@@ -705,7 +705,7 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 	return dynAuthReply.Code, nil
 }
 
-// daRequestAddress ranges over the client_da_addresses map and returns the address configured for a
+// daRequestAddress ranges over the clientDaAddresses map and returns the address configured for a
 // specific client alongside the host.
 func daRequestAddress(remoteAddr string, dynAuthAddresses map[string]config.DAClientOpts) (string, string, error) {
 	if len(dynAuthAddresses) == 0 {

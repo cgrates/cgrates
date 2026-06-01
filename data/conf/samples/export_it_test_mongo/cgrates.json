@@ -236,25 +236,25 @@
 		"data":[											// data profiles to load
 			{
 				"type": "*filters",						// data source type
-				"fileName": "Filters.csv",				// file name in the tp_in_path
+				"fileName": "Filters.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2", "new_branch":true},
+					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2", "newBranch":true},
 					{"tag": "Element", "path": "Rules.Element", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Values", "path": "Rules.Values", "type": "*variable", "value": "~*req.4"},
 				],
 			},
 			{
 				"type": "*attributes",						// data source type
-				"fileName": "Attributes.csv",				// file name in the tp_in_path
+				"fileName": "Attributes.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
-					{"tag": "AttributeFilterIDs", "path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","new_branch":true},					
+					{"tag": "AttributeFilterIDs", "path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","newBranch":true},					
 					{"tag": "Path", "path": "Attributes.Path", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Type", "path": "Attributes.Type", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Value", "path": "Attributes.Value", "type": "*variable", "value": "~*req.8"},
@@ -263,7 +263,7 @@
 			},
 			{
 				"type": "*resources",						// data source type
-				"fileName": "Resources.csv",				// file name in the tp_in_path
+				"fileName": "Resources.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -279,7 +279,7 @@
 			},
 			{
 				"type": "*stats",						// data source type
-				"fileName": "Stats.csv",				// file name in the tp_in_path
+				"fileName": "Stats.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -291,14 +291,14 @@
 					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.9"},
-					{"tag": "MetricIDs", "path": "Metrics.MetricID", "type": "*variable", "value": "~*req.10","new_branch":true},
+					{"tag": "MetricIDs", "path": "Metrics.MetricID", "type": "*variable", "value": "~*req.10","newBranch":true},
 					{"tag": "MetricFilterIDs", "path": "Metrics.FilterIDs", "type": "*variable", "value": "~*req.11"},
 					{"tag": "MetricBlockers", "path": "Metrics.Blockers", "type": "*variable", "value": "~*req.12"},				
 				],
 			},
 			{
 				"type": "*thresholds",						// data source type
-				"fileName": "Thresholds.csv",				// file name in the tp_in_path
+				"fileName": "Thresholds.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -316,7 +316,7 @@
 			},
 			{
 				"type": "*routes",						// data source type
-				"fileName": "Routes.csv",				// file name in the tp_in_path
+				"fileName": "Routes.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -325,7 +325,7 @@
 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.5"},
 					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.6"},
-					{"tag": "RouteID", "path": "Routes.ID", "type": "*variable", "value": "~*req.7","new_branch":true},
+					{"tag": "RouteID", "path": "Routes.ID", "type": "*variable", "value": "~*req.7","newBranch":true},
 					{"tag": "RouteFilterIDs", "path": "Routes.FilterIDs", "type": "*variable", "value": "~*req.8"},
 					{"tag": "RouteAccountIDs", "path": "Routes.AccountIDs", "type": "*variable", "value": "~*req.9"},
 					{"tag": "RouteRateProfileIDs", "path": "Routes.RateProfileIDs", "type": "*variable", "value": "~*req.10"},
@@ -338,7 +338,7 @@
 			},
 			{
 				"type": "*chargers",						// data source type
-				"fileName": "Chargers.csv",				// file name in the tp_in_path
+				"fileName": "Chargers.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -351,7 +351,7 @@
 			},
 			{
 				"type": "*rateProfiles",						// data source type
-				"fileName": "Rates.csv",				// file name in the tp_in_path
+				"fileName": "Rates.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -365,7 +365,7 @@
 					{"tag": "RateActivationTimes", "path": "Rates[<~*req.7>].ActivationTimes", "type": "*variable", "value": "~*req.9", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateWeights", "path": "Rates[<~*req.7>].Weights", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateBlocker", "path": "Rates[<~*req.7>].Blocker", "type": "*variable", "value": "~*req.11", "filters": ["*notempty:~*req.7:"]},
-					{"tag": "RateIntervalStart", "path": "Rates[<~*req.7>].IntervalRates.IntervalStart", "type": "*variable", "value": "~*req.12","new_branch":true, "filters": ["*notempty:~*req.7:"]},
+					{"tag": "RateIntervalStart", "path": "Rates[<~*req.7>].IntervalRates.IntervalStart", "type": "*variable", "value": "~*req.12","newBranch":true, "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateFixedFee", "path": "Rates[<~*req.7>].IntervalRates.FixedFee", "type": "*variable", "value": "~*req.13", "filters": ["*notempty:~*req.7:"]},
                     {"tag": "RateRecurrentFee", "path": "Rates[<~*req.7>].IntervalRates.RecurrentFee", "type": "*variable", "value": "~*req.14", "filters": ["*notempty:~*req.7:"]},
 					{"tag": "RateUnit", "path": "Rates[<~*req.7>].IntervalRates.Unit", "type": "*variable", "value": "~*req.15", "filters": ["*notempty:~*req.7:"]},
@@ -374,7 +374,7 @@
 			},
 			{
 				"type": "*actionProfiles",						// data source type
-				"fileName": "Actions.csv",				// file name in the tp_in_path
+				"fileName": "Actions.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -384,14 +384,14 @@
 					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.5"},
 					// {"tag": "TargetType", "path": "TargetType", "type": "*variable", "value": "~*req.6"},
 					{"tag": "TargetIDs", "path": "Targets[<~*req.6>]", "type": "*variable", "value": "~*req.7"},
-					// {"tag": "ActionID", "path": "Actions.ID", "type": "*variable", "value": "~*req.8","new_branch":true},
+					// {"tag": "ActionID", "path": "Actions.ID", "type": "*variable", "value": "~*req.8","newBranch":true},
 					{"tag": "ActionFilterIDs", "path": "Actions[<~*req.8>].FilterIDs", "type": "*variable", "value": "~*req.9", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionTTL", "path": "Actions[<~*req.8>].TTL", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionType", "path": "Actions[<~*req.8>].Type", "type": "*variable", "value": "~*req.11", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionOpts", "path": "Actions[<~*req.8>].Opts", "type": "*variable", "value": "~*req.12", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionWeights", "path": "Actions[<~*req.8>].Weights", "type": "*variable", "value": "~*req.13", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionBlockers", "path": "Actions[<~*req.8>].Blockers", "type": "*variable", "value": "~*req.14", "filters": ["*notempty:~*req.8:"]},
-					{"tag": "ActionDiktatsID", "path": "Actions[<~*req.8>].Diktats.ID", "type": "*variable", "value": "~*req.15","new_branch":true, "filters": ["*notempty:~*req.8:"]},
+					{"tag": "ActionDiktatsID", "path": "Actions[<~*req.8>].Diktats.ID", "type": "*variable", "value": "~*req.15","newBranch":true, "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsFilterIDs", "path": "Actions[<~*req.8>].Diktats.FilterIDs", "type": "*variable", "value": "~*req.16", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsOpts", "path": "Actions[<~*req.8>].Diktats.Opts", "type": "*variable", "value": "~*req.17", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionDiktatsWeights", "path": "Actions[<~*req.8>].Diktats.Weights", "type": "*variable", "value": "~*req.18", "filters": ["*notempty:~*req.8:"]},
@@ -400,7 +400,7 @@
 			},
 			{
 				"type": "*accounts",						// data source type
-				"fileName": "Accounts.csv",				// file name in the tp_in_path
+				"fileName": "Accounts.csv",				// file name in the tpInPath
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

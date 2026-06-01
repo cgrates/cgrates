@@ -63,7 +63,7 @@ func BenchmarkKafkaExport(b *testing.B) {
             "opts": {
                 "kafkaTopic": "%s"
             },
-            "failed_posts_dir": "*none"
+            "failedPostsDir": "*none"
         }
     ]
 }

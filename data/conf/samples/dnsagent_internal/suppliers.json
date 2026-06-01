@@ -45,7 +45,7 @@
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
-					{"tag": "NAPTROrder", "type": "*group", "new_branch": true,
+					{"tag": "NAPTROrder", "type": "*group", "newBranch": true,
 					 "path": "*rep.Answer.Order", "value": "100"},
 					{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference",
 						"type": "*group", "value": "10"},

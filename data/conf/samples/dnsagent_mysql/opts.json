@@ -16,7 +16,7 @@
                     {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
                     {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
                     {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
-                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "newBranch":true},
                     {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
                 ]
             },
@@ -53,7 +53,7 @@
 				{"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
 				{"tag": "Aip", "path": "*rep.Answer.A", "type": "*constant", "value": "93.184.216.34"},
                 {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
-                {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "newBranch":true},
                 {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
 				]
 			},
@@ -89,7 +89,7 @@
                     {"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "8443"},
                     {"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*constant", "value": "matrix-federation.matrix.org.cdn.cloudflare.net."},
                     {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
-                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "newBranch":true},
                     {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
                 ]
             },

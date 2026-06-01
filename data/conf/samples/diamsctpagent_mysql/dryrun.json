@@ -61,7 +61,7 @@
 			],
 			"reply_fields":[
 				{"tag": "RatingGroup",  "path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
-					"type": "*group", "value": "2","new_branch": true},
+					"type": "*group", "value": "2","newBranch": true},
 				{"tag": "CCTotalOctets2",  "path": "*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
 					"type": "*group", "value": "~*cgreq.UsedUnits2"},
 			],
