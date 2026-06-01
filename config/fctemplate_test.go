@@ -377,7 +377,7 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
                 "padding": "pdding",
                 "mandatory": true,
                 "attribute_id": "random.val",
-                "new_branch": true,
+                "newBranch": true,
                 "timezone": "Local",
                 "blocker": true,
                 "layout": "",

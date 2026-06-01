@@ -55,8 +55,8 @@ func TestKafkaExportFailover(t *testing.T) {
 	content := fmt.Sprintf(`{
 "efs": {
     "enabled": true,
-    "failed_posts_ttl": "1s",
-    "poster_attempts": 1
+    "failedPostsTTL": "1s",
+    "posterAttempts": 1
 },
 "ees": {
     "enabled": true,
@@ -64,11 +64,11 @@ func TestKafkaExportFailover(t *testing.T) {
         {
             "id": "kafka_failover",
             "type": "*kafkaJSONMap",
-            "export_path": "%s",
+            "exportPath": "%s",
             "synchronous": true,
             "attempts": 1,
-            "efs_conns": ["*localhost"],
-            "failed_posts_dir": "%s",
+            "efsConns": ["*localhost"],
+            "failedPostsDir": "%s",
             "opts": {
                 "kafkaTopic": "%s",
                 "kafkaDeliveryTimeout": "2s"

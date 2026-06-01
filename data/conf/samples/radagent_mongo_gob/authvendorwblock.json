@@ -68,11 +68,11 @@
 					},
 					{
 						"tag": "MicrosoftB2","path": "*rep.Microsoft.MS-Service-Class",
-						"type": "*group","value": "Class2","new_branch": true
+						"type": "*group","value": "Class2","newBranch": true
 					},
 					{
 						"tag": "MicrosoftB3","path": "*rep.Microsoft.MS-Service-Class",
-						"type": "*group","value": "Class3","new_branch": true
+						"type": "*group","value": "Class3","newBranch": true
 					}
 				]
 			}

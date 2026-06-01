@@ -344,7 +344,7 @@ type FcTemplateJsonCfg struct {
 	Strip                *string
 	Padding              *string
 	Mandatory            *bool
-	New_branch           *bool
+	New_branch           *bool `json:"newBranch"`
 	Timezone             *string
 	Blocker              *bool
 	Layout               *string

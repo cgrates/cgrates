@@ -68,7 +68,7 @@ func (s *AdminSv1) ReplayFailedReplications(ctx *context.Context, args ReplayFai
 	}
 	if args.SourcePath == "" {
 		return utils.NewErrServerError(
-			errors.New("no source directory specified: both SourcePath and replication_failed_dir configuration are empty"),
+			errors.New("no source directory specified: both SourcePath and replicationFailedDir configuration are empty"),
 		)
 	}
 	if args.FailedPath == "" {

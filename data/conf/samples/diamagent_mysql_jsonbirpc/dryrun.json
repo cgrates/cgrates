@@ -183,7 +183,7 @@
 					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
 					"type": "*group",
 					"value": "2",
-					"new_branch": true
+					"newBranch": true
 				},
 				{
 					"tag": "CCTotalOctets2",
