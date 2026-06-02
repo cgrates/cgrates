@@ -542,7 +542,7 @@ const CGRATES_CFG_JSON = `
 			"opts": {
 				// Partial
 				// "partialPath": "/",			// the path were the partial events will be sent
-				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*postCDR|*dumpToFile>
 				"partialOrderField": "~*req.AnswerTime",// the field after what the events are order when merged
 				// "partialcsvFieldSeparator": ","	// separator used when dumping the fields
 
@@ -2548,21 +2548,21 @@ const CGRATES_CFG_JSON = `
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
-		// "*thresholds": [		// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
+		// "*thresholds": [		// connections to ThresholdS for *resetThreshold action <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
-		// "*stats": [		// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
+		// "*stats": [		// connections to StatS for *resetStatQueue action: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],
 		// 		"ConnIDs": ["*internal"]
 		// 	}
 		// ],
-		// "*accounts": [	// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
+		// "*accounts": [	// connections to AccountS for *topup/*topUpReset action: <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"Tenant": "",
 		// 		"FilterIDs": [],

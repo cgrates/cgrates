@@ -3095,7 +3095,7 @@ func TestConvertOptsToMapStringAny(t *testing.T) {
 	t.Run("DirectMapStringAny", func(t *testing.T) {
 		directMap := map[string]any{
 			"ActionId":   "TOPUP_MONETARY_10",
-			"ActionType": "*topup_reset",
+			"ActionType": "*topUpReset",
 			"ExtraParameters": map[string]string{
 				"*balance_type": "*monetary",
 				"*units":        "10",

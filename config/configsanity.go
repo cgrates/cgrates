@@ -783,7 +783,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			if pAct == utils.MetaDumpToFile ||
-				pAct == utils.MetaDumpToJSON { // only if the action is *dump_to_file
+				pAct == utils.MetaDumpToJSON { // only if the action is *dumpToFile
 				path := rdr.ProcessedPath
 				if rdr.Opts.PartialPath != nil {
 					path = *rdr.Opts.PartialPath

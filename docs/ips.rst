@@ -11,7 +11,7 @@ Processing Logic
 When a request comes in, the IPs service follows this workflow:
 
 1. **Profile Matching**: Finds the IPProfile with the highest weight that matches the event filters
-2. **Caching**: Stores the matched profile ID in the ``*event_ips`` cache partition for faster subsequent operations using the same allocation ID
+2. **Caching**: Stores the matched profile ID in the ``*eventIPs`` cache partition for faster subsequent operations using the same allocation ID
 3. **Pool Selection**: Filters pools within the profile based on event data, sorts by weight (highest first), and stops at the first pool with blocking enabled
 4. **Operation**: Performs authorize (dry-run), allocate, or release based on the API call
 5. **TTL Management**: Automatically expires old allocations based on configured TTL
@@ -49,32 +49,32 @@ Configure the IPs service in the **ips** section of the :ref:`JSON configuration
 enabled
     Enables/disables the IPs component. Values: <true|false>
 
-store_interval
+storeInterval
     How often to dump allocations to DB. Values: <""|duration>
 
     - `"-1"`: Always sync IPs from cache and DB in real-time
     - `""`: Disabled
     - Valid duration (e.g., "10s", "1h", "15m"): Updates IPs from DB with cached version at specified intervals
 
-indexed_selects
+indexedSelects
     Enable profile matching exclusively on indexes for better performance. Values: <true|false>
 
-string_indexed_fields
+stringIndexedFields
     Fields used for string-based index querying (e.g., ["*req.Account"])
 
-prefix_indexed_fields
+prefixIndexedFields
     Fields used for prefix-based index querying
 
-suffix_indexed_fields
+suffixIndexedFields
     Fields used for suffix-based index querying
 
-exists_indexed_fields
+existsIndexedFields
     Fields used for existence-based index querying
 
-notexists_indexed_fields
+notExistsIndexedFields
     Fields used for non-existence-based index querying
 
-nested_fields
+nestedFields
     Controls indexed filter matching depth. Values: <true|false>
 
     - true: checks all levels
@@ -291,9 +291,9 @@ Example Configuration
    {
      "ips": {
        "enabled": true,
-       "store_interval": "30s",
-       "indexed_selects": true,
-       "string_indexed_fields": ["*req.Account"],
+       "storeInterval": "30s",
+       "indexedSelects": true,
+       "stringIndexedFields": ["*req.Account"],
        "opts": {
          "*allocationID": [
            {

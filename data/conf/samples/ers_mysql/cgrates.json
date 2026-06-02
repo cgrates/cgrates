@@ -328,7 +328,7 @@
 			"flags": ["*cdrs"],
 			"processedPath": "",
 			"opts": {
-				"partialCacheAction": "*dump_to_file",
+				"partialCacheAction": "*dumpToFile",
 				"partialOrderField": "~*req.AnswerTime",
 				"partialPath": "/tmp/partErs1/out"
 			},
@@ -373,7 +373,7 @@
 			"processedPath": "",
 			"flags": ["*cdrs"],
 			"opts": {
-				"partialCacheAction": "*post_cdr",
+				"partialCacheAction": "*postCDR",
 				"partialOrderField": "~*req.AnswerTime",
 				"partialPath": "/tmp/partErs2/out"
 			},
@@ -407,7 +407,7 @@
 			"opts": {
 				"csvFieldSeparator":"|",
 				"partialcsvFieldSeparator": "|",
-				"partialCacheAction": "*dump_to_file",
+				"partialCacheAction": "*dumpToFile",
 				"partialOrderField": "~*opts.order",
 				"partialPath": "/tmp/flatstoreErs/out"
 			},
@@ -460,7 +460,7 @@
 			"opts": {
 				"csvFieldSeparator":"|",
 				"partialcsvFieldSeparator": "|",
-				"partialCacheAction": "*dump_to_file",
+				"partialCacheAction": "*dumpToFile",
 				"partialOrderField": "~*opts.order",
 				"partialPath": "/tmp/flatstoreACKErs/out",
 				"csvLazyQuotes": true
@@ -552,7 +552,7 @@
 			"opts": {
 				"csvFieldSeparator":",",
 				"partialcsvFieldSeparator": ",",
-				"partialCacheAction": "*dump_to_file",
+				"partialCacheAction": "*dumpToFile",
 				"partialOrderField": "~*opts.orderID",
 				"partialPath": "/tmp/flatstoreMMErs/out",
 				"csvLazyQuotes": true

@@ -368,9 +368,9 @@ const (
 	MetaDateTime             = "*datetime"
 	MetaMaskedDestination    = "*masked_destination"
 	MetaUnixTimestamp        = "*unixTimestamp"
-	MetaPostCDR              = "*post_cdr"
-	MetaDumpToFile           = "*dump_to_file"
-	MetaDumpToJSON           = "*dump_to_json"
+	MetaPostCDR              = "*postCDR"
+	MetaDumpToFile           = "*dumpToFile"
+	MetaDumpToJSON           = "*dumpToJSON"
 	NonTransactional         = ""
 	DB                       = "db"
 	StorDB                   = "StorDB"
@@ -1190,7 +1190,7 @@ const (
 // Actions
 const (
 	MetaLog                = "*log"
-	MetaTopUpReset         = "*topup_reset"
+	MetaTopUpReset         = "*topUpReset"
 	MetaTopUp              = "*topup"
 	MetaDebitReset         = "*debit_reset"
 	MetaDebit              = "*debit"

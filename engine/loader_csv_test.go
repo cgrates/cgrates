@@ -59,15 +59,15 @@ func TestLoaderCSV(t *testing.T) {
 
 	/* TODO: add a test for loading Actions
 	   	ActionsCSVContent := `
-	   MINI,*topup_reset,,,,*monetary,,,,,*unlimited,,10,10,false,false,10
+	   MINI,*topUpReset,,,,*monetary,,,,,*unlimited,,10,10,false,false,10
 	   MINI,*topup,,,,*voice,,NAT,test,,*unlimited,,100s,10,false,false,10
 	   SHARED,*topup,,,,*monetary,,,,SG1,*unlimited,,100,10,false,false,10
-	   TOPUP10_AC,*topup_reset,,,,*monetary,,*any,,,*unlimited,,1,10,false,false,10
-	   TOPUP10_AC1,*topup_reset,,,,*voice,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
-	   SE0,*topup_reset,,,,*monetary,,,,SG2,*unlimited,,0,10,false,false,10
-	   SE10,*topup_reset,,,,*monetary,,,,SG2,*unlimited,,10,5,false,false,10
+	   TOPUP10_AC,*topUpReset,,,,*monetary,,*any,,,*unlimited,,1,10,false,false,10
+	   TOPUP10_AC1,*topUpReset,,,,*voice,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
+	   SE0,*topUpReset,,,,*monetary,,,,SG2,*unlimited,,0,10,false,false,10
+	   SE10,*topUpReset,,,,*monetary,,,,SG2,*unlimited,,10,5,false,false,10
 	   SE10,*topup,,,,*monetary,,,,,*unlimited,,10,10,false,false,10
-	   EE0,*topup_reset,,,,*monetary,,,,SG3,*unlimited,,0,10,false,false,10
+	   EE0,*topUpReset,,,,*monetary,,,,SG3,*unlimited,,0,10,false,false,10
 	   EE0,*allow_negative,,,,*monetary,,,,,*unlimited,,0,10,false,false,10
 	   DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,false,false,10
 	   NEG,*allow_negative,,,,*monetary,,,,,*unlimited,,0,10,false,false,10
@@ -79,7 +79,7 @@ func TestLoaderCSV(t *testing.T) {
 	   EXP,*topup,,,,*voice,,,,,*monthly,*any,300s,10,false,false,10
 	   NOEXP,*topup,,,,*voice,,,,,*unlimited,*any,50s,10,false,false,10
 	   VF,*debit,,,,*monetary,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
-	   TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,,*any,,,*unlimited,,1000,20,false,false,10
+	   TOPUP_RST_GNR_1000,*topUpReset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,,*any,,,*unlimited,,1000,20,false,false,10
 	   `
 	*/
 
