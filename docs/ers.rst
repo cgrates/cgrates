@@ -33,11 +33,13 @@ With explanations in the comments:
 
  "ers": {
 	"enabled": true,					// enable the service
-	"sessions_conns": ["*internal"],	// connection towards SessionS
+	"conns": {							// RPC Connections IDs
+		"*sessions": [{"ConnIDs": ["*internal"]}]
+	},				
 	"readers": [						// list of active readers
 		{
 			"id": "file_reader2",		// file_reader2 reader
-			"run_delay":  "-1",			// reading of events it is triggered outside of ERs
+			"runDelay":  "-1",			// reading of events it is triggered outside of ERs
 			"opts": {
 				"csvFieldSeparator":";" // field separator definition
 			},		
@@ -46,8 +48,8 @@ With explanations in the comments:
 				"*cdrs",				//   *cdrs will create CDRs
 				"*log"					//   *log will log the events to syslog
 			],
-			"source_path": "/tmp/ers2/in",		// location of the files
-			"processed_path": "/tmp/ers2/out",	// move the files here once processed
+			"sourcePath": "/tmp/ers2/in",		// location of the files
+			"processedPath": "/tmp/ers2/out",	// move the files here once processed
 			"fields":[					// mapping definition between line index in the file and CGRateS field 
 				{
 					"tag": "OriginID",			// OriginID together with OriginHost will 
@@ -169,7 +171,7 @@ type
 	**\*natsJSONMap**
 		Reader for NATS_ events.
 
-run_delay
+runDelay
 	Controls how the reading process is initiated:
 
 	**0**
@@ -181,16 +183,16 @@ run_delay
 	**>0**
 		Fixed duration interval between consecutive reads from source.
 
-start_delay
+startDelay
 	A duration to delay the reader from starting to read events on engine start.
 
-concurrent_requests
+concurrentRequests
 	Limits the number of concurrent reads from source (ie: the number of simultaneously opened files).
 
-source_path
+sourcePath
 	Path towards the events source
 
-processed_path
+processedPath
 	Optional path for moving the events source to after processing. For the *\*sql* and *\*cgrcdr* readers it can be set to *\*delete* to remove the processed rows from the table.
 
 tenant
@@ -278,20 +280,20 @@ reconnects
 	The amount retries to reestablish the connection in case of connection loss for AMQP. `-1` retry indefinitely.
 
 
-max_reconnect_interval
+maxReconnectInterval
 	The duration to wait in between retries to reconnect on a connection loss for AMQP.
 
 
-ees_ids
+eesIDs
 	The IDs of exporters in EEs which you want to make use of, when `*export` flag is present in the reader. When an event is read and processed from the reader in use, the processed event will be sent to those specific IDs in EEs.
 
 
-ees_success_ids
-	When an ERs reader processes an event successfuly, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `ees_success_ids`.
+eesSuccessIDs
+	When an ERs reader processes an event successfuly, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `eesSuccessIDs`.
 
 
-ees_failed_ids
-	When an ERs reader fails to process an event, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `ees_failed_ids`.
+eesFailedIDs
+	When an ERs reader fails to process an event, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `eesFailedIDs`.
 
 
 opts
@@ -307,11 +309,11 @@ opts
 
 		**\*none** - Nothing happens.
 
-		**\*post_cdr** - Try to merge partial events and post them back to ERs for processing.
+		**\*postCDR** - Try to merge partial events and post them back to ERs for processing.
 
-		**\*dump_to_file** - Apply the `cache_dump_fields` to the partial events and write the record to file in CSV format.
+		**\*dumpToFile** - Apply the `cacheDumpFields` to the partial events and write the record to file in CSV format.
 		
-		**\*dump_to_json** - Apply the `cache_dump_fields` to the partial events and write the record to file in JSON format.
+		**\*dumpToJSON** - Apply the `cacheDumpFields` to the partial events and write the record to file in JSON format.
 
 	**partialOrderField**
 		The field after what the events are ordered when merged.
@@ -581,9 +583,9 @@ fields
 			Prefix with *0* chars.
 
 
-partial_commit_fields
-	The fields are written in the same way as import fields template. The fields are used for events which were read but werent fully processed. If the coming events that are being read, match the filters set in these partial_commit_fields, they will be used to fully create and process that partial event.
+partialCommitFields
+	The fields are written in the same way as import fields template. The fields are used for events which were read but werent fully processed. If the coming events that are being read, match the filters set in these partialCommitFields, they will be used to fully create and process that partial event.
 
 
-cache_dump_fields
+cacheDumpFields
 	The fields are written in the same way as import fields template. The fields are used as a template to write the fields of the partial events into dump files, when the TTL expires for that partial event, or when that cache element is evicted.

@@ -20,21 +20,21 @@ There are two ways to set up profiling:
 Using JSON Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Enable profiling by adding the ``pprof_path`` under the ``http`` section in your JSON config file:
+Enable profiling by adding the ``pprofPath`` under the ``http`` section in your JSON config file:
 
 .. code-block:: json
 
    {
        "listen": {
            "http": ":2080",
-           "http_tls": ":2280"
+           "httpTLS": ":2280"
        },
        "http": {
-           "pprof_path": "/debug/pprof/"
+           "pprofPath": "/debug/pprof/"
        }
    }
 
-Profiling is enabled by default and exposes the ``/debug/pprof/`` endpoint. You can access it through the address set in the ``listen`` section (``http`` or ``http_tls``). To turn off profiling, set ``pprof_path`` to an empty string ``""``.
+Profiling is enabled by default and exposes the ``/debug/pprof/`` endpoint. You can access it through the address set in the ``listen`` section (``http`` or ``httpTLS``). To turn off profiling, set ``pprofPath`` to an empty string ``""``.
 
 Using Runtime Flags
 ^^^^^^^^^^^^^^^^^^^

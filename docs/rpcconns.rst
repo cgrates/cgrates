@@ -1,4 +1,4 @@
-.. _rpc_conns:
+.. _rpcConns:
 
 RPCConns
 ========
@@ -14,17 +14,17 @@ Example configuration in the JSON file:
 .. code-block:: json
 
     {
-	"rpc_conns": {
+	"rpcConns": {
 		"conn1": {
 			"strategy": "*first",
-			"pool_size": 0,
+			"poolSize": 0,
 			"conns": [{
 				"address": "192.168.122.210:2012",
 				"transport": "*json",
-				"connect_attempts": 5,
+				"connectAttempts": 5,
 				"reconnects": -1,
-				"connect_timeout": "1s",
-				"reply_timeout": "2s"
+				"connectTimeout": "1s",
+				"replyTimeout": "2s"
 			}]
 		}
 	}
@@ -146,13 +146,15 @@ Components reference connection pools through "_conns" configuration fields:
 
 .. code-block:: json
 
-    {
-	"cdrs": {
-		"enabled": true,
-		"attributes_conns": ["*internal"],
-		"ees_conns": ["conn1"]
-	}
+{
+  "cdrs": {
+    "enabled": true,
+    "conns": {
+      "*attributes": [{"ConnIDs":["*internal"]}],
+      "*ees": [{"ConnIDs":["conn1"]}]
     }
+  }
+}
 
 This configuration approach allows:
 
