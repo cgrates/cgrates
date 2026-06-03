@@ -67,7 +67,7 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*localhost"]}]
+		"*thresholds": [{"connIDs": ["*localhost"]}]
 	},
 },
 
@@ -76,7 +76,7 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*localhost"]}]
+		"*thresholds": [{"connIDs": ["*localhost"]}]
 	},
 },
 
@@ -92,21 +92,21 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 		 }
 	]
 			},
@@ -119,14 +119,14 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"ConnIDs": ["*internal"]}]
+		"*chargers": [{"connIDs": ["*internal"]}]
 	},
 },
 
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 },
 

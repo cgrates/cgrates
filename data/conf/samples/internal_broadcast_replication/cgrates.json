@@ -49,7 +49,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"ConnIDs": ["broadcast_conn"]}]
+		"*chargers": [{"connIDs": ["broadcast_conn"]}]
 	},
 },
 
@@ -62,7 +62,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["broadcast_conn"]}]
+		"*attributes": [{"connIDs": ["broadcast_conn"]}]
 	},
 },
 
@@ -71,7 +71,7 @@
 	"enabled": true,
 	"storeInterval": "-1",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["broadcast_conn"]}]
+		"*thresholds": [{"connIDs": ["broadcast_conn"]}]
 	},
 },
 
@@ -80,7 +80,7 @@
 	"enabled": true,
 	"storeInterval": "-1",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["broadcast_conn"]}]
+		"*thresholds": [{"connIDs": ["broadcast_conn"]}]
 	},
 },
 
@@ -94,8 +94,8 @@
 	"enabled": true,
 	"prefixIndexedFields":["*req.Destination"],
 	"conns": {
-		"*stats": [{"ConnIDs": ["broadcast_conn"]}],
-		"*resources": [{"ConnIDs": ["broadcast_conn"]}]
+		"*stats": [{"connIDs": ["broadcast_conn"]}],
+		"*resources": [{"connIDs": ["broadcast_conn"]}]
 	},
 },
 
@@ -108,42 +108,42 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["broadcast_conn"]
+			"connIDs": ["broadcast_conn"]
 		 }
 	]
 			},

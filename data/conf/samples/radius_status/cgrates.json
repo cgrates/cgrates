@@ -62,35 +62,35 @@
                  {
                         "Tenant": "",
                         "FilterIDs": [],
-                        "ConnIDs": ["*localhost"]
+                        "connIDs": ["*localhost"]
                  }
         ],
         "*cdrs": [
                  {
                         "Tenant": "",
                         "FilterIDs": [],
-                        "ConnIDs": ["*localhost"]
+                        "connIDs": ["*localhost"]
                  }
         ],
         "*rals": [
                  {
                         "Tenant": "",
                         "FilterIDs": [],
-                        "ConnIDs": ["*localhost"]
+                        "connIDs": ["*localhost"]
                  }
         ],
         "*resources": [
                  {
                         "Tenant": "",
                         "FilterIDs": [],
-                        "ConnIDs": ["*localhost"]
+                        "connIDs": ["*localhost"]
                  }
         ],
         "*chargers": [
                  {
                         "Tenant": "",
                         "FilterIDs": [],
-                        "ConnIDs": ["*internal"]
+                        "connIDs": ["*internal"]
                  }
         ]
                         },
@@ -99,7 +99,7 @@
     "radiusAgent": {
         "enabled": true,
         "conns": {
-        	"*sessions": [{"ConnIDs": ["*bijson_localhost"]}]
+        	"*sessions": [{"connIDs": ["*bijson_localhost"]}]
         },
         "listeners": [
       {

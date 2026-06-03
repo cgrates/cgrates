@@ -148,11 +148,11 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"notExistsIndexedFields": ["*req.prefix","*req.indexed"],
 			"nestedFields": true,
 			"conns": {
-				"*attributes": [{"ConnIDs": ["*internal:*attributes", "conn1"]}],
-				"*resources": [{"ConnIDs": ["*internal:*resources", "conn1"]}],
-				"*stats": [{"ConnIDs": ["*internal:*stats", "conn1"]}],
-				"*rates": [{"ConnIDs": ["*internal:*rates", "conn1"]}],
-				"*accounts": [{"ConnIDs": ["*internal:*accounts", "conn1"]}]
+				"*attributes": [{"connIDs": ["*internal:*attributes", "conn1"]}],
+				"*resources": [{"connIDs": ["*internal:*resources", "conn1"]}],
+				"*stats": [{"connIDs": ["*internal:*stats", "conn1"]}],
+				"*rates": [{"connIDs": ["*internal:*rates", "conn1"]}],
+				"*accounts": [{"connIDs": ["*internal:*accounts", "conn1"]}]
 			},
 			"defaultRatio":2,
 		},

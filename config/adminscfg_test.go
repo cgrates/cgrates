@@ -80,10 +80,10 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
     "admins": {
        "enabled": true,
        "conns": {
-           "*attributes": [{"ConnIDs": ["*internal:*attributes", "*conn1"]}],
-           "*ees":        [{"ConnIDs": ["*internal:*ees", "*conn1"]}],
-           "*caches":     [{"ConnIDs": ["*internal:*caches", "*conn1"]}],
-           "*actions":    [{"ConnIDs": ["*internal:*actions", "*conn1"]}]
+           "*attributes": [{"connIDs": ["*internal:*attributes", "*conn1"]}],
+           "*ees":        [{"connIDs": ["*internal:*ees", "*conn1"]}],
+           "*caches":     [{"connIDs": ["*internal:*caches", "*conn1"]}],
+           "*actions":    [{"connIDs": ["*internal:*actions", "*conn1"]}]
        },
     },
 }`

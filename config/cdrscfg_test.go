@@ -182,14 +182,14 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"extraFields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 		"sessionCostRetries": 5,
 		"conns": {
-			"*chargers": [{"ConnIDs": ["*internal:*chargers","*conn1"]}],
-			"*attributes": [{"ConnIDs": ["*internal:*attributes","*conn1"]}],
-			"*thresholds": [{"ConnIDs": ["*internal:*thresholds","*conn1"]}],
-			"*stats": [{"ConnIDs": ["*internal:*stats","*conn1"]}],
-			"*actions": [{"ConnIDs": ["*internal:*actions","*conn1"]}],
-			"*ees": [{"ConnIDs": ["*internal:*ees","*conn1"]}],
-			"*rates": [{"ConnIDs": ["*internal:*rates","*conn1"]}],
-			"*accounts": [{"ConnIDs": ["*internal:*accounts","*conn1"]}]
+			"*chargers": [{"connIDs": ["*internal:*chargers","*conn1"]}],
+			"*attributes": [{"connIDs": ["*internal:*attributes","*conn1"]}],
+			"*thresholds": [{"connIDs": ["*internal:*thresholds","*conn1"]}],
+			"*stats": [{"connIDs": ["*internal:*stats","*conn1"]}],
+			"*actions": [{"connIDs": ["*internal:*actions","*conn1"]}],
+			"*ees": [{"connIDs": ["*internal:*ees","*conn1"]}],
+			"*rates": [{"connIDs": ["*internal:*rates","*conn1"]}],
+			"*accounts": [{"connIDs": ["*internal:*accounts","*conn1"]}]
 		},
 		"onlineCDRExports":["http_localhost", "amqp_localhost", "http_test_file"],
 	},
@@ -234,9 +234,9 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
        "cdrs": {
           "enabled":true,
           "conns": {
-              "*chargers": [{"ConnIDs": ["conn1", "conn2"]}],
-              "*attributes": [{"ConnIDs": ["*internal"]}],
-              "*ees": [{"ConnIDs": ["conn1"]}]
+              "*chargers": [{"connIDs": ["conn1", "conn2"]}],
+              "*attributes": [{"connIDs": ["*internal"]}],
+              "*ees": [{"connIDs": ["conn1"]}]
           },
        },
 }`

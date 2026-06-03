@@ -59,11 +59,11 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"filters": {
 			"conns": {
-				"*stats": [{"ConnIDs": ["*internal:*stats", "*conn1"]}],
-				"*resources": [{"ConnIDs": ["*internal:*resources", "*conn1"]}],
-				"*accounts": [{"ConnIDs": ["*internal:*accounts", "*conn1"]}],
-				"*trends": [{"ConnIDs": ["*internal:*trends", "*conn1"]}],
-				"*rankings": [{"ConnIDs": ["*internal:*rankings", "*conn1"]}]
+				"*stats": [{"connIDs": ["*internal:*stats", "*conn1"]}],
+				"*resources": [{"connIDs": ["*internal:*resources", "*conn1"]}],
+				"*accounts": [{"connIDs": ["*internal:*accounts", "*conn1"]}],
+				"*trends": [{"connIDs": ["*internal:*trends", "*conn1"]}],
+				"*rankings": [{"connIDs": ["*internal:*rankings", "*conn1"]}]
 			}
 	},
 }`

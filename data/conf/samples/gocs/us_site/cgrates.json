@@ -73,8 +73,8 @@
   "cdrs": {
     "enabled": true,
     "conns": {
-    	"*chargers": [{"ConnIDs": ["conn1"]}],
-    	"*rates": [{"ConnIDs": ["*internal"]}]
+    	"*chargers": [{"connIDs": ["conn1"]}],
+    	"*rates": [{"connIDs": ["*internal"]}]
     },
   },
 
@@ -92,21 +92,21 @@
          {
             "Tenant": "",
             "FilterIDs": [],
-            "ConnIDs": ["*internal"]
+            "connIDs": ["*internal"]
          }
     ],
     "*cdrs": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "ConnIDs": ["*internal"]
+            "connIDs": ["*internal"]
          }
     ],
     "*chargers": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "ConnIDs": ["*internal"]
+            "connIDs": ["*internal"]
          }
     ]
             },
@@ -116,7 +116,7 @@
   "admins": {
     "enabled": true,
     "conns": {
-    	"*caches": [{"ConnIDs": ["conn1"]}]
+    	"*caches": [{"connIDs": ["conn1"]}]
     },
   },
 

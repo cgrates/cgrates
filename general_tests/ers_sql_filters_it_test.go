@@ -539,7 +539,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 },
 "ers": {
   "conns": {
-    "*ees": [{"ConnIDs": ["*internal"]}]
+    "*ees": [{"connIDs": ["*internal"]}]
   },
   "readers": [
     {
@@ -629,7 +629,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 },
 "ers": {
   "conns": {
-    "*ees": [{"ConnIDs": ["*localhost"]}]
+    "*ees": [{"connIDs": ["*localhost"]}]
   },
   "readers": [
     {
@@ -721,7 +721,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 },
 "ers": {
   "conns": {
-    "*ees": [{"ConnIDs": ["*localhost"]}]
+    "*ees": [{"connIDs": ["*localhost"]}]
   },
   "readers": [
     {

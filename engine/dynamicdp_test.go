@@ -707,7 +707,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"sessions": {
 				"conns": {
 					"*attributes": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "ConnIDs": ["conn"]},
+						{"FilterIDs": ["*string:~*req.Account:1001"], "connIDs": ["conn"]},
 					]
 				}
 			}
@@ -734,12 +734,12 @@ func TestDPFilterSConns(t *testing.T) {
 		cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 			"filters": {
 				"conns": {
-					"*accounts": [{"ConnIDs": ["*internal"]}]
+					"*accounts": [{"connIDs": ["*internal"]}]
 				}
 			},
 			"chargers": {
 				"conns": {
-					"*attributes": [{"ConnIDs": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
+					"*attributes": [{"connIDs": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
 				}
 			}
 		}`)
@@ -768,7 +768,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"filters": {
 				"conns": {
 					"*accounts": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "ConnIDs": ["*internal"]},
+						{"FilterIDs": ["*string:~*req.Account:1001"], "connIDs": ["*internal"]},
 					]
 				}
 			},

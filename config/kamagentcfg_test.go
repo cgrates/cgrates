@@ -97,7 +97,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"kamailioAgent": {
 			"conns": {
-				"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2", "*internal"]}]
+				"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2", "*internal"]}]
 			},
 			"createCDR": true,
 			"timezone": "UTC",

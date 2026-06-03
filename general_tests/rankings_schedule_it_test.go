@@ -72,7 +72,7 @@ func TestRankingSchedule(t *testing.T) {
         "storeInterval": "-1",
         "scheduledIDs": {},
         "conns": {
-        	"*stats": [{"ConnIDs": ["*localhost"]}]
+        	"*stats": [{"connIDs": ["*localhost"]}]
         },
     },
     "stats": {

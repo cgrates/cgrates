@@ -150,8 +150,8 @@ Components reference connection pools through "_conns" configuration fields:
   "cdrs": {
     "enabled": true,
     "conns": {
-      "*attributes": [{"ConnIDs":["*internal"]}],
-      "*ees": [{"ConnIDs":["conn1"]}]
+      "*attributes": [{"connIDs":["*internal"]}],
+      "*ees": [{"connIDs":["conn1"]}]
     }
   }
 }

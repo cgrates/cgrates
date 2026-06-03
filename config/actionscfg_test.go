@@ -120,12 +120,12 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 "actions": {
 	"enabled": true,
 	"conns": {
-		"*ees":        [{"ConnIDs": ["*internal"]}],
-		"*cdrs":       [{"ConnIDs": ["*internal"]}],
-		"*thresholds": [{"ConnIDs": ["*internal"]}],
-		"*stats":      [{"ConnIDs": ["*internal"]}],
-		"*accounts":   [{"ConnIDs": ["*internal"]}],
-		"*admins":     [{"ConnIDs": ["*internal"]}]
+		"*ees":        [{"connIDs": ["*internal"]}],
+		"*cdrs":       [{"connIDs": ["*internal"]}],
+		"*thresholds": [{"connIDs": ["*internal"]}],
+		"*stats":      [{"connIDs": ["*internal"]}],
+		"*accounts":   [{"connIDs": ["*internal"]}],
+		"*admins":     [{"connIDs": ["*internal"]}]
 	},
 	"tenants": ["itsyscom.com"],
 	"indexedSelects": false,

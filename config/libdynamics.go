@@ -36,7 +36,7 @@ type DynamicStringSliceOpt struct {
 type DynamicConns struct {
 	FilterIDs []string
 	Tenant    string
-	ConnIDs   []string
+	ConnIDs   []string `json:"connIDs"`
 }
 
 type DynamicStringOpt struct {

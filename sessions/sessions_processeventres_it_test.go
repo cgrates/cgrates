@@ -39,7 +39,7 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*resources": [{"ConnIDs": ["*localhost"]}]
+		"*resources": [{"connIDs": ["*localhost"]}]
 	}
 },
 "resources": {

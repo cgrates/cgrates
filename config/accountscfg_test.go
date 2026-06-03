@@ -145,9 +145,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	"enabled": true,
 	"indexedSelects": false,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal:*attributes"]}],
-		"*rates":      [{"ConnIDs": ["*internal:*rates"]}],
-		"*thresholds": [{"ConnIDs": ["*internal:*thresholds"]}]
+		"*attributes": [{"connIDs": ["*internal:*attributes"]}],
+		"*rates":      [{"connIDs": ["*internal:*rates"]}],
+		"*thresholds": [{"connIDs": ["*internal:*thresholds"]}]
 	},
 	"stringIndexedFields": ["*req.index1"],
 	"prefixIndexedFields": ["*req.index1"],

@@ -152,7 +152,7 @@ var natsCfg string = `{
 	"enabled": true,
 	"conns": {
 		"*sessions": [],
-		"*ees": [{"ConnIDs": ["*internal"]}]
+		"*ees": [{"connIDs": ["*internal"]}]
 	},
 	"readers": [
 		{

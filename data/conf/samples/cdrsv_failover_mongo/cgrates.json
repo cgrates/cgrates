@@ -41,12 +41,12 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}],
-		"*chargers": [{"ConnIDs": ["*localhost"]}],
-		"*rates": [{"ConnIDs": ["*localhost"]}],
-		"*stats": [{"ConnIDs": ["*localhost"]}],
-		"*thresholds": [{"ConnIDs": ["*localhost"]}],
-		"*ees": [{"ConnIDs": ["*localhost"]}]
+		"*attributes": [{"connIDs": ["*internal"]}],
+		"*chargers": [{"connIDs": ["*localhost"]}],
+		"*rates": [{"connIDs": ["*localhost"]}],
+		"*stats": [{"connIDs": ["*localhost"]}],
+		"*thresholds": [{"connIDs": ["*localhost"]}],
+		"*ees": [{"connIDs": ["*localhost"]}]
 	},
 	"onlineCDRExports": ["s3_test_file"],
 },
@@ -59,7 +59,7 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -71,7 +71,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -83,7 +83,7 @@
 "ees": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 	"exporters": [
 		{

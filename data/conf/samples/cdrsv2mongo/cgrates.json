@@ -33,11 +33,11 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}],
-		"*chargers": [{"ConnIDs": ["*localhost"]}],
-		"*rates": [{"ConnIDs": ["*localhost"]}],
-		"*stats": [{"ConnIDs": ["*localhost"]}],
-		"*thresholds": [{"ConnIDs": ["*localhost"]}]
+		"*attributes": [{"connIDs": ["*internal"]}],
+		"*chargers": [{"connIDs": ["*localhost"]}],
+		"*rates": [{"connIDs": ["*localhost"]}],
+		"*stats": [{"connIDs": ["*localhost"]}],
+		"*thresholds": [{"connIDs": ["*localhost"]}]
 	},
 },
 
@@ -49,14 +49,14 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 },
 
 "thresholds": {
 	"enabled": true,
 	"conns": {
-		"*actions": [{"ConnIDs": ["*localhost"]}]
+		"*actions": [{"connIDs": ["*localhost"]}]
 	},
 	"storeInterval": "1s"
 },
@@ -64,7 +64,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 },
 

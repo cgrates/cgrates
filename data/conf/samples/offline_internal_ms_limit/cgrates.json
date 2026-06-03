@@ -34,36 +34,36 @@
 	"cdrs": {
 		"enabled": true,
 		"conns": {
-			"*chargers": [{"ConnIDs": ["*localhost"]}],
-			"*rates": [{"ConnIDs": ["*localhost"]}]
+			"*chargers": [{"connIDs": ["*localhost"]}],
+			"*rates": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"attributes": {
 		"enabled": true,
 		"conns": {
-			"*stats": [{"ConnIDs": ["*localhost"]}],
-			"*resources": [{"ConnIDs": ["*localhost"]}],
-			"*accounts": [{"ConnIDs": ["*localhost"]}]
+			"*stats": [{"connIDs": ["*localhost"]}],
+			"*resources": [{"connIDs": ["*localhost"]}],
+			"*accounts": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"chargers": {
 		"enabled": true,
 		"conns": {
-			"*attributes": [{"ConnIDs": ["*localhost"]}]
+			"*attributes": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"resources": {
 		"enabled": true,
 		"storeInterval": "-1",
 		"conns": {
-			"*thresholds": [{"ConnIDs": ["*localhost"]}]
+			"*thresholds": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"stats": {
 		"enabled": true,
 		"storeInterval": "-1",
 		"conns": {
-			"*thresholds": [{"ConnIDs": ["*localhost"]}]
+			"*thresholds": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"thresholds": {
@@ -74,9 +74,9 @@
 		"enabled": true,
 		"prefixIndexedFields": ["*req.Destination"],
 		"conns": {
-			"*stats": [{"ConnIDs": ["*localhost"]}],
-			"*resources": [{"ConnIDs": ["*localhost"]}],
-			"*rates": [{"ConnIDs": ["*localhost"]}]
+			"*stats": [{"connIDs": ["*localhost"]}],
+			"*resources": [{"connIDs": ["*localhost"]}],
+			"*rates": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"admins": {
@@ -88,7 +88,7 @@
 	"actions": {
 		"enabled": true,
 		"conns": {
-			"*accounts": [{"ConnIDs": ["*localhost"]}]
+			"*accounts": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"accounts": {
@@ -96,9 +96,9 @@
 	},
 	"filters": {
 		"conns": {
-			"*stats": [{"ConnIDs": ["*localhost"]}],
-			"*resources": [{"ConnIDs": ["*localhost"]}],
-			"*accounts": [{"ConnIDs": ["*localhost"]}]
+			"*stats": [{"connIDs": ["*localhost"]}],
+			"*resources": [{"connIDs": ["*localhost"]}],
+			"*accounts": [{"connIDs": ["*localhost"]}]
 		},
 	},
 	"loaders": [

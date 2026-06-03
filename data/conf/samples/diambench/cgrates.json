@@ -5,7 +5,7 @@
 "schedulers": {
 	"enabled": true,
 	"conns": {
-		"*cdrs": [{"ConnIDs": ["*internal"]}]
+		"*cdrs": [{"connIDs": ["*internal"]}]
 	},
 },
 "apiers": {
@@ -28,28 +28,28 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	]
 			},
@@ -63,8 +63,8 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}],
-		"*chargers": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}],
+		"*chargers": [{"connIDs": ["*internal"]}]
 	},
 	"rals_conns": ["*internal"]
 },
@@ -74,7 +74,7 @@
 		{"address": "0.0.0.0:3868", "network": "tcp"}
 	],
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*birpc_internal"]}]
+		"*sessions": [{"connIDs": ["*birpc_internal"]}]
 	},
 	"requestProcessors": [{
 		"id": "message",

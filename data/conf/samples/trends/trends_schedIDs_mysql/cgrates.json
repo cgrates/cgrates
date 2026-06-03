@@ -30,7 +30,7 @@
 "trends": {
     "enabled": true,
     "conns": {
-    	"*stats": [{"ConnIDs": ["*localhost"]}]
+    	"*stats": [{"connIDs": ["*localhost"]}]
     },
     "scheduledIDs": {"cgrates.org":["TR_1min"],"tenant1":["TR_5min"],"tenant2":[]}  
 },

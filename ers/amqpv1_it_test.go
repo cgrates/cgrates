@@ -47,7 +47,7 @@ func TestAMQPERv1(t *testing.T) {
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*localhost"]}]
+		"*sessions": [{"connIDs": ["*localhost"]}]
 	},
 	"readers": [
 		{

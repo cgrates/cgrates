@@ -23,14 +23,14 @@
 "thresholds": {
     "enabled": true,
     "conns": {
-    	"*actions": [{"ConnIDs": ["*internal"]}]
+    	"*actions": [{"connIDs": ["*internal"]}]
     },
 },
 
 "resources": {
   "enabled": true,
   "conns": {
-  	"*thresholds": [{"ConnIDs": ["*internal"]}]
+  	"*thresholds": [{"connIDs": ["*internal"]}]
   },
 },
 
