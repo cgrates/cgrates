@@ -1,0 +1,13 @@
+#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionWeights,ActionBlockers,ActionDiktatsID,ActionDiktatsFilterIDs,ActionDiktatsOpts,ActionDiktatsWeights,ActionDiktatsBlockers
+cgrates.org,AP_SUBSCRIBE_US,,;10,,*asap,*accounts,310150123456789,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_SUBSCRIBE_EU,,;10,,*asap,*accounts,262011234567890,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_SUBSCRIBE_GLOBAL,,;10,,*asap,*accounts,999999999999999,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_PLAN_FUNDED,*gte:~*accounts.310150000000901.Balances[monetary].Units:10,;10,,*asap,*accounts,310150000000901,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_PLAN_FUNDED,,,,,,,debit,,0s,*addBalance,,,,debit,,*balancePath:*balance.monetary.Units;*balanceValue:-10,,
+cgrates.org,AP_PLAN_FUNDED,,,,,,,cdr,,0s,*cdrlog,,,,cdr,,,,
+cgrates.org,AP_PLAN_BROKE,*gte:~*accounts.310150000000902.Balances[monetary].Units:10,;10,,*asap,*accounts,310150000000902,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_PLAN_BROKE,,,,,,,debit,,0s,*addBalance,,,,debit,,*balancePath:*balance.monetary.Units;*balanceValue:-10,,
+cgrates.org,AP_PLAN_BROKE,,,,,,,cdr,,0s,*cdrlog,,,,cdr,,,,
+cgrates.org,AP_PLAN_CRON,*gte:~*accounts.310150000000910.Balances[monetary].Units:10,;10,,"@every 1s",*accounts,310150000000910,topup,,0s,*addBalance,,,,topup,,*balancePath:*balance.data_allowance.Units;*balanceValue:1073741824,,
+cgrates.org,AP_PLAN_CRON,,,,,,,debit,,0s,*addBalance,,,,debit,,*balancePath:*balance.monetary.Units;*balanceValue:-10,,
+cgrates.org,AP_PLAN_CRON,,,,,,,cdr,,0s,*cdrlog,,,,cdr,,,,

@@ -1,0 +1,3 @@
+#Tenant,ID,Type,Path,Values
+cgrates.org,FLTR_US,*string,~*req.Country,United States
+cgrates.org,FLTR_EU,*string,~*req.Country,Germany;France;Italy;Romania
