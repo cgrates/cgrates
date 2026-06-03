@@ -134,9 +134,16 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithLock,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	ec = utils.NewEventCharges()
+	cgrEvDP := cgrEv.AsDataProvider()
 	var usage *decimal.Big // total event usage
-	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
+	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEvDP, nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
 		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
+		return
+	}
+	// a bad opt should fail before any account is altered
+	var forceUsage bool
+	if forceUsage, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEvDP, nil, aS.fltrS, nil,
+		utils.OptsAccountsForceUsage); err != nil {
 		return
 	}
 	dbted := decimal.New(0, 0) // amount debited so far
@@ -146,7 +153,6 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 			restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 		}
 	}()
-	cgrEvDP := cgrEv.AsDataProvider()
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debits
@@ -183,21 +189,6 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		// if blockers active, do not debit from the other accounts
 		if blocker {
 			break
-		}
-	}
-	var forceUsage bool
-	values, err := cgrEvDP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
-		return
-	}
-	opts, err := engine.ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	if opt, has := opts[utils.OptsAccountsForceUsage]; has {
-		forceUsage, err = utils.IfaceAsBool(opt)
-		if err != nil {
-			return
 		}
 	}
 	if usage.Cmp(decimal.New(0, 0)) == 1 && forceUsage {
