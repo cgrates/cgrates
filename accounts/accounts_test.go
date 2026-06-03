@@ -509,7 +509,7 @@ func TestAccountsDebit(t *testing.T) {
 	if evCh, err := accnts.accountsDebit(context.Background(), accntsPrf,
 		cgrEvent, true, true); err != nil {
 		t.Error(err)
-	} else if evCh != nil {
+	} else if !evCh.Equals(utils.NewEventCharges()) {
 		t.Errorf("received %+v", utils.ToJSON(evCh))
 	}
 
@@ -715,6 +715,65 @@ func TestV1MaxAbstracts(t *testing.T) {
 		if !reply.Equals(&exEvCh) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
+	}
+}
+
+func TestV1MaxAbstractsNoMatchingBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	// account matches the event but the only balance is filtered out
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "TestV1MaxAbstractsNoMatchingBalance",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:        "AbstractBalance1",
+				FilterIDs: []string{"*string:~*req.Foo:bar"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1MaxAbstractsNoMatchingBalance",
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: "210ns",
+		},
+	}
+	reply := utils.EventCharges{}
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if !reply.Equals(utils.NewEventCharges()) {
+		t.Errorf("Expected empty EventCharges, received %+v", utils.ToJSON(reply))
 	}
 }
 

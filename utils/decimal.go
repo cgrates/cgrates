@@ -266,13 +266,15 @@ func (d *Decimal) Round(rndDec int) *Decimal {
 }
 
 // Duration returns the decimal as duration or !ok otherwise
-func (d *Decimal) Duration() (dur time.Duration, ok bool) {
-	var i64 int64
-	if i64, ok = d.Big.Int64(); !ok {
-		return
+func (d *Decimal) Duration() (time.Duration, bool) {
+	if d == nil || d.Big == nil {
+		return 0, false
 	}
-	dur = time.Duration(i64)
-	return
+	v, ok := d.Big.Int64()
+	if !ok {
+		return 0, false
+	}
+	return time.Duration(v), true
 }
 
 func CloneDecimalBig(in *decimal.Big) *decimal.Big {
