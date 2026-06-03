@@ -200,7 +200,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 			return
 		}
 	}
-	if usage.Cmp(dbted) == 1 && forceUsage {
+	if usage.Cmp(decimal.New(0, 0)) == 1 && forceUsage {
 		err = utils.ErrInsufficientCredit
 		return
 	}

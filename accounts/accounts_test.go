@@ -777,6 +777,57 @@ func TestV1MaxAbstractsNoMatchingBalance(t *testing.T) {
 	}
 }
 
+func TestV1MaxAbstractsForceUsageInsufficientCredit(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	// the balance covers only 20s of the requested 30s
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "TestV1MaxAbstractsForceUsageInsufficientCredit",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 25}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(int64(20*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1MaxAbstractsForceUsageInsufficientCredit",
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage:              "30s",
+			utils.OptsAccountsForceUsage: true,
+		},
+	}
+	reply := utils.EventCharges{}
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err != utils.ErrInsufficientCredit {
+		t.Fatalf("expected %v, got %v", utils.ErrInsufficientCredit, err)
+	}
+}
+
 func TestV1DebitAbstracts1(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
