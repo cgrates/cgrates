@@ -133,6 +133,7 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 // store is used for simulate only or complete debit
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithLock,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
+	ec = utils.NewEventCharges()
 	var usage *decimal.Big // total event usage
 	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
 		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
@@ -158,9 +159,6 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		}
 		if ecDbt == nil { // no balance matched
 			continue
-		}
-		if ec == nil { // no debit performed yet
-			ec = utils.NewEventCharges()
 		}
 		if store && acnt.Account.BalancesAltered(acntBkps[i]) {
 			if err = aS.dm.SetAccount(ctx, acnt.Account, false); err != nil {
