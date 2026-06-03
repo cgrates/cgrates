@@ -1,0 +1,71 @@
+{
+  "radiusAgent": {
+    "requestProcessors": [
+      {
+        "id": "DataStart",
+        "filters": [
+          "*string:~*req.Acct-Status-Type:Start"
+        ],
+        "flags": [
+          "*none",
+          "*continue"
+        ],
+        "request_fields": [],
+        "reply_fields": []
+      },
+      {
+        "id": "DataStop",
+        "filters": [
+          "*string:~*req.Acct-Status-Type:Stop"
+        ],
+        "flags": [
+          "*cdrs",
+          "*continue"
+        ],
+        "request_fields": [
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "AccountIDs",
+            "path": "*opts.*acntProfileIDs",
+            "type": "*variable",
+            "value": "~*req.User-Name"
+          },
+          {
+            "tag": "Country",
+            "path": "*cgreq.Country",
+            "type": "*variable",
+            "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Usage",
+            "path": "*cgreq.Usage",
+            "type": "*variable",
+            "value": "~*req.Acct-Output-Octets",
+            "mandatory": true
+          },
+          {
+            "tag": "DebitUsage",
+            "path": "*opts.*usage",
+            "type": "*variable",
+            "value": "~*req.Acct-Output-Octets",
+            "mandatory": true
+          }
+        ],
+        "reply_fields": []
+      }
+    ]
+  }
+}

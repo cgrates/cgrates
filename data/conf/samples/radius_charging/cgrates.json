@@ -1,0 +1,114 @@
+{
+  "admins": {
+    "enabled": true
+  },
+  "filters": {
+    "conns": {
+      "*accounts": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
+  },
+  "rates": {
+    "enabled": true
+  },
+  "accounts": {
+    "enabled": true,
+    "conns": {
+      "*rates": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
+  },
+  "actions": {
+    "enabled": true,
+    "conns": {
+      "*accounts": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ],
+      "*cdrs": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
+  },
+  "cdrs": {
+    "enabled": true,
+    "opts": {
+      "*accounts": [
+        {
+          "Value": true
+        }
+      ]
+    },
+    "conns": {
+      "*accounts": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "opts": {
+      "*accounts": [
+        {
+          "Value": true
+        }
+      ]
+    },
+    "conns": {
+      "*accounts": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ],
+      "*cdrs": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
+  },
+  "radiusAgent": {
+    "enabled": true,
+    "conns": {
+      "*sessions": [
+        {
+          "ConnIDs": [
+            "*birpc_internal"
+          ]
+        }
+      ]
+    },
+    "listeners": [
+      {
+        "network": "udp",
+        "authAddress": "127.0.0.1:1812",
+        "acctAddress": "127.0.0.1:1813"
+      }
+    ]
+  }
+}
