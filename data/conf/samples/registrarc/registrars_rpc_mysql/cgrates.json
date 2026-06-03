@@ -41,7 +41,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["conn1"]}]
+		"*attributes": [{"connIDs": ["conn1"]}]
 	},
 },
 

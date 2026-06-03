@@ -52,7 +52,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -61,7 +61,7 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -70,7 +70,7 @@
 	"enabled": true,
 	"storeInterval": "1s",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -84,8 +84,8 @@
 "routes": {
 	"enabled": true,
 	"conns": {
-		"*stats": [{"ConnIDs": ["*localhost"]}],
-		"*resources": [{"ConnIDs": ["*localhost"]}]
+		"*stats": [{"connIDs": ["*localhost"]}],
+		"*resources": [{"connIDs": ["*localhost"]}]
 	},
 },
 
@@ -103,7 +103,7 @@
 		"runDelay": "0",									
 		"lockfilePath": ".cgr.lock",					
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": ",",
 		"tpInPath": "/tmp/In",
@@ -125,7 +125,7 @@
 		"runDelay": "0",
 		"lockfilePath": ".cgr.lock",
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": ",",
 		"tpInPath": "/tmp/LoaderIn",
@@ -148,7 +148,7 @@
 		"runDelay": "0",
 		"lockfilePath": ".cgr.lock",
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": ",",
 		"tpInPath": "/tmp/SubpathWithoutMove",
@@ -171,7 +171,7 @@
 		"runDelay": "0",
 		"lockfilePath": ".cgr.lock",
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": ",",
 		"tpInPath": "/tmp/SubpathLoaderWithMove",
@@ -194,7 +194,7 @@
 		"runDelay": "0",
 		"lockfilePath": ".cgr.lock",
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": ",",
 		"tpInPath": "/tmp/templateLoaderIn",
@@ -216,7 +216,7 @@
 		"runDelay": "-1",										
 		"lockfilePath": ".cgr.lock",						
 		"conns": {
-			"*caches": [{"ConnIDs": ["*internal"]}]
+			"*caches": [{"connIDs": ["*internal"]}]
 		},
 		"fieldSeparator": "\t",							
 		"tpInPath": "/tmp/customSepLoaderIn",				
@@ -246,21 +246,21 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	]
 			},

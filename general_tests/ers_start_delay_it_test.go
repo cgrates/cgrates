@@ -59,7 +59,7 @@ func TestErsStartDelay(t *testing.T) {
 		"cdrs":{
 		"enabled":true,
 		"conns": {
-			"*rates": [{"ConnIDs": ["*localhost"]}]
+			"*rates": [{"connIDs": ["*localhost"]}]
 		},
 		"opts":{
 		"*rates":[
@@ -76,7 +76,7 @@ func TestErsStartDelay(t *testing.T) {
 			{
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 			}
 									]
 			}
@@ -99,7 +99,7 @@ func TestErsStartDelay(t *testing.T) {
 		"ers": {
 			"enabled": true,
 			"conns": {
-				"*sessions": [{"ConnIDs": ["*localhost"]}]
+				"*sessions": [{"connIDs": ["*localhost"]}]
 			},
 			"readers": [
 				{

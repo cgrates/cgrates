@@ -6,7 +6,7 @@
 		"id": "httpss",
 		"url": "/httpss",
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*localhost"]}]
+			"*sessions": [{"connIDs": ["*localhost"]}]
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*text",

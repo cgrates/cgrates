@@ -165,9 +165,9 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"dictionariesPath": "/usr/share/cgrates/diameter/dict/",
 		"ceApplications": ["Base"],
 		"conns": {
-			"*sessions": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
-			"*stats": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}],
-			"*thresholds": [{"ConnIDs":["*birpc_internal","*internal","*conn1"]}]
+			"*sessions": [{"connIDs":["*birpc_internal","*internal","*conn1"]}],
+			"*stats": [{"connIDs":["*birpc_internal","*internal","*conn1"]}],
+			"*thresholds": [{"connIDs":["*birpc_internal","*internal","*conn1"]}]
 		},
 		"originHost": "CGR-DA",
 		"originRealm": "cgrates.org",

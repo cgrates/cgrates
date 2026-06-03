@@ -28,9 +28,9 @@
 "actions": {
     "enabled": true,
     "conns": {
-    	"*thresholds": [{"ConnIDs": ["*internal"]}],
-    	"*stats": [{"ConnIDs": ["*internal"]}],
-    	"*accounts": [{"ConnIDs": ["*internal"]}]
+    	"*thresholds": [{"connIDs": ["*internal"]}],
+    	"*stats": [{"connIDs": ["*internal"]}],
+    	"*accounts": [{"connIDs": ["*internal"]}]
     },
 },
 
@@ -42,7 +42,7 @@
     "enabled": true,
     "storeInterval": "-1",
     "conns": {
-    	"*thresholds": [{"ConnIDs": ["*internal"]}]
+    	"*thresholds": [{"connIDs": ["*internal"]}]
     },
 },
 
@@ -50,7 +50,7 @@
     "enabled": true,
     "storeInterval": "-1",
     "conns": {
-    	"*actions": [{"ConnIDs": ["*internal"]}]
+    	"*actions": [{"connIDs": ["*internal"]}]
     },
 },
 

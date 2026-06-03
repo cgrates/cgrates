@@ -438,9 +438,9 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		"id": "conecto1",
 		"url": "/conecto",
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}],
-			"*stats": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}],
-			"*thresholds": [{"ConnIDs": ["*birpc_internal", "*localhost", "conn1"]}]
+			"*sessions": [{"connIDs": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*stats": [{"connIDs": ["*birpc_internal", "*localhost", "conn1"]}],
+			"*thresholds": [{"connIDs": ["*birpc_internal", "*localhost", "conn1"]}]
 		},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",

@@ -34,7 +34,7 @@ With explanations in the comments:
  "ers": {
 	"enabled": true,					// enable the service
 	"conns": {							// RPC Connections IDs
-		"*sessions": [{"ConnIDs": ["*internal"]}]
+		"*sessions": [{"connIDs": ["*internal"]}]
 	},				
 	"readers": [						// list of active readers
 		{

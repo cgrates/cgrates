@@ -183,9 +183,9 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		]
 	},
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}],
-		"*stats": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}],
-		"*thresholds": [{"ConnIDs": ["*internal", "*conn1", "*conn2"]}]
+		"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2"]}],
+		"*stats": [{"connIDs": ["*internal", "*conn1", "*conn2"]}],
+		"*thresholds": [{"connIDs": ["*internal", "*conn1", "*conn2"]}]
 	},
 	"dmrTemplate": "*dmr",
 	"coaTemplate": "*coa",

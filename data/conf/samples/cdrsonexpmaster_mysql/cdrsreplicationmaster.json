@@ -39,9 +39,9 @@
 "cdrs": {
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"conns": {
-		"*chargers": [{"ConnIDs": ["*internal"]}],
-		"*rates": [{"ConnIDs": ["*internal"]}],
-		"*ees": [{"ConnIDs": ["*localhost"]}]
+		"*chargers": [{"connIDs": ["*internal"]}],
+		"*rates": [{"connIDs": ["*internal"]}],
+		"*ees": [{"connIDs": ["*localhost"]}]
 	},
 	"onlineCDRExports": ["http_localhost", "amqp_localhost", "http_test_file", "kafka_localhost", "eventcost_filter"],
 },

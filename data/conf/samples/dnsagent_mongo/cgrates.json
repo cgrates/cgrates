@@ -40,35 +40,35 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 		 }
 	],
 	"*rates": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*routes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*localhost"]
+			"connIDs": ["*localhost"]
 		 }
 	]
 			},
@@ -118,7 +118,7 @@
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*rates": [{"ConnIDs": ["*internal"]}]
+		"*rates": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -162,7 +162,7 @@
 		}
 	],
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*localhost"]}]
+		"*sessions": [{"connIDs": ["*localhost"]}]
 	},
 },
 

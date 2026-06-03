@@ -52,56 +52,56 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*rals": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*routes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*stats": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*thresholds": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	]
 			},

@@ -71,13 +71,13 @@ func TestThresholdEES(t *testing.T) {
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*localhost"]}]
+		"*thresholds": [{"connIDs": ["*localhost"]}]
 	},
 },
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*localhost"]}]
+		"*attributes": [{"connIDs": ["*localhost"]}]
 	},
 },
 "attributes": {
@@ -89,7 +89,7 @@ func TestThresholdEES(t *testing.T) {
 	"scheduledIDs": {},
 	"indexedSelects": false,
 	"conns": {
-		"*ees": [{"ConnIDs": ["*localhost"]}]
+		"*ees": [{"connIDs": ["*localhost"]}]
 	},
 
 },

@@ -91,7 +91,7 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"chargers": {
 			"enabled": false,
-			"conns": {"*attributes": [{"ConnIDs": ["*internal", "*conn1"]}]},
+			"conns": {"*attributes": [{"connIDs": ["*internal", "*conn1"]}]},
 			"indexedSelects":true,
             "stringIndexedFields": ["*req.Field1","*req.Field2","*req.Field3"],
 			"prefixIndexedFields": ["*req.DestinationPrefix"],

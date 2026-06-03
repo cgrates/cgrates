@@ -34,7 +34,7 @@
 "chargers": {
 	"enabled": true,
 	"conns": {
-		"*attributes": [{"ConnIDs": ["*internal"]}]
+		"*attributes": [{"connIDs": ["*internal"]}]
 	},
 },
 
@@ -46,21 +46,21 @@
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	]
 			},

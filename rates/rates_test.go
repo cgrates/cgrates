@@ -1057,7 +1057,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 
 		"cdrs": {
 			"enabled": true,
-			"conns": {"*rates": [{"ConnIDs": ["*internal"]}]},
+			"conns": {"*rates": [{"connIDs": ["*internal"]}]},
 			"opts": {
 				"*rates": [
 					{

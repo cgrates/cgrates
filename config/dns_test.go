@@ -227,9 +227,9 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			}
 		],
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*internal"]}],
-			"*stats": [{"ConnIDs": ["*internal"]}],
-			"*thresholds": [{"ConnIDs": ["*internal"]}]
+			"*sessions": [{"connIDs": ["*internal"]}],
+			"*stats": [{"connIDs": ["*internal"]}],
+			"*thresholds": [{"connIDs": ["*internal"]}]
 		},
 		"timezone": "",
 		"requestProcessors": [],
@@ -267,9 +267,9 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				}
 			],
 			"conns": {
-				"*sessions": [{"ConnIDs": ["*internal:*sessions", "*conn1"]}],
-				"*stats": [{"ConnIDs": ["*internal:*stats", "*conn1"]}],
-				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
+				"*sessions": [{"connIDs": ["*internal:*sessions", "*conn1"]}],
+				"*stats": [{"connIDs": ["*internal:*stats", "*conn1"]}],
+				"*thresholds": [{"connIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"timezone": "UTC",
 			"requestProcessors": [

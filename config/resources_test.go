@@ -163,7 +163,7 @@ func TestResourceSCfgAsMapInterface1(t *testing.T) {
 		"resources": {								
 			"enabled": true,						
 			"storeInterval": "7m",					
-			"conns": {"*thresholds": [{"ConnIDs": ["*internal", "*conn1"]}]},					
+			"conns": {"*thresholds": [{"connIDs": ["*internal", "*conn1"]}]},					
 			"indexedSelects":true,		
             "stringIndexedFields": ["*req.index1"],
 			"prefixIndexedFields": ["*req.prefixIndexedFields1","*req.prefixIndexedFields2"],

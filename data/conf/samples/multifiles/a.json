@@ -13,7 +13,7 @@
 		"id": "conecto1",
 		"url": "/conecto",
 		"conns": {
-		"*sessions": [{"ConnIDs": ["*localhost"]}]
+		"*sessions": [{"connIDs": ["*localhost"]}]
 			},
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",

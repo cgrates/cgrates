@@ -37,14 +37,14 @@
          {
             "Tenant": "",
             "FilterIDs": [],
-            "ConnIDs": ["*localhost"]
+            "connIDs": ["*localhost"]
          }
     ],
     "*cdrs": [
          {
             "Tenant": "",
             "FilterIDs": [],
-            "ConnIDs": ["*localhost"]
+            "connIDs": ["*localhost"]
          }
     ]
             },
@@ -65,10 +65,10 @@
 "cdrs": {
     "enabled": true,
     "conns": {
-    	"*chargers": [{"ConnIDs": ["*localhost"]}],
-    	"*accounts": [{"ConnIDs": ["*localhost"]}],
-    	"*rates": [{"ConnIDs": ["*localhost"]}],
-    	"*ees": [{"ConnIDs": ["*localhost"]}]
+    	"*chargers": [{"connIDs": ["*localhost"]}],
+    	"*accounts": [{"connIDs": ["*localhost"]}],
+    	"*rates": [{"connIDs": ["*localhost"]}],
+    	"*ees": [{"connIDs": ["*localhost"]}]
     },
     "opts": {								
         "*chargers": [
@@ -119,7 +119,7 @@
 "chargers": {
     "enabled": true,
     "conns": {
-    	"*attributes": [{"ConnIDs": ["*localhost"]}]
+    	"*attributes": [{"connIDs": ["*localhost"]}]
     },
 },
     
@@ -141,7 +141,7 @@
 "accounts": {
     "enabled": true,
     "conns": {
-    	"*rates": [{"ConnIDs": ["*localhost"]}]
+    	"*rates": [{"connIDs": ["*localhost"]}]
     },
     "opts":{				
         "*usage": [
@@ -167,8 +167,8 @@
 "routes": {
     "enabled": true,
     "conns": {
-    	"*accounts": [{"ConnIDs": ["*localhost"]}],
-    	"*rates": [{"ConnIDs": ["*localhost"]}]
+    	"*accounts": [{"connIDs": ["*localhost"]}],
+    	"*rates": [{"connIDs": ["*localhost"]}]
     },
     "*ignoreErrors": [						
         {

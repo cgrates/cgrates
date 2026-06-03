@@ -157,7 +157,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			"storeInterval": "72h",
 			"storeUncompressedLimit": 1,
 			"conns": {
-				"*thresholds": [{"ConnIDs": ["*internal:*thresholds", "*conn1"]}]
+				"*thresholds": [{"connIDs": ["*internal:*thresholds", "*conn1"]}]
 			},
 			"indexedSelects":false,
             "stringIndexedFields": ["*req.string"],

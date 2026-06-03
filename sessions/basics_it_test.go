@@ -77,23 +77,23 @@ func TestSessionBasics(t *testing.T) {
 "sessions": {
     "enabled": true,
 	   "conns": {
-            "*accounts": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}],
-            "*rates": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}],
-            "*cdrs": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*internal"]}]
+            "*accounts": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}],
+            "*rates": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}],
+            "*cdrs": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}]
         },
     "opts": { }
 },
 "cdrs": {
     "enabled": true,
     "conns": {
-    	"*accounts": [{"ConnIDs": ["*internal"]}],
-    	"*rates": [{"ConnIDs": ["*internal"]}]
+    	"*accounts": [{"connIDs": ["*internal"]}],
+    	"*rates": [{"connIDs": ["*internal"]}]
     },
 },
 "accounts": {
     "enabled": true,
 	"conns": {
-		"*rates": [{"ConnIDs": ["*internal"]}]
+		"*rates": [{"connIDs": ["*internal"]}]
 	},
 },
 "admins": {
@@ -662,7 +662,7 @@ func TestSessionLifecycle(t *testing.T) {
 	"alterableFields": ["AlterableField"],
 	"terminateAttempts": 1,
 	"conns": {
-		"*chargers": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
+		"*chargers": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
 	},
 	"opts": {}
 },

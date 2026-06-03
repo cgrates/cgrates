@@ -22,9 +22,9 @@ Example configuration in the JSON file:
         "enabled": true,
         "path": "/prometheus",
         "conns": {
-		    "*caches": [{"ConnIDs": ["*internal"]}],
-            "*cores": [{"ConnIDs": ["*internal", "external"]}],
-            "*stats": [{"ConnIDs": ["*internal", "external"]}]
+		    "*caches": [{"connIDs": ["*internal"]}],
+            "*cores": [{"connIDs": ["*internal", "external"]}],
+            "*stats": [{"connIDs": ["*internal", "external"]}]
 	    },
         "cacheIDs": [
             "*attributeFilterIndexes",

@@ -588,18 +588,18 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"enabled": true,
 			"listenBiJSON": "127.0.0.1:2018",
 			"conns": {
-				"*chargers": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*cdrs": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*resources": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*ips": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*thresholds": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*stats": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*routes": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*attributes": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*actions": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*rates": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*accounts": [{"ConnIDs": ["*internal", "*conn1"]}],
-				"*replication": [{"ConnIDs": ["*localhost"]}]
+				"*chargers": [{"connIDs": ["*internal", "*conn1"]}],
+				"*cdrs": [{"connIDs": ["*internal", "*conn1"]}],
+				"*resources": [{"connIDs": ["*internal", "*conn1"]}],
+				"*ips": [{"connIDs": ["*internal", "*conn1"]}],
+				"*thresholds": [{"connIDs": ["*internal", "*conn1"]}],
+				"*stats": [{"connIDs": ["*internal", "*conn1"]}],
+				"*routes": [{"connIDs": ["*internal", "*conn1"]}],
+				"*attributes": [{"connIDs": ["*internal", "*conn1"]}],
+				"*actions": [{"connIDs": ["*internal", "*conn1"]}],
+				"*rates": [{"connIDs": ["*internal", "*conn1"]}],
+				"*accounts": [{"connIDs": ["*internal", "*conn1"]}],
+				"*replication": [{"connIDs": ["*localhost"]}]
 			},
 			"storeSessionCosts": true,
             "minDurLowBalance": "1s",
@@ -875,7 +875,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 "freeswitchAgent": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
+		"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 	},
 	"subscribePark": false,
 	"createCDR": true,
@@ -923,7 +923,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
           "extraFields": ["randomFields"],
           "maxWaitConnection": "0",
 		  "conns": {
-		  	"*sessions": [{"ConnIDs": ["*internal"]}]
+		  	"*sessions": [{"connIDs": ["*internal"]}]
 		  }
     }
 }`
@@ -1062,7 +1062,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"asteriskAgent": {
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*internal"]}]
+			"*sessions": [{"connIDs": ["*internal"]}]
 		},
 	},
 }`
@@ -1097,7 +1097,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	"asteriskAgent": {
 		"enabled": true,
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
+			"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2"]}]
 		},
 		"createCDR": true,
 		"asteriskConns":[

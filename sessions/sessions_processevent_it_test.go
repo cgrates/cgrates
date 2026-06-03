@@ -59,7 +59,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
             "sessions": {
                 "enabled": true,
                 "conns": {
-                    "*routes": [{"ConnIDs": ["*localhost"]}]
+                    "*routes": [{"connIDs": ["*localhost"]}]
                 }
             },
             "routes": {
@@ -345,7 +345,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*stats": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
+		"*stats": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
 	}
 },
 "stats": {
@@ -758,7 +758,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Tenant":"","FilterIDs":[],"ConnIDs":["*localhost"]}]
+		"*thresholds": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
 	}
 },
 "thresholds": {
@@ -981,14 +981,14 @@ func TestSessionSv1ProcessEventCDRs(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*cdrs":    [{"ConnIDs": ["*localhost"]}],
-		"*chargers":[{"ConnIDs": ["*localhost"]}]
+		"*cdrs":    [{"connIDs": ["*localhost"]}],
+		"*chargers":[{"connIDs": ["*localhost"]}]
 	}
 },
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*default": [{"ConnIDs": ["*localhost"]}]
+		"*default": [{"connIDs": ["*localhost"]}]
 	}
 },
 "chargers": {
@@ -1159,8 +1159,8 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"ConnIDs": ["*localhost"]}],
-		"*routes":   [{"ConnIDs": ["*localhost"]}]
+		"*chargers": [{"connIDs": ["*localhost"]}],
+		"*routes":   [{"connIDs": ["*localhost"]}]
 	}
 },
 "chargers": {
@@ -1319,8 +1319,8 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 			"sessions": {
 				"enabled": true,
 				"conns": {
-					"*rates":    [{"ConnIDs": ["*localhost"]}],
-					"*chargers": [{"ConnIDs": ["*localhost"]}]
+					"*rates":    [{"connIDs": ["*localhost"]}],
+					"*chargers": [{"connIDs": ["*localhost"]}]
 				}
 			},
 			"rates": {

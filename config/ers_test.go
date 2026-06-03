@@ -30,10 +30,10 @@ func TestERSClone(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"ConnIDs": ["*internal"]}],
-		"*ees": [{"ConnIDs": ["*internal"]}],
-		"*stats": [{"ConnIDs": ["*internal"]}],
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*sessions": [{"connIDs": ["*internal"]}],
+		"*ees": [{"connIDs": ["*internal"]}],
+		"*stats": [{"connIDs": ["*internal"]}],
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 	"readers": [
          {
@@ -374,10 +374,10 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"conns": {
-		"*sessions": [{"ConnIDs": ["conn1","conn3"]}],
-		"*ees": [{"ConnIDs": ["conn1","conn3"]}],
-		"*stats": [{"ConnIDs": ["conn1","conn3"]}],
-		"*thresholds": [{"ConnIDs": ["conn1","conn3"]}]
+		"*sessions": [{"connIDs": ["conn1","conn3"]}],
+		"*ees": [{"connIDs": ["conn1","conn3"]}],
+		"*stats": [{"connIDs": ["conn1","conn3"]}],
+		"*thresholds": [{"connIDs": ["conn1","conn3"]}]
 	},
 	"readers": [
 		{
@@ -1015,10 +1015,10 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	"ers": {
 		"enabled": true,
 		"conns": {
-			"*sessions": [{"ConnIDs": ["conn1","conn3"]}],
-			"*ees": [{"ConnIDs": ["conn1","conn3"]}],
-			"*stats": [{"ConnIDs": ["conn1","conn3"]}],
-			"*thresholds": [{"ConnIDs": ["conn1","conn3"]}]
+			"*sessions": [{"connIDs": ["conn1","conn3"]}],
+			"*ees": [{"connIDs": ["conn1","conn3"]}],
+			"*stats": [{"connIDs": ["conn1","conn3"]}],
+			"*thresholds": [{"connIDs": ["conn1","conn3"]}]
 		},
 		"readers": [
 			{
@@ -1139,10 +1139,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	"ers": {
 		"enabled": true,
 		"conns": {
-			"*sessions": [{"ConnIDs": ["conn1","conn3"]}],
-			"*ees": [{"ConnIDs": ["conn1","conn3"]}],
-			"*stats": [{"ConnIDs": ["conn1","conn3"]}],
-			"*thresholds": [{"ConnIDs": ["conn1","conn3"]}]
+			"*sessions": [{"connIDs": ["conn1","conn3"]}],
+			"*ees": [{"connIDs": ["conn1","conn3"]}],
+			"*stats": [{"connIDs": ["conn1","conn3"]}],
+			"*thresholds": [{"connIDs": ["conn1","conn3"]}]
 		},
 		"readers": [
 			{

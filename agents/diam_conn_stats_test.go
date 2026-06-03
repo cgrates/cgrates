@@ -72,7 +72,7 @@ func TestDiamConnStats(t *testing.T) {
 "diameterAgent": {
 	"enabled": true,
 	 "conns":{
-	 "*stats": [{"ConnIDs":["*localhost"]}]
+	 "*stats": [{"connIDs":["*localhost"]}]
 	 },
 	// "thresholds_conns": ["*localhost"],
 	// "connStatusStatQueueIDs": ["SQ_CONN_1", "SQ_CONN_2", "SQ_CONN_3"],

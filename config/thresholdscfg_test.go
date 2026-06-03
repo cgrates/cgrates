@@ -163,7 +163,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
             "notExistsIndexedFields": [],
 			"nestedFields": true,
 			"conns": {
-				"*actions": [{"ConnIDs": ["*internal"]}]
+				"*actions": [{"connIDs": ["*internal"]}]
 			},
 		},
 }`

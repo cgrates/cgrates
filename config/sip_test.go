@@ -162,9 +162,9 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		"listen": "127.0.0.1:5060",
 		"listenNet": "udp",
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*internal:*sessions"]}],
-			"*stats": [{"ConnIDs": ["*internal:*stats"]}],
-			"*thresholds": [{"ConnIDs": ["*internal:*thresholds"]}]
+			"*sessions": [{"connIDs": ["*internal:*sessions"]}],
+			"*stats": [{"connIDs": ["*internal:*stats"]}],
+			"*thresholds": [{"connIDs": ["*internal:*thresholds"]}]
 		},
 		"timezone": "",
         "retransmissionTimer": "2s",
@@ -199,9 +199,9 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 			"listen": "127.0.0.1:5060",
 			"listenNet": "udp",
 			"conns": {
-				"*sessions": [{"ConnIDs": ["*internal"]}],
-				"*stats": [{"ConnIDs": ["*internal"]}],
-				"*thresholds": [{"ConnIDs": ["*internal"]}]
+				"*sessions": [{"connIDs": ["*internal"]}],
+				"*stats": [{"connIDs": ["*internal"]}],
+				"*thresholds": [{"connIDs": ["*internal"]}]
 			},
 			"timezone": "UTC",
             "retransmissionTimer": "5s",
@@ -272,9 +272,9 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		"enabled": true,
 		"listen": "",
 		"conns": {
-			"*sessions": [{"ConnIDs": ["*conn1", "*conn2"]}],
-			"*stats": [{"ConnIDs": ["*conn1", "*conn2"]}],
-			"*thresholds": [{"ConnIDs": ["*conn1", "*conn2"]}]
+			"*sessions": [{"connIDs": ["*conn1", "*conn2"]}],
+			"*stats": [{"connIDs": ["*conn1", "*conn2"]}],
+			"*thresholds": [{"connIDs": ["*conn1", "*conn2"]}]
 		},
 		"requestProcessors": [
          {

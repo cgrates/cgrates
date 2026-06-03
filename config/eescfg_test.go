@@ -30,7 +30,7 @@ func TestEESClone(t *testing.T) {
 	cfgJSONStr := `{
   "ees": {
      "enabled": true,
-	"conns": {"*attributes": [{"ConnIDs": ["*internal","*conn1"]}]},
+	"conns": {"*attributes": [{"connIDs": ["*internal","*conn1"]}]},
 	"cache": {
 		"*fileCSV": {"limit": -2, "ttl": "3s", "staticTTL": true},
 	},
@@ -337,7 +337,7 @@ func TestEventExporterSameID(t *testing.T) {
 	cfgJSONStr := `{
 "ees": {
 	"enabled": true,
-	"conns": {"*attributes": [{"ConnIDs": ["conn1"]}]},
+	"conns": {"*attributes": [{"connIDs": ["conn1"]}]},
 	"exporters": [
 		{
 			"id": "file_exporter1",
@@ -633,7 +633,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
       "ees": {									
 	        "enabled": true,						
-            "conns": {"*attributes": [{"ConnIDs": ["*internal","*conn2"]}]},					
+            "conns": {"*attributes": [{"connIDs": ["*internal","*conn2"]}]},					
             "cache": {
 		          "*fileCSV": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "staticTTL": false}
             },

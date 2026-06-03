@@ -98,7 +98,7 @@ func TestKafkaSSL(t *testing.T) {
     "enabled": true,
     "conns": {
         "*sessions": [],
-        "*ees": [{"ConnIDs": ["*internal"]}]
+        "*ees": [{"connIDs": ["*internal"]}]
     },
     "readers": [
         {

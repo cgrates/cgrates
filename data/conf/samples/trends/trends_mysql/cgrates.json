@@ -30,7 +30,7 @@
 "trends": {
     "enabled": true,
     "conns": {
-    	"*stats": [{"ConnIDs": ["*localhost"]}]
+    	"*stats": [{"connIDs": ["*localhost"]}]
     },
     "scheduledIDs": {}    
 },

@@ -818,12 +818,12 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			"sessions": map[string]any{
 				"enabled": true,
 				"conns": map[string]any{
-					"*resources":  []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
-					"*ips":        []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
-					"*routes":     []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
-					"*attributes": []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*localhost"}}},
-					"*cdrs":       []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*internal"}}},
-					"*chargers":   []any{map[string]any{"Tenant": "", "ConnIDs": []any{"*internal"}}},
+					"*resources":  []any{map[string]any{"Tenant": "", "connIDs": []any{"*localhost"}}},
+					"*ips":        []any{map[string]any{"Tenant": "", "connIDs": []any{"*localhost"}}},
+					"*routes":     []any{map[string]any{"Tenant": "", "connIDs": []any{"*localhost"}}},
+					"*attributes": []any{map[string]any{"Tenant": "", "connIDs": []any{"*localhost"}}},
+					"*cdrs":       []any{map[string]any{"Tenant": "", "connIDs": []any{"*internal"}}},
+					"*chargers":   []any{map[string]any{"Tenant": "", "connIDs": []any{"*internal"}}},
 				},
 				"opts": map[string]any{},
 			},
@@ -918,12 +918,12 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-			"*resources": [{"Tenant":"","ConnIDs":["*localhost"]}],
-			"*ips": [{"Tenant":"","ConnIDs":["*localhost"]}],
-			"*routes": [{"Tenant":"","ConnIDs":["*localhost"]}],
-			"*attributes": [{"Tenant":"","ConnIDs":["*localhost"]}],
-			"*cdrs": [{"Tenant":"","ConnIDs":["*internal"]}],
-			"*chargers": [{"Tenant":"","ConnIDs":["*localhost"]}]
+			"*resources": [{"Tenant":"","connIDs":["*localhost"]}],
+			"*ips": [{"Tenant":"","connIDs":["*localhost"]}],
+			"*routes": [{"Tenant":"","connIDs":["*localhost"]}],
+			"*attributes": [{"Tenant":"","connIDs":["*localhost"]}],
+			"*cdrs": [{"Tenant":"","connIDs":["*internal"]}],
+			"*chargers": [{"Tenant":"","connIDs":["*localhost"]}]
 		},
 	"opts": {}
 }
@@ -1351,7 +1351,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"rals": {
 			"enabled": true,
 			"conns": {
-				"*thresholds": [{"ConnIDs": ["*internal"]}]
+				"*thresholds": [{"connIDs": ["*internal"]}]
 			},
 			"max_increments":3000000
 		},
@@ -1360,10 +1360,10 @@ func testApisLoadFromPath(t *testing.T) {
 		"schedulers": {
 			"enabled": true,
 			"conns": {
-				"*cdrs": [{"ConnIDs": ["*internal"]}]
+				"*cdrs": [{"connIDs": ["*internal"]}]
 			},
 			"conns": {
-				"*stats": [{"ConnIDs": ["*localhost"]}]
+				"*stats": [{"connIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1371,7 +1371,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"cdrs": {
 			"enabled": true,
 			"conns": {
-				"*chargers": [{"ConnIDs": ["*internal"]}]
+				"*chargers": [{"connIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1379,9 +1379,9 @@ func testApisLoadFromPath(t *testing.T) {
 		"attributes": {
 			"enabled": true,
 			"conns": {
-				"*stats": [{"ConnIDs": ["*localhost"]}],
-				"*resources": [{"ConnIDs": ["*localhost"]}],
-				"*accounts": [{"ConnIDs": ["*localhost"]}]
+				"*stats": [{"connIDs": ["*localhost"]}],
+				"*resources": [{"connIDs": ["*localhost"]}],
+				"*accounts": [{"connIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1389,7 +1389,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"chargers": {
 			"enabled": true,
 			"conns": {
-				"*attributes": [{"ConnIDs": ["*internal"]}]
+				"*attributes": [{"connIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1398,7 +1398,7 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"storeInterval": "-1",
 			"conns": {
-				"*thresholds": [{"ConnIDs": ["*internal"]}]
+				"*thresholds": [{"connIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1407,7 +1407,7 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"storeInterval": "-1",
 			"conns": {
-				"*thresholds": [{"ConnIDs": ["*internal"]}]
+				"*thresholds": [{"connIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1421,8 +1421,8 @@ func testApisLoadFromPath(t *testing.T) {
 			"enabled": true,
 			"prefixIndexedFields":["*req.Destination"],
 			"conns": {
-				"*stats": [{"ConnIDs": ["*internal"]}],
-				"*resources": [{"ConnIDs": ["*internal"]}]
+				"*stats": [{"connIDs": ["*internal"]}],
+				"*resources": [{"connIDs": ["*internal"]}]
 			},
 		},
 		
@@ -1434,35 +1434,35 @@ func testApisLoadFromPath(t *testing.T) {
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*resources": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*attributes": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
 			"Tenant": "",
 			"FilterIDs": [],
-			"ConnIDs": ["*internal"]
+			"connIDs": ["*internal"]
 		 }
 	]
 			},
@@ -1483,7 +1483,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"actions": {
 			"enabled": true,
 			"conns": {
-				"*accounts": [{"ConnIDs": ["*localhost"]}]
+				"*accounts": [{"connIDs": ["*localhost"]}]
 			},
 		},
 		
@@ -1495,9 +1495,9 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"filters": {
 			"conns": {
-				"*stats": [{"ConnIDs": ["*internal"]}],
-				"*resources": [{"ConnIDs": ["*internal"]}],
-				"*accounts": [{"ConnIDs": ["*internal"]}]
+				"*stats": [{"connIDs": ["*internal"]}],
+				"*resources": [{"connIDs": ["*internal"]}],
+				"*accounts": [{"connIDs": ["*internal"]}]
 			},
 		},
 		

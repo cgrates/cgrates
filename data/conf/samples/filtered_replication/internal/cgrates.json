@@ -71,7 +71,7 @@
 	"enabled": true,
 	"storeInterval": "-1",
 	"conns": {
-		"*thresholds": [{"ConnIDs": ["*internal"]}]
+		"*thresholds": [{"connIDs": ["*internal"]}]
 	},
 },
 
