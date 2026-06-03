@@ -61,38 +61,32 @@ func actionTarget(act string) string {
 }
 
 func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID, schedule string,
-	data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
+	ignFilters bool, data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
 	return &scheduledActs{
-		tenant:   tenant,
-		apID:     apID,
-		trgTyp:   trgTyp,
-		trgID:    trgID,
-		schedule: schedule,
-		data:     data,
-		acts:     acts,
-		cch:      ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}),
+		tenant:     tenant,
+		apID:       apID,
+		trgTyp:     trgTyp,
+		trgID:      trgID,
+		schedule:   schedule,
+		ignFilters: ignFilters,
+		data:       data,
+		acts:       acts,
+		cch:        ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}),
 	}
 }
 
 // scheduled is a set of actions which will be executed directly or by the cron.schedule
 type scheduledActs struct {
-	tenant   string
-	apID     string
-	trgTyp   string
-	trgID    string
-	schedule string
-	data     utils.MapStorage
-	acts     []actioner
+	tenant     string
+	apID       string
+	trgTyp     string
+	trgID      string
+	schedule   string
+	ignFilters bool
+	data       utils.MapStorage
+	acts       []actioner
 
 	cch *ltcache.TransCache // cache data between actions here
-}
-
-// Execute is called when we want the ActionProfile to be executed
-func (s *scheduledActs) ScheduledExecute() {
-	// Create a fresh root context when cron triggers execution.
-	// TODO: decide whether a timeout should be configured.
-	ctx := context.Background()
-	s.Execute(ctx)
 }
 
 // Execute notifies possible errors on execution
@@ -105,15 +99,9 @@ func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
 			partExec = true
 		}
 	}
-	// postexec here
 	if partExec {
 		err = utils.ErrPartiallyExecuted
 	}
-	return
-}
-
-// postExec will save data which was modified in actions and unlock guardian
-func (s *scheduledActs) postExec() (err error) {
 	return
 }
 
