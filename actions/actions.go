@@ -20,6 +20,7 @@ package actions
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -94,23 +95,30 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 	for _, cgrEv := range cgrEvs {
 		var schedActSet []*scheduledActs
 		if schedActSet, err = aS.scheduledActions(ctx, cgrEv.Tenant, cgrEv, aPrflIDs, ignFilters, false); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf(
-					"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
-					utils.ActionS, cgrEv.Tenant, err))
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
+				utils.ActionS, cgrEv.Tenant, err))
 			partExec = true
 			continue
 		}
+		cronGroups := make(map[string][]*scheduledActs)
+		var cronOrder []string
 		for _, sActs := range schedActSet {
 			if sActs.schedule == utils.MetaASAP {
 				go aS.asapExecuteActions(context.Background(), sActs)
 				continue
 			}
-			if _, err = crn.AddFunc(sActs.schedule, sActs.ScheduledExecute); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
-						utils.ActionS, sActs.tenant, sActs.apID, err))
+			if _, has := cronGroups[sActs.apID]; !has {
+				cronOrder = append(cronOrder, sActs.apID)
+			}
+			cronGroups[sActs.apID] = append(cronGroups[sActs.apID], sActs)
+		}
+		for _, apID := range cronOrder {
+			units := cronGroups[apID]
+			if _, err = crn.AddFunc(units[0].schedule, func() { aS.cronExecuteActions(units) }); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
+					utils.ActionS, units[0].tenant, units[0].apID, err))
 				partExec = true
 				continue
 			}
@@ -209,16 +217,17 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 	if err != nil {
 		return
 	}
+	// like matchingActionProfilesForEvent, ignoreFilters only applies with explicit IDs
+	ignoreFilters = ignoreFilters && len(aPrflIDs) != 0
 
 	for _, aPf := range aPfs {
 		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
 		var partExec bool
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
 			if act, errAct := newActioner(ctx, cgrEv, aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",
-						utils.ActionS, aPf.Tenant, aPf.ID, aCfg.ID, errAct))
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",
+					utils.ActionS, aPf.Tenant, aPf.ID, aCfg.ID, errAct))
 				partExec = true
 				break
 			} else {
@@ -231,13 +240,13 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 		}
 		for trg, acts := range trgActs {
 			if trg == utils.MetaNone { // only one scheduledActs set
-				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
-					evNm, acts))
+				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, "", aPf.Schedule,
+					ignoreFilters, evNm, acts))
 				continue
 			}
 			for trgID := range aPf.Targets[trg] {
 				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
-					evNm, acts))
+					ignoreFilters, evNm, acts))
 			}
 		}
 	}
@@ -268,4 +277,32 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 		}
 		return
 	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+sActs.apID)
+}
+
+// cronExecuteActions runs a profile's units together under one lock.
+func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
+	ctx := context.Background()
+	first := units[0]
+	err := guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
+		if !first.ignFilters {
+			ap, err := aS.dm.GetActionProfile(ctx, first.tenant, first.apID, true, true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			pass, err := aS.fltrS.Pass(ctx, first.tenant, ap.FilterIDs, first.data)
+			if err != nil || !pass {
+				return err
+			}
+		}
+		var err error
+		for _, sActs := range units {
+			err = errors.Join(err, sActs.Execute(ctx))
+		}
+		return err
+	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+first.apID)
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> executing scheduled ActionProfile <%s:%s>, error: <%s>",
+			utils.ActionS, first.tenant, first.apID, err))
+	}
 }

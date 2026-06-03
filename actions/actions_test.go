@@ -198,8 +198,8 @@ func TestScheduledActions(t *testing.T) {
 	if rcv, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false, false); err != nil {
 		t.Error(err)
 	} else {
-		expSchedActs := newScheduledActs(context.Background(), cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
-			utils.EmptyString, evNM, rcv[0].acts)
+		expSchedActs := newScheduledActs(context.Background(), cgrEv.Tenant, cgrEv.ID, utils.MetaNone, "",
+			"", false, evNM, rcv[0].acts)
 		if reflect.DeepEqual(expSchedActs, rcv) {
 			t.Errorf("Expected %+v, received %+v", expSchedActs, rcv)
 		}
@@ -313,8 +313,8 @@ func TestAsapExecuteActions(t *testing.T) {
 		utils.MetaOpts: map[string]any{},
 	}
 
-	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, evNM, nil)
+	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, "",
+		"", false, evNM, nil)
 
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
@@ -323,8 +323,8 @@ func TestAsapExecuteActions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	acts.dm = engine.NewDataManager(dbCm, cfg, nil)
-	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, evNM, nil)
+	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, "",
+		"", false, evNM, nil)
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1100,6 +1100,104 @@ func TestACScheduledActions(t *testing.T) {
 	schedActs[0].cch = nil
 	if !reflect.DeepEqual(schedActs, expectedSChed) {
 		t.Errorf("Expected %+v, received %+v", expectedSChed, schedActs)
+	}
+}
+
+func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	t.Cleanup(func() { engine.Cache.Clear(nil) })
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	actPrf := &utils.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TestACCronExecuteActions",
+		FilterIDs: []string{"*string:~*req.Destination:9999"},
+	}
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
+		t.Fatal(err)
+	}
+	acts := NewActionS(cfg, fltrs, dm, nil)
+
+	evData := utils.MapStorage{
+		utils.MetaReq:  map[string]any{utils.Destination: "1005"},
+		utils.MetaOpts: map[string]any{},
+	}
+	cdrLog := []actioner{
+		&actCDRLog{cfg, fltrs, nil, &utils.APAction{ID: "TEST_CDRLOG", Type: utils.CDRLog}},
+	}
+
+	tmpLogger := utils.Logger
+	t.Cleanup(func() { utils.Logger = tmpLogger })
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
+	sActs := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+		true, evData, cdrLog)
+	acts.cronExecuteActions([]*scheduledActs{sActs})
+	if rcv := buf.String(); !strings.Contains(rcv, "executing action: <TEST_CDRLOG>") {
+		t.Errorf("force-scheduled profile did not run, log: %q", rcv)
+	}
+
+	buf.Reset()
+	sActs = newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+		false, evData, cdrLog)
+	acts.cronExecuteActions([]*scheduledActs{sActs})
+	if rcv := buf.String(); strings.Contains(rcv, "executing action: <TEST_CDRLOG>") {
+		t.Errorf("filtered-out profile still ran, log: %q", rcv)
+	}
+}
+
+type dropCounter struct{}
+
+func (dropCounter) id() string           { return "DROP" }
+func (dropCounter) cfg() *utils.APAction { return &utils.APAction{ID: "DROP"} }
+func (dropCounter) execute(ctx *context.Context, data utils.MapStorage, trgID string) error {
+	data[utils.MetaReq].(map[string]any)["Counter"] = 0
+	return nil
+}
+
+func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
+	engine.Cache.Clear(nil)
+	t.Cleanup(func() { engine.Cache.Clear(nil) })
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	actPrf := &utils.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TestACCronFilterOnce",
+		FilterIDs: []string{"*gte:~*req.Counter:10"},
+	}
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
+		t.Fatal(err)
+	}
+	acts := NewActionS(cfg, fltrs, dm, nil)
+
+	evData := utils.MapStorage{
+		utils.MetaReq:  map[string]any{"Counter": 15},
+		utils.MetaOpts: map[string]any{},
+	}
+
+	tmpLogger := utils.Logger
+	t.Cleanup(func() { utils.Logger = tmpLogger })
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
+	drainUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+		false, evData, []actioner{dropCounter{}})
+	logUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+		false, evData, []actioner{&actCDRLog{cfg, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.CDRLog}}})
+
+	acts.cronExecuteActions([]*scheduledActs{drainUnit, logUnit})
+
+	if rcv := buf.String(); !strings.Contains(rcv, "LOG_UNIT") {
+		t.Errorf("second unit did not run, log: %q", rcv)
 	}
 }
 

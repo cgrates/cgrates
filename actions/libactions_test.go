@@ -19,9 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package actions
 
 import (
-	"bytes"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -89,46 +87,6 @@ func TestACExecuteCDRLog(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acts, expectedActs) {
 		t.Errorf("Expected %+v, received %+v", expectedActs, acts)
-	}
-}
-
-func TestACExecuteScheduledAction(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltr := engine.NewFilterS(cfg, nil, dm)
-	acts := []actioner{
-		&actCDRLog{cfg, fltr, nil, &utils.APAction{
-			ID:   "TEST_ACTION",
-			Type: utils.CDRLog,
-		}},
-	}
-	dataStorage := utils.MapStorage{
-		utils.LogLevelCfg: 7,
-	}
-
-	schedActs := newScheduledActs(nil, utils.CGRateSorg, "FirstAction",
-		utils.EmptyString, utils.MetaTopUp, utils.MetaNow,
-		dataStorage, acts)
-
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
-
-	schedActs.ScheduledExecute()
-
-	expected := "CGRateS <> [WARNING] executing action: <TEST_ACTION>, error: <no connection with CDR Server>"
-	if rcv := buf.String(); !strings.Contains(rcv, expected) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
-	}
-
-	//not a data to save
-	if err := schedActs.postExec(); err != nil {
-		t.Error(err)
 	}
 }
 
