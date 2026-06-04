@@ -509,30 +509,30 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	failEvent = map[string]any{
-		"Tenant": "anotherTenant.org",
+		"tenant": "anotherTenant.org",
 	}
 	passEvent = map[string]any{
-		"Tenant": "cgrates.org",
+		"tenant": "cgrates.org",
 	}
 	fEv = utils.MapStorage{}
 	fEv.Set([]string{utils.MetaReq}, failEvent)
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
-		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, fEv); err != nil {
+		[]string{"*rsr:~*req.tenant:~^cgr.*\\.org$"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
-		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
+		[]string{"*rsr:~*req.tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
-		[]string{"*notrsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
+		[]string{"*notrsr:~*req.tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)

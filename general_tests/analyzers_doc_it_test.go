@@ -64,8 +64,8 @@ func TestAnzDocIT(t *testing.T) {
 	"opts": {
 		"*processRuns": [{
 			"Tenant": "cgrates.org",
-			"FilterIDs": [],
-			"Value": "2"
+			"filterIDs": [],
+			"value": "2"
 		}]
 	}
 },

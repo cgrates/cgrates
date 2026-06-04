@@ -54,57 +54,57 @@
 	"conns":{
 	"*rals": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*cdrs": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*resources": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*routes": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*attributes": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*stats": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*thresholds": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	],
 	"*chargers": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	]

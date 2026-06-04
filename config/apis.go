@@ -88,7 +88,7 @@ func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, rep
 // SectionWithAPIOpts the API params for GetConfig
 type SectionWithAPIOpts struct {
 	APIOpts  map[string]any
-	Tenant   string
+	Tenant   string `json:"tenant"`
 	Sections []string
 }
 
@@ -210,7 +210,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 // SetConfigFromJSONArgs the API params for V1SetConfigFromJSON
 type SetConfigFromJSONArgs struct {
 	APIOpts map[string]any
-	Tenant  string
+	Tenant  string `json:"tenant"`
 	Config  string
 	DryRun  bool
 }

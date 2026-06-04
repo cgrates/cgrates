@@ -50,7 +50,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 	"opts": {
 		"*processRuns": [
 				{
-					"Value": "3",
+					"value": "3",
 				},
 			],
 		},					
@@ -220,12 +220,12 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		"*profileIDs": [],
 		"*processRuns": [
 			{
-				"Value": 2,
+				"value": 2,
 			},
 		],
 		"*profileRuns": [
 			{
-				"Value": 0,
+				"value": 0,
 			},
 		],
 	},
@@ -251,7 +251,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		Tenant:   utils.CGRateSorg,
 		Sections: []string{"attributes"},
 	}
-	expectedGet := `{"attributes":{"conns":{},"enabled":false,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
+	expectedGet := `{"attributes":{"conns":{},"enabled":false,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"filterIDs":null,"tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"filterIDs":null,"tenant":""}],"*profileRuns":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var replyGet string
 	if err := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet); err != nil {
 		t.Error(err)

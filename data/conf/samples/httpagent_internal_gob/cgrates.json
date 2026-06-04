@@ -52,29 +52,29 @@
 	"conns":{
 	"*attributes": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["conn1"]
 		 }
 	],
 	"*cdrs": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["conn1"]
 		 }
 	],
 	"*rates": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["conn1"]
 		 }
 	],
 	"*chargers": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	]

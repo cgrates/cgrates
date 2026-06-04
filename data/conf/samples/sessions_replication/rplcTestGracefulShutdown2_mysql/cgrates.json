@@ -56,15 +56,15 @@
 	"conns":{
 	"*replication": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["rplConn"]
 		 }
 	],
 	"*chargers": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	]

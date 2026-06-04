@@ -47,8 +47,8 @@
 	"conns":{
 	"*chargers": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	]

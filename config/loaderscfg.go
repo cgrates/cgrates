@@ -378,7 +378,7 @@ type LoaderJsonOptsCfg struct {
 type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
-	Tenant          *string
+	Tenant          *string   `json:"tenant"`
 	Run_delay       *string   `json:"runDelay"`
 	Lockfile_path   *string   `json:"lockfilePath"`
 	Caches_conns    *[]string `json:"cachesConns"`

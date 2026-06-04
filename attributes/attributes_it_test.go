@@ -2034,8 +2034,8 @@ func testAttributeSClearIndexes(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 
 	var reply string
@@ -2079,8 +2079,8 @@ func testAttributeSCheckIndexesSetAttributeProfileWithoutFilters(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 	var replyIdx []string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2162,8 +2162,8 @@ func testAttributeSCheckIndexesAddIndexedFilters(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 	var replyIdx []string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2238,8 +2238,8 @@ func testAttributeSCheckIndexesModifyIndexedFilter(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 	var replyIdx []string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2286,8 +2286,8 @@ func testAttributeSCheckIndexesRemoveAnIndexedFilter(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 	var replyIdx []string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2319,8 +2319,8 @@ func testAttributeSCheckIndexesRemoveAttributeProfile(t *testing.T) {
 
 	// using a map instead because the object causes import cycle.
 	args := map[string]string{
-		"Tenant":   "cgrates.org",
-		"ItemType": utils.MetaAttributes,
+		"tenant":   "cgrates.org",
+		"itemType": utils.MetaAttributes,
 	}
 
 	var replyIdx []string

@@ -57,9 +57,9 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*exporterIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ]
 	}
@@ -84,8 +84,8 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*ees": [	// connections to EventExporter
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 	},			
@@ -317,35 +317,35 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*stats": [
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*trends": [
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// "*rankings": [
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 	}	
@@ -360,55 +360,55 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*chargers": [		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*attributes": [		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EventExporter
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [	// connections to RateS
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// "*accounts": [	// connections to AccountS
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -417,72 +417,72 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		// "*accounts": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*attributes": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*chargers": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*ees": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*rates": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*stats": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*thresholds": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*refund": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*rerate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*store": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "true"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "true"
 		// 	}
 		// ]
 	}
@@ -494,28 +494,28 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*sessions": [	// RPC Connections IDs
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connection for routing processed and invalid messages through EEs
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// "*thresholds": [	// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -642,8 +642,8 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*attributes": [  // RPC Connections IDs
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -808,367 +808,367 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		// "*accounts": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		//  "*rates": [
         //  {
-        //      "Tenant": "*any",
-        //      "FilterIDs": [],
-        //      "Value": false
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
         //  }
         // ],
 		// "*attributes": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*cdrs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*chargers": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*resources": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ips": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*routes": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*stats": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*thresholds": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*initiate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*update": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*terminate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*message": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*attributesDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*blockerError": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*cdrsDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*resourcesAuthorize": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*resourcesAllocate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*resourcesRelease": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*resourcesDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ipsAuthorize": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ipsAllocate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ipsRelease": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*routesDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*statsDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*thresholdsDerivedReply": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*maxUsage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*forceDuration": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ttl": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*chargeable": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ttlLastUsage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*ttlLastUsed": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*debitInterval": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*ttlMaxDelay": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*ttlUsage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*originID": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*accountsForceUsage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*ees": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*eesIDs": [
         // 	{
-        // 		"Tenant": "*any",
-        // 		"FilterIDs": [],
-        // 		"Value": ""
+        // 		"tenant": "*any",
+        // 		"filterIDs": [],
+        // 		"value": ""
         // 	}
         // ],
 	},
 	"conns": {
 	// "*attributes": [		// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*accounts": [		// connections to AccountS
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*rates": [		// connections to RateS
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*routes": [		// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*stats": [		// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*ips": [	// connections to IPs for monitoring ip usage <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*chargers": [	// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*cdrs": [	// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*replication": [	// replicate sessions towards these session services
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*ees": [	// connections to EEs for exporting session events <""|*internal|$rpc_conns_id>
     // 	{
-    // 		"Tenant": "",
-    // 		"FilterIDs": [],
+    // 		"tenant": "",
+    // 		"filterIDs": [],
     // 		"connIDs": []
     // 	}
     // ],
@@ -1254,15 +1254,15 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
-		 // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+		 // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
-	     // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+	     // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
@@ -1312,15 +1312,15 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
-		 // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+		 // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
-	     // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+	     // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
@@ -1346,15 +1346,15 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
-		 // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+		 // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
-	     // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+	     // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
@@ -1370,29 +1370,29 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	// "*admins": [		// connections to AdminS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*caches": [		// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*cores": [		// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
 	// "*stats": [	// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 	// 	{
-	// 		"Tenant": "",
-	// 		"FilterIDs": [],
+	// 		"tenant": "",
+	// 		"filterIDs": [],
 	// 		"connIDs": []
 	// 	}
 	// ],
@@ -1407,22 +1407,22 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*stats": [		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [		// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [		// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1437,30 +1437,30 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*profileIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ],
 		// "*processRuns": [			// number of run loops when processing event
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "1"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "1"
 		// 	}
 		// ],
 		// "*profileRuns": [			// number of runs a profile will process during the event
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 0
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 0
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [ 		// ignore the filters for attributeIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ]
 	}
@@ -1472,8 +1472,8 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	 	// "*attributes": [		// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1494,8 +1494,8 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*thresholds": [		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1510,23 +1510,23 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*usageID": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*usageTTL": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "72h"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "72h"
 		// 	}
 		// ],
 		// "*units": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 1
 		// 	}
 		// ]
 	}
@@ -1545,23 +1545,23 @@ const CGRATES_CFG_JSON = `
     "opts":{
 	// "*allocationID": [
 	//     {
-	// 		"Tenant": "*any",
-	// 		"FilterIDs": [],
-	// 		"Value": ""
+	// 		"tenant": "*any",
+	// 		"filterIDs": [],
+	// 		"value": ""
 	//     }
 	// ],
 	// "*ttl": [
 	//     {
-	// 		"Tenant": "*any",
-	// 		"FilterIDs": [],
-	// 		"Value": "72h"
+	// 		"tenant": "*any",
+	// 		"filterIDs": [],
+	// 		"value": "72h"
 	//     }
 	// ],
 	// "*units": [
 	//     {
-	// 		"Tenant": "*any",
-	// 		"FilterIDs": [],
-	// 		"Value": 1
+	// 		"tenant": "*any",
+	// 		"filterIDs": [],
+	// 		"value": 1
 	//     }
 	// ]
     }
@@ -1575,15 +1575,15 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*ees": [	// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1599,23 +1599,23 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		// "*profileIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for statIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],	
 		// "*roundingDecimals": [	// ignore the filters for statIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 5
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 5
 		// 	}
 		// ]
 	}
@@ -1635,22 +1635,22 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*actions": [	// connections to ActionS to execute the actions
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EEs to sent threshold events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*attributes": [		// connections to AttributeS to sent threshold events, empty to disable: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1659,16 +1659,16 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*thresholdsIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for thresholdIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ]
 	}
@@ -1682,22 +1682,22 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>	
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1713,22 +1713,22 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*stats": [		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1750,36 +1750,36 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 	    // "*attributes": [		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*resources": [		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [		// connections to RateS
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [	// connections to AccountS
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -1788,58 +1788,58 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*context": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "*routes"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "*routes"
 		// 	}
 		// ],
 		// "*profileCount": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "1"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "1"
 		// 	}
 		// ],
 		// "*ignoreErrors": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ],
 		// "*maxCost": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": ""
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ],
 		// "*limit": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 1
 		// 	}
 		// ],
 		// "*offset": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 1
 		// 	}
 		// ],
 		// "*maxItems": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 1
 		// 	}
 		// ],
 		// "*usage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "1m"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "1m"
 		// 	}
 		// ]
 	}
@@ -2220,9 +2220,9 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*exporterIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ]
 	}
@@ -2235,22 +2235,22 @@ const CGRATES_CFG_JSON = `
 		"*caches": [{"connIDs": ["*internal"]}],
 		// "*actions": [	// connections to ActionS for reloads
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*attributes": [		// connections to AttributeS for CDRExporter
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [	// connections to EEs
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -2278,37 +2278,37 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*profileIDs": [		// select the rate profiles used for cost calculation
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ],
 		// "*startTime": [		// start time used for cost calculation
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "*now"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "*now"
 		// 	}
 		// ],
 		// "*usage": [			// usage used for cost calculation
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "1m"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "1m"
 		// 	}
 		// ],
 		// "*intervalStart": [		// event interval start
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "0"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "0"
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for rateProfileIDs 
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ]
 	}
@@ -2323,15 +2323,15 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*internal"]}]
 		 // "*stats": [			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 		 // 	{
-		 // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+		 // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
 	     // "*thresholds": [		// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	     // 	{
-	     // 		"Tenant": "",
-	     // 		"FilterIDs": [],
+	     // 		"tenant": "",
+	     // 		"filterIDs": [],
 	     // 		"connIDs": []
 	     // 	}
 	     // ],
@@ -2536,43 +2536,43 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*cdrs": [		// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*ees": [		// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for *resetThreshold action <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*stats": [		// connections to StatS for *resetStatQueue action: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*accounts": [	// connections to AccountS for *topup/*topUpReset action: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*admins": [		// connections to AdminS for *dynamic actions: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -2589,23 +2589,23 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*profileIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": [],
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": [],
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for actionProfileIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*posterAttempts": [		// poster attempts for HTTPPost action type	
 		//     {
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": 1
 		// 	}
 		// ]
 	}
@@ -2618,22 +2618,22 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		// "*attributes": [		// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*rates": [		// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
 		// "*thresholds": [		// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 		// 	{
-		// 		"Tenant": "",
-		// 		"FilterIDs": [],
+		// 		"tenant": "",
+		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
@@ -2649,23 +2649,23 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		// "*profileIDs": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Values": []
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
 		// 	}
 		// ],
 		// "*usage": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "72h"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "72h"
 		// 	}
 		// ],
 		// "*profileIgnoreFilters": [	// ignore the filters for accountIDs
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "false"
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
 		// 	}
 		// ]
 	}

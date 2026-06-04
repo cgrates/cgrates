@@ -4,22 +4,22 @@
     "conns":{
     "*ips": [
          {
-            "Tenant": "",
-            "FilterIDs": [],
+            "tenant": "",
+            "filterIDs": [],
             "connIDs": ["*localhost"]
          }
     ],
     "*cdrs": [
          {
-            "Tenant": "",
-            "FilterIDs": [],
+            "tenant": "",
+            "filterIDs": [],
             "connIDs": ["*localhost"]
          }
     ],
     "*chargers": [
          {
-            "Tenant": "",
-            "FilterIDs": [],
+            "tenant": "",
+            "filterIDs": [],
             "connIDs": ["*localhost"]
          }
     ]

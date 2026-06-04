@@ -1906,24 +1906,24 @@ func TestAttrDynamicOptsFromJson(t *testing.T) {
 			"opts": {
 				"*processRuns": [
 						{
-							"Value": "~*req.ProcessRuns",
-							"FilterIDs": ["*string:~*req.Account:1001"]
+							"value": "~*req.ProcessRuns",
+							"filterIDs": ["*string:~*req.Account:1001"]
 						},
 						{
-							"Value": 11,
-							"FilterIDs": ["*string:~*req.Account:1003"]
+							"value": 11,
+							"filterIDs": ["*string:~*req.Account:1003"]
 						},
 					],
 		        "*profileRuns": [			
 		        	{
-		        		"FilterIDs": ["*string:~*req.Account:1001"],
-		        		"Value": "~*opts.ProfileRuns"
+		        		"filterIDs": ["*string:~*req.Account:1001"],
+		        		"value": "~*opts.ProfileRuns"
 		        	}
 		        ],
 		        "*profileIgnoreFilters": [ 		
 		        	{
-		        		"FilterIDs": ["*string:~*req.Account:1001"],
-		        		"Value": "~*req.IgnoreFilters"
+		        		"filterIDs": ["*string:~*req.Account:1001"],
+		        		"value": "~*req.IgnoreFilters"
 		        	}
 		         ] 
 			},					
@@ -2019,26 +2019,26 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 			"opts": {
 			  "*accounts": [
 		      	{
-		      		"FilterIDs": ["*string:~*req.Account:1001"],
-		      		"Value": "~*opts.*accounts"
+		      		"filterIDs": ["*string:~*req.Account:1001"],
+		      		"value": "~*opts.*accounts"
 		      	}
 		      ],
 		      "*attributes": [
 		      	{
-		      		"FilterIDs": ["*string:~*req.Account:1001"],
-		      		"Value": "~*opts.*attributes"
+		      		"filterIDs": ["*string:~*req.Account:1001"],
+		      		"value": "~*opts.*attributes"
 		      	}
 		      ],
 				"*ttl": [
 					{
-				        "FilterIDs": ["*string:~*req.Account:1001"],
-						"Value": "~*req.TTL",
+				        "filterIDs": ["*string:~*req.Account:1001"],
+						"value": "~*req.TTL",
 					},
 				],
 				"*debitInterval": [
 					{
-				        "FilterIDs": ["*string:~*req.Account:1001"],
-						"Value": "~*req.Usage",
+				        "filterIDs": ["*string:~*req.Account:1001"],
+						"value": "~*req.Usage",
 					},
 				],
 			},
@@ -2132,20 +2132,20 @@ func TestResDynamicOptsFromJson(t *testing.T) {
 				"opts":{
 		          "*usageID": [
 		          	{
-		          		"FilterIDs": ["*string:~*req.Account:1001"],
-		          		"Value": "~*req.UsageID"
+		          		"filterIDs": ["*string:~*req.Account:1001"],
+		          		"value": "~*req.UsageID"
 		          	}
 		          ],
 		          "*usageTTL": [
 		          	{
-		          		"FilterIDs": ["*string:~*req.Account:1001"],
-		          		"Value": "~*req.UsageTTL"
+		          		"filterIDs": ["*string:~*req.Account:1001"],
+		          		"value": "~*req.UsageTTL"
 		          	}
 		          ],
 		          "*units": [
 		          	{
-		          		"FilterIDs": ["*string:~*req.Account:1001"],
-		          		"Value": "~*opts.*units"
+		          		"filterIDs": ["*string:~*req.Account:1001"],
+		          		"value": "~*opts.*units"
 		          	}
 		          ]
 	           }				
@@ -2223,20 +2223,20 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
              "opts":{
 		         "*usage": [
 		         	{
-		         		"FilterIDs": ["*string:~*req.Account:1001"],
-		         		"Value": "~*req.Usage"
+		         		"filterIDs": ["*string:~*req.Account:1001"],
+		         		"value": "~*req.Usage"
 		         	},
 					{
-		         		"FilterIDs": ["*string:~*req.Account:1002"],
-		         		"Value": 15555
+		         		"filterIDs": ["*string:~*req.Account:1002"],
+		         		"value": 15555
 		         	},
 					{
-		         		"FilterIDs": ["*string:~*req.Account:1003"],
-		         		"Value": "5m"
+		         		"filterIDs": ["*string:~*req.Account:1003"],
+		         		"value": "5m"
 		         	},
 					{
-		         		"FilterIDs": ["*string:~*req.Account:1004"],
-		         		"Value": "~*opts.*usage"
+		         		"filterIDs": ["*string:~*req.Account:1004"],
+		         		"value": "~*opts.*usage"
 		         	},
 		         ]
 	            }

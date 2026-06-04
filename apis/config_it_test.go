@@ -143,9 +143,9 @@ func testCfgGetConfig(t *testing.T) {
 			"existsIndexedFields":    []string{},
 			"notExistsIndexedFields": []string{},
 			utils.ConnsCfg: map[string]any{
-				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaStats:     []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
 			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
@@ -211,32 +211,32 @@ func testCfgSetGetConfig(t *testing.T) {
 			"existsIndexedFields":    []any{},
 			"notExistsIndexedFields": []any{},
 			utils.ConnsCfg: map[string]any{
-				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaStats:     []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
 			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 				utils.MetaProfileRunsCfg: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 				utils.MetaProfileIgnoreFilters: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 			},
@@ -360,7 +360,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	"opts":{
 		"*processRuns": [
 			{
-				"Value": 2,
+				"value": 2,
 			},
 		],
 		},
@@ -374,7 +374,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","connIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":false,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
+	expectedGet := `{"attributes":{"conns":{"*accounts":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*resources":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*stats":[{"filterIDs":null,"tenant":"","connIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":false,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"filterIDs":null,"tenant":""},{"filterIDs":null,"tenant":""},{"filterIDs":null,"tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"filterIDs":null,"tenant":""}],"*profileRuns":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -542,9 +542,9 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"existsIndexedFields":    []string{},
 			"notExistsIndexedFields": []string{},
 			utils.ConnsCfg: map[string]any{
-				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaStats:     []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
 			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
@@ -673,32 +673,32 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"existsIndexedFields":    []any{},
 			"notExistsIndexedFields": []any{},
 			utils.ConnsCfg: map[string]any{
-				utils.MetaStats:     []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaResources: []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
-				utils.MetaAccounts:  []any{map[string]any{"FilterIDs": nil, "Tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaStats:     []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaResources: []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
+				utils.MetaAccounts:  []any{map[string]any{"filterIDs": nil, "tenant": "", "connIDs": []any{utils.MetaLocalHost}}},
 			},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 				utils.MetaProfileRunsCfg: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 				utils.MetaProfileIgnoreFilters: []any{
 					map[string]any{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
+						"tenant":    utils.EmptyString,
+						"filterIDs": nil,
 					},
 				},
 			},

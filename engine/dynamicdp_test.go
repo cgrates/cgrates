@@ -707,7 +707,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"sessions": {
 				"conns": {
 					"*attributes": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "connIDs": ["conn"]},
+						{"filterIDs": ["*string:~*req.Account:1001"], "connIDs": ["conn"]},
 					]
 				}
 			}
@@ -739,7 +739,7 @@ func TestDPFilterSConns(t *testing.T) {
 			},
 			"chargers": {
 				"conns": {
-					"*attributes": [{"connIDs": ["conn2"],"FilterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
+					"*attributes": [{"connIDs": ["conn2"],"filterIDs":["*gte:~*accounts.1001.Balances[Bal1].Units:20"]}]
 				}
 			}
 		}`)
@@ -768,7 +768,7 @@ func TestDPFilterSConns(t *testing.T) {
 			"filters": {
 				"conns": {
 					"*accounts": [
-						{"FilterIDs": ["*string:~*req.Account:1001"], "connIDs": ["*internal"]},
+						{"filterIDs": ["*string:~*req.Account:1001"], "connIDs": ["*internal"]},
 					]
 				}
 			},

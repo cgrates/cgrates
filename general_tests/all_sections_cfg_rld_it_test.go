@@ -339,7 +339,7 @@ func testSectConfigSReloadFilters(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"filters":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]}}}`
+	cfgStr := `{"filters":{"conns":{"*accounts":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*resources":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*stats":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]}}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -368,7 +368,7 @@ func testSectConfigSReloadCDRS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"cdrs":{"conns":{"*chargers":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"enabled":true,"extraFields":[],"onlineCDRExports":null,"opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*ees":[{"FilterIDs":null,"Tenant":""}],"*rates":[{"FilterIDs":null,"Tenant":""}],"*refund":[{"FilterIDs":null,"Tenant":""}],"*rerate":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*store":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}]},"sessionCostRetries":5}}`
+	cfgStr := `{"cdrs":{"conns":{"*chargers":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"enabled":true,"extraFields":[],"onlineCDRExports":null,"opts":{"*accounts":[{"filterIDs":null,"tenant":""}],"*attributes":[{"filterIDs":null,"tenant":""}],"*chargers":[{"filterIDs":null,"tenant":""}],"*ees":[{"filterIDs":null,"tenant":""}],"*rates":[{"filterIDs":null,"tenant":""}],"*refund":[{"filterIDs":null,"tenant":""}],"*rerate":[{"filterIDs":null,"tenant":""}],"*stats":[{"filterIDs":null,"tenant":""}],"*store":[{"filterIDs":null,"tenant":""}],"*thresholds":[{"filterIDs":null,"tenant":""}]},"sessionCostRetries":5}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -441,7 +441,7 @@ func testSectConfigSReloadSessions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"sessions":{"alterableFields":[],"channelSyncInterval":"0","clientProtocol":1,"conns":{"*attributes":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}],"*cdrs":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}],"*chargers":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}],"*rates":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}],"*resources":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}],"*routes":[{"FilterIDs":[],"Tenant":"","connIDs":["*internal"]}]},"defaultUsage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listenBiGob":"","listenBiJSON":"127.0.0.1:2014","minDurLowBalance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*accountsForceUsage":[],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*ips":[{"FilterIDs":null,"Tenant":""}],"*ipsAllocate":[{"FilterIDs":null,"Tenant":""}],"*ipsAuthorize":[{"FilterIDs":null,"Tenant":""}],"*ipsRelease":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*originID":[],"*rates":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"sessionIndexes":["OriginID"],"stir":{"allowedAttest":["*any"],"defaultAttest":"A","payloadMaxduration":"-1","privateKeyPath":"","publicKeyPath":""},"storeSessionCosts":false,"terminateAttempts":5}}`
+	cfgStr := `{"sessions":{"alterableFields":[],"channelSyncInterval":"0","clientProtocol":1,"conns":{"*attributes":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}],"*cdrs":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}],"*chargers":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}],"*rates":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}],"*resources":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}],"*routes":[{"filterIDs":[],"tenant":"","connIDs":["*internal"]}]},"defaultUsage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listenBiGob":"","listenBiJSON":"127.0.0.1:2014","minDurLowBalance":"0","opts":{"*accounts":[{"filterIDs":null,"tenant":""}],"*accountsForceUsage":[],"*attributes":[{"filterIDs":null,"tenant":""}],"*attributesDerivedReply":[{"filterIDs":null,"tenant":""}],"*blockerError":[{"filterIDs":null,"tenant":""}],"*cdrs":[{"filterIDs":null,"tenant":""}],"*cdrsDerivedReply":[{"filterIDs":null,"tenant":""}],"*chargeable":[{"filterIDs":null,"tenant":""}],"*chargers":[{"filterIDs":null,"tenant":""}],"*debitInterval":[{"filterIDs":null,"tenant":""}],"*forceUsage":[],"*initiate":[{"filterIDs":null,"tenant":""}],"*ips":[{"filterIDs":null,"tenant":""}],"*ipsAllocate":[{"filterIDs":null,"tenant":""}],"*ipsAuthorize":[{"filterIDs":null,"tenant":""}],"*ipsRelease":[{"filterIDs":null,"tenant":""}],"*maxUsage":[{"filterIDs":null,"tenant":""}],"*message":[{"filterIDs":null,"tenant":""}],"*originID":[],"*rates":[{"filterIDs":null,"tenant":""}],"*resources":[{"filterIDs":null,"tenant":""}],"*resourcesAllocate":[{"filterIDs":null,"tenant":""}],"*resourcesAuthorize":[{"filterIDs":null,"tenant":""}],"*resourcesDerivedReply":[{"filterIDs":null,"tenant":""}],"*resourcesRelease":[{"filterIDs":null,"tenant":""}],"*routes":[{"filterIDs":null,"tenant":""}],"*routesDerivedReply":[{"filterIDs":null,"tenant":""}],"*stats":[{"filterIDs":null,"tenant":""}],"*statsDerivedReply":[{"filterIDs":null,"tenant":""}],"*terminate":[{"filterIDs":null,"tenant":""}],"*thresholds":[{"filterIDs":null,"tenant":""}],"*thresholdsDerivedReply":[{"filterIDs":null,"tenant":""}],"*ttl":[{"filterIDs":null,"tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"filterIDs":null,"tenant":""}],"*ttlUsage":[],"*update":[{"filterIDs":null,"tenant":""}]},"sessionIndexes":["OriginID"],"stir":{"allowedAttest":["*any"],"defaultAttest":"A","payloadMaxduration":"-1","privateKeyPath":"","publicKeyPath":""},"storeSessionCosts":false,"terminateAttempts":5}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -464,7 +464,7 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"asteriskAgent":{"asteriskConns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false}}`
+	cfgStr := `{"asteriskAgent":{"asteriskConns":[{"address":"127.0.0.1:8088","alias":"","ariWebsocket":false,"connectAttempts":3,"maxReconnectInterval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -487,7 +487,7 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
 
-	cfgStr := `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
+	cfgStr := `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -509,7 +509,7 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"kamailioAgent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"timezone":""}}`
+	cfgStr := `{"kamailioAgent":{"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -531,7 +531,7 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"diameterAgent":{"asrTemplate":"","connHealthCheckInterval":"0s","connStatusStatQueueIDs":[],"connStatusThresholdIDs":[],"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*birpc_internal"]}]},"dictionariesAppendDefaults":true,"dictionariesPath":"/usr/share/cgrates/diameter/dict/","enabled":false,"forcedDisconnect":"*none","listen":"127.0.0.1:3868","listenNet":"tcp","originHost":"CGR-DA","originRealm":"cgrates.org","productName":"CGRateS","rarTemplate":"","requestProcessors":[],"syncedConnRequests":false,"vendorID":0}}`
+	cfgStr := `{"diameterAgent":{"asrTemplate":"","connHealthCheckInterval":"0s","connStatusStatQueueIDs":[],"connStatusThresholdIDs":[],"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"dictionariesAppendDefaults":true,"dictionariesPath":"/usr/share/cgrates/diameter/dict/","enabled":false,"forcedDisconnect":"*none","listen":"127.0.0.1:3868","listenNet":"tcp","originHost":"CGR-DA","originRealm":"cgrates.org","productName":"CGRateS","rarTemplate":"","requestProcessors":[],"syncedConnRequests":false,"vendorID":0}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -575,7 +575,7 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"dnsAgent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"timezone":""}}`
+	cfgStr := `{"dnsAgent":{"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"enabled":false,"listeners":[{"address":"127.0.0.1:2053","network":"udp"}],"requestProcessors":[],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -604,7 +604,7 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"attributes":{"conns":{"*accounts":[{"FilterIDs":null,"Tenant":"","connIDs":["*localhost"]}],"*resources":[{"FilterIDs":null,"Tenant":"","connIDs":["*localhost"]}],"*stats":[{"FilterIDs":null,"Tenant":"","connIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
+	cfgStr := `{"attributes":{"conns":{"*accounts":[{"filterIDs":null,"tenant":"","connIDs":["*localhost"]}],"*resources":[{"filterIDs":null,"tenant":"","connIDs":["*localhost"]}],"*stats":[{"filterIDs":null,"tenant":"","connIDs":["*localhost"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*processRuns":[{"filterIDs":null,"tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"filterIDs":null,"tenant":""}],"*profileRuns":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -641,7 +641,7 @@ func testSectConfigSReloadChargers(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"chargers":{"conns":{"*attributes":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
+	cfgStr := `{"chargers":{"conns":{"*attributes":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"prefixIndexedFields":[],"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -677,7 +677,7 @@ func testSectConfigSReloadResources(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"resources":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
+	cfgStr := `{"resources":{"conns":{"*thresholds":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*units":[{"filterIDs":null,"tenant":""}],"*usageID":[{"filterIDs":null,"tenant":""}],"*usageTTL":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -713,7 +713,7 @@ func testSectConfigSReloadStats(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"stats":{"conns":{"*thresholds":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"eesExporterIDs":null,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","storeUncompressedLimit":0,"suffixIndexedFields":[]}}`
+	cfgStr := `{"stats":{"conns":{"*thresholds":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"eesExporterIDs":null,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"filterIDs":null,"tenant":""}],"*roundingDecimals":[]},"prefixIndexedFields":[],"storeInterval":"-1ns","storeUncompressedLimit":0,"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -749,7 +749,7 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"thresholds":{"conns":{"*actions":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"eesExporterIDs":[],"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
+	cfgStr := `{"thresholds":{"conns":{"*actions":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"eesExporterIDs":[],"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":[],"storeInterval":"-1ns","suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -785,7 +785,7 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"routes":{"conns":{"*rates":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*resources":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}],"*stats":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"defaultRatio":1,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffixIndexedFields":[]}}`
+	cfgStr := `{"routes":{"conns":{"*rates":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*resources":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}],"*stats":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"defaultRatio":1,"enabled":true,"existsIndexedFields":[],"indexedSelects":true,"nestedFields":false,"notExistsIndexedFields":[],"opts":{"*context":[{"filterIDs":null,"tenant":""}],"*ignoreErrors":[{"filterIDs":null,"tenant":""}],"*limit":[],"*maxCost":[{"Tenant":"","Value":""}],"*maxItems":[],"*offset":[],"*profileCount":[{"filterIDs":null,"tenant":""}],"*usage":[{"filterIDs":null,"tenant":""}]},"prefixIndexedFields":["*req.Destination"],"suffixIndexedFields":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -947,7 +947,7 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"sipAgent":{"conns":{"*sessions":[{"FilterIDs":null,"Tenant":"","connIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listenNet":"udp","requestProcessors":[],"retransmissionTimer":"1s","timezone":""}}`
+	cfgStr := `{"sipAgent":{"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*internal"]}]},"enabled":false,"listen":"127.0.0.1:5060","listenNet":"udp","requestProcessors":[],"retransmissionTimer":"1s","timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

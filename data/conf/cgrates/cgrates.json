@@ -35,8 +35,8 @@
 // 	"opts":{
 // 		// "*exporterIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ]
@@ -292,72 +292,72 @@
 // 	"opts": {
 // 		// "*accounts": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*attributes": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*chargers": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*ees": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*rates": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*stats": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*thresholds": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*refund": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*rerate": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*store": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "true"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "true"
 // 		// 	}
 // 		// ]
 // 	}
@@ -642,219 +642,219 @@
 // 	"opts": {
 // 		// "*accounts": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*attributes": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*cdrs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*chargers": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*resources": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*routes": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*stats": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*thresholds": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*initiate": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*update": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*terminate": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*message": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*attributesDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*blockerError": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*cdrsDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*resourcesAuthorize": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*resourcesAllocate": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*resourcesRelease": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*resourcesDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*routesDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*statsDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*thresholdsDerivedReply": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*maxUsage": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*forceDuration": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*ttl": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*chargeable": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*ttlLastUsage": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*ttlLastUsed": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*debitInterval": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*ttlMaxDelay": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*ttlUsage": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ]
 // 	}
@@ -988,30 +988,30 @@
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ],
 // 		// "*processRuns": [			// number of run loops when processing event
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "1"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "1"
 // 		// 	}
 // 		// ],
 // 		// "*profileRuns": [			// number of runs a profile will process during the event
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 0
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 0
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [ 		// ignore the filters for attributeIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ]
 // 	}
@@ -1045,23 +1045,23 @@
 // 	"opts":{
 // 		// "*usageID": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*usageTTL": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "72h"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "72h"
 // 		// 	}
 // 		// ],
 // 		// "*units": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 1
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 1
 // 		// 	}
 // 		// ]
 // 	}
@@ -1085,23 +1085,23 @@
 // 	"opts": {
 // 		// "*profileIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for statIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],	
 // 		// "*roundingDecimals": [	// ignore the filters for statIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 5
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 5
 // 		// 	}
 // 		// ]
 // 	}
@@ -1122,16 +1122,16 @@
 // 	"opts":{
 // 		// "*thresholdsIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for thresholdIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ]
 // 	}
@@ -1179,58 +1179,58 @@
 // 	"opts":{
 // 		// "*context": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "*routes"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "*routes"
 // 		// 	}
 // 		// ],
 // 		// "*profileCount": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "1"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "1"
 // 		// 	}
 // 		// ],
 // 		// "*ignoreErrors": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ],
 // 		// "*maxCost": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": ""
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": ""
 // 		// 	}
 // 		// ],
 // 		// "*limit": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 1
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 1
 // 		// 	}
 // 		// ],
 // 		// "*offset": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 1
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 1
 // 		// 	}
 // 		// ],
 // 		// "*maxItems": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 1
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 1
 // 		// 	}
 // 		// ],
 // 		// "*usage": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "1m"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "1m"
 // 		// 	}
 // 		// ]
 // 	}
@@ -1588,8 +1588,8 @@
 // 	"opts":{
 // 		// "*exporterIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ]
@@ -1626,37 +1626,37 @@
 // 	"opts":{
 // 		// "*profileIDs": [		// select the rate profiles used for cost calculation
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ],
 // 		// "*startTime": [		// start time used for cost calculation
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "*now"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "*now"
 // 		// 	}
 // 		// ],
 // 		// "*usage": [			// usage used for cost calculation
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "1m"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "1m"
 // 		// 	}
 // 		// ],
 // 		// "*intervalStart": [		// event interval start
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "0"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "0"
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for rateProfileIDs 
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ]
 // 	}
@@ -1818,23 +1818,23 @@
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": [],
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for actionProfileIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": false
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": false
 // 		// 	}
 // 		// ],
 // 		// "*posterAttempts": [		// poster attempts for HTTPPost action type	
 // 		//     {
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": 1
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": 1
 // 		// 	}
 // 		// ]
 // 	}
@@ -1858,23 +1858,23 @@
 // 	"opts":{
 // 		// "*profileIDs": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
 // 		// 		"connIDs": []
 // 		// 	}
 // 		// ],
 // 		// "*usage": [
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "72h"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "72h"
 // 		// 	}
 // 		// ],
 // 		// "*profileIgnoreFilters": [	// ignore the filters for accountIDs
 // 		// 	{
-// 		// 		"Tenant": "*any",
-// 		// 		"FilterIDs": [],
-// 		// 		"Value": "false"
+// 		// 		"tenant": "*any",
+// 		// 		"filterIDs": [],
+// 		// 		"value": "false"
 // 		// 	}
 // 		// ]
 // 	}

@@ -75,15 +75,15 @@
     "conns":{
     "*rates": [
          {
-            "Tenant": "",
-            "FilterIDs": [],
+            "tenant": "",
+            "filterIDs": [],
             "connIDs": ["*internal"]
          }
     ],
     "*chargers": [
          {
-            "Tenant": "",
-            "FilterIDs": [],
+            "tenant": "",
+            "filterIDs": [],
             "connIDs": ["*internal"]
          }
     ]
