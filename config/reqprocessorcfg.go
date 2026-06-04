@@ -126,7 +126,7 @@ func (rp RequestProcessor) Clone() (cln *RequestProcessor) {
 type ReqProcessorJsnCfg struct {
 	ID             *string
 	Filters        *[]string
-	Tenant         *string
+	Tenant         *string `json:"tenant"`
 	Timezone       *string
 	Flags          *[]string
 	Request_fields *[]*FcTemplateJsonCfg

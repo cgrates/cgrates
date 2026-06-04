@@ -74,8 +74,8 @@ func TestErsStartDelay(t *testing.T) {
 		    "conns": {
 			"*cdrs": [ 
 			{
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 			}
 									]
@@ -88,7 +88,7 @@ func TestErsStartDelay(t *testing.T) {
 			"opts": {
 			 "*usage": [			
 			{
-				"Value": "~*req.Usage",
+				"value": "~*req.Usage",
 	       	}
 				]
 			},

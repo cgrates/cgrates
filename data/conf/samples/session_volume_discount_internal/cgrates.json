@@ -28,15 +28,15 @@
         "conns":{
         "*routes": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ],
         "*cdrs": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ]
@@ -48,8 +48,8 @@
         "opts":{	
             "*processRuns": [
                 {
-                    "Tenant": "*any",
-                    "Value": "2",
+                    "tenant": "*any",
+                    "value": "2",
                 },
             ],							// 			
         },
@@ -66,34 +66,34 @@
         "opts": {			
             "*chargers": [
                 {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*notstring:~*req.Account:sipp"],
-                    "Value": "true",
+                    "tenant": "*any",
+                    "filterIDs": ["*notstring:~*req.Account:sipp"],
+                    "value": "true",
                 },
             ],
             "*rates": [
                 {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
-                    "Value": "true",
+                    "tenant": "*any",
+                    "filterIDs": ["*notstring:~*req.Account:sipp|1001"],
+                    "value": "true",
                 },
                 {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*string:~*opts.*runID:customers"],
-                    "Value": "true",
+                    "tenant": "*any",
+                    "filterIDs": ["*string:~*opts.*runID:customers"],
+                    "value": "true",
                 },
             ],	
             "*accounts": [
                 {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
-                    "Value": "true",
+                    "tenant": "*any",
+                    "filterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
+                    "value": "true",
                 },
             ],			
             "*ees": [
                 {
-                    "Tenant": "*any",
-                    "Value": "true",
+                    "tenant": "*any",
+                    "value": "true",
                 },
             ],
         },   
@@ -124,8 +124,8 @@
         "opts":{
             "*profileIgnoreFilters": [
                 {
-                    "Tenant": "*any",
-                    "Value": "true",
+                    "tenant": "*any",
+                    "value": "true",
                 },
             ],
         },
@@ -139,8 +139,8 @@
         "opts":{	
             "*usage": [
                 {
-                    "Tenant": "*any",
-                    "Value": "1m",
+                    "tenant": "*any",
+                    "value": "1m",
                 },
             ],			
         },
@@ -166,8 +166,8 @@
         "opts":{
             "*ignoreErrors": [						
                 {
-                    "Tenant": "*any",
-                    "Value": "true",
+                    "tenant": "*any",
+                    "value": "true",
                 },
             ],
         },

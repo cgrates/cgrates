@@ -99,22 +99,22 @@
 	"conns":{
 	"*rates": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	],
 	"*cdrs": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	],
 	"*chargers": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	]
@@ -160,7 +160,7 @@
         "registrarsConns": ["regConn"],
         "hosts": [
 			{
-				"Tenant": "*default",
+				"tenant": "*default",
 				"ID":"attributes",
 				"transport": "*json",
 				"tls": false

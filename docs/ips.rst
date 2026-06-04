@@ -297,9 +297,9 @@ Example Configuration
        "opts": {
          "*allocationID": [
            {
-             "Tenant": "cgrates.org",
-             "FilterIDs": ["*string:~*req.Account:1001"],
-             "Value": "ip_session_fixed_id"
+             "tenant": "cgrates.org",
+             "filterIDs": ["*string:~*req.Account:1001"],
+             "value": "ip_session_fixed_id"
            }
          ]
        }

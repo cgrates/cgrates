@@ -140,34 +140,34 @@ func TestIPsIT(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-			"*ips": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
+			"*ips": [{"tenant":"","filterIDs":[],"connIDs":["*localhost"]}]
 		},
 	"opts": {
 		// "*ips": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// "*ipsAuthorize": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ipsAllocate": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ],
 		// "*ipsRelease": [
 		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
 		// 	}
 		// ]
 	}
@@ -184,9 +184,9 @@ func TestIPsIT(t *testing.T) {
     "opts":{
 		// "*allocationID": [
 		// 	{
-		// 		"Tenant": "cgrates.org",
-		// 		"FilterIDs": ["*string:~*req.Account:1001"],
-		// 		"Value": "cfg_allocation"
+		// 		"tenant": "cgrates.org",
+		// 		"filterIDs": ["*string:~*req.Account:1001"],
+		// 		"value": "cfg_allocation"
 		// 	}
 		// ]
     }

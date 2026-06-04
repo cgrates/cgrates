@@ -111,12 +111,12 @@
 "sessions": {
 	"enabled": true,
 	"conns":{
-	"*resources": [{"Tenant": "", "connIDs": ["*localhost"]}],
-	"*routes": [{"Tenant": "", "connIDs": ["*localhost"]}],
-	"*attributes": [{"Tenant": "", "connIDs": ["*localhost"]}],
-	"*rals": [{"Tenant": "", "connIDs": ["*internal"]}],
-	"*cdrs": [{"Tenant": "", "connIDs": ["*internal"]}],
-	"*chargers": [{"Tenant": "", "connIDs": ["*internal"]}]
+	"*resources": [{"tenant": "", "connIDs": ["*localhost"]}],
+	"*routes": [{"tenant": "", "connIDs": ["*localhost"]}],
+	"*attributes": [{"tenant": "", "connIDs": ["*localhost"]}],
+	"*rals": [{"tenant": "", "connIDs": ["*internal"]}],
+	"*cdrs": [{"tenant": "", "connIDs": ["*internal"]}],
+	"*chargers": [{"tenant": "", "connIDs": ["*internal"]}]
 			},
 },
 

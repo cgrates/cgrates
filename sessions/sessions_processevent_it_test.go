@@ -345,7 +345,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*stats": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
+		"*stats": [{"tenant":"","filterIDs":[],"connIDs":["*localhost"]}]
 	}
 },
 "stats": {
@@ -758,7 +758,7 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"conns": {
-		"*thresholds": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
+		"*thresholds": [{"tenant":"","filterIDs":[],"connIDs":["*localhost"]}]
 	}
 },
 "thresholds": {

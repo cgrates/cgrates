@@ -144,7 +144,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"opts": {
 		"*processRuns": [
 				{
-					"Value": "3",
+					"value": "3",
 				},
 			],
 	},
@@ -195,7 +195,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "opts": {
 			"*processRuns": [
 				{
-					"Value": "7",
+					"value": "7",
 				},
 			],
 		},	

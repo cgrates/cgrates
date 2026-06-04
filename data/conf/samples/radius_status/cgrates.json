@@ -60,36 +60,36 @@
         "conns":{
         "*attributes": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ],
         "*cdrs": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ],
         "*rals": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ],
         "*resources": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*localhost"]
                  }
         ],
         "*chargers": [
                  {
-                        "Tenant": "",
-                        "FilterIDs": [],
+                        "tenant": "",
+                        "filterIDs": [],
                         "connIDs": ["*internal"]
                  }
         ]

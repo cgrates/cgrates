@@ -615,12 +615,12 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"opts": {
 				"*ttl": [
 					{
-						"Value": "1s"
+						"value": "1s"
 					}
 				],
 				"*debitInterval": [
 					{
-						"Value": "8s"
+						"value": "8s"
 					}
 				]
 			}

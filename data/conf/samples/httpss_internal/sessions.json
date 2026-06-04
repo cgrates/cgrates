@@ -6,8 +6,8 @@
 	"conns":{
 	    "*accounts": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*localhost"]
 		 }
 	    ]

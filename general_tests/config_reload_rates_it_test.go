@@ -102,7 +102,7 @@ func testRateConfigSReloadRates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"rates\":{\"enabled\":true,\"existsIndexedFields\":[],\"indexedSelects\":true,\"nestedFields\":false,\"notExistsIndexedFields\":[],\"opts\":{\"*intervalStart\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*profileIDs\":[],\"*profileIgnoreFilters\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*startTime\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*usage\":[{\"FilterIDs\":null,\"Tenant\":\"\"}]},\"prefixIndexedFields\":[],\"rateExistsIndexedFields\":[],\"rateIndexedSelects\":true,\"rateNestedFields\":false,\"rateNotExistsIndexedFields\":[],\"ratePrefixIndexedFields\":[],\"rateSuffixIndexedFields\":[],\"suffixIndexedFields\":[],\"verbosity\":1000}}"
+	cfgStr := "{\"rates\":{\"enabled\":true,\"existsIndexedFields\":[],\"indexedSelects\":true,\"nestedFields\":false,\"notExistsIndexedFields\":[],\"opts\":{\"*intervalStart\":[{\"filterIDs\":null,\"tenant\":\"\"}],\"*profileIDs\":[],\"*profileIgnoreFilters\":[{\"filterIDs\":null,\"tenant\":\"\"}],\"*startTime\":[{\"filterIDs\":null,\"tenant\":\"\"}],\"*usage\":[{\"filterIDs\":null,\"tenant\":\"\"}]},\"prefixIndexedFields\":[],\"rateExistsIndexedFields\":[],\"rateIndexedSelects\":true,\"rateNestedFields\":false,\"rateNotExistsIndexedFields\":[],\"ratePrefixIndexedFields\":[],\"rateSuffixIndexedFields\":[],\"suffixIndexedFields\":[],\"verbosity\":1000}}"
 	var rpl string
 	if err := testRateRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

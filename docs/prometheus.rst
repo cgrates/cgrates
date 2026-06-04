@@ -1,4 +1,4 @@
-.. _prometheus_agent:
+.. _prometheusAgent:
 
 PrometheusAgent
 ===============

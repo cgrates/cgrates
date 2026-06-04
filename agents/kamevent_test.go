@@ -164,7 +164,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
-		"Tenant": "cgrates.org", "Account": "1001",
+		"tenant": "cgrates.org", "Account": "1001",
 		KamReplyRoute:        "CGR_PROFILE_REPLY",
 		utils.MetaAttributes: "true"}
 	authArgs = &utils.CGREvent{
@@ -238,7 +238,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
-		"Tenant": "cgrates.org", "Account": "1001",
+		"tenant": "cgrates.org", "Account": "1001",
 		KamReplyRoute:        "CGR_PROFILE_REPLY",
 		utils.MetaAttributes: "true",
 	}

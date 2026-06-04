@@ -68,8 +68,8 @@ func TestDiamPrometheus(t *testing.T) {
 	"conns":  {
 	"*cdrs": [
 		 {
-			"Tenant": "",
-			"FilterIDs": [],
+			"tenant": "",
+			"filterIDs": [],
 			"connIDs": ["*internal"]
 		 }
 	],

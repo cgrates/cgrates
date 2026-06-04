@@ -77,9 +77,9 @@ func TestSessionBasics(t *testing.T) {
 "sessions": {
     "enabled": true,
 	   "conns": {
-            "*accounts": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}],
-            "*rates": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}],
-            "*cdrs": [{"Tenant":"","FilterIDs":[],"connIDs":["*internal"]}]
+            "*accounts": [{"tenant":"","filterIDs":[],"connIDs":["*internal"]}],
+            "*rates": [{"tenant":"","filterIDs":[],"connIDs":["*internal"]}],
+            "*cdrs": [{"tenant":"","filterIDs":[],"connIDs":["*internal"]}]
         },
     "opts": { }
 },
@@ -662,7 +662,7 @@ func TestSessionLifecycle(t *testing.T) {
 	"alterableFields": ["AlterableField"],
 	"terminateAttempts": 1,
 	"conns": {
-		"*chargers": [{"Tenant":"","FilterIDs":[],"connIDs":["*localhost"]}]
+		"*chargers": [{"tenant":"","filterIDs":[],"connIDs":["*localhost"]}]
 	},
 	"opts": {}
 },

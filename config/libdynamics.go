@@ -28,75 +28,75 @@ import (
 )
 
 type DynamicStringSliceOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	Values    []string
 }
 
 type DynamicConns struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	ConnIDs   []string `json:"connIDs"`
 }
 
 type DynamicStringOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     string
 	rsVal     utils.RSRParsers
 }
 
 type DynamicIntOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     int
 	rsVal     utils.RSRParsers
 }
 
 type DynamicFloat64Opt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     float64
 	rsVal     utils.RSRParsers
 }
 
 type DynamicBoolOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     bool
 	rsVal     utils.RSRParsers
 }
 
 type DynamicDurationOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     time.Duration
 	rsVal     utils.RSRParsers
 }
 
 type DynamicDecimalOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     *decimal.Big
 	rsVal     utils.RSRParsers
 }
 
 type DynamicInterfaceOpt struct {
-	FilterIDs []string `json:",omitempty"`
-	Tenant    string
+	FilterIDs []string `json:"filterIDs,omitempty"`
+	Tenant    string   `json:"tenant"`
 	Value     any
 }
 
 type DynamicIntPointerOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     *int
 	rsVal     utils.RSRParsers
 }
 
 type DynamicDurationPointerOpt struct {
-	FilterIDs []string
-	Tenant    string
+	FilterIDs []string `json:"filterIDs"`
+	Tenant    string   `json:"tenant"`
 	value     *time.Duration
 	rsVal     utils.RSRParsers
 }

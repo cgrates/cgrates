@@ -135,7 +135,7 @@ func TestRPCExpIT(t *testing.T) {
 	"opts": {
 		"*profileIDs": [
 			{
-				"Values": ["THD_1"]
+				"values": ["THD_1"]
 			}
 		]
 	}
