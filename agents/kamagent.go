@@ -284,28 +284,18 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
-	kamDlgRpl, err := NewKamDlgReply(evData)
-	if err != nil {
+	var reply kamDlgReply
+	if err := json.Unmarshal(evData, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
 		return
 	}
 	var sIDs []*sessions.SessionID
-	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
-		originHost := ka.conns[connIdx].RemoteAddr().String()
-		originID := dlgInfo.CallId + ";" + dlgInfo.Caller.Tag
-		for _, variable := range dlgInfo.Variables {
-			if variable.CgrOriginHost != utils.EmptyString {
-				originHost = variable.CgrOriginHost
-			}
-			if variable.CgrOriginID != utils.EmptyString {
-				originID = variable.CgrOriginID
-			}
+	if body := reply.Body; body != nil {
+		host := ka.conns[connIdx].RemoteAddr().String()
+		for _, dlg := range body.Result {
+			sIDs = append(sIDs, dlg.sessionID(host))
 		}
-		sIDs = append(sIDs, &sessions.SessionID{
-			OriginHost: originHost,
-			OriginID:   originID,
-		})
 	}
 	// kamevapi runs onDlgList in its own goroutine, so a blocking send
 	// would leak it.
