@@ -26,7 +26,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -111,30 +110,28 @@ func TestKamailioAgentReloadResizesChannel(t *testing.T) {
 }
 
 func TestKamailioAgentOnDlgListDelivery(t *testing.T) {
-	synctest.Test(t, func(t *testing.T) {
-		ka := &KamailioAgent{replyCh: make(chan []*sessions.SessionID, 1)}
-		evData := []byte(`{"Jsonrpl_body":{"Result":[]}}`)
+	addr := startMockKamailio(t, nil, -1)
+	ka := dialMockKamailio(t, addr, time.Second)
+	evData := []byte(`{"Jsonrpl_body":{"Result":[]}}`)
 
+	ka.onDlgList(evData, 0)
+	select {
+	case <-ka.replyCh:
+	default:
+		t.Fatal("expected the reply on the channel")
+	}
+
+	ka.replyCh <- nil // fill the buffer
+	done := make(chan struct{})
+	go func() {
 		ka.onDlgList(evData, 0)
-		select {
-		case <-ka.replyCh:
-		default:
-			t.Fatal("expected the reply on the channel")
-		}
-
-		ka.replyCh <- nil // fill the buffer
-		done := make(chan struct{})
-		go func() {
-			ka.onDlgList(evData, 0)
-			close(done)
-		}()
-		synctest.Wait()
-		select {
-		case <-done:
-		default:
-			t.Fatal("onDlgList blocked on a full reply channel")
-		}
-	})
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(10 * time.Millisecond):
+		t.Fatal("onDlgList blocked on a full reply channel")
+	}
 }
 
 func TestKamailioAgentV1GetActiveSessionIDs(t *testing.T) {
@@ -154,6 +151,22 @@ func TestKamailioAgentV1GetActiveSessionIDs(t *testing.T) {
 		}
 		if sIDs[0].OriginHost == "" {
 			t.Error("expected OriginHost set from the connection")
+		}
+	})
+
+	t.Run("collects replies from dlg.briefing", func(t *testing.T) {
+		addr := startMockKamailio(t, buildDlgBriefing("call-1", "call-2"), 0)
+		ka := dialMockKamailio(t, addr, time.Second)
+
+		var sIDs []*sessions.SessionID
+		if err := ka.V1GetActiveSessionIDs(context.Background(), "", &sIDs); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(sIDs) != 2 {
+			t.Fatalf("expected 2 session IDs, got %d", len(sIDs))
+		}
+		if sIDs[0].OriginID != "call-1" {
+			t.Errorf("expected OriginID call-1, got %q", sIDs[0].OriginID)
 		}
 	})
 
@@ -220,6 +233,19 @@ func buildDlgList(originIDs ...string) []byte {
 			b.WriteByte(',')
 		}
 		fmt.Fprintf(&b, `{"call-id":%q,"caller":{"tag":"tag"}}`, id)
+	}
+	b.WriteString(`]}}`)
+	return []byte(b.String())
+}
+
+func buildDlgBriefing(callIDs ...string) []byte {
+	var b strings.Builder
+	b.WriteString(`{"Event":"CGR_DLG_LIST","Jsonrpl_body":{"result":[`)
+	for i, id := range callIDs {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		fmt.Fprintf(&b, `{"h_entry":1,"h_id":%d,"call-id":%q}`, i, id)
 	}
 	b.WriteString(`]}}`)
 	return []byte(b.String())
