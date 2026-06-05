@@ -171,7 +171,6 @@ type EventExporterOpts struct {
 	ElsCAPath                   *string
 	ElsDiscoverNodesOnStart     *bool
 	ElsDiscoverNodeInterval     *time.Duration
-	ElsCloud                    *bool
 	ElsAPIKey                   *string
 	ElsCertificateFingerprint   *string
 	ElsServiceToken             *string
@@ -282,9 +281,6 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.CSVFieldSeparator != nil {
 		eeOpts.CSVFieldSeparator = jsnCfg.CSVFieldSeparator
-	}
-	if jsnCfg.ElsCloud != nil {
-		eeOpts.ElsCloud = jsnCfg.ElsCloud
 	}
 	if jsnCfg.ElsAPIKey != nil {
 		eeOpts.ElsAPIKey = jsnCfg.ElsAPIKey
@@ -684,10 +680,6 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.ElsDiscoverNodeInterval = new(time.Duration)
 		*cln.ElsDiscoverNodeInterval = *eeOpts.ElsDiscoverNodeInterval
 	}
-	if eeOpts.ElsCloud != nil {
-		cln.ElsCloud = new(bool)
-		*cln.ElsCloud = *eeOpts.ElsCloud
-	}
 	if eeOpts.ElsAPIKey != nil {
 		cln.ElsAPIKey = new(string)
 		*cln.ElsAPIKey = *eeOpts.ElsAPIKey
@@ -1049,9 +1041,6 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.ElsDiscoverNodeInterval != nil {
 		opts[utils.ElsDiscoverNodeInterval] = *optsEes.ElsDiscoverNodeInterval
 	}
-	if optsEes.ElsCloud != nil {
-		opts[utils.ElsCloud] = *optsEes.ElsCloud
-	}
 	if optsEes.ElsAPIKey != nil {
 		opts[utils.ElsAPIKey] = *optsEes.ElsAPIKey
 	}
@@ -1242,7 +1231,6 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 
 type EventExporterOptsJson struct {
 	CSVFieldSeparator           *string           `json:"csvFieldSeparator"`
-	ElsCloud                    *bool             `json:"elsCloud"`
 	ElsAPIKey                   *string           `json:"elsApiKey"`
 	ElsServiceToken             *string           `json:"elsServiceToken"`
 	ElsCertificateFingerprint   *string           `json:"elsCertificateFingerPrint"`
