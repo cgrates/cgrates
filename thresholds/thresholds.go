@@ -150,13 +150,13 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 			continue
 		}
 		t := tIf.(*utils.Threshold)
-		lkID := guardian.Guardian.GuardIDs("",
+		lockID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ThresholdLockKey(t.Tenant, t.ID))
 		if err := s.StoreThreshold(ctx, t); err != nil {
 			failedThresholds = append(failedThresholds, tID) // record failure so we can schedule it for next backup
 		}
-		guardian.Guardian.UnguardIDs(lkID)
+		guardian.Guardian.UnguardIDs(lockID)
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -236,7 +236,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 	ts = make([]*matchedThreshold, 0, len(itemIDs))
 	for _, id := range itemIDs {
 		lockID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ThresholdLockKey(tnt, id))
 		profile, err := s.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional)
 		if err != nil {
