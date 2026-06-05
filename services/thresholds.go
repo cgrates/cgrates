@@ -66,9 +66,13 @@ func (s *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	s.thrs = thresholds.NewThresholdService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
-	s.thrs.StartLoop(context.TODO())
-	srv, _ := engine.NewService(s.thrs)
+	ts := thresholds.NewThresholdService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	srv, err := engine.NewService(ts)
+	if err != nil {
+		return err
+	}
+	ts.StartLoop(context.TODO())
+	s.thrs = ts
 	for _, svc := range srv {
 		cl.RpcRegister(svc)
 	}
@@ -85,7 +89,6 @@ func (s *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) 
 // Shutdown stops the service
 func (s *ThresholdService) Shutdown(registry *servmanager.Registry) error {
 	s.thrs.Shutdown(context.TODO())
-	s.thrs = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.ThresholdSv1)
 	return nil
