@@ -27,7 +27,6 @@ require (
 	github.com/creack/pty v1.1.23
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/elastic-transport-go/v8 v8.6.0
-	github.com/elastic/go-elasticsearch/v8 v8.15.0
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.8.1

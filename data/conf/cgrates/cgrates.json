@@ -504,7 +504,6 @@
 
 
 // 				// Elasticsearch options
-// 				// "elsCloud":true,                     // whether ExportPath represents a cloud ID deployment
 // 				// "elsApiKey": "",                     // Base64-encoded token for authorization; if set, overrides username/password and service token.
 // 				// "elsUsername":"",                    // Username for HTTP Basic Authentication.
 // 				// "elsPassword":"",			// Password for HTTP Basic Authentication.

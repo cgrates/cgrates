@@ -677,7 +677,6 @@ const CGRATES_CFG_JSON = `
 
 
 				// Elasticsearch options
-				// "elsCloud": true,			// if true, use cloud ID deployment
 				// "elsApiKey": "",			// base64-encoded token for auth; overrides username/password and service token
 				// "elsUsername": "",			// username for HTTP Basic Authentication
 				// "elsPassword": "",			// password for HTTP Basic Authentication

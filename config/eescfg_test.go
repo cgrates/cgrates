@@ -1854,7 +1854,6 @@ func TestEescfgNewEventExporterCfg(t *testing.T) {
 		ElsRefresh:                  &str,
 		ElsDiscoverNodesOnStart:     &bl,
 		ElsDiscoverNodeInterval:     &tm,
-		ElsCloud:                    &bl,
 		ElsAPIKey:                   &str,
 		ElsCertificateFingerprint:   &str,
 		ElsServiceToken:             &str,
@@ -1959,7 +1958,6 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 	eeOpts := &EventExporterOpts{}
 	jsnCfg := &EventExporterOptsJson{
 		CSVFieldSeparator:           &str,
-		ElsCloud:                    &bl,
 		ElsAPIKey:                   &str,
 		ElsServiceToken:             &str,
 		ElsCertificateFingerprint:   &str,
@@ -2042,7 +2040,6 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 		ElsRefresh:                  &str,
 		ElsDiscoverNodesOnStart:     &bl,
 		ElsDiscoverNodeInterval:     &tm,
-		ElsCloud:                    &bl,
 		ElsAPIKey:                   &str,
 		ElsCertificateFingerprint:   &str,
 		ElsServiceToken:             &str,

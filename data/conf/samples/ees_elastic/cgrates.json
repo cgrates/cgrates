@@ -51,18 +51,6 @@
 			]
 		},
 		{
-			"id": "els_cloud",
-			"type": "*els",
-			"exportPath": "ELASTIC_DEPLOYMENT",
-			"synchronous": true,
-			"failedPostsDir": "*none",
-			"opts": {
-				"elsIndex": "cdrs",
-				"elsCloud": true,
-				"elsApiKey": "ELASTIC_APIKEY"
-			}
-		},
-		{
 			"id": "els_cluster",
 			"type": "*els",
 			"exportPath": "http://192.168.56.22:9200;http://192.168.56.64:9200",
@@ -83,7 +71,6 @@
 				"elsIndex": "cdrs",
 				"elsUsername": "elastic",
 				// "elsPassword":"",
-				// "elsCloud":true,
 				// "elsApiKey": "",
 				// "elsServiceToken": "",
 				// "elsCertificateFingerPrint": "",

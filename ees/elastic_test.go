@@ -50,7 +50,7 @@ func TestInitClient(t *testing.T) {
 	if err := ee.parseClientOpts(); err != nil {
 		t.Error(err)
 	}
-	errExpect := `cannot create client: cannot parse url: parse "/\x00": net/url: invalid control character in URL`
+	errExpect := `parse "/\x00": net/url: invalid control character in URL`
 	if err := ee.Connect(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
@@ -69,7 +69,7 @@ func TestElasticExportEventErr(t *testing.T) {
 	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
-	errExpect := `an error happened during the Index query execution: unsupported protocol scheme ""`
+	errExpect := `unsupported protocol scheme ""`
 	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
