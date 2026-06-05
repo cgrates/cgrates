@@ -22,13 +22,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 )
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -38,15 +37,15 @@ func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, 
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
-	var ids []string
-	if ids, err = s.processEvent(ctx, tnt, args); err != nil {
-		return
+	ids, err := s.processEvent(ctx, tnt, args)
+	if err != nil {
+		return err
 	}
 	*reply = ids
-	return
+	return nil
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
@@ -102,14 +101,14 @@ func (s *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.TenantW
 // V1GetThreshold retrieves a Threshold
 func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, th *utils.Threshold) error {
 	tnt := tntID.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.ThresholdLockKey(tnt, tntID.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	thd, err := s.dm.GetThreshold(ctx, tnt, tntID.ID, true, true, "")
 	if err != nil {
 		return err
@@ -121,14 +120,14 @@ func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDW
 // V1ResetThreshold resets the threshold hits
 func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
 	tnt := tntID.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.ThresholdLockKey(tnt, tntID.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	thd, err := s.dm.GetThreshold(ctx, tnt, tntID.ID, true, true, "")
 	if err != nil {
 		return err
