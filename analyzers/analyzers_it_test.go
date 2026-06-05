@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -157,7 +158,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "DEFAULT",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -180,7 +181,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 		},
 		{
 			ChargerSProfile: "Raw",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},

@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -154,7 +155,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CustomerCharges",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -174,7 +175,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 		}, {
 			ChargerSProfile: "Raw",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -200,7 +201,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 				},
 			},
 		}, {
-			ChargerSProfile: "SupplierCharges", AlteredFields: []*utils.FieldsAltered{
+			ChargerSProfile: "SupplierCharges", AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},

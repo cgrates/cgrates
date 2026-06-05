@@ -159,7 +159,7 @@ package general_tests
 // 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
 // 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 // 	}
-// 	eAttrs := &utils.AttrSProcessEventReply{
+// 	eAttrs := &attributes.ProcessEventReply{
 // 		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 // 		AlteredFields:   []string{"*req.OfficeGroup"},
 

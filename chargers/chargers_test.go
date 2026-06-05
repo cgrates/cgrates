@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
@@ -491,7 +492,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -1010,8 +1011,8 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				rply := utils.AttrSProcessEventReply{
-					AlteredFields: []*utils.FieldsAltered{{
+				rply := attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						MatchedProfileID: "attr1",
 						Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},
@@ -1023,7 +1024,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*utils.AttrSProcessEventReply) = rply
+				*reply.(*attributes.ProcessEventReply) = rply
 				return nil
 			},
 		},
@@ -1049,7 +1050,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -1131,7 +1132,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -1192,8 +1193,8 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				rply := utils.AttrSProcessEventReply{
-					AlteredFields: []*utils.FieldsAltered{{
+				rply := attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
@@ -1204,7 +1205,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*utils.AttrSProcessEventReply) = rply
+				*reply.(*attributes.ProcessEventReply) = rply
 				return nil
 			},
 		},
@@ -1261,8 +1262,8 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			"invalidMethod": func(ctx *context.Context, args, reply any) error {
-				rply := utils.AttrSProcessEventReply{
-					AlteredFields: []*utils.FieldsAltered{{
+				rply := attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
@@ -1273,7 +1274,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*utils.AttrSProcessEventReply) = rply
+				*reply.(*attributes.ProcessEventReply) = rply
 				return nil
 			},
 		},
@@ -1337,8 +1338,8 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				rply := utils.AttrSProcessEventReply{
-					AlteredFields: []*utils.FieldsAltered{{
+				rply := attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						MatchedProfileID: "attr2",
 						Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},
@@ -1356,7 +1357,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*utils.AttrSProcessEventReply) = rply
+				*reply.(*attributes.ProcessEventReply) = rply
 				return nil
 			},
 		},
@@ -1383,7 +1384,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields: []*utils.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
