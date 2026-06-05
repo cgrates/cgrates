@@ -306,50 +306,66 @@ func (ts Thresholds) unlock() {
 // NewThresholdService the constructor for ThresoldS service
 func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, conn *ConnManager) *ThresholdService {
 	return &ThresholdService{
-		dm:            dm,
-		cgrcfg:        cgrcfg,
-		filterS:       filterS,
-		connMgr:       conn,
-		stopBackup:    make(chan struct{}),
-		loopStopped:   make(chan struct{}),
-		storedTdIDs:   make(utils.StringSet),
-		sBiRPCClients: utils.NewServiceBiRPCClients(),
-		clientConnID:  make(map[string]*utils.SyConnIDs),
+		dm:               dm,
+		cgrcfg:           cgrcfg,
+		filterS:          filterS,
+		connMgr:          conn,
+		stopBackup:       make(chan struct{}),
+		storedThresholds: make(utils.StringSet),
+		sBiRPCClients:    utils.NewServiceBiRPCClients(),
+		clientConnID:     make(map[string]*utils.SyConnIDs),
 	}
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
-	dm            *DataManager
-	cgrcfg        *config.CGRConfig
-	filterS       *FilterS
-	stopBackup    chan struct{}
-	loopStopped   chan struct{}
-	storedTdIDs   utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux         sync.RWMutex    // protects storedTdIDs
-	connMgr       *ConnManager
+	cgrcfg  *config.CGRConfig
+	dm      *DataManager
+	filterS *FilterS
+	connMgr *ConnManager
+
+	stMux            sync.Mutex
+	storedThresholds utils.StringSet // thresholds that need saving
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
+
 	sBiRPCClients *utils.ServiceBiRPCClients  // will hold ThresholdS BiRPC clients and conns
 	ccidMux       sync.RWMutex                // protects clientConnID
 	clientConnID  map[string]*utils.SyConnIDs // holds ClientConnID per threshold profile, used for birpc calls. [ThresholdProfileID]SyConnIds
 }
 
-// Reload stops the backupLoop and restarts it
+// Reload restarts the backup loop. No-op after Shutdown.
 func (tS *ThresholdService) Reload() {
+	tS.stateMu.Lock()
+	defer tS.stateMu.Unlock()
+	if tS.stopBackup == nil {
+		return
+	}
 	close(tS.stopBackup)
-	<-tS.loopStopped // wait until the loop is done
+	tS.backupLoop.Wait()
 	tS.stopBackup = make(chan struct{})
-	go tS.runBackup()
+	tS.StartLoop()
 }
 
-// StartLoop starts the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (tS *ThresholdService) StartLoop() {
+	tS.backupLoop.Add(1)
 	go tS.runBackup()
 }
 
 // Shutdown is called to shutdown the service
 func (tS *ThresholdService) Shutdown() {
+	tS.stateMu.Lock()
+	defer tS.stateMu.Unlock()
+	if tS.stopBackup == nil {
+		return
+	}
 	utils.Logger.Info("<ThresholdS> shutdown initialized")
 	close(tS.stopBackup)
+	tS.backupLoop.Wait()
+	tS.stopBackup = nil
 	tS.storeThresholds()
 	utils.Logger.Info("<ThresholdS> shutdown complete")
 }
@@ -366,16 +382,15 @@ func (tS *ThresholdService) OnBiJSONDisconnect(c birpc.ClientConnector) {
 
 // backup will regularly store thresholds changed to dataDB
 func (tS *ThresholdService) runBackup() {
+	defer tS.backupLoop.Done()
 	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
-		tS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		tS.storeThresholds()
 		select {
 		case <-tS.stopBackup:
-			tS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
@@ -384,12 +399,12 @@ func (tS *ThresholdService) runBackup() {
 
 // storeThresholds represents one task of complete backup
 func (tS *ThresholdService) storeThresholds() {
-	var failedTdIDs []string
+	var failedThresholds []string
 	for { // don't stop until we store all dirty thresholds
 		tS.stMux.Lock()
-		tID := tS.storedTdIDs.GetOne()
+		tID := tS.storedThresholds.GetOne()
 		if tID != "" {
-			tS.storedTdIDs.Remove(tID)
+			tS.storedThresholds.Remove(tID)
 		}
 		tS.stMux.Unlock()
 		if tID == "" {
@@ -403,15 +418,15 @@ func (tS *ThresholdService) storeThresholds() {
 		t := tIf.(*Threshold)
 		t.lock(utils.EmptyString)
 		if err := tS.StoreThreshold(t); err != nil {
-			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
+			failedThresholds = append(failedThresholds, tID) // record failure so we can schedule it for next backup
 		}
 		t.unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
-	if len(failedTdIDs) != 0 { // there were errors on save, schedule the keys for next backup
+	if len(failedThresholds) != 0 { // there were errors on save, schedule the keys for next backup
 		tS.stMux.Lock()
-		tS.storedTdIDs.AddSlice(failedTdIDs)
+		tS.storedThresholds.AddSlice(failedThresholds)
 		tS.stMux.Unlock()
 	}
 }
@@ -635,7 +650,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 			tS.StoreThreshold(t)
 		} else {
 			tS.stMux.Lock()
-			tS.storedTdIDs.Add(t.TenantID())
+			tS.storedThresholds.Add(t.TenantID())
 			tS.stMux.Unlock()
 		}
 	}
@@ -755,7 +770,7 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 			}
 		} else {
 			tS.stMux.Lock()
-			tS.storedTdIDs.Add(thd.TenantID())
+			tS.storedThresholds.Add(thd.TenantID())
 			tS.stMux.Unlock()
 		}
 	}
