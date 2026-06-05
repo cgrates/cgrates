@@ -195,26 +195,26 @@ type ThresholdSv1 struct {
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) error {
-	return tSv1.tS.V1GetThresholdIDs(ctx, args, tIDs)
+func (s *ThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) error {
+	return s.tS.V1GetThresholdIDs(ctx, args, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Threshold) error {
-	return tSv1.tS.V1GetThresholdsForEvent(ctx, args, reply)
+func (s *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Threshold) error {
+	return s.tS.V1GetThresholdsForEvent(ctx, args, reply)
 }
 
 // GetThreshold queries a Threshold
-func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *utils.Threshold) error {
-	return tSv1.tS.V1GetThreshold(ctx, tntID, t)
+func (s *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *utils.Threshold) error {
+	return s.tS.V1GetThreshold(ctx, tntID, t)
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, tIDs *[]string) error {
-	return tSv1.tS.V1ProcessEvent(ctx, args, tIDs)
+func (s *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, tIDs *[]string) error {
+	return s.tS.V1ProcessEvent(ctx, args, tIDs)
 }
 
 // ResetThreshold resets the threshold hits
-func (tSv1 *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
-	return tSv1.tS.V1ResetThreshold(ctx, tntID, reply)
+func (s *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
+	return s.tS.V1ResetThreshold(ctx, tntID, reply)
 }
