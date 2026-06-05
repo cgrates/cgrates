@@ -96,12 +96,6 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) error {
 		tp.Tenant = IfaceAsString(val)
 	case ID:
 		tp.ID = IfaceAsString(val)
-	case Blocker:
-		tp.Blocker, err = IfaceAsBool(val)
-	case Weights:
-		if val != "" {
-			tp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
-		}
 	case FilterIDs:
 		var valA []string
 		valA, err = IfaceAsStringSlice(val)
@@ -116,20 +110,26 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) error {
 		}
 	case MinSleep:
 		tp.MinSleep, err = IfaceAsDuration(val)
-	case ActionProfileIDs:
-		var valA []string
-		valA, err = IfaceAsStringSlice(val)
-		tp.ActionProfileIDs = append(tp.ActionProfileIDs, valA...)
-	case EeIDs:
-		var valA []string
-		valA, err = IfaceAsStringSlice(val)
-		tp.EeIDs = append(tp.EeIDs, valA...)
+	case Blocker:
+		tp.Blocker, err = IfaceAsBool(val)
+	case Weights:
+		if val != "" {
+			tp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		}
 	case AttributeIDs:
 		var valA []string
 		valA, err = IfaceAsStringSlice(val)
 		tp.AttributeIDs = append(tp.AttributeIDs, valA...)
+	case ActionProfileIDs:
+		var valA []string
+		valA, err = IfaceAsStringSlice(val)
+		tp.ActionProfileIDs = append(tp.ActionProfileIDs, valA...)
 	case Async:
 		tp.Async, err = IfaceAsBool(val)
+	case EeIDs:
+		var valA []string
+		valA, err = IfaceAsStringSlice(val)
+		tp.EeIDs = append(tp.EeIDs, valA...)
 	}
 	return err
 }
@@ -202,10 +202,6 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (any, error) {
 		return tp.ID, nil
 	case FilterIDs:
 		return tp.FilterIDs, nil
-	case Weights:
-		return tp.Weights, nil
-	case ActionProfileIDs:
-		return tp.ActionProfileIDs, nil
 	case MaxHits:
 		return tp.MaxHits, nil
 	case MinHits:
@@ -214,12 +210,16 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (any, error) {
 		return tp.MinSleep, nil
 	case Blocker:
 		return tp.Blocker, nil
+	case Weights:
+		return tp.Weights, nil
+	case AttributeIDs:
+		return tp.AttributeIDs, nil
+	case ActionProfileIDs:
+		return tp.ActionProfileIDs, nil
 	case Async:
 		return tp.Async, nil
 	case EeIDs:
 		return tp.EeIDs, nil
-	case AttributeIDs:
-		return tp.AttributeIDs, nil
 	}
 }
 
@@ -237,10 +237,10 @@ func (tp *ThresholdProfile) AsMapStringInterface() map[string]any {
 		MinSleep:         tp.MinSleep,
 		Blocker:          tp.Blocker,
 		Weights:          tp.Weights,
+		AttributeIDs:     tp.AttributeIDs,
 		ActionProfileIDs: tp.ActionProfileIDs,
 		Async:            tp.Async,
 		EeIDs:            tp.EeIDs,
-		AttributeIDs:     tp.AttributeIDs,
 	}
 }
 
