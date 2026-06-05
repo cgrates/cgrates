@@ -138,8 +138,11 @@ func testThresholdsGetThresholdBeforeSet(t *testing.T) {
 	var rplyTh utils.Threshold
 
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-		&utils.TenantWithAPIOpts{
-			Tenant: "cgrates.org",
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "THD_1",
+			},
 		}, &rplyTh); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}

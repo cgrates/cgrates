@@ -100,6 +100,9 @@ func (s *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.TenantW
 
 // V1GetThreshold retrieves a Threshold
 func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, th *utils.Threshold) error {
+	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	tnt := tntID.Tenant
 	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
@@ -119,6 +122,9 @@ func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDW
 
 // V1ResetThreshold resets the threshold hits
 func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
+	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	tnt := tntID.Tenant
 	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
