@@ -12,7 +12,9 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -614,7 +616,7 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	}
 	Cache.SetWithoutReplicate(utils.CacheThresholds, "cgrates.org:TH1", exp, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("cgrates.org:TH1")
+	tS.storedThresholds.Add("cgrates.org:TH1")
 	tS.storeThresholds()
 
 	if rcv, err := tS.dm.GetThreshold("cgrates.org", "TH1", true, false,
@@ -651,15 +653,15 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 
 	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH1", value, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("TH1")
+	tS.storedThresholds.Add("TH1")
 	exp := utils.StringSet{
 		"TH1": struct{}{},
 	}
 	expLog := `[WARNING] <ThresholdS> failed saving Threshold with tenant: cgrates.org and ID: TH1, error: NO_DATABASE_CONNECTION`
 	tS.storeThresholds()
 
-	if !reflect.DeepEqual(tS.storedTdIDs, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, tS.storedTdIDs)
+	if !reflect.DeepEqual(tS.storedThresholds, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, tS.storedThresholds)
 	}
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
@@ -697,7 +699,7 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 
 	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH2", value, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("TH1")
+	tS.storedThresholds.Add("TH1")
 	expLog := `[WARNING] <ThresholdS> failed retrieving from cache threshold with ID: TH1`
 	tS.storeThresholds()
 
@@ -784,8 +786,8 @@ func TestThresholdsProcessEventOK(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
-	} else if !reflect.DeepEqual(tS.storedTdIDs, expStored) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedTdIDs)
+	} else if !reflect.DeepEqual(tS.storedThresholds, expStored) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedThresholds)
 	}
 
 }
@@ -1486,22 +1488,6 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}
 }
 
-func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = -1
-	tS := &ThresholdService{
-		cgrcfg:      cfg,
-		loopStopped: make(chan struct{}, 1),
-	}
-
-	tS.runBackup()
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
-}
-
 func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
@@ -1514,12 +1500,11 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	thID := "Th1"
 	tS := &ThresholdService{
 		dm: dm,
-		storedTdIDs: utils.StringSet{
+		storedThresholds: utils.StringSet{
 			thID: struct{}{},
 		},
-		cgrcfg:      cfg,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cgrcfg:     cfg,
+		stopBackup: make(chan struct{}),
 	}
 	value := &Threshold{
 		dirty:  utils.BoolPointer(true),
@@ -1532,7 +1517,8 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	// channel after storing the threshold. Channel can be
 	// safely closed beforehand.
 	close(tS.stopBackup)
-	tS.runBackup()
+	tS.StartLoop()
+	tS.backupLoop.Wait()
 
 	want := &Threshold{
 		dirty:  utils.BoolPointer(false),
@@ -1544,46 +1530,41 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	} else if !reflect.DeepEqual(got, want) {
 		t.Errorf("dm.GetThreshold(%q,%q) = %v, want %v", tnt, thID, got, want)
 	}
-
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
 }
 
 func TestThresholdsReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	tS := &ThresholdService{
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
-	}
-	tS.loopStopped <- struct{}{}
-	tS.Reload()
-	close(tS.stopBackup)
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
+		tS := NewThresholdService(nil, cfg, nil, nil)
+		tS.StartLoop()
+		tS.Reload()
+		tS.Shutdown()
+		tS.Shutdown()
+		tS.Reload()
+	})
+}
+
+func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
+		tS := NewThresholdService(nil, cfg, nil, nil)
+		tS.StartLoop()
+		var wg sync.WaitGroup
+		wg.Go(func() { tS.Reload() })
+		wg.Go(func() { tS.Shutdown() })
+		wg.Wait()
+	})
 }
 
 func TestThresholdsStartLoop(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = -1
-	tS := &ThresholdService{
-		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
-	}
-
-	tS.StartLoop()
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		tS := NewThresholdService(nil, cfg, nil, nil)
+		tS.StartLoop()
+		tS.backupLoop.Wait()
+	})
 }
 
 func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
@@ -1834,8 +1815,8 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 		t.Errorf("not ok")
 	} else if x.(*Threshold).Hits != 0 {
 		t.Errorf("expected nr. of hits to be 0, received: <%+v>", x.(*Threshold).Hits)
-	} else if !reflect.DeepEqual(tS.storedTdIDs, expStored) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedTdIDs)
+	} else if !reflect.DeepEqual(tS.storedThresholds, expStored) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedThresholds)
 	}
 }
 
