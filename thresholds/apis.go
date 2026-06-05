@@ -136,7 +136,7 @@ func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantI
 		thd.Hits = 0
 		thd.Snooze = time.Time{}
 		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
-			if err := s.StoreThreshold(ctx, thd); err != nil {
+			if err := s.storeThreshold(ctx, thd); err != nil {
 				return err
 			}
 		} else {

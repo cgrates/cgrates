@@ -153,7 +153,7 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 		lockID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ThresholdLockKey(t.Tenant, t.ID))
-		if err := s.StoreThreshold(ctx, t); err != nil {
+		if err := s.storeThreshold(ctx, t); err != nil {
 			failedThresholds = append(failedThresholds, tID) // record failure so we can schedule it for next backup
 		}
 		guardian.Guardian.UnguardIDs(lockID)
@@ -167,8 +167,8 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 	}
 }
 
-// StoreThreshold stores the threshold in DB
-func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) error {
+// storeThreshold stores the threshold in DB
+func (s *ThresholdS) storeThreshold(ctx *context.Context, t *utils.Threshold) error {
 	if err := s.dm.SetThreshold(ctx, t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed saving Threshold with tenant: %s and ID: %s, error: %v",
@@ -181,7 +181,7 @@ func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) er
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed caching Threshold with ID: %s, error: %v",
-					utils.ThresholdS, t.TenantID(), err))
+					utils.ThresholdS, tntID, err))
 			return err
 		}
 	}
@@ -371,7 +371,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			}
 		}
 		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
-			if err := s.StoreThreshold(ctx, mt.threshold); err != nil {
+			if err := s.storeThreshold(ctx, mt.threshold); err != nil {
 				withErrors = true
 			}
 		} else {
