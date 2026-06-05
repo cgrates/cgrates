@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -182,8 +183,8 @@ func testDCLoaderRun(t *testing.T) {
 }
 
 func testDCAttributeProcessEvent(t *testing.T) {
-	expected := utils.AttrSProcessEventReply{
-		AlteredFields: []*utils.FieldsAltered{
+	expected := attributes.ProcessEventReply{
+		AlteredFields: []*attributes.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_DC",
 				Fields: []string{"*req.DivideVariable", "*req.DurationVariable", "*req.IP2HexVariable",
@@ -226,7 +227,7 @@ func testDCAttributeProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply utils.AttrSProcessEventReply
+	var reply attributes.ProcessEventReply
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "DCEvent",

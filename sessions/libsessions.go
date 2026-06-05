@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
@@ -333,7 +334,7 @@ type V1ProcessEventReply struct {
 	RateSCost          map[string]float64                       `json:",omitempty"`
 	ResourceAllocation map[string]string                        `json:",omitempty"`
 	IPsAllocation      map[string]*utils.AllocatedIP            `json:",omitempty"`
-	Attributes         map[string]*utils.AttrSProcessEventReply `json:",omitempty"`
+	Attributes         map[string]*attributes.ProcessEventReply `json:",omitempty"`
 	RouteProfiles      map[string]routes.SortedRoutesList       `json:",omitempty"`
 	ThresholdIDs       map[string][]string                      `json:",omitempty"`
 	StatQueueIDs       map[string][]string                      `json:",omitempty"`
@@ -429,7 +430,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                `json:",omitempty"`
 	ResourceAllocation *string                       `json:",omitempty"`
-	Attributes         *utils.AttrSProcessEventReply `json:",omitempty"`
+	Attributes         *attributes.ProcessEventReply `json:",omitempty"`
 	RouteProfiles      routes.SortedRoutesList       `json:",omitempty"`
 	ThresholdIDs       *[]string                     `json:",omitempty"`
 	StatQueueIDs       *[]string                     `json:",omitempty"`
@@ -492,7 +493,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 
 // V1AuthorizeReply are options available in auth reply
 type V1AuthorizeReply struct {
-	Attributes         *utils.AttrSProcessEventReply `json:",omitempty"`
+	Attributes         *attributes.ProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                       `json:",omitempty"`
 	AllocatedIP        *utils.AllocatedIP            `json:",omitempty"`
 	MaxUsage           *utils.Decimal                `json:",omitempty"`
@@ -575,7 +576,7 @@ type V1AuthorizeReplyWithDigest struct {
 
 // V1InitSessionReply are options for initialization reply
 type V1InitSessionReply struct {
-	Attributes         *utils.AttrSProcessEventReply `json:",omitempty"`
+	Attributes         *attributes.ProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                       `json:",omitempty"`
 	AllocatedIP        *utils.AllocatedIP            `json:",omitempty"`
 	MaxUsage           *time.Duration                `json:",omitempty"`
@@ -652,7 +653,7 @@ type V1InitReplyWithDigest struct {
 
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
-	Attributes *utils.AttrSProcessEventReply `json:",omitempty"`
+	Attributes *attributes.ProcessEventReply `json:",omitempty"`
 	MaxUsage   *time.Duration                `json:",omitempty"`
 
 	needsMaxUsage bool // for gob encoding only

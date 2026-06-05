@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -159,7 +160,7 @@ func testAttributeSetProfile(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	var rplyEv utils.AttrSProcessEventReply
+	var rplyEv attributes.ProcessEventReply
 	if err := attrFltrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -206,8 +207,8 @@ func testAttributeSetFltr2(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	exp := utils.AttrSProcessEventReply{
-		AlteredFields: []*utils.FieldsAltered{
+	exp := attributes.ProcessEventReply{
+		AlteredFields: []*attributes.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ApierTest",
 				Fields:           []string{"*req.FL1"},
@@ -222,7 +223,7 @@ func testAttributeSetFltr2(t *testing.T) {
 			APIOpts: map[string]any{},
 		},
 	}
-	var rplyEv utils.AttrSProcessEventReply
+	var rplyEv attributes.ProcessEventReply
 	if err := attrFltrRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Fatal(err)
