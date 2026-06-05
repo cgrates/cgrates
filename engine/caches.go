@@ -42,10 +42,10 @@ func init() {
 	gob.Register(new(utils.AttributeProfileWithAPIOpts))
 	gob.Register(new(utils.TPAttributeProfile))
 	// Threshold
-	gob.Register(new(Threshold))
-	gob.Register(new(ThresholdProfile))
-	gob.Register(new(ThresholdProfileWithAPIOpts))
-	gob.Register(new(ThresholdWithAPIOpts))
+	gob.Register(new(utils.Threshold))
+	gob.Register(new(utils.ThresholdProfile))
+	gob.Register(new(utils.ThresholdProfileWithAPIOpts))
+	gob.Register(new(utils.ThresholdWithAPIOpts))
 	gob.Register(new(utils.TPThresholdProfile))
 	// Resource
 	gob.Register(new(utils.Resource))

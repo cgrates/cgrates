@@ -261,7 +261,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if !cmp.Equal(sts, rcv, cmpopts.IgnoreUnexported(ThresholdProfile{}), cmpopts.IgnoreFields(ThresholdProfile{}, "EeIDs")) {
+		if !cmp.Equal(sts, rcv, cmpopts.IgnoreUnexported(utils.ThresholdProfile{}), cmpopts.IgnoreFields(utils.ThresholdProfile{}, "EeIDs")) {
 			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}

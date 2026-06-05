@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/thresholds"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,7 @@ func NewThresholdService(cfg *config.CGRConfig) *ThresholdService {
 type ThresholdService struct {
 	mu   sync.RWMutex
 	cfg  *config.CGRConfig
-	thrs *engine.ThresholdS
+	thrs *thresholds.ThresholdS
 }
 
 // Start should handle the sercive start
@@ -70,7 +71,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 
 	thrs.mu.Lock()
 	defer thrs.mu.Unlock()
-	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
+	thrs.thrs = thresholds.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)

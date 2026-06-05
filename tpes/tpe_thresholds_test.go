@@ -34,8 +34,8 @@ func TestTPEnewTPThresholds(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.ThresholdProfile, error) {
-			thd := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ThresholdProfile, error) {
+			thd := &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
 				FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -71,7 +71,7 @@ func TestTPEExportThresholds(t *testing.T) {
 	tpThd := TPThresholds{
 		dm: dm,
 	}
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -98,7 +98,7 @@ func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
 	tpThd := TPThresholds{
 		dm: nil,
 	}
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -128,7 +128,7 @@ func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	tpThd := TPThresholds{
 		dm: dm,
 	}
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},

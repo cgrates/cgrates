@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetThresholdProfile{
 		name:      "threshold_profile_set",
 		rpcMethod: utils.AdminSv1SetThresholdProfile,
-		rpcParams: &engine.ThresholdProfileWithAPIOpts{},
+		rpcParams: &utils.ThresholdProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdSetThresholdProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ThresholdProfileWithAPIOpts
+	rpcParams *utils.ThresholdProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,8 +50,8 @@ func (self *CmdSetThresholdProfile) RpcMethod() string {
 
 func (self *CmdSetThresholdProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: new(engine.ThresholdProfile),
+		self.rpcParams = &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: new(utils.ThresholdProfile),
 			APIOpts:          map[string]any{},
 		}
 	}

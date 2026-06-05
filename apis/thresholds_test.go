@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/thresholds"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -47,11 +48,11 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 			ID: "thdID",
 		},
 	}
-	var result engine.ThresholdProfile
+	var result utils.ThresholdProfile
 	var reply string
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "thdID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -120,7 +121,7 @@ func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.ThresholdProfile
+	var rcv utils.ThresholdProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
@@ -156,8 +157,8 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{},
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{},
 	}
 
 	var reply string
@@ -190,14 +191,14 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -232,8 +233,8 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			ID:      "TestThresholdsRemoveThresholdProfileCheckErrors",
 			Tenant:  "cgrates.org",
 			MaxHits: 10,
@@ -266,7 +267,7 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.ThresholdProfile
+	var rcv utils.ThresholdProfile
 
 	arg := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -297,14 +298,14 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -345,14 +346,14 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -413,14 +414,14 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -459,14 +460,14 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -507,14 +508,14 @@ func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
-			thPrf := &engine.ThresholdProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
+			thPrf := &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return thPrf, nil
 		},
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -570,7 +571,7 @@ func TestThresholdsNewThresholdSv1(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	tS := engine.NewThresholdService(dm, cfg, nil, nil)
+	tS := thresholds.NewThresholdService(dm, cfg, nil, nil)
 
 	exp := &ThresholdSv1{
 		tS: tS,
@@ -630,7 +631,7 @@ func TestThresholdsAPIs(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, rpcInternal)
 
-	tS := engine.NewThresholdService(dm, cfg, fltrs, cM)
+	tS := thresholds.NewThresholdService(dm, cfg, fltrs, cM)
 	adms := &AdminSv1{
 		dm:  dm,
 		cfg: cfg,
@@ -654,8 +655,8 @@ func TestThresholdsAPIs(t *testing.T) {
 		t.Error(err)
 	}
 
-	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "thd1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -675,8 +676,8 @@ func TestThresholdsAPIs(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:  "cgrates.org",
 			ID:      "thd2",
 			MaxHits: 10,
@@ -707,7 +708,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 	}
 
-	expThresholds := []*engine.Threshold{
+	expThresholds := []*utils.Threshold{
 		{
 			Tenant: "cgrates.org",
 			ID:     "thd1",
@@ -718,7 +719,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 	}
 
-	var rplyThresholds []*engine.Threshold
+	var rplyThresholds []*utils.Threshold
 	if err := tSv1.GetThresholdsForEvent(context.Background(), args, &rplyThresholds); err != nil {
 		t.Error(err)
 	} else {
@@ -732,12 +733,12 @@ func TestThresholdsAPIs(t *testing.T) {
 		}
 	}
 
-	expThreshold := engine.Threshold{
+	expThreshold := utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "thd1",
 	}
 
-	var rplyThreshold engine.Threshold
+	var rplyThreshold utils.Threshold
 	if err := tSv1.GetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "thd1",
@@ -791,8 +792,8 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	args1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	args1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "test_ID1",
 			MaxHits:          5,
@@ -814,8 +815,8 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	args2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "test_ID2",
 			MaxHits:          4,
@@ -837,8 +838,8 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	args3 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "test2_ID1",
 			MaxHits:          5,
@@ -863,7 +864,7 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsSearch: "test_ID",
 	}
-	exp := []*engine.ThresholdProfile{
+	exp := []*utils.ThresholdProfile{
 		{
 			Tenant:           "cgrates.org",
 			ID:               "test_ID1",
@@ -890,7 +891,7 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.ThresholdProfile
+	var getReply []*utils.ThresholdProfile
 	if err := admS.GetThresholdProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -912,8 +913,8 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	args := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	args := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "test_ID1",
 			MaxHits:          5,
@@ -946,7 +947,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.ThresholdProfile
+	var getReply []*utils.ThresholdProfile
 	if err := admS.GetThresholdProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -957,7 +958,7 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
 		},
 		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
@@ -975,7 +976,7 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.ThresholdProfile
+	var reply []*utils.ThresholdProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetThresholdProfiles(context.Background(),

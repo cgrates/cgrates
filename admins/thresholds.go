@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetThresholdProfile returns a Threshold Profile
-func (adms *AdminS) V1GetThresholdProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) (err error) {
+func (adms *AdminS) V1GetThresholdProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,7 +75,7 @@ func (adms *AdminS) V1GetThresholdProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetThresholdProfiles returns a list of threshold profiles registered for a tenant
-func (admS *AdminS) V1GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, thdPrfs *[]*engine.ThresholdProfile) (err error) {
+func (admS *AdminS) V1GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, thdPrfs *[]*utils.ThresholdProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,9 +84,9 @@ func (admS *AdminS) V1GetThresholdProfiles(ctx *context.Context, args *utils.Arg
 	if err = admS.V1GetThresholdProfileIDs(ctx, args, &thdPrfIDs); err != nil {
 		return
 	}
-	*thdPrfs = make([]*engine.ThresholdProfile, 0, len(thdPrfIDs))
+	*thdPrfs = make([]*utils.ThresholdProfile, 0, len(thdPrfIDs))
 	for _, thdPrfID := range thdPrfIDs {
-		var thdPrf *engine.ThresholdProfile
+		var thdPrf *utils.ThresholdProfile
 		thdPrf, err = admS.dm.GetThresholdProfile(ctx, tnt, thdPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -121,7 +120,7 @@ func (adms *AdminS) V1GetThresholdProfilesCount(ctx *context.Context, args *util
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (adms *AdminS) V1SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
+func (adms *AdminS) V1SetThresholdProfile(ctx *context.Context, args *utils.ThresholdProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

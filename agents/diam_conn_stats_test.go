@@ -126,8 +126,8 @@ func TestDiamConnStats(t *testing.T) {
 		t.Helper()
 		var reply string
 		if err := client.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
-			engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
+			utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
 					Tenant:    "cgrates.org",
 					ID:        id,
 					FilterIDs: []string{"*string:~*opts.*eventType:ConnectionStatusReport"},

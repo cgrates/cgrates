@@ -896,8 +896,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			ID:        "THD_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			MaxHits:   10,
@@ -1073,8 +1073,8 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			ID:        "THD_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			MaxHits:   10,

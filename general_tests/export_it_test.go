@@ -303,8 +303,8 @@ func testExpVerifyFilters(t *testing.T) {
 }
 
 func testExpVerifyThresholds(t *testing.T) {
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
 			FilterIDs: []string{"FLTR_ACCOUNT_1001", "*ai:~*opts.*startTime:2014-07-29T15:00:00Z"},
@@ -321,7 +321,7 @@ func testExpVerifyThresholds(t *testing.T) {
 			Async:            false,
 		},
 	}
-	var reply *engine.ThresholdProfile
+	var reply *utils.ThresholdProfile
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)

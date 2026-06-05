@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,7 +59,7 @@ func (self *CmdGetThresholdProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetThresholdProfile) RpcResult() any {
-	var atr engine.ThresholdProfile
+	var atr utils.ThresholdProfile
 	return &atr
 }
 

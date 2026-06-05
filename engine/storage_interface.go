@@ -64,11 +64,11 @@ type DataDB interface {
 	GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
 	SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error)
 	RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error)
-	GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *ThresholdProfile, err error)
-	SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error)
+	GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *utils.ThresholdProfile, err error)
+	SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error)
 	RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error)
-	GetThresholdDrv(*context.Context, string, string) (*Threshold, error)
-	SetThresholdDrv(*context.Context, *Threshold) error
+	GetThresholdDrv(*context.Context, string, string) (*utils.Threshold, error)
+	SetThresholdDrv(*context.Context, *utils.Threshold) error
 	RemoveThresholdDrv(*context.Context, string, string) error
 	SetRankingProfileDrv(ctx *context.Context, rp *utils.RankingProfile) (err error)
 	GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)

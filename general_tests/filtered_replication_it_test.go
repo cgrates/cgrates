@@ -368,8 +368,8 @@ func testFltrRplFilters(t *testing.T) {
 
 func testFltrRplThresholdProfile(t *testing.T) {
 	thID := "TH1"
-	thPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        thID,
 			FilterIDs: []string{"*string:~*req.Account:dan"},
@@ -381,14 +381,14 @@ func testFltrRplThresholdProfile(t *testing.T) {
 			},
 		},
 	}
-	th := engine.Threshold{
+	th := utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     thID,
 	}
 	var result string
-	var replyPrfl *engine.ThresholdProfile
+	var replyPrfl *utils.ThresholdProfile
 	var rplyIDs []string
-	var replyTh engine.Threshold
+	var replyTh utils.Threshold
 
 	argsTh := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{

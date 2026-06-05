@@ -377,15 +377,15 @@ func testCDRsSetThresholdProfile(t *testing.T) {
 	}
 
 	// Set Threshold
-	var reply *engine.ThresholdProfile
+	var reply *utils.ThresholdProfile
 	var result string
 	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ProcessCDR",
 			FilterIDs: []string{"*string:~*req.OriginID:testCDRsProcessCDR4"},
@@ -475,7 +475,7 @@ func testCDRsGetThreshold1(t *testing.T) {
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	var td engine.Threshold
+	var td utils.Threshold
 	if err := cdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"},
@@ -540,7 +540,7 @@ func testCDRsGetStats2(t *testing.T) {
 }
 
 func testCDRsGetThreshold2(t *testing.T) {
-	var td engine.Threshold
+	var td utils.Threshold
 	if err := cdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"},

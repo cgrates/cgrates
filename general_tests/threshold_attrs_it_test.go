@@ -136,8 +136,8 @@ func TestThresholdProcessEventWithAttributes(t *testing.T) {
 	})
 
 	t.Run("SetThresholdProfile", func(t *testing.T) {
-		tPrfl := &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		tPrfl := &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THR_ATTR_TEST",
 				FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -171,7 +171,7 @@ func TestThresholdProcessEventWithAttributes(t *testing.T) {
 		if !slices.Contains(thIDs, "THR_ATTR_TEST") {
 			t.Errorf("expected THR_ATTR_TEST in reply, got %v", thIDs)
 		}
-		var thr engine.Threshold
+		var thr utils.Threshold
 		if err := client.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THR_ATTR_TEST"},

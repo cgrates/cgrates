@@ -85,7 +85,7 @@ func (r *ReplicatorSv1) GetFilter(ctx *context.Context, args *utils.TenantIDWith
 }
 
 // GetThreshold retrieves a threshold from the remote database.
-func (r *ReplicatorSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
+func (r *ReplicatorSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Threshold) error {
 	engine.UpdateReplicationFilters(utils.ThresholdPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
@@ -100,7 +100,7 @@ func (r *ReplicatorSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDW
 }
 
 // GetThresholdProfile retrieves a threshold profile from the remote database.
-func (r *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
+func (r *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ThresholdProfile) error {
 	engine.UpdateReplicationFilters(utils.ThresholdProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
@@ -383,7 +383,7 @@ func (r *ReplicatorSv1) SetAccount(ctx *context.Context, args *utils.AccountWith
 }
 
 // SetThresholdProfile stores a threshold profile in the remote database.
-func (r *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *utils.ThresholdProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
@@ -404,7 +404,7 @@ func (r *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *engine.T
 }
 
 // SetThreshold stores a threshold in the remote database.
-func (r *ReplicatorSv1) SetThreshold(ctx *context.Context, args *engine.ThresholdWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetThreshold(ctx *context.Context, args *utils.ThresholdWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err

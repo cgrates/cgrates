@@ -705,7 +705,7 @@ func (rs *RedisStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from DB
-func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
+func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *utils.ThresholdProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, ID)); err != nil {
 		return
@@ -718,7 +718,7 @@ func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID 
 }
 
 // SetThresholdProfileDrv stores a ThresholdProfile into DB
-func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(tp); err != nil {
 		return
@@ -731,7 +731,7 @@ func (rs *RedisStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id 
 	return rs.Cmd(nil, redisDEL, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *Threshold, err error) {
+func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *utils.Threshold, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -743,7 +743,7 @@ func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
-func (rs *RedisStorage) SetThresholdDrv(ctx *context.Context, r *Threshold) (err error) {
+func (rs *RedisStorage) SetThresholdDrv(ctx *context.Context, r *utils.Threshold) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return

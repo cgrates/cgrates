@@ -136,8 +136,8 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 			}
 		}
 		// Prepare request arguments based on provided parameters.
-		args := &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		args := &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant: params[0],
 				ID:     params[1],
 			},

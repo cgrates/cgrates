@@ -217,7 +217,7 @@ func checkThresholdsHits(t *testing.T, client *birpc.Client, expectedThHits map[
 	}
 
 	method := utils.ThresholdSv1GetThresholdsForEvent
-	var reply []*engine.Threshold
+	var reply []*utils.Threshold
 	if err := client.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -234,7 +234,7 @@ func checkThresholdsHits(t *testing.T, client *birpc.Client, expectedThHits map[
 
 	for tntID, want := range expectedThHits {
 		var got int
-		if !slices.ContainsFunc(reply, func(th *engine.Threshold) bool {
+		if !slices.ContainsFunc(reply, func(th *utils.Threshold) bool {
 			has := th.TenantID() == tntID
 			if has {
 				got = th.Hits

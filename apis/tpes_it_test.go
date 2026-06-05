@@ -926,8 +926,8 @@ func testTPeSetActions(t *testing.T) {
 }
 
 func testTPeSetThresholds(t *testing.T) {
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_2",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -950,8 +950,8 @@ func testTPeSetThresholds(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned:", reply)
 	}
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
 			FilterIDs: []string{"*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*req.Destination:1011"},

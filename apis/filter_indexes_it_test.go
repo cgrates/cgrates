@@ -4765,8 +4765,8 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 	}
 
 	// we will set a ThresholdProfile with our filter and check the indexes
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "THD_ACNT_1001",
 			FilterIDs: []string{"fltr_for_attr",
@@ -4861,8 +4861,8 @@ func testV1FIdxSetThresholdSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our ThresholdsProfile with our filters
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "THD_ACNT_1001",
 			FilterIDs: []string{"fltr_for_attr",
@@ -4967,8 +4967,8 @@ func testV1FIdxThresholdSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
 	// will add more thresholds profiles with our filters for matching indexes
-	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "THD_ACNT_1002",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
@@ -4983,8 +4983,8 @@ func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
 			ActionProfileIDs: []string{"ADDBAL"},
 		},
 	}
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "THD_ACNT_1003",
 			FilterIDs: []string{"fltr_for_attr",
@@ -5298,8 +5298,8 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	tPrfl1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
 			FilterIDs: []string{"FLTR_Charger"},
@@ -5477,8 +5477,8 @@ func testV1FidxSetAndChangeFiltersOnProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	tPrfl1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "TEST_PROFILE1",
 			FilterIDs: []string{"FLTR_Charger",

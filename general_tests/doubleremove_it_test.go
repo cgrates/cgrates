@@ -181,15 +181,15 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 
 func testdoubleRemoveThresholdProfile(t *testing.T) {
 	// check
-	var reply *engine.ThresholdProfile
+	var reply *utils.ThresholdProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TH_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           doubleRemoveTenant,
 			ID:               "TH_PROFILE",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},

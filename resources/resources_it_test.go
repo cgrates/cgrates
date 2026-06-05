@@ -622,8 +622,8 @@ func testResourceSSetActionProfile(t *testing.T) {
 }
 
 func testResourceSSetThresholdProfile(t *testing.T) {
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			FilterIDs:        []string{"*string:~*opts.*eventType:ResourceUpdate"},
 			ID:               "THD_1",
@@ -643,7 +643,7 @@ func testResourceSSetThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "THD_1",
 	}
-	var result *engine.ThresholdProfile
+	var result *utils.ThresholdProfile
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		args, &result); err != nil {
 		t.Error(err)
@@ -710,7 +710,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "THD_1",
 	}
-	var result *engine.Threshold
+	var result *utils.Threshold
 	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		args, &result); err != nil {
 		t.Error(err)
@@ -740,7 +740,7 @@ func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "THD_1",
 	}
-	var result *engine.Threshold
+	var result *utils.Threshold
 	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		args, &result); err != nil {
 		t.Error(err)

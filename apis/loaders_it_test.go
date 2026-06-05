@@ -1368,7 +1368,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 }
 
 func testLoadersGetThresholdProfiles(t *testing.T) {
-	expThPrfs := []*engine.ThresholdProfile{
+	expThPrfs := []*utils.ThresholdProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH1",
@@ -1402,7 +1402,7 @@ func testLoadersGetThresholdProfiles(t *testing.T) {
 			Async:            true,
 		},
 	}
-	var thPrfs []*engine.ThresholdProfile
+	var thPrfs []*utils.ThresholdProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1614,7 +1614,7 @@ func testLoadersGetThresholdProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyThPrf engine.ThresholdProfile
+	var rplyThPrf utils.ThresholdProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

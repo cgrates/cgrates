@@ -128,7 +128,7 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 }
 
 func testTwoEnginesSetThreshold(t *testing.T) {
-	var reply *engine.ThresholdProfile
+	var reply *utils.ThresholdProfile
 	// enforce caching with nil on engine2 so CacheSv1.ReloadCache load correctly the threshold
 	if err := engineTwoRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err == nil ||
@@ -136,8 +136,8 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	var result string
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -200,8 +200,8 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
 	// after we verify the cache make sure it was set correctly there
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -217,7 +217,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 			Async:            true,
 		},
 	}
-	var rplTh *engine.ThresholdProfile
+	var rplTh *utils.ThresholdProfile
 	if err := engineTwoRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)
@@ -227,10 +227,10 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 }
 
 func testTwoEnginesUpdateThreshold(t *testing.T) {
-	var rplTh *engine.ThresholdProfile
+	var rplTh *utils.ThresholdProfile
 	var result string
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
 			FilterIDs: []string{"*string:~*req.Account:10"},

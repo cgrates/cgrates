@@ -1233,8 +1233,8 @@ func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
 }
 
 func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_ID",
 			FilterIDs:        []string{"*string:~*req.EventType:StatUpdate"},
@@ -1257,13 +1257,13 @@ func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	var rplyTh engine.Threshold
-	var rplyThPrf engine.ThresholdProfile
-	expTh := engine.Threshold{
+	var rplyTh utils.Threshold
+	var rplyThPrf utils.ThresholdProfile
+	expTh := utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_ID",
 	}
-	expThPrf := engine.ThresholdProfile{
+	expThPrf := utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_ID",
 		FilterIDs:        []string{"*string:~*req.EventType:StatUpdate"},
@@ -1419,7 +1419,7 @@ func testStatsGetThresholdAfterProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "THD_ID",
 	}
-	var reply *engine.Threshold
+	var reply *utils.Threshold
 	if err := sqRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		args, &reply); err != nil {
 		t.Error(err)

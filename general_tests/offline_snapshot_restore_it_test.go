@@ -208,7 +208,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				})
 			})
 
-			var thrsholds []*engine.ThresholdProfile
+			var thrsholds []*utils.ThresholdProfile
 
 			t.Run("GetThresholdProfiles", func(t *testing.T) {
 				if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
@@ -581,7 +581,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 			})
 
 			t.Run("GetThresholdProfiles2", func(t *testing.T) {
-				var rcv []*engine.ThresholdProfile
+				var rcv []*utils.ThresholdProfile
 				if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",
@@ -852,7 +852,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 			})
 
 			t.Run("GetThresholdProfiles3", func(t *testing.T) {
-				var rcv []*engine.ThresholdProfile
+				var rcv []*utils.ThresholdProfile
 				if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",
@@ -1160,7 +1160,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 			})
 
 			t.Run("GetThresholdProfiles4", func(t *testing.T) {
-				var rcv []*engine.ThresholdProfile
+				var rcv []*utils.ThresholdProfile
 				if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",

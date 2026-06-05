@@ -236,7 +236,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
 	}
 
-	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
+	v4 := &utils.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := setToDB(context.Background(), dm, utils.MetaThresholds, v4, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -512,7 +512,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 
 	{
-		v := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)

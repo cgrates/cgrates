@@ -1,0 +1,462 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
+package thresholds
+
+import (
+	"cmp"
+	"fmt"
+	"maps"
+	"runtime"
+	"slices"
+	"sync"
+	"time"
+
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
+)
+
+type ThresholdConfig struct {
+	FilterIDs        []string
+	MaxHits          int
+	MinHits          int
+	MinSleep         time.Duration
+	Blocker          bool                 // blocker flag to stop processing on filters matched
+	Weights          utils.DynamicWeights // Weight to sort the thresholds
+	ActionProfileIDs []string
+	Async            bool
+	EeIDs            []string
+	AttributeIDs     []string
+}
+
+// matchedThreshold is the unit matched by filters
+type matchedThreshold struct {
+	Threshold *utils.Threshold
+	tPrfl     *utils.ThresholdProfile
+	lkID      string // ID of the lock used when matching the threshold
+}
+
+// NewThresholdService the constructor for ThresoldS service
+func NewThresholdService(dm *engine.DataManager, cgrcfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) (tS *ThresholdS) {
+	return &ThresholdS{
+		dm:          dm,
+		cfg:         cgrcfg,
+		fltrS:       filterS,
+		connMgr:     connMgr,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}),
+		storedTdIDs: make(utils.StringSet),
+	}
+}
+
+// ThresholdS manages Threshold execution and storing them to DB
+type ThresholdS struct {
+	dm          *engine.DataManager
+	cfg         *config.CGRConfig
+	fltrS       *engine.FilterS
+	connMgr     *engine.ConnManager
+	stopBackup  chan struct{}
+	loopStopped chan struct{}
+	storedTdIDs utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
+	stMux       sync.RWMutex    // protects storedTdIDs
+}
+
+// Reload stops the backupLoop and restarts it
+func (s *ThresholdS) Reload(ctx *context.Context) {
+	close(s.stopBackup)
+	<-s.loopStopped // wait until the loop is done
+	s.stopBackup = make(chan struct{})
+	go s.runBackup(ctx)
+}
+
+// StartLoop starts the gorutine with the backup loop
+func (s *ThresholdS) StartLoop(ctx *context.Context) {
+	go s.runBackup(ctx)
+}
+
+// Shutdown is called to shutdown the service
+func (s *ThresholdS) Shutdown(ctx *context.Context) {
+	close(s.stopBackup)
+	s.storeThresholds(ctx)
+}
+
+// backup will regularly store thresholds changed to DB
+func (s *ThresholdS) runBackup(ctx *context.Context) {
+	storeInterval := s.cfg.ThresholdSCfg().StoreInterval
+	if storeInterval <= 0 {
+		s.loopStopped <- struct{}{}
+		return
+	}
+	for {
+		s.storeThresholds(ctx)
+		select {
+		case <-s.stopBackup:
+			s.loopStopped <- struct{}{}
+			return
+		case <-time.After(storeInterval):
+		}
+	}
+}
+
+// storeThresholds represents one task of complete backup
+func (s *ThresholdS) storeThresholds(ctx *context.Context) {
+	var failedTdIDs []string
+	for {
+		s.stMux.Lock()
+		tID := s.storedTdIDs.GetOne()
+		if tID != "" {
+			s.storedTdIDs.Remove(tID)
+		}
+		s.stMux.Unlock()
+		if tID == "" {
+			break // no more keys, backup completed
+		}
+		tIf, ok := engine.Cache.Get(utils.CacheThresholds, tID)
+		if !ok || tIf == nil {
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
+			continue
+		}
+		t := tIf.(*utils.Threshold)
+		lkID := guardian.Guardian.GuardIDs("",
+			s.cfg.GeneralCfg().LockingTimeout,
+			utils.ThresholdLockKey(t.Tenant, t.ID))
+		if err := s.StoreThreshold(ctx, t); err != nil {
+			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
+		}
+		guardian.Guardian.UnguardIDs(lkID)
+		// randomize the CPU load and give up thread control
+		runtime.Gosched()
+	}
+	if len(failedTdIDs) != 0 { // there were errors on save, schedule the keys for next backup
+		s.stMux.Lock()
+		s.storedTdIDs.AddSlice(failedTdIDs)
+		s.stMux.Unlock()
+	}
+}
+
+// StoreThreshold stores the threshold in DB
+func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) error {
+	if err := s.dm.SetThreshold(ctx, t); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
+				t.Tenant, t.ID, err.Error()))
+		return err
+	}
+	//since we no longer handle cache in DataManager do here a manual caching
+	if tntID := t.TenantID(); engine.Cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
+		if err := engine.Cache.Set(ctx, utils.CacheThresholds, tntID, t, nil,
+			true, utils.NonTransactional); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<ThresholdService> failed caching Threshold with ID: %s, error: %s",
+					t.TenantID(), err.Error()))
+			return err
+		}
+	}
+	return nil
+}
+
+// matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
+func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string,
+	args *utils.CGREvent) (ts []*matchedThreshold, unlock func(), err error) {
+	unlockAll := func() {
+		for _, t := range ts {
+			guardian.Guardian.UnguardIDs(t.lkID)
+		}
+	}
+
+	evNm := utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.APIOpts,
+	}
+	thIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, s.fltrS, s.cfg.ThresholdSCfg().Opts.ProfileIDs,
+		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs)
+	if err != nil {
+		return nil, nil, err
+	}
+	ignFilters, err := engine.GetBoolOpts(ctx, tnt, evNm, nil, s.fltrS, s.cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	tIDs := utils.NewStringSet(thIDs)
+	if len(tIDs) == 0 {
+		ignFilters = false
+		tIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
+			s.cfg.ThresholdSCfg().StringIndexedFields,
+			s.cfg.ThresholdSCfg().PrefixIndexedFields,
+			s.cfg.ThresholdSCfg().SuffixIndexedFields,
+			s.cfg.ThresholdSCfg().ExistsIndexedFields,
+			s.cfg.ThresholdSCfg().NotExistsIndexedFields,
+			s.dm, utils.CacheThresholdFilterIndexes, tnt,
+			s.cfg.ThresholdSCfg().IndexedSelects,
+			s.cfg.ThresholdSCfg().NestedFields,
+		)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// Lock items in sorted order to prevent AB-BA deadlock.
+	itemIDs := slices.Sorted(maps.Keys(tIDs))
+
+	ts = make([]*matchedThreshold, 0, len(itemIDs))
+	weights := make(map[string]float64) // stores sorting weights by tID
+	for _, id := range itemIDs {
+		lkPrflID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			utils.ThresholdLockKey(tnt, id))
+		tPrfl, err := s.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional)
+		if err != nil {
+			guardian.Guardian.UnguardIDs(lkPrflID)
+			if err == utils.ErrNotFound {
+				err = nil
+				continue
+			}
+			unlockAll()
+			return nil, nil, err
+		}
+		if !ignFilters {
+			var pass bool
+			if pass, err = s.fltrS.Pass(ctx, tnt, tPrfl.FilterIDs,
+				evNm); err != nil {
+				guardian.Guardian.UnguardIDs(lkPrflID)
+				unlockAll()
+				return nil, nil, err
+			} else if !pass {
+				guardian.Guardian.UnguardIDs(lkPrflID)
+				continue
+			}
+		}
+		th, err := s.dm.GetThreshold(ctx, tPrfl.Tenant, tPrfl.ID, true, true, "")
+		if err != nil {
+			guardian.Guardian.UnguardIDs(lkPrflID)
+			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
+				err = nil
+				continue
+			}
+			unlockAll()
+			return nil, nil, err
+		}
+		weight, err := engine.WeightFromDynamics(ctx, tPrfl.Weights,
+			s.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, nil, err
+		}
+		weights[th.ID] = weight
+		ts = append(ts, &matchedThreshold{
+			Threshold: th,
+			tPrfl:     tPrfl,
+			lkID:      lkPrflID,
+		})
+	}
+	if len(ts) == 0 {
+		return nil, nil, utils.ErrNotFound
+	}
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(ts, func(a, b *matchedThreshold) int {
+		return cmp.Compare(weights[b.Threshold.ID], weights[a.Threshold.ID])
+	})
+
+	for i, t := range ts {
+		if t.tPrfl.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
+			for _, dropped := range ts[i+1:] {
+				guardian.Guardian.UnguardIDs(dropped.lkID)
+			}
+			ts = ts[:i+1]
+			break
+		}
+	}
+	return ts, unlockAll, nil
+}
+
+// processEvent processes a new event, dispatching to matching thresholds
+func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thIDs []string, err error) {
+	matchTs, unlock, err := s.matchingThresholdsForEvent(ctx, tnt, args)
+	if err != nil {
+		return nil, err
+	}
+	defer unlock()
+	var withErrors bool
+	thIDs = make([]string, 0, len(matchTs))
+	for _, t := range matchTs {
+		thIDs = append(thIDs, t.Threshold.ID)
+		if t.tPrfl.MaxHits != -1 && t.Threshold.Hits >= t.tPrfl.MaxHits { // threshold already reached max hits
+			continue
+		}
+		t.Threshold.Hits++
+		if time.Now().After(t.Threshold.Snooze) &&
+			t.Threshold.Hits >= t.tPrfl.MinHits &&
+			(t.tPrfl.MaxHits != 1 || t.Threshold.Hits <= t.tPrfl.MaxHits) { // threshold is active
+			if args.APIOpts == nil {
+				args.APIOpts = make(map[string]any)
+			}
+			args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
+			evNm := utils.MapStorage{
+				utils.MetaReq:  args.Event,
+				utils.MetaOpts: args.APIOpts,
+			}
+			if len(t.tPrfl.AttributeIDs) != 0 && !slices.Contains(t.tPrfl.AttributeIDs, utils.MetaNone) {
+				rplyAttrS, err := s.processAttributeS(ctx, tnt, t, args)
+				if err != nil {
+					withErrors = true
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed processing event with Attributes: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+				}
+				if rplyAttrS != nil && len(rplyAttrS.AlteredFields) != 0 {
+					args = rplyAttrS.CGREvent
+				}
+			}
+			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.fltrS)
+			if err != nil {
+				withErrors = true
+				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+				continue
+			}
+			var reply string
+			if !t.tPrfl.Async {
+				if err = s.connMgr.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+					withErrors = true
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+				}
+			} else {
+				go func() {
+					if errExec := s.connMgr.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
+						args, &reply); errExec != nil {
+						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.Threshold.TenantID(), errExec.Error()))
+					}
+				}()
+			}
+			if !withErrors {
+				t.Threshold.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+			}
+			if err := s.processEEs(ctx, args.APIOpts, t, tnt, evNm); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
+				withErrors = true
+			}
+		}
+		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
+			s.StoreThreshold(ctx, t.Threshold)
+		} else {
+			s.stMux.Lock()
+			s.storedTdIDs.Add(t.Threshold.TenantID())
+			s.stMux.Unlock()
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
+	return thIDs, err
+}
+
+// processAttributeS will process the event with AttributeS
+func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, th *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttrSProcessEventReply, error) {
+	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), s.fltrS)
+	if err != nil {
+		return nil, err
+	}
+	cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = []string{th.tPrfl.ID}
+	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = th.tPrfl.AttributeIDs
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaThresholds)
+	var rplyAttr utils.AttrSProcessEventReply
+	if err = s.connMgr.Call(ctx, attrConns, utils.AttributeSv1ProcessEvent, cgrEv, &rplyAttr); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			return nil, err
+		}
+	}
+	return &rplyAttr, nil
+}
+
+func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *matchedThreshold, tnt string, dP utils.DataProvider) error {
+	var targetEeIDs []string
+	if len(th.tPrfl.EeIDs) > 0 {
+		targetEeIDs = th.tPrfl.EeIDs
+		if isNone := slices.Contains(th.tPrfl.EeIDs, utils.MetaNone); isNone {
+			targetEeIDs = []string{}
+		}
+	} else {
+		targetEeIDs = s.cfg.ThresholdSCfg().EEsExporterIDs
+	}
+	eesConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaEEs], tnt, dP, s.fltrS)
+	if err != nil {
+		return err
+	}
+	if len(targetEeIDs) > 0 {
+		if len(eesConns) == 0 {
+			return utils.NewErrNotConnected(utils.EEs)
+		}
+	} else {
+		return nil // no EEs to process
+	}
+	if opts == nil {
+		opts = make(map[string]any)
+	}
+	sortedFilterIDs := slices.Clone(th.tPrfl.FilterIDs)
+	slices.Sort(sortedFilterIDs)
+	opts[utils.MetaEventType] = utils.ThresholdHit
+	cgrEv := &utils.CGREvent{
+		Tenant: th.Threshold.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]any{
+			utils.EventType: utils.ThresholdHit,
+			utils.ID:        th.Threshold.ID,
+			utils.Hits:      th.Threshold.Hits,
+			utils.Snooze:    th.Threshold.Snooze,
+			utils.ThresholdConfig: ThresholdConfig{
+				FilterIDs:        sortedFilterIDs,
+				MaxHits:          th.tPrfl.MaxHits,
+				MinHits:          th.tPrfl.MinHits,
+				MinSleep:         th.tPrfl.MinSleep,
+				Blocker:          th.tPrfl.Blocker,
+				Weights:          th.tPrfl.Weights,
+				ActionProfileIDs: th.tPrfl.ActionProfileIDs,
+				Async:            th.tPrfl.Async,
+				EeIDs:            th.tPrfl.EeIDs,
+			},
+		},
+		APIOpts: opts,
+	}
+	cgrEventWithID := &utils.CGREventWithEeIDs{
+		CGREvent: cgrEv,
+		EeIDs:    targetEeIDs,
+	}
+	var reply map[string]map[string]any
+	if th.tPrfl.Async {
+		go func() {
+			if errExec := s.connMgr.Call(context.TODO(), eesConns,
+				utils.EeSv1ProcessEvent,
+				cgrEventWithID, &reply); errExec != nil &&
+				errExec.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ThresholdS> error: %v processing event %+v with EEs.", errExec, cgrEv))
+			}
+		}()
+	} else if err := s.connMgr.Call(context.TODO(), eesConns,
+		utils.EeSv1ProcessEvent,
+		cgrEventWithID, &reply); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return err
+	}
+	return nil
+}

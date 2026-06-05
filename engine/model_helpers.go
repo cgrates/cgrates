@@ -1281,8 +1281,8 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 	return
 }
 
-func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th *ThresholdProfile, err error) {
-	th = &ThresholdProfile{
+func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th *utils.ThresholdProfile, err error) {
+	th = &utils.ThresholdProfile{
 		Tenant:           tpTH.Tenant,
 		ID:               tpTH.ID,
 		MaxHits:          tpTH.MaxHits,
@@ -1311,7 +1311,7 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 	return th, nil
 }
 
-func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile) {
+func ThresholdProfileToAPI(th *utils.ThresholdProfile) (tpTH *utils.TPThresholdProfile) {
 	tpTH = &utils.TPThresholdProfile{
 		Tenant:           th.Tenant,
 		ID:               th.ID,

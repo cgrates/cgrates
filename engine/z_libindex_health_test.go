@@ -159,8 +159,8 @@ func TestHealthIndexThreshold(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	// we will set this threshold but without indexing
-	thPrf := &ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "TestHealthIndexThreshold",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
@@ -229,8 +229,8 @@ func TestHealthIndexThreshold(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same ThresholdProfile
-	thPrf = &ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &ThresholdProfile{
+	thPrf = &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "TestHealthIndexThreshold",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",

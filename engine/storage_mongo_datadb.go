@@ -1062,8 +1062,8 @@ func (ms *MongoStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from DB
-func (ms *MongoStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (*ThresholdProfile, error) {
-	thProfile := new(ThresholdProfile)
+func (ms *MongoStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (*utils.ThresholdProfile, error) {
+	thProfile := new(utils.ThresholdProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColTps).FindOne(sctx, bson.M{"tenant": tenant, "id": ID})
 		decodeErr := sr.Decode(thProfile)
@@ -1076,7 +1076,7 @@ func (ms *MongoStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID 
 }
 
 // SetThresholdProfileDrv stores a ThresholdProfile into DB
-func (ms *MongoStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) error {
+func (ms *MongoStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColTps).UpdateOne(sctx, bson.M{"tenant": tp.Tenant, "id": tp.ID},
 			bson.M{"$set": tp}, options.Update().SetUpsert(true),
@@ -1096,8 +1096,8 @@ func (ms *MongoStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id 
 	})
 }
 
-func (ms *MongoStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (*Threshold, error) {
-	th := new(Threshold)
+func (ms *MongoStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+	th := new(utils.Threshold)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColThs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(th)
@@ -1109,7 +1109,7 @@ func (ms *MongoStorage) GetThresholdDrv(ctx *context.Context, tenant, id string)
 	return th, err
 }
 
-func (ms *MongoStorage) SetThresholdDrv(ctx *context.Context, r *Threshold) error {
+func (ms *MongoStorage) SetThresholdDrv(ctx *context.Context, r *utils.Threshold) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColThs).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
