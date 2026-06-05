@@ -43,7 +43,7 @@ type ThresholdService struct {
 	thrs *thresholds.ThresholdS
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
@@ -71,10 +71,9 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 
 	thrs.mu.Lock()
 	defer thrs.mu.Unlock()
-	thrs.thrs = thresholds.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
+	thrs.thrs = thresholds.NewThresholdService(thrs.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
-	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	for _, s := range srv {
 		cl.RpcRegister(s)
 	}
