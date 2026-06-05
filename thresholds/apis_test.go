@@ -610,8 +610,8 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 		t.Errorf("not ok")
 	} else if x.(*utils.Threshold).Hits != 0 {
 		t.Errorf("expected nr. of hits to be 0, received: <%+v>", x.(*utils.Threshold).Hits)
-	} else if !reflect.DeepEqual(tS.storedTdIDs, expStored) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedTdIDs)
+	} else if !reflect.DeepEqual(tS.storedThresholds, expStored) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedThresholds)
 	}
 }
 
