@@ -34,6 +34,9 @@ func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *util
 
 // GetThreshold queries a Threshold
 func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error {
+	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	return tSv1.tS.V1GetThreshold(ctx, tntID.TenantID, t)
 }
 
@@ -44,6 +47,9 @@ func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREven
 
 // ResetThreshold resets the threshold hits
 func (tSv1 *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	return tSv1.tS.V1ResetThreshold(ctx, tntID.TenantID, reply)
 }
 
