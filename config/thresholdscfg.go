@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -35,7 +36,7 @@ type ThresholdsOpts struct {
 	ProfileIgnoreFilters []*DynamicBoolOpt
 }
 
-// ThresholdSCfg the threshold config section
+// ThresholdSCfg is the threshold config section
 type ThresholdSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
@@ -51,36 +52,35 @@ type ThresholdSCfg struct {
 	Opts                   *ThresholdsOpts
 }
 
-// loadThresholdSCfg loads the ThresholdS section of the configuration
-func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+// Load loads the ThresholdS section of the configuration
+func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnThresholdSCfg := new(ThresholdSJsonCfg)
-	if err = jsnCfg.GetSection(ctx, ThresholdSJSON, jsnThresholdSCfg); err != nil {
-		return
+	if err := jsnCfg.GetSection(ctx, ThresholdSJSON, jsnThresholdSCfg); err != nil {
+		return err
 	}
 	return t.loadFromJSONCfg(jsnThresholdSCfg)
 }
 
-func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err error) {
+func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.ProfileIDs != nil {
 		thdOpts.ProfileIDs = append(thdOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		var profileIgnFltr []*DynamicBoolOpt
-		profileIgnFltr, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		profileIgnFltr, err := IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
 		if err != nil {
-			return
+			return err
 		}
 		thdOpts.ProfileIgnoreFilters = append(profileIgnFltr, thdOpts.ProfileIgnoreFilters...)
 	}
-	return
+	return nil
 }
 
-func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
+func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.Enabled != nil {
 		t.Enabled = *jsnCfg.Enabled
@@ -89,9 +89,11 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		t.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Store_interval != nil {
-		if t.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
+		ivl, err := utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval)
+		if err != nil {
 			return err
 		}
+		t.StoreInterval = ivl
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		t.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
@@ -112,18 +114,15 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
-		for connType, opts := range tagged {
-			t.Conns[connType] = opts
-		}
+		maps.Copy(t.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		t.EEsExporterIDs = slices.Clone(*jsnCfg.Ees_exporter_ids)
 	}
 	if jsnCfg.Opts != nil {
-		err = t.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		return t.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
-	return
+	return nil
 }
 
 // AsMapInterface returns the config as a map[string]any
@@ -184,8 +183,8 @@ func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 }
 
 // Clone returns a deep copy of ThresholdSCfg
-func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
-	cln = &ThresholdSCfg{
+func (t ThresholdSCfg) Clone() *ThresholdSCfg {
+	cln := &ThresholdSCfg{
 		Enabled:        t.Enabled,
 		IndexedSelects: t.IndexedSelects,
 		StoreInterval:  t.StoreInterval,
@@ -212,7 +211,7 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.EEsExporterIDs != nil {
 		cln.EEsExporterIDs = slices.Clone(t.EEsExporterIDs)
 	}
-	return
+	return cln
 }
 
 type ThresholdsOptsJson struct {
@@ -220,7 +219,7 @@ type ThresholdsOptsJson struct {
 	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 }
 
-// Threshold service config section
+// ThresholdSJsonCfg is the threshold service config section
 type ThresholdSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool                      `json:"indexedSelects"`
