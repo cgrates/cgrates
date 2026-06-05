@@ -285,6 +285,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		})
 	}
 	if len(ts) == 0 {
+		unlockAll()
 		return nil, nil, utils.ErrNotFound
 	}
 
