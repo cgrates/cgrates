@@ -371,7 +371,9 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			}
 		}
 		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
-			s.StoreThreshold(ctx, mt.threshold)
+			if err := s.StoreThreshold(ctx, mt.threshold); err != nil {
+				withErrors = true
+			}
 		} else {
 			s.storedMu.Lock()
 			s.storedThresholds.Add(mt.threshold.TenantID())

@@ -99,7 +99,7 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) error {
 	case Blocker:
 		tp.Blocker, err = IfaceAsBool(val)
 	case Weights:
-		if val != EmptyString {
+		if val != "" {
 			tp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		}
 	case FilterIDs:
@@ -107,11 +107,11 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) error {
 		valA, err = IfaceAsStringSlice(val)
 		tp.FilterIDs = append(tp.FilterIDs, valA...)
 	case MaxHits:
-		if val != EmptyString {
+		if val != "" {
 			tp.MaxHits, err = IfaceAsInt(val)
 		}
 	case MinHits:
-		if val != EmptyString {
+		if val != "" {
 			tp.MinHits, err = IfaceAsInt(val)
 		}
 	case MinSleep:
