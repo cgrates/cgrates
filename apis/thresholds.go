@@ -183,12 +183,12 @@ func (adms *AdminSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.T
 	return nil
 }
 
-// NewThresholdSv1 initializes ThresholdSV1
+// NewThresholdSv1 initializes the ThresholdSv1 object.
 func NewThresholdSv1(tS *thresholds.ThresholdS) *ThresholdSv1 {
 	return &ThresholdSv1{tS: tS}
 }
 
-// ThresholdSv1 exports RPC from RLs
+// ThresholdSv1 represents the RPC object to register for thresholds v1 APIs.
 type ThresholdSv1 struct {
 	ping
 	tS *thresholds.ThresholdS
