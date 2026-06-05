@@ -49,10 +49,10 @@ type ThresholdConfig struct {
 
 // matchedThreshold is the unit matched by filters
 type matchedThreshold struct {
-	Threshold *utils.Threshold
-	tPrfl     *utils.ThresholdProfile
+	threshold *utils.Threshold
+	profile   *utils.ThresholdProfile
 	weight    float64
-	lkID      string // ID of the lock used when matching the threshold
+	lockID    string // ID of the lock used when matching the threshold
 }
 
 // NewThresholdService the constructor for ThresoldS service
@@ -178,8 +178,8 @@ func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) er
 func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string,
 	args *utils.CGREvent) (ts []*matchedThreshold, unlock func(), err error) {
 	unlockAll := func() {
-		for _, t := range ts {
-			guardian.Guardian.UnguardIDs(t.lkID)
+		for _, mt := range ts {
+			guardian.Guardian.UnguardIDs(mt.lockID)
 		}
 	}
 
@@ -221,12 +221,12 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 
 	ts = make([]*matchedThreshold, 0, len(itemIDs))
 	for _, id := range itemIDs {
-		lkPrflID := guardian.Guardian.GuardIDs("",
+		lockID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			utils.ThresholdLockKey(tnt, id))
-		tPrfl, err := s.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional)
+		profile, err := s.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkPrflID)
+			guardian.Guardian.UnguardIDs(lockID)
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
@@ -236,19 +236,19 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		}
 		if !ignFilters {
 			var pass bool
-			if pass, err = s.fltrS.Pass(ctx, tnt, tPrfl.FilterIDs,
+			if pass, err = s.fltrS.Pass(ctx, tnt, profile.FilterIDs,
 				evNm); err != nil {
-				guardian.Guardian.UnguardIDs(lkPrflID)
+				guardian.Guardian.UnguardIDs(lockID)
 				unlockAll()
 				return nil, nil, err
 			} else if !pass {
-				guardian.Guardian.UnguardIDs(lkPrflID)
+				guardian.Guardian.UnguardIDs(lockID)
 				continue
 			}
 		}
-		th, err := s.dm.GetThreshold(ctx, tPrfl.Tenant, tPrfl.ID, true, true, "")
+		threshold, err := s.dm.GetThreshold(ctx, profile.Tenant, profile.ID, true, true, "")
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkPrflID)
+			guardian.Guardian.UnguardIDs(lockID)
 			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
 				err = nil
 				continue
@@ -256,18 +256,18 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 			unlockAll()
 			return nil, nil, err
 		}
-		weight, err := engine.WeightFromDynamics(ctx, tPrfl.Weights,
+		weight, err := engine.WeightFromDynamics(ctx, profile.Weights,
 			s.fltrS, tnt, evNm)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkPrflID)
+			guardian.Guardian.UnguardIDs(lockID)
 			unlockAll()
 			return nil, nil, err
 		}
 		ts = append(ts, &matchedThreshold{
-			Threshold: th,
-			tPrfl:     tPrfl,
+			threshold: threshold,
+			profile:   profile,
 			weight:    weight,
-			lkID:      lkPrflID,
+			lockID:    lockID,
 		})
 	}
 	if len(ts) == 0 {
@@ -279,10 +279,10 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		return cmp.Compare(b.weight, a.weight)
 	})
 
-	for i, t := range ts {
-		if t.tPrfl.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
+	for i, mt := range ts {
+		if mt.profile.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
 			for _, dropped := range ts[i+1:] {
-				guardian.Guardian.UnguardIDs(dropped.lkID)
+				guardian.Guardian.UnguardIDs(dropped.lockID)
 			}
 			ts = ts[:i+1]
 			break
@@ -300,28 +300,28 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 	defer unlock()
 	var withErrors bool
 	thIDs = make([]string, 0, len(matchTs))
-	for _, t := range matchTs {
-		thIDs = append(thIDs, t.Threshold.ID)
-		if t.tPrfl.MaxHits != -1 && t.Threshold.Hits >= t.tPrfl.MaxHits { // threshold already reached max hits
+	for _, mt := range matchTs {
+		thIDs = append(thIDs, mt.threshold.ID)
+		if mt.profile.MaxHits != -1 && mt.threshold.Hits >= mt.profile.MaxHits { // threshold already reached max hits
 			continue
 		}
-		t.Threshold.Hits++
-		if time.Now().After(t.Threshold.Snooze) &&
-			t.Threshold.Hits >= t.tPrfl.MinHits &&
-			(t.tPrfl.MaxHits != 1 || t.Threshold.Hits <= t.tPrfl.MaxHits) { // threshold is active
+		mt.threshold.Hits++
+		if time.Now().After(mt.threshold.Snooze) &&
+			mt.threshold.Hits >= mt.profile.MinHits &&
+			(mt.profile.MaxHits != 1 || mt.threshold.Hits <= mt.profile.MaxHits) { // threshold is active
 			if args.APIOpts == nil {
 				args.APIOpts = make(map[string]any)
 			}
-			args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
+			args.APIOpts[utils.OptsActionsProfileIDs] = mt.profile.ActionProfileIDs
 			evNm := utils.MapStorage{
 				utils.MetaReq:  args.Event,
 				utils.MetaOpts: args.APIOpts,
 			}
-			if len(t.tPrfl.AttributeIDs) != 0 && !slices.Contains(t.tPrfl.AttributeIDs, utils.MetaNone) {
-				rplyAttrS, err := s.processAttributeS(ctx, tnt, t, args)
+			if len(mt.profile.AttributeIDs) != 0 && !slices.Contains(mt.profile.AttributeIDs, utils.MetaNone) {
+				rplyAttrS, err := s.processAttributeS(ctx, tnt, mt, args)
 				if err != nil {
 					withErrors = true
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed processing event with Attributes: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed processing event with Attributes: %s, error: %s", mt.threshold.TenantID(), err.Error()))
 				}
 				if rplyAttrS != nil && len(rplyAttrS.AlteredFields) != 0 {
 					args = rplyAttrS.CGREvent
@@ -330,37 +330,37 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.fltrS)
 			if err != nil {
 				withErrors = true
-				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
 				continue
 			}
 			var reply string
-			if !t.tPrfl.Async {
+			if !mt.profile.Async {
 				if err = s.connMgr.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
 					withErrors = true
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.Threshold.TenantID(), err.Error()))
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
 				}
 			} else {
 				go func() {
 					if errExec := s.connMgr.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
 						args, &reply); errExec != nil {
-						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.Threshold.TenantID(), errExec.Error()))
+						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), errExec.Error()))
 					}
 				}()
 			}
 			if !withErrors {
-				t.Threshold.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+				mt.threshold.Snooze = time.Now().Add(mt.profile.MinSleep)
 			}
-			if err := s.processEEs(ctx, args.APIOpts, t, tnt, evNm); err != nil {
+			if err := s.processEEs(ctx, args.APIOpts, mt, tnt, evNm); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
 				withErrors = true
 			}
 		}
 		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
-			s.StoreThreshold(ctx, t.Threshold)
+			s.StoreThreshold(ctx, mt.threshold)
 		} else {
 			s.stMux.Lock()
-			s.storedTdIDs.Add(t.Threshold.TenantID())
+			s.storedTdIDs.Add(mt.threshold.TenantID())
 			s.stMux.Unlock()
 		}
 	}
@@ -371,13 +371,13 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 }
 
 // processAttributeS will process the event with AttributeS
-func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, th *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttrSProcessEventReply, error) {
+func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttrSProcessEventReply, error) {
 	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), s.fltrS)
 	if err != nil {
 		return nil, err
 	}
-	cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = []string{th.tPrfl.ID}
-	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = th.tPrfl.AttributeIDs
+	cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = []string{mt.profile.ID}
+	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = mt.profile.AttributeIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaThresholds)
@@ -390,11 +390,11 @@ func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, th *mat
 	return &rplyAttr, nil
 }
 
-func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *matchedThreshold, tnt string, dP utils.DataProvider) error {
+func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *matchedThreshold, tnt string, dP utils.DataProvider) error {
 	var targetEeIDs []string
-	if len(th.tPrfl.EeIDs) > 0 {
-		targetEeIDs = th.tPrfl.EeIDs
-		if isNone := slices.Contains(th.tPrfl.EeIDs, utils.MetaNone); isNone {
+	if len(mt.profile.EeIDs) > 0 {
+		targetEeIDs = mt.profile.EeIDs
+		if isNone := slices.Contains(mt.profile.EeIDs, utils.MetaNone); isNone {
 			targetEeIDs = []string{}
 		}
 	} else {
@@ -414,27 +414,27 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *m
 	if opts == nil {
 		opts = make(map[string]any)
 	}
-	sortedFilterIDs := slices.Clone(th.tPrfl.FilterIDs)
+	sortedFilterIDs := slices.Clone(mt.profile.FilterIDs)
 	slices.Sort(sortedFilterIDs)
 	opts[utils.MetaEventType] = utils.ThresholdHit
 	cgrEv := &utils.CGREvent{
-		Tenant: th.Threshold.Tenant,
+		Tenant: mt.threshold.Tenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
 			utils.EventType: utils.ThresholdHit,
-			utils.ID:        th.Threshold.ID,
-			utils.Hits:      th.Threshold.Hits,
-			utils.Snooze:    th.Threshold.Snooze,
+			utils.ID:        mt.threshold.ID,
+			utils.Hits:      mt.threshold.Hits,
+			utils.Snooze:    mt.threshold.Snooze,
 			utils.ThresholdConfig: ThresholdConfig{
 				FilterIDs:        sortedFilterIDs,
-				MaxHits:          th.tPrfl.MaxHits,
-				MinHits:          th.tPrfl.MinHits,
-				MinSleep:         th.tPrfl.MinSleep,
-				Blocker:          th.tPrfl.Blocker,
-				Weights:          th.tPrfl.Weights,
-				ActionProfileIDs: th.tPrfl.ActionProfileIDs,
-				Async:            th.tPrfl.Async,
-				EeIDs:            th.tPrfl.EeIDs,
+				MaxHits:          mt.profile.MaxHits,
+				MinHits:          mt.profile.MinHits,
+				MinSleep:         mt.profile.MinSleep,
+				Blocker:          mt.profile.Blocker,
+				Weights:          mt.profile.Weights,
+				ActionProfileIDs: mt.profile.ActionProfileIDs,
+				Async:            mt.profile.Async,
+				EeIDs:            mt.profile.EeIDs,
 			},
 		},
 		APIOpts: opts,
@@ -444,7 +444,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, th *m
 		EeIDs:    targetEeIDs,
 	}
 	var reply map[string]map[string]any
-	if th.tPrfl.Async {
+	if mt.profile.Async {
 		go func() {
 			if errExec := s.connMgr.Call(context.TODO(), eesConns,
 				utils.EeSv1ProcessEvent,

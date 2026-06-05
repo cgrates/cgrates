@@ -363,36 +363,36 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	unlock()
-	if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Threshold.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Threshold.Tenant)
-	} else if !reflect.DeepEqual(ths[0].ID, thMatched[0].Threshold.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[0].ID, thMatched[0].Threshold.ID)
-	} else if !reflect.DeepEqual(ths[0].Hits, thMatched[0].Threshold.Hits) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[0].Hits, thMatched[0].Threshold.Hits)
+	if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].threshold.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].threshold.Tenant)
+	} else if !reflect.DeepEqual(ths[0].ID, thMatched[0].threshold.ID) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[0].ID, thMatched[0].threshold.ID)
+	} else if !reflect.DeepEqual(ths[0].Hits, thMatched[0].threshold.Hits) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[0].Hits, thMatched[0].threshold.Hits)
 	}
 	thMatched, unlock, err = thServ.matchingThresholdsForEvent(context.TODO(), argsGetThresholds[1].Tenant, argsGetThresholds[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	unlock()
-	if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Threshold.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Threshold.Tenant)
-	} else if !reflect.DeepEqual(ths[1].ID, thMatched[0].Threshold.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[1].ID, thMatched[0].Threshold.ID)
-	} else if !reflect.DeepEqual(ths[1].Hits, thMatched[0].Threshold.Hits) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[1].Hits, thMatched[0].Threshold.Hits)
+	if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].threshold.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].threshold.Tenant)
+	} else if !reflect.DeepEqual(ths[1].ID, thMatched[0].threshold.ID) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[1].ID, thMatched[0].threshold.ID)
+	} else if !reflect.DeepEqual(ths[1].Hits, thMatched[0].threshold.Hits) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[1].Hits, thMatched[0].threshold.Hits)
 	}
 	thMatched, unlock, err = thServ.matchingThresholdsForEvent(context.TODO(), argsGetThresholds[2].Tenant, argsGetThresholds[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	unlock()
-	if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Threshold.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Threshold.Tenant)
-	} else if !reflect.DeepEqual(ths[2].ID, thMatched[0].Threshold.ID) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[2].ID, thMatched[0].Threshold.ID)
-	} else if !reflect.DeepEqual(ths[2].Hits, thMatched[0].Threshold.Hits) {
-		t.Errorf("Expecting: %+v, received: %+v", ths[2].Hits, thMatched[0].Threshold.Hits)
+	if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].threshold.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].threshold.Tenant)
+	} else if !reflect.DeepEqual(ths[2].ID, thMatched[0].threshold.ID) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[2].ID, thMatched[0].threshold.ID)
+	} else if !reflect.DeepEqual(ths[2].Hits, thMatched[0].threshold.Hits) {
+		t.Errorf("Expecting: %+v, received: %+v", ths[2].Hits, thMatched[0].threshold.Hits)
 	}
 }
 

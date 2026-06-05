@@ -69,8 +69,8 @@ func (s *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.C
 	}
 	defer unlock()
 	out := make([]*utils.Threshold, 0, len(matched))
-	for _, t := range matched {
-		out = append(out, t.Threshold)
+	for _, mt := range matched {
+		out = append(out, mt.threshold)
 	}
 	*reply = out
 	return nil
