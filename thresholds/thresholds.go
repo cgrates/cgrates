@@ -146,7 +146,7 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 		}
 		tIf, ok := engine.Cache.Get(utils.CacheThresholds, tID)
 		if !ok || tIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache threshold with ID: %s", utils.ThresholdS, tID))
 			continue
 		}
 		t := tIf.(*utils.Threshold)
@@ -171,8 +171,8 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) error {
 	if err := s.dm.SetThreshold(ctx, t); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
-				t.Tenant, t.ID, err.Error()))
+			fmt.Sprintf("<%s> failed saving Threshold with tenant: %s and ID: %s, error: %v",
+				utils.ThresholdS, t.Tenant, t.ID, err))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
@@ -180,8 +180,8 @@ func (s *ThresholdS) StoreThreshold(ctx *context.Context, t *utils.Threshold) er
 		if err := engine.Cache.Set(ctx, utils.CacheThresholds, tntID, t, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<ThresholdService> failed caching Threshold with ID: %s, error: %s",
-					t.TenantID(), err.Error()))
+				fmt.Sprintf("<%s> failed caching Threshold with ID: %s, error: %v",
+					utils.ThresholdS, t.TenantID(), err))
 			return err
 		}
 	}
@@ -335,7 +335,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 				rplyAttrS, err := s.processAttributeS(ctx, tnt, mt, args)
 				if err != nil {
 					withErrors = true
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed processing event with Attributes: %s, error: %s", mt.threshold.TenantID(), err.Error()))
+					utils.Logger.Warning(fmt.Sprintf("<%s> failed processing event with Attributes: %s, error: %v", utils.ThresholdS, mt.threshold.TenantID(), err))
 				}
 				if rplyAttrS != nil && len(rplyAttrS.AlteredFields) != 0 {
 					args = rplyAttrS.CGREvent
@@ -344,20 +344,20 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.filters)
 			if err != nil {
 				withErrors = true
-				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
+				utils.Logger.Warning(fmt.Sprintf("<%s> failed resolving action connections for threshold: %s, error: %v", utils.ThresholdS, mt.threshold.TenantID(), err))
 				continue
 			}
 			var reply string
 			if !mt.profile.Async {
 				if err = s.cm.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
 					withErrors = true
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
+					utils.Logger.Warning(fmt.Sprintf("<%s> failed executing actions for threshold: %s, error: %v", utils.ThresholdS, mt.threshold.TenantID(), err))
 				}
 			} else {
 				go func() {
 					if errExec := s.cm.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
 						args, &reply); errExec != nil {
-						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), errExec.Error()))
+						utils.Logger.Warning(fmt.Sprintf("<%s> failed executing actions for threshold: %s, error: %v", utils.ThresholdS, mt.threshold.TenantID(), errExec))
 					}
 				}()
 			}
@@ -366,7 +366,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			}
 			if err := s.processEEs(ctx, args.APIOpts, mt, tnt, evNm); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
+					fmt.Sprintf("<%s> received error: %v when processing with EEs.", utils.ThresholdS, err))
 				withErrors = true
 			}
 		}
@@ -465,7 +465,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *m
 				cgrEventWithID, &reply); errExec != nil &&
 				errExec.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<ThresholdS> error: %v processing event %+v with EEs.", errExec, cgrEv))
+					fmt.Sprintf("<%s> error: %v processing event %+v with EEs.", utils.ThresholdS, errExec, cgrEv))
 			}
 		}()
 	} else if err := s.cm.Call(context.TODO(), eesConns,
