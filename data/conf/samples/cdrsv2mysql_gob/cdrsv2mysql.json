@@ -28,7 +28,6 @@
 			"*stats": [{"connIDs": ["conn1"]}],
 			"*thresholds": [{"connIDs": ["conn1"]}]
 		},
-		"scheduler_conns": ["*localhost"]
 	},
 
 	"attributes": {

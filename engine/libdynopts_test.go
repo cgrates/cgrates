@@ -1896,9 +1896,23 @@ func TestAttrDynamicOptsFromJson(t *testing.T) {
 	cfgJSONStr := `{
 		"attributes": {								
 			"enabled": true,	
-			"stats_conns": ["*internal"],			
-			"resources_conns": ["*internal"],		
-			"accounts_conns": ["*internal"],			
+				"conns": {
+					"*stats": [		
+						{
+							"connIDs": ["*internal"]
+						}
+					],
+					"*resources": [		
+						{
+							"connIDs": ["*internal"]
+						}
+					],
+					"*accounts": [		
+						{
+							"connIDs": ["*internal"]
+						}
+					],
+				},				
 			"prefixIndexedFields": ["*req.index1","*req.index2"],		
 			"stringIndexedFields": ["*req.index1"],
 			"existsIndexedFields": ["*req.index1","*req.index2"],		
@@ -2126,7 +2140,13 @@ func TestResDynamicOptsFromJson(t *testing.T) {
 		"resources": {								
 			"enabled": true,						
 			"storeInterval": "7m",					
-			"thresholds_conns": ["*internal:*thresholds", "*conn1"],					
+			"conns": {
+				"*thresholds": [
+					{
+						"connIDs": ["*internal", "*conn1"]
+					}
+				],
+			},				
 			"indexedSelects":true,		
 			"nestedFields": true,
 				"opts":{

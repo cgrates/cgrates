@@ -271,12 +271,26 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,,tr
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"trends": map[string]any{
-					"enabled":          true,
-					"stats_conns":      []string{"*localhost"},
-					"storeInterval":    "-1",
-					"thresholds_conns": []string{"*localhost"},
-					"eesConns":         []string{"*localhost"},
-					"eesExporterIDs":   []string{"exporter1"},
+					"enabled": true,
+					"conns": map[string][]*config.DynamicConns{
+						"*stats": {
+							{
+								ConnIDs: []string{"*internal"},
+							},
+						},
+						"*thresholds": {
+							{
+								ConnIDs: []string{"*internal"},
+							},
+						},
+						"*ees": {
+							{
+								ConnIDs: []string{"*internal"},
+							},
+						},
+					},
+					"storeInterval":  "-1",
+					"eesExporterIDs": []string{"exporter1"},
 				},
 			},
 		}, &reply); err != nil {

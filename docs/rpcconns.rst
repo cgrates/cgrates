@@ -142,7 +142,7 @@ Transport Performance
 Using Connection Pools
 ----------------------
 
-Components reference connection pools through "_conns" configuration fields:
+Components reference connection pools through "conns" configuration fields:
 
 .. code-block:: json
 
