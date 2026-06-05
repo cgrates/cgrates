@@ -273,7 +273,7 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
-		d.Ees_exporter_ids = &v2.EEsExporterIDs
+		d.Ees_exporter_ids = utils.SliceStringPointer(slices.Clone(v2.EEsExporterIDs))
 	}
 	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
