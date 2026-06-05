@@ -647,7 +647,9 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 		}
 		*t.dirty = true // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
-			tS.StoreThreshold(t)
+			if err := tS.StoreThreshold(t); err != nil {
+				withErrors = true
+			}
 		} else {
 			tS.stMux.Lock()
 			tS.storedThresholds.Add(t.TenantID())
