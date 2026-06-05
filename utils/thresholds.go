@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-// ThresholdProfile the profile for threshold
+// ThresholdProfile represents the user configuration for the threshold
 type ThresholdProfile struct {
 	Tenant           string
 	ID               string
@@ -253,7 +253,6 @@ type ThresholdProfileWithAPIOpts struct {
 // MapStringInterfaceToThresholdProfile converts map[string]any to ThresholdProfile struct
 func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, error) {
 	tp := &ThresholdProfile{}
-
 	if v, ok := m[Tenant].(string); ok {
 		tp.Tenant = v
 	}
@@ -268,11 +267,11 @@ func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, 
 		tp.MinHits = int(v)
 	}
 	if v, ok := m[MinSleep].(string); ok {
-		if dur, err := time.ParseDuration(v); err != nil {
+		dur, err := time.ParseDuration(v)
+		if err != nil {
 			return nil, err
-		} else {
-			tp.MinSleep = dur
 		}
+		tp.MinSleep = dur
 	} else if v, ok := m[MinSleep].(float64); ok { // for -1 cases
 		tp.MinSleep = time.Duration(v)
 	}
@@ -343,7 +342,6 @@ type ThresholdWithAPIOpts struct {
 // MapStringInterfaceToThreshold converts map[string]any to Threshold struct
 func MapStringInterfaceToThreshold(m map[string]any) (*Threshold, error) {
 	th := &Threshold{}
-
 	if v, ok := m[Tenant].(string); ok {
 		th.Tenant = v
 	}
