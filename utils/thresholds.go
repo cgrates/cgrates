@@ -22,12 +22,6 @@ import (
 	"time"
 )
 
-// ThresholdProfileWithAPIOpts is used in replicatorV1 for dispatcher
-type ThresholdProfileWithAPIOpts struct {
-	*ThresholdProfile
-	APIOpts map[string]any
-}
-
 // ThresholdProfile the profile for threshold
 type ThresholdProfile struct {
 	Tenant           string
@@ -44,7 +38,7 @@ type ThresholdProfile struct {
 	EeIDs            []string
 }
 
-// Clone clones *ThresholdProfile (lkID excluded)
+// Clone clones *ThresholdProfile
 func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 	if tp == nil {
 		return nil
@@ -85,88 +79,16 @@ func (tp *ThresholdProfile) CacheClone() any {
 	return tp.Clone()
 }
 
-// TenantID returns the concatenated key beteen tenant and ID
+// TenantID returns the concatenated key between tenant and ID
 func (tp *ThresholdProfile) TenantID() string {
 	return ConcatenatedKey(tp.Tenant, tp.ID)
 }
 
-// ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
-type ThresholdWithAPIOpts struct {
-	*Threshold
-	APIOpts map[string]any
-}
-
-// Threshold is the unit matched by filters
-type Threshold struct {
-	Tenant string
-	ID     string
-	Hits   int       // number of hits for this threshold
-	Snooze time.Time // prevent threshold to run too early
-}
-
-// Clone clones *Threshold (lkID excluded)
-func (t *Threshold) Clone() *Threshold {
-	if t == nil {
-		return nil
-	}
-	clone := &Threshold{
-		Tenant: t.Tenant,
-		ID:     t.ID,
-		Hits:   t.Hits,
-		Snooze: t.Snooze,
-	}
-	return clone
-}
-
-// CacheClone returns a clone of Threshold used by ltcache CacheCloner
-func (t *Threshold) CacheClone() any {
-	return t.Clone()
-}
-
-// TenantID returns the concatenated key beteen tenant and ID
-func (t *Threshold) TenantID() string {
-	return ConcatenatedKey(t.Tenant, t.ID)
-}
-
-// AsMapStringInterface converts Threshold struct to map[string]any
-func (t *Threshold) AsMapStringInterface() map[string]any {
-	if t == nil {
-		return nil
-	}
-	return map[string]any{
-		Tenant: t.Tenant,
-		ID:     t.ID,
-		Hits:   t.Hits,
-		Snooze: t.Snooze,
-	}
-}
-
-// MapStringInterfaceToThreshold converts map[string]any to Threshold struct
-func MapStringInterfaceToThreshold(m map[string]any) (*Threshold, error) {
-	th := &Threshold{}
-
-	if v, ok := m[Tenant].(string); ok {
-		th.Tenant = v
-	}
-	if v, ok := m[ID].(string); ok {
-		th.ID = v
-	}
-	if v, ok := m[Hits].(float64); ok {
-		th.Hits = int(v)
-	}
-	if v, ok := m[Snooze].(string); ok {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
-			th.Snooze = t
-		}
-	}
-	return th, nil
-}
-
-func (tp *ThresholdProfile) Set(path []string, val any, _ bool) (err error) {
+func (tp *ThresholdProfile) Set(path []string, val any, _ bool) error {
 	if len(path) != 1 {
 		return ErrWrongPath
 	}
-
+	var err error
 	switch path[0] {
 	default:
 		return ErrWrongPath
@@ -209,7 +131,7 @@ func (tp *ThresholdProfile) Set(path []string, val any, _ bool) (err error) {
 	case Async:
 		tp.Async, err = IfaceAsBool(val)
 	}
-	return
+	return err
 }
 
 func (tp *ThresholdProfile) Merge(v2 any) {
@@ -243,14 +165,14 @@ func (tp *ThresholdProfile) Merge(v2 any) {
 }
 
 func (tp *ThresholdProfile) String() string { return ToJSON(tp) }
-func (tp *ThresholdProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val any
-	if val, err = tp.FieldAsInterface(fldPath); err != nil {
-		return
+func (tp *ThresholdProfile) FieldAsString(fldPath []string) (string, error) {
+	val, err := tp.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", err
 	}
 	return IfaceAsString(val), nil
 }
-func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
+func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}
@@ -322,6 +244,12 @@ func (tp *ThresholdProfile) AsMapStringInterface() map[string]any {
 	}
 }
 
+// ThresholdProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type ThresholdProfileWithAPIOpts struct {
+	*ThresholdProfile
+	APIOpts map[string]any
+}
+
 // MapStringInterfaceToThresholdProfile converts map[string]any to ThresholdProfile struct
 func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, error) {
 	tp := &ThresholdProfile{}
@@ -359,6 +287,78 @@ func MapStringInterfaceToThresholdProfile(m map[string]any) (*ThresholdProfile, 
 	tp.EeIDs = InterfaceToStringSlice(m[EeIDs])
 	tp.AttributeIDs = InterfaceToStringSlice(m[AttributeIDs])
 	return tp, nil
+}
+
+// Threshold is the unit matched by filters
+type Threshold struct {
+	Tenant string
+	ID     string
+	Hits   int       // number of hits for this threshold
+	Snooze time.Time // prevent threshold to run too early
+}
+
+// Clone clones *Threshold
+func (t *Threshold) Clone() *Threshold {
+	if t == nil {
+		return nil
+	}
+	clone := &Threshold{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+		Hits:   t.Hits,
+		Snooze: t.Snooze,
+	}
+	return clone
+}
+
+// CacheClone returns a clone of Threshold used by ltcache CacheCloner
+func (t *Threshold) CacheClone() any {
+	return t.Clone()
+}
+
+// TenantID returns the concatenated key between tenant and ID
+func (t *Threshold) TenantID() string {
+	return ConcatenatedKey(t.Tenant, t.ID)
+}
+
+// AsMapStringInterface converts Threshold struct to map[string]any
+func (t *Threshold) AsMapStringInterface() map[string]any {
+	if t == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+		Hits:   t.Hits,
+		Snooze: t.Snooze,
+	}
+}
+
+// ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
+type ThresholdWithAPIOpts struct {
+	*Threshold
+	APIOpts map[string]any
+}
+
+// MapStringInterfaceToThreshold converts map[string]any to Threshold struct
+func MapStringInterfaceToThreshold(m map[string]any) (*Threshold, error) {
+	th := &Threshold{}
+
+	if v, ok := m[Tenant].(string); ok {
+		th.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		th.ID = v
+	}
+	if v, ok := m[Hits].(float64); ok {
+		th.Hits = int(v)
+	}
+	if v, ok := m[Snooze].(string); ok {
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			th.Snooze = t
+		}
+	}
+	return th, nil
 }
 
 // ThresholdLockKey returns the ID used to lock a threshold with guardian.
