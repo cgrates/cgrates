@@ -44,7 +44,7 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -113,7 +113,7 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -179,7 +179,7 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -268,7 +268,7 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -325,7 +325,7 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -370,7 +370,7 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -426,7 +426,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -495,7 +495,7 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -558,7 +558,7 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	var reply []string
 	if err := tS.V1GetThresholdIDs(context.Background(), &utils.TenantWithAPIOpts{}, &reply); err == nil ||
@@ -583,7 +583,7 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -630,7 +630,7 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -666,7 +666,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, dm, filterS, nil)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -710,7 +710,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(nil, cfg, filterS, nil)
+	tS := NewThresholdService(cfg, nil, filterS, nil)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -752,7 +752,7 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, cM)
+	tS := NewThresholdService(cfg, dm, filterS, cM)
 	th := &utils.Threshold{
 		Hits:   2,
 		Tenant: "cgrates.org",

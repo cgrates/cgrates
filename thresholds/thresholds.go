@@ -55,13 +55,13 @@ type matchedThreshold struct {
 	lockID    string // ID of the lock used when matching the threshold
 }
 
-// NewThresholdService the constructor for ThresoldS service
-func NewThresholdService(dm *engine.DataManager, cgrcfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) (tS *ThresholdS) {
+// NewThresholdService the constructor for ThresholdS service
+func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engine.FilterS, cm *engine.ConnManager) *ThresholdS {
 	return &ThresholdS{
+		cfg:         cfg,
 		dm:          dm,
-		cfg:         cgrcfg,
-		fltrS:       filterS,
-		connMgr:     connMgr,
+		filters:     filters,
+		cm:          cm,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}),
 		storedTdIDs: make(utils.StringSet),
@@ -70,14 +70,14 @@ func NewThresholdService(dm *engine.DataManager, cgrcfg *config.CGRConfig, filte
 
 // ThresholdS manages Threshold execution and storing them to DB
 type ThresholdS struct {
-	dm          *engine.DataManager
 	cfg         *config.CGRConfig
-	fltrS       *engine.FilterS
-	connMgr     *engine.ConnManager
+	dm          *engine.DataManager
+	filters     *engine.FilterS
+	cm          *engine.ConnManager
 	stopBackup  chan struct{}
 	loopStopped chan struct{}
-	storedTdIDs utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux       sync.RWMutex    // protects storedTdIDs
+	storedTdIDs utils.StringSet // thresholds that need saving
+	storedMu    sync.RWMutex    // protects storedTdIDs
 }
 
 // Reload stops the backupLoop and restarts it
@@ -121,12 +121,12 @@ func (s *ThresholdS) runBackup(ctx *context.Context) {
 func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 	var failedTdIDs []string
 	for {
-		s.stMux.Lock()
+		s.storedMu.Lock()
 		tID := s.storedTdIDs.GetOne()
 		if tID != "" {
 			s.storedTdIDs.Remove(tID)
 		}
-		s.stMux.Unlock()
+		s.storedMu.Unlock()
 		if tID == "" {
 			break // no more keys, backup completed
 		}
@@ -147,9 +147,9 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedTdIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		s.stMux.Lock()
+		s.storedMu.Lock()
 		s.storedTdIDs.AddSlice(failedTdIDs)
-		s.stMux.Unlock()
+		s.storedMu.Unlock()
 	}
 }
 
@@ -187,12 +187,12 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	thIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, s.fltrS, s.cfg.ThresholdSCfg().Opts.ProfileIDs,
+	thIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, s.filters, s.cfg.ThresholdSCfg().Opts.ProfileIDs,
 		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs)
 	if err != nil {
 		return nil, nil, err
 	}
-	ignFilters, err := engine.GetBoolOpts(ctx, tnt, evNm, nil, s.fltrS, s.cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+	ignFilters, err := engine.GetBoolOpts(ctx, tnt, evNm, nil, s.filters, s.cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters)
 	if err != nil {
 		return nil, nil, err
@@ -236,7 +236,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		}
 		if !ignFilters {
 			var pass bool
-			if pass, err = s.fltrS.Pass(ctx, tnt, profile.FilterIDs,
+			if pass, err = s.filters.Pass(ctx, tnt, profile.FilterIDs,
 				evNm); err != nil {
 				guardian.Guardian.UnguardIDs(lockID)
 				unlockAll()
@@ -257,7 +257,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 			return nil, nil, err
 		}
 		weight, err := engine.WeightFromDynamics(ctx, profile.Weights,
-			s.fltrS, tnt, evNm)
+			s.filters, tnt, evNm)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lockID)
 			unlockAll()
@@ -327,7 +327,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 					args = rplyAttrS.CGREvent
 				}
 			}
-			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.fltrS)
+			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.filters)
 			if err != nil {
 				withErrors = true
 				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed resolving action connections for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
@@ -335,13 +335,13 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			}
 			var reply string
 			if !mt.profile.Async {
-				if err = s.connMgr.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+				if err = s.cm.Call(ctx, actionConns, utils.ActionSv1ExecuteActions, args, &reply); err != nil {
 					withErrors = true
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), err.Error()))
 				}
 			} else {
 				go func() {
-					if errExec := s.connMgr.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
+					if errExec := s.cm.Call(context.Background(), actionConns, utils.ActionSv1ExecuteActions,
 						args, &reply); errExec != nil {
 						utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", mt.threshold.TenantID(), errExec.Error()))
 					}
@@ -359,9 +359,9 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 		if s.cfg.ThresholdSCfg().StoreInterval == -1 {
 			s.StoreThreshold(ctx, mt.threshold)
 		} else {
-			s.stMux.Lock()
+			s.storedMu.Lock()
 			s.storedTdIDs.Add(mt.threshold.TenantID())
-			s.stMux.Unlock()
+			s.storedMu.Unlock()
 		}
 	}
 	if withErrors {
@@ -372,7 +372,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 
 // processAttributeS will process the event with AttributeS
 func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttrSProcessEventReply, error) {
-	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), s.fltrS)
+	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), s.filters)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +382,7 @@ func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *mat
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaThresholds)
 	var rplyAttr utils.AttrSProcessEventReply
-	if err = s.connMgr.Call(ctx, attrConns, utils.AttributeSv1ProcessEvent, cgrEv, &rplyAttr); err != nil {
+	if err = s.cm.Call(ctx, attrConns, utils.AttributeSv1ProcessEvent, cgrEv, &rplyAttr); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			return nil, err
 		}
@@ -400,7 +400,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *m
 	} else {
 		targetEeIDs = s.cfg.ThresholdSCfg().EEsExporterIDs
 	}
-	eesConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaEEs], tnt, dP, s.fltrS)
+	eesConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaEEs], tnt, dP, s.filters)
 	if err != nil {
 		return err
 	}
@@ -446,7 +446,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *m
 	var reply map[string]map[string]any
 	if mt.profile.Async {
 		go func() {
-			if errExec := s.connMgr.Call(context.TODO(), eesConns,
+			if errExec := s.cm.Call(context.TODO(), eesConns,
 				utils.EeSv1ProcessEvent,
 				cgrEventWithID, &reply); errExec != nil &&
 				errExec.Error() != utils.ErrNotFound.Error() {
@@ -454,7 +454,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *m
 					fmt.Sprintf("<ThresholdS> error: %v processing event %+v with EEs.", errExec, cgrEv))
 			}
 		}()
-	} else if err := s.connMgr.Call(context.TODO(), eesConns,
+	} else if err := s.cm.Call(context.TODO(), eesConns,
 		utils.EeSv1ProcessEvent,
 		cgrEventWithID, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
