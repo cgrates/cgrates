@@ -1121,7 +1121,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheThresholds, th.TenantID(), th, nil, true, utils.NonTransactional)
 	expLog := `[WARNING] <ThresholdS> failed caching Threshold with ID: cgrates.org:TH1, error: DISCONNECTED`
-	if err := tS.StoreThreshold(context.Background(), th); err == nil ||
+	if err := tS.storeThreshold(context.Background(), th); err == nil ||
 		err.Error() != utils.ErrDisconnected.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
 	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
