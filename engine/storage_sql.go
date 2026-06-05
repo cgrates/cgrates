@@ -926,7 +926,7 @@ func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
-func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	var result []*ThresholdProfileMdl
 	if err = sqls.db.Model(&ThresholdProfileMdl{}).Where(&ThresholdProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -935,10 +935,10 @@ func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id 
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return MapStringInterfaceToThresholdProfile(result[0].ThresholdProfile)
+	return utils.MapStringInterfaceToThresholdProfile(result[0].ThresholdProfile)
 }
 
-func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ThresholdProfileMdl{
 		Tenant:           tp.Tenant,
@@ -970,7 +970,7 @@ func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id 
 	return
 }
 
-func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (tp *Threshold, err error) {
+func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (tp *utils.Threshold, err error) {
 	var result []*ThresholdJSONMdl
 	if err = sqls.db.Model(&ThresholdJSONMdl{}).Where(&ThresholdJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -979,10 +979,10 @@ func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string)
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return MapStringInterfaceToThreshold(result[0].Threshold)
+	return utils.MapStringInterfaceToThreshold(result[0].Threshold)
 }
 
-func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, t *Threshold) (err error) {
+func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, t *utils.Threshold) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ThresholdJSONMdl{
 		Tenant:    t.Tenant,

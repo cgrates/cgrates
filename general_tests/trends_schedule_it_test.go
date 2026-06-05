@@ -203,7 +203,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,,tr
 	})
 
 	t.Run("CheckThresholds", func(t *testing.T) {
-		var td *engine.Threshold
+		var td *utils.Threshold
 		if err := client.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}}, &td); err != nil {
 			t.Error(err)
@@ -323,7 +323,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,,tr
 		}
 	})
 	t.Run("CheckThresholds", func(t *testing.T) {
-		var td *engine.Threshold
+		var td *utils.Threshold
 		if err := client.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}}, &td); err != nil {
 			t.Error(err)

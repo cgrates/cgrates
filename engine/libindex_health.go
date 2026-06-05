@@ -83,7 +83,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = st.FilterIDs
 	case utils.CacheThresholdFilterIndexes:
-		var th *ThresholdProfile
+		var th *utils.ThresholdProfile
 		if th, err = dm.GetThresholdProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

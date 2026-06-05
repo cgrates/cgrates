@@ -340,10 +340,10 @@ func TestReplicatorGetThreshold(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.Threshold
+	var reply utils.Threshold
 	rp := NewReplicatorSv1(dm, v1)
 
-	thd := &engine.Threshold{
+	thd := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_2",
 		Hits:   0,
@@ -373,10 +373,10 @@ func TestReplicatorGetThresholdError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.Threshold
+	var reply utils.Threshold
 	rp := NewReplicatorSv1(dm, v1)
 
-	thd := &engine.Threshold{
+	thd := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_3",
 		Hits:   0,
@@ -403,10 +403,10 @@ func TestReplicatorGetThresholdProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ThresholdProfile
+	var reply utils.ThresholdProfile
 	rp := NewReplicatorSv1(dm, v1)
 
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -445,10 +445,10 @@ func TestReplicatorGetThresholdProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ThresholdProfile
+	var reply utils.ThresholdProfile
 	rp := NewReplicatorSv1(dm, v1)
 
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_4",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -945,8 +945,8 @@ func TestReplicatorSetThresholdProfile(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	th := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	th := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_100",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -971,7 +971,7 @@ func TestReplicatorSetThresholdProfile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	exp := &engine.ThresholdProfile{
+	exp := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -1006,8 +1006,8 @@ func TestReplicatorSetThresholdProfileErr1(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	th := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	th := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_100",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -1132,8 +1132,8 @@ func TestReplicatorSetThreshold(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.ThresholdWithAPIOpts{
-		Threshold: &engine.Threshold{
+	thd := &utils.ThresholdWithAPIOpts{
+		Threshold: &utils.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_20",
 			Hits:   0,
@@ -1149,7 +1149,7 @@ func TestReplicatorSetThreshold(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	exp := &engine.Threshold{
+	exp := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_20",
 		Hits:   0,
@@ -1175,8 +1175,8 @@ func TestReplicatorSetThresholdErr1(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.ThresholdWithAPIOpts{
-		Threshold: &engine.Threshold{
+	thd := &utils.ThresholdWithAPIOpts{
+		Threshold: &utils.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_20",
 			Hits:   0,
@@ -1914,7 +1914,7 @@ func TestReplicatorRemoveThreshold(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.Threshold{
+	thd := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_2",
 		Hits:   0,
@@ -1953,7 +1953,7 @@ func TestReplicatorRemoveThresholdErr(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.Threshold{
+	thd := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_2",
 		Hits:   0,
@@ -2245,7 +2245,7 @@ func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -2293,7 +2293,7 @@ func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},

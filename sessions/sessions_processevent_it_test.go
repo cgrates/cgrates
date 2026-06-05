@@ -800,8 +800,8 @@ func TestSessionSv1ProcessEventThresholds(t *testing.T) {
 	}
 
 	if err := client.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
-		&engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		&utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant:    "cgrates.org",
 				ID:        "THD_ACNT_1001",
 				FilterIDs: []string{"*string:~*req.Account:1001"},

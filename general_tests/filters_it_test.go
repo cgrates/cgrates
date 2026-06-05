@@ -319,8 +319,8 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	}
 
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
 			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
@@ -340,7 +340,7 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var rcvTh *engine.ThresholdProfile
+	var rcvTh *utils.ThresholdProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -396,8 +396,8 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	//update the threshold with new filter
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
 			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*opts.*startTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
@@ -507,8 +507,8 @@ func testV1FltrPopulateResources(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_ResTest",
 			FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
@@ -528,7 +528,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var rcvTh *engine.ThresholdProfile
+	var rcvTh *utils.ThresholdProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -812,8 +812,8 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", result)
 	}
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Account",
 			FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
@@ -833,7 +833,7 @@ func testV1FltrAccounts(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var rcvTh *engine.ThresholdProfile
+	var rcvTh *utils.ThresholdProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -914,8 +914,8 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Error("Got error on AdminSv1.SetActionProfile: ", err.Error())
 	}
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	tPrfl := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_AccountDinamic",
 			FilterIDs: []string{"*exists:~*accounts.<~*req.Account>:"},
@@ -935,7 +935,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var rcvTh *engine.ThresholdProfile
+	var rcvTh *utils.ThresholdProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

@@ -23,12 +23,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/thresholds"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetThresholdProfile returns a Threshold Profile
-func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) (err error) {
+func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,7 +76,7 @@ func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetThresholdProfiles returns a list of threshold profiles registered for a tenant
-func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, thdPrfs *[]*engine.ThresholdProfile) (err error) {
+func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, thdPrfs *[]*utils.ThresholdProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,9 +85,9 @@ func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.Arg
 	if err = admS.GetThresholdProfileIDs(ctx, args, &thdPrfIDs); err != nil {
 		return
 	}
-	*thdPrfs = make([]*engine.ThresholdProfile, 0, len(thdPrfIDs))
+	*thdPrfs = make([]*utils.ThresholdProfile, 0, len(thdPrfIDs))
 	for _, thdPrfID := range thdPrfIDs {
-		var thdPrf *engine.ThresholdProfile
+		var thdPrf *utils.ThresholdProfile
 		thdPrf, err = admS.dm.GetThresholdProfile(ctx, tnt, thdPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -121,7 +121,7 @@ func (adms *AdminSv1) GetThresholdProfilesCount(ctx *context.Context, args *util
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (adms *AdminSv1) SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetThresholdProfile(ctx *context.Context, args *utils.ThresholdProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -184,14 +184,14 @@ func (adms *AdminSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.T
 }
 
 // NewThresholdSv1 initializes ThresholdSV1
-func NewThresholdSv1(tS *engine.ThresholdS) *ThresholdSv1 {
+func NewThresholdSv1(tS *thresholds.ThresholdS) *ThresholdSv1 {
 	return &ThresholdSv1{tS: tS}
 }
 
 // ThresholdSv1 exports RPC from RLs
 type ThresholdSv1 struct {
 	ping
-	tS *engine.ThresholdS
+	tS *thresholds.ThresholdS
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
@@ -200,12 +200,12 @@ func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.Tena
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.Threshold) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Threshold) error {
 	return tSv1.tS.V1GetThresholdsForEvent(ctx, args, reply)
 }
 
 // GetThreshold queries a Threshold
-func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error {
+func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *utils.Threshold) error {
 	return tSv1.tS.V1GetThreshold(ctx, tntID, t)
 }
 

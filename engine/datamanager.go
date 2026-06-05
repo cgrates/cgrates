@@ -341,7 +341,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, thresholdProfileLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThresholdProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.RankingProfilePrefix:
@@ -354,7 +354,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetTrendProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, thresholdLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThreshold(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.FilterPrefix:
@@ -615,14 +615,14 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 }
 
 func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
-	cacheRead, cacheWrite bool, transactionID string) (th *Threshold, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (th *utils.Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholds, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*Threshold), nil
+			return x.(*utils.Threshold), nil
 		}
 	}
 	if dm == nil {
@@ -666,7 +666,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold) (err error) {
+func (dm *DataManager) SetThreshold(ctx *context.Context, th *utils.Threshold) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -682,7 +682,7 @@ func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold) (err er
 		err = rpl.replicate(ctx,
 			utils.ThresholdPrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThreshold,
-			&ThresholdWithAPIOpts{
+			&utils.ThresholdWithAPIOpts{
 				Threshold: th,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dbCfg.RplCache, utils.EmptyString)}, itm)
@@ -715,14 +715,14 @@ func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id string) 
 }
 
 func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (th *ThresholdProfile, err error) {
+	transactionID string) (th *utils.ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholdProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ThresholdProfile), nil
+			return x.(*utils.ThresholdProfile), nil
 		}
 	}
 	if dm == nil {
@@ -768,7 +768,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *utils.ThresholdProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -805,7 +805,7 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 		if err = rpl.replicate(ctx,
 			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
-			&ThresholdProfileWithAPIOpts{
+			&utils.ThresholdProfileWithAPIOpts{
 				ThresholdProfile: th,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
@@ -817,14 +817,14 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 		oldTh.MaxHits != th.MaxHits ||
 		oldTh.MinHits != th.MinHits ||
 		oldTh.MinSleep != th.MinSleep { // reset the threshold if the profile changed this fields
-		err = dm.SetThreshold(ctx, &Threshold{
+		err = dm.SetThreshold(ctx, &utils.Threshold{
 			Tenant: th.Tenant,
 			ID:     th.ID,
 			Hits:   0,
 		})
 	} else if _, errTh := dm.GetThreshold(ctx, th.Tenant, th.ID, // do not try to get the threshold if the configuration changed
 		true, false, utils.NonTransactional); errTh == utils.ErrNotFound { // the threshold does not exist
-		err = dm.SetThreshold(ctx, &Threshold{
+		err = dm.SetThreshold(ctx, &utils.Threshold{
 			Tenant: th.Tenant,
 			ID:     th.ID,
 			Hits:   0,

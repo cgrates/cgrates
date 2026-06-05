@@ -917,8 +917,8 @@ func TestDynThdIT(t *testing.T) {
 	})
 
 	t.Run("SetThresholdProfile", func(t *testing.T) {
-		thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		thPrf1 := &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant:           utils.CGRateSorg,
 				ID:               "THD_ACNT_1002",
 				FilterIDs:        []string{"*string:~*opts.*acntProfileIDs:1002"},
@@ -939,13 +939,13 @@ func TestDynThdIT(t *testing.T) {
 	})
 
 	t.Run("GetThresholdProfile", func(t *testing.T) {
-		var rplyTh engine.Threshold
-		var rplyThPrf engine.ThresholdProfile
-		expTh := engine.Threshold{
+		var rplyTh utils.Threshold
+		var rplyThPrf utils.ThresholdProfile
+		expTh := utils.Threshold{
 			Tenant: utils.CGRateSorg,
 			ID:     "THD_ACNT_1002",
 		}
-		expThPrf := engine.ThresholdProfile{
+		expThPrf := utils.ThresholdProfile{
 			Tenant:           utils.CGRateSorg,
 			ID:               "THD_ACNT_1002",
 			FilterIDs:        []string{"*string:~*opts.*acntProfileIDs:1002"},
@@ -999,7 +999,7 @@ func TestDynThdIT(t *testing.T) {
 		time.Sleep(700 * time.Millisecond) //wait for async
 	})
 	t.Run("GetDynamicThresholdProfile", func(t *testing.T) {
-		var thrsholds []*engine.ThresholdProfile
+		var thrsholds []*utils.ThresholdProfile
 		if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 			&utils.ArgsItemIDs{
 				Tenant: utils.CGRateSorg,
@@ -1012,7 +1012,7 @@ func TestDynThdIT(t *testing.T) {
 		sort.Slice(thrsholds, func(i, j int) bool {
 			return thrsholds[i].ID > thrsholds[j].ID
 		})
-		exp := []*engine.ThresholdProfile{
+		exp := []*utils.ThresholdProfile{
 			{
 				Tenant:           utils.CGRateSorg,
 				ID:               "THD_ACNT_1002",

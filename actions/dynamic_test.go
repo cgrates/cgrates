@@ -225,12 +225,12 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 	engine.Cache.Clear(nil)
 	defer engine.Cache.Clear(nil)
 
-	var tpwo *engine.ThresholdProfileWithAPIOpts
+	var tpwo *utils.ThresholdProfileWithAPIOpts
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AdminSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error {
 				var canCast bool
-				if tpwo, canCast = args.(*engine.ThresholdProfileWithAPIOpts); !canCast {
+				if tpwo, canCast = args.(*utils.ThresholdProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
 				}
 				return nil
@@ -241,13 +241,13 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 	testcases := []struct {
 		name    string
 		diktats []*utils.APDiktat
-		expTpwo *engine.ThresholdProfileWithAPIOpts
+		expTpwo *utils.ThresholdProfileWithAPIOpts
 		wantErr bool
 	}{
 		{
 			name: "SuccessfulRequest",
-			expTpwo: &engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
+			expTpwo: &utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
 					Tenant:    "cgrates.org",
 					ID:        "THD_ACNT_1001",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -282,8 +282,8 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 		},
 		{
 			name: "SuccessfulRequestWithDyanmicPaths",
-			expTpwo: &engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
+			expTpwo: &utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
 					Tenant:    "cgrates.org",
 					ID:        "THD_ACNT_1001",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -318,8 +318,8 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 		},
 		{
 			name: "SuccessfulRequestEmptyFields",
-			expTpwo: &engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
+			expTpwo: &utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
 					Tenant:           "cgrates.org",
 					ID:               "THD_ACNT_1001",
 					FilterIDs:        nil,

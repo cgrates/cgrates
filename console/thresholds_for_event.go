@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -62,6 +61,6 @@ func (self *CmdThresholdsForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdThresholdsForEvent) RpcResult() any {
-	var s []*engine.Threshold
+	var s []*utils.Threshold
 	return &s
 }

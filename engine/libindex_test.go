@@ -110,7 +110,7 @@ func TestComputeIndexes(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -149,7 +149,7 @@ func TestComputeIndexesIDsNotNil(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -183,7 +183,7 @@ func TestRemoveIndexFiltersItem(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -210,7 +210,7 @@ func TestRemoveFilterIndexesForFilter(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -555,7 +555,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
-	thP := &ThresholdProfile{
+	thP := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "ThP1",
 		FilterIDs:        []string{"fltr_test"},
@@ -2905,7 +2905,7 @@ func TestComputeIndexesNilFilterIDs(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -2955,7 +2955,7 @@ func TestComputeIndexesNilFilterIDs(t *testing.T) {
 
 func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 
-	thd := &ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -2975,8 +2975,10 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return nil },
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) { return thd, nil },
+		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return thd, nil
+		},
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)

@@ -660,7 +660,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		ActionProfileIDs: []string{"WARN3"},
 	}
 
-	eTPs := &ThresholdProfile{
+	eTPs := &utils.ThresholdProfile{
 		ID:               tps.ID,
 		MaxHits:          tps.MaxHits,
 		Blocker:          tps.Blocker,
@@ -699,7 +699,7 @@ func TestThresholdProfileToAPI(t *testing.T) {
 		AttributeIDs:     []string{},
 	}
 
-	thPrf := &ThresholdProfile{
+	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH1",
 		FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
@@ -3609,7 +3609,7 @@ func TestFilterMdlsCSVHeader(t *testing.T) {
 }
 
 func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
-	testStruct := &ThresholdProfile{
+	testStruct := &utils.ThresholdProfile{
 		FilterIDs:        []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		ActionProfileIDs: []string{"test_action_id"},
 	}

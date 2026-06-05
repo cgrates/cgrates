@@ -473,7 +473,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("ThresholdProfiles:")
 	}
 	for _, tpTH := range tpr.thProfiles {
-		var th *ThresholdProfile
+		var th *utils.ThresholdProfile
 		if th, err = APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}

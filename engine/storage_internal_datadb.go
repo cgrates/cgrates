@@ -393,12 +393,12 @@ func (iDB *InternalDB) RemStatQueueDrv(_ *context.Context, tenant, id string) (e
 	return
 }
 
-func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*ThresholdProfile), nil
+	return x.(*utils.ThresholdProfile), nil
 }
 
 func (iDB *InternalDB) SetTrendProfileDrv(_ *context.Context, srp *utils.TrendProfile) (err error) {
@@ -439,7 +439,7 @@ func (iDB *InternalDB) RemoveTrendDrv(_ *context.Context, tenant, id string) (er
 	return
 }
 
-func (iDB *InternalDB) SetThresholdProfileDrv(_ *context.Context, tp *ThresholdProfile) (err error) {
+func (iDB *InternalDB) SetThresholdProfileDrv(_ *context.Context, tp *utils.ThresholdProfile) (err error) {
 	iDB.db.Set(utils.CacheThresholdProfiles, tp.TenantID(), tp, nil,
 		true, utils.NonTransactional)
 	return
@@ -451,15 +451,15 @@ func (iDB *InternalDB) RemThresholdProfileDrv(_ *context.Context, tenant, id str
 	return
 }
 
-func (iDB *InternalDB) GetThresholdDrv(_ *context.Context, tenant, id string) (th *Threshold, err error) {
+func (iDB *InternalDB) GetThresholdDrv(_ *context.Context, tenant, id string) (th *utils.Threshold, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*Threshold), nil
+	return x.(*utils.Threshold), nil
 }
 
-func (iDB *InternalDB) SetThresholdDrv(_ *context.Context, th *Threshold) (err error) {
+func (iDB *InternalDB) SetThresholdDrv(_ *context.Context, th *utils.Threshold) (err error) {
 	iDB.db.Set(utils.CacheThresholds, th.TenantID(), th, nil,
 		true, utils.NonTransactional)
 	return

@@ -664,8 +664,8 @@ func TestStatsAPIs(t *testing.T) {
 		t.Error(err)
 	}
 
-	thPrf := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "thdID",
 			FilterIDs: []string{"*string:~*req.Account:1002"},

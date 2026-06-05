@@ -49,7 +49,7 @@ func (tpThd TPThresholds) exportItems(ctx *context.Context, wrtr io.Writer, tnt 
 		return
 	}
 	for _, thdID := range itmIDs {
-		var thdPrf *engine.ThresholdProfile
+		var thdPrf *utils.ThresholdProfile
 		thdPrf, err = tpThd.dm.GetThresholdProfile(ctx, tnt, thdID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

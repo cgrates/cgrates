@@ -52,7 +52,7 @@ func TestCallCacheForFilter(t *testing.T) {
 	if err := dm.SetFilter(context.TODO(), flt, true); err != nil {
 		t.Fatal(err)
 	}
-	th := &engine.ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:    tnt,
 		ID:        "TH1",
 		FilterIDs: []string{flt.ID},

@@ -329,7 +329,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Thresholds
-	thd := &engine.ThresholdProfile{
+	thd := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},

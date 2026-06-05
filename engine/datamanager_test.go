@@ -1067,7 +1067,7 @@ func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1091,7 +1091,7 @@ func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
 		},
 		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
@@ -1116,7 +1116,7 @@ func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
 		},
 		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
@@ -1141,8 +1141,8 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
-			return &ThresholdProfile{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
 				FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -1179,8 +1179,8 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
-			return &ThresholdProfile{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
 				FilterIDs:        []string{"*string:~*req.Account:1001", "noPrefix"},
@@ -1225,8 +1225,8 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
-			return &ThresholdProfile{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
 				FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -1263,10 +1263,10 @@ func TestDMSetThresholdErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		SetThresholdDrvF: func(ctx *context.Context, t *Threshold) error { return utils.ErrNotImplemented },
+		SetThresholdDrvF: func(ctx *context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
 	}
 
-	th := &Threshold{
+	th := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH_1",
 		Hits:   0,
@@ -1295,7 +1295,7 @@ func TestDMSetThresholdReplicateTrue(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &Threshold{
+	th := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH_1",
 		Hits:   0,
@@ -1324,7 +1324,7 @@ func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &Threshold{
+	th := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH_1",
 		Hits:   0,
@@ -1949,8 +1949,8 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*Threshold, error) {
-			return &Threshold{}, nil
+		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+			return &utils.Threshold{}, nil
 		},
 	}
 
@@ -2125,8 +2125,8 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
-			return &ThresholdProfile{}, nil
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return &utils.ThresholdProfile{}, nil
 		},
 	}
 	Cache = NewCacheS(cfg, dm, cM, nil)
@@ -2342,7 +2342,7 @@ func TestDMCacheDataFromDBThresholdProfilePrefix(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	thP := &ThresholdProfile{
+	thP := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -2390,7 +2390,7 @@ func TestDMCacheDataFromDBThresholdPrefix(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &Threshold{
+	th := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH_3",
 		Hits:   0,
@@ -4165,7 +4165,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -4181,7 +4181,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return th, utils.ErrNotFound
 		},
 	}
@@ -4195,7 +4195,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 func TestDMSetThresholdProfileNilDM(t *testing.T) {
 
 	var dm *DataManager
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -4229,7 +4229,7 @@ func TestDMSetThresholdProfileWithIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string*req.Account1001"},
@@ -4266,12 +4266,12 @@ func TestDMSetThresholdProfileGetThPrfErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -4306,7 +4306,7 @@ func TestDMSetThresholdProfileSetThPrflDrvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -4322,10 +4322,10 @@ func TestDMSetThresholdProfileSetThPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return th, nil
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return utils.ErrNotFound },
+		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return utils.ErrNotFound },
 	}
 
 	if err := dm.SetThresholdProfile(context.Background(), th, false); err != utils.ErrNotFound {
@@ -4349,15 +4349,15 @@ func TestDMSetThresholdProfileUpdatedIndexesErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
-			return &ThresholdProfile{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+			return &utils.ThresholdProfile{
 				Tenant: utils.CGRateSorg,
 			}, nil
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return nil },
+		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
 	}
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -4407,7 +4407,7 @@ func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_100",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -5433,10 +5433,10 @@ func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*Threshold, error) {
-			return &Threshold{}, utils.ErrNotFound
+		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+			return &utils.Threshold{}, utils.ErrNotFound
 		},
-		SetThresholdDrvF: func(ctx *context.Context, t *Threshold) error { return utils.ErrNotImplemented },
+		SetThresholdDrvF: func(ctx *context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
 	}
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())

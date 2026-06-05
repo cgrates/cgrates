@@ -459,7 +459,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 			},
 		},
 	}
-	th := &ThresholdProfile{
+	th := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test",
 		FilterIDs: []string{"TestFilter2"},
@@ -521,7 +521,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 }
 
 func testOnStorITThreshold(t *testing.T) {
-	th := &Threshold{
+	th := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH1",
 		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC),

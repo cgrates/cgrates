@@ -214,8 +214,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("SetThresholdProfile", func(t *testing.T) {
 
-		eTHPrf := &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		eTHPrf := &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "THRHLD_1",
 			},
@@ -260,8 +260,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetThresholdProfile", func(t *testing.T) {
 
-		eTHPrf := &engine.ThresholdProfileWithAPIOpts{
-			ThresholdProfile: &engine.ThresholdProfile{
+		eTHPrf := &utils.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "THRHLD_2",
 			},

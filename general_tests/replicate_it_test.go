@@ -185,7 +185,7 @@ cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,;10,-1,0,0,false,,TOPUP_MON
 			t.Error(diff)
 		}
 
-		var rcvTHP *engine.ThresholdProfile
+		var rcvTHP *utils.ThresholdProfile
 		if err := client1.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{
@@ -196,7 +196,7 @@ cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,;10,-1,0,0,false,,TOPUP_MON
 			t.Error(err)
 		}
 
-		var rcvTHP2 *engine.ThresholdProfile
+		var rcvTHP2 *utils.ThresholdProfile
 		if err := client2.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{
@@ -205,7 +205,7 @@ cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,;10,-1,0,0,false,,TOPUP_MON
 				},
 			}, &rcvTHP2); err != nil {
 			t.Error(err)
-		} else if diff := cmp.Diff(rcvTHP, rcvTHP2, cmpopts.IgnoreUnexported(engine.ThresholdProfile{})); diff != "" {
+		} else if diff := cmp.Diff(rcvTHP, rcvTHP2, cmpopts.IgnoreUnexported(utils.ThresholdProfile{})); diff != "" {
 			t.Error(diff)
 		}
 

@@ -135,7 +135,7 @@ func testThresholdsPing(t *testing.T) {
 }
 
 func testThresholdsGetThresholdBeforeSet(t *testing.T) {
-	var rplyTh engine.Threshold
+	var rplyTh utils.Threshold
 
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantWithAPIOpts{
@@ -165,8 +165,8 @@ func testThresholdsSetActionProfile(t *testing.T) {
 }
 
 func testThresholdsSetThresholdProfiles(t *testing.T) {
-	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_1",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -189,8 +189,8 @@ func testThresholdsSetThresholdProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_2",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -214,13 +214,13 @@ func testThresholdsSetThresholdProfiles(t *testing.T) {
 }
 
 func testThresholdsGetThresholdAfterSet(t *testing.T) {
-	var rplyTh engine.Threshold
-	var rplyThPrf engine.ThresholdProfile
-	expTh := engine.Threshold{
+	var rplyTh utils.Threshold
+	var rplyThPrf utils.ThresholdProfile
+	expTh := utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_1",
 	}
-	expThPrf := engine.ThresholdProfile{
+	expThPrf := utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_1",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -258,11 +258,11 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 			utils.ToJSON(expThPrf), utils.ToJSON(rplyThPrf))
 	}
 
-	expTh = engine.Threshold{
+	expTh = utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_2",
 	}
-	expThPrf = engine.ThresholdProfile{
+	expThPrf = utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
 		FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -334,7 +334,7 @@ func testThresholdsGetThresholdProfileIDs(t *testing.T) {
 }
 
 func testThresholdsGetThresholdProfiles(t *testing.T) {
-	exp := []*engine.ThresholdProfile{
+	exp := []*utils.ThresholdProfile{
 		{
 			Tenant:           "cgrates.org",
 			ID:               "THD_1",
@@ -362,7 +362,7 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 			},
 		},
 	}
-	var ths []*engine.ThresholdProfile
+	var ths []*utils.ThresholdProfile
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -379,7 +379,7 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 }
 
 func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
-	exp := []*engine.ThresholdProfile{
+	exp := []*utils.ThresholdProfile{
 		{
 			Tenant:           "cgrates.org",
 			ID:               "THD_2",
@@ -394,7 +394,7 @@ func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
 			},
 		},
 	}
-	var ths []*engine.ThresholdProfile
+	var ths []*utils.ThresholdProfile
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 		&utils.ArgsItemIDs{
 			Tenant:      "cgrates.org",
@@ -434,7 +434,7 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := []*engine.Threshold{
+	expThs := []*utils.Threshold{
 		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
@@ -447,7 +447,7 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 		},
 	}
 
-	var rplyThs []*engine.Threshold
+	var rplyThs []*utils.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)
@@ -495,7 +495,7 @@ func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
 		},
 	}
 
-	var rplyThs []*engine.Threshold
+	var rplyThs []*utils.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -530,8 +530,8 @@ func testThresholdsSetActionProfileBeforeProcessEv(t *testing.T) {
 }
 
 func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
-	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf1 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_1",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -555,8 +555,8 @@ func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
+	thPrf2 := &utils.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &utils.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "THD_2",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
@@ -616,7 +616,7 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := []*engine.Threshold{
+	expThs := []*utils.Threshold{
 		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
@@ -629,7 +629,7 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 		},
 	}
 
-	var rplyThs []*engine.Threshold
+	var rplyThs []*utils.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)
@@ -655,7 +655,7 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := []*engine.Threshold{
+	expThs := []*utils.Threshold{
 		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
@@ -668,7 +668,7 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 		},
 	}
 
-	var rplyThs []*engine.Threshold
+	var rplyThs []*utils.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)

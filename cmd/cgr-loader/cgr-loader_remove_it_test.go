@@ -195,7 +195,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// thresholdPrf
-	var replyThdPrf *engine.ThresholdProfile
+	var replyThdPrf *utils.ThresholdProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&replyThdPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -203,7 +203,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// threshold
-	var rplyThd *engine.Threshold
+	var rplyThd *utils.Threshold
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&rplyThd); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -673,7 +673,7 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
-	expThPrf := &engine.ThresholdProfile{
+	expThPrf := &utils.ThresholdProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "THD_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
@@ -688,7 +688,7 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 		EeIDs:            []string{},
 		AttributeIDs:     []string{},
 	}
-	var replyThdPrf *engine.ThresholdProfile
+	var replyThdPrf *utils.ThresholdProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
 		&replyThdPrf); err != nil {
@@ -699,12 +699,12 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
-	expThPrf := &engine.Threshold{
+	expThPrf := &utils.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_ACNT_1001",
 		Hits:   0,
 	}
-	var replyThdPrf *engine.Threshold
+	var replyThdPrf *utils.Threshold
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
 		&replyThdPrf); err != nil {

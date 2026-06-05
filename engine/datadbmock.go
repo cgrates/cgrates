@@ -38,10 +38,10 @@ type DataDBMock struct {
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
 	GetChargerProfileDrvF      func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error)
 	SetChargerProfileDrvF      func(ctx *context.Context, chr *utils.ChargerProfile) (err error)
-	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
-	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
+	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error)
+	SetThresholdProfileDrvF    func(ctx *context.Context, tp *utils.ThresholdProfile) (err error)
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
-	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
+	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*utils.Threshold, error)
 	RemoveThresholdDrvF        func(ctx *context.Context, tnt, id string) error
 	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error)
 	SetResourceProfileDrvF     func(ctx *context.Context, rp *utils.ResourceProfile) error
@@ -78,7 +78,7 @@ type DataDBMock struct {
 	RemoveRouteProfileDrvF     func(ctx *context.Context, tnt, id string) error
 	RemoveChargerProfileDrvF   func(ctx *context.Context, chr string, rpl string) error
 	GetItemLoadIDsDrvF         func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
-	SetThresholdDrvF           func(*context.Context, *Threshold) error
+	SetThresholdDrvF           func(*context.Context, *utils.Threshold) error
 	SetStatQueueDrvF           func(*context.Context, *StoredStatQueue, *StatQueue) error
 	HasDataDrvF                func(ctx *context.Context, category, subject, tenant string) (bool, error)
 	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error
@@ -330,14 +330,14 @@ func (dbM *DataDBMock) RemTrendProfileDrv(ctx *context.Context, tenant string, i
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	if dbM.GetThresholdProfileDrvF != nil {
 		return dbM.GetThresholdProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+func (dbM *DataDBMock) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
 	if dbM.SetThresholdProfileDrvF != nil {
 		return dbM.SetThresholdProfileDrvF(ctx, tp)
 	}
@@ -351,14 +351,14 @@ func (dbM *DataDBMock) RemThresholdProfileDrv(ctx *context.Context, tenant, id s
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdDrv(ctx *context.Context, tenant, id string) (*Threshold, error) {
+func (dbM *DataDBMock) GetThresholdDrv(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
 	if dbM.GetThresholdDrvF != nil {
 		return dbM.GetThresholdDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdDrv(*context.Context, *Threshold) error {
+func (dbM *DataDBMock) SetThresholdDrv(*context.Context, *utils.Threshold) error {
 	return utils.ErrNotImplemented
 }
 

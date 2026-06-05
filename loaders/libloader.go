@@ -284,7 +284,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaThresholds:
 		return func() profile {
-			return new(engine.ThresholdProfile)
+			return new(utils.ThresholdProfile)
 		}
 	case utils.MetaRoutes:
 		return func() profile {
