@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,13 +36,12 @@ func NewThresholdService(cfg *config.CGRConfig) *ThresholdService {
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
-	mu   sync.RWMutex
 	cfg  *config.CGRConfig
 	thrs *thresholds.ThresholdS
 }
 
 // Start should handle the service start
-func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+func (s *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -53,7 +50,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 			utils.FilterS,
 			utils.DB,
 		},
-		thrs.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -64,48 +61,42 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,
 		utils.CacheThresholdFilterIndexes); err != nil {
-		return
+		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	thrs.mu.Lock()
-	defer thrs.mu.Unlock()
-	thrs.thrs = thresholds.NewThresholdService(thrs.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
-	thrs.thrs.StartLoop(context.TODO())
-	srv, _ := engine.NewService(thrs.thrs)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	s.thrs = thresholds.NewThresholdService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	s.thrs.StartLoop(context.TODO())
+	srv, _ := engine.NewService(s.thrs)
+	for _, svc := range srv {
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.ThresholdS, srv)
-	return
+	return nil
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
-	thrs.mu.Lock()
-	thrs.thrs.Reload(context.TODO())
-	thrs.mu.Unlock()
+func (s *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	s.thrs.Reload(context.TODO())
 	return nil
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown(registry *servmanager.Registry) error {
-	thrs.mu.Lock()
-	defer thrs.mu.Unlock()
-	thrs.thrs.Shutdown(context.TODO())
-	thrs.thrs = nil
+func (s *ThresholdService) Shutdown(registry *servmanager.Registry) error {
+	s.thrs.Shutdown(context.TODO())
+	s.thrs = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.ThresholdSv1)
 	return nil
 }
 
 // ServiceName returns the service name
-func (thrs *ThresholdService) ServiceName() string {
+func (s *ThresholdService) ServiceName() string {
 	return utils.ThresholdS
 }
 
 // ShouldRun returns if the service should be running
-func (thrs *ThresholdService) ShouldRun() bool {
-	return thrs.cfg.ThresholdSCfg().Enabled
+func (s *ThresholdService) ShouldRun() bool {
+	return s.cfg.ThresholdSCfg().Enabled
 }
