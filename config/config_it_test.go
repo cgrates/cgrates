@@ -1471,7 +1471,6 @@ func testApisLoadFromPath(t *testing.T) {
 		
 		"admins": {
 			"enabled": true,
-			"scheduler_conns": ["*internal"]
 		},
 		
 		

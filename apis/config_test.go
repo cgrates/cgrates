@@ -43,9 +43,11 @@ func TestConfigSetGetConfig(t *testing.T) {
 	cfgJSONStr := `{
 "attributes": {								
 	"enabled": true,	
-	"stats_conns": ["*internal"],			
-	"resources_conns": ["*internal"],		
-	"accounts_conns": ["*internal"],			
+	"conns": {
+		"*stats":     [{"connIDs": ["*internal"]}],
+		"*resources": [{"connIDs": ["*internal"]}],
+		"*accounts":  [{"connIDs": ["*internal"]}]
+	},		
 	"prefixIndexedFields": ["index1","index2"],		
 	"opts": {
 		"*processRuns": [
@@ -78,7 +80,23 @@ func TestConfigSetGetConfig(t *testing.T) {
 	err = rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
 	expectedGet := map[string]any{
 		"attributes": map[string]any{
-			utils.ConnsCfg:           map[string][]*config.DynamicConns{},
+			utils.ConnsCfg: map[string][]*config.DynamicConns{
+				utils.MetaStats: {
+					{
+						ConnIDs: []string{"*internal"},
+					},
+				},
+				utils.MetaResources: {
+					{
+						ConnIDs: []string{"*internal"},
+					},
+				},
+				utils.MetaAccounts: {
+					{
+						ConnIDs: []string{"*internal"},
+					},
+				},
+			},
 			"enabled":                true,
 			"indexedSelects":         true,
 			"nestedFields":           false,
@@ -212,7 +230,11 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		Tenant:  utils.CGRateSorg,
 		Config: `{
 "attributes":{
-	"accounts_conns":["*localhost"],
+	"conns": {
+		"*stats": [{"connIDs": ["*localhost"]}],
+		"*resources": [{"connIDs": ["*localhost"]}],
+		"*accounts": [{"connIDs": ["*localhost"]}]
+	},
 	"enabled":true,
 	"indexedSelects":true,
 	"nestedFields":false,
@@ -230,8 +252,6 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		],
 	},
 	"prefixIndexedFields":[],
-	"resources_conns":["*localhost"],
-	"stats_conns":["*localhost"],
 	"suffixIndexedFields":[],
 	"existsIndexedFields":[],
 	"notExistsIndexedFields":[],

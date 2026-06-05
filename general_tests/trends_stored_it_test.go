@@ -169,8 +169,14 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"trends": map[string]any{
-					"enabled":       true,
-					"stats_conns":   []string{"*localhost"},
+					"enabled": true,
+					"conns": map[string][]*config.DynamicConns{
+						utils.MetaStats: {
+							{
+								ConnIDs: []string{"*localhost"},
+							},
+						},
+					},
 					"storeInterval": "0",
 				},
 			},
@@ -231,8 +237,14 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 			Tenant: "cgrates.org",
 			Config: map[string]any{
 				"trends": map[string]any{
-					"enabled":       true,
-					"stats_conns":   []string{"*localhost"},
+					"enabled": true,
+					"conns": map[string][]*config.DynamicConns{
+						utils.MetaStats: {
+							{
+								ConnIDs: []string{"*localhost"},
+							},
+						},
+					},
 					"storeInterval": "-1",
 				},
 			},

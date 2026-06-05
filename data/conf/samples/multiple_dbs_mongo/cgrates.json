@@ -162,7 +162,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"]
 },
 
 

@@ -2277,19 +2277,10 @@ const (
 	HTTPClientDialKeepAliveCfg         = "dialKeepAlive"
 )
 
-// FilterSCfg
 const (
-	StatSConnsCfg     = "stats_conns"
-	ResourceSConnsCfg = "resources_conns"
-	TrendSConnsCfg    = "trends_conns"
-	RankingSConnsCfg  = "rankings_conns"
-)
-
-const (
-	EnabledCfg         = "enabled"
-	ThresholdSConnsCfg = "thresholds_conns"
-	CacheSConnsCfg     = "cachesConns"
-	ScheduledIDsCfg    = "scheduledIDs"
+	EnabledCfg      = "enabled"
+	CacheSConnsCfg  = "cachesConns"
+	ScheduledIDsCfg = "scheduledIDs"
 )
 
 // Efs
@@ -2299,24 +2290,18 @@ const (
 
 // CdrsCfg
 const (
-	CDRsConnsCfg           = "cdrs_conns"
 	FiltersCfg             = "filters"
 	ExtraFieldsCfg         = "extraFields"
 	SMCostRetriesCfg       = "sessionCostRetries"
-	ChargerSConnsCfg       = "chargers_conns"
-	AttributeSConnsCfg     = "attributes_conns"
 	RetransmissionTimerCfg = "retransmissionTimer"
 	OnlineCDRExportsCfg    = "onlineCDRExports"
 	SessionCostRetires     = "sessionCostRetries"
-	RateSConnsCfg          = "rates_conns"
 )
 
 // SessionSCfg
 const (
 	ListenBijsonCfg        = "listenBiJSON"
 	ListenBigobCfg         = "listenBiGob"
-	RouteSConnsCfg         = "routes_conns"
-	IPsConnsCfg            = "ips_conns"
 	ReplicationConnsCfg    = "replicationConns"
 	RemoteConnsCfg         = "remoteConns"
 	DebitIntervalCfg       = "debitInterval"
@@ -2344,7 +2329,6 @@ const (
 
 // FsAgentCfg
 const (
-	SessionSConnsCfg          = "sessions_conns"
 	SubscribeParkCfg          = "subscribePark"
 	CreateCdrCfg              = "createCDR"
 	LowBalanceAnnFileCfg      = "lowBalanceAnnFile"

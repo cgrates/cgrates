@@ -34,8 +34,10 @@
 
 "cdrs": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
-	"chargers_conns": ["*internal"],
+	"conns": {
+		"*chargers": [{"connIDs": ["*internal"]}],
+		"*stats": [{"connIDs": ["*localhost"]}]
+	},
 	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
@@ -43,7 +45,9 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"connIDs": ["*internal"]}]
+	},
 },
 
 
@@ -117,7 +121,9 @@
 	"evapiConns":[
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
-	"sessions_conns": ["*birpc_internal"],
+	"conns": {
+		"*sessions":[{"connIDs":["*birpc_internal"]}]
+	},	
 	"createCDR": true,
 },
 
@@ -148,8 +154,10 @@
 
 "routes": {
 	"enabled": true,
-	"resources_conns": ["*internal"],
-	"stats_conns": ["*internal"],
+	"conns": {
+		"*resources": [{"connIDs": ["*internal"]}],
+		"*stats": [{"connIDs": ["*internal"]}]
+	},
 	"rals_conns": ["*internal"],	
 	"stringIndexedFields": ["*req.Account"],
 },
@@ -157,7 +165,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

@@ -28,15 +28,19 @@
 
 "cdrs": {
 	"enabled": true,
-	"stats_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"conns": {
+		"*chargers": [{"connIDs": ["*internal"]}],
+		"*stats": [{"connIDs": ["*internal"]}]
+	},
 	"sessions_cost_retries": 5,
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"conns": {
+		"*attributes": [{"connIDs": ["*internal"]}]
+	},
 },
 
 
@@ -115,7 +119,9 @@
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*thresholds": [{"connIDs": ["*internal"]}]
+	},
 	"stringIndexedFields": ["*req.Account"],
 	"prefixIndexedFields": ["*req.Destination"],
 },
@@ -123,7 +129,9 @@
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": ["*internal"],
+	"conns": {
+		"*thresholds": [{"connIDs": ["*internal"]}]
+	},
 	"stringIndexedFields": ["*req.Account"],
 },
 
@@ -136,8 +144,10 @@
 
 "routes": {
 	"enabled": true,
-	"resources_conns": ["*internal"],
-	"stats_conns": ["*internal"],
+	"conns": {
+		"*resources": [{"connIDs": ["*internal"]}],
+		"*stats": [{"connIDs": ["*internal"]}]
+	},
 	"stringIndexedFields": ["*req.Account"],
 	"prefixIndexedFields": ["*req.Destination"],
 },
@@ -145,7 +155,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 
