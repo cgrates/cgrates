@@ -51,6 +51,7 @@ type ThresholdConfig struct {
 type matchedThreshold struct {
 	Threshold *utils.Threshold
 	tPrfl     *utils.ThresholdProfile
+	weight    float64
 	lkID      string // ID of the lock used when matching the threshold
 }
 
@@ -219,7 +220,6 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 	itemIDs := slices.Sorted(maps.Keys(tIDs))
 
 	ts = make([]*matchedThreshold, 0, len(itemIDs))
-	weights := make(map[string]float64) // stores sorting weights by tID
 	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -259,12 +259,14 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		weight, err := engine.WeightFromDynamics(ctx, tPrfl.Weights,
 			s.fltrS, tnt, evNm)
 		if err != nil {
+			guardian.Guardian.UnguardIDs(lkPrflID)
+			unlockAll()
 			return nil, nil, err
 		}
-		weights[th.ID] = weight
 		ts = append(ts, &matchedThreshold{
 			Threshold: th,
 			tPrfl:     tPrfl,
+			weight:    weight,
 			lkID:      lkPrflID,
 		})
 	}
@@ -274,7 +276,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 
 	// Sort by weight (higher values first).
 	slices.SortFunc(ts, func(a, b *matchedThreshold) int {
-		return cmp.Compare(weights[b.Threshold.ID], weights[a.Threshold.ID])
+		return cmp.Compare(b.weight, a.weight)
 	})
 
 	for i, t := range ts {
