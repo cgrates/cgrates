@@ -58,59 +58,73 @@ type matchedThreshold struct {
 // NewThresholdService the constructor for ThresholdS service
 func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engine.FilterS, cm *engine.ConnManager) *ThresholdS {
 	return &ThresholdS{
-		cfg:         cfg,
-		dm:          dm,
-		filters:     filters,
-		cm:          cm,
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}),
-		storedTdIDs: make(utils.StringSet),
+		cfg:              cfg,
+		dm:               dm,
+		filters:          filters,
+		cm:               cm,
+		storedThresholds: make(utils.StringSet),
+		stopBackup:       make(chan struct{}),
 	}
 }
 
 // ThresholdS manages Threshold execution and storing them to DB
 type ThresholdS struct {
-	cfg         *config.CGRConfig
-	dm          *engine.DataManager
-	filters     *engine.FilterS
-	cm          *engine.ConnManager
-	stopBackup  chan struct{}
-	loopStopped chan struct{}
-	storedTdIDs utils.StringSet // thresholds that need saving
-	storedMu    sync.RWMutex    // protects storedTdIDs
+	cfg     *config.CGRConfig
+	dm      *engine.DataManager
+	filters *engine.FilterS
+	cm      *engine.ConnManager
+
+	storedMu         sync.Mutex
+	storedThresholds utils.StringSet // thresholds that need saving
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
 }
 
-// Reload stops the backupLoop and restarts it
+// Reload restarts the backup loop. No-op after Shutdown.
 func (s *ThresholdS) Reload(ctx *context.Context) {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
-	<-s.loopStopped // wait until the loop is done
+	s.backupLoop.Wait()
 	s.stopBackup = make(chan struct{})
-	go s.runBackup(ctx)
+	s.StartLoop(ctx)
 }
 
-// StartLoop starts the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (s *ThresholdS) StartLoop(ctx *context.Context) {
+	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
 func (s *ThresholdS) Shutdown(ctx *context.Context) {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
+	s.backupLoop.Wait()
+	s.stopBackup = nil
 	s.storeThresholds(ctx)
 }
 
 // backup will regularly store thresholds changed to DB
 func (s *ThresholdS) runBackup(ctx *context.Context) {
+	defer s.backupLoop.Done()
 	storeInterval := s.cfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
-		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		s.storeThresholds(ctx)
 		select {
 		case <-s.stopBackup:
-			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
@@ -119,12 +133,12 @@ func (s *ThresholdS) runBackup(ctx *context.Context) {
 
 // storeThresholds represents one task of complete backup
 func (s *ThresholdS) storeThresholds(ctx *context.Context) {
-	var failedTdIDs []string
+	var failedThresholds []string
 	for {
 		s.storedMu.Lock()
-		tID := s.storedTdIDs.GetOne()
+		tID := s.storedThresholds.GetOne()
 		if tID != "" {
-			s.storedTdIDs.Remove(tID)
+			s.storedThresholds.Remove(tID)
 		}
 		s.storedMu.Unlock()
 		if tID == "" {
@@ -140,15 +154,15 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 			s.cfg.GeneralCfg().LockingTimeout,
 			utils.ThresholdLockKey(t.Tenant, t.ID))
 		if err := s.StoreThreshold(ctx, t); err != nil {
-			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
+			failedThresholds = append(failedThresholds, tID) // record failure so we can schedule it for next backup
 		}
 		guardian.Guardian.UnguardIDs(lkID)
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
-	if len(failedTdIDs) != 0 { // there were errors on save, schedule the keys for next backup
+	if len(failedThresholds) != 0 { // there were errors on save, schedule the keys for next backup
 		s.storedMu.Lock()
-		s.storedTdIDs.AddSlice(failedTdIDs)
+		s.storedThresholds.AddSlice(failedThresholds)
 		s.storedMu.Unlock()
 	}
 }
@@ -360,7 +374,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			s.StoreThreshold(ctx, mt.threshold)
 		} else {
 			s.storedMu.Lock()
-			s.storedTdIDs.Add(mt.threshold.TenantID())
+			s.storedThresholds.Add(mt.threshold.TenantID())
 			s.storedMu.Unlock()
 		}
 	}

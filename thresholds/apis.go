@@ -142,7 +142,7 @@ func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantI
 			}
 		} else {
 			s.storedMu.Lock()
-			s.storedTdIDs.Add(thd.TenantID())
+			s.storedThresholds.Add(thd.TenantID())
 			s.storedMu.Unlock()
 		}
 	}

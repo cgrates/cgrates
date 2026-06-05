@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -563,7 +565,7 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheThresholds, "cgrates.org:TH1", exp, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("cgrates.org:TH1")
+	tS.storedThresholds.Add("cgrates.org:TH1")
 	tS.storeThresholds(context.Background())
 
 	if rcv, err := tS.dm.GetThreshold(context.Background(), "cgrates.org", "TH1", true, false,
@@ -599,15 +601,15 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 
 	engine.Cache.SetWithoutReplicate(utils.CacheThresholds, "TH1", value, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("TH1")
+	tS.storedThresholds.Add("TH1")
 	exp := utils.StringSet{
 		"TH1": struct{}{},
 	}
 	expLog := `[WARNING] <ThresholdS> failed saving Threshold with tenant: cgrates.org and ID: TH1, error: NO_DATABASE_CONNECTION`
 	tS.storeThresholds(context.Background())
 
-	if !reflect.DeepEqual(tS.storedTdIDs, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, tS.storedTdIDs)
+	if !reflect.DeepEqual(tS.storedThresholds, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, tS.storedThresholds)
 	}
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
@@ -641,7 +643,7 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 
 	engine.Cache.SetWithoutReplicate(utils.CacheThresholds, "TH2", value, nil, true,
 		utils.NonTransactional)
-	tS.storedTdIDs.Add("TH1")
+	tS.storedThresholds.Add("TH1")
 	expLog := `[WARNING] <ThresholdS> failed retrieving from cache treshold with ID: TH1`
 	tS.storeThresholds(context.Background())
 
@@ -1009,21 +1011,6 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}
 }
 
-func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = -1
-	tS := &ThresholdS{
-		cfg:         cfg,
-		loopStopped: make(chan struct{}, 1),
-	}
-	tS.runBackup(context.Background())
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
-}
-
 func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
@@ -1034,12 +1021,11 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	thID := "Th1"
 	tS := &ThresholdS{
 		dm: dm,
-		storedTdIDs: utils.StringSet{
+		storedThresholds: utils.StringSet{
 			thID: struct{}{},
 		},
-		cfg:         cfg,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cfg:        cfg,
+		stopBackup: make(chan struct{}),
 	}
 	value := &utils.Threshold{
 		Tenant: tnt,
@@ -1051,7 +1037,8 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	// channel after storing the threshold. Channel can be
 	// safely closed beforehand.
 	close(tS.stopBackup)
-	tS.runBackup(context.Background())
+	tS.StartLoop(context.Background())
+	tS.backupLoop.Wait()
 
 	want := &utils.Threshold{
 		Tenant: tnt,
@@ -1062,45 +1049,41 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	} else if !reflect.DeepEqual(got, want) {
 		t.Errorf("dm.GetThreshold(%q,%q) = %v, want %v", tnt, thID, got, want)
 	}
-
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
 }
 
 func TestThresholdsReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	tS := &ThresholdS{
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cfg:         cfg,
-	}
-	tS.loopStopped <- struct{}{}
-	tS.Reload(context.Background())
-	close(tS.stopBackup)
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
+		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS.StartLoop(context.Background())
+		tS.Reload(context.Background())
+		tS.Shutdown(context.Background())
+		tS.Shutdown(context.Background())
+		tS.Reload(context.Background())
+	})
+}
+
+func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
+		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS.StartLoop(context.Background())
+		var wg sync.WaitGroup
+		wg.Go(func() { tS.Reload(context.Background()) })
+		wg.Go(func() { tS.Shutdown(context.Background()) })
+		wg.Wait()
+	})
 }
 
 func TestThresholdsStartLoop(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().StoreInterval = -1
-	tS := &ThresholdS{
-		loopStopped: make(chan struct{}, 1),
-		cfg:         cfg,
-	}
-	tS.StartLoop(context.Background())
-	select {
-	case <-tS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS.StartLoop(context.Background())
+		tS.backupLoop.Wait()
+	})
 }
 
 func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
@@ -1364,13 +1347,12 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, cM, dm)
 	tS := &ThresholdS{
 		dm: dm,
-		storedTdIDs: utils.StringSet{
+		storedThresholds: utils.StringSet{
 			"Th1": struct{}{},
 		},
-		cfg:         cfg,
-		filters:     filterS,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cfg:        cfg,
+		filters:    filterS,
+		stopBackup: make(chan struct{}),
 	}
 
 	args := &utils.CGREvent{
@@ -1430,13 +1412,12 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, cM, dm)
 	tS := &ThresholdS{
 		dm: dm,
-		storedTdIDs: utils.StringSet{
+		storedThresholds: utils.StringSet{
 			"Th1": struct{}{},
 		},
-		cfg:         cfg,
-		filters:     filterS,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cfg:        cfg,
+		filters:    filterS,
+		stopBackup: make(chan struct{}),
 	}
 
 	args := &utils.CGREvent{
