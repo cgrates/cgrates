@@ -511,41 +511,6 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	}
 }
 
-// func TestThresholdsProcessEvent3(t *testing.T) {
-// 	thPrf := &ThresholdProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "TH1",
-// 		FilterIDs: []string{"*string:~*req.Account:1001"},
-// 		MinHits:   3,
-// 		MaxHits:   5,
-// 		Weight:    10,
-// 		ActionIDs: []string{"actPrf"},
-// 	}
-// 	th := &Threshold{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TH1",
-// 		Hits:   2,
-// 		tPrfl:  thPrf,
-// 	}
-
-// 	args := &ThresholdsArgsProcessEvent{
-// 		ThresholdIDs: []string{"TH1"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "ThresholdProcessEvent",
-// 			Event: map[string]any{
-// 				utils.AccountField: "1001",
-// 			},
-// 			APIOpts: map[string]any{
-// 				utils.MetaEventType: utils.AccountUpdate,
-// 			},
-// 		},
-// 	}
-// 	if err := processEventWithThreshold(args, dm); err != nil {
-// 		t.Error(err)
-// 	}
-// }
-
 func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	tmp := engine.Cache
 	defer func() {
@@ -853,13 +818,12 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	rS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
-	prfs := make([]*utils.ThresholdProfile, 0)
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
-		rPrf := &utils.ThresholdProfile{
+		thPrf := &utils.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TH%d", i),
 			Weights: utils.DynamicWeights{
@@ -869,14 +833,13 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 			},
 			MaxHits: 5,
 		}
-		dm.SetThresholdProfile(context.Background(), rPrf, true)
-		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		dm.SetThresholdProfile(context.Background(), thPrf, true)
+		ids.Add(thPrf.ID)
 	}
-	rPrf := &utils.ThresholdProfile{
+	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH20",
-		FilterIDs: []string{"FLTR_RES_201"},
+		FilterIDs: []string{"FLTR_TH_201"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 20.00,
@@ -884,19 +847,18 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 		},
 		MaxHits: 5,
 	}
-	err := db.SetThresholdProfileDrv(context.Background(), rPrf)
+	err := db.SetThresholdProfileDrv(context.Background(), thPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	prfs = append(prfs, rPrf)
-	ids.Add(rPrf.ID)
+	ids.Add(thPrf.ID)
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, _, err = rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
-	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
+	_, _, err = tS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
+	expErr := utils.ErrPrefixNotFound(thPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
 	}
@@ -904,7 +866,6 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 
 func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	prfs := make([]*utils.ThresholdProfile, 0)
 	tmp := engine.Cache
 
 	defer func() {
@@ -917,7 +878,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 			if id == "TH1" {
 				return nil, utils.ErrNotImplemented
 			}
-			rPrf := &utils.ThresholdProfile{
+			thPrf := &utils.ThresholdProfile{
 				Tenant:  "cgrates.org",
 				ID:      id,
 				MaxHits: 5,
@@ -927,12 +888,11 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 					},
 				},
 			}
-			engine.Cache.Set(ctx, utils.CacheThresholds, rPrf.TenantID(), &utils.Threshold{
-				Tenant: rPrf.Tenant,
-				ID:     rPrf.ID,
+			engine.Cache.Set(ctx, utils.CacheThresholds, thPrf.TenantID(), &utils.Threshold{
+				Tenant: thPrf.Tenant,
+				ID:     thPrf.ID,
 			}, nil, true, utils.NonTransactional)
-			prfs = append(prfs, rPrf)
-			return rPrf, nil
+			return thPrf, nil
 		},
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
@@ -940,7 +900,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	rS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -952,7 +912,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, _, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
+	_, _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
 	if err != utils.ErrNotImplemented {
 		t.Fatalf("Error: %+v", err)
 	}
@@ -979,13 +939,12 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"test"}
 	cfg.DbCfg().Items[utils.CacheThresholds].Remote = true
 	config.SetCgrConfig(cfg)
-	rS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
-	prfs := make([]*utils.ThresholdProfile, 0)
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
-		rPrf := &utils.ThresholdProfile{
+		thPrf := &utils.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TH%d", i),
 			Weights: utils.DynamicWeights{
@@ -995,9 +954,8 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 			},
 			MaxHits: 5,
 		}
-		dm.SetThresholdProfile(context.Background(), rPrf, true)
-		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		dm.SetThresholdProfile(context.Background(), thPrf, true)
+		ids.Add(thPrf.ID)
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
@@ -1005,7 +963,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 		},
 	}
 	dm.RemoveThreshold(context.Background(), "cgrates.org", "TH1")
-	_, _, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
+	_, _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
 	if err != utils.ErrDisconnected {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1247,7 +1205,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	if err := dm.SetThreshold(context.Background(), th); err != nil {
 		t.Error(err)
 	}
-	// testing if the profile matches wtih profile ignore filters on false
+	// testing if the profile matches with profile ignore filters on false
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
@@ -1265,7 +1223,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
-	// testing if the profile matches with wtih profile ignore filters on true
+	// testing if the profile matches with profile ignore filters on true
 	args2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ThdProcessEvent",
