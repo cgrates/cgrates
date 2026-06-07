@@ -122,7 +122,9 @@ func (e *ElasticEE) parseRequestOpts() {
 	e.docURL = "http:///" + indexName + "/_doc/"
 
 	q := make(url.Values)
-	q.Set("refresh", "true")
+	if opts.ElsRefresh != nil {
+		q.Set("refresh", *opts.ElsRefresh)
+	}
 	if opts.ElsOpType != nil {
 		q.Set("op_type", *opts.ElsOpType)
 	}
