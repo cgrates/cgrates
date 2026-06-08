@@ -115,6 +115,157 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	}
 }
 
+func TestActionsOptsLoadFromJSONCfg(t *testing.T) {
+	tests := []struct {
+		name     string
+		jsonCfg  *ActionSJsonCfg
+		expected *ActionSCfg
+	}{
+		{
+			name: "Complete ActionsOptsJson",
+			jsonCfg: &ActionSJsonCfg{
+				Enabled: utils.BoolPointer(true),
+				Conns: map[string][]*DynamicConns{
+					utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+					utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+					utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+					utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+					utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+					utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+				},
+				Indexed_selects:           utils.BoolPointer(false),
+				Tenants:                   &[]string{"cgrates.org"},
+				String_indexed_fields:     &[]string{"*req.index1"},
+				Prefix_indexed_fields:     &[]string{"*req.index1", "*req.index2"},
+				Suffix_indexed_fields:     &[]string{"*req.index1"},
+				Exists_indexed_fields:     &[]string{"*req.index1"},
+				Notexists_indexed_fields:  &[]string{"*req.index1", "*req.index2"},
+				Nested_fields:             utils.BoolPointer(true),
+				Dynaprepaid_actionprofile: &[]string{"val1", "val2"},
+				Opts: &ActionsOptsJson{
+					ProfileIDs: []*DynamicStringSliceOpt{
+						{
+							Tenant: "cgrates.org",
+						},
+					},
+					ProfileIgnoreFilters: []*DynamicInterfaceOpt{
+						{
+							Tenant: "cgrates.org",
+						},
+					},
+					PosterAttempts: []*DynamicInterfaceOpt{
+						{
+							FilterIDs: []string{"fld1"},
+							Tenant:    "cgrates.org",
+							Value:     2,
+						},
+					},
+				},
+			},
+			expected: &ActionSCfg{
+				Enabled: true,
+				Conns: map[string][]*DynamicConns{
+					utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+					utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+					utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+					utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+					utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+					utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+				},
+				IndexedSelects:           false,
+				Tenants:                  &[]string{"cgrates.org"},
+				StringIndexedFields:      &[]string{"*req.index1"},
+				PrefixIndexedFields:      &[]string{"*req.index1", "*req.index2"},
+				SuffixIndexedFields:      &[]string{"*req.index1"},
+				NotExistsIndexedFields:   &[]string{"*req.index1", "*req.index2"},
+				ExistsIndexedFields:      &[]string{"*req.index1"},
+				NestedFields:             true,
+				DynaprepaidActionProfile: []string{"val1", "val2"},
+				Opts: &ActionsOpts{
+					ProfileIDs: []*DynamicStringSliceOpt{
+						{
+							Tenant: "cgrates.org",
+						},
+					},
+					ProfileIgnoreFilters: []*DynamicBoolOpt{
+						{
+							Tenant: "cgrates.org",
+						},
+						{},
+					},
+					PosterAttempts: []*DynamicIntOpt{
+						NewDynamicIntOpt(nil, "", 2, nil),
+						NewDynamicIntOpt([]string{"fld1"}, "cgrates.org", 2, nil),
+					},
+				},
+			},
+		},
+		{
+			name: "Nil ActionsOptsJson",
+			jsonCfg: &ActionSJsonCfg{
+				Enabled: utils.BoolPointer(true),
+				Conns: map[string][]*DynamicConns{
+					utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+					utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+					utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+					utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+					utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+					utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+				},
+				Indexed_selects:           utils.BoolPointer(false),
+				Tenants:                   &[]string{"cgrates.org"},
+				String_indexed_fields:     &[]string{"*req.index1"},
+				Prefix_indexed_fields:     &[]string{"*req.index1", "*req.index2"},
+				Suffix_indexed_fields:     &[]string{"*req.index1"},
+				Exists_indexed_fields:     &[]string{"*req.index1"},
+				Notexists_indexed_fields:  &[]string{"*req.index1", "*req.index2"},
+				Nested_fields:             utils.BoolPointer(true),
+				Dynaprepaid_actionprofile: &[]string{"val1", "val2"},
+				Opts:                      nil,
+			},
+			expected: &ActionSCfg{
+				Enabled: true,
+				Conns: map[string][]*DynamicConns{
+					utils.MetaEEs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}},
+					utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+					utils.MetaThresholds: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}},
+					utils.MetaStats:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
+					utils.MetaAccounts:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}},
+					utils.MetaAdminS:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}},
+				},
+				IndexedSelects:           false,
+				Tenants:                  &[]string{"cgrates.org"},
+				StringIndexedFields:      &[]string{"*req.index1"},
+				PrefixIndexedFields:      &[]string{"*req.index1", "*req.index2"},
+				SuffixIndexedFields:      &[]string{"*req.index1"},
+				NotExistsIndexedFields:   &[]string{"*req.index1", "*req.index2"},
+				ExistsIndexedFields:      &[]string{"*req.index1"},
+				NestedFields:             true,
+				DynaprepaidActionProfile: []string{"val1", "val2"},
+				Opts: &ActionsOpts{
+					ProfileIDs:           []*DynamicStringSliceOpt{},
+					ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+					PosterAttempts: []*DynamicIntOpt{
+						{
+							value: ActionsPosterAttempsDftOpt,
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsnCfg := NewDefaultCGRConfig()
+			if err := jsnCfg.actionSCfg.loadFromJSONCfg(tt.jsonCfg); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(utils.ToJSON(tt.expected), utils.ToJSON(jsnCfg.actionSCfg)) {
+				t.Errorf("\nExpecting <%v>,\n Received <%v>", utils.ToJSON(tt.expected), utils.ToJSON(jsnCfg.actionSCfg))
+			}
+		})
+	}
+}
+
 func TestActionSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "actions": {

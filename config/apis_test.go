@@ -601,6 +601,90 @@ func TestStoreDiffSectionRadius(t *testing.T) {
 	}
 }
 
+func TestStoreDiffSectionJanusAgent(t *testing.T) {
+	section := JanusAgentJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.janusAgentCfg = &JanusAgentCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.janusAgentCfg = &JanusAgentCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreDiffSectionPrometheusAgent(t *testing.T) {
+	section := PrometheusAgentJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.prometheusAgentCfg = &PrometheusAgentCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.prometheusAgentCfg = &PrometheusAgentCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreDiffSectionTrendS(t *testing.T) {
+	section := TrendSJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.trendSCfg = &TrendSCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.trendSCfg = &TrendSCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreDiffSectionRankingS(t *testing.T) {
+	section := RankingSJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.rankingSCfg = &RankingSCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.rankingSCfg = &RankingSCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreDiffSectionSentryPeer(t *testing.T) {
+	section := SentryPeerJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.sentryPeerCfg = &SentryPeerCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.sentryPeerCfg = &SentryPeerCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreDiffSectionTPeS(t *testing.T) {
+	section := TPeSJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.tpeSCfg = &TpeSCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.tpeSCfg = &TpeSCfg{}
+
+	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
 func TestStoreDiffSectionHTTPAgent(t *testing.T) {
 	section := HTTPAgentJSON
 

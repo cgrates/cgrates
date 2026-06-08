@@ -28,6 +28,13 @@ import (
 func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AnalyzerSJsonCfg{
 		Enabled: utils.BoolPointer(false),
+		Opts: &AnalyzerSOptsJson{
+			ExporterIDs: []*DynamicStringSliceOpt{
+				{
+					FilterIDs: []string{"filtr1"},
+				},
+			},
+		},
 	}
 	expected := &AnalyzerSCfg{
 		Enabled:         false,
@@ -37,7 +44,11 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
 		Opts: &AnalyzerSOpts{
-			ExporterIDs: []*DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{
+				{
+					FilterIDs: []string{"filtr1"},
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()

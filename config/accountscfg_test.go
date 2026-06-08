@@ -43,6 +43,27 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		Nested_fields:            utils.BoolPointer(true),
 		Max_iterations:           utils.IntPointer(1000),
 		Max_usage:                utils.StringPointer("200h"),
+		Opts: &AccountsOptsJson{
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"ACC1"},
+				},
+			},
+			Usage: []*DynamicInterfaceOpt{
+				{
+					FilterIDs: []string{"fld1"},
+					Tenant:    "cgrates.org",
+					Value:     AccountsUsageDftOpt,
+				},
+			},
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
+				},
+			},
+		},
 	}
 	usage, err := utils.NewDecimalFromUsage("200h")
 	if err != nil {
@@ -65,9 +86,24 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:          1000,
 		MaxUsage:               usage,
 		Opts: &AccountsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			Usage:                []*DynamicDecimalOpt{NewDynamicDecimalOpt(nil, "", AccountsUsageDftOpt, nil)},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"ACC1"},
+				},
+			},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt([]string{"fld1"}, "cgrates.org", AccountsUsageDftOpt, nil),
+				NewDynamicDecimalOpt(nil, "", AccountsUsageDftOpt, nil),
+			},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
+				{
+					FilterIDs: nil,
+					Tenant:    "cgrates.org",
+					value:     true,
+				},
+				{},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
