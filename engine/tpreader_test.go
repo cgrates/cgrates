@@ -2569,3 +2569,59 @@ func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
 		})
 	}
 }
+
+func TestTPReaderLoadActionsNegatedTimingPrefix(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tpr, err := NewTpReader(db, db, "tpID", "UTC", nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tpr.timings["HALF2"] = &utils.TPTiming{
+		ID:        "HALF2",
+		StartTime: "12:00:00",
+		EndTime:   "23:59:59",
+	}
+	db.db.Set(utils.CacheTBLTPActions, "tpID:actNeg", &utils.TPActions{
+		TPid: "tpID",
+		ID:   "actNeg",
+		Actions: []*utils.TPAction{
+			{
+				Identifier:  utils.MetaTopUpReset,
+				BalanceId:   "balNeg",
+				BalanceType: utils.MetaMonetary,
+				TimingTags:  "!HALF2",
+				Units:       "100",
+				ExpiryTime:  utils.MetaUnlimited,
+				Weight:      10,
+			},
+		},
+	}, []string{}, true, utils.NonTransactional)
+
+	if err := tpr.LoadActions(); err != nil {
+		t.Fatalf("LoadActions failed with negated TimingTag: %v", err)
+	}
+	acts, has := tpr.actions["actNeg"]
+	if !has {
+		t.Fatal("actNeg not found in tpr.actions")
+	}
+	if len(acts) == 0 || acts[0].Balance == nil {
+		t.Fatal("no actions or balance is nil")
+	}
+	if len(acts[0].Balance.Timings) == 0 {
+		t.Fatal("Timings is empty")
+	}
+	if acts[0].Balance.Timings[0].ID != "HALF2" {
+		t.Errorf("expected Timings[0].ID=HALF2, got %s", acts[0].Balance.Timings[0].ID)
+	}
+	if acts[0].Balance.TimingIDs == nil {
+		t.Fatal("TimingIDs is nil")
+	}
+	if v, ok := (*acts[0].Balance.TimingIDs)["HALF2"]; !ok || v != false {
+		t.Errorf("expected TimingIDs[HALF2]=false, got %v (exists: %v)", v, ok)
+	}
+}

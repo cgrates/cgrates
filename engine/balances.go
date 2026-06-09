@@ -142,12 +142,31 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 	if len(b.Timings) == 0 {
 		return true
 	}
+	if len(b.TimingIDs) == 0 {
+		for _, tim := range b.Timings {
+			if tim.IsActiveAt(t) {
+				return true
+			}
+		}
+		return false
+	}
+	hasPositive := false
+	positiveActive := false
 	for _, tim := range b.Timings {
-		if tim.IsActiveAt(t) {
-			return true
+		active := tim.IsActiveAt(t)
+		if b.TimingIDs[tim.ID] {
+			hasPositive = true
+			if active {
+				positiveActive = true
+			}
+		} else if active {
+			return false
 		}
 	}
-	return false
+	if hasPositive {
+		return positiveActive
+	}
+	return true
 }
 
 func (b *Balance) MatchCategory(category string) bool {
