@@ -517,6 +517,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 			if tpact.TimingTags != "" {
 				timingIds := strings.Split(tpact.TimingTags, utils.InfieldSep)
 				for _, timingID := range timingIds {
+					timingID = strings.TrimPrefix(timingID, utils.NegativePrefix)
 					timing, found := tpr.timings[timingID]
 					if !found {
 						if timing, err = tpr.dm.GetTiming(timingID, false,
@@ -989,6 +990,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					if tpact.TimingTags != "" {
 						timingIds := strings.Split(tpact.TimingTags, utils.InfieldSep)
 						for _, timingID := range timingIds {
+							timingID = strings.TrimPrefix(timingID, utils.NegativePrefix)
 							if timing, found := tpr.timings[timingID]; found {
 								acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
 									ID:        timingID,

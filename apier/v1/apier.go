@@ -654,6 +654,7 @@ func (apierSv1 *APIerSv1) SetActions(ctx *context.Context, attrs *V1AttrSetActio
 		if apiAct.TimingTags != "" {
 			timingIds := strings.Split(apiAct.TimingTags, utils.InfieldSep)
 			for _, timingID := range timingIds {
+				timingID = strings.TrimPrefix(timingID, utils.NegativePrefix)
 				timing, err := apierSv1.DataManager.GetTiming(timingID, false,
 					utils.NonTransactional)
 				if err != nil {
