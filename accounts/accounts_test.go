@@ -777,7 +777,7 @@ func TestV1MaxAbstractsNoMatchingBalance(t *testing.T) {
 	}
 }
 
-func TestV1MaxAbstractsForceUsageInsufficientCredit(t *testing.T) {
+func TestV1DebitAbstractsForceUsage(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -786,45 +786,85 @@ func TestV1MaxAbstractsForceUsageInsufficientCredit(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	// the balance covers only 20s of the requested 30s
-	accPrf := &utils.Account{
-		Tenant:    "cgrates.org",
-		ID:        "TestV1MaxAbstractsForceUsageInsufficientCredit",
-		FilterIDs: []string{"*string:~*req.Account:1004"},
-		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": {
-				ID:      "AbstractBalance1",
-				Weights: utils.DynamicWeights{{Weight: 25}},
-				Type:    utils.MetaAbstract,
-				Units:   utils.NewDecimal(int64(20*time.Second), 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						FixedFee:     utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(0, 0),
+	const requested = 30 * time.Second
+	tests := []struct {
+		name        string
+		available   time.Duration
+		forceUsage  bool
+		wantErr     error
+		wantBalance time.Duration // units left after the call
+	}{
+		{
+			name:        "fully covered is debited",
+			available:   30 * time.Second,
+			forceUsage:  true,
+			wantErr:     nil,
+			wantBalance: 0,
+		},
+		{
+			name:        "one second short is rejected and reverted",
+			available:   29 * time.Second,
+			forceUsage:  true,
+			wantErr:     utils.ErrInsufficientCredit,
+			wantBalance: 29 * time.Second,
+		},
+		{
+			name:        "one second short is debited without forceUsage",
+			available:   29 * time.Second,
+			forceUsage:  false,
+			wantErr:     nil,
+			wantBalance: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			acc := &utils.Account{
+				Tenant:    "cgrates.org",
+				ID:        "TestV1DebitAbstractsForceUsage",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID:      "AbstractBalance1",
+						Weights: utils.DynamicWeights{{Weight: 25}},
+						Type:    utils.MetaAbstract,
+						Units:   utils.NewDecimal(int64(tt.available), 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
 					},
 				},
-			},
-		},
-	}
-	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
-		t.Error(err)
-	}
-
-	ev := &utils.CGREvent{
-		ID:     "TestV1MaxAbstractsForceUsageInsufficientCredit",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "1004",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:              "30s",
-			utils.OptsAccountsForceUsage: true,
-		},
-	}
-	reply := utils.EventCharges{}
-	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err != utils.ErrInsufficientCredit {
-		t.Fatalf("expected %v, got %v", utils.ErrInsufficientCredit, err)
+			}
+			if err := accnts.dm.SetAccount(context.Background(), acc, true); err != nil {
+				t.Fatal(err)
+			}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestV1DebitAbstractsForceUsage",
+				Event: map[string]any{
+					utils.AccountField: "1004",
+				},
+				APIOpts: map[string]any{
+					utils.MetaUsage:              requested.String(),
+					utils.OptsAccountsForceUsage: tt.forceUsage,
+				},
+			}
+			reply := utils.EventCharges{}
+			if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err != tt.wantErr {
+				t.Errorf("V1DebitAbstracts() err = %v, want %v", err, tt.wantErr)
+			}
+			dbAcc, err := accnts.dm.GetAccount(context.Background(), acc.Tenant, acc.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			gotBalance := dbAcc.Balances["AbstractBalance1"].Units
+			if wantBalance := utils.NewDecimal(int64(tt.wantBalance), 0); gotBalance.Compare(wantBalance) != 0 {
+				t.Errorf("balance after = %v, want %v", gotBalance, wantBalance)
+			}
+		})
 	}
 }
 
