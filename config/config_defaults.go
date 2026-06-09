@@ -94,8 +94,8 @@ const CGRATES_CFG_JSON = `
 
 "rpcConns": {			// rpc connections definitions
 	// "*localhost": {
-	// 	"strategy": "*first",
-	// 	"poolSize": 0,
+	// 	"strategy": "*first", // Controls connection selection within the pool. <*first|*next|*random|*first_positive|*first_positive_async|*broadcast|*broadcast_sync|*broadcast_async|*parallel>
+	// 	"poolSize": 0, //Sets the connection limit for *parallel strategy (0 means unlimited)
 	// 	"replyTimeout": "2s",
 	// 	"conns": [{
 	// 		"address": "127.0.0.1:2012",
