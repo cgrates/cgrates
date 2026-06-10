@@ -1491,3 +1491,244 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventAccountsAuthorizeRates(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+			"logger": {"level": 7},
+			"sessions": {
+				"enabled": true,
+				"conns": {
+					"*accounts": [{"ConnIDs": ["*localhost"]}],
+					"*rates":    [{"ConnIDs": ["*localhost"]}]
+				}
+			},
+			"accounts": {
+				"enabled": true,
+				"indexed_selects": true,
+				"conns": {
+					"*rates": [{"ConnIDs": ["*localhost"]}]
+				}
+			},
+			"rates":  {"enabled": true},
+			"admins": {"enabled": true}
+		}`,
+		TpFiles: map[string]string{
+			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * *",;10,false,0s,0,1,1m,1m,`,
+		},
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	t.Run("setAccount", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 20}},
+					Balances: map[string]*utils.Balance{
+						"AbstractBalance": {
+							ID:             "AbstractBalance",
+							Type:           utils.MetaAbstract,
+							Weights:        utils.DynamicWeights{{Weight: 10}},
+							Units:          utils.NewDecimal(int64(10*time.Minute), 0),
+							RateProfileIDs: []string{"RP_SIMPLE"},
+						},
+						"ConcreteBalance": {
+							ID:      "ConcreteBalance",
+							Type:    utils.MetaConcrete,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							Units:   utils.NewDecimal(10, 0),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetAccount failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetAccount reply = %s, want OK", reply)
+		}
+	})
+	t.Run("noFlags", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noFlags",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err != nil {
+			t.Fatalf("ProcessEvent failed without flags: %v", err)
+		}
+		if len(rply.RateSCost) > 0 {
+			t.Errorf("RateSCost should be empty without flags, got: %v", rply.RateSCost)
+		}
+		if len(rply.AccountSUsage) > 0 {
+			t.Errorf("AccountSUsage should be empty without flags, got: %v", rply.AccountSUsage)
+		}
+	})
+
+	t.Run("accountsAuthorizeFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "accountsAuthorizeFlag",
+				APIOpts: map[string]any{
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
+					utils.MetaUsage:     10 * time.Minute,
+					utils.MetaOriginID:  "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err != nil {
+			t.Fatalf("ProcessEvent failed with *accounts + *authorize: %v", err)
+		}
+		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		if !ok {
+			t.Fatal("AccountSUsage missing *primary")
+		}
+		wantUsage := 10 * time.Minute
+		if usage != wantUsage {
+			t.Errorf("AccountSUsage[*primary] = %v, want %v",
+				time.Duration(usage), time.Duration(wantUsage))
+		}
+		if len(rply.RateSCost) > 0 {
+			t.Errorf("RateSCost should be empty without *rates flag, got: %v", rply.RateSCost)
+		}
+	})
+
+	t.Run("ratesFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ratesFlag",
+				APIOpts: map[string]any{
+					utils.MetaRates:    true,
+					utils.MetaUsage:    10 * time.Minute,
+					utils.MetaOriginID: "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err != nil {
+			t.Fatalf("ProcessEvent failed with *rates: %v", err)
+		}
+		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("RateSCost missing *primary, got: %v", rply.RateSCost)
+		}
+		if cost != 10.0 {
+			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+		}
+		if len(rply.AccountSUsage) > 0 {
+			t.Errorf("AccountSUsage should be empty without *accounts flag, got: %v", rply.AccountSUsage)
+		}
+	})
+
+	t.Run("accountsAuthorizeAndRates", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "accountsAuthorizeAndRates",
+				APIOpts: map[string]any{
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
+					utils.MetaRates:     true,
+					utils.MetaUsage:     10 * time.Minute,
+					utils.MetaOriginID:  "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err != nil {
+			t.Fatalf("ProcessEvent failed with *accounts + *authorize + *rates: %v", err)
+		}
+		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		if !ok {
+			t.Fatal("AccountSUsage missing *primary")
+		}
+		wantUsage := 10 * time.Minute
+		if usage != wantUsage {
+			t.Errorf("AccountSUsage[*primary] = %v, want %v", usage, wantUsage)
+		}
+		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		if !ok {
+			t.Fatal("RateSCost missing *primary")
+		}
+		if cost != 10.0 {
+			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+		}
+	})
+
+	t.Run("noMatchingAccount", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchingAccount",
+				APIOpts: map[string]any{
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
+					utils.MetaUsage:     10 * time.Minute,
+					utils.MetaOriginID:  "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Fatalf("expected NOT_FOUND for unknown account, got: %v", err)
+		}
+	})
+
+	t.Run("noMatchingRate", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchingRate",
+				APIOpts: map[string]any{
+					utils.MetaRates:    true,
+					utils.MetaUsage:    10 * time.Minute,
+					utils.MetaOriginID: "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "9999",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err == nil {
+			t.Fatal("expected error for unmatched destination, got none")
+		}
+	})
+}
