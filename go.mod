@@ -14,7 +14,7 @@ require (
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf
-	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
+	github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191
 	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e

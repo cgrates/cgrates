@@ -33,8 +33,8 @@ github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b/go.mod h1:bKByLko2HF33K+PbiiToAgevrrbr96C+7Pp3HGS6oag=
 github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf h1:GHRbG17c8E+RjPKrH5WTdxC+nBDmUfESJw5h99ISX2g=
 github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf/go.mod h1:Vfjo2o1DEmpI+csUo3cYRpCzfM9DajXZ8CR73MNeNh4=
-github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
-github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
+github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191 h1:R8CCMTO4SYvpJv6nND7SlszZ5qcExN1pmtCJrUkOOrs=
+github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191/go.mod h1:W+poB+NifleUXm1bFYTx+amOAOAjfOcrN3p4tlNZoyw=
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db h1:JRgzMS5kJ1WxaveoZ1YG/FowUDxFQXD3GjCHR7rH0Gk=
 github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db/go.mod h1:jVYq943GCWxhXXxi/1NthN9ATeyFUSbwJRbN/bb+ADQ=
 github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727 h1:rhYHlbfEPDNreekd1ZtUYi/NbFm5cEl8twQZ3c/0nYU=
