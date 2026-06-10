@@ -205,6 +205,146 @@ func TestRadiusChargingRecurringFee(t *testing.T) {
 	checkCDRs(t, client, acctID, fee, fee)
 }
 
+// TestRadiusChargingActionProvisioning runs the same US plan as
+// TestRadiusChargingProvisioning, but the data balances come from a *setBalance
+// action instead of being declared in SetAccount.
+func TestRadiusChargingActionProvisioning(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	dictDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dictDir, "dictionary.test"), []byte(radiusDict), 0644); err != nil {
+		t.Fatal(err)
+	}
+	ng := engine.TestEngine{
+		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
+		ConfigJSON: fmt.Sprintf(`{
+"radiusAgent": {"clientDictionaries": {"*default": [%q]}}
+}`, dictDir+"/"),
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, cfg := ng.Run(t)
+
+	const usULIHex = "8213f010000113f01000000101" // United States
+	const euULIHex = "8262f210000162f21000000101" // Germany
+
+	setFilter(t, client, "FLTR_US", []*engine.FilterRule{
+		{
+			Type:    utils.MetaString,
+			Element: "~*req.Country",
+			Values:  []string{"United States"},
+		},
+	})
+	setOverageRate(t, client, "RP_US_OVERAGE", utils.NewDecimal(15, 0))
+
+	const usIMSI = "310150123456789"
+
+	// monetary carries the region filter too, otherwise it stays eligible
+	// everywhere and auth accepts a request from outside the region.
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     usIMSI,
+				Balances: map[string]*utils.Balance{
+					"monetary": {
+						ID:        "monetary",
+						Type:      utils.MetaConcrete,
+						Weights:   utils.DynamicWeights{{Weight: 5}},
+						FilterIDs: []string{"FLTR_US"},
+						Units:     utils.NewDecimalFromFloat64(100),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("SetAccount: %v", err)
+	}
+
+	// Weights and CostIncrements are wrapped in backticks because the diktat
+	// value splits on ";", which is also the separator inside those fields.
+	// The overage increment has no fee, otherwise the usage is free and never
+	// falls through to the overage rate.
+	dk := func(id, path string, value any) *utils.APDiktat {
+		return &utils.APDiktat{
+			ID: id,
+			Opts: map[string]any{
+				"*balancePath":  path,
+				"*balanceValue": value,
+			},
+		}
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		&utils.ActionProfileWithAPIOpts{
+			ActionProfile: &utils.ActionProfile{
+				Tenant:   "cgrates.org",
+				ID:       "AP_PROVISION_US",
+				Weights:  utils.DynamicWeights{{Weight: 10}},
+				Schedule: utils.MetaASAP,
+				Targets:  map[string]utils.StringSet{utils.MetaAccounts: {usIMSI: {}}},
+				Actions: []*utils.APAction{
+					{
+						ID:   "provision",
+						Type: utils.MetaSetBalance,
+						Diktats: []*utils.APDiktat{
+							dk("alw_type", "*balance.data_allowance.Type", utils.MetaAbstract),
+							dk("alw_weight", "*balance.data_allowance.Weights", "`;20`"),
+							dk("alw_filter", "*balance.data_allowance.FilterIDs", "FLTR_US"),
+							dk("alw_cost", "*balance.data_allowance.CostIncrements", "`;1;0;0`"),
+							dk("alw_units", "*balance.data_allowance.Units", gb),
+							dk("ovg_type", "*balance.data_overage.Type", utils.MetaAbstract),
+							dk("ovg_weight", "*balance.data_overage.Weights", "`;10`"),
+							dk("ovg_filter", "*balance.data_overage.FilterIDs", "FLTR_US"),
+							dk("ovg_cost", "*balance.data_overage.CostIncrements", "`;1;;`"),
+							dk("ovg_rate", "*balance.data_overage.RateProfileIDs", "RP_US_OVERAGE"),
+							dk("ovg_units", "*balance.data_overage.Units", 100*gb),
+						},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("SetActionProfile: %v", err)
+	}
+
+	var acc utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: usIMSI}},
+		&acc); err != nil {
+		t.Fatalf("GetAccount %s: %v", usIMSI, err)
+	}
+	if _, has := acc.Balances["data_allowance"]; has {
+		t.Fatal("data_allowance exists before the provisioning action ran")
+	}
+
+	subscribe(t, client, "AP_PROVISION_US", usIMSI)
+	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(gb, 0), "allowance after provisioning")
+	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(100), "monetary after provisioning")
+
+	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-1", usULIHex, radigo.AccessAccept)
+	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-2", euULIHex, radigo.AccessReject)
+
+	// auth is a dry run, it must not charge
+	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(gb, 0), "allowance after auth")
+	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(100), "monetary after auth")
+
+	sendAcct(t, cfg, radiusDict, usIMSI, "us-sess-1", "Start", usULIHex, 0)
+	sendAcct(t, cfg, radiusDict, usIMSI, "us-sess-1", "Stop", usULIHex, gb/2)
+	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(gb/2, 0), "allowance after 0.5GB")
+
+	sendAcct(t, cfg, radiusDict, usIMSI, "us-sess-2", "Start", usULIHex, 0)
+	sendAcct(t, cfg, radiusDict, usIMSI, "us-sess-2", "Stop", usULIHex, gb)
+	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(0, 0), "allowance after overage")
+	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(92.5), "monetary after overage")
+
+	checkCDRs(t, client, usIMSI, 0, 7.5)
+}
+
 const radiusDict = `
 VALUE	Service-Type		Framed		2
 VALUE	Acct-Status-Type	Start		1
