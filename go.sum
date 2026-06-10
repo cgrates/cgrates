@@ -85,8 +85,8 @@ github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b h1:SqTeoUV65ki0ls
 github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b/go.mod h1:te9B6PUvoE0jWCM7Zj4Ftrsco3mREKZ0Y29ODxAYDpY=
 github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73 h1:7AYhvpegrSkY9tLGCQsZgNl8yTjL5CaQOTr3/kYlPek=
 github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
-github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf h1:GbMJzvtwdX1OCEmsqSts/cRCIcIMvo8AYtC2dQExWlg=
-github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf/go.mod h1:oEq/JbubkOD2pXHvDy4r7519NkxriONisrnVpkCaNJw=
+github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191 h1:R8CCMTO4SYvpJv6nND7SlszZ5qcExN1pmtCJrUkOOrs=
+github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191/go.mod h1:W+poB+NifleUXm1bFYTx+amOAOAjfOcrN3p4tlNZoyw=
 github.com/cgrates/ltcache v0.0.0-20260512080837-0d98106c5460 h1:FWU/GQO4ug70ejb6J1X7tbAl0u68skkV1wxx4yThbXU=
 github.com/cgrates/ltcache v0.0.0-20260512080837-0d98106c5460/go.mod h1:E6jHedwqFkZsXZG7MVvnCagpFQgKqDF6tg/mUqRRu34=
 github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727 h1:rhYHlbfEPDNreekd1ZtUYi/NbFm5cEl8twQZ3c/0nYU=
