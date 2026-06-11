@@ -288,7 +288,7 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 		d.Conns = stripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
-		d.Ees_exporter_ids = &v2.EEsExporterIDs
+		d.Ees_exporter_ids = utils.SliceStringPointer(slices.Clone(v2.EEsExporterIDs))
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
