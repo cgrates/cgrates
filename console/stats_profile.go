@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,7 +60,7 @@ func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetStatQueueProfile) RpcResult() any {
-	var atr engine.StatQueueProfile
+	var atr utils.StatQueueProfile
 	return &atr
 }
 

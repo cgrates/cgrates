@@ -358,13 +358,13 @@ func testExpVerifyResources(t *testing.T) {
 }
 
 func testExpVerifyStats(t *testing.T) {
-	sPrf := &engine.StatQueueProfile{
+	sPrf := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "Stat_1",
 		FilterIDs:   []string{"FLTR_STAT_1", "*ai:~*opts.*startTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaACD,
 			},
@@ -385,7 +385,7 @@ func testExpVerifyStats(t *testing.T) {
 		MinItems:     0,
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var reply *engine.StatQueueProfile
+	var reply *utils.StatQueueProfile
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &reply); err != nil {
 		t.Error(err)

@@ -1483,7 +1483,7 @@ func TestDMSetStatQueueNewErr(t *testing.T) {
 	experr := "marshal mock error"
 	dm.ms = mockMarshal(experr)
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		SQMetrics: map[string]utils.StatMetric{
 			"key": statMetricMock(""),
 		},
@@ -1507,10 +1507,12 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) error { return utils.ErrNotImplemented },
+		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
+			return utils.ErrNotImplemented
+		},
 	}
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 
 		SQMetrics: map[string]utils.StatMetric{
 			utils.MetaASR: &utils.StatASR{
@@ -1520,13 +1522,6 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
-				},
-			},
-		},
-		sqPrfl: &StatQueueProfile{
-			Metrics: []*MetricWithFilters{
-				{
-					MetricID: utils.MetaASR,
 				},
 			},
 		},
@@ -1556,7 +1551,7 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 
 		SQMetrics: map[string]utils.StatMetric{
 			utils.MetaASR: &utils.StatASR{
@@ -1566,13 +1561,6 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
-				},
-			},
-		},
-		sqPrfl: &StatQueueProfile{
-			Metrics: []*MetricWithFilters{
-				{
-					MetricID: utils.MetaASR,
 				},
 			},
 		},
@@ -1646,7 +1634,7 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: utils.CGRateSorg,
 		ID:     "sqid99",
 		SQMetrics: map[string]utils.StatMetric{
@@ -1657,13 +1645,6 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
-				},
-			},
-		},
-		sqPrfl: &StatQueueProfile{
-			Metrics: []*MetricWithFilters{
-				{
-					MetricID: utils.MetaASR,
 				},
 			},
 		},
@@ -1756,13 +1737,13 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
 		FilterIDs:   []string{"fltr_test"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -1778,10 +1759,10 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return utils.ErrNotImplemented },
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
 
 	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
@@ -1819,13 +1800,13 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
 		FilterIDs:   []string{"fltr_test"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -1841,7 +1822,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
 	}
@@ -1884,13 +1865,13 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
 		FilterIDs:   []string{"fltr_test"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -2244,13 +2225,13 @@ func TestDMCacheDataFromDBStatQueueProfilePrefix(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sQP := &StatQueueProfile{
+	sQP := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "StatQueueProfile3",
 		FilterIDs:   []string{"fltr_test"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -2298,10 +2279,10 @@ func TestDMCacheDataFromDBStatQueuePrefix(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "SQ1",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "SqProcessEvent",
 			},
@@ -4465,13 +4446,13 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	config.SetCgrConfig(cfg)
 
-	stq := &StatQueue{
+	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq01",
 		SQMetrics: map[string]utils.StatMetric{
 			"key": statMetricMock(""),
 		},
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "SqProcessEvent",
 			},
@@ -4492,7 +4473,7 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 			return stq, utils.ErrNotFound
 		},
 	}
@@ -4521,10 +4502,10 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	config.SetCgrConfig(cfg)
 
-	stq := &StatQueue{
+	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq01",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "SqProcessEvent",
 			},
@@ -4546,10 +4527,12 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 			return stq, utils.ErrNotFound
 		},
-		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) error { return utils.ErrNotImplemented },
+		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
+			return utils.ErrNotImplemented
+		},
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -4594,7 +4577,7 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 	ssq := &StoredStatQueue{
 		Tenant: "cgrates.org",
 		ID:     "ssq01",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "testEventID",
 			},
@@ -4605,10 +4588,10 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 		Compressed: true,
 	}
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq01",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "SqProcessEvent",
 			},
@@ -4688,7 +4671,7 @@ func TestDMSetStatQueueProfileNilDm(t *testing.T) {
 
 	var dm *DataManager
 
-	sqp := &StatQueueProfile{}
+	sqp := &utils.StatQueueProfile{}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
@@ -4710,13 +4693,13 @@ func TestDMSetStatQueueProfileCheckFiltrsErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp001",
 		FilterIDs:   []string{":::"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -4752,13 +4735,13 @@ func TestDMSetStatQueueProfileGetStatQProflErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp002",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -4774,7 +4757,7 @@ func TestDMSetStatQueueProfileGetStatQProflErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotImplemented
 		},
 	}
@@ -4800,13 +4783,13 @@ func TestDMSetStatQueueProfileSetStatQPrflDrvErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -4822,8 +4805,8 @@ func TestDMSetStatQueueProfileSetStatQPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) { return sqp, nil },
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return utils.ErrNotImplemented },
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) { return sqp, nil },
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
 
 	expErr := utils.ErrNotImplemented
@@ -8762,22 +8745,22 @@ func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
-			return &StatQueueProfile{}, nil
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+			return &utils.StatQueueProfile{}, nil
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return nil },
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -8806,13 +8789,13 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -8844,10 +8827,10 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
 
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return nil },
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -8867,13 +8850,13 @@ func TestDMSetStatQueueProfileNewStatQueueNilOldStsErr(t *testing.T) {
 	}()
 
 	var minItems int
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "invalid",
 			},
@@ -8909,13 +8892,13 @@ func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
 	}()
 
 	var minItems int
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "invalid",
 			},
@@ -8966,8 +8949,8 @@ func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
-			return &StatQueueProfile{}, utils.ErrNotImplemented
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+			return &utils.StatQueueProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
@@ -8989,21 +8972,21 @@ func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
-			return &StatQueueProfile{}, nil
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+			return &utils.StatQueueProfile{}, nil
 		},
 	}
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -9054,8 +9037,8 @@ func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
-			return &StatQueueProfile{}, nil
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+			return &utils.StatQueueProfile{}, nil
 		},
 		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
 	}
@@ -9063,13 +9046,13 @@ func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -9097,13 +9080,13 @@ func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"fltrID1"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -9120,7 +9103,7 @@ func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
 		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
@@ -9145,13 +9128,13 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 		config.SetCgrConfig(cfgtmp)
 	}()
 
-	sqp := &StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp003",
 		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},
@@ -9182,7 +9165,7 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
 		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
@@ -9197,10 +9180,10 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 
 func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq01",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{
 				EventID: "SqProcessEvent",
 			},
@@ -9234,7 +9217,9 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) { return sq, utils.ErrNotFound },
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+			return sq, utils.ErrNotFound
+		},
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)

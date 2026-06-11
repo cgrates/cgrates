@@ -113,7 +113,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.StatQueue, sts *engine.StatQueueProfile, err error) {
+func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *utils.StatQueue, sts *utils.StatQueueProfile, err error) {
 	mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return
@@ -131,8 +131,8 @@ func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.Stat
 	return
 }
 
-func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
-	out = &engine.StatQueue{
+func remakeQueue(sq *utils.StatQueue) (out *utils.StatQueue) {
+	out = &utils.StatQueue{
 		Tenant:    sq.Tenant,
 		ID:        sq.ID,
 		SQItems:   sq.SQItems,
@@ -144,7 +144,7 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 	return
 }
 
-func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.StatQueue, err error) {
+func (m *Migrator) migrateV2Stats(v2Stats *utils.StatQueue) (v3Stats *utils.StatQueue, err error) {
 	if v2Stats == nil {
 		// read from DB
 		mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
@@ -170,10 +170,10 @@ func (m *Migrator) migrateStats() (err error) {
 	}
 	migrated := true
 	var filter *engine.Filter
-	var v3sts *engine.StatQueueProfile
-	var v4sts *engine.StatQueueProfile
-	var v2Stats *engine.StatQueue
-	var v3Stats *engine.StatQueue
+	var v3sts *utils.StatQueueProfile
+	var v4sts *utils.StatQueueProfile
+	var v2Stats *utils.StatQueue
+	var v3Stats *utils.StatQueue
 	for {
 		version := vrs[utils.Stats]
 		for {
@@ -260,7 +260,7 @@ func (m *Migrator) migrateStats() (err error) {
 	return m.ensureIndexesDataDB(engine.ColSqs)
 }
 
-func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq *engine.StatQueueProfile, err error) {
+func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *utils.StatQueue, stq *utils.StatQueueProfile, err error) {
 	var filters []*engine.FilterRule
 	if len(v1Sts.SetupInterval) == 1 {
 		x, err := engine.NewFilterRule(utils.MetaGreaterOrEqual,
@@ -405,10 +405,10 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     v1Sts.Id,
 		Rules:  filters}
-	stq = &engine.StatQueueProfile{
+	stq = &utils.StatQueueProfile{
 		ID:           v1Sts.Id,
 		QueueLength:  v1Sts.QueueLength,
-		Metrics:      make([]*engine.MetricWithFilters, 0),
+		Metrics:      make([]*utils.MetricWithFilters, 0),
 		Tenant:       config.CgrConfig().GeneralCfg().DefaultTenant,
 		Blockers:     utils.DynamicBlockers{{Blocker: false}},
 		Stored:       false,
@@ -418,7 +418,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	if v1Sts.SaveInterval != 0 {
 		stq.Stored = true
 	}
-	sq = &engine.StatQueue{
+	sq = &utils.StatQueue{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        v1Sts.Id,
 		SQMetrics: make(map[string]utils.StatMetric),
@@ -429,7 +429,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 				v1Sts.Metrics[i] = utils.Meta + v1Sts.Metrics[i]
 			}
 			v1Sts.Metrics[i] = strings.ToLower(v1Sts.Metrics[i])
-			stq.Metrics = append(stq.Metrics, &engine.MetricWithFilters{MetricID: v1Sts.Metrics[i]})
+			stq.Metrics = append(stq.Metrics, &utils.MetricWithFilters{MetricID: v1Sts.Metrics[i]})
 			if sq.SQMetrics[stq.Metrics[i].MetricID], err = utils.NewStatMetric(stq.Metrics[i].MetricID, 0, []string{}); err != nil {
 				return nil, nil, nil, err
 			}
@@ -438,7 +438,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	return filter, sq, stq, nil
 }
 
-func (m *Migrator) migrateV3ToV4Stats(v3sts *engine.StatQueueProfile) (v4Cpp *engine.StatQueueProfile, err error) {
+func (m *Migrator) migrateV3ToV4Stats(v3sts *utils.StatQueueProfile) (v4Cpp *utils.StatQueueProfile, err error) {
 	if v3sts == nil {
 		mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
 		if err != nil {

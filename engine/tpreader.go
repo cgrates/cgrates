@@ -454,7 +454,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("StatQueueProfiles:")
 	}
 	for _, tpST := range tpr.sqProfiles {
-		var st *StatQueueProfile
+		var st *utils.StatQueueProfile
 		if st, err = APItoStats(tpST, tpr.timezone); err != nil {
 			return
 		}

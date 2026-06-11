@@ -319,8 +319,8 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 			}
 		}
 		// Prepare request arguments based on provided parameters.
-		args := &engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		args := &utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant: params[0],
 				ID:     params[1],
 			},
@@ -399,9 +399,9 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 		// populate Stat's MetricID
 		if params[10] != utils.EmptyString {
 			metrics := strings.Split(params[10], utils.ANDSep)
-			args.Metrics = make([]*engine.MetricWithFilters, len(metrics))
+			args.Metrics = make([]*utils.MetricWithFilters, len(metrics))
 			for i, strM := range metrics {
-				args.Metrics[i] = &engine.MetricWithFilters{MetricID: strM}
+				args.Metrics[i] = &utils.MetricWithFilters{MetricID: strM}
 			}
 		}
 		// populate Stat's metricFliterIDs

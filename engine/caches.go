@@ -59,12 +59,12 @@ func init() {
 	gob.Register(new(utils.IPProfileWithAPIOpts))
 	gob.Register(new(utils.IPAllocationsWithAPIOpts))
 	// Stats
-	gob.Register(new(StatQueue))
-	gob.Register(new(StatQueueWithAPIOpts))
-	gob.Register(new(StatQueueProfile))
-	gob.Register(new(StatQueueProfileWithAPIOpts))
+	gob.Register(new(utils.StatQueue))
+	gob.Register(new(utils.StatQueueWithAPIOpts))
+	gob.Register(new(utils.StatQueueProfile))
+	gob.Register(new(utils.StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
-	gob.Register(new(StatQueueProfileWithAPIOpts))
+	gob.Register(new(utils.StatQueueProfileWithAPIOpts))
 	gob.Register(new(utils.TPStatProfile))
 	// RankingS
 	gob.Register(new(utils.Ranking))

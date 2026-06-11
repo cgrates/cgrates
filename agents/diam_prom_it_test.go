@@ -202,14 +202,14 @@ func TestDiamPrometheus(t *testing.T) {
 	var reply string
 
 	if err := client.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
-		engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_1",
 				FilterIDs:   []string{"*string:~*opts.*eventType:PerformanceReport"},
 				QueueLength: -1,
 				TTL:         5 * time.Second,
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{
 						MetricID: "*average#~*req.ProcessingTime",
 					},
@@ -243,14 +243,14 @@ func TestDiamPrometheus(t *testing.T) {
 	}
 
 	if err := client.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
-		engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_2",
 				FilterIDs:   []string{"*string:~*opts.*eventType:PerformanceReport"},
 				QueueLength: -1,
 				TTL:         10 * time.Second,
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{
 						MetricID: "*average#~*req.ProcessingTime",
 					},

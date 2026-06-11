@@ -1245,14 +1245,14 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 }
 
 func testLoadersGetStatQueueProfiles(t *testing.T) {
-	expSqPrfs := []*engine.StatQueueProfile{
+	expSqPrfs := []*utils.StatQueueProfile{
 		{
 			Tenant:      "cgrates.org",
 			ID:          "TestStats",
 			FilterIDs:   []string{"*string:~*req.Account:1001"},
 			QueueLength: 100,
 			TTL:         time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: "*sum#~*req.Value",
 				},
@@ -1289,7 +1289,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			FilterIDs:   []string{"*string:~*req.Account:1002"},
 			QueueLength: 100,
 			TTL:         time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: "*sum#~*req.Value",
 				},
@@ -1326,7 +1326,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			FilterIDs:   []string{"*string:~*req.Account:1003"},
 			QueueLength: 100,
 			TTL:         time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: "*sum#~*req.Value",
 				},
@@ -1351,7 +1351,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	var sqPrfs []*engine.StatQueueProfile
+	var sqPrfs []*utils.StatQueueProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1595,7 +1595,7 @@ func testLoadersGetStatQueueProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplySqPrf engine.StatQueueProfile
+	var rplySqPrf utils.StatQueueProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

@@ -293,7 +293,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Stats
-	stq := &engine.StatQueueProfile{
+	stq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
 		Weights: utils.DynamicWeights{
@@ -302,7 +302,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},

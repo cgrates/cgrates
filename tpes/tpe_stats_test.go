@@ -34,8 +34,8 @@ func TestTPEnewTPStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.StatQueueProfile, error) {
-			stq := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.StatQueueProfile, error) {
+			stq := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "SQ_2",
 				Weights: utils.DynamicWeights{
@@ -44,7 +44,7 @@ func TestTPEnewTPStats(t *testing.T) {
 					},
 				},
 				QueueLength: 14,
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{
 						MetricID: utils.MetaASR,
 					},
@@ -85,7 +85,7 @@ func TestTPEExportStats(t *testing.T) {
 	tpStq := TPStats{
 		dm: dm,
 	}
-	stq := &engine.StatQueueProfile{
+	stq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
 		Weights: utils.DynamicWeights{
@@ -94,7 +94,7 @@ func TestTPEExportStats(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},
@@ -126,7 +126,7 @@ func TestTPEExportItemsStatsNoDbConn(t *testing.T) {
 	tpStq := TPStats{
 		dm: nil,
 	}
-	stq := &engine.StatQueueProfile{
+	stq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
 		Weights: utils.DynamicWeights{
@@ -135,7 +135,7 @@ func TestTPEExportItemsStatsNoDbConn(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},
@@ -170,7 +170,7 @@ func TestTPEExportItemsStatsIDNotFound(t *testing.T) {
 	tpStq := TPStats{
 		dm: dm,
 	}
-	stq := &engine.StatQueueProfile{
+	stq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
 		Weights: utils.DynamicWeights{
@@ -179,7 +179,7 @@ func TestTPEExportItemsStatsIDNotFound(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},

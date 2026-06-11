@@ -280,7 +280,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaStats:
 		return func() profile {
-			return new(engine.StatQueueProfile)
+			return new(utils.StatQueueProfile)
 		}
 	case utils.MetaThresholds:
 		return func() profile {

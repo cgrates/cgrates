@@ -196,13 +196,13 @@ func testStsITFlush(t *testing.T) {
 // 		ID:     v1Sts.Id,
 // 		Rules:  filters}
 
-// 	sqp := &engine.StatQueueProfile{
+// 	sqp := &utils.StatQueueProfile{
 // 		Tenant:      "cgrates.org",
 // 		ID:          "test",
 // 		FilterIDs:   []string{v1Sts.Id},
 // 		QueueLength: 10,
 // 		TTL:         0,
-// 		Metrics: []*engine.MetricWithFilters{
+// 		Metrics: []*utils.MetricWithFilters{
 // 			{
 // 				MetricID: "*asr",
 // 			},
@@ -219,7 +219,7 @@ func testStsITFlush(t *testing.T) {
 // 		Weight:       float64(0),
 // 		MinItems:     0,
 // 	}
-// 	sq := &engine.StatQueue{
+// 	sq := &utils.StatQueue{
 // 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 // 		ID:        v1Sts.Id,
 // 		SQMetrics: make(map[string]utils.StatMetric),
@@ -414,7 +414,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 			}
 		}
 	}
-	metrics := []*engine.MetricWithFilters{
+	metrics := []*utils.MetricWithFilters{
 		{
 			MetricID: "*asr",
 		}, {
@@ -452,7 +452,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 	}
 
 	//from V2 to V3
-	var statQueue *engine.StatQueue
+	var statQueue *utils.StatQueue
 	if statQueue, err = stsMigrator.dmTo[utils.MetaDefault].DataManager().GetStatQueue(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if statQueue.ID != "test" {

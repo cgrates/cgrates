@@ -61,8 +61,8 @@ type DataDBMock struct {
 	SetRankingProfileDrvF      func(ctx *context.Context, sq *utils.RankingProfile) (err error)
 	GetRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)
 	RemRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (err error)
-	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
-	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
+	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error)
+	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *utils.StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	RemStatQueueDrvF           func(ctx *context.Context, tenant, id string) (err error)
 	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
@@ -79,10 +79,10 @@ type DataDBMock struct {
 	RemoveChargerProfileDrvF   func(ctx *context.Context, chr string, rpl string) error
 	GetItemLoadIDsDrvF         func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
 	SetThresholdDrvF           func(*context.Context, *utils.Threshold) error
-	SetStatQueueDrvF           func(*context.Context, *StoredStatQueue, *StatQueue) error
+	SetStatQueueDrvF           func(*context.Context, *StoredStatQueue, *utils.StatQueue) error
 	HasDataDrvF                func(ctx *context.Context, category, subject, tenant string) (bool, error)
 	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error
-	GetStatQueueDrvF           func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
+	GetStatQueueDrvF           func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error)
 }
 
 // Storage methods
@@ -238,14 +238,14 @@ func (dbM *DataDBMock) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetStatQueueProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
 	if dbM.SetStatQueueProfileDrvF != nil {
 		return dbM.SetStatQueueProfileDrvF(ctx, sq)
 	}
@@ -259,14 +259,14 @@ func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx *context.Context, tenant, id s
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	if dbM.GetStatQueueDrvF != nil {
 		return dbM.GetStatQueueDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
 	return utils.ErrNotImplemented
 }
 

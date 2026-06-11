@@ -718,13 +718,13 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	// set a StatQueueProfile and simulate process event
-	statConfig := &StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &StatQueueProfile{
+	statConfig := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "DistinctMetricProfile",
 			QueueLength: 10,
 			TTL:         10 * time.Second,
-			Metrics: []*MetricWithFilters{{
+			Metrics: []*utils.MetricWithFilters{{
 				MetricID: utils.MetaDDC,
 			}},
 			ThresholdIDs: []string{utils.MetaNone},

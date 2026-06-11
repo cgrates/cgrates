@@ -301,19 +301,19 @@ func testCDRsProcessCDR3(t *testing.T) {
 }
 
 func testCDRsSetStats(t *testing.T) {
-	var reply *engine.StatQueueProfile
+	var reply *utils.StatQueueProfile
 	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_ProcessCDR"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	statConfig := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STS_ProcessCDR",
 			FilterIDs: []string{"*string:~*req.OriginID:testCDRsProcessCDR4"},
 			// QueueLength: 10,
-			Metrics: []*engine.MetricWithFilters{{
+			Metrics: []*utils.MetricWithFilters{{
 				MetricID: "*sum#~*opts.*usage",
 			}},
 			ThresholdIDs: []string{utils.MetaNone},

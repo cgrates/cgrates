@@ -30,8 +30,8 @@ func TestReplicationTaskGobRoundTrip(t *testing.T) {
 	// types passed to rpl.replicate() must be gob-registered
 	argTypes := []any{
 		new(FilterWithAPIOpts),
-		new(StatQueueProfileWithAPIOpts),
-		new(StatQueueWithAPIOpts),
+		new(utils.StatQueueProfileWithAPIOpts),
+		new(utils.StatQueueWithAPIOpts),
 		new(utils.ThresholdProfileWithAPIOpts),
 		new(utils.ThresholdWithAPIOpts),
 		new(utils.AccountWithAPIOpts),

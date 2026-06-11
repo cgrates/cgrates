@@ -490,8 +490,8 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 }
 
 func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_ID",
 			Weights: utils.DynamicWeights{
@@ -502,7 +502,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -520,7 +520,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	expSqPrf := engine.StatQueueProfile{
+	expSqPrf := utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_ID",
 		Weights: utils.DynamicWeights{
@@ -531,7 +531,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    0,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaTCD,
 			},
@@ -540,7 +540,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 		Stored:       true,
 	}
 
-	var rplySqPrf engine.StatQueueProfile
+	var rplySqPrf utils.StatQueueProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetStatQueue{
 		name:      "stats_profile_set",
 		rpcMethod: utils.AdminSv1SetStatQueueProfile,
-		rpcParams: &engine.StatQueueProfileWithAPIOpts{},
+		rpcParams: &utils.StatQueueProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdSetStatQueue struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.StatQueueProfileWithAPIOpts
+	rpcParams *utils.StatQueueProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,8 +50,8 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: new(engine.StatQueueProfile),
+		self.rpcParams = &utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: new(utils.StatQueueProfile),
 			APIOpts:          make(map[string]any),
 		}
 	}

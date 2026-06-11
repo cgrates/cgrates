@@ -674,8 +674,8 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//set a statQueueProfile with that filter
-	statsPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	statsPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STATS_RES_TEST12",
 			FilterIDs: []string{"FLTR_ST_Resource1", "*string:~*req.Account:1001"},
@@ -692,7 +692,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var replyStats *engine.StatQueueProfile
+	var replyStats *utils.StatQueueProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetStatQueueProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",

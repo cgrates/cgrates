@@ -967,13 +967,13 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
 		t.Error(err)
 	}
-	statQProfl := &StatQueueProfile{
+	statQProfl := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "StatQueueProfile3",
 		FilterIDs:   []string{"fltr_test"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#~*req.Usage",
 			},

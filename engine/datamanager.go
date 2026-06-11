@@ -331,12 +331,12 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, statQueueProfileLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueueProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, statQueueLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ThresholdProfilePrefix:
@@ -876,14 +876,14 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id s
 // GetStatQueue retrieves a StatQueue from db
 // handles caching and deserialization of metrics
 func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
-	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (sq *utils.StatQueue, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheStatQueues, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*StatQueue), nil
+			return x.(*utils.StatQueue), nil
 		}
 	}
 	if dm == nil {
@@ -935,7 +935,7 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 }
 
 // SetStatQueue converts to StoredStatQueue and stores the result in db
-func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue) (err error) {
+func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -958,7 +958,7 @@ func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue) (err er
 		err = rpl.replicate(ctx,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
-			&StatQueueWithAPIOpts{
+			&utils.StatQueueWithAPIOpts{
 				StatQueue: sq,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dbCfg.RplCache, utils.EmptyString)}, itm)
@@ -992,14 +992,14 @@ func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string) 
 }
 
 func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (sqp *StatQueueProfile, err error) {
+	transactionID string) (sqp *utils.StatQueueProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheStatQueueProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*StatQueueProfile), nil
+			return x.(*utils.StatQueueProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1045,7 +1045,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.StatQueueProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1082,7 +1082,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		if err = rpl.replicate(ctx,
 			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
-			&StatQueueProfileWithAPIOpts{
+			&utils.StatQueueProfileWithAPIOpts{
 				StatQueueProfile: sqp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
@@ -1095,8 +1095,8 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		oldSts.MinItems != sqp.MinItems ||
 		oldSts.Stored != sqp.Stored && oldSts.Stored { // reset the stats queue if the profile changed this fields
 		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
-			var sq *StatQueue
-			if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+			var sq *utils.StatQueue
+			if sq, err = utils.NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
 				uint64(sqp.MinItems)); err != nil {
 				return
 			}
@@ -1108,8 +1108,8 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 			oSq, errRs := dm.GetStatQueue(ctx, sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
 				true, false, utils.NonTransactional)
 			if errRs == utils.ErrNotFound { // the stats queue does not exist
-				var sq *StatQueue
-				if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+				var sq *utils.StatQueue
+				if sq, err = utils.NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
 					uint64(sqp.MinItems)); err != nil {
 					return
 				}

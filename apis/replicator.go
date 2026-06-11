@@ -55,7 +55,7 @@ func (r *ReplicatorSv1) GetAccount(ctx *context.Context, args *utils.TenantIDWit
 }
 
 // GetStatQueue retrieves a stat queue from the remote database.
-func (r *ReplicatorSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
+func (r *ReplicatorSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	engine.UpdateReplicationFilters(utils.StatQueuePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
@@ -115,7 +115,7 @@ func (r *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, args *utils.Te
 }
 
 // GetStatQueueProfile retrieves a stat queue profile from the remote database.
-func (r *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
+func (r *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) error {
 	engine.UpdateReplicationFilters(utils.StatQueueProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
@@ -467,7 +467,7 @@ func (r *ReplicatorSv1) SetTrend(ctx *context.Context, args *utils.TrendWithAPIO
 }
 
 // SetStatQueueProfile stores a stat queue profile in the remote database.
-func (r *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, args *engine.StatQueueProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, args *utils.StatQueueProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
@@ -721,7 +721,7 @@ func (r *ReplicatorSv1) SetActionProfile(ctx *context.Context, args *utils.Actio
 // SetStatQueue stores a stat queue in the remote database.
 // Unlike the standard Set pattern, StatQueueWithAPIOpts uses a named field
 // (not embedded), so tenant/ID access goes through args.StatQueue.
-func (r *ReplicatorSv1) SetStatQueue(ctx *context.Context, args *engine.StatQueueWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetStatQueue(ctx *context.Context, args *utils.StatQueueWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err

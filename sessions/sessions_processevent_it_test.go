@@ -394,8 +394,8 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 	}
 
 	if err := client.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
-		&engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		&utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant:    "cgrates.org",
 				ID:        "SQ_ACNT_1001",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -410,7 +410,7 @@ func TestSessionSv1ProcessEventStats(t *testing.T) {
 				MinItems:     0,
 				Stored:       false,
 				ThresholdIDs: []string{utils.MetaNone},
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{MetricID: utils.MetaACC},
 					{MetricID: utils.MetaTCC},
 				},

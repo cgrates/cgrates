@@ -1068,7 +1068,7 @@ func TestDynThdIT(t *testing.T) {
 	})
 
 	t.Run("GetDynamicStatQueueProfile", func(t *testing.T) {
-		exp := []*engine.StatQueueProfile{
+		exp := []*utils.StatQueueProfile{
 			{
 				Tenant:    utils.CGRateSorg,
 				ID:        "DYNAMICLY_STAT_3_1002",
@@ -1090,7 +1090,7 @@ func TestDynThdIT(t *testing.T) {
 				MinItems:     0,
 				Stored:       false,
 				ThresholdIDs: []string{utils.MetaNone},
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{
 						MetricID:  utils.MetaTCC,
 						FilterIDs: []string{"*string:~*req.Account:1002"},
@@ -1134,7 +1134,7 @@ func TestDynThdIT(t *testing.T) {
 				MinItems:     0,
 				Stored:       false,
 				ThresholdIDs: []string{utils.MetaNone},
-				Metrics: []*engine.MetricWithFilters{
+				Metrics: []*utils.MetricWithFilters{
 					{
 						MetricID:  utils.MetaTCC,
 						FilterIDs: []string{"*string:~*req.Account:1002"},
@@ -1159,7 +1159,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 		}
 
-		var rply []*engine.StatQueueProfile
+		var rply []*utils.StatQueueProfile
 		if err := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles, &utils.ArgsItemIDs{
 			Tenant: utils.CGRateSorg,
 		}, &rply); err != nil {

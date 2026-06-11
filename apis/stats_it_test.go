@@ -165,7 +165,7 @@ func testStatsGetStatQueueBeforeSet(t *testing.T) {
 }
 
 func testStatsGetStatQueueProfilesBeforeSet(t *testing.T) {
-	var reply []*engine.StatQueueProfile
+	var reply []*utils.StatQueueProfile
 	var args *utils.ArgsItemIDs
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
 		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -174,8 +174,8 @@ func testStatsGetStatQueueProfilesBeforeSet(t *testing.T) {
 }
 
 func testStatsSetStatQueueProfiles(t *testing.T) {
-	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_1",
 			Weights: utils.DynamicWeights{
@@ -186,7 +186,7 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    5,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACC,
 				},
@@ -216,8 +216,8 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
 			Weights: utils.DynamicWeights{
@@ -225,7 +225,7 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -256,7 +256,7 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 }
 
 func testStatsGetStatQueueAfterSet(t *testing.T) {
-	var rplySqPrf engine.StatQueueProfile
+	var rplySqPrf utils.StatQueueProfile
 	expStrMetrics := map[string]string{
 		utils.MetaACC: utils.NotAvailable,
 		utils.MetaACD: utils.NotAvailable,
@@ -271,7 +271,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 		utils.MetaDDC: -1,
 		utils.MetaTCD: -1,
 	}
-	expSqPrf := engine.StatQueueProfile{
+	expSqPrf := utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_1",
 		Weights: utils.DynamicWeights{
@@ -282,7 +282,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    5,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaACC,
 			},
@@ -354,7 +354,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 		utils.MetaTCC: -1,
 		utils.MetaTCD: -1,
 	}
-	expSqPrf = engine.StatQueueProfile{
+	expSqPrf = utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
 		Weights: utils.DynamicWeights{
@@ -362,7 +362,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},
@@ -456,9 +456,9 @@ func testStatsGetStatQueueProfileIDs(t *testing.T) {
 }
 
 func testStatsGetStatQueueProfiles1(t *testing.T) {
-	var reply []*engine.StatQueueProfile
+	var reply []*utils.StatQueueProfile
 	var args *utils.ArgsItemIDs
-	exp := []*engine.StatQueueProfile{
+	exp := []*utils.StatQueueProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "SQ_1",
@@ -470,7 +470,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    5,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACC,
 				},
@@ -498,7 +498,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -532,11 +532,11 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 }
 
 func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
-	var reply []*engine.StatQueueProfile
+	var reply []*utils.StatQueueProfile
 	args := &utils.ArgsItemIDs{
 		ItemsSearch: "SQ_2",
 	}
-	exp := []*engine.StatQueueProfile{
+	exp := []*utils.StatQueueProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
@@ -545,7 +545,7 @@ func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -632,8 +632,8 @@ func testStatsGetStatQueuesAfterRemove(t *testing.T) {
 }
 
 func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "SQ_WithBlockers",
 			FilterIDs:   []string{"*string:~*req.StatsMetrics:*exists"},
@@ -641,7 +641,7 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
 			Stored:      true,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -831,8 +831,8 @@ func testStatsProcessEventNoBlockers(t *testing.T) {
 }
 
 func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "SQ_Blockers1",
 			FilterIDs:   []string{"*string:~*req.StatsBlockers:correct"},
@@ -845,7 +845,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 				},
 			},
 			Stored: true,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -853,8 +853,8 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			ThresholdIDs: []string{"*none"},
 		},
 	}
-	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SQ_Blockers2",
 			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
@@ -870,7 +870,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			Stored:      true,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -878,8 +878,8 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			ThresholdIDs: []string{"*none"},
 		},
 	}
-	sqPrf3 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf3 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SQ_Blockers3",
 			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
@@ -892,7 +892,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
 			Stored:      true,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -948,8 +948,8 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 }
 
 func testStatsStatOneEvent(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_OneEv",
 			//FilterIDs:   []string{"*string:~*req.StatsMetrics:*exist"},
@@ -967,7 +967,7 @@ func testStatsStatOneEvent(t *testing.T) {
 				},
 			},
 			Stored: true,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -1158,7 +1158,7 @@ func testStatsStatOneEvent(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", expString, rplString)
 	}
 
-	var sQ *engine.StatQueue
+	var sQ *utils.StatQueue
 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueue, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -1304,8 +1304,8 @@ func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 }
 
 func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_3",
 			Weights: utils.DynamicWeights{
@@ -1316,7 +1316,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -1334,7 +1334,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	expSqPrf := engine.StatQueueProfile{
+	expSqPrf := utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_3",
 		Weights: utils.DynamicWeights{
@@ -1345,7 +1345,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    0,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaTCD,
 			},
@@ -1354,7 +1354,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 		Stored:       true,
 	}
 
-	var rplySqPrf engine.StatQueueProfile
+	var rplySqPrf utils.StatQueueProfile
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

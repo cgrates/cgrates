@@ -107,21 +107,21 @@ func testdoubleRemoveRpcConn(t *testing.T) {
 
 func testdoubleRemoveStatQueueProfile(t *testing.T) {
 	// check
-	var reply *engine.StatQueueProfile
+	var reply *utils.StatQueueProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	statConfig := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	statConfig := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      doubleRemoveTenant,
 			ID:          "TEST_PROFILE1",
 			FilterIDs:   []string{"*ai:~*opts.*startTime:2020-04-18T14:25:00Z|2020-04-18T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: "*sum",
 				},
