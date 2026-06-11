@@ -414,7 +414,9 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 		}
 		if s.cfg.StatSCfg().StoreInterval != 0 && m.profile.Stored {
 			if s.cfg.StatSCfg().StoreInterval == -1 {
-				s.StoreStatQueue(ctx, m.statQueue)
+				if err := s.StoreStatQueue(ctx, m.statQueue); err != nil {
+					withErrors = true
+				}
 			} else {
 				s.storedMu.Lock()
 				s.storedStatQueues.Add(m.statQueue.TenantID())
