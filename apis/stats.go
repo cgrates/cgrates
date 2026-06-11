@@ -183,53 +183,53 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 	return nil
 }
 
-// NewStatSv1 initializes StatSV1
+// NewStatSv1 initializes the StatSv1 object.
 func NewStatSv1(sS *stats.StatS) *StatSv1 {
 	return &StatSv1{sS: sS}
 }
 
-// StatSv1 exports RPC from RLs
+// StatSv1 represents the RPC object to register for stats v1 APIs.
 type StatSv1 struct {
 	ping
 	sS *stats.StatS
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSv1) GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
-	return stsv1.sS.V1GetQueueIDs(ctx, args, qIDs)
+func (s *StatSv1) GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
+	return s.sS.V1GetQueueIDs(ctx, args, qIDs)
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
-	return stsv1.sS.V1ProcessEvent(ctx, args, reply)
+func (s *StatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+	return s.sS.V1ProcessEvent(ctx, args, reply)
 }
 
 // GetStatQueuesForEvent returns the list of queues IDs in the system
-func (stsv1 *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
-	return stsv1.sS.V1GetStatQueuesForEvent(ctx, args, reply)
+func (s *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	return s.sS.V1GetStatQueuesForEvent(ctx, args, reply)
 }
 
 // GetStatQueue returns a StatQueue object
-func (stsv1 *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
-	return stsv1.sS.V1GetStatQueue(ctx, args, reply)
+func (s *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
+	return s.sS.V1GetStatQueue(ctx, args, reply)
 }
 
 // GetQueueStringMetrics returns the string metrics for a Queue
-func (stsv1 *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
-	return stsv1.sS.V1GetQueueStringMetrics(ctx, args, reply)
+func (s *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+	return s.sS.V1GetQueueStringMetrics(ctx, args, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (stsv1 *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
-	return stsv1.sS.V1GetQueueFloatMetrics(ctx, args, reply)
+func (s *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+	return s.sS.V1GetQueueFloatMetrics(ctx, args, reply)
 }
 
 // GetQueueDecimalMetrics returns the decimal metrics for a Queue
-func (stsv1 *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
-	return stsv1.sS.V1GetQueueDecimalMetrics(ctx, args, reply)
+func (s *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+	return s.sS.V1GetQueueDecimalMetrics(ctx, args, reply)
 }
 
 // ResetStatQueue resets the stat queue
-func (stsv1 *StatSv1) ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
-	return stsv1.sS.V1ResetStatQueue(ctx, tntID, reply)
+func (s *StatSv1) ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
+	return s.sS.V1ResetStatQueue(ctx, tntID, reply)
 }
