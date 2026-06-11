@@ -51,54 +51,68 @@ func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engi
 		filters:          filters,
 		cm:               cm,
 		storedStatQueues: make(utils.StringSet),
-		loopStopped:      make(chan struct{}),
 		stopBackup:       make(chan struct{}),
 	}
 }
 
 // StatS builds stats for events
 type StatS struct {
-	cfg              *config.CGRConfig
-	dm               *engine.DataManager
-	filters          *engine.FilterS
-	cm               *engine.ConnManager
-	loopStopped      chan struct{}
-	stopBackup       chan struct{}
+	cfg     *config.CGRConfig
+	dm      *engine.DataManager
+	filters *engine.FilterS
+	cm      *engine.ConnManager
+
+	storedMu         sync.Mutex
 	storedStatQueues utils.StringSet // stat queues that need saving
-	storedMu         sync.RWMutex    // protects storedStatQueues
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
 }
 
-// Reload stops the backupLoop and restarts it
+// Reload restarts the backup loop. No-op after Shutdown.
 func (s *StatS) Reload(ctx *context.Context) {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
-	<-s.loopStopped // wait until the loop is done
+	s.backupLoop.Wait()
 	s.stopBackup = make(chan struct{})
-	go s.runBackup(ctx)
+	s.StartLoop(ctx)
 }
 
-// StartLoop starsS the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (s *StatS) StartLoop(ctx *context.Context) {
+	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
 func (s *StatS) Shutdown(ctx *context.Context) {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
+	s.backupLoop.Wait()
+	s.stopBackup = nil
 	s.storeStats(ctx)
 }
 
 // runBackup will regularly store statQueues changed to DB
 func (s *StatS) runBackup(ctx *context.Context) {
+	defer s.backupLoop.Done()
 	storeInterval := s.cfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
-		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		s.storeStats(ctx)
 		select {
 		case <-s.stopBackup:
-			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
