@@ -27,7 +27,7 @@ import (
 )
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -38,10 +38,10 @@ func (sS *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, repl
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	var ids []string
-	if ids, err = sS.processEvent(ctx, tnt, args); err != nil {
+	if ids, err = s.processEvent(ctx, tnt, args); err != nil {
 		return
 	}
 	*reply = ids
@@ -49,7 +49,7 @@ func (sS *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, repl
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -60,9 +60,9 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
-	sQs, unlock, err := sS.matchingStatQueuesForEvent(ctx, tnt, args)
+	sQs, unlock, err := s.matchingStatQueuesForEvent(ctx, tnt, args)
 	if err != nil {
 		return err
 	}
@@ -72,20 +72,20 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (sS *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
+func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
+	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		return err
 	}
@@ -94,20 +94,20 @@ func (sS *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAP
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
+	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -115,8 +115,8 @@ func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenan
 		return err
 	}
 	var rnd int
-	if rnd, err = engine.GetIntOpts(ctx, tnt, engine.MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, nil, sS.fltrS,
-		sS.cfg.StatSCfg().Opts.RoundingDecimals,
+	if rnd, err = engine.GetIntOpts(ctx, tnt, engine.MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, nil, s.filters,
+		s.cfg.StatSCfg().Opts.RoundingDecimals,
 		utils.OptsRoundingDecimals); err != nil {
 		return
 	}
@@ -129,20 +129,20 @@ func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenan
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (sS *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
+	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -162,20 +162,20 @@ func (sS *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.Tenant
 }
 
 // V1GetQueueDecimalMetrics returns the metrics as decimal values
-func (sS *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
+	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -191,13 +191,13 @@ func (sS *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tena
 }
 
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) (err error) {
+func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) (err error) {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
-		tenant = sS.cfg.GeneralCfg().DefaultTenant
+		tenant = s.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	db, _, err := sS.dm.DBConns().GetConn(utils.MetaStatQueues)
+	db, _, err := s.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err
 	}
@@ -214,13 +214,13 @@ func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOp
 }
 
 // V1ResetStatQueue resets the stat queue
-func (sS *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) (err error) {
+func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) (err error) {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cfg.GeneralCfg().DefaultTenant
+		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -228,7 +228,7 @@ func (sS *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWit
 		utils.StatQueueLockKey(tnt, tntID.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 	var sq *utils.StatQueue
-	if sq, err = sS.dm.GetStatQueue(ctx, tnt, tntID.ID,
+	if sq, err = s.dm.GetStatQueue(ctx, tnt, tntID.ID,
 		true, true, utils.NonTransactional); err != nil {
 		return
 	}
@@ -243,13 +243,13 @@ func (sS *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWit
 		}
 		sq.SQMetrics[id] = metric
 	}
-	if sS.cfg.StatSCfg().StoreInterval != 0 {
-		if sS.cfg.StatSCfg().StoreInterval == -1 {
-			sS.StoreStatQueue(ctx, sq)
+	if s.cfg.StatSCfg().StoreInterval != 0 {
+		if s.cfg.StatSCfg().StoreInterval == -1 {
+			s.StoreStatQueue(ctx, sq)
 		} else {
-			sS.ssqMux.Lock()
-			sS.storedStatQueues.Add(sq.TenantID())
-			sS.ssqMux.Unlock()
+			s.storedMu.Lock()
+			s.storedStatQueues.Add(sq.TenantID())
+			s.storedMu.Unlock()
 		}
 	}
 	*rply = utils.OK
