@@ -28,7 +28,6 @@ import (
 
 	"maps"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -93,6 +92,14 @@ func NewASR(minItems uint64, _ string, filterIDs []string) StatMetric {
 	return &StatASR{Metric: NewMetric(minItems, filterIDs)}
 }
 
+// timezoneOf returns the provider's timezone if it exposes one, else "".
+func timezoneOf(dp utils.DataProvider) string {
+	if p, ok := dp.(interface{ Timezone() string }); ok {
+		return p.Timezone()
+	}
+	return ""
+}
+
 // ASR implements AverageSuccessRatio metric
 type StatASR struct {
 	*Metric
@@ -123,7 +130,7 @@ func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 		if err != utils.ErrNotFound {
 			return
 		}
-	} else if at, err := utils.IfaceAsTime(val, config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+	} else if at, err := utils.IfaceAsTime(val, timezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1
@@ -140,8 +147,7 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 		if err != utils.ErrNotFound {
 			return err
 		}
-	} else if at, err := utils.IfaceAsTime(val,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+	} else if at, err := utils.IfaceAsTime(val, timezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1
