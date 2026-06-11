@@ -23,7 +23,9 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -875,44 +877,38 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 }
 
 func TestStatQueueReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-	sS := &StatS{
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cfg:         cfg,
-	}
-	sS.loopStopped <- struct{}{}
-	sS.Reload(context.Background())
-	close(sS.stopBackup)
-	select {
-	case <-sS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+		sS := NewStatService(cfg, nil, nil, nil)
+		sS.StartLoop(context.Background())
+		sS.Reload(context.Background())
+		sS.Shutdown(context.Background())
+		sS.Shutdown(context.Background())
+		sS.Reload(context.Background())
+	})
+}
+
+func TestStatQueueReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+		sS := NewStatService(cfg, nil, nil, nil)
+		sS.StartLoop(context.Background())
+		var wg sync.WaitGroup
+		wg.Go(func() { sS.Reload(context.Background()) })
+		wg.Go(func() { sS.Shutdown(context.Background()) })
+		wg.Wait()
+	})
 }
 
 func TestStatQueueStartLoop(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().StoreInterval = -1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := &StatS{
-		dm:          dm,
-		filters:     filterS,
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cfg:         cfg,
-	}
-
-	sS.StartLoop(context.Background())
-	time.Sleep(10 * time.Millisecond)
-
-	if len(sS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(sS.loopStopped))
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		sS := NewStatService(cfg, nil, nil, nil)
+		sS.StartLoop(context.Background())
+		sS.backupLoop.Wait()
+	})
 }
 
 func TestStatQueueStoreStatsOK(t *testing.T) {
