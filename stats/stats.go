@@ -136,7 +136,7 @@ func (s *StatS) storeStats(ctx *context.Context) {
 		if !ok || sqIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
-					utils.StatService, sID))
+					utils.StatS, sID))
 			continue
 		}
 		sq := sqIf.(*utils.StatQueue)
@@ -161,8 +161,8 @@ func (s *StatS) storeStats(ctx *context.Context) {
 func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
 	if err = s.dm.SetStatQueue(ctx, sq); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
-				sq.TenantID(), err.Error()))
+			fmt.Sprintf("<%s> failed saving StatQueue with ID: %s, error: %v",
+				utils.StatS, sq.TenantID(), err))
 		return
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
@@ -170,8 +170,8 @@ func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) (err e
 		if err = engine.Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> failed caching StatQueue with ID: %s, error: %s",
-					tntID, err.Error()))
+				fmt.Sprintf("<%s> failed caching StatQueue with ID: %s, error: %v",
+					utils.StatS, tntID, err))
 			return
 		}
 	}
@@ -334,7 +334,7 @@ func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(m.profile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
+				fmt.Sprintf("<%s> error: %v processing event %+v with ThresholdS.", utils.StatS, err, thEv))
 			withErrs = true
 		}
 	}
@@ -383,7 +383,7 @@ func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts m
 			&cgrEventWithID, &reply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> error: %s processing event %+v with EEs.", err.Error(), cgrEv))
+				fmt.Sprintf("<%s> error: %v processing event %+v with EEs.", utils.StatS, err, cgrEv))
 			withErrs = true
 		}
 	}
@@ -408,8 +408,8 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 	for idx, m := range matchSQs {
 		if err = m.processEvent(ctx, tnt, args.ID, s.filters, evNm); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
-					m.statQueue.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
+				fmt.Sprintf("<%s> Queue: %s, ignoring event: %s, error: %v",
+					utils.StatS, m.statQueue.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err))
 			withErrors = true
 		}
 		if s.cfg.StatSCfg().StoreInterval != 0 && m.profile.Stored {
@@ -465,7 +465,7 @@ func remEventWithID(sq *utils.StatQueue, evID string) (err error) {
 				err = nil
 				continue
 			}
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %v", metricID, evID, err))
 			return
 		}
 	}
@@ -531,8 +531,8 @@ func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, 
 		}
 		// in case of # metrics type
 		if err = m.statQueue.SQMetrics[metricCfg.MetricID].AddEvent(evID, dDP); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %s", metricCfg.MetricID,
-				evID, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %v", metricCfg.MetricID,
+				evID, err))
 			return
 		}
 		// every metric has a blocker, verify them
@@ -566,7 +566,7 @@ func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, fil
 		}
 
 		if err = m.statQueue.SQMetrics[metricCfg.MetricID].AddOneEvent(dDP); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, error: %s", metricCfg.MetricID, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, error: %v", metricCfg.MetricID, err))
 			return
 		}
 
