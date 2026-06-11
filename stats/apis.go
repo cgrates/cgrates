@@ -20,7 +20,6 @@ package stats
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -77,14 +76,14 @@ func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		return err
@@ -99,14 +98,14 @@ func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenant
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -134,14 +133,14 @@ func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -167,14 +166,14 @@ func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tenan
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, args.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	sq, err := s.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -219,14 +218,14 @@ func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWith
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := tntID.Tenant
-	if tnt == utils.EmptyString {
+	if tnt == "" {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lockID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, tntID.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	var sq *utils.StatQueue
 	if sq, err = s.dm.GetStatQueue(ctx, tnt, tntID.ID,
 		true, true, utils.NonTransactional); err != nil {

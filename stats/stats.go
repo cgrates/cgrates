@@ -140,13 +140,13 @@ func (s *StatS) storeStats(ctx *context.Context) {
 			continue
 		}
 		sq := sqIf.(*utils.StatQueue)
-		lkID := guardian.Guardian.GuardIDs("",
+		lockID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
 			utils.StatQueueLockKey(sq.Tenant, sq.ID))
 		if err := s.StoreStatQueue(ctx, sq); err != nil {
 			failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 		}
-		guardian.Guardian.UnguardIDs(lkID)
+		guardian.Guardian.UnguardIDs(lockID)
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -222,12 +222,12 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 
 	sqs = make([]*matchedStatQueue, 0, len(itemIDs))
 	for _, id := range itemIDs {
-		lkID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
+		lockID := guardian.Guardian.GuardIDs("",
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.StatQueueLockKey(tnt, id))
 		sqPrfl, err := s.dm.GetStatQueueProfile(ctx, tnt, id, true, true, utils.NonTransactional)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			guardian.Guardian.UnguardIDs(lockID)
 			if err == utils.ErrNotFound {
 				continue
 			}
@@ -238,17 +238,17 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 			pass, err := s.filters.Pass(ctx, tnt, sqPrfl.FilterIDs,
 				evNm)
 			if err != nil {
-				guardian.Guardian.UnguardIDs(lkID)
+				guardian.Guardian.UnguardIDs(lockID)
 				unlockAll()
 				return nil, nil, err
 			} else if !pass {
-				guardian.Guardian.UnguardIDs(lkID)
+				guardian.Guardian.UnguardIDs(lockID)
 				continue
 			}
 		}
 		sq, err := s.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, utils.EmptyString)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			guardian.Guardian.UnguardIDs(lockID)
 			unlockAll()
 			return nil, nil, err
 		}
@@ -261,7 +261,7 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 		}
 		weight, err := engine.WeightFromDynamics(ctx, sqPrfl.Weights, s.filters, tnt, evNm)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			guardian.Guardian.UnguardIDs(lockID)
 			unlockAll()
 			return nil, nil, err
 		}
@@ -270,7 +270,7 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 			profile:   sqPrfl,
 			ttl:       ttl,
 			weight:    weight,
-			lockID:    lkID,
+			lockID:    lockID,
 		})
 	}
 	if len(sqs) == 0 {
