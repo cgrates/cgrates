@@ -51,6 +51,10 @@ type DynamicDP struct {
 
 func (dDP *DynamicDP) String() string { return dDP.initialDP.String() }
 
+func (dDP *DynamicDP) Timezone() string {
+	return dDP.cfg.GeneralCfg().DefaultTimezone
+}
+
 func (dDP *DynamicDP) FieldAsString(fldPath []string) (string, error) {
 	val, err := dDP.FieldAsInterface(fldPath)
 	if err != nil {
