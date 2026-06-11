@@ -26,56 +26,70 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 		filterS:          filterS,
 		cgrcfg:           cgrcfg,
 		storedStatQueues: make(utils.StringSet),
-		loopStopped:      make(chan struct{}),
 		stopBackup:       make(chan struct{}),
 	}
 }
 
 // StatService builds stats for events
 type StatService struct {
-	dm               *DataManager
-	connMgr          *ConnManager
-	filterS          *FilterS
-	cgrcfg           *config.CGRConfig
-	loopStopped      chan struct{}
-	stopBackup       chan struct{}
-	storedStatQueues utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
-	ssqMux           sync.RWMutex    // protects storedStatQueues
+	cgrcfg  *config.CGRConfig
+	dm      *DataManager
+	filterS *FilterS
+	connMgr *ConnManager
+
+	ssqMux           sync.Mutex
+	storedStatQueues utils.StringSet // stat queues that need saving
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
 }
 
-// Reload stops the backupLoop and restarts it
+// Reload restarts the backup loop. No-op after Shutdown.
 func (sS *StatService) Reload() {
+	sS.stateMu.Lock()
+	defer sS.stateMu.Unlock()
+	if sS.stopBackup == nil {
+		return
+	}
 	close(sS.stopBackup)
-	<-sS.loopStopped // wait until the loop is done
+	sS.backupLoop.Wait()
 	sS.stopBackup = make(chan struct{})
-	go sS.runBackup()
+	sS.StartLoop()
 }
 
-// StartLoop starsS the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (sS *StatService) StartLoop() {
+	sS.backupLoop.Add(1)
 	go sS.runBackup()
 }
 
 // Shutdown is called to shutdown the service
 func (sS *StatService) Shutdown() {
+	sS.stateMu.Lock()
+	defer sS.stateMu.Unlock()
+	if sS.stopBackup == nil {
+		return
+	}
 	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(sS.stopBackup)
+	sS.backupLoop.Wait()
+	sS.stopBackup = nil
 	sS.storeStats()
 	utils.Logger.Info("<StatS> service shutdown complete")
 }
 
 // runBackup will regularly store statQueues changed to dataDB
 func (sS *StatService) runBackup() {
+	defer sS.backupLoop.Done()
 	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
-		sS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		sS.storeStats()
 		select {
 		case <-sS.stopBackup:
-			sS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}

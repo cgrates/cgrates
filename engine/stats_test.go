@@ -11,7 +11,9 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -903,37 +905,38 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 }
 
 func TestStatQueueReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-	sS := &StatService{
-		stopBackup:  make(chan struct{}),
-		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
-	}
-	sS.loopStopped <- struct{}{}
-	sS.Reload()
-	close(sS.stopBackup)
-	select {
-	case <-sS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+		sS := NewStatService(nil, cfg, nil, nil)
+		sS.StartLoop()
+		sS.Reload()
+		sS.Shutdown()
+		sS.Shutdown()
+		sS.Reload()
+	})
+}
+
+func TestStatQueueReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+		sS := NewStatService(nil, cfg, nil, nil)
+		sS.StartLoop()
+		var wg sync.WaitGroup
+		wg.Go(func() { sS.Reload() })
+		wg.Go(func() { sS.Shutdown() })
+		wg.Wait()
+	})
 }
 
 func TestStatQueueStartLoop(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().StoreInterval = -1
-	sS := &StatService{
-		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
-	}
-
-	sS.StartLoop()
-	select {
-	case <-sS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
-	}
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		sS := NewStatService(nil, cfg, nil, nil)
+		sS.StartLoop()
+		sS.backupLoop.Wait()
+	})
 }
 
 func TestStatQueueRunBackupStop(t *testing.T) {
@@ -951,9 +954,8 @@ func TestStatQueueRunBackupStop(t *testing.T) {
 		storedStatQueues: utils.StringSet{
 			sqID: struct{}{},
 		},
-		cgrcfg:      cfg,
-		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
+		cgrcfg:     cfg,
+		stopBackup: make(chan struct{}),
 	}
 	value := &StatQueue{
 		dirty:  utils.BoolPointer(true),
@@ -966,7 +968,8 @@ func TestStatQueueRunBackupStop(t *testing.T) {
 	// channel after storing the stat queue. Channel can be
 	// safely closed beforehand.
 	close(sqS.stopBackup)
-	sqS.runBackup()
+	sqS.StartLoop()
+	sqS.backupLoop.Wait()
 
 	want := &StatQueue{
 		dirty:  utils.BoolPointer(false),
@@ -977,12 +980,6 @@ func TestStatQueueRunBackupStop(t *testing.T) {
 		t.Errorf("dm.GetStatQueue(%q,%q): got unexpected err=%v", tnt, sqID, err)
 	} else if !reflect.DeepEqual(got, want) {
 		t.Errorf("dm.GetStatQueue(%q,%q) = %v, want %v", tnt, sqID, got, want)
-	}
-
-	select {
-	case <-sqS.loopStopped:
-	case <-time.After(time.Second):
-		t.Error("timed out waiting for loop to stop")
 	}
 }
 
