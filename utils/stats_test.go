@@ -1070,22 +1070,31 @@ func TestStatQueueProfileSetBlockersOK(t *testing.T) {
 	}
 }
 
+func mustNewStatMetric(t *testing.T, metricID string) StatMetric {
+	t.Helper()
+	metric, err := NewStatMetric(metricID, 0, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return metric
+}
+
 func TestStatQueueUnmarshalJSONOK(t *testing.T) {
 
 	sqData := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "STS",
 		SQMetrics: map[string]StatMetric{
-			MetaASR:      new(StatASR),
-			MetaACD:      new(StatACD),
-			MetaTCD:      new(StatTCD),
-			MetaACC:      new(StatACC),
-			MetaTCC:      new(StatTCC),
-			MetaPDD:      new(StatPDD),
-			MetaDDC:      new(StatDDC),
-			MetaSum:      new(StatSum),
-			MetaAverage:  new(StatAverage),
-			MetaDistinct: new(StatDistinct),
+			MetaASR:      mustNewStatMetric(t, MetaASR),
+			MetaACD:      mustNewStatMetric(t, MetaACD),
+			MetaTCD:      mustNewStatMetric(t, MetaTCD),
+			MetaACC:      mustNewStatMetric(t, MetaACC),
+			MetaTCC:      mustNewStatMetric(t, MetaTCC),
+			MetaPDD:      mustNewStatMetric(t, MetaPDD),
+			MetaDDC:      mustNewStatMetric(t, MetaDDC),
+			MetaSum:      mustNewStatMetric(t, MetaSum),
+			MetaAverage:  mustNewStatMetric(t, MetaAverage),
+			MetaDistinct: mustNewStatMetric(t, MetaDistinct),
 		},
 	}
 
