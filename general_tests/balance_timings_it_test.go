@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -1190,7 +1191,6 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 	})
 
 	t.Run("PMCDRShouldNotDebitBalNeg", func(t *testing.T) {
-		t.Skip("It gets debited even with the use of !")
 		var acntBefore engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
@@ -1301,6 +1301,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 				utils.ID:        "balOnlyNeg",
 				utils.TimingIDs: "!half2",
 				utils.Value:     100.0,
+				utils.Weight:    20,
 			},
 		}, &reply); err != nil {
 			t.Fatal(err)
@@ -1353,7 +1354,6 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 		}
 	})
 	t.Run("OnlyNegatedTimingShouldDebitAM", func(t *testing.T) {
-		t.Skip("NegatedTimingShouldDebitAM")
 		var acntBefore engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
@@ -1402,7 +1402,6 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 		}
 	})
 	t.Run("BothTimingsNegated", func(t *testing.T) {
-		t.Skip("should not debit balance")
 		var reply string
 		if err := client.Call(context.Background(), utils.APIerSv1SetAccount, &utils.AttrSetAccount{
 			Tenant:  "cgrates.org",
@@ -1487,6 +1486,85 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 		}
 		if balAfter != balBefore {
 			t.Errorf("balBothNeg was debited despite both timings negated, before: %v after: %v", balBefore, balAfter)
+		}
+	})
+	t.Run("VerifyNegatedTimingStored", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		var balNeg *engine.Balance
+		for _, b := range acnt.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balNeg = b
+				break
+			}
+		}
+		if balNeg == nil {
+			t.Fatal("balNeg not found")
+		}
+		found := false
+		for _, tim := range balNeg.Timings {
+			if strings.HasPrefix(tim.ID, "!") {
+				t.Errorf("Timings entry has unexpected '!' prefix: %s", tim.ID)
+			}
+			if tim.ID == "half2" {
+				found = true
+			}
+		}
+		if !found {
+			t.Error("expected half2 in Timings, not found")
+		}
+		if v, ok := balNeg.TimingIDs["half2"]; !ok || v != false {
+			t.Errorf("expected TimingIDs[half2]=false, got %v (exists: %v)", v, ok)
+		}
+	})
+
+	t.Run("SetActionsWithNegatedTimingTag", func(t *testing.T) {
+		attrs := &v1.V1AttrSetActions{
+			ActionsId: "actNeagtedTiming",
+			Actions: []*v1.V1TPAction{
+				{
+					Identifier:  utils.MetaTopUpReset,
+					BalanceId:   "balNegAction",
+					TimingTags:  "!half2",
+					BalanceType: utils.MetaMonetary,
+					Units:       10.0,
+					ExpiryTime:  utils.MetaUnlimited,
+					Weight:      10.0,
+				},
+			},
+			Overwrite: true,
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetActions, attrs, &reply); err != nil {
+			t.Fatalf("SetActions with negated TimingTag failed: %v", err)
+		} else if reply != utils.OK {
+			t.Errorf("unexpected reply: %s", reply)
+		}
+	})
+	t.Run("SetActionsV2WithNegatedTimingTag", func(t *testing.T) {
+		attrs := &utils.AttrSetActions{
+			ActionsId: "actNeagtedTimingV2",
+			Overwrite: true,
+			Actions: []*utils.TPAction{
+				{
+					Identifier:  utils.MetaTopUpReset,
+					BalanceId:   "balNegActionV2",
+					TimingTags:  "!half2",
+					BalanceType: utils.MetaMonetary,
+					Units:       "10",
+					ExpiryTime:  utils.MetaUnlimited,
+					Weight:      10.0,
+				},
+			},
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetActions, attrs, &reply); err != nil {
+			t.Fatalf("APIerSv2SetActions with negated TimingTag failed: %v", err)
+		} else if reply != utils.OK {
+			t.Errorf("unexpected reply: %s", reply)
 		}
 	})
 }
@@ -1625,7 +1703,6 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 	})
 
 	t.Run("WeekendCDRShouldNotDebitBalWeekdays", func(t *testing.T) {
-		t.Skip("With negation balance should not be debited")
 		var acntBefore engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
