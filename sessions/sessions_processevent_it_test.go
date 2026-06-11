@@ -1732,3 +1732,250 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventMultipleFlags(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+            "logger": {"level": 7},
+            "sessions": {
+                "enabled": true,
+                "conns": {
+                    "*attributes": [{"ConnIDs": ["*localhost"]}],
+                    "*chargers":   [{"ConnIDs": ["*localhost"]}],
+                    "*routes":     [{"ConnIDs": ["*localhost"]}],
+                    "*rates":      [{"ConnIDs": ["*localhost"]}],
+                    "*accounts":   [{"ConnIDs": ["*localhost"]}],
+                    "*resources":  [{"ConnIDs": ["*localhost"]}],
+                    "*ips":        [{"ConnIDs": ["*localhost"]}]
+                }
+            },
+            "attributes": {"enabled": true},
+            "chargers": {
+                "enabled": true,
+                "conns": {
+                    "*attributes": [{"ConnIDs": ["*localhost"]}]
+                }
+            },
+            "routes":  {"enabled": true},
+            "rates":   {"enabled": true},
+            "accounts": {
+                "enabled": true,
+                "conns": {
+                    "*rates": [{"ConnIDs": ["*localhost"]}]
+                }
+            },
+            "resources": {"enabled": true},
+            "ips":       {"enabled": true},
+            "admins":    {"enabled": true}
+        }`,
+		TpFiles: map[string]string{
+			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * *",;10,false,0s,0,1,1m,1m,`,
+		},
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	var reply string
+
+	t.Run("setAttributeProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+			&utils.APIAttributeProfileWithAPIOpts{
+				APIAttributeProfile: &utils.APIAttributeProfile{
+					Tenant:    "cgrates.org",
+					ID:        "ATTR_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 10}},
+					Attributes: []*utils.ExternalAttribute{
+						{
+							Path:  "*req.Subject",
+							Type:  utils.MetaConstant,
+							Value: "1001",
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetAttributeProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetAttributeProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setChargerProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+			&utils.ChargerProfileWithAPIOpts{
+				ChargerProfile: &utils.ChargerProfile{
+					Tenant:       "cgrates.org",
+					ID:           "DEFAULT",
+					Weights:      utils.DynamicWeights{{Weight: 0}},
+					RunID:        utils.MetaDefault,
+					AttributeIDs: []string{utils.MetaNone},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetChargerProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setRouteProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+			&utils.RouteProfileWithAPIOpts{
+				RouteProfile: &utils.RouteProfile{
+					Tenant:    "cgrates.org",
+					ID:        "ROUTE_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 10}},
+					Sorting:   utils.MetaWeight,
+					Routes: []*utils.Route{
+						{
+							ID:       "route1",
+							Weights:  utils.DynamicWeights{{Weight: 20}},
+							Blockers: utils.DynamicBlockers{{Blocker: false}},
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetRouteProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetRouteProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setResourceProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+			&utils.ResourceProfileWithAPIOpts{
+				ResourceProfile: &utils.ResourceProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RES_1001",
+					FilterIDs:         []string{"*string:~*req.Account:1001"},
+					Weights:           utils.DynamicWeights{{Weight: 10}},
+					UsageTTL:          time.Hour,
+					Limit:             10,
+					AllocationMessage: "RES_1001_ALLOC",
+					Blocker:           false,
+					Stored:            true,
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetResourceProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetResourceProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setIPProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetIPProfile,
+			&utils.IPProfileWithAPIOpts{
+				IPProfile: &utils.IPProfile{
+					Tenant:    "cgrates.org",
+					ID:        "IP_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					TTL:       10 * time.Minute,
+					Pools: []*utils.IPPool{
+						{
+							ID:      "POOL_1001",
+							Range:   "10.10.10.1/32",
+							Message: "Allocated by test",
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetIPProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetIPProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setAccount", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 20}},
+					Balances: map[string]*utils.Balance{
+						"AbstractBalance": {
+							ID:             "AbstractBalance",
+							Type:           utils.MetaAbstract,
+							Weights:        utils.DynamicWeights{{Weight: 10}},
+							Units:          utils.NewDecimal(int64(10*time.Minute), 0),
+							RateProfileIDs: []string{"RP_SIMPLE"},
+						},
+						"ConcreteBalance": {
+							ID:      "ConcreteBalance",
+							Type:    utils.MetaConcrete,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							Units:   utils.NewDecimal(10, 0),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetAccount failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetAccount reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("allFlagsOneRequest", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "allFlagsOneRequest",
+				APIOpts: map[string]any{
+					utils.MetaAttributes:       true,
+					utils.MetaChargers:         true,
+					utils.MetaRoutes:           true,
+					utils.MetaRates:            true,
+					utils.MetaAccounts:         true,
+					utils.MetaResources:        true,
+					utils.MetaIPs:              true,
+					utils.MetaAuthorize:        true,
+					utils.MetaUsage:            10 * time.Minute,
+					utils.MetaOriginID:         "originIDprocessing",
+					utils.OptsResourcesUsageID: "resourceUsageTest",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2026-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent allFlagsOneRequest failed: %v", err)
+		}
+		if len(rply.Attributes) == 0 {
+			t.Error("Attributes should be populated")
+		}
+		if len(rply.RouteProfiles) == 0 {
+			t.Error("RouteProfiles should be populated")
+		}
+		cost, ok := rply.RateSCost[utils.MetaDefault]
+		if !ok {
+			t.Fatalf("RateSCost missing *default, got: %v", rply.RateSCost)
+		}
+		if cost != 10.0 {
+			t.Errorf("RateSCost[*default] = %g, want 10.0", cost)
+		}
+		usage, ok := rply.AccountSUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatalf("AccountSUsage missing *default, got: %v", rply.AccountSUsage)
+		}
+		if usage != 10*time.Minute {
+			t.Errorf("AccountSUsage[*default] = %v, want %v", usage, 10*time.Minute)
+		}
+		resID, ok := rply.ResourceAllocation[utils.MetaDefault]
+		if !ok {
+			t.Fatalf("ResourceAllocation missing *default, got: %v", rply.ResourceAllocation)
+		}
+		if resID != "RES_1001_ALLOC" {
+			t.Errorf("ResourceAllocation[*default] = %q, want RES_1001_ALLOC", resID)
+		}
+		if len(rply.IPsAllocation) == 0 {
+			t.Error("IPsAllocation should be populated")
+		}
+	})
+}
