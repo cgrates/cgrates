@@ -347,7 +347,7 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 				FilterIDs:   []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 				QueueLength: 100,
 				TTL:         "1s",
-				Metrics: []*utils.MetricWithFilters{
+				Metrics: []*utils.TPMetricWithFilters{
 					{
 						MetricID: "*sum#Value",
 					},
@@ -371,7 +371,7 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 				FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 				QueueLength: 100,
 				TTL:         "1s",
-				Metrics: []*utils.MetricWithFilters{
+				Metrics: []*utils.TPMetricWithFilters{
 					{
 						MetricID: "*sum#Value",
 					},
