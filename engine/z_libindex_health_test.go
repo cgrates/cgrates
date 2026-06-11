@@ -532,7 +532,7 @@ func TestHealthIndexStats(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 
 	// we will set this statQueue but without indexing
-	sqPrf := &StatQueueProfile{
+	sqPrf := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "Stat_1",
 		FilterIDs: []string{
@@ -549,7 +549,7 @@ func TestHealthIndexStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*tcd",
 			},
@@ -622,7 +622,7 @@ func TestHealthIndexStats(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same StatQueueProfile
-	sqPrf = &StatQueueProfile{
+	sqPrf = &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "Stat_1",
 		FilterIDs: []string{
@@ -640,7 +640,7 @@ func TestHealthIndexStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*tcd",
 			},

@@ -22,12 +22,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetStatQueueProfile returns a StatQueue profile
-func (adms *AdminS) V1GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) (err error) {
+func (adms *AdminS) V1GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,7 +75,7 @@ func (adms *AdminS) V1GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetStatQueueProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminS) V1GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*engine.StatQueueProfile) (err error) {
+func (admS *AdminS) V1GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.StatQueueProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,9 +84,9 @@ func (admS *AdminS) V1GetStatQueueProfiles(ctx *context.Context, args *utils.Arg
 	if err = admS.V1GetStatQueueProfileIDs(ctx, args, &sqPrfIDs); err != nil {
 		return
 	}
-	*sqPrfs = make([]*engine.StatQueueProfile, 0, len(sqPrfIDs))
+	*sqPrfs = make([]*utils.StatQueueProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
-		var sqPrf *engine.StatQueueProfile
+		var sqPrf *utils.StatQueueProfile
 		sqPrf, err = admS.dm.GetStatQueueProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -121,7 +120,7 @@ func (admS *AdminS) V1GetStatQueueProfilesCount(ctx *context.Context, args *util
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (adms *AdminS) V1SetStatQueueProfile(ctx *context.Context, arg *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminS) V1SetStatQueueProfile(ctx *context.Context, arg *utils.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

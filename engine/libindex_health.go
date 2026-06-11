@@ -77,7 +77,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = ipp.FilterIDs
 	case utils.CacheStatFilterIndexes:
-		var st *StatQueueProfile
+		var st *utils.StatQueueProfile
 		if st, err = dm.GetStatQueueProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

@@ -84,10 +84,10 @@ func testDMitDataFlush(t *testing.T) {
 
 func testDMitCRUDStatQueue(t *testing.T) {
 	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC))
-	sq := &StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "testDMitCRUDStatQueue",
-		SQItems: []SQItem{
+		SQItems: []utils.SQItem{
 			{EventID: "cgrates.org:ev1", ExpiryTime: eTime},
 			{EventID: "cgrates.org:ev2", ExpiryTime: eTime},
 			{EventID: "cgrates.org:ev3", ExpiryTime: eTime},

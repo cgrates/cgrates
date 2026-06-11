@@ -934,8 +934,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			ID:        "SQ_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			Weights: utils.DynamicWeights{
@@ -1111,8 +1111,8 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			ID:        "SQ_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			Weights: utils.DynamicWeights{

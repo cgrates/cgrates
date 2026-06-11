@@ -546,14 +546,14 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 // func testFltrRplStatQueueProfile(t *testing.T) {
 // 	stID := "ST1"
-// 	stPrf := &engine.StatQueueProfileWithAPIOpts{
-// 		StatQueueProfile: &engine.StatQueueProfile{
+// 	stPrf := &utils.StatQueueProfileWithAPIOpts{
+// 		StatQueueProfile: &utils.StatQueueProfile{
 // 			Tenant:      "cgrates.org",
 // 			ID:          stID,
 // 			FilterIDs:   []string{"*string:~*req.Account:dan"},
 // 			QueueLength: 100,
 // 			TTL:         time.Second,
-// 			Metrics: []*engine.MetricWithFilters{
+// 			Metrics: []*utils.MetricWithFilters{
 // 				{
 // 					MetricID: utils.MetaACD,
 // 				},
@@ -565,16 +565,16 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 			MinItems:     1,
 // 		},
 // 	}
-// 	sq := engine.StatQueue{
+// 	sq := utils.StatQueue{
 // 		Tenant:    "cgrates.org",
 // 		ID:        stID,
-// 		SQItems:   []engine.SQItem{},
+// 		SQItems:   []utils.SQItem{},
 // 		SQMetrics: map[string]utils.StatMetric{},
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.StatQueueProfile
+// 	var replyPrfl *utils.StatQueueProfile
 // 	var rplyIDs []string
-// 	var replySq engine.StatQueue
+// 	var replySq utils.StatQueue
 
 // 	argsSq := &utils.TenantIDWithAPIOpts{
 // 		TenantID: &utils.TenantID{
@@ -640,7 +640,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	if !reflect.DeepEqual(stPrf.StatQueueProfile, replyPrfl) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(stPrf.StatQueueProfile), utils.ToJSON(replyPrfl))
 // 	}
-// 	replySq = engine.StatQueue{}
+// 	replySq = utils.StatQueue{}
 // 	sq.SQItems = nil
 // 	s, _ := utils.NewACD(1, "", nil)
 // 	sq.SQMetrics = map[string]utils.StatMetric{
@@ -703,7 +703,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	sq.SQItems = []engine.SQItem{{
+// 	sq.SQItems = []utils.SQItem{{
 // 		EventID: "event1",
 // 	}}
 // 	s.AddEvent("event1", utils.MapStorage{utils.MetaReq: map[string]any{utils.Usage: 45 * time.Second}})

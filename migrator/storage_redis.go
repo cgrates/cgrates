@@ -85,7 +85,7 @@ func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	return v1st, nil
 }
 
-func (v1rs *redisMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err error) {
+func (v1rs *redisMigrator) getV3Stats() (v1st *utils.StatQueueProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix, utils.EmptyString)
 		if err != nil {
@@ -125,7 +125,7 @@ func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 }
 
 // get
-func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
+func (v1rs *redisMigrator) getV2Stats() (v2 *utils.StatQueue, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix, utils.EmptyString)
 		if err != nil {
@@ -152,7 +152,7 @@ func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 }
 
 // set
-func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
+func (v1rs *redisMigrator) setV2Stats(v2 *utils.StatQueue) (err error) {
 	key := utils.StatQueuePrefix + v2.ID
 	bit, err := v1rs.rds.Marshaler().Marshal(v2)
 	if err != nil {

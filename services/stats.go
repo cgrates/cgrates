@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,7 @@ func NewStatService(cfg *config.CGRConfig) *StatService {
 type StatService struct {
 	mu  sync.RWMutex
 	cfg *config.CGRConfig
-	sts *engine.StatS
+	sts *stats.StatS
 }
 
 // Start should handle the sercive start
@@ -70,7 +71,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 
 	sts.mu.Lock()
 	defer sts.mu.Unlock()
-	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
+	sts.sts = stats.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)

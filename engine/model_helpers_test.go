@@ -266,9 +266,9 @@ func TestAPItoTPStats(t *testing.T) {
 		Blockers:     ";false",
 		Weights:      ";20.0",
 	}
-	eTPs := &StatQueueProfile{ID: tps.ID,
+	eTPs := &utils.StatQueueProfile{ID: tps.ID,
 		QueueLength: tps.QueueLength,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -326,11 +326,11 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		Weights:      ";20",
 	}
-	sqPrf := &StatQueueProfile{
+	sqPrf := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "Stats1",
 		QueueLength: 100,
-		Metrics: []*MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -3762,13 +3762,13 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 }
 
 func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
-	testStruct := &StatQueueProfile{
+	testStruct := &utils.StatQueueProfile{
 		Tenant:      "",
 		ID:          "",
 		FilterIDs:   []string{"test_filter_Id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		QueueLength: 0,
 		MinItems:    0,
-		Metrics: []*MetricWithFilters{{
+		Metrics: []*utils.MetricWithFilters{{
 			FilterIDs: []string{"test_id"},
 			Blockers: utils.DynamicBlockers{{
 				FilterIDs: []string{"fltr2"},

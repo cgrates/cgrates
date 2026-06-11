@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetStatQueueProfile returns a StatQueue profile
-func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) (err error) {
+func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,7 +76,7 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetStatQueueProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*engine.StatQueueProfile) (err error) {
+func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.StatQueueProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,9 +85,9 @@ func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.Arg
 	if err = admS.GetStatQueueProfileIDs(ctx, args, &sqPrfIDs); err != nil {
 		return
 	}
-	*sqPrfs = make([]*engine.StatQueueProfile, 0, len(sqPrfIDs))
+	*sqPrfs = make([]*utils.StatQueueProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
-		var sqPrf *engine.StatQueueProfile
+		var sqPrf *utils.StatQueueProfile
 		sqPrf, err = admS.dm.GetStatQueueProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -121,7 +121,7 @@ func (admS *AdminSv1) GetStatQueueProfilesCount(ctx *context.Context, args *util
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *utils.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -184,14 +184,14 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 }
 
 // NewStatSv1 initializes StatSV1
-func NewStatSv1(sS *engine.StatS) *StatSv1 {
+func NewStatSv1(sS *stats.StatS) *StatSv1 {
 	return &StatSv1{sS: sS}
 }
 
 // StatSv1 exports RPC from RLs
 type StatSv1 struct {
 	ping
-	sS *engine.StatS
+	sS *stats.StatS
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
@@ -210,7 +210,7 @@ func (stsv1 *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CG
 }
 
 // GetStatQueue returns a StatQueue object
-func (stsv1 *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
+func (stsv1 *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
 	return stsv1.sS.V1GetStatQueue(ctx, args, reply)
 }
 

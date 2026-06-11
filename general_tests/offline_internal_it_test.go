@@ -190,7 +190,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				})
 			})
 
-			var stats []*engine.StatQueueProfile
+			var stats []*utils.StatQueueProfile
 
 			t.Run("GetStatQueueProfiles", func(t *testing.T) {
 				if err := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
@@ -474,7 +474,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			})
 
 			t.Run("GetStatQueueProfiles2", func(t *testing.T) {
-				var rcv []*engine.StatQueueProfile
+				var rcv []*utils.StatQueueProfile
 				if err := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",

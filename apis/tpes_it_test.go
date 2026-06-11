@@ -790,8 +790,8 @@ func testTPeSetAccount(t *testing.T) {
 }
 
 func testTPeSetStatQueueProfile(t *testing.T) {
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
 			Weights: utils.DynamicWeights{
@@ -802,7 +802,7 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 			QueueLength:  14,
 			ThresholdIDs: []string{utils.MetaNone},
 			Blockers:     utils.DynamicBlockers{{Blocker: false}},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -830,8 +830,8 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:   "cgrates.org",
 			ID:       "SQ_basic",
 			TTL:      0,
@@ -843,7 +843,7 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},

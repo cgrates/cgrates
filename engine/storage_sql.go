@@ -829,7 +829,7 @@ func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id strin
 	return
 }
 
-func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
+func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	var result []*StatQueueProfileMdl
 	if err = sqls.db.Model(&StatQueueProfileMdl{}).Where(&StatQueueProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -838,10 +838,10 @@ func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 	if len(result) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return MapStringInterfaceToStatQueueProfile(result[0].StatQueueProfile)
+	return utils.MapStringInterfaceToStatQueueProfile(result[0].StatQueueProfile)
 }
 
-func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &StatQueueProfileMdl{
 		Tenant:           sq.Tenant,
@@ -873,7 +873,7 @@ func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id 
 	return
 }
 
-func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	var result []*StatQueueMdl
 	if err = sqls.db.Model(&StatQueueMdl{}).Where(&StatQueueMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -889,7 +889,7 @@ func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 	return ssq.AsStatQueue(sqls.ms)
 }
 
-func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
 	if ssq == nil {
 		if ssq, err = NewStoredStatQueue(sq, sqls.ms); err != nil {
 			return

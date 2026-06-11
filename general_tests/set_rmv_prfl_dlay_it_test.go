@@ -168,8 +168,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("SetStatQueueProfile", func(t *testing.T) {
 
-		eSQPrf := &engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		eSQPrf := &utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "SQ_1",
 			},
@@ -283,8 +283,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetStatQueueProfile", func(t *testing.T) {
 
-		eSQPrf := &engine.StatQueueProfileWithAPIOpts{
-			StatQueueProfile: &engine.StatQueueProfile{
+		eSQPrf := &utils.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "SQ_2",
 			},

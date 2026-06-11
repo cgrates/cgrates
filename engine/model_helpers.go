@@ -687,14 +687,14 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls StatMdls) {
 	return
 }
 
-func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfile, err error) {
-	st = &StatQueueProfile{
+func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *utils.StatQueueProfile, err error) {
+	st = &utils.StatQueueProfile{
 		Tenant:       tpST.Tenant,
 		ID:           tpST.ID,
 		FilterIDs:    make([]string, len(tpST.FilterIDs)),
 		QueueLength:  tpST.QueueLength,
 		MinItems:     tpST.MinItems,
-		Metrics:      make([]*MetricWithFilters, len(tpST.Metrics)),
+		Metrics:      make([]*utils.MetricWithFilters, len(tpST.Metrics)),
 		Stored:       tpST.Stored,
 		ThresholdIDs: make([]string, len(tpST.ThresholdIDs)),
 	}
@@ -714,7 +714,7 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		}
 	}
 	for i, metric := range tpST.Metrics {
-		st.Metrics[i] = &MetricWithFilters{
+		st.Metrics[i] = &utils.MetricWithFilters{
 			MetricID:  metric.MetricID,
 			FilterIDs: metric.FilterIDs,
 		}
@@ -729,7 +729,7 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 	return st, nil
 }
 
-func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
+func StatQueueProfileToAPI(st *utils.StatQueueProfile) (tpST *utils.TPStatProfile) {
 	tpST = &utils.TPStatProfile{
 		Tenant:       st.Tenant,
 		ID:           st.ID,

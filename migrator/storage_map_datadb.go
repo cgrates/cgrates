@@ -54,7 +54,7 @@ func (iDBMig *internalMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (iDBMig *internalMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err error) {
+func (iDBMig *internalMigrator) getV3Stats() (v1st *utils.StatQueueProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -63,12 +63,12 @@ func (iDBMig *internalMigrator) setV1Stats(x *v1Stat) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (iDBMig *internalMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
+func (iDBMig *internalMigrator) getV2Stats() (v2 *utils.StatQueue, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // set
-func (iDBMig *internalMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
+func (iDBMig *internalMigrator) setV2Stats(v2 *utils.StatQueue) (err error) {
 	return utils.ErrNotImplemented
 }
 

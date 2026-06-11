@@ -982,8 +982,8 @@ func (ms *MongoStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) 
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from DB
-func (ms *MongoStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (*StatQueueProfile, error) {
-	sqProfile := new(StatQueueProfile)
+func (ms *MongoStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (*utils.StatQueueProfile, error) {
+	sqProfile := new(utils.StatQueueProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColSqp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(sqProfile)
@@ -996,7 +996,7 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 }
 
 // SetStatQueueProfileDrv stores a StatsQueue into DB
-func (ms *MongoStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) error {
+func (ms *MongoStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColSqp).UpdateOne(sctx, bson.M{"tenant": sq.Tenant, "id": sq.ID},
 			bson.M{"$set": sq},
@@ -1018,7 +1018,7 @@ func (ms *MongoStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id 
 }
 
 // GetStatQueueDrv retrieves a StoredStatQueue
-func (ms *MongoStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (*StatQueue, error) {
+func (ms *MongoStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (*utils.StatQueue, error) {
 	ssq := new(StoredStatQueue)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColSqs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -1035,7 +1035,7 @@ func (ms *MongoStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StoredStatQueue
-func (ms *MongoStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (ms *MongoStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
 	if ssq == nil {
 		if ssq, err = NewStoredStatQueue(sq, ms.ms); err != nil {
 			return err

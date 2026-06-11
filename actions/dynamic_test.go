@@ -577,12 +577,12 @@ func TestActDynamicStatsExecute(t *testing.T) {
 	engine.Cache.Clear(nil)
 	defer engine.Cache.Clear(nil)
 
-	var sqpwo *engine.StatQueueProfileWithAPIOpts
+	var sqpwo *utils.StatQueueProfileWithAPIOpts
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AdminSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
 				var canCast bool
-				if sqpwo, canCast = args.(*engine.StatQueueProfileWithAPIOpts); !canCast {
+				if sqpwo, canCast = args.(*utils.StatQueueProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
 				}
 				return nil
@@ -593,13 +593,13 @@ func TestActDynamicStatsExecute(t *testing.T) {
 	testcases := []struct {
 		name     string
 		diktats  []*utils.APDiktat
-		expSqpwo *engine.StatQueueProfileWithAPIOpts
+		expSqpwo *utils.StatQueueProfileWithAPIOpts
 		wantErr  bool
 	}{
 		{
 			name: "SuccessfulRequest",
-			expSqpwo: &engine.StatQueueProfileWithAPIOpts{
-				StatQueueProfile: &engine.StatQueueProfile{
+			expSqpwo: &utils.StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &utils.StatQueueProfile{
 					Tenant:       "cgrates.org",
 					ID:           "STATS_1001",
 					FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -620,7 +620,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 							Blocker:   true,
 						},
 					},
-					Metrics: []*engine.MetricWithFilters{
+					Metrics: []*utils.MetricWithFilters{
 						{
 							MetricID:  "ASR",
 							FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -663,8 +663,8 @@ func TestActDynamicStatsExecute(t *testing.T) {
 		},
 		{
 			name: "SuccessfulRequestWithDynamicPaths",
-			expSqpwo: &engine.StatQueueProfileWithAPIOpts{
-				StatQueueProfile: &engine.StatQueueProfile{
+			expSqpwo: &utils.StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &utils.StatQueueProfile{
 					Tenant:       "cgrates.org",
 					ID:           "STATS_1001",
 					FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -685,7 +685,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 							Blocker:   true,
 						},
 					},
-					Metrics: []*engine.MetricWithFilters{
+					Metrics: []*utils.MetricWithFilters{
 						{
 							MetricID:  "ASR",
 							FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -728,8 +728,8 @@ func TestActDynamicStatsExecute(t *testing.T) {
 		},
 		{
 			name: "SuccessfulRequestEmptyFields",
-			expSqpwo: &engine.StatQueueProfileWithAPIOpts{
-				StatQueueProfile: &engine.StatQueueProfile{
+			expSqpwo: &utils.StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &utils.StatQueueProfile{
 					Tenant:       "cgrates.org",
 					ID:           "STATS_1001",
 					FilterIDs:    nil,

@@ -102,14 +102,14 @@ func TestDiamConnStats(t *testing.T) {
 		}
 		var reply string
 		if err := client.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
-			engine.StatQueueProfileWithAPIOpts{
-				StatQueueProfile: &engine.StatQueueProfile{
+			utils.StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &utils.StatQueueProfile{
 					Tenant:      "cgrates.org",
 					ID:          id,
 					FilterIDs:   fltrIDs,
 					QueueLength: -1,
 					TTL:         ttl,
-					Metrics: []*engine.MetricWithFilters{
+					Metrics: []*utils.MetricWithFilters{
 						{
 							MetricID: "*sum#~*req.ConnectionStatus{*conn_status}",
 						},

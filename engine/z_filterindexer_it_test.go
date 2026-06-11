@@ -1373,19 +1373,19 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	statQueue1 := &StatQueueProfile{
+	statQueue1 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SQUEUE_PRF1",
 		FilterIDs: []string{"SQUEUE1", "*string:~*opts.ToR:*data"},
 		TTL:       time.Minute,
 	}
-	statQueue2 := &StatQueueProfile{
+	statQueue2 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SQUEUE_PRF2",
 		FilterIDs: []string{"SQUEUE2", "*string:~*opts.ToR:*voice"},
 		TTL:       time.Minute,
 	}
-	statQueue3 := &StatQueueProfile{
+	statQueue3 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SQUEUE_PRF3",
 		FilterIDs: []string{"SQUEUE2", "SQUEUE1", "*string:~*opts.ToR:~*req.Usage"},

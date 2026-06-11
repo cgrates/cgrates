@@ -166,10 +166,10 @@ func TestReplicatorGetStatQueue(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.StatQueue
+	var reply utils.StatQueue
 	rp := NewReplicatorSv1(dm, v1)
 
-	stq := &engine.StatQueue{
+	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq1",
 		SQMetrics: map[string]utils.StatMetric{
@@ -202,10 +202,10 @@ func TestReplicatorGetStatQueueErr(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.StatQueue
+	var reply utils.StatQueue
 	rp := NewReplicatorSv1(dm, v1)
 
-	stq := &engine.StatQueue{
+	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq2",
 		SQMetrics: map[string]utils.StatMetric{
@@ -1207,8 +1207,8 @@ func TestReplicatorSetStatQueueProfile(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sq := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_20",
 			Weights: utils.DynamicWeights{
@@ -1217,7 +1217,7 @@ func TestReplicatorSetStatQueueProfile(t *testing.T) {
 				},
 			},
 			QueueLength: 14,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -1268,8 +1268,8 @@ func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sq := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_20",
 			Weights: utils.DynamicWeights{
@@ -1278,7 +1278,7 @@ func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 				},
 			},
 			QueueLength: 14,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
 				},
@@ -1322,8 +1322,8 @@ func TestReplicatorSetStatQueue(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueueWithAPIOpts{
-		StatQueue: &engine.StatQueue{
+	sq := &utils.StatQueueWithAPIOpts{
+		StatQueue: &utils.StatQueue{
 			Tenant: "cgrates.org",
 			ID:     "sq11",
 			SQMetrics: map[string]utils.StatMetric{
@@ -2049,7 +2049,7 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq11",
 		SQMetrics: map[string]utils.StatMetric{
@@ -2091,7 +2091,7 @@ func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq11",
 		SQMetrics: map[string]utils.StatMetric{
@@ -2338,7 +2338,7 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueueProfile{
+	sq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_20",
 		Weights: utils.DynamicWeights{
@@ -2347,7 +2347,7 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},
@@ -2400,7 +2400,7 @@ func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 	}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	sq := &engine.StatQueueProfile{
+	sq := &utils.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_20",
 		Weights: utils.DynamicWeights{
@@ -2409,7 +2409,7 @@ func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 			},
 		},
 		QueueLength: 14,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
 			},

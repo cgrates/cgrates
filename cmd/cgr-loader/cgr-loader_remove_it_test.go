@@ -179,7 +179,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// statsPrf
-	var replySts *engine.StatQueueProfile
+	var replySts *utils.StatQueueProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replySts); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -187,7 +187,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// statQueue
-	var replyStQue *engine.StatQueue
+	var replyStQue *utils.StatQueue
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -612,7 +612,7 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
-	expStatsprf := &engine.StatQueueProfile{
+	expStatsprf := &utils.StatQueueProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "Stat_1",
 		FilterIDs: []string{"FLTR_STAT_1"},
@@ -624,7 +624,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*tcd",
 			},
@@ -638,7 +638,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var replySts *engine.StatQueueProfile
+	var replySts *utils.StatQueueProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replySts); err != nil {

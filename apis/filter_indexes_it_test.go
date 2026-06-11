@@ -4296,15 +4296,15 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set a StatProfile with our filter and check the indexes
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stat_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			QueueLength: 100,
 			TTL:         10000000000,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -4400,8 +4400,8 @@ func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our StatsProfile with our filters
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stat_1",
 			FilterIDs: []string{"fltr_for_attr",
@@ -4409,7 +4409,7 @@ func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
 				"*string:~*req.Account:1001"},
 			QueueLength: 100,
 			TTL:         10000000000,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -4515,15 +4515,15 @@ func testV1FIdxStatSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
 	// will add more stats with our filters for matching indexes
-	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stat_2",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			QueueLength: 100,
 			TTL:         10000000000,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -4537,15 +4537,15 @@ func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
-	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stat_3",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			QueueLength: 1000,
 			TTL:         0,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCC,
 				},
@@ -5233,8 +5233,8 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	stat1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	stat1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stats1",
 			FilterIDs: []string{
@@ -5243,7 +5243,7 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 			},
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -5260,8 +5260,8 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 			MinItems: 1,
 		},
 	}
-	stat2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	stat2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
 			FilterIDs: []string{
@@ -5269,7 +5269,7 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 			},
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -5414,14 +5414,14 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 }
 
 func testV1FidxSetAndChangeFiltersOnProfiles(t *testing.T) {
-	stat1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	stat1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "Stats1",
 			FilterIDs:   []string{},
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -5439,8 +5439,8 @@ func testV1FidxSetAndChangeFiltersOnProfiles(t *testing.T) {
 		},
 	}
 
-	stat2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	stat2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
 			FilterIDs: []string{
@@ -5448,7 +5448,7 @@ func testV1FidxSetAndChangeFiltersOnProfiles(t *testing.T) {
 			},
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},

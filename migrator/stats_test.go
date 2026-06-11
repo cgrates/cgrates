@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -67,13 +66,13 @@ func TestV1StatsAsStats(t *testing.T) {
 		ID:     v1Sts.Id,
 		Rules:  filters}
 
-	sqp := &engine.StatQueueProfile{
+	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "test",
 		FilterIDs:   []string{v1Sts.Id},
 		QueueLength: 10,
 		TTL:         0,
-		Metrics: []*engine.MetricWithFilters{
+		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*asr",
 			},
@@ -135,10 +134,10 @@ func TestV1StatsAsStats(t *testing.T) {
 */
 
 func TestRemakeQueue(t *testing.T) {
-	sq := &engine.StatQueue{
+	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "StatsID",
-		SQItems: []engine.SQItem{{
+		SQItems: []utils.SQItem{{
 			EventID: "ev1",
 		}},
 		SQMetrics: map[string]utils.StatMetric{
@@ -147,7 +146,7 @@ func TestRemakeQueue(t *testing.T) {
 			"*average#~*req.Cost": nil,
 		},
 	}
-	expected := &engine.StatQueue{
+	expected := &utils.StatQueue{
 		Tenant:  sq.Tenant,
 		ID:      sq.ID,
 		SQItems: sq.SQItems,

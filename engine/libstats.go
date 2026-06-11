@@ -28,12 +28,12 @@ import (
 )
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
-func NewStoredStatQueue(sq *StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue, err error) {
+func NewStoredStatQueue(sq *utils.StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
 		Tenant:     sq.Tenant,
 		ID:         sq.ID,
 		Compressed: sq.Compress(uint64(config.CgrConfig().StatSCfg().StoreUncompressedLimit)),
-		SQItems:    make([]SQItem, len(sq.SQItems)),
+		SQItems:    make([]utils.SQItem, len(sq.SQItems)),
 		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
 	}
 	copy(sSQ.SQItems, sq.SQItems)
@@ -51,7 +51,7 @@ func NewStoredStatQueue(sq *StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue
 type StoredStatQueue struct {
 	Tenant     string
 	ID         string
-	SQItems    []SQItem
+	SQItems    []utils.SQItem
 	SQMetrics  map[string][]byte
 	Compressed bool
 }
@@ -62,14 +62,14 @@ func (ssq *StoredStatQueue) SqID() string {
 }
 
 // AsStatQueue converts into StatQueue unmarshaling SQMetrics
-func (ssq *StoredStatQueue) AsStatQueue(ms utils.Marshaler) (sq *StatQueue, err error) {
+func (ssq *StoredStatQueue) AsStatQueue(ms utils.Marshaler) (sq *utils.StatQueue, err error) {
 	if ssq == nil {
 		return
 	}
-	sq = &StatQueue{
+	sq = &utils.StatQueue{
 		Tenant:    ssq.Tenant,
 		ID:        ssq.ID,
-		SQItems:   make([]SQItem, len(ssq.SQItems)),
+		SQItems:   make([]utils.SQItem, len(ssq.SQItems)),
 		SQMetrics: make(map[string]utils.StatMetric, len(ssq.SQMetrics)),
 	}
 	copy(sq.SQItems, ssq.SQItems)
@@ -115,7 +115,7 @@ func MapStringInterfaceToStoredStatQueue(m map[string]any) (*StoredStatQueue, er
 	if items, ok := m[utils.SQItems].([]any); ok {
 		for _, item := range items {
 			if itemMap, ok := item.(map[string]any); ok {
-				sqItem := SQItem{}
+				sqItem := utils.SQItem{}
 				if eventID, ok := itemMap[utils.EventID].(string); ok {
 					sqItem.EventID = eventID
 				}

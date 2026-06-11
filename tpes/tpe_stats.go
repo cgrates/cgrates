@@ -50,7 +50,7 @@ func (tpSts TPStats) exportItems(ctx *context.Context, wrtr io.Writer, tnt strin
 		return
 	}
 	for _, statsID := range itmIDs {
-		var statPrf *engine.StatQueueProfile
+		var statPrf *utils.StatQueueProfile
 		statPrf, err = tpSts.dm.GetStatQueueProfile(ctx, tnt, statsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

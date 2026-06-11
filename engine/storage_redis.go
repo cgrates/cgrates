@@ -546,7 +546,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from db
-func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
+func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -559,7 +559,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 }
 
 // SetStatQueueProfileDrv stores a StatsQueue into db
-func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sq); err != nil {
 		return
@@ -573,7 +573,7 @@ func (rs *RedisStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id 
 }
 
 // GetStatQueueDrv retrieves the stored metrics for a StatsQueue
-func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -590,7 +590,7 @@ func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
 	if ssq == nil {
 		if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
 			return

@@ -311,15 +311,15 @@ func (iDB *InternalDB) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return nil
 }
 
-func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
+func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*StatQueueProfile), nil
+	return x.(*utils.StatQueueProfile), nil
 
 }
-func (iDB *InternalDB) SetStatQueueProfileDrv(_ *context.Context, sq *StatQueueProfile) (err error) {
+func (iDB *InternalDB) SetStatQueueProfileDrv(_ *context.Context, sq *utils.StatQueueProfile) (err error) {
 	iDB.db.Set(utils.CacheStatQueueProfiles, sq.TenantID(), sq, nil,
 		true, utils.NonTransactional)
 	return
@@ -369,14 +369,14 @@ func (iDB *InternalDB) RemoveRankingDrv(_ *context.Context, tenant, id string) (
 	return
 }
 
-func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (sq *StatQueue, err error) {
+func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*StatQueue), nil
+	return x.(*utils.StatQueue), nil
 }
-func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
 	if sq == nil {
 		sq, err = ssq.AsStatQueue(iDB.ms)
 		if err != nil {

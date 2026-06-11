@@ -26,8 +26,8 @@ import (
 type MigratorDataDB interface {
 	getV1Stats() (v1st *v1Stat, err error)
 	setV1Stats(x *v1Stat) (err error)
-	getV2Stats() (v2 *engine.StatQueue, err error)
-	setV2Stats(v2 *engine.StatQueue) (err error)
+	getV2Stats() (v2 *utils.StatQueue, err error)
+	setV2Stats(v2 *utils.StatQueue) (err error)
 
 	getV1Filter() (v1Fltr *v1Filter, err error)
 	setV1Filter(x *v1Filter) (err error)
@@ -36,7 +36,7 @@ type MigratorDataDB interface {
 
 	getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error)
 
-	getV3Stats() (v1st *engine.StatQueueProfile, err error)
+	getV3Stats() (v1st *utils.StatQueueProfile, err error)
 
 	DataManager() *engine.DataManager
 	close()

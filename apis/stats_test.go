@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,11 +49,11 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 			ID: "sqID",
 		},
 	}
-	var result engine.StatQueueProfile
+	var result utils.StatQueueProfile
 	var reply string
 
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "sqID",
 			Weights: utils.DynamicWeights{
@@ -119,7 +120,7 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.StatQueueProfile
+	var rcv utils.StatQueueProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetStatQueueProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
@@ -155,8 +156,8 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{},
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{},
 	}
 
 	var reply string
@@ -189,14 +190,14 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -232,8 +233,8 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	sqPrf := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			ID:     "TestStatsRemoveStatQueueProfileCheckErrors",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -265,7 +266,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.StatQueueProfile
+	var rcv utils.StatQueueProfile
 
 	arg := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -296,14 +297,14 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -343,14 +344,14 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -411,14 +412,14 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -457,14 +458,14 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -505,14 +506,14 @@ func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*engine.StatQueueProfile, error) {
-			sqPrf := &engine.StatQueueProfile{
+		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -568,7 +569,7 @@ func TestStatsNewStatsv1(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	sS := engine.NewStatService(dm, cfg, nil, nil)
+	sS := stats.NewStatService(dm, cfg, nil, nil)
 
 	exp := &StatSv1{
 		sS: sS,
@@ -643,7 +644,7 @@ func TestStatsAPIs(t *testing.T) {
 		dm:  dm,
 		cfg: cfg,
 	}
-	sS := engine.NewStatService(dm, cfg, fltrs, cM)
+	sS := stats.NewStatService(dm, cfg, fltrs, cM)
 	stV1 := NewStatSv1(sS)
 	var reply string
 
@@ -685,15 +686,15 @@ func TestStatsAPIs(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
-	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "sq1",
 			FilterIDs:   []string{"*string:~*req.Account:1001"},
 			QueueLength: 100,
 			TTL:         10 * time.Second,
 			MinItems:    0,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -717,14 +718,14 @@ func TestStatsAPIs(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 
-	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	sqPrf2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "sq2",
 			FilterIDs:   []string{"*string:~*req.Account:1002"},
 			QueueLength: 100,
 			TTL:         1 * time.Second,
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -791,7 +792,7 @@ func TestStatsAPIs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", expIDs, qIDs)
 	}
 
-	expStatQueue := &engine.StatQueue{
+	expStatQueue := &utils.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq1",
 		SQMetrics: map[string]utils.StatMetric{
@@ -800,7 +801,7 @@ func TestStatsAPIs(t *testing.T) {
 		},
 	}
 
-	var rplyStatQueue engine.StatQueue
+	var rplyStatQueue utils.StatQueue
 	if err := stV1.GetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -872,14 +873,14 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	args1 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	args1 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:       "cgrates.org",
 			ID:           "test_ID1",
 			QueueLength:  10,
 			MinItems:     2,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -901,14 +902,14 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	args2 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:       "cgrates.org",
 			ID:           "test_ID2",
 			QueueLength:  15,
 			MinItems:     3,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -930,14 +931,14 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	args3 := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:       "cgrates.org",
 			ID:           "test2_ID1",
 			QueueLength:  10,
 			MinItems:     2,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -965,14 +966,14 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsSearch: "test_ID",
 	}
-	exp := []*engine.StatQueueProfile{
+	exp := []*utils.StatQueueProfile{
 		{
 			Tenant:       "cgrates.org",
 			ID:           "test_ID1",
 			QueueLength:  10,
 			MinItems:     2,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -990,7 +991,7 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 			QueueLength:  15,
 			MinItems:     3,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
 				},
@@ -1004,7 +1005,7 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.StatQueueProfile
+	var getReply []*utils.StatQueueProfile
 	if err := admS.GetStatQueueProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -1026,14 +1027,14 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	args := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
+	args := &utils.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &utils.StatQueueProfile{
 			Tenant:       "cgrates.org",
 			ID:           "test_ID1",
 			QueueLength:  10,
 			MinItems:     2,
 			ThresholdIDs: []string{utils.MetaNone},
-			Metrics: []*engine.MetricWithFilters{
+			Metrics: []*utils.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
 				},
@@ -1066,7 +1067,7 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.StatQueueProfile
+	var getReply []*utils.StatQueueProfile
 	if err := admS.GetStatQueueProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1077,7 +1078,7 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetStatQueueProfileDrvF: func(*context.Context, *engine.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
 		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
@@ -1095,7 +1096,7 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.StatQueueProfile
+	var reply []*utils.StatQueueProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetStatQueueProfiles(context.Background(),
