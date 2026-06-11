@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,13 +36,12 @@ func NewStatService(cfg *config.CGRConfig) *StatService {
 
 // StatService implements Service interface
 type StatService struct {
-	mu  sync.RWMutex
 	cfg *config.CGRConfig
 	sts *stats.StatS
 }
 
-// Start should handle the sercive start
-func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+// Start should handle the service start
+func (s *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -53,7 +50,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			utils.FilterS,
 			utils.DB,
 		},
-		sts.cfg.GeneralCfg().ConnectTimeout)
+		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -64,49 +61,42 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
 		utils.CacheStatFilterIndexes); err != nil {
-		return
+		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	sts.mu.Lock()
-	defer sts.mu.Unlock()
-	sts.sts = stats.NewStatService(sts.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
-	sts.sts.StartLoop(context.TODO())
-	srv, _ := engine.NewService(sts.sts)
-	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	s.sts = stats.NewStatService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	s.sts.StartLoop(context.TODO())
+	srv, _ := engine.NewService(s.sts)
+	for _, svc := range srv {
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.StatS, srv)
-	return
+	return nil
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
-	sts.mu.Lock()
-	sts.sts.Reload(context.TODO())
-	sts.mu.Unlock()
-	return
+func (s *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+	s.sts.Reload(context.TODO())
+	return nil
 }
 
 // Shutdown stops the service
-func (sts *StatService) Shutdown(registry *servmanager.Registry) (err error) {
-	sts.mu.Lock()
-	defer sts.mu.Unlock()
-	sts.sts.Shutdown(context.TODO())
-	sts.sts = nil
+func (s *StatService) Shutdown(registry *servmanager.Registry) error {
+	s.sts.Shutdown(context.TODO())
+	s.sts = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.StatSv1)
-	return
+	return nil
 }
 
 // ServiceName returns the service name
-func (sts *StatService) ServiceName() string {
+func (s *StatService) ServiceName() string {
 	return utils.StatS
 }
 
 // ShouldRun returns if the service should be running
-func (sts *StatService) ShouldRun() bool {
-	return sts.cfg.StatSCfg().Enabled
+func (s *StatService) ShouldRun() bool {
+	return s.cfg.StatSCfg().Enabled
 }
