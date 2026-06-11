@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-// StatQueueProfile the profile for a StatQueue
+// StatQueueProfile represents the user configuration for the StatQueue
 type StatQueueProfile struct {
 	Tenant       string
 	ID           string // QueueID
@@ -81,14 +81,241 @@ func (sqp *StatQueueProfile) CacheClone() any {
 	return sqp.Clone()
 }
 
+func (sqp *StatQueueProfile) TenantID() string {
+	return ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
+func (sqp *StatQueueProfile) Set(path []string, val any, newBranch bool) error {
+	var err error
+	switch len(path) {
+	default:
+		return ErrWrongPath
+	case 1:
+		if val == "" {
+			return nil
+		}
+		switch path[0] {
+		default:
+			return ErrWrongPath
+		case Tenant:
+			sqp.Tenant = IfaceAsString(val)
+		case ID:
+			sqp.ID = IfaceAsString(val)
+		case FilterIDs:
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			sqp.FilterIDs = append(sqp.FilterIDs, valA...)
+		case Weights:
+			if val != "" {
+				sqp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
+		case Blockers:
+			if val != "" {
+				sqp.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
+		case QueueLength:
+			sqp.QueueLength, err = IfaceAsInt(val)
+		case TTL:
+			sqp.TTL, err = IfaceAsDuration(val)
+		case MinItems:
+			sqp.MinItems, err = IfaceAsInt(val)
+		case Stored:
+			sqp.Stored, err = IfaceAsBool(val)
+		case ThresholdIDs:
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			sqp.ThresholdIDs = append(sqp.ThresholdIDs, valA...)
+		}
+	case 2:
+		// path =[]string{Metrics, MetricID}
+		if path[0] != Metrics {
+			return ErrWrongPath
+		}
+		// val := *acd;*tcd;*asr
+		if val != "" {
+			if len(sqp.Metrics) == 0 || newBranch {
+				sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
+			}
+			switch path[1] {
+			case FilterIDs:
+				var valA []string
+				valA, err = IfaceAsStringSlice(val)
+				sqp.Metrics[len(sqp.Metrics)-1].FilterIDs = append(sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, valA...)
+			case MetricID:
+				valA := InfieldSplit(IfaceAsString(val))
+				sqp.Metrics[len(sqp.Metrics)-1].MetricID = valA[0]
+				for _, mID := range valA[1:] { // add the rest of the metrics
+					sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
+				}
+			case Blockers:
+				var blkrs DynamicBlockers
+				if blkrs, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep); err != nil {
+					return err
+				}
+				sqp.Metrics[len(sqp.Metrics)-1].Blockers = append(sqp.Metrics[len(sqp.Metrics)-1].Blockers, blkrs...)
+			default:
+				return ErrWrongPath
+			}
+		}
+	}
+	return err
+}
+
+func (sqp *StatQueueProfile) Merge(v2 any) {
+	vi := v2.(*StatQueueProfile)
+	if len(vi.Tenant) != 0 {
+		sqp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		sqp.ID = vi.ID
+	}
+	sqp.FilterIDs = append(sqp.FilterIDs, vi.FilterIDs...)
+	sqp.ThresholdIDs = append(sqp.ThresholdIDs, vi.ThresholdIDs...)
+	sqp.Metrics = append(sqp.Metrics, vi.Metrics...)
+
+	if vi.QueueLength != 0 {
+		sqp.QueueLength = vi.QueueLength
+	}
+	if vi.TTL != 0 {
+		sqp.TTL = vi.TTL
+	}
+	if vi.MinItems != 0 {
+		sqp.MinItems = vi.MinItems
+	}
+	if vi.Stored {
+		sqp.Stored = vi.Stored
+	}
+	sqp.Weights = append(sqp.Weights, vi.Weights...)
+	sqp.Blockers = append(sqp.Blockers, vi.Blockers...)
+}
+
+func (sqp *StatQueueProfile) String() string { return ToJSON(sqp) }
+func (sqp *StatQueueProfile) FieldAsString(fldPath []string) (string, error) {
+	val, err := sqp.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", err
+	}
+	return IfaceAsString(val), nil
+}
+func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idx := GetPathIndex(fldPath[0])
+			if idx != nil {
+				switch fld {
+				case ThresholdIDs:
+					if *idx < len(sqp.ThresholdIDs) {
+						return sqp.ThresholdIDs[*idx], nil
+					}
+				case FilterIDs:
+					if *idx < len(sqp.FilterIDs) {
+						return sqp.FilterIDs[*idx], nil
+					}
+				case Metrics:
+					if *idx < len(sqp.Metrics) {
+						return sqp.Metrics[*idx], nil
+					}
+				}
+			}
+			return nil, ErrNotFound
+		case Tenant:
+			return sqp.Tenant, nil
+		case ID:
+			return sqp.ID, nil
+		case FilterIDs:
+			return sqp.FilterIDs, nil
+		case Weights:
+			return sqp.Weights, nil
+		case Blockers:
+			return sqp.Blockers, nil
+		case QueueLength:
+			return sqp.QueueLength, nil
+		case TTL:
+			return sqp.TTL, nil
+		case MinItems:
+			return sqp.MinItems, nil
+		case Stored:
+			return sqp.Stored, nil
+		case ThresholdIDs:
+			return sqp.ThresholdIDs, nil
+		case Metrics:
+			return sqp.Metrics, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, ErrNotFound
+	}
+	fld, idx := GetPathIndex(fldPath[0])
+	if fld != Metrics ||
+		idx == nil {
+		return nil, ErrNotFound
+	}
+	if *idx >= len(sqp.Metrics) {
+		return nil, ErrNotFound
+	}
+	return sqp.Metrics[*idx].FieldAsInterface(fldPath[1:])
+}
+
+// AsMapStringInterface converts StatQueueProfile struct to map[string]any
+func (sqp *StatQueueProfile) AsMapStringInterface() map[string]any {
+	if sqp == nil {
+		return nil
+	}
+	return map[string]any{
+		Tenant:       sqp.Tenant,
+		ID:           sqp.ID,
+		FilterIDs:    sqp.FilterIDs,
+		Weights:      sqp.Weights,
+		Blockers:     sqp.Blockers,
+		QueueLength:  sqp.QueueLength,
+		TTL:          sqp.TTL,
+		MinItems:     sqp.MinItems,
+		Stored:       sqp.Stored,
+		ThresholdIDs: sqp.ThresholdIDs,
+		Metrics:      sqp.Metrics,
+	}
+}
+
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile
 	APIOpts map[string]any
 }
 
-func (sqp *StatQueueProfile) TenantID() string {
-	return ConcatenatedKey(sqp.Tenant, sqp.ID)
+// MapStringInterfaceToStatQueueProfile converts map[string]any to StatQueueProfile struct
+func MapStringInterfaceToStatQueueProfile(m map[string]any) (*StatQueueProfile, error) {
+	sqp := &StatQueueProfile{}
+	if v, ok := m[Tenant].(string); ok {
+		sqp.Tenant = v
+	}
+	if v, ok := m[ID].(string); ok {
+		sqp.ID = v
+	}
+	sqp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
+	sqp.Weights = InterfaceToDynamicWeights(m[Weights])
+	sqp.Blockers = InterfaceToDynamicBlockers(m[Blockers])
+	if v, ok := m[QueueLength].(float64); ok {
+		sqp.QueueLength = int(v)
+	}
+	if v, ok := m[TTL].(string); ok {
+		dur, err := time.ParseDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		sqp.TTL = dur
+	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
+		sqp.TTL = time.Duration(v)
+	}
+	if v, ok := m[MinItems].(float64); ok {
+		sqp.MinItems = int(v)
+	}
+	if v, ok := m[Stored].(bool); ok {
+		sqp.Stored = v
+	}
+	sqp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
+	sqp.Metrics = InterfaceToMetrics(m[Metrics])
+	return sqp, nil
 }
 
 type MetricWithFilters struct {
@@ -115,14 +342,57 @@ func (mwf *MetricWithFilters) Clone() *MetricWithFilters {
 	return result
 }
 
-type StatQueueWithAPIOpts struct {
-	StatQueue *StatQueue
-	APIOpts   map[string]any
+func (mf *MetricWithFilters) String() string { return ToJSON(mf) }
+func (mf *MetricWithFilters) FieldAsString(fldPath []string) (string, error) {
+	val, err := mf.FieldAsInterface(fldPath)
+	if err != nil {
+		return "", err
+	}
+	return IfaceAsString(val), nil
+}
+func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if fld == FilterIDs &&
+			idx != nil &&
+			*idx < len(mf.FilterIDs) {
+			return mf.FilterIDs[*idx], nil
+		}
+		return nil, ErrNotFound
+	case MetricID:
+		return mf.MetricID, nil
+	case FilterIDs:
+		return mf.FilterIDs, nil
+	case Blockers:
+		return mf.Blockers, nil
+	}
 }
 
-type SQItem struct {
-	EventID    string     // Bounded to the original CGREvent
-	ExpiryTime *time.Time // Used to auto-expire events
+func InterfaceToMetrics(v any) []*MetricWithFilters {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case []any:
+		result := make([]*MetricWithFilters, 0, len(val))
+		for _, item := range val {
+			if itemMap, ok := item.(map[string]any); ok {
+				metric := &MetricWithFilters{}
+				if metricID, ok := itemMap[MetricID].(string); ok {
+					metric.MetricID = metricID
+				}
+				metric.FilterIDs = InterfaceToStringSlice(itemMap[FilterIDs])
+				metric.Blockers = InterfaceToDynamicBlockers(itemMap[Blockers])
+				result = append(result, metric)
+			}
+		}
+		return result
+	}
+	return nil
 }
 
 func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems uint64) (sq *StatQueue, err error) {
@@ -279,6 +549,16 @@ func (sq *StatQueue) CacheClone() any {
 	return sq.Clone()
 }
 
+type SQItem struct {
+	EventID    string     // Bounded to the original CGREvent
+	ExpiryTime *time.Time // Used to auto-expire events
+}
+
+type StatQueueWithAPIOpts struct {
+	StatQueue *StatQueue
+	APIOpts   map[string]any
+}
+
 func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
 	if ssq == nil {
 		return []byte("null"), nil
@@ -309,287 +589,6 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 	ssq.StatQueue = sq
 	ssq.APIOpts = i.APIOpts
 	return
-}
-
-func (sqp *StatQueueProfile) Set(path []string, val any, newBranch bool) (err error) {
-	switch len(path) {
-	default:
-		return ErrWrongPath
-	case 1:
-		if val == EmptyString {
-			return
-		}
-		switch path[0] {
-		default:
-			return ErrWrongPath
-		case Tenant:
-			sqp.Tenant = IfaceAsString(val)
-		case ID:
-			sqp.ID = IfaceAsString(val)
-
-		case QueueLength:
-			sqp.QueueLength, err = IfaceAsInt(val)
-		case MinItems:
-			sqp.MinItems, err = IfaceAsInt(val)
-		case TTL:
-			sqp.TTL, err = IfaceAsDuration(val)
-		case Stored:
-			sqp.Stored, err = IfaceAsBool(val)
-		case Blockers:
-			if val != EmptyString {
-				sqp.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
-			}
-		case Weights:
-			if val != EmptyString {
-				sqp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
-			}
-
-		case FilterIDs:
-			var valA []string
-			valA, err = IfaceAsStringSlice(val)
-			sqp.FilterIDs = append(sqp.FilterIDs, valA...)
-		case ThresholdIDs:
-			var valA []string
-			valA, err = IfaceAsStringSlice(val)
-			sqp.ThresholdIDs = append(sqp.ThresholdIDs, valA...)
-		}
-	case 2:
-		// path =[]string{Metrics, MetricID}
-		if path[0] != Metrics {
-			return ErrWrongPath
-		}
-		// val := *acd;*tcd;*asr
-		if val != EmptyString {
-			if len(sqp.Metrics) == 0 || newBranch {
-				sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
-			}
-			switch path[1] {
-			case FilterIDs:
-				var valA []string
-				valA, err = IfaceAsStringSlice(val)
-				sqp.Metrics[len(sqp.Metrics)-1].FilterIDs = append(sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, valA...)
-			case MetricID:
-				valA := InfieldSplit(IfaceAsString(val))
-				sqp.Metrics[len(sqp.Metrics)-1].MetricID = valA[0]
-				for _, mID := range valA[1:] { // add the rest of the metrics
-					sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
-				}
-			case Blockers:
-				var blkrs DynamicBlockers
-				if blkrs, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep); err != nil {
-					return
-				}
-				sqp.Metrics[len(sqp.Metrics)-1].Blockers = append(sqp.Metrics[len(sqp.Metrics)-1].Blockers, blkrs...)
-			default:
-				return ErrWrongPath
-			}
-		}
-	}
-	return
-}
-
-func (sqp *StatQueueProfile) Merge(v2 any) {
-	vi := v2.(*StatQueueProfile)
-	if len(vi.Tenant) != 0 {
-		sqp.Tenant = vi.Tenant
-	}
-	if len(vi.ID) != 0 {
-		sqp.ID = vi.ID
-	}
-	sqp.FilterIDs = append(sqp.FilterIDs, vi.FilterIDs...)
-	sqp.ThresholdIDs = append(sqp.ThresholdIDs, vi.ThresholdIDs...)
-	sqp.Metrics = append(sqp.Metrics, vi.Metrics...)
-
-	if vi.QueueLength != 0 {
-		sqp.QueueLength = vi.QueueLength
-	}
-	if vi.TTL != 0 {
-		sqp.TTL = vi.TTL
-	}
-	if vi.MinItems != 0 {
-		sqp.MinItems = vi.MinItems
-	}
-	if vi.Stored {
-		sqp.Stored = vi.Stored
-	}
-	sqp.Weights = append(sqp.Weights, vi.Weights...)
-	sqp.Blockers = append(sqp.Blockers, vi.Blockers...)
-}
-
-func (sqp *StatQueueProfile) String() string { return ToJSON(sqp) }
-func (sqp *StatQueueProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val any
-	if val, err = sqp.FieldAsInterface(fldPath); err != nil {
-		return
-	}
-	return IfaceAsString(val), nil
-}
-func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
-	if len(fldPath) == 1 {
-		switch fldPath[0] {
-		default:
-			fld, idx := GetPathIndex(fldPath[0])
-			if idx != nil {
-				switch fld {
-				case ThresholdIDs:
-					if *idx < len(sqp.ThresholdIDs) {
-						return sqp.ThresholdIDs[*idx], nil
-					}
-				case FilterIDs:
-					if *idx < len(sqp.FilterIDs) {
-						return sqp.FilterIDs[*idx], nil
-					}
-				case Metrics:
-					if *idx < len(sqp.Metrics) {
-						return sqp.Metrics[*idx], nil
-					}
-				}
-			}
-			return nil, ErrNotFound
-		case Tenant:
-			return sqp.Tenant, nil
-		case ID:
-			return sqp.ID, nil
-		case FilterIDs:
-			return sqp.FilterIDs, nil
-		case Weights:
-			return sqp.Weights, nil
-		case ThresholdIDs:
-			return sqp.ThresholdIDs, nil
-		case QueueLength:
-			return sqp.QueueLength, nil
-		case TTL:
-			return sqp.TTL, nil
-		case MinItems:
-			return sqp.MinItems, nil
-		case Metrics:
-			return sqp.Metrics, nil
-		case Stored:
-			return sqp.Stored, nil
-		case Blockers:
-			return sqp.Blockers, nil
-		}
-	}
-	if len(fldPath) == 0 {
-		return nil, ErrNotFound
-	}
-	fld, idx := GetPathIndex(fldPath[0])
-	if fld != Metrics ||
-		idx == nil {
-		return nil, ErrNotFound
-	}
-	if *idx >= len(sqp.Metrics) {
-		return nil, ErrNotFound
-	}
-	return sqp.Metrics[*idx].FieldAsInterface(fldPath[1:])
-}
-
-func (mf *MetricWithFilters) String() string { return ToJSON(mf) }
-func (mf *MetricWithFilters) FieldAsString(fldPath []string) (_ string, err error) {
-	var val any
-	if val, err = mf.FieldAsInterface(fldPath); err != nil {
-		return
-	}
-	return IfaceAsString(val), nil
-}
-func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ any, err error) {
-	if len(fldPath) != 1 {
-		return nil, ErrNotFound
-	}
-	switch fldPath[0] {
-	default:
-		fld, idx := GetPathIndex(fldPath[0])
-		if fld == FilterIDs &&
-			idx != nil &&
-			*idx < len(mf.FilterIDs) {
-			return mf.FilterIDs[*idx], nil
-		}
-		return nil, ErrNotFound
-	case MetricID:
-		return mf.MetricID, nil
-	case FilterIDs:
-		return mf.FilterIDs, nil
-	case Blockers:
-		return mf.Blockers, nil
-	}
-}
-
-// AsMapStringInterface converts StatQueueProfile struct to map[string]any
-func (sqp *StatQueueProfile) AsMapStringInterface() map[string]any {
-	if sqp == nil {
-		return nil
-	}
-	return map[string]any{
-		Tenant:       sqp.Tenant,
-		ID:           sqp.ID,
-		FilterIDs:    sqp.FilterIDs,
-		Weights:      sqp.Weights,
-		Blockers:     sqp.Blockers,
-		QueueLength:  sqp.QueueLength,
-		TTL:          sqp.TTL,
-		MinItems:     sqp.MinItems,
-		Stored:       sqp.Stored,
-		ThresholdIDs: sqp.ThresholdIDs,
-		Metrics:      sqp.Metrics,
-	}
-}
-
-// MapStringInterfaceToStatQueueProfile converts map[string]any to StatQueueProfile struct
-func MapStringInterfaceToStatQueueProfile(m map[string]any) (*StatQueueProfile, error) {
-	sqp := &StatQueueProfile{}
-	if v, ok := m[Tenant].(string); ok {
-		sqp.Tenant = v
-	}
-	if v, ok := m[ID].(string); ok {
-		sqp.ID = v
-	}
-	sqp.FilterIDs = InterfaceToStringSlice(m[FilterIDs])
-	sqp.Weights = InterfaceToDynamicWeights(m[Weights])
-	sqp.Blockers = InterfaceToDynamicBlockers(m[Blockers])
-	if v, ok := m[QueueLength].(float64); ok {
-		sqp.QueueLength = int(v)
-	}
-	if v, ok := m[TTL].(string); ok {
-		if dur, err := time.ParseDuration(v); err != nil {
-			return nil, err
-		} else {
-			sqp.TTL = dur
-		}
-	} else if v, ok := m[TTL].(float64); ok { // for -1 cases
-		sqp.TTL = time.Duration(v)
-	}
-	if v, ok := m[MinItems].(float64); ok {
-		sqp.MinItems = int(v)
-	}
-	if v, ok := m[Stored].(bool); ok {
-		sqp.Stored = v
-	}
-	sqp.ThresholdIDs = InterfaceToStringSlice(m[ThresholdIDs])
-	sqp.Metrics = InterfaceToMetrics(m[Metrics])
-	return sqp, nil
-}
-
-func InterfaceToMetrics(v any) []*MetricWithFilters {
-	if v == nil {
-		return nil
-	}
-	switch val := v.(type) {
-	case []any:
-		result := make([]*MetricWithFilters, 0, len(val))
-		for _, item := range val {
-			if itemMap, ok := item.(map[string]any); ok {
-				metric := &MetricWithFilters{}
-				if metricID, ok := itemMap[MetricID].(string); ok {
-					metric.MetricID = metricID
-				}
-				metric.FilterIDs = InterfaceToStringSlice(itemMap[FilterIDs])
-				metric.Blockers = InterfaceToDynamicBlockers(itemMap[Blockers])
-				result = append(result, metric)
-			}
-		}
-		return result
-	}
-	return nil
 }
 
 // StatQueueLockKey returns the ID used to lock a StatQueue with guardian.
