@@ -66,9 +66,13 @@ func (s *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	s.sts = stats.NewStatService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
-	s.sts.StartLoop(context.TODO())
-	srv, _ := engine.NewService(s.sts)
+	ss := stats.NewStatService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	srv, err := engine.NewService(ss)
+	if err != nil {
+		return err
+	}
+	ss.StartLoop(context.TODO())
+	s.sts = ss
 	for _, svc := range srv {
 		cl.RpcRegister(svc)
 	}
@@ -85,7 +89,6 @@ func (s *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error
 // Shutdown stops the service
 func (s *StatService) Shutdown(registry *servmanager.Registry) error {
 	s.sts.Shutdown(context.TODO())
-	s.sts = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.StatSv1)
 	return nil
