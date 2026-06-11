@@ -20,10 +20,8 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"slices"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -219,61 +217,31 @@ func (sq *StatQueue) Expand() {
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue
-func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
+func (sq *StatQueue) UnmarshalJSON(data []byte) error {
 	var tmp struct {
 		Tenant    string
 		ID        string
 		SQItems   []SQItem
 		SQMetrics map[string]json.RawMessage
 	}
-	if err = json.Unmarshal(data, &tmp); err != nil {
-		return
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
 	}
 	sq.Tenant = tmp.Tenant
 	sq.ID = tmp.ID
 	sq.SQItems = tmp.SQItems
 	sq.SQMetrics = make(map[string]StatMetric)
 	for metricID, val := range tmp.SQMetrics {
-		metricSplit := strings.Split(metricID, HashtagSep)
-		var metric StatMetric
-		switch metricSplit[0] {
-		case MetaASR:
-			metric = new(StatASR)
-		case MetaACD:
-			metric = new(StatACD)
-		case MetaTCD:
-			metric = new(StatTCD)
-		case MetaACC:
-			metric = new(StatACC)
-		case MetaTCC:
-			metric = new(StatTCC)
-		case MetaPDD:
-			metric = new(StatPDD)
-		case MetaDDC:
-			metric = new(StatDDC)
-		case MetaSum:
-			metric = new(StatSum)
-		case MetaAverage:
-			metric = new(StatAverage)
-		case MetaDistinct:
-			metric = new(StatDistinct)
-		case MetaHighest:
-			metric = new(StatHighest)
-		case MetaLowest:
-			metric = new(StatLowest)
-		case MetaREPSC:
-			metric = new(StatREPSC)
-		case MetaREPFC:
-			metric = new(StatREPFC)
-		default:
-			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
+		metric, err := NewStatMetric(metricID, 0, nil)
+		if err != nil {
+			return err
 		}
-		if err = json.Unmarshal([]byte(val), metric); err != nil {
-			return
+		if err := json.Unmarshal([]byte(val), metric); err != nil {
+			return err
 		}
 		sq.SQMetrics[metricID] = metric
 	}
-	return
+	return nil
 }
 
 func (sq *StatQueue) Clone() (cln *StatQueue) {
