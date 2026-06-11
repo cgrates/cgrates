@@ -658,10 +658,10 @@ func (sS *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWit
 	}
 	sq.SQItems = make([]SQItem, 0)
 	metrics := sq.SQMetrics
-	sq.SQMetrics = make(map[string]StatMetric)
+	sq.SQMetrics = make(map[string]utils.StatMetric)
 	for id, m := range metrics {
-		var metric StatMetric
-		if metric, err = NewStatMetric(id,
+		var metric utils.StatMetric
+		if metric, err = utils.NewStatMetric(id,
 			m.GetMinItems(), m.GetFilterIDs()); err != nil {
 			return
 		}

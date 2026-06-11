@@ -569,7 +569,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		Tenant:    "cgrates.org",
 // 		ID:        stID,
 // 		SQItems:   []engine.SQItem{},
-// 		SQMetrics: map[string]engine.StatMetric{},
+// 		SQMetrics: map[string]utils.StatMetric{},
 // 	}
 // 	var result string
 // 	var replyPrfl *engine.StatQueueProfile
@@ -642,8 +642,8 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replySq = engine.StatQueue{}
 // 	sq.SQItems = nil
-// 	s, _ := engine.NewACD(1, "", nil)
-// 	sq.SQMetrics = map[string]engine.StatMetric{
+// 	s, _ := utils.NewACD(1, "", nil)
+// 	sq.SQMetrics = map[string]utils.StatMetric{
 // 		utils.MetaACD: s,
 // 	}
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {

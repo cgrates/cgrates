@@ -1484,7 +1484,7 @@ func TestDMSetStatQueueNewErr(t *testing.T) {
 	dm.ms = mockMarshal(experr)
 
 	sq := &StatQueue{
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]utils.StatMetric{
 			"key": statMetricMock(""),
 		},
 	}
@@ -1512,12 +1512,12 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 
 	sq := &StatQueue{
 
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Metric: &Metric{
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaASR: &utils.StatASR{
+				Metric: &utils.Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
-					Events: map[string]*DecimalWithCompress{
+					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
 				},
@@ -1558,12 +1558,12 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 
 	sq := &StatQueue{
 
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Metric: &Metric{
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaASR: &utils.StatASR{
+				Metric: &utils.Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
-					Events: map[string]*DecimalWithCompress{
+					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
 				},
@@ -1649,12 +1649,12 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 	sq := &StatQueue{
 		Tenant: utils.CGRateSorg,
 		ID:     "sqid99",
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Metric: &Metric{
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaASR: &utils.StatASR{
+				Metric: &utils.Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
-					Events: map[string]*DecimalWithCompress{
+					Events: map[string]*utils.DecimalWithCompress{
 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
 				},
@@ -2306,7 +2306,7 @@ func TestDMCacheDataFromDBStatQueuePrefix(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
 	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
@@ -4468,7 +4468,7 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	stq := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq01",
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]utils.StatMetric{
 			"key": statMetricMock(""),
 		},
 		SQItems: []SQItem{
@@ -4529,7 +4529,7 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -4613,7 +4613,7 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
 	if err := dm.DB()[utils.MetaDefault].SetStatQueueDrv(context.Background(), ssq, sq); err != nil {
@@ -9205,7 +9205,7 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
 	cfgtmp := config.CgrConfig()

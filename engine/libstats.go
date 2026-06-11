@@ -70,11 +70,11 @@ func (ssq *StoredStatQueue) AsStatQueue(ms utils.Marshaler) (sq *StatQueue, err 
 		Tenant:    ssq.Tenant,
 		ID:        ssq.ID,
 		SQItems:   make([]SQItem, len(ssq.SQItems)),
-		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
+		SQMetrics: make(map[string]utils.StatMetric, len(ssq.SQMetrics)),
 	}
 	copy(sq.SQItems, ssq.SQItems)
 	for metricID, marshaled := range ssq.SQMetrics {
-		metric, err := NewStatMetric(metricID, 0, []string{})
+		metric, err := utils.NewStatMetric(metricID, 0, []string{})
 		if err != nil {
 			return nil, err
 		}

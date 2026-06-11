@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package engine
+package utils
 
 import (
 	"errors"
@@ -28,7 +28,6 @@ import (
 
 	"maps"
 
-	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -46,24 +45,24 @@ func withErrReturn(fn metricConstructor) metricConstructorErr {
 // cfg serves as general purpose container to pass config options to metric
 func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm StatMetric, err error) {
 	metrics := map[string]metricConstructorErr{
-		utils.MetaASR:      withErrReturn(NewASR),
-		utils.MetaACD:      withErrReturn(NewACD),
-		utils.MetaTCD:      withErrReturn(NewTCD),
-		utils.MetaACC:      withErrReturn(NewACC),
-		utils.MetaTCC:      withErrReturn(NewTCC),
-		utils.MetaPDD:      withErrReturn(NewPDD),
-		utils.MetaDDC:      withErrReturn(NewDDC),
-		utils.MetaSum:      NewStatSum, // Already returns (StatMetric, error)
-		utils.MetaAverage:  withErrReturn(NewStatAverage),
-		utils.MetaDistinct: withErrReturn(NewStatDistinct),
-		utils.MetaHighest:  withErrReturn(NewStatHighest),
-		utils.MetaLowest:   withErrReturn(NewStatLowest),
-		utils.MetaREPSC:    withErrReturn(NewStatREPSC),
-		utils.MetaREPFC:    withErrReturn(NewStatREPFC),
+		MetaASR:      withErrReturn(NewASR),
+		MetaACD:      withErrReturn(NewACD),
+		MetaTCD:      withErrReturn(NewTCD),
+		MetaACC:      withErrReturn(NewACC),
+		MetaTCC:      withErrReturn(NewTCC),
+		MetaPDD:      withErrReturn(NewPDD),
+		MetaDDC:      withErrReturn(NewDDC),
+		MetaSum:      NewStatSum, // Already returns (StatMetric, error)
+		MetaAverage:  withErrReturn(NewStatAverage),
+		MetaDistinct: withErrReturn(NewStatDistinct),
+		MetaHighest:  withErrReturn(NewStatHighest),
+		MetaLowest:   withErrReturn(NewStatLowest),
+		MetaREPSC:    withErrReturn(NewStatREPSC),
+		MetaREPFC:    withErrReturn(NewStatREPFC),
 	}
 	// split the metricID
 	// in case of *sum we have *sum#~*req.FieldName
-	metricSplit := strings.Split(metricID, utils.HashtagSep)
+	metricSplit := strings.Split(metricID, HashtagSep)
 	if _, has := metrics[metricSplit[0]]; !has {
 		return nil, fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 	}
@@ -76,10 +75,10 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm Sta
 
 // StatMetric is the interface which a metric should implement
 type StatMetric interface {
-	GetValue() *utils.Decimal
+	GetValue() *Decimal
 	GetStringValue(rounding int) string
-	AddOneEvent(ev utils.DataProvider) error
-	AddEvent(evID string, ev utils.DataProvider) error
+	AddOneEvent(ev DataProvider) error
+	AddEvent(evID string, ev DataProvider) error
 	RemEvent(evID string) error
 	GetMinItems() (minIts uint64)
 	Compress(queueLen uint64, defaultID string) (eventIDs []string)
@@ -93,7 +92,7 @@ func NewASR(minItems uint64, _ string, filterIDs []string) StatMetric {
 }
 
 // timezoneOf returns the provider's timezone if it exposes one, else "".
-func timezoneOf(dp utils.DataProvider) string {
+func timezoneOf(dp DataProvider) string {
 	if p, ok := dp.(interface{ Timezone() string }); ok {
 		return p.Timezone()
 	}
@@ -106,31 +105,31 @@ type StatASR struct {
 }
 
 func (asr *StatASR) GetStringValue(rounding int) (valStr string) {
-	valStr = utils.NotAvailable
-	if val := asr.getAvgValue(); val != utils.DecimalNaN {
-		v, _ := utils.MultiplyDecimal(val, utils.NewDecimal(100, 0)).Round(rounding).Float64()
+	valStr = NotAvailable
+	if val := asr.getAvgValue(); val != DecimalNaN {
+		v, _ := MultiplyDecimal(val, NewDecimal(100, 0)).Round(rounding).Float64()
 		valStr = strconv.FormatFloat(v, 'f', -1, 64) + "%"
 	}
 	return
 }
 
-func (asr *StatASR) GetValue() (val *utils.Decimal) {
-	if val = asr.getAvgValue(); val != utils.DecimalNaN {
-		val = utils.MultiplyDecimal(val, utils.NewDecimal(100, 0))
+func (asr *StatASR) GetValue() (val *Decimal) {
+	if val = asr.getAvgValue(); val != DecimalNaN {
+		val = MultiplyDecimal(val, NewDecimal(100, 0))
 	}
 	return
 }
 
-func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
+func (asr *StatASR) AddOneEvent(ev DataProvider) (err error) {
 	var (
 		answered int64
 		val      any
 	)
-	if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
-		if err != utils.ErrNotFound {
+	if val, err = ev.FieldAsInterface([]string{MetaOpts, MetaStartTime}); err != nil {
+		if err != ErrNotFound {
 			return
 		}
-	} else if at, err := utils.IfaceAsTime(val, timezoneOf(ev)); err != nil {
+	} else if at, err := IfaceAsTime(val, timezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1
@@ -140,14 +139,14 @@ func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
+func (asr *StatASR) AddEvent(evID string, ev DataProvider) (err error) {
 	var answered int
 	var val any
-	if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
-		if err != utils.ErrNotFound {
+	if val, err = ev.FieldAsInterface([]string{MetaOpts, MetaStartTime}); err != nil {
+		if err != ErrNotFound {
 			return err
 		}
-	} else if at, err := utils.IfaceAsTime(val, timezoneOf(ev)); err != nil {
+	} else if at, err := IfaceAsTime(val, timezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1
@@ -158,22 +157,22 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 func (asr *StatASR) RemEvent(evID string) (err error) {
 	val, has := asr.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
-	ans := utils.NewDecimal(0, 0)
-	if val.Stat.Compare(utils.NewDecimalFromFloat64(0.5)) > 0 {
-		ans := utils.NewDecimal(1, 0)
-		asr.Value = utils.SubstractDecimal(asr.Value, ans)
+	ans := NewDecimal(0, 0)
+	if val.Stat.Compare(NewDecimalFromFloat64(0.5)) > 0 {
+		ans := NewDecimal(1, 0)
+		asr.Value = SubstractDecimal(asr.Value, ans)
 	}
 	asr.Count--
 	if val.CompressFactor <= 1 {
 		delete(asr.Events, evID)
 	} else {
-		val.Stat = utils.DivideDecimal(
-			utils.SubstractDecimal(
-				utils.MultiplyDecimal(val.Stat, utils.NewDecimal(int64(val.CompressFactor), 0)),
+		val.Stat = DivideDecimal(
+			SubstractDecimal(
+				MultiplyDecimal(val.Stat, NewDecimal(int64(val.CompressFactor), 0)),
 				ans),
-			utils.NewDecimal(int64(val.CompressFactor)-1, 0))
+			NewDecimal(int64(val.CompressFactor)-1, 0))
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	return
@@ -196,32 +195,32 @@ type StatACD struct {
 
 func (acd *StatACD) GetStringValue(rounding int) string {
 	if acd.Count == 0 || acd.Count < acd.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := acd.getAvgValue().Round(rounding).Duration()
 	return v.String()
 }
 
-func (acd *StatACD) GetValue() *utils.Decimal {
+func (acd *StatACD) GetValue() *Decimal {
 	return acd.getAvgValue()
 }
 
-func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+func (acd *StatACD) AddEvent(evID string, ev DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaUsage})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaUsage)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaUsage)
 		}
 		return err
 	}
 	return acd.addEvent(evID, ival)
 }
 
-func (acd *StatACD) AddOneEvent(ev utils.DataProvider) (err error) {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+func (acd *StatACD) AddOneEvent(ev DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaUsage})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaUsage)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaUsage)
 		}
 		return err
 	}
@@ -247,28 +246,28 @@ type StatTCD struct {
 
 func (sum *StatTCD) GetStringValue(rounding int) string {
 	if sum.Count == 0 || sum.Count < sum.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := sum.Value.Round(rounding).Duration()
 	return v.String()
 }
 
-func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+func (sum *StatTCD) AddEvent(evID string, ev DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaUsage})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaUsage)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaUsage)
 		}
 		return err
 	}
 	return sum.addEvent(evID, ival)
 }
 
-func (sum *StatTCD) AddOneEvent(ev utils.DataProvider) (err error) {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+func (sum *StatTCD) AddOneEvent(ev DataProvider) (err error) {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaUsage})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaUsage)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaUsage)
 		}
 		return err
 	}
@@ -295,42 +294,42 @@ func (acc *StatACC) GetStringValue(rounding int) string {
 	return acc.getAvgStringValue(rounding)
 }
 
-func (acc *StatACC) GetValue() *utils.Decimal {
+func (acc *StatACC) GetValue() *Decimal {
 	return acc.getAvgValue()
 }
 
-func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+func (acc *StatACC) AddEvent(evID string, ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaCost})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaCost)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaCost)
 		}
 		return err
 	}
-	val, err := utils.IfaceAsBig(ival)
+	val, err := IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+		return ErrPrefix(ErrNegative, MetaCost)
 	}
 	return acc.addEvent(evID, val)
 }
 
-func (acc *StatACC) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+func (acc *StatACC) AddOneEvent(ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaCost})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaCost)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaCost)
 		}
 		return err
 	}
-	val, err := utils.IfaceAsBig(ival)
+	val, err := IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+		return ErrPrefix(ErrNegative, MetaCost)
 	}
 	return acc.addOneEvent(val)
 }
@@ -350,38 +349,38 @@ type StatTCC struct {
 	*Metric
 }
 
-func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+func (tcc *StatTCC) AddEvent(evID string, ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaCost})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaCost)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaCost)
 		}
 		return err
 	}
-	val, err := utils.IfaceAsBig(ival)
+	val, err := IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+		return ErrPrefix(ErrNegative, MetaCost)
 	}
 	return tcc.addEvent(evID, val)
 }
 
-func (tcc *StatTCC) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+func (tcc *StatTCC) AddOneEvent(ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaCost})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaCost)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaCost)
 		}
 		return err
 	}
-	val, err := utils.IfaceAsBig(ival)
+	val, err := IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
+		return ErrPrefix(ErrNegative, MetaCost)
 	}
 	return tcc.addOneEvent(ival)
 }
@@ -403,32 +402,32 @@ type StatPDD struct {
 
 func (pdd *StatPDD) GetStringValue(rounding int) string {
 	if pdd.Count == 0 || pdd.Count < pdd.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := pdd.getAvgValue().Round(rounding).Duration()
 	return v.String()
 }
 
-func (pdd *StatPDD) GetValue() *utils.Decimal {
+func (pdd *StatPDD) GetValue() *Decimal {
 	return pdd.getAvgValue()
 }
 
-func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaPDD})
+func (pdd *StatPDD) AddEvent(evID string, ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaPDD})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaPDD)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaPDD)
 		}
 		return err
 	}
 	return pdd.addEvent(evID, ival)
 }
 
-func (pdd *StatPDD) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaPDD})
+func (pdd *StatPDD) AddOneEvent(ev DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{MetaOpts, MetaPDD})
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaPDD)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaPDD)
 		}
 		return err
 	}
@@ -444,7 +443,7 @@ func (pdd *StatPDD) Clone() StatMetric {
 func NewDDC(minItems uint64, _ string, filterIDs []string) StatMetric {
 	return &StatDDC{
 		Events:      make(map[string]map[string]uint64),
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		MinItems:    minItems,
 		FilterIDs:   filterIDs,
 	}
@@ -452,7 +451,7 @@ func NewDDC(minItems uint64, _ string, filterIDs []string) StatMetric {
 
 // StatDDC count  values occurring in destination field
 type StatDDC struct {
-	FieldValues map[string]utils.StringSet   // map[fieldValue]map[eventID]
+	FieldValues map[string]StringSet         // map[fieldValue]map[eventID]
 	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    uint64
 	Count       uint64
@@ -462,33 +461,33 @@ type StatDDC struct {
 func (ddc *StatDDC) GetFilterIDs() []string { return ddc.FilterIDs }
 
 func (ddc *StatDDC) GetStringValue(rounding int) (valStr string) {
-	valStr = utils.NotAvailable
-	if val := ddc.GetValue(); val != utils.DecimalNaN {
+	valStr = NotAvailable
+	if val := ddc.GetValue(); val != DecimalNaN {
 		v, _ := val.Round(rounding).Float64()
 		valStr = strconv.FormatFloat(v, 'f', -1, 64)
 	}
 	return
 }
 
-func (ddc *StatDDC) GetValue() *utils.Decimal {
+func (ddc *StatDDC) GetValue() *Decimal {
 	if ddc.Count == 0 || ddc.Count < ddc.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
-	return utils.NewDecimal(int64(len(ddc.FieldValues)), 0)
+	return NewDecimal(int64(len(ddc.FieldValues)), 0)
 }
 
-func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
+func (ddc *StatDDC) AddEvent(evID string, ev DataProvider) (err error) {
 	var fieldValue string
-	if fieldValue, err = ev.FieldAsString([]string{utils.MetaOpts, utils.MetaDestination}); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaDestination)
+	if fieldValue, err = ev.FieldAsString([]string{MetaOpts, MetaDestination}); err != nil {
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaDestination)
 		}
 		return
 	}
 
 	// add to fieldValues
 	if _, has := ddc.FieldValues[fieldValue]; !has {
-		ddc.FieldValues[fieldValue] = make(utils.StringSet)
+		ddc.FieldValues[fieldValue] = make(StringSet)
 	}
 	ddc.FieldValues[fieldValue].Add(evID)
 
@@ -505,16 +504,16 @@ func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	return
 }
 
-func (ddc *StatDDC) AddOneEvent(ev utils.DataProvider) (err error) {
+func (ddc *StatDDC) AddOneEvent(ev DataProvider) (err error) {
 	var fieldValue string
-	if fieldValue, err = ev.FieldAsString([]string{utils.MetaOpts, utils.MetaDestination}); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.MetaDestination)
+	if fieldValue, err = ev.FieldAsString([]string{MetaOpts, MetaDestination}); err != nil {
+		if err == ErrNotFound {
+			err = ErrPrefix(err, MetaDestination)
 		}
 		return
 	}
 	if _, has := ddc.FieldValues[fieldValue]; !has {
-		ddc.FieldValues[fieldValue] = make(utils.StringSet)
+		ddc.FieldValues[fieldValue] = make(StringSet)
 	}
 	ddc.Count++
 	return
@@ -523,11 +522,11 @@ func (ddc *StatDDC) AddOneEvent(ev utils.DataProvider) (err error) {
 func (ddc *StatDDC) RemEvent(evID string) (err error) {
 	fieldValues, has := ddc.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	if len(fieldValues) == 0 {
 		delete(ddc.Events, evID)
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 
 	// decrement events
@@ -587,7 +586,7 @@ func (ddc *StatDDC) Clone() StatMetric {
 		return nil
 	}
 	cln := &StatDDC{
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		Count:       ddc.Count,
 		Events:      make(map[string]map[string]uint64),
 		MinItems:    ddc.MinItems,
@@ -607,13 +606,13 @@ func (ddc *StatDDC) Clone() StatMetric {
 
 // ACDHelper structure
 type DecimalWithCompress struct {
-	Stat           *utils.Decimal
+	Stat           *Decimal
 	CompressFactor uint64
 }
 
 func NewMetric(minItems uint64, filterIDs []string) *Metric {
 	return &Metric{
-		Value:     utils.NewDecimal(0, 0),
+		Value:     NewDecimal(0, 0),
 		Events:    make(map[string]*DecimalWithCompress),
 		MinItems:  minItems,
 		FilterIDs: filterIDs,
@@ -621,7 +620,7 @@ func NewMetric(minItems uint64, filterIDs []string) *Metric {
 }
 
 type Metric struct {
-	Value     *utils.Decimal
+	Value     *Decimal
 	Count     uint64
 	Events    map[string]*DecimalWithCompress // map[EventTenantID]Cost
 	MinItems  uint64
@@ -630,55 +629,55 @@ type Metric struct {
 
 func (m *Metric) GetFilterIDs() []string { return m.FilterIDs }
 
-func (m *Metric) getTotalValue() *utils.Decimal {
+func (m *Metric) getTotalValue() *Decimal {
 	if m.Count == 0 || m.Count < m.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
 	return m.Value
 }
 
-func (m *Metric) getAvgValue() *utils.Decimal {
+func (m *Metric) getAvgValue() *Decimal {
 	if m.Count == 0 || m.Count < m.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
-	return utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0))
+	return DivideDecimal(m.Value, NewDecimal(int64(m.Count), 0))
 }
 
 func (m *Metric) getAvgStringValue(rounding int) string {
 	if m.Count == 0 || m.Count < m.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
-	v, _ := utils.DivideDecimal(m.Value, utils.NewDecimal(int64(m.Count), 0)).Round(rounding).Float64()
+	v, _ := DivideDecimal(m.Value, NewDecimal(int64(m.Count), 0)).Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
 func (m *Metric) GetStringValue(rounding int) string {
 	if m.Count == 0 || m.Count < m.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := m.Value.Round(rounding).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (m *Metric) GetValue() (v *utils.Decimal) {
+func (m *Metric) GetValue() (v *Decimal) {
 	return m.getTotalValue()
 }
 
 func (m *Metric) addEvent(evID string, ival any) (err error) {
 	var val *decimal.Big
-	if val, err = utils.IfaceAsBig(ival); err != nil {
+	if val, err = IfaceAsBig(ival); err != nil {
 		return
 	}
-	dVal := &utils.Decimal{Big: val}
-	m.Value = utils.SumDecimal(m.Value, dVal)
+	dVal := &Decimal{Big: val}
+	m.Value = SumDecimal(m.Value, dVal)
 	if v, has := m.Events[evID]; !has {
 		m.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
 	} else {
-		v.Stat = utils.DivideDecimal(
-			utils.SumDecimal(
-				utils.MultiplyDecimal(v.Stat, utils.NewDecimal(int64(v.CompressFactor), 0)),
+		v.Stat = DivideDecimal(
+			SumDecimal(
+				MultiplyDecimal(v.Stat, NewDecimal(int64(v.CompressFactor), 0)),
 				dVal),
-			utils.NewDecimal(int64(v.CompressFactor)+1, 0))
+			NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
 	m.Count++
@@ -688,11 +687,11 @@ func (m *Metric) addEvent(evID string, ival any) (err error) {
 // Adding aggregated metrics without events
 func (m *Metric) addOneEvent(ival any) (err error) {
 	var val *decimal.Big
-	if val, err = utils.IfaceAsBig(ival); err != nil {
+	if val, err = IfaceAsBig(ival); err != nil {
 		return
 	}
-	dVal := &utils.Decimal{Big: val}
-	m.Value = utils.SumDecimal(m.Value, dVal)
+	dVal := &Decimal{Big: val}
+	m.Value = SumDecimal(m.Value, dVal)
 	m.Count++
 	return
 }
@@ -701,10 +700,10 @@ func (m *Metric) addOneEvent(ival any) (err error) {
 func (m *Metric) RemEvent(evID string) (err error) {
 	val, has := m.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
-	if val.Stat.Compare(utils.NewDecimal(0, 0)) != 0 {
-		m.Value = utils.SubstractDecimal(m.Value, val.Stat)
+	if val.Stat.Compare(NewDecimal(0, 0)) != 0 {
+		m.Value = SubstractDecimal(m.Value, val.Stat)
 	}
 	m.Count--
 	if val.CompressFactor <= 1 {
@@ -728,7 +727,7 @@ func (m *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string)
 		return
 	}
 	m.Events = map[string]*DecimalWithCompress{defaultID: {
-		Stat:           utils.DivideDecimal(m.Value, utils.NewDecimalFromFloat64(float64(m.Count))),
+		Stat:           DivideDecimal(m.Value, NewDecimalFromFloat64(float64(m.Count))),
 		CompressFactor: m.Count,
 	}}
 	return []string{defaultID}
@@ -788,7 +787,7 @@ func (m *Metric) Equal(v *Metric) bool {
 }
 
 func NewStatSum(minItems uint64, fieldName string, filterIDs []string) (StatMetric, error) {
-	flds, err := utils.NewRSRParsers(fieldName, utils.InfieldSep)
+	flds, err := NewRSRParsers(fieldName, InfieldSep)
 	if err != nil {
 		return nil, err
 	}
@@ -800,17 +799,17 @@ func NewStatSum(minItems uint64, fieldName string, filterIDs []string) (StatMetr
 
 type StatSum struct {
 	*Metric
-	Fields utils.RSRParsers
+	Fields RSRParsers
 }
 
-func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
+func (sum *StatSum) AddEvent(evID string, ev DataProvider) error {
 	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
 		return err
 	}
 	return sum.addEvent(evID, ival)
 }
-func (sum *StatSum) AddOneEvent(ev utils.DataProvider) error {
+func (sum *StatSum) AddOneEvent(ev DataProvider) error {
 	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
 		return err
@@ -840,26 +839,26 @@ func (avg *StatAverage) GetStringValue(rounding int) string {
 	return avg.getAvgStringValue(rounding)
 }
 
-func (avg *StatAverage) GetValue() *utils.Decimal {
+func (avg *StatAverage) GetValue() *Decimal {
 	return avg.getAvgValue()
 }
 
-func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(avg.FieldName, ev)
+func (avg *StatAverage) AddEvent(evID string, ev DataProvider) error {
+	ival, err := DPDynamicInterface(avg.FieldName, ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, avg.FieldName)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, avg.FieldName)
 		}
 		return err
 	}
 	return avg.addEvent(evID, ival)
 }
 
-func (avg *StatAverage) AddOneEvent(ev utils.DataProvider) error {
-	ival, err := utils.DPDynamicInterface(avg.FieldName, ev)
+func (avg *StatAverage) AddOneEvent(ev DataProvider) error {
+	ival, err := DPDynamicInterface(avg.FieldName, ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, avg.FieldName)
+		if err == ErrNotFound {
+			err = ErrPrefix(err, avg.FieldName)
 		}
 		return err
 	}
@@ -877,7 +876,7 @@ func (avg *StatAverage) Clone() StatMetric {
 func NewStatDistinct(minItems uint64, fieldName string, filterIDs []string) StatMetric {
 	return &StatDistinct{
 		Events:      make(map[string]map[string]uint64),
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		MinItems:    minItems,
 		FieldName:   fieldName,
 		FilterIDs:   filterIDs,
@@ -885,7 +884,7 @@ func NewStatDistinct(minItems uint64, fieldName string, filterIDs []string) Stat
 }
 
 type StatDistinct struct {
-	FieldValues map[string]utils.StringSet   // map[fieldValue]map[eventID]
+	FieldValues map[string]StringSet         // map[fieldValue]map[eventID]
 	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    uint64
 	FieldName   string
@@ -896,38 +895,38 @@ type StatDistinct struct {
 func (dst *StatDistinct) GetFilterIDs() []string { return dst.FilterIDs }
 
 func (dst *StatDistinct) GetStringValue(rounding int) (valStr string) {
-	valStr = utils.NotAvailable
-	if val := dst.GetValue(); val != utils.DecimalNaN {
+	valStr = NotAvailable
+	if val := dst.GetValue(); val != DecimalNaN {
 		v, _ := val.Round(rounding).Float64()
 		valStr = strconv.FormatFloat(v, 'f', -1, 64)
 	}
 	return
 }
 
-func (dst *StatDistinct) GetValue() *utils.Decimal {
+func (dst *StatDistinct) GetValue() *Decimal {
 	if dst.Count == 0 || dst.Count < dst.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
-	return utils.NewDecimal(int64(len(dst.FieldValues)), 0)
+	return NewDecimal(int64(len(dst.FieldValues)), 0)
 }
 
-func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error) {
+func (dst *StatDistinct) AddEvent(evID string, ev DataProvider) (err error) {
 	var fieldValue string
 	// simply remove the ~*req./~*opts. prefix and do normal process
-	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) && !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep) {
+	if !strings.HasPrefix(dst.FieldName, DynamicDataPrefix+MetaReq+NestingSep) && !strings.HasPrefix(dst.FieldName, DynamicDataPrefix+MetaOpts+NestingSep) {
 		return fmt.Errorf("invalid format for field <%s>", dst.FieldName)
 	}
 
-	if fieldValue, err = utils.DPDynamicString(dst.FieldName, ev); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, dst.FieldName)
+	if fieldValue, err = DPDynamicString(dst.FieldName, ev); err != nil {
+		if err == ErrNotFound {
+			err = ErrPrefix(err, dst.FieldName)
 		}
 		return
 	}
 
 	// add to fieldValues
 	if _, has := dst.FieldValues[fieldValue]; !has {
-		dst.FieldValues[fieldValue] = make(utils.StringSet)
+		dst.FieldValues[fieldValue] = make(StringSet)
 	}
 	dst.FieldValues[fieldValue].Add(evID)
 
@@ -944,21 +943,21 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 	return
 }
 
-func (dst *StatDistinct) AddOneEvent(ev utils.DataProvider) (err error) {
+func (dst *StatDistinct) AddOneEvent(ev DataProvider) (err error) {
 	var fieldValue string
 	// simply remove the ~*req./~*opts. prefix and do normal process
-	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) && !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep) {
+	if !strings.HasPrefix(dst.FieldName, DynamicDataPrefix+MetaReq+NestingSep) && !strings.HasPrefix(dst.FieldName, DynamicDataPrefix+MetaOpts+NestingSep) {
 		return fmt.Errorf("invalid format for field <%s>", dst.FieldName)
 	}
-	if fieldValue, err = utils.DPDynamicString(dst.FieldName, ev); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, dst.FieldName)
+	if fieldValue, err = DPDynamicString(dst.FieldName, ev); err != nil {
+		if err == ErrNotFound {
+			err = ErrPrefix(err, dst.FieldName)
 		}
 		return
 	}
 	// add to fieldValues
 	if _, has := dst.FieldValues[fieldValue]; !has {
-		dst.FieldValues[fieldValue] = make(utils.StringSet)
+		dst.FieldValues[fieldValue] = make(StringSet)
 	}
 
 	dst.Count++
@@ -968,11 +967,11 @@ func (dst *StatDistinct) AddOneEvent(ev utils.DataProvider) (err error) {
 func (dst *StatDistinct) RemEvent(evID string) (err error) {
 	fieldValues, has := dst.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	if len(fieldValues) == 0 {
 		delete(dst.Events, evID)
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 
 	// decrement events
@@ -1036,7 +1035,7 @@ func (dst *StatDistinct) Clone() StatMetric {
 		Events:      make(map[string]map[string]uint64),
 		MinItems:    dst.MinItems,
 		FieldName:   dst.FieldName,
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		FilterIDs:   slices.Clone(dst.FilterIDs),
 	}
 	for k, v := range dst.Events {
@@ -1057,8 +1056,8 @@ func NewStatHighest(minItems uint64, fieldName string, filterIDs []string) StatM
 		FilterIDs: filterIDs,
 		MinItems:  minItems,
 		FieldName: fieldName,
-		Highest:   utils.NewDecimal(0, 0),
-		Events:    make(map[string]*utils.Decimal),
+		Highest:   NewDecimal(0, 0),
+		Events:    make(map[string]*Decimal),
 	}
 }
 
@@ -1068,9 +1067,9 @@ type StatHighest struct {
 	FieldName string   // field path to extract from events
 	MinItems  uint64   // minimum events required for valid results
 
-	Highest *utils.Decimal            // current maximum value tracked
-	Count   uint64                    // number of events currently tracked
-	Events  map[string]*utils.Decimal // event values indexed by ID for deletion
+	Highest *Decimal            // current maximum value tracked
+	Count   uint64              // number of events currently tracked
+	Events  map[string]*Decimal // event values indexed by ID for deletion
 }
 
 // Clone creates a deep copy of StatHighest.
@@ -1091,21 +1090,21 @@ func (s *StatHighest) Clone() StatMetric {
 
 func (s *StatHighest) GetStringValue(decimals int) string {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := s.Highest.Round(decimals).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (s *StatHighest) GetValue() *utils.Decimal {
+func (s *StatHighest) GetValue() *Decimal {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
 	return s.Highest
 }
 
 // AddEvent processes a new event, updating highest value if necessary
-func (s *StatHighest) AddEvent(evID string, ev utils.DataProvider) error {
+func (s *StatHighest) AddEvent(evID string, ev DataProvider) error {
 	val, err := fieldValueFromDP(s.FieldName, ev)
 	if err != nil {
 		return err
@@ -1125,7 +1124,7 @@ func (s *StatHighest) AddEvent(evID string, ev utils.DataProvider) error {
 
 // AddOneEvent processes event without storing for removal (used when events
 // never expire).
-func (s *StatHighest) AddOneEvent(ev utils.DataProvider) error {
+func (s *StatHighest) AddOneEvent(ev DataProvider) error {
 	val, err := fieldValueFromDP(s.FieldName, ev)
 	if err != nil {
 		return err
@@ -1140,12 +1139,12 @@ func (s *StatHighest) AddOneEvent(ev utils.DataProvider) error {
 func (s *StatHighest) RemEvent(evID string) error {
 	v, exists := s.Events[evID]
 	if !exists {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	delete(s.Events, evID)
 	s.Count--
 	if v.Compare(s.Highest) == 0 {
-		s.Highest = utils.NewDecimal(0, 0) // reset highest
+		s.Highest = NewDecimal(0, 0) // reset highest
 
 		// Find new highest among remaining events.
 		for _, val := range s.Events {
@@ -1189,8 +1188,8 @@ func NewStatLowest(minItems uint64, fieldName string, filterIDs []string) StatMe
 		FilterIDs: filterIDs,
 		MinItems:  minItems,
 		FieldName: fieldName,
-		Lowest:    utils.NewDecimalFromFloat64(math.MaxFloat64),
-		Events:    make(map[string]*utils.Decimal),
+		Lowest:    NewDecimalFromFloat64(math.MaxFloat64),
+		Events:    make(map[string]*Decimal),
 	}
 }
 
@@ -1200,9 +1199,9 @@ type StatLowest struct {
 	FieldName string   // field path to extract from events
 	MinItems  uint64   // minimum events required for valid results
 
-	Lowest *utils.Decimal            // current minimum value tracked
-	Count  uint64                    // number of events currently tracked
-	Events map[string]*utils.Decimal // event values indexed by ID for deletion
+	Lowest *Decimal            // current minimum value tracked
+	Count  uint64              // number of events currently tracked
+	Events map[string]*Decimal // event values indexed by ID for deletion
 }
 
 // Clone creates a deep copy of StatLowest.
@@ -1223,21 +1222,21 @@ func (s *StatLowest) Clone() StatMetric {
 
 func (s *StatLowest) GetStringValue(decimals int) string {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	v, _ := s.Lowest.Round(decimals).Float64()
 	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
-func (s *StatLowest) GetValue() *utils.Decimal {
+func (s *StatLowest) GetValue() *Decimal {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
 	return s.Lowest
 }
 
 // AddEvent processes a new event, updating lowest value if necessary.
-func (s *StatLowest) AddEvent(evID string, ev utils.DataProvider) error {
+func (s *StatLowest) AddEvent(evID string, ev DataProvider) error {
 	val, err := fieldValueFromDP(s.FieldName, ev)
 	if err != nil {
 		return err
@@ -1257,7 +1256,7 @@ func (s *StatLowest) AddEvent(evID string, ev utils.DataProvider) error {
 
 // AddOneEvent processes event without storing for removal (used when events
 // never expire).
-func (s *StatLowest) AddOneEvent(ev utils.DataProvider) error {
+func (s *StatLowest) AddOneEvent(ev DataProvider) error {
 	val, err := fieldValueFromDP(s.FieldName, ev)
 	if err != nil {
 		return err
@@ -1272,12 +1271,12 @@ func (s *StatLowest) AddOneEvent(ev utils.DataProvider) error {
 func (s *StatLowest) RemEvent(evID string) error {
 	v, exists := s.Events[evID]
 	if !exists {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	delete(s.Events, evID)
 	s.Count--
 	if v.Compare(s.Lowest) == 0 {
-		s.Lowest = utils.NewDecimalFromFloat64(math.MaxFloat64) // reset lowest
+		s.Lowest = NewDecimalFromFloat64(math.MaxFloat64) // reset lowest
 
 		// Find new lowest among remaining events.
 		for _, val := range s.Events {
@@ -1348,25 +1347,25 @@ func (s *StatREPSC) Clone() StatMetric {
 
 func (s *StatREPSC) GetStringValue(_ int) string {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	return strconv.Itoa(int(s.Count))
 }
 
-func (s *StatREPSC) GetValue() *utils.Decimal {
+func (s *StatREPSC) GetValue() *Decimal {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
-	return utils.NewDecimal(int64(s.Count), 0)
+	return NewDecimal(int64(s.Count), 0)
 }
 
 // AddEvent processes a new event, incrementing count if ReplyState is "OK".
-func (s *StatREPSC) AddEvent(evID string, ev utils.DataProvider) error {
+func (s *StatREPSC) AddEvent(evID string, ev DataProvider) error {
 	replyState, err := replyStateFromDP(ev)
 	if err != nil {
 		return err
 	}
-	if replyState != utils.OK {
+	if replyState != OK {
 		return nil
 	}
 
@@ -1381,12 +1380,12 @@ func (s *StatREPSC) AddEvent(evID string, ev utils.DataProvider) error {
 
 // AddOneEvent processes event without storing for removal (used when events
 // never expire).
-func (s *StatREPSC) AddOneEvent(ev utils.DataProvider) error {
+func (s *StatREPSC) AddOneEvent(ev DataProvider) error {
 	replyState, err := replyStateFromDP(ev)
 	if err != nil {
 		return err
 	}
-	if replyState != utils.OK {
+	if replyState != OK {
 		return nil
 	}
 	s.Count++
@@ -1395,7 +1394,7 @@ func (s *StatREPSC) AddOneEvent(ev utils.DataProvider) error {
 
 func (s *StatREPSC) RemEvent(evID string) error {
 	if _, exists := s.Events[evID]; !exists {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	delete(s.Events, evID)
 	s.Count--
@@ -1466,20 +1465,20 @@ func (s *StatREPFC) Clone() StatMetric {
 
 func (s *StatREPFC) GetStringValue(_ int) string {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.NotAvailable
+		return NotAvailable
 	}
 	return strconv.Itoa(int(s.Count))
 }
 
-func (s *StatREPFC) GetValue() *utils.Decimal {
+func (s *StatREPFC) GetValue() *Decimal {
 	if s.Count == 0 || s.Count < s.MinItems {
-		return utils.DecimalNaN
+		return DecimalNaN
 	}
-	return utils.NewDecimal(int64(s.Count), 0)
+	return NewDecimal(int64(s.Count), 0)
 }
 
 // AddEvent processes a new event, incrementing count if ReplyState is not "OK".
-func (s *StatREPFC) AddEvent(evID string, ev utils.DataProvider) error {
+func (s *StatREPFC) AddEvent(evID string, ev DataProvider) error {
 	replyState, err := replyStateFromDP(ev)
 	if err != nil {
 		return err
@@ -1487,13 +1486,13 @@ func (s *StatREPFC) AddEvent(evID string, ev utils.DataProvider) error {
 
 	// Skip if success when counting all failures, or if not matching specific
 	// error type.
-	if s.ErrorType == "" && replyState == utils.OK {
+	if s.ErrorType == "" && replyState == OK {
 		return nil
 	}
 	// Handle multiple errors separated by ";" (e.g., "ERR_TERMINATE;ERR_CDRS")
 	// Use split + exact match instead of strings.Contains to avoid false positives.
 	if s.ErrorType != "" {
-		errors := strings.Split(replyState, utils.InfieldSep)
+		errors := strings.Split(replyState, InfieldSep)
 		if !slices.Contains(errors, s.ErrorType) {
 			return nil
 		}
@@ -1510,7 +1509,7 @@ func (s *StatREPFC) AddEvent(evID string, ev utils.DataProvider) error {
 
 // AddOneEvent processes event without storing for removal (used when events
 // never expire).
-func (s *StatREPFC) AddOneEvent(ev utils.DataProvider) error {
+func (s *StatREPFC) AddOneEvent(ev DataProvider) error {
 	replyState, err := replyStateFromDP(ev)
 	if err != nil {
 		return err
@@ -1518,13 +1517,13 @@ func (s *StatREPFC) AddOneEvent(ev utils.DataProvider) error {
 
 	// Skip if success when counting all failures, or if not matching specific
 	// error type.
-	if s.ErrorType == "" && replyState == utils.OK {
+	if s.ErrorType == "" && replyState == OK {
 		return nil
 	}
 	// Handle multiple errors separated by ";" (e.g., "ERR_TERMINATE;ERR_CDRS")
 	// Use split + exact match instead of strings.Contains to avoid false positives
 	if s.ErrorType != "" {
-		errors := strings.Split(replyState, utils.InfieldSep)
+		errors := strings.Split(replyState, InfieldSep)
 		if !slices.Contains(errors, s.ErrorType) {
 			return nil
 		}
@@ -1536,7 +1535,7 @@ func (s *StatREPFC) AddOneEvent(ev utils.DataProvider) error {
 
 func (s *StatREPFC) RemEvent(evID string) error {
 	if _, exists := s.Events[evID]; !exists {
-		return utils.ErrNotFound
+		return ErrNotFound
 	}
 	delete(s.Events, evID)
 	s.Count--
@@ -1572,33 +1571,33 @@ func (s *StatREPFC) GetCompressFactor(events map[string]uint64) map[string]uint6
 }
 
 // fieldValueFromDP gets the numeric value from the DataProvider.
-func fieldValueFromDP(fldName string, dp utils.DataProvider) (*utils.Decimal, error) {
-	ival, err := utils.DPDynamicInterface(fldName, dp)
+func fieldValueFromDP(fldName string, dp DataProvider) (*Decimal, error) {
+	ival, err := DPDynamicInterface(fldName, dp)
 	if err != nil {
-		if errors.Is(err, utils.ErrNotFound) {
-			return nil, utils.ErrPrefix(err, fldName)
+		if errors.Is(err, ErrNotFound) {
+			return nil, ErrPrefix(err, fldName)
 			// NOTE: return below might be clearer
 			// return nil, fmt.Errorf("field %s: %v", field, err)
 		}
 		return nil, err
 	}
-	v, err := utils.IfaceAsBig(ival)
+	v, err := IfaceAsBig(ival)
 	if err != nil {
 		return nil, err
 	}
-	return &utils.Decimal{Big: v}, nil
+	return &Decimal{Big: v}, nil
 }
 
 // replyStateFromDP gets the numeric value from the DataProvider.
-func replyStateFromDP(dp utils.DataProvider) (string, error) {
-	ival, err := dp.FieldAsInterface([]string{utils.MetaReq, utils.ReplyState})
+func replyStateFromDP(dp DataProvider) (string, error) {
+	ival, err := dp.FieldAsInterface([]string{MetaReq, ReplyState})
 	if err != nil {
-		if errors.Is(err, utils.ErrNotFound) {
-			return "", utils.ErrPrefix(err, utils.ReplyState)
+		if errors.Is(err, ErrNotFound) {
+			return "", ErrPrefix(err, ReplyState)
 			// NOTE: return below might be clearer
-			// return 0, fmt.Errorf("field %s: %v", utils.ReplyState, err)
+			// return 0, fmt.Errorf("field %s: %v", ReplyState, err)
 		}
 		return "", err
 	}
-	return utils.IfaceAsString(ival), nil
+	return IfaceAsString(ival), nil
 }

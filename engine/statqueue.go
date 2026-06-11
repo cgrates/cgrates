@@ -136,11 +136,11 @@ func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems uint64)
 	sq = &StatQueue{
 		Tenant:    tnt,
 		ID:        id,
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
 	for _, metric := range metrics {
-		if sq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
+		if sq.SQMetrics[metric.MetricID], err = utils.NewStatMetric(metric.MetricID,
 			minItems, metric.FilterIDs); err != nil {
 			return
 		}
@@ -153,7 +153,7 @@ type StatQueue struct {
 	Tenant    string
 	ID        string
 	SQItems   []SQItem
-	SQMetrics map[string]StatMetric
+	SQMetrics map[string]utils.StatMetric
 	lkID      string // ID of the lock used when matching the stat
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
@@ -249,39 +249,39 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 	sq.Tenant = tmp.Tenant
 	sq.ID = tmp.ID
 	sq.SQItems = tmp.SQItems
-	sq.SQMetrics = make(map[string]StatMetric)
+	sq.SQMetrics = make(map[string]utils.StatMetric)
 	for metricID, val := range tmp.SQMetrics {
 		metricSplit := strings.Split(metricID, utils.HashtagSep)
-		var metric StatMetric
+		var metric utils.StatMetric
 		switch metricSplit[0] {
 		case utils.MetaASR:
-			metric = new(StatASR)
+			metric = new(utils.StatASR)
 		case utils.MetaACD:
-			metric = new(StatACD)
+			metric = new(utils.StatACD)
 		case utils.MetaTCD:
-			metric = new(StatTCD)
+			metric = new(utils.StatTCD)
 		case utils.MetaACC:
-			metric = new(StatACC)
+			metric = new(utils.StatACC)
 		case utils.MetaTCC:
-			metric = new(StatTCC)
+			metric = new(utils.StatTCC)
 		case utils.MetaPDD:
-			metric = new(StatPDD)
+			metric = new(utils.StatPDD)
 		case utils.MetaDDC:
-			metric = new(StatDDC)
+			metric = new(utils.StatDDC)
 		case utils.MetaSum:
-			metric = new(StatSum)
+			metric = new(utils.StatSum)
 		case utils.MetaAverage:
-			metric = new(StatAverage)
+			metric = new(utils.StatAverage)
 		case utils.MetaDistinct:
-			metric = new(StatDistinct)
+			metric = new(utils.StatDistinct)
 		case utils.MetaHighest:
-			metric = new(StatHighest)
+			metric = new(utils.StatHighest)
 		case utils.MetaLowest:
-			metric = new(StatLowest)
+			metric = new(utils.StatLowest)
 		case utils.MetaREPSC:
-			metric = new(StatREPSC)
+			metric = new(utils.StatREPSC)
 		case utils.MetaREPFC:
-			metric = new(StatREPFC)
+			metric = new(utils.StatREPFC)
 		default:
 			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 		}
@@ -331,7 +331,7 @@ func (sq *StatQueue) Clone() (cln *StatQueue) {
 		}
 	}
 	if sq.SQMetrics != nil {
-		cln.SQMetrics = make(map[string]StatMetric, len(sq.SQMetrics))
+		cln.SQMetrics = make(map[string]utils.StatMetric, len(sq.SQMetrics))
 		for k, m := range sq.SQMetrics {
 			if m != nil {
 				cln.SQMetrics[k] = m.Clone()

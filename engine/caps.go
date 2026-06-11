@@ -71,7 +71,7 @@ func (cR *Caps) Deallocate() {
 
 // NewCapsStats returns the stats for the caps
 func NewCapsStats(sampleinterval time.Duration, caps *Caps, stopChan chan struct{}) (cs *CapsStats) {
-	cs = &CapsStats{st: NewStatAverage(1, utils.MetaDynReq, nil)}
+	cs = &CapsStats{st: utils.NewStatAverage(1, utils.MetaDynReq, nil)}
 	go cs.loop(sampleinterval, stopChan, caps)
 	return
 }
@@ -79,7 +79,7 @@ func NewCapsStats(sampleinterval time.Duration, caps *Caps, stopChan chan struct
 // CapsStats stores the stats for caps
 type CapsStats struct {
 	sync.RWMutex
-	st   StatMetric
+	st   utils.StatMetric
 	peak int
 }
 
