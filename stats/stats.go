@@ -274,6 +274,7 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 		})
 	}
 	if len(sqs) == 0 {
+		unlockAll()
 		return nil, nil, utils.ErrNotFound
 	}
 
