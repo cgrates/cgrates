@@ -390,7 +390,14 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 	var withErrors bool
 	for _, sq := range matchSQs {
 		sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
-		sS.storeStatQueue(sq)
+		if sS.cgrcfg.StatSCfg().StoreInterval == -1 && sq.dirty != nil {
+			*sq.dirty = true
+			if err := sS.StoreStatQueue(sq); err != nil {
+				withErrors = true
+			}
+		} else {
+			sS.storeStatQueue(sq)
+		}
 	}
 	if sS.processThresholds(matchSQs, args.APIOpts) != nil || sS.processEEs(matchSQs, args.APIOpts) != nil ||
 		withErrors {
