@@ -3500,6 +3500,676 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 
 }
 
+func TestStatRemEventWithID(t *testing.T) {
+	type step struct {
+		rem        []string
+		wantVal    *utils.Decimal
+		wantEvents int
+	}
+	tests := []struct {
+		name    string
+		metric  *utils.StatASR
+		initVal *utils.Decimal
+		steps   []step
+	}{
+		{
+			name: "compress factor 1",
+			metric: &utils.StatASR{
+				Metric: &utils.Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 2,
+					Events: map[string]*utils.DecimalWithCompress{
+						"cgrates.org:TestRemEventWithID_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+					},
+				},
+			},
+			initVal: utils.NewDecimal(50, 0),
+			steps: []step{
+				{rem: []string{"cgrates.org:TestRemEventWithID_1"}, wantVal: utils.NewDecimal(0, 0), wantEvents: 1},
+				{rem: []string{"cgrates.org:TestRemEventWithID_5"}, wantVal: utils.NewDecimal(0, 0), wantEvents: 1}, // non existent
+				{rem: []string{"cgrates.org:TestRemEventWithID_2"}, wantVal: utils.DecimalNaN, wantEvents: 0},
+				{rem: []string{"cgrates.org:TestRemEventWithID_2"}, wantVal: utils.DecimalNaN, wantEvents: 0},
+			},
+		},
+		{
+			name: "compress factor 2",
+			metric: &utils.StatASR{
+				Metric: &utils.Metric{
+					Value: utils.NewDecimal(2, 0),
+					Count: 4,
+					Events: map[string]*utils.DecimalWithCompress{
+						"cgrates.org:TestRemEventWithID_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 2},
+						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 2},
+					},
+				},
+			},
+			initVal: utils.NewDecimal(50, 0),
+			steps: []step{
+				{rem: []string{"cgrates.org:TestRemEventWithID_1", "cgrates.org:TestRemEventWithID_2"}, wantVal: utils.NewDecimal(50, 0), wantEvents: 2},
+				{rem: []string{"cgrates.org:TestRemEventWithID_5"}, wantVal: utils.NewDecimal(50, 0), wantEvents: 2}, // non existent
+				{rem: []string{"cgrates.org:TestRemEventWithID_2", "cgrates.org:TestRemEventWithID_1"}, wantVal: utils.DecimalNaN, wantEvents: 0},
+				{rem: []string{"cgrates.org:TestRemEventWithID_2"}, wantVal: utils.DecimalNaN, wantEvents: 0},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sq := &utils.StatQueue{SQMetrics: map[string]utils.StatMetric{utils.MetaASR: tt.metric}}
+			m := tt.metric
+			if got := m.GetValue(); got.Compare(tt.initVal) != 0 {
+				t.Errorf("initial GetValue: %v", got)
+			}
+			for i, s := range tt.steps {
+				for _, id := range s.rem {
+					remEventWithID(sq, id)
+				}
+				if got := m.GetValue(); got.Compare(s.wantVal) != 0 {
+					t.Errorf("step %d GetValue: %v", i, got)
+				} else if len(m.Events) != s.wantEvents {
+					t.Errorf("step %d Events: %+v", i, m.Events)
+				}
+			}
+		})
+	}
+}
+
+func TestStatRemExpired(t *testing.T) {
+	sq := &utils.StatQueue{
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaASR: &utils.StatASR{
+				Metric: &utils.Metric{
+					Value: utils.NewDecimal(2, 0),
+					Count: 3,
+					Events: map[string]*utils.DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+						"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+						"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		SQItems: []utils.SQItem{
+			{EventID: "cgrates.org:TestStatRemExpired_1", ExpiryTime: utils.TimePointer(time.Now())},
+			{EventID: "cgrates.org:TestStatRemExpired_2", ExpiryTime: utils.TimePointer(time.Now())},
+			{EventID: "cgrates.org:TestStatRemExpired_3", ExpiryTime: utils.TimePointer(time.Now().Add(time.Minute))},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*utils.StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric.GetValue())
+	}
+	remExpired(sq)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric.GetValue())
+	} else if len(asrMetric.Events) != 1 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
+	}
+	if len(sq.SQItems) != 1 {
+		t.Errorf("Unexpected items: %+v", sq.SQItems)
+	}
+}
+
+func TestStatRemOnQueueLength(t *testing.T) {
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQItems: []utils.SQItem{
+				{EventID: "cgrates.org:TestStatRemExpired_1"},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			QueueLength: 2,
+		},
+	}
+	m.remOnQueueLength()
+	if len(m.statQueue.SQItems) != 1 {
+		t.Errorf("wrong items: %+v", m.statQueue.SQItems)
+	}
+	m.statQueue.SQItems = []utils.SQItem{
+		{EventID: "cgrates.org:TestStatRemExpired_1"},
+		{EventID: "cgrates.org:TestStatRemExpired_2"},
+	}
+	m.remOnQueueLength()
+	if len(m.statQueue.SQItems) != 1 {
+		t.Errorf("wrong items: %+v", m.statQueue.SQItems)
+	} else if m.statQueue.SQItems[0].EventID != "cgrates.org:TestStatRemExpired_2" {
+		t.Errorf("wrong item in SQItems: %+v", m.statQueue.SQItems[0])
+	}
+	m.profile.QueueLength = -1
+	m.statQueue.SQItems = []utils.SQItem{
+		{EventID: "cgrates.org:TestStatRemExpired_1"},
+		{EventID: "cgrates.org:TestStatRemExpired_2"},
+		{EventID: "cgrates.org:TestStatRemExpired_3"},
+	}
+	m.remOnQueueLength()
+	if len(m.statQueue.SQItems) != 3 {
+		t.Errorf("wrong items: %+v", m.statQueue.SQItems)
+	}
+}
+
+func TestStatAddStatEvent(t *testing.T) {
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaASR: &utils.StatASR{
+					Metric: &utils.Metric{
+						Value: utils.NewDecimal(1, 0),
+						Count: 1,
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
+				},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			Metrics: []*utils.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+		},
+	}
+	asrMetric := m.statQueue.SQMetrics[utils.MetaASR].(*utils.StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.Event})
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(50)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	} else if asrMetric.Value.Compare(utils.NewDecimal(1, 0)) != 0 || asrMetric.Count != 2 {
+		t.Errorf("ASR: %v", asrMetric)
+	}
+	ev1.APIOpts = map[string]any{
+		utils.MetaStartTime: time.Now()}
+	m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	} else if asrMetric.Value.Compare(utils.NewDecimal(2, 0)) != 0 || asrMetric.Count != 3 {
+		t.Errorf("ASR: %v", asrMetric)
+	}
+}
+
+func TestStatRemOnQueueLength2(t *testing.T) {
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQItems: []utils.SQItem{
+				{EventID: "cgrates.org:TestStatRemExpired_1"},
+				{EventID: "cgrates.org:TestStatRemExpired_2"},
+			},
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaTCD: &utils.StatTCD{
+					Metric: &utils.Metric{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+						Value:     utils.NewDecimal(0, 0),
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(float64(time.Minute)), CompressFactor: 1},
+						},
+					},
+				},
+				utils.MetaASR: &utils.StatASR{
+					Metric: &utils.Metric{
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Value:     utils.NewDecimal(0, 0),
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
+				},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			QueueLength: 2,
+			FilterIDs:   []string{"*string:~Account:1001|1002"},
+		},
+	}
+	m.remOnQueueLength()
+	if len(m.statQueue.SQItems) != 1 {
+		t.Errorf("wrong items: %+v", utils.ToJSON(m.statQueue.SQItems))
+	}
+}
+
+func TestStatRemoveExpiredTTL(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		m := &matchedStatQueue{
+			statQueue: &utils.StatQueue{
+				SQMetrics: map[string]utils.StatMetric{
+					utils.MetaASR: &utils.StatASR{
+						Metric: &utils.Metric{
+							Value: utils.NewDecimal(1, 0),
+							Count: 1,
+							Events: map[string]*utils.DecimalWithCompress{
+								"grates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+							},
+						},
+					},
+				},
+			},
+			profile: &utils.StatQueueProfile{
+				QueueLength: 0, //unlimited que
+			},
+			ttl: utils.DurationPointer(100 * time.Millisecond),
+		}
+
+		//add ev1 with ttl 100ms (after 100ms the event should be removed)
+		ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+		m.processEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+
+		if len(m.statQueue.SQItems) != 1 && m.statQueue.SQItems[0].EventID != "TestStatAddStatEvent_1" {
+			t.Errorf("Expecting: 1, received: %+v", len(m.statQueue.SQItems))
+		}
+		//after 150ms the event expired
+		time.Sleep(150 * time.Millisecond)
+
+		//processing a new event should clean the expired events and add the new one
+		ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+		m.processEvent(context.Background(), ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
+		if len(m.statQueue.SQItems) != 1 && m.statQueue.SQItems[0].EventID != "TestStatAddStatEvent_2" {
+			t.Errorf("Expecting: 1, received: %+v", len(m.statQueue.SQItems))
+		}
+	})
+}
+
+func TestStatRemoveExpiredQueue(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		m := &matchedStatQueue{
+			statQueue: &utils.StatQueue{
+				SQMetrics: map[string]utils.StatMetric{
+					utils.MetaASR: &utils.StatASR{
+						Metric: &utils.Metric{
+							Value: utils.NewDecimal(1, 0),
+							Count: 1,
+							Events: map[string]*utils.DecimalWithCompress{
+								"grates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+							},
+						},
+					},
+				},
+			},
+			profile: &utils.StatQueueProfile{
+				QueueLength: 2, //unlimited que
+			},
+		}
+
+		//add ev1 with ttl 100ms (after 100ms the event should be removed)
+		ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+		m.processEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+
+		if len(m.statQueue.SQItems) != 1 && m.statQueue.SQItems[0].EventID != "TestStatAddStatEvent_1" {
+			t.Errorf("Expecting: 1, received: %+v", len(m.statQueue.SQItems))
+		}
+		//after 150ms the event expired
+		time.Sleep(150 * time.Millisecond)
+
+		//processing a new event should clean the expired events and add the new one
+		ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+		m.processEvent(context.Background(), ev2.Tenant, ev2.ID, nil, utils.MapStorage{utils.MetaReq: ev2.Event})
+		if len(m.statQueue.SQItems) != 2 && m.statQueue.SQItems[0].EventID != "TestStatAddStatEvent_1" &&
+			m.statQueue.SQItems[1].EventID != "TestStatAddStatEvent_2" {
+			t.Errorf("Expecting: 2, received: %+v", len(m.statQueue.SQItems))
+		}
+
+		//processing a new event should clean the expired events and add the new one
+		ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_3"}
+		m.processEvent(context.Background(), ev3.Tenant, ev3.ID, nil, utils.MapStorage{utils.MetaReq: ev3.Event})
+		if len(m.statQueue.SQItems) != 2 && m.statQueue.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
+			m.statQueue.SQItems[1].EventID != "TestStatAddStatEvent_3" {
+			t.Errorf("Expecting: 2, received: %+v", len(m.statQueue.SQItems))
+		}
+	})
+}
+
+func TestStatQueueProcessEventremExpiredErr(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &engine.FilterS{}
+	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.UTC)
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQItems: []utils.SQItem{
+				{
+					EventID:    evID,
+					ExpiryTime: &expiry,
+				},
+			},
+			SQMetrics: map[string]utils.StatMetric{
+				"key": statMetricMock("remExpired error"),
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			QueueLength: -1,
+		},
+	}
+
+	experr := "remExpired mock error"
+	err := m.processEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestStatQueueProcessEventremOnQueueLengthErr(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &engine.FilterS{}
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQItems: []utils.SQItem{
+				{
+					EventID: evID,
+				},
+			},
+			SQMetrics: map[string]utils.StatMetric{
+				"key": statMetricMock("remExpired error"),
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			QueueLength: 1,
+		},
+	}
+
+	experr := "remExpired mock error"
+	err := m.processEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &engine.FilterS{}
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQItems: []utils.SQItem{
+				{
+					EventID: evID,
+				},
+			},
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaTCD: &utils.StatTCD{Metric: &utils.Metric{}},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			QueueLength: 1,
+			Metrics: []*utils.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+		},
+	}
+
+	experr := utils.ErrWrongPath
+	err := m.processEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestStatQueueaddStatEventNoPass(t *testing.T) {
+	sm, err := utils.NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaTCD: sm,
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			Metrics: []*utils.MetricWithFilters{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					MetricID:  utils.MetaTCD,
+				},
+			},
+		},
+	}
+
+	tnt, evID := "cgrates.org", "eventID"
+	cfg := config.NewDefaultCGRConfig()
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.MetaReq: nil,
+		},
+		utils.MetaOpts: nil,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	exp := &utils.StatQueue{
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaTCD: sm,
+		},
+		SQItems: []utils.SQItem{
+			{
+				EventID: "eventID",
+			},
+		},
+	}
+	expProfile := &utils.StatQueueProfile{
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID:  utils.MetaTCD,
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+			},
+		},
+	}
+	if err := m.addStatEvent(context.Background(), tnt, evID, filters, evNm); err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(m.statQueue, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, m.statQueue)
+	}
+	if !reflect.DeepEqual(m.profile, expProfile) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expProfile, m.profile)
+	}
+}
+
+func TestStatQAddStatEventFilterPassErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
+
+	fltrS := engine.NewFilterS(cfg, cM, dm)
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaASR: &utils.StatASR{
+					Metric: &utils.Metric{
+						Value: utils.NewDecimal(1, 0),
+						Count: 1,
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
+				},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			Metrics: []*utils.MetricWithFilters{
+				{
+					FilterIDs: []string{"*"},
+					MetricID:  utils.MetaASR,
+				},
+			},
+		},
+	}
+	asrMetric := m.statQueue.SQMetrics[utils.MetaASR].(*utils.StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	expErr := `inline parse error for string: <*>`
+	if err := m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
+
+	fltrS := engine.NewFilterS(cfg, cM, dm)
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaASR: &utils.StatASR{
+					Metric: &utils.Metric{
+						Value: utils.NewDecimal(1, 0),
+						Count: 1,
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
+				},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			Metrics: []*utils.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.DynamicBlockers{
+						{
+							FilterIDs: []string{"*stirng:~*req.Account:1001"},
+							Blocker:   true,
+						},
+					},
+				},
+			},
+		},
+	}
+	asrMetric := m.statQueue.SQMetrics[utils.MetaASR].(*utils.StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	expErr := `NOT_IMPLEMENTED:*stirng`
+	if err := m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestStatQAddStatEventBlockNotLast(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
+
+	fltrS := engine.NewFilterS(cfg, cM, dm)
+
+	m := &matchedStatQueue{
+		statQueue: &utils.StatQueue{
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaASR: &utils.StatASR{
+					Metric: &utils.Metric{
+						Value: utils.NewDecimal(1, 0),
+						Count: 1,
+						Events: map[string]*utils.DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
+				},
+			},
+		},
+		profile: &utils.StatQueueProfile{
+			Metrics: []*utils.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+				{
+					MetricID: utils.MetaTCD,
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+			},
+		},
+	}
+	asrMetric := m.statQueue.SQMetrics[utils.MetaASR].(*utils.StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	exp := &utils.StatQueueProfile{
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+				Blockers: utils.DynamicBlockers{
+					{
+						Blocker: true,
+					},
+				},
+			},
+			{
+				MetricID: utils.MetaTCD,
+				Blockers: utils.DynamicBlockers{
+					{
+						Blocker: true,
+					},
+				},
+			},
+		},
+	}
+
+	if err := m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, m.profile) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, m.profile)
+	}
+
+}
+
 type ccMock struct {
 	calls map[string]func(ctx *context.Context, args any, reply any) error
 }
