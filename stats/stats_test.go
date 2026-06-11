@@ -725,12 +725,12 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	rS := NewStatService(cfg, dm,
+	sS := NewStatService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
-		rPrf := &utils.StatQueueProfile{
+		sqPrf := &utils.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("STS%d", i),
 			Weights: utils.DynamicWeights{
@@ -742,8 +742,8 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 			QueueLength:  1,
 			Stored:       true,
 		}
-		dm.SetStatQueueProfile(context.Background(), rPrf, true)
-		ids.Add(rPrf.ID)
+		dm.SetStatQueueProfile(context.Background(), sqPrf, true)
+		ids.Add(sqPrf.ID)
 	}
 	dm.RemoveStatQueue(context.Background(), "cgrates.org", "STS1")
 	ev := &utils.CGREvent{
@@ -751,7 +751,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 			utils.OptsStatsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, _, err := rS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
+	_, _, err := sS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -768,13 +768,12 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	rS := NewStatService(cfg, dm,
+	sS := NewStatService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
-	prfs := make([]*utils.StatQueueProfile, 0)
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
-		rPrf := &utils.StatQueueProfile{
+		sqPrf := &utils.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          fmt.Sprintf("STS%d", i),
 			QueueLength: 1,
@@ -786,14 +785,13 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 			},
 			ThresholdIDs: []string{utils.MetaNone},
 		}
-		dm.SetStatQueueProfile(context.Background(), rPrf, true)
-		prfs = append(prfs, rPrf)
-		ids.Add(rPrf.ID)
+		dm.SetStatQueueProfile(context.Background(), sqPrf, true)
+		ids.Add(sqPrf.ID)
 	}
-	rPrf := &utils.StatQueueProfile{
+	sqPrf := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "STS20",
-		FilterIDs:   []string{"FLTR_RES_201"},
+		FilterIDs:   []string{"FLTR_STATS_201"},
 		QueueLength: 1,
 		Stored:      true,
 		Weights: utils.DynamicWeights{
@@ -803,19 +801,18 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	err := db.SetStatQueueProfileDrv(context.Background(), rPrf)
+	err := db.SetStatQueueProfileDrv(context.Background(), sqPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	prfs = append(prfs, rPrf)
-	ids.Add(rPrf.ID)
+	ids.Add(sqPrf.ID)
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, _, err = rS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
-	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
+	_, _, err = sS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
+	expErr := utils.ErrPrefixNotFound(sqPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
 	}
@@ -823,7 +820,6 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	prfs := make([]*utils.StatQueueProfile, 0)
 	tmp := engine.Cache
 	defer func() { engine.Cache = tmp }()
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
@@ -832,7 +828,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 			if id == "STS1" {
 				return nil, utils.ErrNotImplemented
 			}
-			rPrf := &utils.StatQueueProfile{
+			sqPrf := &utils.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          id,
 				QueueLength: 1,
@@ -844,13 +840,12 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 				},
 				ThresholdIDs: []string{utils.MetaNone},
 			}
-			engine.Cache.Set(ctx, utils.CacheStatQueues, rPrf.TenantID(), &utils.StatQueue{
-				Tenant:    rPrf.Tenant,
-				ID:        rPrf.ID,
+			engine.Cache.Set(ctx, utils.CacheStatQueues, sqPrf.TenantID(), &utils.StatQueue{
+				Tenant:    sqPrf.Tenant,
+				ID:        sqPrf.ID,
 				SQMetrics: make(map[string]utils.StatMetric),
 			}, nil, true, utils.NonTransactional)
-			prfs = append(prfs, rPrf)
-			return rPrf, nil
+			return sqPrf, nil
 		},
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
@@ -858,7 +853,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	rS := NewStatService(cfg, dm,
+	sS := NewStatService(cfg, dm,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -870,7 +865,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 			utils.OptsStatsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, _, err := rS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
+	_, _, err := sS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ev)
 	if err != utils.ErrNotImplemented {
 		t.Fatalf("Error: %+v", err)
 	}
