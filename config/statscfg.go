@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -36,7 +37,7 @@ type StatsOpts struct {
 	RoundingDecimals     []*DynamicIntOpt
 }
 
-// StatSCfg the stats config section
+// StatSCfg is the stats config section
 type StatSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
@@ -53,41 +54,42 @@ type StatSCfg struct {
 	EEsExporterIDs         []string
 }
 
-// loadStatSCfg loads the StatS section of the configuration
-func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+// Load loads the StatS section of the configuration
+func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnStatSCfg := new(StatServJsonCfg)
-	if err = jsnCfg.GetSection(ctx, StatSJSON, jsnStatSCfg); err != nil {
-		return
+	if err := jsnCfg.GetSection(ctx, StatSJSON, jsnStatSCfg); err != nil {
+		return err
 	}
 	return st.loadFromJSONCfg(jsnStatSCfg)
 }
 
-func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
+func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.ProfileIDs != nil {
 		sqOpts.ProfileIDs = append(sqOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		var prfIgnFltrs []*DynamicBoolOpt
-		prfIgnFltrs, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		prfIgnFltrs, err := IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
 		if err != nil {
-			return
+			return err
 		}
 		sqOpts.ProfileIgnoreFilters = append(prfIgnFltrs, sqOpts.ProfileIgnoreFilters...)
 	}
 	if jsnCfg.RoundingDecimals != nil {
-		var roundDec []*DynamicIntOpt
-		roundDec, err = IfaceToIntDynamicOpts(jsnCfg.RoundingDecimals)
+		roundDec, err := IfaceToIntDynamicOpts(jsnCfg.RoundingDecimals)
+		if err != nil {
+			return err
+		}
 		sqOpts.RoundingDecimals = append(roundDec, sqOpts.RoundingDecimals...)
 	}
-	return
+	return nil
 }
 
-func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
+func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.Enabled != nil {
 		st.Enabled = *jsnCfg.Enabled
@@ -96,18 +98,17 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Store_interval != nil {
-		if st.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
-			return
+		ivl, err := utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval)
+		if err != nil {
+			return err
 		}
+		st.StoreInterval = ivl
 	}
 	if jsnCfg.Store_uncompressed_limit != nil {
 		st.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
-		for connType, opts := range tagged {
-			st.Conns[connType] = opts
-		}
+		maps.Copy(st.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		st.EEsExporterIDs = append(st.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -131,9 +132,9 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		st.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		return st.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
-	return
+	return nil
 }
 
 // AsMapInterface returns the config as a map[string]any
@@ -198,8 +199,8 @@ func (sqOpts *StatsOpts) Clone() *StatsOpts {
 }
 
 // Clone returns a deep copy of StatSCfg
-func (st StatSCfg) Clone() (cln *StatSCfg) {
-	cln = &StatSCfg{
+func (st StatSCfg) Clone() *StatSCfg {
+	cln := &StatSCfg{
 		Enabled:                st.Enabled,
 		IndexedSelects:         st.IndexedSelects,
 		StoreInterval:          st.StoreInterval,
@@ -226,7 +227,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	if st.NotExistsIndexedFields != nil {
 		cln.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*st.NotExistsIndexedFields))
 	}
-	return
+	return cln
 }
 
 type StatsOptsJson struct {
@@ -235,7 +236,7 @@ type StatsOptsJson struct {
 	RoundingDecimals     []*DynamicInterfaceOpt   `json:"*roundingDecimals"`
 }
 
-// Stat service config section
+// StatServJsonCfg is the stat service config section
 type StatServJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool                      `json:"indexedSelects"`
