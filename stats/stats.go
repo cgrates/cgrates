@@ -158,24 +158,24 @@ func (s *StatS) storeStats(ctx *context.Context) {
 }
 
 // storeStatQueue stores the statQueue in DB
-func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
-	if err = s.dm.SetStatQueue(ctx, sq); err != nil {
+func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) error {
+	if err := s.dm.SetStatQueue(ctx, sq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed saving StatQueue with ID: %s, error: %v",
 				utils.StatS, sq.TenantID(), err))
-		return
+		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
 	if tntID := sq.TenantID(); engine.Cache.HasItem(utils.CacheStatQueues, tntID) { // only cache if previously there
-		if err = engine.Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
+		if err := engine.Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed caching StatQueue with ID: %s, error: %v",
 					utils.StatS, tntID, err))
-			return
+			return err
 		}
 	}
-	return
+	return nil
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
@@ -286,24 +286,25 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	return sqs, unlockAll, nil
 }
 
-func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (sq *utils.StatQueue, err error) {
-	if sq, err = s.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString); err != nil {
-		return
-	}
-	if _, err = remExpired(sq); err != nil {
+func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (*utils.StatQueue, error) {
+	sq, err := s.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString)
+	if err != nil {
 		return nil, err
 	}
-	return
+	if _, err := remExpired(sq); err != nil {
+		return nil, err
+	}
+	return sq, nil
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
 	threshConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaThresholds], tnt, dP, s.filters)
 	if err != nil {
-		return
+		return err
 	}
 	if len(threshConns) == 0 {
-		return
+		return nil
 	}
 	if opts == nil {
 		opts = make(map[string]any)
@@ -339,19 +340,19 @@ func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue,
 		}
 	}
 	if withErrs {
-		err = utils.ErrPartiallyExecuted
+		return utils.ErrPartiallyExecuted
 	}
-	return
+	return nil
 }
 
 // processEEs will pass the event for statQueue to EEs
-func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
 	eesConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaEEs], tnt, dP, s.filters)
 	if err != nil {
-		return
+		return err
 	}
 	if len(eesConns) == 0 {
-		return
+		return nil
 	}
 	var withErrs bool
 	if opts == nil {
@@ -388,9 +389,9 @@ func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts m
 		}
 	}
 	if withErrs {
-		err = utils.ErrPartiallyExecuted
+		return utils.ErrPartiallyExecuted
 	}
-	return
+	return nil
 }
 
 // processEvent processes a new event, dispatching to matching queues.
@@ -427,7 +428,7 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 		// get the dynamic blocker from the profile and check if it pass trough its filters
 		var blocker bool
 		if blocker, err = engine.BlockerFromDynamics(ctx, m.profile.Blockers, s.filters, tnt, evNm); err != nil {
-			return
+			return statQueueIDs, err
 		}
 		if blocker && idx != len(matchSQs)-1 { // blocker will stop processing and we are not at last index
 			break
@@ -438,42 +439,41 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 	if s.processThresholds(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || s.processEEs(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
-	return
+	return statQueueIDs, err
 }
 
 // processEvent processes a utils.CGREvent, returns true if processed
-func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) (err error) {
+func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) error {
 
 	//processing metrics without storing in the queue
 	if oneEv := m.isOneEvent(); oneEv {
 		return m.addStatOneEvent(ctx, tnt, filterS, evNm)
 	}
-	if _, err = remExpired(m.statQueue); err != nil {
-		return
+	if _, err := remExpired(m.statQueue); err != nil {
+		return err
 	}
-	if err = m.remOnQueueLength(); err != nil {
-		return
+	if err := m.remOnQueueLength(); err != nil {
+		return err
 	}
 	return m.addStatEvent(ctx, tnt, evID, filterS, evNm)
 }
 
 // remEventWithID removes an event from metrics
-func remEventWithID(sq *utils.StatQueue, evID string) (err error) {
+func remEventWithID(sq *utils.StatQueue, evID string) error {
 	for metricID, metric := range sq.SQMetrics {
-		if err = metric.RemEvent(evID); err != nil {
+		if err := metric.RemEvent(evID); err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				err = nil
 				continue
 			}
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %v", metricID, evID, err))
-			return
+			return err
 		}
 	}
-	return
+	return nil
 }
 
 // remExpired expires items in queue
-func remExpired(sq *utils.StatQueue) (removed int, err error) {
+func remExpired(sq *utils.StatQueue) (int, error) {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.SQItems {
 		if item.ExpiryTime == nil {
@@ -482,103 +482,102 @@ func remExpired(sq *utils.StatQueue) (removed int, err error) {
 		if item.ExpiryTime.After(time.Now()) {
 			break
 		}
-		if err = remEventWithID(sq, item.EventID); err != nil {
-			return
+		if err := remEventWithID(sq, item.EventID); err != nil {
+			return 0, err
 		}
 		expIdx = utils.IntPointer(i)
 	}
 	if expIdx == nil {
-		return
+		return 0, nil
 	}
-	removed = *expIdx + 1
+	removed := *expIdx + 1
 	sq.SQItems = sq.SQItems[removed:]
-	return
+	return removed, nil
 }
 
 // remOnQueueLength removes elements based on QueueLength setting
-func (m *matchedStatQueue) remOnQueueLength() (err error) {
+func (m *matchedStatQueue) remOnQueueLength() error {
 	if m.profile.QueueLength <= 0 { // infinite length
-		return
+		return nil
 	}
 	if len(m.statQueue.SQItems) == m.profile.QueueLength { // reached limit, rem first element
 		item := m.statQueue.SQItems[0]
-		if err = remEventWithID(m.statQueue, item.EventID); err != nil {
-			return
+		if err := remEventWithID(m.statQueue, item.EventID); err != nil {
+			return err
 		}
 		m.statQueue.SQItems = m.statQueue.SQItems[1:]
 	}
-	return
+	return nil
 }
 
 // addStatEvent computes metrics for an event
-func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) (err error) {
+func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) error {
 	var expTime *time.Time
 	if m.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*m.ttl))
 	}
 	m.statQueue.SQItems = append(m.statQueue.SQItems, utils.SQItem{EventID: evID, ExpiryTime: expTime})
-	var pass bool
 	// recreate the request without *opts
 	metricEvNm := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]}
 
 	dDP := engine.NewDynamicDP(ctx, config.CgrConfig(), tnt, metricEvNm, filterS)
 	for idx, metricCfg := range m.profile.Metrics {
-		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
-			evNm); err != nil {
-			return
+		pass, err := filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
+			evNm)
+		if err != nil {
+			return err
 		} else if !pass {
 			continue
 		}
 		// in case of # metrics type
-		if err = m.statQueue.SQMetrics[metricCfg.MetricID].AddEvent(evID, dDP); err != nil {
+		if err := m.statQueue.SQMetrics[metricCfg.MetricID].AddEvent(evID, dDP); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %v", metricCfg.MetricID,
 				evID, err))
-			return
+			return err
 		}
 		// every metric has a blocker, verify them
-		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm); err != nil {
-			return
+		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm)
+		if err != nil {
+			return err
 		}
 		if blocker && idx != len(m.profile.Metrics)-1 {
 			break
 		}
 	}
-	return
+	return nil
 }
 
 func (m *matchedStatQueue) isOneEvent() bool {
 	return m.ttl != nil && *m.ttl == -1
 }
 
-func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *engine.FilterS, evNm utils.MapStorage) (err error) {
-	var pass bool
-
+func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *engine.FilterS, evNm utils.MapStorage) error {
 	metricEvNm := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]}
 	dDP := engine.NewDynamicDP(ctx, config.CgrConfig(), tnt, metricEvNm, filterS)
 
 	for idx, metricCfg := range m.profile.Metrics {
-		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
-			evNm); err != nil {
-			return
+		pass, err := filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
+			evNm)
+		if err != nil {
+			return err
 		} else if !pass {
 			continue
 		}
 
-		if err = m.statQueue.SQMetrics[metricCfg.MetricID].AddOneEvent(dDP); err != nil {
+		if err := m.statQueue.SQMetrics[metricCfg.MetricID].AddOneEvent(dDP); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, error: %v", metricCfg.MetricID, err))
-			return
+			return err
 		}
 
-		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm); err != nil {
-			return
+		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm)
+		if err != nil {
+			return err
 		}
 		if blocker && idx != len(m.profile.Metrics)-1 {
 			break
 		}
 	}
-	return
+	return nil
 }
 
 // getStatQueueIDs returns a slice of IDs from the given matched StatQueues
