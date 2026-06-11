@@ -26,7 +26,7 @@ import (
 )
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -39,16 +39,16 @@ func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply
 	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
-	var ids []string
-	if ids, err = s.processEvent(ctx, tnt, args); err != nil {
-		return
+	ids, err := s.processEvent(ctx, tnt, args)
+	if err != nil {
+		return err
 	}
 	*reply = ids
-	return
+	return nil
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -67,11 +67,11 @@ func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREve
 	}
 	defer unlock()
 	*reply = getStatQueueIDs(sQs)
-	return
+	return nil
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
+func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -89,11 +89,11 @@ func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPI
 		return err
 	}
 	*reply = *sq.Clone() // clone so the reply is marshaled safely after the lock is released
-	return
+	return nil
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -117,18 +117,18 @@ func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenant
 	if rnd, err = engine.GetIntOpts(ctx, tnt, engine.MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, nil, s.filters,
 		s.cfg.StatSCfg().Opts.RoundingDecimals,
 		utils.OptsRoundingDecimals); err != nil {
-		return
+		return err
 	}
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
 		metrics[metricID] = metric.GetStringValue(rnd)
 	}
 	*reply = metrics
-	return
+	return nil
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -157,11 +157,11 @@ func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantI
 		}
 	}
 	*reply = metrics
-	return
+	return nil
 }
 
 // V1GetQueueDecimalMetrics returns the metrics as decimal values
-func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -186,11 +186,11 @@ func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tenan
 		metrics[metricID] = metric.GetValue()
 	}
 	*reply = metrics
-	return
+	return nil
 }
 
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) (err error) {
+func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = s.cfg.GeneralCfg().DefaultTenant
@@ -209,11 +209,11 @@ func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpt
 		retIDs[i] = key[len(prfx):]
 	}
 	*qIDs = retIDs
-	return
+	return nil
 }
 
 // V1ResetStatQueue resets the stat queue
-func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) (err error) {
+func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -226,19 +226,19 @@ func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWith
 		s.cfg.GeneralCfg().LockingTimeout,
 		utils.StatQueueLockKey(tnt, tntID.ID))
 	defer guardian.Guardian.UnguardIDs(lockID)
-	var sq *utils.StatQueue
-	if sq, err = s.dm.GetStatQueue(ctx, tnt, tntID.ID,
-		true, true, utils.NonTransactional); err != nil {
-		return
+	sq, err := s.dm.GetStatQueue(ctx, tnt, tntID.ID,
+		true, true, utils.NonTransactional)
+	if err != nil {
+		return err
 	}
 	sq.SQItems = make([]utils.SQItem, 0)
 	metrics := sq.SQMetrics
 	sq.SQMetrics = make(map[string]utils.StatMetric)
 	for id, m := range metrics {
-		var metric utils.StatMetric
-		if metric, err = utils.NewStatMetric(id,
-			m.GetMinItems(), m.GetFilterIDs()); err != nil {
-			return
+		metric, err := utils.NewStatMetric(id,
+			m.GetMinItems(), m.GetFilterIDs())
+		if err != nil {
+			return err
 		}
 		sq.SQMetrics[id] = metric
 	}
@@ -252,5 +252,5 @@ func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWith
 		}
 	}
 	*rply = utils.OK
-	return
+	return nil
 }

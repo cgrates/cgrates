@@ -205,27 +205,27 @@ func (s *StatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply
 }
 
 // GetStatQueuesForEvent returns the list of queues IDs in the system
-func (s *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (s *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return s.sS.V1GetStatQueuesForEvent(ctx, args, reply)
 }
 
 // GetStatQueue returns a StatQueue object
-func (s *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) (err error) {
+func (s *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	return s.sS.V1GetStatQueue(ctx, args, reply)
 }
 
 // GetQueueStringMetrics returns the string metrics for a Queue
-func (s *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+func (s *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
 	return s.sS.V1GetQueueStringMetrics(ctx, args, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (s *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+func (s *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
 	return s.sS.V1GetQueueFloatMetrics(ctx, args, reply)
 }
 
 // GetQueueDecimalMetrics returns the decimal metrics for a Queue
-func (s *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+func (s *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
 	return s.sS.V1GetQueueDecimalMetrics(ctx, args, reply)
 }
 
