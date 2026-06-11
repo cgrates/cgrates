@@ -222,7 +222,7 @@ func testStsITFlush(t *testing.T) {
 // 	sq := &engine.StatQueue{
 // 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 // 		ID:        v1Sts.Id,
-// 		SQMetrics: make(map[string]engine.StatMetric),
+// 		SQMetrics: make(map[string]utils.StatMetric),
 // 	}
 // 	for _, metric := range sqp.Metrics {
 // 		if stsMetric, err := engine.NewStatMetric(metric.MetricID, 0, []string{}); err != nil {

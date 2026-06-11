@@ -794,9 +794,9 @@ func TestStatsAPIs(t *testing.T) {
 	expStatQueue := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq1",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: engine.NewACD(0, "", nil),
-			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaACD: utils.NewACD(0, "", nil),
+			utils.MetaTCD: utils.NewTCD(0, "", nil),
 		},
 	}
 

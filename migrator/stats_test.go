@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -140,7 +141,7 @@ func TestRemakeQueue(t *testing.T) {
 		SQItems: []engine.SQItem{{
 			EventID: "ev1",
 		}},
-		SQMetrics: map[string]engine.StatMetric{
+		SQMetrics: map[string]utils.StatMetric{
 			"*tcc":                nil,
 			"*sum#~*req.Usage":    nil,
 			"*average#~*req.Cost": nil,
@@ -150,7 +151,7 @@ func TestRemakeQueue(t *testing.T) {
 		Tenant:  sq.Tenant,
 		ID:      sq.ID,
 		SQItems: sq.SQItems,
-		SQMetrics: map[string]engine.StatMetric{
+		SQMetrics: map[string]utils.StatMetric{
 			"*tcc":                nil,
 			"*sum#~*req.Usage":    nil,
 			"*average#~*req.Cost": nil,

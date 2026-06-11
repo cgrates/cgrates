@@ -2929,6 +2929,20 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsE
 	}
 }
 
+type mockDP struct{}
+
+func (mockDP) String() string {
+	return ""
+}
+
+func (mockDP) FieldAsInterface(fldPath []string) (any, error) {
+	return nil, utils.ErrAccountNotFound
+}
+
+func (mockDP) FieldAsString([]string) (string, error) {
+	return "", nil
+}
+
 func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()

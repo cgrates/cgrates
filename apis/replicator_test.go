@@ -172,9 +172,9 @@ func TestReplicatorGetStatQueue(t *testing.T) {
 	stq := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq1",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: engine.NewACD(0, "", nil),
-			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaACD: utils.NewACD(0, "", nil),
+			utils.MetaTCD: utils.NewTCD(0, "", nil),
 		},
 	}
 	rp.dm.SetStatQueue(context.Background(), stq)
@@ -208,9 +208,9 @@ func TestReplicatorGetStatQueueErr(t *testing.T) {
 	stq := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq2",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: engine.NewACD(0, "", nil),
-			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaACD: utils.NewACD(0, "", nil),
+			utils.MetaTCD: utils.NewTCD(0, "", nil),
 		},
 	}
 	rp.dm.SetStatQueue(context.Background(), stq)
@@ -1326,9 +1326,9 @@ func TestReplicatorSetStatQueue(t *testing.T) {
 		StatQueue: &engine.StatQueue{
 			Tenant: "cgrates.org",
 			ID:     "sq11",
-			SQMetrics: map[string]engine.StatMetric{
-				utils.MetaACD: engine.NewACD(0, "", nil),
-				utils.MetaTCD: engine.NewTCD(0, "", nil),
+			SQMetrics: map[string]utils.StatMetric{
+				utils.MetaACD: utils.NewACD(0, "", nil),
+				utils.MetaTCD: utils.NewTCD(0, "", nil),
 			},
 		},
 		APIOpts: map[string]any{
@@ -2052,9 +2052,9 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 	sq := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq11",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: engine.NewACD(0, "", nil),
-			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaACD: utils.NewACD(0, "", nil),
+			utils.MetaTCD: utils.NewTCD(0, "", nil),
 		},
 	}
 	if err := rp.dm.SetStatQueue(context.Background(), sq); err != nil {
@@ -2094,9 +2094,9 @@ func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 	sq := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq11",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: engine.NewACD(0, "", nil),
-			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		SQMetrics: map[string]utils.StatMetric{
+			utils.MetaACD: utils.NewACD(0, "", nil),
+			utils.MetaTCD: utils.NewTCD(0, "", nil),
 		},
 	}
 	if err := rp.dm.SetStatQueue(context.Background(), sq); err != nil {

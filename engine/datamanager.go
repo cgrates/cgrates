@@ -1124,7 +1124,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 				cMetricIDs.Add(metric.MetricID)
 				if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
 					!slices.Equal(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
-					if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
+					if oSq.SQMetrics[metric.MetricID], err = utils.NewStatMetric(metric.MetricID,
 						uint64(sqp.MinItems), metric.FilterIDs); err != nil {
 						return
 					}

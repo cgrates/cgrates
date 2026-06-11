@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
-package engine
+package utils
 
 import (
 	"reflect"
@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -32,7 +31,7 @@ const roundingDecimals = 5
 
 func TestStatMetricsGetStringValue(t *testing.T) {
 	startTime := time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)
-	started := map[string]any{utils.MetaStartTime: startTime}
+	started := map[string]any{MetaStartTime: startTime}
 	sum1, err := NewStatSum(2, "~*opts.*cost", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -56,8 +55,8 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "ASR",
 			metric: NewASR(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: started, wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: started, wantStr: NotAvailable},
 				{add: "EVENT_2", wantStr: "50%"},
 				{add: "EVENT_3", wantStr: "33.333%"},
 				{rem: "EVENT_3", wantStr: "50%"},
@@ -66,7 +65,7 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 				{rem: "EVENT_1", wantStr: "66.667%"},
 				{rem: "EVENT_2", wantStr: "100%"},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantStr: utils.NotAvailable},
+				{rem: "EVENT_5", wantStr: NotAvailable},
 			},
 		},
 		{
@@ -87,28 +86,28 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "ACD",
 			metric: NewACD(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 10 * time.Second, utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 10 * time.Second, MetaStartTime: startTime}, wantStr: NotAvailable},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*usage"},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantStr: utils.NotAvailable},
-				{wantStr: utils.NotAvailable},
-				{rem: "EVENT_1", wantStr: utils.NotAvailable},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: 478433753 * time.Nanosecond, utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: 30*time.Second + 982433452*time.Nanosecond, utils.MetaStartTime: startTime}, wantStr: "15.73s"},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantStr: NotAvailable},
+				{wantStr: NotAvailable},
+				{rem: "EVENT_1", wantStr: NotAvailable},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: 478433753 * time.Nanosecond, MetaStartTime: startTime}, wantStr: NotAvailable},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: 30*time.Second + 982433452*time.Nanosecond, MetaStartTime: startTime}, wantStr: "15.73s"},
 				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantStr: "15.73s"},
 				{rem: "EVENT_5"},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantStr: utils.NotAvailable},
+				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "ACD repeated events",
 			metric: NewACD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}, wantStr: "1m30s"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}, wantStr: "1m15s"},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}, wantStr: "1m30s"},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}, wantStr: "1m15s"},
 				{rem: "EVENT_2", wantStr: "1m20s"},
 			},
 		},
@@ -116,27 +115,27 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "TCD",
 			metric: NewTCD(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 10 * time.Second, utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: 10 * time.Second, utils.MetaStartTime: startTime}},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 10 * time.Second, MetaStartTime: startTime}, wantStr: NotAvailable},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: 10 * time.Second, MetaStartTime: startTime}},
 				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantStr: "20s"},
-				{rem: "EVENT_2", wantStr: utils.NotAvailable},
-				{rem: "EVENT_1", wantStr: utils.NotAvailable},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime}, wantStr: "2m30s"},
-				{rem: "EVENT_4", wantStr: utils.NotAvailable},
+				{rem: "EVENT_2", wantStr: NotAvailable},
+				{rem: "EVENT_1", wantStr: NotAvailable},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute, MetaStartTime: startTime}},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime}, wantStr: "2m30s"},
+				{rem: "EVENT_4", wantStr: NotAvailable},
 				{rem: "EVENT_5"},
-				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantStr: utils.NotAvailable},
+				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "TCD repeated events",
 			metric: NewTCD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}, wantStr: "3m0s"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaUsage: time.Minute}, wantStr: "5m0s"},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}, wantStr: "3m0s"},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaUsage: time.Minute}, wantStr: "5m0s"},
 				{rem: "EVENT_2", wantStr: "4m0s"},
 			},
 		},
@@ -144,28 +143,28 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "ACC",
 			metric: NewACC(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 12.3}, wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaCost: 12.3}, wantStr: NotAvailable},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*cost"},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 12.3}, wantStr: "12.3"},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 5.6}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 1.2}},
+				{add: "EVENT_3", opts: map[string]any{MetaStartTime: startTime, MetaCost: 12.3}, wantStr: "12.3"},
+				{rem: "EVENT_3", wantStr: NotAvailable},
+				{add: "EVENT_4", opts: map[string]any{MetaStartTime: startTime, MetaCost: 5.6}},
+				{add: "EVENT_5", opts: map[string]any{MetaStartTime: startTime, MetaCost: 1.2}},
 				{rem: "EVENT_1", wantStr: "3.4"},
 				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantStr: "3.4"},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantStr: utils.NotAvailable},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaCost: -1}, wantErr: "NEGATIVE:*cost"},
+				{rem: "EVENT_5", wantStr: NotAvailable},
+				{add: "EVENT_5", opts: map[string]any{MetaCost: -1}, wantErr: "NEGATIVE:*cost"},
 			},
 		},
 		{
 			name:   "ACC repeated events",
 			metric: NewACC(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 12.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "15.3"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "16.8"},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 12.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "15.3"},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "16.8"},
 				{rem: "EVENT_2", wantStr: "16.3"},
 			},
 		},
@@ -173,28 +172,28 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "TCC",
 			metric: NewTCC(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 12.3}, wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaCost: 12.3}, wantStr: NotAvailable},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*cost"},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 5.7}, wantStr: "18"},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 5.6}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 1.2}},
+				{add: "EVENT_3", opts: map[string]any{MetaStartTime: startTime, MetaCost: 5.7}, wantStr: "18"},
+				{rem: "EVENT_3", wantStr: NotAvailable},
+				{add: "EVENT_4", opts: map[string]any{MetaStartTime: startTime, MetaCost: 5.6}},
+				{add: "EVENT_5", opts: map[string]any{MetaStartTime: startTime, MetaCost: 1.2}},
 				{rem: "EVENT_1", wantStr: "6.8"},
 				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantStr: "6.8"},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantStr: utils.NotAvailable},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaCost: -1}, wantErr: "NEGATIVE:*cost"},
+				{rem: "EVENT_5", wantStr: NotAvailable},
+				{add: "EVENT_5", opts: map[string]any{MetaCost: -1}, wantErr: "NEGATIVE:*cost"},
 			},
 		},
 		{
 			name:   "TCC repeated events",
 			metric: NewTCC(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 12.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "30.6"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "67.2"},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 12.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "30.6"},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "67.2"},
 				{rem: "EVENT_2", wantStr: "48.9"},
 			},
 		},
@@ -202,28 +201,28 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "PDD",
 			metric: NewPDD(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 5 * time.Second, utils.MetaUsage: 10 * time.Second, utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 5 * time.Second, MetaUsage: 10 * time.Second, MetaStartTime: startTime}, wantStr: NotAvailable},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*pdd"},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*pdd", wantStr: utils.NotAvailable},
-				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantStr: utils.NotAvailable},
-				{rem: "EVENT_1", wantStr: utils.NotAvailable},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaPDD: 10 * time.Second, utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaPDD: 10 * time.Second}, wantStr: "10s"},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*pdd", wantStr: NotAvailable},
+				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantStr: NotAvailable},
+				{rem: "EVENT_1", wantStr: NotAvailable},
+				{add: "EVENT_4", opts: map[string]any{MetaPDD: 10 * time.Second, MetaUsage: time.Minute, MetaStartTime: startTime}, wantStr: NotAvailable},
+				{add: "EVENT_5", opts: map[string]any{MetaPDD: 10 * time.Second}, wantStr: "10s"},
 				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantStr: "10s"},
 				{rem: "EVENT_5"},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantStr: utils.NotAvailable},
+				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "PDD repeated events",
 			metric: NewPDD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 2 * time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaPDD: time.Minute}, wantStr: "1m30s"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaPDD: time.Minute}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaPDD: time.Minute}, wantStr: "1m15s"},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 2 * time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaPDD: time.Minute}, wantStr: "1m30s"},
+				{add: "EVENT_2", opts: map[string]any{MetaPDD: time.Minute}},
+				{add: "EVENT_2", opts: map[string]any{MetaPDD: time.Minute}, wantStr: "1m15s"},
 				{rem: "EVENT_2", wantStr: "1m20s"},
 			},
 		},
@@ -231,46 +230,46 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "DDC",
 			metric: NewDDC(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaStartTime: startTime}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaDestination: "1001", utils.MetaStartTime: startTime}, wantStr: "2"},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1002", MetaStartTime: startTime}, wantStr: NotAvailable},
+				{add: "EVENT_2", opts: map[string]any{MetaDestination: "1002", MetaStartTime: startTime}},
+				{add: "EVENT_3", opts: map[string]any{MetaDestination: "1001", MetaStartTime: startTime}, wantStr: "2"},
 				{rem: "EVENT_1", wantStr: "2"},
-				{rem: "EVENT_2", wantStr: utils.NotAvailable},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
+				{rem: "EVENT_2", wantStr: NotAvailable},
+				{rem: "EVENT_3", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "DDC repeated events",
 			metric: NewDDC(2, "", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1001"}, wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1002"}, wantStr: "2"},
-				{rem: "EVENT_1", wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1001"}, wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1002"}, wantStr: "2"},
+				{rem: "EVENT_1", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "Sum",
 			metric: sum1,
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaCost: "20", utils.MetaStartTime: startTime}, wantStr: utils.NotAvailable},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaCost: "20", utils.MetaStartTime: startTime}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaDestination: "1001", utils.MetaCost: "20", utils.MetaStartTime: startTime}, wantStr: "60"},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1002", MetaCost: "20", MetaStartTime: startTime}, wantStr: NotAvailable},
+				{add: "EVENT_2", opts: map[string]any{MetaDestination: "1002", MetaCost: "20", MetaStartTime: startTime}},
+				{add: "EVENT_3", opts: map[string]any{MetaDestination: "1001", MetaCost: "20", MetaStartTime: startTime}, wantStr: "60"},
 				{rem: "EVENT_1", wantStr: "40"},
-				{rem: "EVENT_2", wantStr: utils.NotAvailable},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
+				{rem: "EVENT_2", wantStr: NotAvailable},
+				{rem: "EVENT_3", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "Sum repeated events",
 			metric: sum2,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 12.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "30.6"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "67.2"},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 12.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "30.6"},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "67.2"},
 				{rem: "EVENT_2", wantStr: "48.9"},
 			},
 		},
@@ -278,23 +277,23 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "Average",
 			metric: NewStatAverage(2, "~*opts.*cost", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaDestination: "1002"}, wantStr: utils.NotAvailable},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaDestination: "1002"}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaDestination: "1001"}, wantStr: "20"},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: "20", MetaStartTime: startTime, MetaDestination: "1002"}, wantStr: NotAvailable},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: "20", MetaStartTime: startTime, MetaDestination: "1002"}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: "20", MetaStartTime: startTime, MetaDestination: "1001"}, wantStr: "20"},
 				{rem: "EVENT_1", wantStr: "20"},
-				{rem: "EVENT_2", wantStr: utils.NotAvailable},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
+				{rem: "EVENT_2", wantStr: NotAvailable},
+				{rem: "EVENT_3", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "Average repeated events",
 			metric: NewStatAverage(2, "~*opts.*cost", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 12.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "15.3"},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 18.3}, wantStr: "16.8"},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 12.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "15.3"},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 18.3}, wantStr: "16.8"},
 				{rem: "EVENT_2", wantStr: "16.3"},
 			},
 		},
@@ -302,23 +301,23 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 			name:   "Distinct",
 			metric: NewStatDistinct(2, "~*opts.*cost", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: "20"}, wantStr: utils.NotAvailable},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: "20"}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: "40"}, wantStr: "2"},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: "20"}, wantStr: NotAvailable},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: "20"}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: "40"}, wantStr: "2"},
 				{rem: "EVENT_1", wantStr: "2"},
-				{rem: "EVENT_2", wantStr: utils.NotAvailable},
-				{rem: "EVENT_3", wantStr: utils.NotAvailable},
+				{rem: "EVENT_2", wantStr: NotAvailable},
+				{rem: "EVENT_3", wantStr: NotAvailable},
 			},
 		},
 		{
 			name:   "Distinct repeated events",
 			metric: NewStatDistinct(2, "~*opts.*cost", nil),
 			steps: []step{
-				{wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: "20"}, wantStr: utils.NotAvailable},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: "40"}, wantStr: "2"},
-				{rem: "EVENT_1", wantStr: utils.NotAvailable},
+				{wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: "20"}, wantStr: NotAvailable},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: "40"}, wantStr: "2"},
+				{rem: "EVENT_1", wantStr: NotAvailable},
 			},
 		},
 	}
@@ -329,7 +328,7 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 				var err error
 				switch {
 				case s.add != "":
-					err = m.AddEvent(s.add, utils.MapStorage{utils.MetaOpts: s.opts})
+					err = m.AddEvent(s.add, MapStorage{MetaOpts: s.opts})
 				case s.rem != "":
 					err = m.RemEvent(s.rem)
 				}
@@ -354,7 +353,7 @@ func TestStatMetricsGetStringValue(t *testing.T) {
 func TestStatMetricsGetValue(t *testing.T) {
 	startTime := time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)
 	startTime2015 := time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC)
-	started := map[string]any{utils.MetaStartTime: startTime}
+	started := map[string]any{MetaStartTime: startTime}
 	sum, err := NewStatSum(2, "~*opts.*cost", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -362,7 +361,7 @@ func TestStatMetricsGetValue(t *testing.T) {
 	type step struct {
 		add, rem string
 		opts     map[string]any
-		wantVal  *utils.Decimal
+		wantVal  *Decimal
 		wantErr  string
 	}
 	tests := []struct {
@@ -374,195 +373,195 @@ func TestStatMetricsGetValue(t *testing.T) {
 			name:   "ASR",
 			metric: NewASR(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: started, wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: started, wantVal: DecimalNaN},
 				{add: "EVENT_2"},
-				{add: "EVENT_3", wantVal: utils.NewDecimalFromFloat64(33.33333333333333)},
-				{rem: "EVENT_3", wantVal: utils.NewDecimalFromFloat64(50.0)},
+				{add: "EVENT_3", wantVal: NewDecimalFromFloat64(33.33333333333333)},
+				{rem: "EVENT_3", wantVal: NewDecimalFromFloat64(50.0)},
 				{add: "EVENT_4", opts: started},
 				{add: "EVENT_5", opts: started},
-				{rem: "EVENT_1", wantVal: utils.NewDecimalFromFloat64(66.66666666666667)},
-				{rem: "EVENT_2", wantVal: utils.NewDecimalFromFloat64(100.0)},
-				{rem: "EVENT_4", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_1", wantVal: NewDecimalFromFloat64(66.66666666666667)},
+				{rem: "EVENT_2", wantVal: NewDecimalFromFloat64(100.0)},
+				{rem: "EVENT_4", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "ACD",
 			metric: NewACD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:*usage", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(35.0 * 1e9)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(53.33333333333333 * 1e9)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(53.33333333333333 * 1e9)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(50.0 * 1e9)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:*usage", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(35.0 * 1e9)},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(53.33333333333333 * 1e9)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(53.33333333333333 * 1e9)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(50.0 * 1e9)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "ACD 2",
 			metric: NewACD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 8 * time.Second}},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantVal: utils.NewDecimalFromFloat64(float64(9 * time.Second))},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_2", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: 4*time.Minute + 30*time.Second, utils.MetaStartTime: startTime}, wantVal: utils.NewDecimalFromFloat64(float64(2*time.Minute + 45*time.Second))},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 8 * time.Second}},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantVal: NewDecimalFromFloat64(float64(9 * time.Second))},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_2", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute, MetaStartTime: startTime}},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: 4*time.Minute + 30*time.Second, MetaStartTime: startTime}, wantVal: NewDecimalFromFloat64(float64(2*time.Minute + 45*time.Second))},
 				{rem: "EVENT_5"},
-				{rem: "EVENT_4", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_4", wantVal: DecimalNaN},
+				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "TCD",
 			metric: NewTCD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:*usage", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}, wantVal: utils.NewDecimalFromFloat64(70.0 * 1e9)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime}, wantVal: utils.NewDecimalFromFloat64(160.0 * 1e9)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(160.0 * 1e9)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(100.0 * 1e9)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:*usage", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute, MetaStartTime: startTime}, wantVal: NewDecimalFromFloat64(70.0 * 1e9)},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime}, wantVal: NewDecimalFromFloat64(160.0 * 1e9)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(160.0 * 1e9)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(100.0 * 1e9)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "TCD 2",
 			metric: NewTCD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 5 * time.Second}},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantVal: utils.NewDecimalFromFloat64(float64(15 * time.Second))},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_2", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime}, wantVal: utils.NewDecimalFromFloat64(float64(2*time.Minute + 30*time.Second))},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", opts: map[string]any{MetaStartTime: startTime, MetaUsage: 5 * time.Second}},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*usage", wantVal: NewDecimalFromFloat64(float64(15 * time.Second))},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_2", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute, MetaStartTime: startTime}},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime}, wantVal: NewDecimalFromFloat64(float64(2*time.Minute + 30*time.Second))},
 				{rem: "EVENT_5"},
-				{rem: "EVENT_4", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_4", wantVal: DecimalNaN},
+				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "ACC",
 			metric: NewACC(2, "", nil),
 			steps: []step{
-				{wantVal: utils.DecimalNaN},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "12.3"}, wantVal: utils.DecimalNaN},
+				{wantVal: DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaCost: "12.3"}, wantVal: DecimalNaN},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*cost"},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*cost", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "5.6"}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "1.2"}},
-				{rem: "EVENT_1", wantVal: utils.NewDecimalFromFloat64(3.4)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(3.4)},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*cost", wantVal: DecimalNaN},
+				{rem: "EVENT_3", wantErr: "NOT_FOUND", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaStartTime: startTime, MetaCost: "5.6"}},
+				{add: "EVENT_5", opts: map[string]any{MetaStartTime: startTime, MetaCost: "1.2"}},
+				{rem: "EVENT_1", wantVal: NewDecimalFromFloat64(3.4)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(3.4)},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "TCC",
 			metric: NewTCC(2, "", nil),
 			steps: []step{
-				{wantVal: utils.DecimalNaN},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "12.3"}, wantVal: utils.DecimalNaN},
+				{wantVal: DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaStartTime: startTime, MetaCost: "12.3"}, wantVal: DecimalNaN},
 				{add: "EVENT_2", wantErr: "NOT_FOUND:*cost"},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: 1.2}, wantVal: utils.NewDecimalFromFloat64(13.5)},
-				{rem: "EVENT_3", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "5.6"}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "1.2"}},
-				{rem: "EVENT_1", wantVal: utils.NewDecimalFromFloat64(6.8)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(6.8)},
+				{add: "EVENT_3", opts: map[string]any{MetaStartTime: startTime, MetaCost: 1.2}, wantVal: NewDecimalFromFloat64(13.5)},
+				{rem: "EVENT_3", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaStartTime: startTime, MetaCost: "5.6"}},
+				{add: "EVENT_5", opts: map[string]any{MetaStartTime: startTime, MetaCost: "1.2"}},
+				{rem: "EVENT_1", wantVal: NewDecimalFromFloat64(6.8)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(6.8)},
 				{rem: "EVENT_4"},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "PDD",
 			metric: NewPDD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 5 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:*pdd", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaPDD: 10 * time.Second, utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(7.5 * 1e9)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime2015}, wantErr: "NOT_FOUND:*pdd", wantVal: utils.NewDecimalFromFloat64(7.5 * 1e9)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(7.5 * 1e9)},
-				{rem: "EVENT_4", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 5 * time.Second, MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:*pdd", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaPDD: 10 * time.Second, MetaUsage: time.Minute, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(7.5 * 1e9)},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime2015}, wantErr: "NOT_FOUND:*pdd", wantVal: NewDecimalFromFloat64(7.5 * 1e9)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(7.5 * 1e9)},
+				{rem: "EVENT_4", wantVal: DecimalNaN},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantErr: "NOT_FOUND", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "PDD 2",
 			metric: NewPDD(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 9 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaPDD: 10 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 8 * time.Second}},
-				{add: "EVENT_3", wantErr: "NOT_FOUND:*pdd", wantVal: utils.NewDecimalFromFloat64(float64(9*time.Second + 500*time.Millisecond))},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_2", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaPDD: 8 * time.Second, utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime}},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: 4*time.Minute + 30*time.Second, utils.MetaStartTime: startTime}, wantErr: "NOT_FOUND:*pdd", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 9 * time.Second, MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", opts: map[string]any{MetaPDD: 10 * time.Second, MetaStartTime: startTime, MetaUsage: 8 * time.Second}},
+				{add: "EVENT_3", wantErr: "NOT_FOUND:*pdd", wantVal: NewDecimalFromFloat64(float64(9*time.Second + 500*time.Millisecond))},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_2", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaPDD: 8 * time.Second, MetaUsage: time.Minute, MetaStartTime: startTime}},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: 4*time.Minute + 30*time.Second, MetaStartTime: startTime}, wantErr: "NOT_FOUND:*pdd", wantVal: DecimalNaN},
 				{rem: "EVENT_5", wantErr: "NOT_FOUND"},
-				{rem: "EVENT_4", wantVal: utils.DecimalNaN},
+				{rem: "EVENT_4", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "DDC",
 			metric: NewDDC(2, "", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:*destination", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaDestination: "1001", utils.MetaPDD: 10 * time.Second, utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(2)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaDestination: "1003", utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(3)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(3)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(2)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:*destination", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaDestination: "1001", MetaPDD: 10 * time.Second, MetaUsage: time.Minute, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(2)},
+				{add: "EVENT_5", opts: map[string]any{MetaDestination: "1003", MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(3)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(3)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(2)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "Sum",
 			metric: sum,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaDestination: "1001", utils.MetaPDD: 10 * time.Second, utils.MetaCost: "20", utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(40)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaDestination: "1003", utils.MetaCost: "20", utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime2015}, wantVal: utils.NewDecimalFromFloat64(60)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(60)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(40)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaCost: "20", MetaStartTime: startTime, MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaDestination: "1001", MetaPDD: 10 * time.Second, MetaCost: "20", MetaUsage: time.Minute, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(40)},
+				{add: "EVENT_5", opts: map[string]any{MetaDestination: "1003", MetaCost: "20", MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime2015}, wantVal: NewDecimalFromFloat64(60)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(60)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(40)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "Average",
 			metric: NewStatAverage(2, "~*opts.*cost", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second, utils.MetaPDD: 5 * time.Second, utils.MetaDestination: "1002"}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:~*opts.*cost", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaCost: "30", utils.MetaUsage: time.Minute, utils.MetaStartTime: startTime2015, utils.MetaPDD: 10 * time.Second, utils.MetaDestination: "1001"}, wantVal: utils.NewDecimalFromFloat64(25)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaCost: "20", utils.MetaUsage: time.Minute + 30*time.Second, utils.MetaStartTime: startTime2015, utils.MetaDestination: "1003"}, wantVal: utils.NewDecimalFromFloat64(23.33333333333333)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(23.33333333333333)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(20)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: "20", MetaStartTime: startTime, MetaUsage: 10 * time.Second, MetaPDD: 5 * time.Second, MetaDestination: "1002"}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:~*opts.*cost", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaCost: "30", MetaUsage: time.Minute, MetaStartTime: startTime2015, MetaPDD: 10 * time.Second, MetaDestination: "1001"}, wantVal: NewDecimalFromFloat64(25)},
+				{add: "EVENT_5", opts: map[string]any{MetaCost: "20", MetaUsage: time.Minute + 30*time.Second, MetaStartTime: startTime2015, MetaDestination: "1003"}, wantVal: NewDecimalFromFloat64(23.33333333333333)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(23.33333333333333)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(20)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 		{
 			name:   "Distinct",
 			metric: NewStatDistinct(2, "~*opts.*usage", nil),
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 10 * time.Second}, wantVal: utils.DecimalNaN},
-				{add: "EVENT_2", wantErr: "NOT_FOUND:~*opts.*usage", wantVal: utils.DecimalNaN},
-				{add: "EVENT_4", opts: map[string]any{utils.MetaUsage: time.Minute}, wantVal: utils.NewDecimalFromFloat64(2)},
-				{add: "EVENT_5", opts: map[string]any{utils.MetaUsage: time.Minute + 30*time.Second}, wantVal: utils.NewDecimalFromFloat64(3)},
-				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: utils.NewDecimalFromFloat64(3)},
-				{rem: "EVENT_4", wantVal: utils.NewDecimalFromFloat64(2)},
-				{rem: "EVENT_1", wantVal: utils.DecimalNaN},
-				{rem: "EVENT_5", wantVal: utils.DecimalNaN},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 10 * time.Second}, wantVal: DecimalNaN},
+				{add: "EVENT_2", wantErr: "NOT_FOUND:~*opts.*usage", wantVal: DecimalNaN},
+				{add: "EVENT_4", opts: map[string]any{MetaUsage: time.Minute}, wantVal: NewDecimalFromFloat64(2)},
+				{add: "EVENT_5", opts: map[string]any{MetaUsage: time.Minute + 30*time.Second}, wantVal: NewDecimalFromFloat64(3)},
+				{rem: "EVENT_2", wantErr: "NOT_FOUND", wantVal: NewDecimalFromFloat64(3)},
+				{rem: "EVENT_4", wantVal: NewDecimalFromFloat64(2)},
+				{rem: "EVENT_1", wantVal: DecimalNaN},
+				{rem: "EVENT_5", wantVal: DecimalNaN},
 			},
 		},
 	}
@@ -573,7 +572,7 @@ func TestStatMetricsGetValue(t *testing.T) {
 				var err error
 				switch {
 				case s.add != "":
-					err = m.AddEvent(s.add, utils.MapStorage{utils.MetaOpts: s.opts})
+					err = m.AddEvent(s.add, MapStorage{MetaOpts: s.opts})
 				case s.rem != "":
 					err = m.RemEvent(s.rem)
 				}
@@ -587,8 +586,8 @@ func TestStatMetricsGetValue(t *testing.T) {
 				}
 				if s.wantVal != nil {
 					got := m.GetValue()
-					if s.wantVal == utils.DecimalNaN {
-						if got != utils.DecimalNaN {
+					if s.wantVal == DecimalNaN {
+						if got != DecimalNaN {
 							t.Fatalf("step %d: GetValue() = %v, want NaN", i, got)
 						}
 					} else if got.Compare(s.wantVal) != 0 {
@@ -604,12 +603,12 @@ func TestStatMetricsGetValue2(t *testing.T) {
 	tests := []struct {
 		name   string
 		metric StatMetric
-		want   *utils.Decimal
+		want   *Decimal
 	}{
 		{
 			name: "Distinct",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -622,13 +621,13 @@ func TestStatMetricsGetValue2(t *testing.T) {
 				FieldName: "Test_Field_Name",
 				Count:     3,
 			},
-			want: utils.NewDecimal(1, 0),
+			want: NewDecimal(1, 0),
 		},
 		{
 			name: "Average",
 			metric: &StatAverage{
 				Metric: &Metric{
-					Value:    utils.NewDecimal(10, 0),
+					Value:    NewDecimal(10, 0),
 					Count:    20,
 					MinItems: 10,
 					Events: map[string]*DecimalWithCompress{
@@ -636,13 +635,13 @@ func TestStatMetricsGetValue2(t *testing.T) {
 					},
 				},
 			},
-			want: utils.NewDecimalFromFloat64(0.5),
+			want: NewDecimalFromFloat64(0.5),
 		},
 		{
 			name: "Sum",
 			metric: &StatSum{
 				Metric: &Metric{
-					Value:    utils.NewDecimal(10, 0),
+					Value:    NewDecimal(10, 0),
 					Count:    15,
 					MinItems: 20,
 					Events: map[string]*DecimalWithCompress{
@@ -650,7 +649,7 @@ func TestStatMetricsGetValue2(t *testing.T) {
 					},
 				},
 			},
-			want: utils.DecimalNaN,
+			want: DecimalNaN,
 		},
 		{
 			name: "ACC",
@@ -660,17 +659,17 @@ func TestStatMetricsGetValue2(t *testing.T) {
 						"Event1": {},
 					},
 					MinItems: 3,
-					Value:    utils.NewDecimal(0, 0),
+					Value:    NewDecimal(0, 0),
 					Count:    3,
 				},
 			},
-			want: utils.NewDecimal(0, 0),
+			want: NewDecimal(0, 0),
 		},
 		{
 			name: "TCC",
 			metric: &StatTCC{
 				Metric: &Metric{
-					Value: utils.NewDecimal(2, 0),
+					Value: NewDecimal(2, 0),
 					Count: 3,
 					Events: map[string]*DecimalWithCompress{
 						"Event1": {},
@@ -678,12 +677,12 @@ func TestStatMetricsGetValue2(t *testing.T) {
 					MinItems: 3,
 				},
 			},
-			want: utils.NewDecimal(2, 0),
+			want: NewDecimal(2, 0),
 		},
 		{
 			name: "DDC",
 			metric: &StatDDC{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"Field_Value1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -695,14 +694,14 @@ func TestStatMetricsGetValue2(t *testing.T) {
 				MinItems: 3,
 				Count:    3,
 			},
-			want: utils.NewDecimal(1, 0),
+			want: NewDecimal(1, 0),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.metric.GetValue()
-			if tt.want == utils.DecimalNaN {
-				if got != utils.DecimalNaN {
+			if tt.want == DecimalNaN {
+				if got != DecimalNaN {
 					t.Errorf("GetValue() = %v, want NaN", got)
 				}
 			} else if got.Compare(tt.want) != 0 {
@@ -713,7 +712,7 @@ func TestStatMetricsGetValue2(t *testing.T) {
 }
 
 func TestStatMetricsState(t *testing.T) {
-	started := map[string]any{utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
+	started := map[string]any{MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 	asr := &StatASR{Metric: NewMetric(2, nil)}
 	acd := &StatACD{Metric: NewMetric(2, nil)}
 	tcd := &StatTCD{Metric: NewMetric(2, nil)}
@@ -722,7 +721,7 @@ func TestStatMetricsState(t *testing.T) {
 	pdd := &StatPDD{Metric: NewMetric(2, nil)}
 	sum := &StatSum{
 		Metric: NewMetric(2, nil),
-		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+		Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 	}
 	avg := &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
 	type step struct {
@@ -744,51 +743,51 @@ func TestStatMetricsState(t *testing.T) {
 				{add: "EVENT_2", wantStr: "50%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    2,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(1, 0), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimal(0, 0), CompressFactor: 1},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 				{add: "EVENT_2"},
 				{add: "EVENT_1", wantStr: "25%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    4,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 2},
-								"EVENT_2": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 2},
+								"EVENT_1": {Stat: NewDecimalFromFloat64(0.5), CompressFactor: 2},
+								"EVENT_2": {Stat: NewDecimalFromFloat64(0), CompressFactor: 2},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 				{rem: "EVENT_1"},
 				{rem: "EVENT_2", wantStr: "50%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    2,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromFloat64(1), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimalFromFloat64(0), CompressFactor: 1},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 			},
@@ -797,38 +796,38 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "ACD",
 			metric: acd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaUsage: time.Minute}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaUsage: time.Minute}, check: func(t *testing.T) {
 					expected := &StatACD{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
 						},
 					}
 					if !expected.Equal(acd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acd))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatACD{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(int64(3*time.Minute+30*time.Second), 0),
+							Value:    NewDecimal(int64(3*time.Minute+30*time.Second), 0),
 							Count:    2,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
 						},
 					}
 					if !expected.Equal(acd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acd))
 					}
 				}},
 			},
@@ -837,38 +836,38 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "TCD",
 			metric: tcd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaUsage: time.Minute}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaUsage: time.Minute}, check: func(t *testing.T) {
 					expected := &StatTCD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(tcd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcd))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatTCD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second)),
+							Value:    NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second)),
 							Count:    2,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(tcd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcd))
 					}
 				}},
 			},
@@ -877,38 +876,38 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "ACC",
 			metric: acc,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: 18.3}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: 18.3}, check: func(t *testing.T) {
 					expected := &StatACC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
-								"EVENT_3": {Stat: &utils.Decimal{Big: decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
+								"EVENT_3": {Stat: &Decimal{Big: decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    3,
-							Value:    utils.NewDecimalFromStringIgnoreError("42.7"),
+							Value:    NewDecimalFromStringIgnoreError("42.7"),
 						},
 					}
 					if !expected.Equal(acc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acc))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatACC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 1},
-								"EVENT_3": {Stat: &utils.Decimal{Big: decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 1},
+								"EVENT_3": {Stat: &Decimal{Big: decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    2,
-							Value:    utils.SubstractDecimal(utils.NewDecimalFromStringIgnoreError("42.7"), utils.NewDecimalFromFloat64(12.2)),
+							Value:    SubstractDecimal(NewDecimalFromStringIgnoreError("42.7"), NewDecimalFromFloat64(12.2)),
 						},
 					}
 					if !expected.Equal(acc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acc))
 					}
 				}},
 			},
@@ -917,38 +916,38 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "TCC",
 			metric: tcc,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: 18.3}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: 18.3}, check: func(t *testing.T) {
 					expected := &StatTCC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    3,
-							Value:    utils.NewDecimalFromStringIgnoreError("42.700"),
+							Value:    NewDecimalFromStringIgnoreError("42.700"),
 						},
 					}
 					if !expected.Equal(tcc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcc))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatTCC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    2,
-							Value:    utils.SubstractDecimal(utils.NewDecimalFromStringIgnoreError("42.700"), utils.NewDecimalFromFloat64(12.2)),
+							Value:    SubstractDecimal(NewDecimalFromStringIgnoreError("42.700"), NewDecimalFromFloat64(12.2)),
 						},
 					}
 					if !expected.Equal(tcc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcc))
 					}
 				}},
 			},
@@ -957,38 +956,38 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "PDD",
 			metric: pdd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaPDD: time.Minute}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaPDD: time.Minute}, check: func(t *testing.T) {
 					expected := &StatPDD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(pdd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(pdd))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatPDD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second)),
+							Value:    NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second)),
 							Count:    2,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(pdd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(pdd))
 					}
 				}},
 			},
@@ -997,40 +996,40 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "Sum",
 			metric: sum,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: utils.NewDecimal(182, 1)}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: utils.NewDecimal(62, 1)}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: utils.NewDecimal(183, 1)}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaCost: NewDecimal(182, 1)}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: NewDecimal(62, 1)}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: NewDecimal(183, 1)}, check: func(t *testing.T) {
 					expected := &StatSum{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.3"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.3"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    3,
-							Value:    utils.NewDecimalFromStringIgnoreError("42.7"),
+							Value:    NewDecimalFromStringIgnoreError("42.7"),
 						},
-						Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+						Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 					}
 					if !expected.Equal(sum.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(sum))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatSum{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.3"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.2"), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.3"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    2,
-							Value:    utils.SubstractDecimal(utils.NewDecimalFromStringIgnoreError("42.7"), utils.NewDecimalFromFloat64(12.2)),
+							Value:    SubstractDecimal(NewDecimalFromStringIgnoreError("42.7"), NewDecimalFromFloat64(12.2)),
 						},
-						Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+						Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 					}
 					if !expected.Equal(sum.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(sum))
 					}
 				}},
 			},
@@ -1039,40 +1038,40 @@ func TestStatMetricsState(t *testing.T) {
 			name:   "Average",
 			metric: avg,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaCost: 18.3}, check: func(t *testing.T) {
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_3", opts: map[string]any{MetaCost: 18.3}, check: func(t *testing.T) {
 					expected := &StatAverage{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    3,
-							Value:    utils.NewDecimalFromStringIgnoreError("42.70000000000000"),
+							Value:    NewDecimalFromStringIgnoreError("42.70000000000000"),
 						},
 						FieldName: "~*opts.*cost",
 					}
 					if !expected.Equal(avg.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(avg))
 					}
 				}},
 				{rem: "EVENT_1", check: func(t *testing.T) {
 					expected := &StatAverage{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 1},
-								"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 1},
+								"EVENT_3": {Stat: NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
 							},
 							MinItems: 2,
 							Count:    2,
-							Value:    utils.SubstractDecimal(utils.NewDecimalFromStringIgnoreError("42.70000000000000"), utils.NewDecimalFromFloat64(12.2)),
+							Value:    SubstractDecimal(NewDecimalFromStringIgnoreError("42.70000000000000"), NewDecimalFromFloat64(12.2)),
 						},
 						FieldName: "~*opts.*cost",
 					}
 					if !reflect.DeepEqual(*expected, *avg) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(avg))
 					}
 				}},
 			},
@@ -1084,7 +1083,7 @@ func TestStatMetricsState(t *testing.T) {
 			for i, s := range tt.steps {
 				switch {
 				case s.add != "":
-					if err := m.AddEvent(s.add, utils.MapStorage{utils.MetaOpts: s.opts}); err != nil {
+					if err := m.AddEvent(s.add, MapStorage{MetaOpts: s.opts}); err != nil {
 						t.Fatalf("step %d: %v", i, err)
 					}
 				case s.rem != "":
@@ -1106,7 +1105,7 @@ func TestStatMetricsState(t *testing.T) {
 }
 
 func TestStatMetricsCompress(t *testing.T) {
-	started := map[string]any{utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
+	started := map[string]any{MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 	asr := &StatASR{Metric: NewMetric(2, nil)}
 	acd := &StatACD{Metric: NewMetric(2, nil)}
 	tcd := &StatTCD{Metric: NewMetric(2, nil)}
@@ -1115,19 +1114,19 @@ func TestStatMetricsCompress(t *testing.T) {
 	pdd := &StatPDD{Metric: NewMetric(2, nil)}
 	ddc := &StatDDC{
 		Events:      make(map[string]map[string]uint64),
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		MinItems:    2,
 	}
 	sum := &StatSum{
 		Metric: NewMetric(2, nil),
-		Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+		Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 	}
 	avg := &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
 	dst := &StatDistinct{
 		Events:      make(map[string]map[string]uint64),
-		FieldValues: make(map[string]utils.StringSet),
+		FieldValues: make(map[string]StringSet),
 		MinItems:    2,
-		FieldName:   utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaDestination,
+		FieldName:   DynamicDataPrefix + MetaOpts + NestingSep + MetaDestination,
 	}
 	type step struct {
 		add      string
@@ -1151,32 +1150,32 @@ func TestStatMetricsCompress(t *testing.T) {
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_2"}, wantStr: "50%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    2,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(1, 0), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimal(0, 0), CompressFactor: 1},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, wantStr: "50%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    2,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(0.5), CompressFactor: 2},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 				{add: "EVENT_2"},
@@ -1184,16 +1183,16 @@ func TestStatMetricsCompress(t *testing.T) {
 				{compress: 1, wantIDs: []string{"EVENT_3"}, wantStr: "25%", check: func(t *testing.T) {
 					expected := &StatASR{
 						Metric: &Metric{
-							Value:    utils.NewDecimal(1, 0),
+							Value:    NewDecimal(1, 0),
 							Count:    4,
 							MinItems: 2,
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(0.25), CompressFactor: 4},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(0.25), CompressFactor: 4},
 							},
 						},
 					}
 					if !reflect.DeepEqual(*expected, *asr) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(asr))
 					}
 				}},
 			},
@@ -1202,38 +1201,38 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "ACD",
 			metric: acd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaUsage: time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaUsage: time.Minute}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatACD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(acd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acd))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatACD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
+								"EVENT_3": {Stat: NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(acd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acd))
 					}
 				}},
 			},
@@ -1242,38 +1241,38 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "TCD",
 			metric: tcd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaUsage: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaUsage: time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaUsage: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaUsage: time.Minute}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatTCD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(tcd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcd))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatTCD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
+								"EVENT_3": {Stat: NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(tcd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcd))
 					}
 				}},
 			},
@@ -1282,54 +1281,54 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "ACC",
 			metric: acc,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_2"}, check: func(t *testing.T) {
 					expected := &StatACC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromStringIgnoreError("24.4"),
+							Value:    NewDecimalFromStringIgnoreError("24.4"),
 							Count:    2,
 						},
 					}
 					if !expected.Equal(acc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acc))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatACC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.2), CompressFactor: 2},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(24.4),
+							Value:    NewDecimalFromFloat64(24.4),
 							Count:    2,
 						},
 					}
 					if !expected.Equal(acc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acc))
 					}
 				}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.3}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatACC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.22500000000000), CompressFactor: 4},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.22500000000000), CompressFactor: 4},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(48.9),
+							Value:    NewDecimalFromFloat64(48.9),
 							Count:    4,
 						},
 					}
 					if !expected.Equal(acc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(acc))
 					}
 				}},
 			},
@@ -1338,54 +1337,54 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "TCC",
 			metric: tcc,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_2"}, check: func(t *testing.T) {
 					expected := &StatTCC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromStringIgnoreError("24.400"),
+							Value:    NewDecimalFromStringIgnoreError("24.400"),
 							Count:    2,
 						},
 					}
 					if !expected.Equal(tcc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcc))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatTCC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.2), CompressFactor: 2},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(24.4),
+							Value:    NewDecimalFromFloat64(24.4),
 							Count:    2,
 						},
 					}
 					if !expected.Equal(tcc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcc))
 					}
 				}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.3}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatTCC{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.225), CompressFactor: 4},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.225), CompressFactor: 4},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(48.9),
+							Value:    NewDecimalFromFloat64(48.9),
 							Count:    4,
 						},
 					}
 					if !expected.Equal(tcc.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(tcc))
 					}
 				}},
 			},
@@ -1394,38 +1393,38 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "PDD",
 			metric: pdd,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 2 * time.Minute}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaPDD: 3 * time.Minute}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaPDD: time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 2 * time.Minute}},
+				{add: "EVENT_1", opts: map[string]any{MetaPDD: 3 * time.Minute}},
+				{add: "EVENT_3", opts: map[string]any{MetaPDD: time.Minute}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatPDD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
-								"EVENT_3": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimal(int64(2*time.Minute+30*time.Second), 0), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(pdd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(pdd))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatPDD{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
+								"EVENT_3": {Stat: NewDecimal(int64(2*time.Minute), 0), CompressFactor: 3},
 							},
-							Value:    utils.NewDecimal(6*int64(time.Minute), 0),
+							Value:    NewDecimal(6*int64(time.Minute), 0),
 							Count:    3,
 							MinItems: 2,
 						},
 					}
 					if !expected.Equal(pdd.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(pdd))
 					}
 				}},
 			},
@@ -1434,9 +1433,9 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "DDC",
 			metric: ddc,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1001"}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1001"}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaDestination: "1002"}},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1001"}},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1001"}},
+				{add: "EVENT_3", opts: map[string]any{MetaDestination: "1002"}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatDDC{
 						Events: map[string]map[string]uint64{
@@ -1447,7 +1446,7 @@ func TestStatMetricsCompress(t *testing.T) {
 								"1002": 1,
 							},
 						},
-						FieldValues: map[string]utils.StringSet{
+						FieldValues: map[string]StringSet{
 							"1001": {
 								"EVENT_1": {},
 							},
@@ -1459,7 +1458,7 @@ func TestStatMetricsCompress(t *testing.T) {
 						Count:    3,
 					}
 					if !reflect.DeepEqual(*expected, *ddc) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(ddc))
 					}
 				}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
@@ -1472,7 +1471,7 @@ func TestStatMetricsCompress(t *testing.T) {
 								"1002": 1,
 							},
 						},
-						FieldValues: map[string]utils.StringSet{
+						FieldValues: map[string]StringSet{
 							"1001": {
 								"EVENT_1": {},
 							},
@@ -1484,7 +1483,7 @@ func TestStatMetricsCompress(t *testing.T) {
 						Count:    3,
 					}
 					if !reflect.DeepEqual(*expected, *ddc) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(ddc))
 					}
 				}},
 			},
@@ -1493,57 +1492,57 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "Sum",
 			metric: sum,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: utils.NewDecimal(182, 1)}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: utils.NewDecimal(62, 1)}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: NewDecimal(182, 1)}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: NewDecimal(62, 1)}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_2"}, check: func(t *testing.T) {
 					expected := &StatSum{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.2"), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.2"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("18.2"), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimalFromStringIgnoreError("6.2"), CompressFactor: 1},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromStringIgnoreError("24.4"),
+							Value:    NewDecimalFromStringIgnoreError("24.4"),
 							Count:    2,
 						},
-						Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+						Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 					}
 					if !expected.Equal(sum.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(sum))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatSum{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.2), CompressFactor: 2},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(24.4),
+							Value:    NewDecimalFromFloat64(24.4),
 							Count:    2,
 						},
-						Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+						Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 					}
 					if !expected.Equal(sum.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(sum))
 					}
 				}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: utils.NewDecimal(62, 1)}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: utils.NewDecimal(183, 1)}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: NewDecimal(62, 1)}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: NewDecimal(183, 1)}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatSum{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.225), CompressFactor: 4},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.225), CompressFactor: 4},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(48.9),
+							Value:    NewDecimalFromFloat64(48.9),
 							Count:    4,
 						},
-						Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+						Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 					}
 					if !expected.Equal(sum.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(sum))
 					}
 				}},
 			},
@@ -1552,57 +1551,57 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "Average",
 			metric: avg,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.2}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.2}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_2"}, check: func(t *testing.T) {
 					expected := &StatAverage{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
-								"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
+								"EVENT_1": {Stat: NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
+								"EVENT_2": {Stat: NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromStringIgnoreError("24.40000000000000"),
+							Value:    NewDecimalFromStringIgnoreError("24.40000000000000"),
 							Count:    2,
 						},
 						FieldName: "~*opts.*cost",
 					}
 					if !expected.Equal(avg.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(avg))
 					}
 				}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatAverage{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.2), CompressFactor: 2},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(24.4),
+							Value:    NewDecimalFromFloat64(24.4),
 							Count:    2,
 						},
 						FieldName: "~*opts.*cost",
 					}
 					if !expected.Equal(avg.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(avg))
 					}
 				}},
-				{add: "EVENT_2", opts: map[string]any{utils.MetaCost: 6.2}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaCost: 18.3}},
+				{add: "EVENT_2", opts: map[string]any{MetaCost: 6.2}},
+				{add: "EVENT_1", opts: map[string]any{MetaCost: 18.3}},
 				{compress: 1, wantIDs: []string{"EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatAverage{
 						Metric: &Metric{
 							Events: map[string]*DecimalWithCompress{
-								"EVENT_3": {Stat: utils.NewDecimalFromFloat64(12.22500000000000), CompressFactor: 4},
+								"EVENT_3": {Stat: NewDecimalFromFloat64(12.22500000000000), CompressFactor: 4},
 							},
 							MinItems: 2,
-							Value:    utils.NewDecimalFromFloat64(48.90000000000000),
+							Value:    NewDecimalFromFloat64(48.90000000000000),
 							Count:    4,
 						},
 						FieldName: "~*opts.*cost",
 					}
 					if !expected.Equal(avg.Metric) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(avg))
 					}
 				}},
 			},
@@ -1611,9 +1610,9 @@ func TestStatMetricsCompress(t *testing.T) {
 			name:   "Distinct",
 			metric: dst,
 			steps: []step{
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1001"}},
-				{add: "EVENT_1", opts: map[string]any{utils.MetaDestination: "1001"}},
-				{add: "EVENT_3", opts: map[string]any{utils.MetaDestination: "1002"}},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1001"}},
+				{add: "EVENT_1", opts: map[string]any{MetaDestination: "1001"}},
+				{add: "EVENT_3", opts: map[string]any{MetaDestination: "1002"}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
 					expected := &StatDistinct{
 						Events: map[string]map[string]uint64{
@@ -1624,7 +1623,7 @@ func TestStatMetricsCompress(t *testing.T) {
 								"1002": 1,
 							},
 						},
-						FieldValues: map[string]utils.StringSet{
+						FieldValues: map[string]StringSet{
 							"1001": {
 								"EVENT_1": {},
 							},
@@ -1633,11 +1632,11 @@ func TestStatMetricsCompress(t *testing.T) {
 							},
 						},
 						MinItems:  2,
-						FieldName: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaDestination,
+						FieldName: DynamicDataPrefix + MetaOpts + NestingSep + MetaDestination,
 						Count:     3,
 					}
 					if !reflect.DeepEqual(*expected, *dst) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(dst))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(dst))
 					}
 				}},
 				{compress: 10, wantIDs: []string{"EVENT_1", "EVENT_3"}, check: func(t *testing.T) {
@@ -1650,7 +1649,7 @@ func TestStatMetricsCompress(t *testing.T) {
 								"1002": 1,
 							},
 						},
-						FieldValues: map[string]utils.StringSet{
+						FieldValues: map[string]StringSet{
 							"1001": {
 								"EVENT_1": {},
 							},
@@ -1659,11 +1658,11 @@ func TestStatMetricsCompress(t *testing.T) {
 							},
 						},
 						MinItems:  2,
-						FieldName: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaDestination,
+						FieldName: DynamicDataPrefix + MetaOpts + NestingSep + MetaDestination,
 						Count:     3,
 					}
 					if !reflect.DeepEqual(*expected, *dst) {
-						t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(dst))
+						t.Errorf("Expected: %s , received: %s", ToJSON(expected), ToJSON(dst))
 					}
 				}},
 			},
@@ -1675,14 +1674,14 @@ func TestStatMetricsCompress(t *testing.T) {
 			for i, s := range tt.steps {
 				switch {
 				case s.add != "":
-					if err := m.AddEvent(s.add, utils.MapStorage{utils.MetaOpts: s.opts}); err != nil {
+					if err := m.AddEvent(s.add, MapStorage{MetaOpts: s.opts}); err != nil {
 						t.Fatalf("step %d: %v", i, err)
 					}
 				case s.compress != 0:
 					rply := m.Compress(s.compress, "EVENT_3")
 					sort.Strings(rply)
 					if !reflect.DeepEqual(s.wantIDs, rply) {
-						t.Fatalf("step %d: Compress() = %s, want %s", i, utils.ToJSON(rply), utils.ToJSON(s.wantIDs))
+						t.Fatalf("step %d: Compress() = %s, want %s", i, ToJSON(rply), ToJSON(s.wantIDs))
 					}
 				}
 				if s.wantStr != "" {
@@ -1699,7 +1698,7 @@ func TestStatMetricsCompress(t *testing.T) {
 }
 
 func TestStatMetricsGetCompressFactor(t *testing.T) {
-	started := map[string]any{utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
+	started := map[string]any{MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 	sum, err := NewStatSum(2, "~*opts.*cost", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1724,9 +1723,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "ACD",
 			metric: NewACD(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaUsage: time.Minute},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaUsage: time.Minute},
-			ev4: "EVENT_2", opts4: map[string]any{utils.MetaUsage: 2 * time.Minute},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaUsage: time.Minute},
+			ev2: "EVENT_2", opts2: map[string]any{MetaUsage: time.Minute},
+			ev4: "EVENT_2", opts4: map[string]any{MetaUsage: 2 * time.Minute},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 1, "EVENT_2": 3},
@@ -1734,9 +1733,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "TCD",
 			metric: NewTCD(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaUsage: time.Minute},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaUsage: time.Minute},
-			ev4: "EVENT_2", opts4: map[string]any{utils.MetaUsage: 2 * time.Minute},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaUsage: time.Minute},
+			ev2: "EVENT_2", opts2: map[string]any{MetaUsage: time.Minute},
+			ev4: "EVENT_2", opts4: map[string]any{MetaUsage: 2 * time.Minute},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 1, "EVENT_2": 3},
@@ -1744,9 +1743,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "ACC",
 			metric: NewACC(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaCost: 18.2},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaCost: 18.2},
-			ev4: "EVENT_1", opts4: map[string]any{utils.MetaCost: 18.2},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaCost: 18.2},
+			ev2: "EVENT_2", opts2: map[string]any{MetaCost: 18.2},
+			ev4: "EVENT_1", opts4: map[string]any{MetaCost: 18.2},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 2, "EVENT_2": 3},
@@ -1754,9 +1753,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "TCC",
 			metric: NewTCC(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaCost: 18.2},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaCost: 18.2},
-			ev4: "EVENT_1", opts4: map[string]any{utils.MetaCost: 18.2},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaCost: 18.2},
+			ev2: "EVENT_2", opts2: map[string]any{MetaCost: 18.2},
+			ev4: "EVENT_1", opts4: map[string]any{MetaCost: 18.2},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 2, "EVENT_2": 3},
@@ -1764,9 +1763,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "PDD",
 			metric: NewPDD(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaPDD: time.Minute},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaPDD: time.Minute},
-			ev4: "EVENT_2", opts4: map[string]any{utils.MetaPDD: 2 * time.Minute},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaPDD: time.Minute},
+			ev2: "EVENT_2", opts2: map[string]any{MetaPDD: time.Minute},
+			ev4: "EVENT_2", opts4: map[string]any{MetaPDD: 2 * time.Minute},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 1, "EVENT_2": 3},
@@ -1774,9 +1773,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "DDC",
 			metric: NewDDC(2, "", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaDestination: "1002"},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaDestination: "1001"},
-			ev4: "EVENT_2", opts4: map[string]any{utils.MetaDestination: "1001"},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaDestination: "1002"},
+			ev2: "EVENT_2", opts2: map[string]any{MetaDestination: "1001"},
+			ev4: "EVENT_2", opts4: map[string]any{MetaDestination: "1001"},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 1, "EVENT_2": 3},
@@ -1784,9 +1783,9 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "Sum",
 			metric: sum,
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaCost: 18.2},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaCost: 18.2},
-			ev4: "EVENT_1", opts4: map[string]any{utils.MetaCost: 18.2},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaCost: 18.2},
+			ev2: "EVENT_2", opts2: map[string]any{MetaCost: 18.2},
+			ev4: "EVENT_1", opts4: map[string]any{MetaCost: 18.2},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 2, "EVENT_2": 3},
@@ -1794,19 +1793,19 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 		{
 			name:   "Average",
 			metric: NewStatAverage(2, "~*opts.*cost", nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaCost: 18.2},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaCost: 18.2},
-			ev4: "EVENT_1", opts4: map[string]any{utils.MetaCost: 18.2},
+			ev1:    "EVENT_1", opts1: map[string]any{MetaCost: 18.2},
+			ev2: "EVENT_2", opts2: map[string]any{MetaCost: 18.2},
+			ev4: "EVENT_1", opts4: map[string]any{MetaCost: 18.2},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 2, "EVENT_2": 3},
 		},
 		{
 			name:   "Distinct",
-			metric: NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep+utils.MetaDestination, nil),
-			ev1:    "EVENT_1", opts1: map[string]any{utils.MetaDestination: "1002"},
-			ev2: "EVENT_2", opts2: map[string]any{utils.MetaDestination: "1001"},
-			ev4: "EVENT_2", opts4: map[string]any{utils.MetaDestination: "1001"},
+			metric: NewStatDistinct(2, DynamicDataPrefix+MetaOpts+NestingSep+MetaDestination, nil),
+			ev1:    "EVENT_1", opts1: map[string]any{MetaDestination: "1002"},
+			ev2: "EVENT_2", opts2: map[string]any{MetaDestination: "1001"},
+			ev4: "EVENT_2", opts4: map[string]any{MetaDestination: "1001"},
 			cf1: map[string]uint64{"EVENT_1": 1, "EVENT_2": 1},
 			cf2: map[string]uint64{"EVENT_1": 1, "EVENT_2": 2},
 			cf3: map[string]uint64{"EVENT_1": 1, "EVENT_2": 3},
@@ -1815,30 +1814,30 @@ func TestStatMetricsGetCompressFactor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := tt.metric
-			if err := m.AddEvent(tt.ev1, utils.MapStorage{utils.MetaOpts: tt.opts1}); err != nil {
+			if err := m.AddEvent(tt.ev1, MapStorage{MetaOpts: tt.opts1}); err != nil {
 				t.Fatal(err)
 			}
-			if err := m.AddEvent(tt.ev2, utils.MapStorage{utils.MetaOpts: tt.opts2}); err != nil {
+			if err := m.AddEvent(tt.ev2, MapStorage{MetaOpts: tt.opts2}); err != nil {
 				t.Fatal(err)
 			}
 			CF := m.GetCompressFactor(make(map[string]uint64))
 			if !reflect.DeepEqual(tt.cf1, CF) {
-				t.Errorf("Expected: %s , received: %s", utils.ToJSON(tt.cf1), utils.ToJSON(CF))
+				t.Errorf("Expected: %s , received: %s", ToJSON(tt.cf1), ToJSON(CF))
 			}
-			if err := m.AddEvent(tt.ev2, utils.MapStorage{utils.MetaOpts: tt.opts2}); err != nil {
+			if err := m.AddEvent(tt.ev2, MapStorage{MetaOpts: tt.opts2}); err != nil {
 				t.Fatal(err)
 			}
 			CF = m.GetCompressFactor(make(map[string]uint64))
 			if !reflect.DeepEqual(tt.cf2, CF) {
-				t.Errorf("Expected: %s , received: %s", utils.ToJSON(tt.cf2), utils.ToJSON(CF))
+				t.Errorf("Expected: %s , received: %s", ToJSON(tt.cf2), ToJSON(CF))
 			}
-			if err := m.AddEvent(tt.ev4, utils.MapStorage{utils.MetaOpts: tt.opts4}); err != nil {
+			if err := m.AddEvent(tt.ev4, MapStorage{MetaOpts: tt.opts4}); err != nil {
 				t.Fatal(err)
 			}
 			CF["EVENT_2"] = 3
 			CF = m.GetCompressFactor(CF)
 			if !reflect.DeepEqual(tt.cf3, CF) {
-				t.Errorf("Expected: %s , received: %s", utils.ToJSON(tt.cf3), utils.ToJSON(CF))
+				t.Errorf("Expected: %s , received: %s", ToJSON(tt.cf3), ToJSON(CF))
 			}
 		})
 	}
@@ -1857,7 +1856,7 @@ func TestStatMetricsGetCompressFactor2(t *testing.T) {
 				Metric: &Metric{
 					Events: map[string]*DecimalWithCompress{
 						"Event1": {
-							Stat:           utils.NewDecimal(int64(time.Second), 0),
+							Stat:           NewDecimal(int64(time.Second), 0),
 							CompressFactor: 200000000,
 						},
 					},
@@ -1874,7 +1873,7 @@ func TestStatMetricsGetCompressFactor2(t *testing.T) {
 				Metric: &Metric{
 					Events: map[string]*DecimalWithCompress{
 						"Event1": {
-							Stat:           utils.NewDecimal(int64(time.Second), 0),
+							Stat:           NewDecimal(int64(time.Second), 0),
 							CompressFactor: 200000000,
 						},
 					},
@@ -1891,7 +1890,7 @@ func TestStatMetricsGetCompressFactor2(t *testing.T) {
 				Metric: &Metric{
 					Events: map[string]*DecimalWithCompress{
 						"Event1": {
-							Stat:           utils.NewDecimal(int64(time.Second), 0),
+							Stat:           NewDecimal(int64(time.Second), 0),
 							CompressFactor: 200000000,
 						},
 					},
@@ -1919,7 +1918,7 @@ func TestStatMetricsGetCompressFactor2(t *testing.T) {
 		{
 			name: "Distinct",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {
 						"1": 10000000000,
@@ -1939,17 +1938,17 @@ func TestStatMetricsGetCompressFactor2(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.metric.GetCompressFactor(tt.give); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Expected: %s , received: %s", utils.ToJSON(tt.want), utils.ToJSON(got))
+				t.Errorf("Expected: %s , received: %s", ToJSON(tt.want), ToJSON(got))
 			}
 		})
 	}
 }
 
-var jMarshaler utils.JSONMarshaler
+var jMarshaler JSONMarshaler
 
 func TestStatMetricsMarshal(t *testing.T) {
 	startTime := time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)
-	asr, err := NewStatMetric(utils.MetaASR, 2, []string{"*string:Account:1001"})
+	asr, err := NewStatMetric(MetaASR, 2, []string{"*string:Account:1001"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -1967,77 +1966,77 @@ func TestStatMetricsMarshal(t *testing.T) {
 		{
 			name:   "ASR",
 			metric: asr,
-			opts:   map[string]any{utils.MetaStartTime: startTime},
+			opts:   map[string]any{MetaStartTime: startTime},
 			want:   []byte(`{"Value":1,"Count":1,"Events":{"EVENT_1":{"Stat":1,"CompressFactor":1}},"MinItems":2,"FilterIDs":["*string:Account:1001"]}`),
 			into:   new(StatASR),
 		},
 		{
 			name:   "ACD",
 			metric: NewACD(2, "", nil),
-			opts:   map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`),
 			into:   new(StatACD),
 		},
 		{
 			name:   "TCD",
 			metric: NewTCD(2, "", nil),
-			opts:   map[string]any{utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`),
 			into:   new(StatTCD),
 		},
 		{
 			name:   "ACC",
 			metric: NewACC(2, "", nil),
-			opts:   map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "12.3"},
+			opts:   map[string]any{MetaStartTime: startTime, MetaCost: "12.3"},
 			want:   []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`),
 			into:   new(StatACC),
 		},
 		{
 			name:   "TCC",
 			metric: NewTCC(2, "", nil),
-			opts:   map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "12.3"},
+			opts:   map[string]any{MetaStartTime: startTime, MetaCost: "12.3"},
 			want:   []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`),
 			into:   new(StatTCC),
 		},
 		{
 			name:   "PDD",
 			metric: NewPDD(2, "", nil),
-			opts:   map[string]any{utils.MetaPDD: 5 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaPDD: 5 * time.Second, MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"Value":5000000000,"Count":1,"Events":{"EVENT_1":{"Stat":5000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`),
 			into:   new(StatPDD),
 		},
 		{
 			name:   "DDC",
 			metric: NewDDC(2, "", nil),
-			opts:   map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"FieldValues":{"1002":{"EVENT_1":{}}},"Events":{"EVENT_1":{"1002":1}},"MinItems":2,"Count":1,"FilterIDs":null}`),
 			into:   new(StatDDC),
 		},
 		{
 			name:   "Sum",
 			metric: sum,
-			opts:   map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaCost: "20", MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Fields":[{"Rules":"~*opts.*cost","Path":"~*opts.*cost"}]}`),
 			into:   new(StatSum),
 		},
 		{
 			name:   "Average",
 			metric: NewStatAverage(2, "~*opts.*cost", nil),
-			opts:   map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaCost: "20", MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`),
 			into:   new(StatAverage),
 		},
 		{
 			name:   "Distinct",
 			metric: NewStatDistinct(2, "~*opts.*usage", nil),
-			opts:   map[string]any{utils.MetaDestination: "1002", utils.MetaPDD: 5 * time.Second, utils.MetaCost: "20", utils.MetaStartTime: startTime, utils.MetaUsage: 10 * time.Second},
+			opts:   map[string]any{MetaDestination: "1002", MetaPDD: 5 * time.Second, MetaCost: "20", MetaStartTime: startTime, MetaUsage: 10 * time.Second},
 			want:   []byte(`{"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~*opts.*usage","Count":1,"FilterIDs":null}`),
 			into:   new(StatDistinct),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.metric.AddEvent("EVENT_1", utils.MapStorage{utils.MetaOpts: tt.opts}); err != nil {
+			if err := tt.metric.AddEvent("EVENT_1", MapStorage{MetaOpts: tt.opts}); err != nil {
 				t.Fatal(err)
 			}
 			b, err := jMarshaler.Marshal(tt.metric)
@@ -2098,7 +2097,7 @@ func TestStatMetricsGetMinItems(t *testing.T) {
 		{
 			name: "Distinct",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events:      map[string]map[string]uint64{},
 				MinItems:    3,
 			},
@@ -2125,7 +2124,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 		{
 			name: "Distinct not found",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {
 						"FieldValue1": 1,
@@ -2137,12 +2136,12 @@ func TestStatMetricsRemEvent(t *testing.T) {
 				Count:     3,
 			},
 			remID:   "Event2",
-			wantErr: utils.ErrNotFound,
+			wantErr: ErrNotFound,
 		},
 		{
 			name: "Distinct",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {
 						"FieldValue1": 1,
@@ -2155,7 +2154,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 			},
 			remID: "Event1",
 			want: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {},
 					"Event2": {},
@@ -2168,7 +2167,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 		{
 			name: "Distinct compressed",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -2183,7 +2182,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 			},
 			remID: "Event1",
 			want: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -2200,7 +2199,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 		{
 			name: "DDC not found",
 			metric: &StatDDC{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {
 						"FieldValue1": 1,
@@ -2211,12 +2210,12 @@ func TestStatMetricsRemEvent(t *testing.T) {
 				Count:    3,
 			},
 			remID:   "Event2",
-			wantErr: utils.ErrNotFound,
+			wantErr: ErrNotFound,
 		},
 		{
 			name: "DDC",
 			metric: &StatDDC{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {
 						"FieldValue1": 1,
@@ -2228,7 +2227,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 			},
 			remID: "Event1",
 			want: &StatDDC{
-				FieldValues: map[string]utils.StringSet{},
+				FieldValues: map[string]StringSet{},
 				Events: map[string]map[string]uint64{
 					"Event1": {},
 					"Event2": {},
@@ -2240,7 +2239,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 		{
 			name: "DDC compressed",
 			metric: &StatDDC{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -2254,7 +2253,7 @@ func TestStatMetricsRemEvent(t *testing.T) {
 			},
 			remID: "Event1",
 			want: &StatDDC{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -2293,21 +2292,21 @@ func TestStatMetricsAddEventErr(t *testing.T) {
 		name    string
 		metric  StatMetric
 		evID    string
-		dp      utils.DataProvider
+		dp      DataProvider
 		wantErr string
 	}{
 		{
 			name:    "ASR unsupported time format",
 			metric:  &StatASR{Metric: NewMetric(2, nil)},
 			evID:    "EVENT_1",
-			dp:      utils.MapStorage{utils.MetaOpts: map[string]any{utils.MetaStartTime: "10"}},
+			dp:      MapStorage{MetaOpts: map[string]any{MetaStartTime: "10"}},
 			wantErr: "Unsupported time format",
 		},
 		{
 			name:    "ASR bad time type",
 			metric:  &StatASR{Metric: NewMetric(2, nil)},
 			evID:    "EVENT_1",
-			dp:      utils.MapStorage{utils.MetaOpts: utils.MapStorage{utils.MetaStartTime: false}},
+			dp:      MapStorage{MetaOpts: MapStorage{MetaStartTime: false}},
 			wantErr: "cannot convert field: false to time.Time",
 		},
 		{
@@ -2315,26 +2314,26 @@ func TestStatMetricsAddEventErr(t *testing.T) {
 			metric:  &StatASR{Metric: NewMetric(2, nil)},
 			evID:    "EVENT_1",
 			dp:      new(mockDP),
-			wantErr: utils.ErrAccountNotFound.Error(),
+			wantErr: ErrAccountNotFound.Error(),
 		},
 		{
 			name:    "ACC bad cost",
 			metric:  NewACC(2, "", nil),
 			evID:    "EVENT_1",
-			dp:      utils.MapStorage{utils.MetaOpts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "wrong input"}},
+			dp:      MapStorage{MetaOpts: map[string]any{MetaStartTime: startTime, MetaCost: "wrong input"}},
 			wantErr: "can't convert <wrong input> to decimal",
 		},
 		{
 			name:    "TCC bad cost",
 			metric:  NewTCC(2, "", nil),
 			evID:    "EVENT_1",
-			dp:      utils.MapStorage{utils.MetaOpts: map[string]any{utils.MetaStartTime: startTime, utils.MetaCost: "wrong input"}},
+			dp:      MapStorage{MetaOpts: map[string]any{MetaStartTime: startTime, MetaCost: "wrong input"}},
 			wantErr: "can't convert <wrong input> to decimal",
 		},
 		{
 			name: "Distinct bad field name",
 			metric: &StatDistinct{
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"FieldValue1": {},
 				},
 				Events: map[string]map[string]uint64{
@@ -2348,7 +2347,7 @@ func TestStatMetricsAddEventErr(t *testing.T) {
 				Count:     3,
 			},
 			evID:    "Event1",
-			dp:      utils.MapStorage{utils.MetaOpts: map[string]any{utils.MetaStartTime: startTime}},
+			dp:      MapStorage{MetaOpts: map[string]any{MetaStartTime: startTime}},
 			wantErr: "invalid format for field <Test_Field_Name>",
 		},
 	}
@@ -2376,7 +2375,7 @@ func (mockDP) String() string {
 }
 
 func (mockDP) FieldAsInterface(fldPath []string) (any, error) {
-	return nil, utils.ErrAccountNotFound
+	return nil, ErrAccountNotFound
 }
 
 func (mockDP) FieldAsString([]string) (string, error) {
@@ -2405,7 +2404,7 @@ func TestStatMetricsClone(t *testing.T) {
 						"1002": 1,
 					},
 				},
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"1001": {
 						"EVENT_1": {},
 					},
@@ -2421,7 +2420,7 @@ func TestStatMetricsClone(t *testing.T) {
 			name: "Sum",
 			metric: &StatSum{
 				Metric: NewMetric(2, nil),
-				Fields: utils.NewRSRParsersMustCompile("~*opts.*cost", utils.InfieldSep),
+				Fields: NewRSRParsersMustCompile("~*opts.*cost", InfieldSep),
 			},
 		},
 		{name: "Average", metric: &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}},
@@ -2436,7 +2435,7 @@ func TestStatMetricsClone(t *testing.T) {
 						"1002": 1,
 					},
 				},
-				FieldValues: map[string]utils.StringSet{
+				FieldValues: map[string]StringSet{
 					"1001": {
 						"EVENT_1": {},
 					},
@@ -2467,7 +2466,7 @@ func TestDDCGetFilterIDs(t *testing.T) {
 	}
 
 	if rcv := ddc.GetFilterIDs(); !reflect.DeepEqual(rcv, exp.FilterIDs) {
-		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ToJSON(exp.FilterIDs), utils.ToJSON(rcv))
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", ToJSON(exp.FilterIDs), ToJSON(rcv))
 	}
 
 }
@@ -2475,10 +2474,10 @@ func TestDDCGetFilterIDs(t *testing.T) {
 func TestMetricClone(t *testing.T) {
 
 	sum := &Metric{
-		Value: utils.NewDecimal(2, 0),
+		Value: NewDecimal(2, 0),
 		Events: map[string]*DecimalWithCompress{
 			"Event1": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 200000000,
 			},
 		},
@@ -2494,10 +2493,10 @@ func TestMetricClone(t *testing.T) {
 func TestMetricEqualFalse(t *testing.T) {
 
 	sum := &Metric{
-		Value: utils.NewDecimal(2, 0),
+		Value: NewDecimal(2, 0),
 		Events: map[string]*DecimalWithCompress{
 			"Event1": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 200000000,
 			},
 		},
@@ -2506,14 +2505,14 @@ func TestMetricEqualFalse(t *testing.T) {
 	}
 
 	sum2 := &Metric{
-		Value: utils.NewDecimal(2, 0),
+		Value: NewDecimal(2, 0),
 		Events: map[string]*DecimalWithCompress{
 			"Event1": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 200000000,
 			},
 			"Event2": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 200000000,
 			},
 		},
@@ -2529,10 +2528,10 @@ func TestMetricEqualFalse(t *testing.T) {
 func TestMetricEqualEventFalse(t *testing.T) {
 
 	sum := &Metric{
-		Value: utils.NewDecimal(2, 0),
+		Value: NewDecimal(2, 0),
 		Events: map[string]*DecimalWithCompress{
 			"even1": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 200000000,
 			},
 		},
@@ -2541,10 +2540,10 @@ func TestMetricEqualEventFalse(t *testing.T) {
 	}
 
 	sum2 := &Metric{
-		Value: utils.NewDecimal(2, 0),
+		Value: NewDecimal(2, 0),
 		Events: map[string]*DecimalWithCompress{
 			"even1": {
-				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				Stat:           NewDecimal(int64(time.Second), 0),
 				CompressFactor: 1,
 			},
 		},
@@ -2566,7 +2565,7 @@ func TestStatDistinctGetFilterIDs(t *testing.T) {
 	}
 
 	if rcv := dst.GetFilterIDs(); !reflect.DeepEqual(rcv, exp.FilterIDs) {
-		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ToJSON(exp.FilterIDs), utils.ToJSON(rcv))
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", ToJSON(exp.FilterIDs), ToJSON(rcv))
 	}
 
 }
@@ -2574,7 +2573,7 @@ func TestStatDistinctGetFilterIDs(t *testing.T) {
 func TestMetricAddOneEvent(t *testing.T) {
 	tests := []struct {
 		name        string
-		initialVal  *utils.Decimal
+		initialVal  *Decimal
 		initialCnt  uint64
 		input       any
 		expectErr   bool
@@ -2585,23 +2584,23 @@ func TestMetricAddOneEvent(t *testing.T) {
 			name:        "Int input",
 			input:       42,
 			expectErr:   false,
-			expectVal:   utils.NewDecimal(42, 0).Big,
+			expectVal:   NewDecimal(42, 0).Big,
 			expectCount: 1,
 		},
 		{
 			name:        "Duration input",
 			input:       time.Duration(5),
 			expectErr:   false,
-			expectVal:   utils.NewDecimal(5, 0).Big,
+			expectVal:   NewDecimal(5, 0).Big,
 			expectCount: 1,
 		},
 		{
 			name:        "Add to existing value",
-			initialVal:  &utils.Decimal{Big: utils.NewDecimal(10, 0).Big},
+			initialVal:  &Decimal{Big: NewDecimal(10, 0).Big},
 			initialCnt:  1,
 			input:       15,
 			expectErr:   false,
-			expectVal:   utils.NewDecimal(25, 0).Big,
+			expectVal:   NewDecimal(25, 0).Big,
 			expectCount: 2,
 		},
 		{
@@ -2648,8 +2647,8 @@ func TestMetricAddOneEvent(t *testing.T) {
 
 func TestStatDDCClones(t *testing.T) {
 	original := &StatDDC{
-		FieldValues: map[string]utils.StringSet{
-			"field1": utils.NewStringSet([]string{"ID", "ID1"}),
+		FieldValues: map[string]StringSet{
+			"field1": NewStringSet([]string{"ID", "ID1"}),
 		},
 		Events: map[string]map[string]uint64{
 			"cgrates.org": {
@@ -2686,8 +2685,8 @@ func TestStatDDCClones(t *testing.T) {
 
 func TestStatDistinctClones(t *testing.T) {
 	original := &StatDistinct{
-		FieldValues: map[string]utils.StringSet{
-			"field1": utils.NewStringSet([]string{"ID", "ID1"}),
+		FieldValues: map[string]StringSet{
+			"field1": NewStringSet([]string{"ID", "ID1"}),
 		},
 		Events: map[string]map[string]uint64{
 			"cgrates.org": {
