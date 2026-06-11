@@ -244,7 +244,7 @@ func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWith
 	}
 	if s.cfg.StatSCfg().StoreInterval != 0 {
 		if s.cfg.StatSCfg().StoreInterval == -1 {
-			s.StoreStatQueue(ctx, sq)
+			s.storeStatQueue(ctx, sq)
 		} else {
 			s.storedMu.Lock()
 			s.storedStatQueues.Add(sq.TenantID())

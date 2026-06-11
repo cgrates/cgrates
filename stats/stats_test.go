@@ -1053,7 +1053,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), sq, nil, true, utils.NonTransactional)
 	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
-	if err := sS.StoreStatQueue(context.Background(), sq); err == nil ||
+	if err := sS.storeStatQueue(context.Background(), sq); err == nil ||
 		err.Error() != utils.ErrDisconnected.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
 	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
@@ -1061,7 +1061,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	}
 }
 
-func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
+func TestStatQueueStoreStatQueueOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -1074,7 +1074,7 @@ func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
-	if err := sS.StoreStatQueue(context.Background(), sq); err != nil {
+	if err := sS.storeStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 }

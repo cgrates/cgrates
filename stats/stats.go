@@ -143,7 +143,7 @@ func (s *StatS) storeStats(ctx *context.Context) {
 		lockID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout,
 			utils.StatQueueLockKey(sq.Tenant, sq.ID))
-		if err := s.StoreStatQueue(ctx, sq); err != nil {
+		if err := s.storeStatQueue(ctx, sq); err != nil {
 			failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 		}
 		guardian.Guardian.UnguardIDs(lockID)
@@ -157,8 +157,8 @@ func (s *StatS) storeStats(ctx *context.Context) {
 	}
 }
 
-// StoreStatQueue stores the statQueue in DB
-func (s *StatS) StoreStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
+// storeStatQueue stores the statQueue in DB
+func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
 	if err = s.dm.SetStatQueue(ctx, sq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
@@ -414,7 +414,7 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 		}
 		if s.cfg.StatSCfg().StoreInterval != 0 && m.profile.Stored {
 			if s.cfg.StatSCfg().StoreInterval == -1 {
-				if err := s.StoreStatQueue(ctx, m.statQueue); err != nil {
+				if err := s.storeStatQueue(ctx, m.statQueue); err != nil {
 					withErrors = true
 				}
 			} else {
