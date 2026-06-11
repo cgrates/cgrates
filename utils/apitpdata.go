@@ -247,8 +247,8 @@ type AttrDisconnectSession struct {
 	Reason     string
 }
 
-// MetricWithFilters is used in TPStatProfile
-type MetricWithFilters struct {
+// TPMetricWithFilters is used in TPStatProfile
+type TPMetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string
 	Blockers  string
@@ -267,7 +267,7 @@ type TPStatProfile struct {
 	Blockers     string // blocker flag to stop processing on filters matched
 	Stored       bool
 	ThresholdIDs []string
-	Metrics      []*MetricWithFilters
+	Metrics      []*TPMetricWithFilters
 }
 
 // TPRankingProfile is used in APIs to manage remotely offline RankingProfile

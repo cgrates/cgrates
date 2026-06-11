@@ -560,7 +560,7 @@ func (tps StatMdls) CSVHeader() (result []string) {
 func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 	filterMap := make(map[string]utils.StringSet)
 	thresholdMap := make(map[string]utils.StringSet)
-	statMetricsMap := make(map[string]map[string]*utils.MetricWithFilters)
+	statMetricsMap := make(map[string]map[string]*utils.TPMetricWithFilters)
 	mst := make(map[string]*utils.TPStatProfile)
 	for _, model := range tps {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
@@ -609,13 +609,13 @@ func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 		}
 		if model.MetricIDs != utils.EmptyString {
 			if _, has := statMetricsMap[key.TenantID()]; !has {
-				statMetricsMap[key.TenantID()] = make(map[string]*utils.MetricWithFilters)
+				statMetricsMap[key.TenantID()] = make(map[string]*utils.TPMetricWithFilters)
 			}
 			metricIDsSplit := strings.Split(model.MetricIDs, utils.InfieldSep)
 			for _, metricID := range metricIDsSplit {
 				stsMetric, found := statMetricsMap[key.TenantID()][metricID]
 				if !found {
-					stsMetric = &utils.MetricWithFilters{
+					stsMetric = &utils.TPMetricWithFilters{
 						MetricID: metricID,
 					}
 				}
@@ -735,7 +735,7 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 		ID:           st.ID,
 		FilterIDs:    make([]string, len(st.FilterIDs)),
 		QueueLength:  st.QueueLength,
-		Metrics:      make([]*utils.MetricWithFilters, len(st.Metrics)),
+		Metrics:      make([]*utils.TPMetricWithFilters, len(st.Metrics)),
 		Blockers:     st.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		Stored:       st.Stored,
 		Weights:      st.Weights.String(utils.InfieldSep, utils.ANDSep),
@@ -743,7 +743,7 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 		ThresholdIDs: make([]string, len(st.ThresholdIDs)),
 	}
 	for i, metric := range st.Metrics {
-		tpST.Metrics[i] = &utils.MetricWithFilters{
+		tpST.Metrics[i] = &utils.TPMetricWithFilters{
 			MetricID: metric.MetricID,
 			Blockers: metric.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		}

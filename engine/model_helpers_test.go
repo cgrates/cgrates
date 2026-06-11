@@ -249,7 +249,7 @@ func TestAPItoTPStats(t *testing.T) {
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -311,7 +311,7 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -365,7 +365,7 @@ func TestAPItoModelStats(t *testing.T) {
 		FilterIDs:   []string{"*string:Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*tcc",
 			},
@@ -3791,7 +3791,7 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		FilterIDs:   []string{"test_filter_Id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		QueueLength: 0,
 		MinItems:    0,
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				FilterIDs: []string{"test_id"},
 				Blockers:  "fltr2;false",
@@ -3835,7 +3835,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 		FilterIDs:   []string{"*string:Account:1002", "*string:Account:1003", "*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				FilterIDs: []string{"test_filter_id1", "test_filter_id2"},
 				MetricID:  "*tcc",
@@ -3880,7 +3880,7 @@ func TestStatMdlsAsTPStatsCase2(t *testing.T) {
 	}}
 	expStruct := []*utils.TPStatProfile{{
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z"},
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID:  "test_id",
 				FilterIDs: []string{"test_filter_id"},
@@ -4664,7 +4664,7 @@ func TestAPItoTPStatsNewDynamicWeightsFromStringErr(t *testing.T) {
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -5210,7 +5210,7 @@ func TestAPItoTPStatsNewDynamicBlockersFromStringErr(t *testing.T) {
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 			},
@@ -5242,7 +5242,7 @@ func TestAPItoTPStatsMetricNewDynamicBlockersFromStringErr(t *testing.T) {
 		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithFilters{
+		Metrics: []*utils.TPMetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
 				Blockers: "wrong input",
