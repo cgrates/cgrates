@@ -44,13 +44,12 @@ type matchedStatQueue struct {
 }
 
 // NewStatService initializes a StatService
-func NewStatService(dm *engine.DataManager, cgrcfg *config.CGRConfig,
-	filterS *engine.FilterS, connMgr *engine.ConnManager) *StatS {
+func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engine.FilterS, cm *engine.ConnManager) *StatS {
 	return &StatS{
+		cfg:              cfg,
 		dm:               dm,
-		connMgr:          connMgr,
-		fltrS:            filterS,
-		cfg:              cgrcfg,
+		filters:          filters,
+		cm:               cm,
 		storedStatQueues: make(utils.StringSet),
 		loopStopped:      make(chan struct{}),
 		stopBackup:       make(chan struct{}),
@@ -59,47 +58,47 @@ func NewStatService(dm *engine.DataManager, cgrcfg *config.CGRConfig,
 
 // StatS builds stats for events
 type StatS struct {
-	dm               *engine.DataManager
-	connMgr          *engine.ConnManager
-	fltrS            *engine.FilterS
 	cfg              *config.CGRConfig
+	dm               *engine.DataManager
+	filters          *engine.FilterS
+	cm               *engine.ConnManager
 	loopStopped      chan struct{}
 	stopBackup       chan struct{}
-	storedStatQueues utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
-	ssqMux           sync.RWMutex    // protects storedStatQueues
+	storedStatQueues utils.StringSet // stat queues that need saving
+	storedMu         sync.RWMutex    // protects storedStatQueues
 }
 
 // Reload stops the backupLoop and restarts it
-func (sS *StatS) Reload(ctx *context.Context) {
-	close(sS.stopBackup)
-	<-sS.loopStopped // wait until the loop is done
-	sS.stopBackup = make(chan struct{})
-	go sS.runBackup(ctx)
+func (s *StatS) Reload(ctx *context.Context) {
+	close(s.stopBackup)
+	<-s.loopStopped // wait until the loop is done
+	s.stopBackup = make(chan struct{})
+	go s.runBackup(ctx)
 }
 
 // StartLoop starsS the gorutine with the backup loop
-func (sS *StatS) StartLoop(ctx *context.Context) {
-	go sS.runBackup(ctx)
+func (s *StatS) StartLoop(ctx *context.Context) {
+	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (sS *StatS) Shutdown(ctx *context.Context) {
-	close(sS.stopBackup)
-	sS.storeStats(ctx)
+func (s *StatS) Shutdown(ctx *context.Context) {
+	close(s.stopBackup)
+	s.storeStats(ctx)
 }
 
 // runBackup will regularly store statQueues changed to DB
-func (sS *StatS) runBackup(ctx *context.Context) {
-	storeInterval := sS.cfg.StatSCfg().StoreInterval
+func (s *StatS) runBackup(ctx *context.Context) {
+	storeInterval := s.cfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
-		sS.loopStopped <- struct{}{}
+		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
-		sS.storeStats(ctx)
+		s.storeStats(ctx)
 		select {
-		case <-sS.stopBackup:
-			sS.loopStopped <- struct{}{}
+		case <-s.stopBackup:
+			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
@@ -107,15 +106,15 @@ func (sS *StatS) runBackup(ctx *context.Context) {
 }
 
 // storeStats represents one task of complete backup
-func (sS *StatS) storeStats(ctx *context.Context) {
+func (s *StatS) storeStats(ctx *context.Context) {
 	var failedSqIDs []string
 	for { // don't stop untill we store all dirty statQueues
-		sS.ssqMux.Lock()
-		sID := sS.storedStatQueues.GetOne()
+		s.storedMu.Lock()
+		sID := s.storedStatQueues.GetOne()
 		if sID != "" {
-			sS.storedStatQueues.Remove(sID)
+			s.storedStatQueues.Remove(sID)
 		}
-		sS.ssqMux.Unlock()
+		s.storedMu.Unlock()
 		if sID == "" {
 			break // no more keys, backup completed
 		}
@@ -128,9 +127,9 @@ func (sS *StatS) storeStats(ctx *context.Context) {
 		}
 		sq := sqIf.(*utils.StatQueue)
 		lkID := guardian.Guardian.GuardIDs("",
-			sS.cfg.GeneralCfg().LockingTimeout,
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.StatQueueLockKey(sq.Tenant, sq.ID))
-		if err := sS.StoreStatQueue(ctx, sq); err != nil {
+		if err := s.StoreStatQueue(ctx, sq); err != nil {
 			failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 		}
 		guardian.Guardian.UnguardIDs(lkID)
@@ -138,15 +137,15 @@ func (sS *StatS) storeStats(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedSqIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		sS.ssqMux.Lock()
-		sS.storedStatQueues.AddSlice(failedSqIDs)
-		sS.ssqMux.Unlock()
+		s.storedMu.Lock()
+		s.storedStatQueues.AddSlice(failedSqIDs)
+		s.storedMu.Unlock()
 	}
 }
 
 // StoreStatQueue stores the statQueue in DB
-func (sS *StatS) StoreStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
-	if err = sS.dm.SetStatQueue(ctx, sq); err != nil {
+func (s *StatS) StoreStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
+	if err = s.dm.SetStatQueue(ctx, sq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
@@ -166,7 +165,7 @@ func (sS *StatS) StoreStatQueue(ctx *context.Context, sq *utils.StatQueue) (err 
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
-func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
+func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	args *utils.CGREvent) (sqs []*matchedStatQueue, unlock func(), err error) {
 	unlockAll := func() {
 		for _, m := range sqs {
@@ -175,12 +174,12 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	}
 
 	evNm := args.AsDataProvider()
-	statsIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	statsIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, s.filters, s.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs)
 	if err != nil {
 		return nil, nil, err
 	}
-	ignoreFilters, err := engine.GetBoolOpts(ctx, tnt, evNm, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	ignoreFilters, err := engine.GetBoolOpts(ctx, tnt, evNm, nil, s.filters, s.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters)
 	if err != nil {
 		return nil, nil, err
@@ -190,14 +189,14 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	if len(sqIDs) == 0 {
 		ignoreFilters = false
 		sqIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
-			sS.cfg.StatSCfg().StringIndexedFields,
-			sS.cfg.StatSCfg().PrefixIndexedFields,
-			sS.cfg.StatSCfg().SuffixIndexedFields,
-			sS.cfg.StatSCfg().ExistsIndexedFields,
-			sS.cfg.StatSCfg().NotExistsIndexedFields,
-			sS.dm, utils.CacheStatFilterIndexes, tnt,
-			sS.cfg.StatSCfg().IndexedSelects,
-			sS.cfg.StatSCfg().NestedFields,
+			s.cfg.StatSCfg().StringIndexedFields,
+			s.cfg.StatSCfg().PrefixIndexedFields,
+			s.cfg.StatSCfg().SuffixIndexedFields,
+			s.cfg.StatSCfg().ExistsIndexedFields,
+			s.cfg.StatSCfg().NotExistsIndexedFields,
+			s.dm, utils.CacheStatFilterIndexes, tnt,
+			s.cfg.StatSCfg().IndexedSelects,
+			s.cfg.StatSCfg().NestedFields,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -212,7 +211,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 		lkID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			utils.StatQueueLockKey(tnt, id))
-		sqPrfl, err := sS.dm.GetStatQueueProfile(ctx, tnt, id, true, true, utils.NonTransactional)
+		sqPrfl, err := s.dm.GetStatQueueProfile(ctx, tnt, id, true, true, utils.NonTransactional)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			if err == utils.ErrNotFound {
@@ -222,7 +221,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 			return nil, nil, err
 		}
 		if !ignoreFilters {
-			pass, err := sS.fltrS.Pass(ctx, tnt, sqPrfl.FilterIDs,
+			pass, err := s.filters.Pass(ctx, tnt, sqPrfl.FilterIDs,
 				evNm)
 			if err != nil {
 				guardian.Guardian.UnguardIDs(lkID)
@@ -233,7 +232,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 				continue
 			}
 		}
-		sq, err := sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, utils.EmptyString)
+		sq, err := s.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, utils.EmptyString)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			unlockAll()
@@ -246,7 +245,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 		if sqPrfl.TTL == -1 && sqPrfl.QueueLength == -1 {
 			ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
-		weight, err := engine.WeightFromDynamics(ctx, sqPrfl.Weights, sS.fltrS, tnt, evNm)
+		weight, err := engine.WeightFromDynamics(ctx, sqPrfl.Weights, s.filters, tnt, evNm)
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			unlockAll()
@@ -272,8 +271,8 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	return sqs, unlockAll, nil
 }
 
-func (sS *StatS) getStatQueue(ctx *context.Context, tnt, id string) (sq *utils.StatQueue, err error) {
-	if sq, err = sS.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString); err != nil {
+func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (sq *utils.StatQueue, err error) {
+	if sq, err = s.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString); err != nil {
 		return
 	}
 	if _, err = remExpired(sq); err != nil {
@@ -283,8 +282,8 @@ func (sS *StatS) getStatQueue(ctx *context.Context, tnt, id string) (sq *utils.S
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (sS *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
-	threshConns, err := engine.GetConnIDs(ctx, sS.cfg.StatSCfg().Conns[utils.MetaThresholds], tnt, dP, sS.fltrS)
+func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+	threshConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaThresholds], tnt, dP, s.filters)
 	if err != nil {
 		return
 	}
@@ -316,7 +315,7 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue
 		}
 
 		var tIDs []string
-		if err := sS.connMgr.Call(ctx, threshConns,
+		if err := s.cm.Call(ctx, threshConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(m.profile.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -331,8 +330,8 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue
 }
 
 // processEEs will pass the event for statQueue to EEs
-func (sS *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
-	eesConns, err := engine.GetConnIDs(ctx, sS.cfg.StatSCfg().Conns[utils.MetaEEs], tnt, dP, sS.fltrS)
+func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) (err error) {
+	eesConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaEEs], tnt, dP, s.filters)
 	if err != nil {
 		return
 	}
@@ -361,10 +360,10 @@ func (sS *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts 
 
 		cgrEventWithID := &utils.CGREventWithEeIDs{
 			CGREvent: cgrEv,
-			EeIDs:    sS.cfg.StatSCfg().EEsExporterIDs,
+			EeIDs:    s.cfg.StatSCfg().EEsExporterIDs,
 		}
 		var reply map[string]map[string]any
-		if err := sS.connMgr.Call(ctx, eesConns,
+		if err := s.cm.Call(ctx, eesConns,
 			utils.EeSv1ProcessEvent,
 			&cgrEventWithID, &reply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -381,8 +380,8 @@ func (sS *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts 
 
 // processEvent processes a new event, dispatching to matching queues.
 // Queues matching are also cached to speed up
-func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
-	matchSQs, unlock, err := sS.matchingStatQueuesForEvent(ctx, tnt, args)
+func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
+	matchSQs, unlock, err := s.matchingStatQueuesForEvent(ctx, tnt, args)
 	if err != nil {
 		return nil, err
 	}
@@ -392,25 +391,25 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	statQueueIDs = getStatQueueIDs(matchSQs)
 	var withErrors bool
 	for idx, m := range matchSQs {
-		if err = m.processEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
+		if err = m.processEvent(ctx, tnt, args.ID, s.filters, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					m.statQueue.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 		}
-		if sS.cfg.StatSCfg().StoreInterval != 0 && m.profile.Stored {
-			if sS.cfg.StatSCfg().StoreInterval == -1 {
-				sS.StoreStatQueue(ctx, m.statQueue)
+		if s.cfg.StatSCfg().StoreInterval != 0 && m.profile.Stored {
+			if s.cfg.StatSCfg().StoreInterval == -1 {
+				s.StoreStatQueue(ctx, m.statQueue)
 			} else {
-				sS.ssqMux.Lock()
-				sS.storedStatQueues.Add(m.statQueue.TenantID())
-				sS.ssqMux.Unlock()
+				s.storedMu.Lock()
+				s.storedStatQueues.Add(m.statQueue.TenantID())
+				s.storedMu.Unlock()
 			}
 		}
 		// verify the Blockers from the profiles
 		// get the dynamic blocker from the profile and check if it pass trough its filters
 		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, m.profile.Blockers, sS.fltrS, tnt, evNm); err != nil {
+		if blocker, err = engine.BlockerFromDynamics(ctx, m.profile.Blockers, s.filters, tnt, evNm); err != nil {
 			return
 		}
 		if blocker && idx != len(matchSQs)-1 { // blocker will stop processing and we are not at last index
@@ -419,7 +418,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 
 	}
 
-	if sS.processThresholds(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || sS.processEEs(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || withErrors {
+	if s.processThresholds(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || s.processEEs(ctx, matchSQs, args.APIOpts, tnt, evNm) != nil || withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
 	return

@@ -71,7 +71,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 
 	sts.mu.Lock()
 	defer sts.mu.Unlock()
-	sts.sts = stats.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
+	sts.sts = stats.NewStatService(sts.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)

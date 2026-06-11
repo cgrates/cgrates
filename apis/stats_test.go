@@ -569,7 +569,7 @@ func TestStatsNewStatsv1(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	sS := stats.NewStatService(dm, cfg, nil, nil)
+	sS := stats.NewStatService(cfg, dm, nil, nil)
 
 	exp := &StatSv1{
 		sS: sS,
@@ -644,7 +644,7 @@ func TestStatsAPIs(t *testing.T) {
 		dm:  dm,
 		cfg: cfg,
 	}
-	sS := stats.NewStatService(dm, cfg, fltrs, cM)
+	sS := stats.NewStatService(cfg, dm, fltrs, cM)
 	stV1 := NewStatSv1(sS)
 	var reply string
 
