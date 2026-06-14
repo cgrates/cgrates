@@ -1739,7 +1739,8 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 // processStats will receive the event and send it to StatS to be processed
 func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaStats],
+		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1754,7 +1755,8 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply routes.SortedRoutesList, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaRoutes], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaRoutes],
+		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1766,6 +1768,28 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 	if err = sS.connMgr.Call(ctx, conns, utils.RouteSv1GetRoutes,
 		cgrEv, &routesReply); err != nil {
 		return routesReply, utils.NewErrRouteS(err)
+	}
+	return
+}
+
+// eesProcessEvent will send the CGREvent to EEs
+func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, cch map[string]any) (eesIDs []string, err error) {
+	var conns []string
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaEEs],
+		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+		return
+	}
+	if len(conns) == 0 {
+		return eesIDs, utils.NewErrNotConnected(utils.EEs)
+	}
+	procEEs := make(map[string]map[string]any)
+	if err = sS.connMgr.Call(ctx, conns, utils.EeSv1ProcessEvent,
+		cgrEv, &eesIDs); err != nil {
+		return eesIDs, utils.NewErrRouteS(err)
+	}
+	eesIDs = make([]string, 0, len(procEEs))
+	for eeID := range procEEs {
+		eesIDs = append(eesIDs, eeID)
 	}
 	return
 }

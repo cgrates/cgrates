@@ -339,6 +339,7 @@ type V1ProcessEventReply struct {
 	ThresholdIDs       map[string][]string                      `json:",omitempty"`
 	StatQueueIDs       map[string][]string                      `json:",omitempty"`
 	STIRIdentity       map[string]string                        `json:",omitempty"`
+	EventExporters     map[string][]string                      `json:",omitempty"`
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface

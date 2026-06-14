@@ -1194,30 +1194,34 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			apiRply.AccountSUsage[runID] = maxDur
 		}
 
-		// CDRs Enabled
-		if cdrs, errCDRs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
-			sS.fltrS, sS.cfg.SessionSCfg().Opts.CDRs,
-			utils.MetaCDRs); errCDRs != nil {
+		// UsageRecords generation
+		if ees, errEEs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.EEs,
+			utils.MetaEEs); errEEs != nil {
 			if cch[utils.OptsSesBlockerError].(bool) {
-				return errCDRs
+				return errEEs
 			}
 			withErrors = true
 			utils.Logger.Warning(
+
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, errCDRs.Error(), cgrEv, utils.CDRs))
-		} else if cdrs {
-			var rply string
-			if err = sS.processCDR(ctx, cgrEv, &rply); err != nil {
+					utils.SessionS, errEEs.Error(), cgrEv, utils.EEs))
+		} else if ees {
+			var eesIDs []string
+			if eesIDs, err = sS.eesProcessEvent(ctx, cgrEv, cchEv); err != nil {
 				if cch[utils.OptsSesBlockerError].(bool) {
 					return
 				}
 				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
-						utils.SessionS, err.Error(), cgrEv, utils.CDRs))
+						utils.SessionS, err.Error(), cgrEv, utils.EEs))
 			}
+			if apiRply.EventExporters == nil {
+				apiRply.EventExporters = make(map[string][]string)
+			}
+			apiRply.EventExporters[runID] = eesIDs
 		}
-
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
