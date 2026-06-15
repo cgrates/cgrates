@@ -305,8 +305,8 @@ func (a *IPAllocations) allocateIPOnPool(allocID string, pool *IPPool,
 		poolAlloc.Time = time.Now()
 		if a.prfl.TTL > 0 {
 			a.removeAllocFromTTLIndex(allocID)
+			a.TTLIndex = append(a.TTLIndex, allocID)
 		}
-		a.TTLIndex = append(a.TTLIndex, allocID)
 		return &AllocatedIP{
 			ProfileID: a.ID,
 			PoolID:    pool.ID,
@@ -343,6 +343,9 @@ func (a *IPAllocations) allocateIPOnPool(allocID string, pool *IPPool,
 		a.poolAllocs[pool.ID] = make(map[netip.Addr]string)
 	}
 	a.poolAllocs[pool.ID][addr] = allocID
+	if a.prfl.TTL > 0 {
+		a.TTLIndex = append(a.TTLIndex, allocID)
+	}
 	return allocIP, nil
 }
 
