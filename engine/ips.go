@@ -215,21 +215,22 @@ func (a *IPAllocations) computeUnexported(prfl *IPProfile) error {
 	if a.prfl == prfl {
 		return nil // already computed for this profile
 	}
+	poolRanges := make(map[string]netip.Prefix, len(prfl.Pools))
+	for _, poolCfg := range prfl.Pools {
+		prefix, err := netip.ParsePrefix(poolCfg.Range)
+		if err != nil {
+			return err
+		}
+		poolRanges[poolCfg.ID] = prefix
+	}
 	a.prfl = prfl
+	a.poolRanges = poolRanges
 	a.poolAllocs = make(map[string]map[netip.Addr]string)
 	for allocID, alloc := range a.Allocations {
 		if _, hasPool := a.poolAllocs[alloc.PoolID]; !hasPool {
 			a.poolAllocs[alloc.PoolID] = make(map[netip.Addr]string)
 		}
 		a.poolAllocs[alloc.PoolID][alloc.Address] = allocID
-	}
-	a.poolRanges = make(map[string]netip.Prefix)
-	for _, poolCfg := range a.prfl.Pools {
-		prefix, err := netip.ParsePrefix(poolCfg.Range)
-		if err != nil {
-			return err
-		}
-		a.poolRanges[poolCfg.ID] = prefix
 	}
 	return nil
 }
@@ -662,6 +663,9 @@ func (s *IPService) matchingIPAllocationsForEvent(tnt string,
 			if err == utils.ErrNotFound {
 				continue
 			}
+			if matchedPrfl != nil {
+				matchedPrfl.unlock()
+			}
 			return nil, err
 		}
 		prfl.lock(lkPrflID)
@@ -673,6 +677,9 @@ func (s *IPService) matchingIPAllocationsForEvent(tnt string,
 		var pass bool
 		if pass, err = s.fltrs.Pass(tnt, prfl.FilterIDs, evNm); err != nil {
 			prfl.unlock()
+			if matchedPrfl != nil {
+				matchedPrfl.unlock()
+			}
 			return nil, err
 		} else if !pass {
 			prfl.unlock()
@@ -703,6 +710,7 @@ func (s *IPService) matchingIPAllocationsForEvent(tnt string,
 	allocs.lock(lkID)
 	if err = Cache.Set(utils.CacheEventIPs, evUUID, allocs.ID, nil, true, ""); err != nil {
 		allocs.unlock()
+		return nil, err
 	}
 	return allocs, nil
 }
@@ -1032,12 +1040,16 @@ func (s *IPService) V1ClearIPAllocations(ctx *context.Context, args *ClearIPAllo
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+	lkID := guardian.Guardian.GuardIDs("",
 		config.CgrConfig().GeneralCfg().LockingTimeout,
-		ipAllocationsLockKey(tnt, args.ID))
+		ipProfileLockKey(tnt, args.ID), ipAllocationsLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	allocs, err := s.dm.GetIPAllocations(tnt, args.ID, true, true, utils.NonTransactional, nil)
+	prfl, err := s.dm.GetIPProfile(tnt, args.ID, true, true, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	allocs, err := s.dm.GetIPAllocations(tnt, args.ID, true, true, utils.NonTransactional, prfl)
 	if err != nil {
 		return err
 	}
