@@ -457,60 +457,74 @@ func ipAllocationsLockKey(tnt, id string) string {
 
 // IPService is the service handling IP allocations
 type IPService struct {
-	cfg          *config.CGRConfig
-	dm           *DataManager // So we can load the data in cache and index it
-	cm           *ConnManager
-	fltrs        *FilterS
-	storedIPsMux sync.RWMutex    // protects storedIPs
-	storedIPs    utils.StringSet // keep a record of IP allocations which need saving, map[allocsID]bool
-	stopBackup   chan struct{}   // control storing process
-	loopStopped  chan struct{}
+	cfg   *config.CGRConfig
+	dm    *DataManager
+	fltrs *FilterS
+	cm    *ConnManager
+
+	storedIPsMux sync.Mutex
+	storedIPs    utils.StringSet // IP allocations that need saving
+
+	stateMu    sync.Mutex // guards stopBackup
+	stopBackup chan struct{}
+	backupLoop sync.WaitGroup
 }
 
 // NewIPService returns a new IPService.
 func NewIPService(dm *DataManager, cfg *config.CGRConfig, fltrs *FilterS,
 	cm *ConnManager) *IPService {
 	return &IPService{dm: dm,
-		storedIPs:   make(utils.StringSet),
-		cfg:         cfg,
-		cm:          cm,
-		fltrs:       fltrs,
-		loopStopped: make(chan struct{}),
-		stopBackup:  make(chan struct{}),
+		storedIPs:  make(utils.StringSet),
+		cfg:        cfg,
+		cm:         cm,
+		fltrs:      fltrs,
+		stopBackup: make(chan struct{}),
 	}
 }
 
-// Reload restarts the backup loop.
+// Reload restarts the backup loop. No-op after Shutdown.
 func (s *IPService) Reload() {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
-	<-s.loopStopped // wait until the loop is done
+	s.backupLoop.Wait()
 	s.stopBackup = make(chan struct{})
-	go s.runBackup()
+	s.StartLoop()
 }
 
-// StartLoop starts the gorutine with the backup loop
+// StartLoop starts the goroutine with the backup loop
 func (s *IPService) StartLoop() {
+	s.backupLoop.Add(1)
 	go s.runBackup()
 }
 
 // Shutdown is called to shutdown the service
 func (s *IPService) Shutdown() {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+	if s.stopBackup == nil {
+		return
+	}
 	close(s.stopBackup)
+	s.backupLoop.Wait()
+	s.stopBackup = nil
 	s.storeIPAllocationsList()
 }
 
 // runBackup will regularly update IP allocations stored in dataDB.
 func (s *IPService) runBackup() {
+	defer s.backupLoop.Done()
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval <= 0 {
-		s.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		s.storeIPAllocationsList()
 		select {
 		case <-s.stopBackup:
-			s.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}

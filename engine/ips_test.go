@@ -4,9 +4,94 @@
 package engine
 
 import (
+	"net/netip"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
+
+func TestIPsReload(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.IPsCfg().StoreInterval = 5 * time.Millisecond
+		s := NewIPService(nil, cfg, nil, nil)
+		s.StartLoop()
+		s.Reload()
+		s.Shutdown()
+		s.Shutdown()
+		s.Reload()
+	})
+}
+
+func TestIPsReloadShutdownConcurrent(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		cfg.IPsCfg().StoreInterval = 5 * time.Millisecond
+		s := NewIPService(nil, cfg, nil, nil)
+		s.StartLoop()
+		var wg sync.WaitGroup
+		wg.Go(func() { s.Reload() })
+		wg.Go(func() { s.Shutdown() })
+		wg.Wait()
+	})
+}
+
+func TestIPsStartLoop(t *testing.T) {
+	synctest.Test(t, func(*testing.T) {
+		cfg := config.NewDefaultCGRConfig()
+		s := NewIPService(nil, cfg, nil, nil)
+		s.StartLoop()
+		s.backupLoop.Wait()
+	})
+}
+
+func TestStoreIPAllocationsList(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	s := NewIPService(dm, cfg, nil, nil)
+
+	exp := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "alloc1",
+		Allocations: map[string]*PoolAllocation{
+			"alloc1": {
+				PoolID:  "pool1",
+				Address: netip.MustParseAddr("192.168.1.10"),
+				Time:    time.Now(),
+			},
+		},
+	}
+	Cache.SetWithoutReplicate(utils.CacheIPAllocations, "cgrates.org:alloc1", exp, nil, true,
+		utils.NonTransactional)
+	s.storedIPs.Add("cgrates.org:alloc1")
+	s.storeIPAllocationsList()
+
+	rcv, err := s.dm.GetIPAllocations("cgrates.org", "alloc1", true, false,
+		utils.NonTransactional, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rcv.ID != exp.ID {
+		t.Errorf("expected IPAllocations ID %q, got %q", exp.ID, rcv.ID)
+	}
+	if pa, has := rcv.Allocations["alloc1"]; !has {
+		t.Errorf("expected PoolAllocation %q to exist", "alloc1")
+	} else if pa.Address.String() != "192.168.1.10" {
+		t.Errorf("expected address 192.168.1.10, got %s", pa.Address.String())
+	}
+
+	Cache.Remove(utils.CacheIPAllocations, "cgrates.org:alloc1", true, utils.NonTransactional)
+}
 
 func newTestIPAllocations(t *testing.T) *IPAllocations {
 	t.Helper()
