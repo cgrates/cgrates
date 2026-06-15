@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -53,10 +52,10 @@ func (s *IPService) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.
 	}
 
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if s.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.IPsV1GetIPAllocationForEvent, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -106,10 +105,10 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if s.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.IPsV1AuthorizeIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -174,10 +173,10 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	}
 
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if s.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.IPsV1AllocateIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -243,10 +242,10 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	}
 
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if s.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.IPsV1ReleaseIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -294,8 +293,8 @@ func (s *IPService) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantID
 	}
 
 	// make sure resource is locked at process level
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lkID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.IPAllocationsLockKey(tnt, arg.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
@@ -319,8 +318,8 @@ func (s *IPService) V1ClearIPAllocations(ctx *context.Context, args *utils.Clear
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lkID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.IPAllocationsLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 

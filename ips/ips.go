@@ -222,7 +222,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 	var maxWeight float64
 	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
+			s.cfg.GeneralCfg().LockingTimeout,
 			utils.IPProfileLockKey(tnt, id))
 		var prfl *utils.IPProfile
 		if prfl, err = s.dm.GetIPProfile(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
@@ -259,8 +259,8 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 	if matchedPrfl == nil {
 		return nil, utils.ErrNotFound
 	}
-	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout,
+	lkID := guardian.Guardian.GuardIDs("",
+		s.cfg.GeneralCfg().LockingTimeout,
 		utils.IPAllocationsLockKey(matchedPrfl.Tenant, matchedPrfl.ID))
 	allocs, err = s.dm.GetIPAllocations(ctx, matchedPrfl.Tenant, matchedPrfl.ID, true, true, "", matchedPrfl)
 	if err != nil {
