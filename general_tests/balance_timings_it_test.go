@@ -1800,3 +1800,389 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,rp1001,`,
 		}
 	})
 }
+
+func TestBalanceTimingsCSVNegations(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+"rals": {"enabled": true},
+"schedulers": {"enabled": true, "cdrs_conns": ["*internal"]},
+"attributes": {"enabled": true},
+"cdrs": {"enabled": true, "chargers_conns":["*internal"], "rals_conns": ["*localhost"]},
+"chargers": {"enabled": true, "attributes_conns": ["*internal"]},
+"sessions": {
+    "enabled": true,
+    "rals_conns": ["*internal"],
+    "cdrs_conns": ["*internal"],
+    "chargers_conns": ["*internal"]
+},
+"apiers": {"enabled": true, "scheduler_conns": ["*internal"]}
+}`
+
+	tpFiles := map[string]string{
+		utils.TimingsCsv: `#Tag,Years,Months,MonthDays,WeekDays,Time
+HALF1,*any,*any,*any,*any,00:00:00;11:59:59
+HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
+		utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_NEG,*topup_reset,,,balNeg,*monetary,,*any,,,*unlimited,!HALF2,100,10,false,false,10
+ACT_BOTH_NEG,*topup_reset,,,balBoth,*monetary,,*any,,,*unlimited,!HALF1;!HALF2,100,10,false,false,10
+ACT_MIX,*topup_reset,,,balMix,*monetary,,*any,,,*unlimited,HALF1;!HALF2,100,30,false,false,10`,
+		utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
+AP_NEG,ACT_NEG,*asap,10
+AP_NEG,ACT_BOTH_NEG,*asap,10
+AP_NEG,ACT_MIX,*asap,10`,
+		utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,1001,AP_NEG,,,`,
+		utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,*default,*none,0
+cgrates.org,Raw,,,*raw,*constant:*req.RequestType:*none,0`,
+		utils.DestinationsCsv: `#Id,Prefix
+DST_1002,1002`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_1,0,1,60s,1s,0s`,
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_1,DST_1002,RT_1,*up,4,0,`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_1,DR_1,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1,`,
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+
+	t.Run("VerifyCSVNegatedTimingsStored", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		balances := map[string]*engine.Balance{}
+		for _, b := range acnt.BalanceMap[utils.MetaMonetary] {
+			balances[b.ID] = b
+		}
+		for _, name := range []string{"balNeg", "balBoth", "balMix"} {
+			if balances[name] == nil {
+				t.Errorf("balance %s not found", name)
+			}
+		}
+		if b := balances["balNeg"]; b != nil {
+			if v, ok := b.TimingIDs["HALF2"]; !ok || v != false {
+				t.Errorf("balNeg: expected TimingIDs[HALF2]=false, got %v (exists: %v)", v, ok)
+			}
+			for _, tim := range b.Timings {
+				if strings.HasPrefix(tim.ID, "!") {
+					t.Errorf("balNeg: Timings entry has unexpected '!' prefix: %s", tim.ID)
+				}
+			}
+		}
+		if b := balances["balBoth"]; b != nil {
+			if v, ok := b.TimingIDs["HALF1"]; !ok || v != false {
+				t.Errorf("balBoth: expected TimingIDs[HALF1]=false, got %v (exists: %v)", v, ok)
+			}
+			if v, ok := b.TimingIDs["HALF2"]; !ok || v != false {
+				t.Errorf("balBoth: expected TimingIDs[HALF2]=false, got %v (exists: %v)", v, ok)
+			}
+		}
+		if b := balances["balMix"]; b != nil {
+			if v, ok := b.TimingIDs["HALF1"]; !ok || v != true {
+				t.Errorf("balMix: expected TimingIDs[HALF1]=true, got %v (exists: %v)", v, ok)
+			}
+			if v, ok := b.TimingIDs["HALF2"]; !ok || v != false {
+				t.Errorf("balMix: expected TimingIDs[HALF2]=false, got %v (exists: %v)", v, ok)
+			}
+		}
+	})
+
+	t.Run("PMCDRShouldNotDebitAnyBalance", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		balBefore := map[string]float64{}
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			balBefore[b.ID] = b.Value
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-pm-neg",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T15:00:00Z",
+					AnswerTime:  "2024-08-04T15:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		balAfter := map[string]float64{}
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			balAfter[b.ID] = b.Value
+		}
+		if balAfter["balNeg"] != balBefore["balNeg"] {
+			t.Errorf("balNeg debited in PM despite !HALF2: before=%v after=%v", balBefore["balNeg"], balAfter["balNeg"])
+		}
+		if balAfter["balBoth"] != balBefore["balBoth"] {
+			t.Errorf("balBoth debited despite both timings negated: before=%v after=%v", balBefore["balBoth"], balAfter["balBoth"])
+		}
+		if balAfter["balMix"] != balBefore["balMix"] {
+			t.Errorf("balMix debited in PM: before=%v after=%v", balBefore["balMix"], balAfter["balMix"])
+		}
+	})
+
+	t.Run("AMCDRShouldDebitActiveBalances", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		balBefore := map[string]float64{}
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			balBefore[b.ID] = b.Value
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-am-neg",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T10:00:00Z",
+					AnswerTime:  "2024-08-04T10:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		balAfter := map[string]float64{}
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			balAfter[b.ID] = b.Value
+		}
+		if balAfter["balMix"] >= balBefore["balMix"] {
+			t.Errorf("balMix NOT debited in AM: before=%v after=%v", balBefore["balMix"], balAfter["balMix"])
+		}
+		if balAfter["balBoth"] != balBefore["balBoth"] {
+			t.Errorf("balBoth debited despite both timings negated: before=%v after=%v", balBefore["balBoth"], balAfter["balBoth"])
+		}
+	})
+	t.Run("OnlyNegatedTimingShouldNotDebitPM", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		var balBefore float64
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balBefore = b.Value
+			}
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-pm-only-neg",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T15:00:00Z",
+					AnswerTime:  "2024-08-04T15:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		var balAfter float64
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balNeg" {
+				balAfter = b.Value
+			}
+		}
+		if balAfter != balBefore {
+			t.Errorf("balNeg debited during PM despite !HALF2, before: %v after: %v", balBefore, balAfter)
+		}
+	})
+
+	t.Run("OnlyNegatedTimingShouldDebitAM", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		var balBefore float64
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balMix" {
+				balBefore = b.Value
+			}
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-am-only-neg",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T10:00:00Z",
+					AnswerTime:  "2024-08-04T10:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		var balAfter float64
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balMix" {
+				balAfter = b.Value
+			}
+		}
+		if balAfter >= balBefore {
+			t.Errorf("balMix NOT debited during AM, before: %v after: %v", balBefore, balAfter)
+		}
+	})
+
+	t.Run("BothTimingsNegatedNeverDebited", func(t *testing.T) {
+		var acntBefore engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntBefore); err != nil {
+			t.Fatal(err)
+		}
+		var balBefore float64
+		for _, b := range acntBefore.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balBoth" {
+				balBefore = b.Value
+			}
+		}
+
+		var reply string
+		// CDR in AM
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-both-neg-am",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T10:00:00Z",
+					AnswerTime:  "2024-08-04T10:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		// CDR in PM
+		if err := client.Call(context.Background(), utils.CDRsV1ProcessExternalCDR,
+			&engine.ExternalCDRWithAPIOpts{
+				ExternalCDR: &engine.ExternalCDR{
+					OriginID:    "cdr-both-neg-pm",
+					ToR:         utils.MetaVoice,
+					RequestType: utils.MetaPostpaid,
+					SetupTime:   "2024-08-04T15:00:00Z",
+					AnswerTime:  "2024-08-04T15:00:00Z",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Account:     "1001",
+					Subject:     "1001",
+					Destination: "1002",
+					Usage:       "10s",
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+
+		var acntAfter engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAfter); err != nil {
+			t.Fatal(err)
+		}
+		var balAfter float64
+		for _, b := range acntAfter.BalanceMap[utils.MetaMonetary] {
+			if b.ID == "balBoth" {
+				balAfter = b.Value
+			}
+		}
+		if balAfter != balBefore {
+			t.Errorf("balBoth debited despite both timings negated, before: %v after: %v", balBefore, balAfter)
+		}
+	})
+
+}
