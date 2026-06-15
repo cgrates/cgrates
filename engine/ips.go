@@ -991,8 +991,7 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	defer allocs.unlock()
 
 	if err = allocs.releaseAllocation(allocID); err != nil {
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, allocs.TenantID(), err))
+		return err
 	}
 
 	// Handle storing
