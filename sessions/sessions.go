@@ -1801,10 +1801,10 @@ func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent)
 	if len(conns) == 0 {
 		return eesIDs, utils.NewErrNotConnected(utils.EEs)
 	}
-	procEEs := make(map[string]map[string]any)
+	var procEEs map[string]map[string]any
 	if err = sS.connMgr.Call(ctx, conns, utils.EeSv1ProcessEvent,
-		cgrEv, &eesIDs); err != nil {
-		return eesIDs, utils.NewErrRouteS(err)
+		cgrEv, &procEEs); err != nil {
+		return eesIDs, utils.NewErrEEs(err)
 	}
 	eesIDs = make([]string, 0, len(procEEs))
 	for eeID := range procEEs {

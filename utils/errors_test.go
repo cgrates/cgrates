@@ -244,3 +244,10 @@ func TestAPIErrorHandlerCase2(t *testing.T) {
 		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
 	}
 }
+
+func TestNewErrEEs(t *testing.T) {
+	expected := "EES_ERROR:NOT_FOUND"
+	if rcv := NewErrEEs(ErrNotFound); rcv.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, rcv.Error())
+	}
+}
