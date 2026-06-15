@@ -20,7 +20,6 @@ package ips
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
@@ -269,8 +268,7 @@ func (s *IPs) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *str
 	defer unlock()
 
 	if err = matched.releaseAllocation(allocID); err != nil {
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, matched.allocs.TenantID(), err))
+		return err
 	}
 
 	// Handle storing
