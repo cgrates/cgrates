@@ -72,13 +72,13 @@ func (s *IPs) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREve
 	}
 	// end of RPC caching
 
-	var allocs *utils.IPAllocations
-	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	matched, unlock, err := s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID)
+	if err != nil {
 		return err
 	}
-	defer allocs.Unlock()
-	*reply = *allocs
-	return err
+	defer unlock()
+	*reply = *matched.allocs
+	return nil
 }
 
 // V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
@@ -125,20 +125,20 @@ func (s *IPs) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *u
 	}
 	// end of RPC caching
 
-	var allocs *utils.IPAllocations
-	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	matched, unlock, err := s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID)
+	if err != nil {
 		return err
 	}
-	defer allocs.Unlock()
+	defer unlock()
 
 	var poolIDs []string
-	if poolIDs, err = filterAndSortPools(ctx, tnt, allocs.Config().Pools, s.filters,
+	if poolIDs, err = filterAndSortPools(ctx, tnt, matched.profile.Pools, s.filters,
 		args.AsDataProvider()); err != nil {
 		return err
 	}
 
 	var allocIP *utils.AllocatedIP
-	if allocIP, err = s.allocateFromPools(allocs, allocID, poolIDs, true); err != nil {
+	if allocIP, err = matched.allocateFromPools(allocID, poolIDs, true); err != nil {
 		if errors.Is(err, utils.ErrIPAlreadyAllocated) {
 			return utils.ErrIPUnauthorized
 		}
@@ -193,25 +193,25 @@ func (s *IPs) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *ut
 	}
 	// end of RPC caching
 
-	var allocs *utils.IPAllocations
-	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	matched, unlock, err := s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID)
+	if err != nil {
 		return err
 	}
-	defer allocs.Unlock()
+	defer unlock()
 
 	var poolIDs []string
-	if poolIDs, err = filterAndSortPools(ctx, tnt, allocs.Config().Pools, s.filters,
+	if poolIDs, err = filterAndSortPools(ctx, tnt, matched.profile.Pools, s.filters,
 		args.AsDataProvider()); err != nil {
 		return err
 	}
 
 	var allocIP *utils.AllocatedIP
-	if allocIP, err = s.allocateFromPools(allocs, allocID, poolIDs, false); err != nil {
+	if allocIP, err = matched.allocateFromPools(allocID, poolIDs, false); err != nil {
 		return err
 	}
 
 	// index it for storing
-	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, matched.allocs); err != nil {
 		return err
 	}
 	*reply = *allocIP
@@ -262,19 +262,19 @@ func (s *IPs) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *str
 	}
 	// end of RPC caching
 
-	var allocs *utils.IPAllocations
-	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	matched, unlock, err := s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID)
+	if err != nil {
 		return err
 	}
-	defer allocs.Unlock()
+	defer unlock()
 
-	if err = allocs.ReleaseAllocation(allocID); err != nil {
+	if err = matched.releaseAllocation(allocID); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, allocs.TenantID(), err))
+			"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, matched.allocs.TenantID(), err))
 	}
 
 	// Handle storing
-	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, matched.allocs); err != nil {
 		return err
 	}
 
@@ -298,7 +298,7 @@ func (s *IPs) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAP
 		utils.IPAllocationsLockKey(tnt, arg.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional, nil)
+	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -323,14 +323,22 @@ func (s *IPs) V1ClearIPAllocations(ctx *context.Context, args *utils.ClearIPAllo
 		utils.IPAllocationsLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional, nil)
+	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
-	if err := allocs.ClearAllocations(args.AllocationIDs); err != nil {
+	prfl, err := s.dm.GetIPProfile(ctx, tnt, args.ID, true, true, utils.NonTransactional)
+	if err != nil {
 		return err
 	}
-	if err := s.storeIPAllocations(ctx, allocs); err != nil {
+	matched, err := newMatchedIPAllocs(allocs, prfl)
+	if err != nil {
+		return err
+	}
+	if err := matched.clearAllocations(args.AllocationIDs); err != nil {
+		return err
+	}
+	if err := s.storeIPAllocations(ctx, matched.allocs); err != nil {
 		return err
 	}
 
