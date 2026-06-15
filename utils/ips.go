@@ -19,14 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
-	"fmt"
-	"maps"
 	"net/netip"
 	"slices"
 	"time"
-
-	"github.com/cgrates/guardian"
 )
 
 // IPProfile defines the configuration of an IPAllocations object.
@@ -38,8 +33,6 @@ type IPProfile struct {
 	TTL       time.Duration
 	Stored    bool
 	Pools     []*IPPool
-
-	lockID string // reference ID of lock used when matching the IPProfile
 }
 
 // IPProfileWithAPIOpts wraps IPProfile with APIOpts.
@@ -70,7 +63,6 @@ func (p *IPProfile) Clone() *IPProfile {
 		TTL:       p.TTL,
 		Stored:    p.Stored,
 		Pools:     pools,
-		lockID:    p.lockID,
 	}
 }
 
@@ -191,34 +183,6 @@ func (p *IPProfile) FieldAsInterface(fldPath []string) (any, error) {
 	case Pools:
 		return p.Pools, nil
 	}
-}
-
-// Lock acquires a guardian lock on the IPProfile and stores the lock ID.
-// Uses given lockID or creates a new lock.
-func (p *IPProfile) Lock(lockID string) {
-	if lockID == "" {
-		lockID = guardian.Guardian.GuardIDs("",
-			0, // TODO: find a way to pass timeout without importing config
-			IPProfileLockKey(p.Tenant, p.ID))
-	}
-	p.lockID = lockID
-}
-
-// Unlock releases the lock on the IPProfile and clears the stored lock ID.
-func (p *IPProfile) Unlock() {
-	if p.lockID == "" {
-		return
-	}
-
-	// Store current lock ID before clearing to prevent race conditions.
-	id := p.lockID
-	p.lockID = ""
-	guardian.Guardian.UnguardIDs(id)
-}
-
-// IPProfileLockKey returns the ID used to lock an IPProfile with guardian.
-func IPProfileLockKey(tnt, id string) string {
-	return ConcatenatedKey(CacheIPProfiles, tnt, id)
 }
 
 // IPPool defines a pool of IP addresses within an IPProfile.
@@ -403,11 +367,6 @@ type IPAllocations struct {
 	ID          string
 	Allocations map[string]*PoolAllocation // map[allocID]*PoolAllocation
 	TTLIndex    []string                   // allocIDs ordered by allocation time for TTL expiry
-
-	prfl       *IPProfile                       // cached profile configuration
-	poolRanges map[string]netip.Prefix          // parsed CIDR ranges by pool ID
-	poolAllocs map[string]map[netip.Addr]string // IP to allocation ID mapping by pool (map[poolID]map[Addr]allocID)
-	lockID     string                           // guardian lock reference
 }
 
 // IPAllocationsWithAPIOpts wraps IPAllocations with APIOpts.
@@ -423,210 +382,6 @@ type ClearIPAllocationsArgs struct {
 	ID            string
 	AllocationIDs []string
 	APIOpts       map[string]any
-}
-
-// ComputeUnexported sets up unexported fields based on the provided profile.
-// Safe to call multiple times with the same profile.
-func (a *IPAllocations) ComputeUnexported(prfl *IPProfile) error {
-	if prfl == nil {
-		return nil // nothing to compute without a profile
-	}
-	if a.prfl == prfl {
-		return nil // already computed for this profile
-	}
-	a.prfl = prfl
-	a.poolAllocs = make(map[string]map[netip.Addr]string)
-	for allocID, alloc := range a.Allocations {
-		if _, hasPool := a.poolAllocs[alloc.PoolID]; !hasPool {
-			a.poolAllocs[alloc.PoolID] = make(map[netip.Addr]string)
-		}
-		a.poolAllocs[alloc.PoolID][alloc.Address] = allocID
-	}
-	a.poolRanges = make(map[string]netip.Prefix)
-	for _, poolCfg := range a.prfl.Pools {
-		prefix, err := netip.ParsePrefix(poolCfg.Range)
-		if err != nil {
-			return err
-		}
-		a.poolRanges[poolCfg.ID] = prefix
-	}
-	return nil
-}
-
-// ReleaseAllocation releases the allocation for an ID.
-func (a *IPAllocations) ReleaseAllocation(allocID string) error {
-	alloc, has := a.Allocations[allocID] // Get the allocation first
-	if !has {
-		return fmt.Errorf("cannot find allocation record with id: %s", allocID)
-	}
-	if poolMap, hasPool := a.poolAllocs[alloc.PoolID]; hasPool {
-		delete(poolMap, alloc.Address)
-	}
-	if a.prfl.TTL > 0 {
-		for i, refID := range a.TTLIndex {
-			if refID == allocID {
-				a.TTLIndex = slices.Delete(a.TTLIndex, i, i+1)
-				break
-			}
-		}
-	}
-	delete(a.Allocations, allocID)
-	return nil
-}
-
-// ClearAllocations clears specified IP allocations or all allocations if allocIDs is empty/nil.
-// Either all specified IDs exist and get cleared, or none are cleared and an error is returned.
-func (a *IPAllocations) ClearAllocations(allocIDs []string) error {
-	if len(allocIDs) == 0 {
-		clear(a.Allocations)
-		clear(a.poolAllocs)
-		a.TTLIndex = a.TTLIndex[:0] // maintain capacity
-		return nil
-	}
-
-	// Validate all IDs exist before clearing any.
-	var notFound []string
-	for _, allocID := range allocIDs {
-		if _, has := a.Allocations[allocID]; !has {
-			notFound = append(notFound, allocID)
-		}
-	}
-	if len(notFound) > 0 {
-		return fmt.Errorf("cannot find allocation records with ids: %v", notFound)
-	}
-
-	for _, allocID := range allocIDs {
-		alloc := a.Allocations[allocID]
-		if poolMap, hasPool := a.poolAllocs[alloc.PoolID]; hasPool {
-			delete(poolMap, alloc.Address)
-		}
-		if a.prfl.TTL > 0 {
-			for i, refID := range a.TTLIndex {
-				if refID == allocID {
-					a.TTLIndex = slices.Delete(a.TTLIndex, i, i+1)
-					break
-				}
-			}
-		}
-		delete(a.Allocations, allocID)
-	}
-
-	return nil
-}
-
-// AllocateIPOnPool allocates an IP from the specified pool or refreshes
-// existing allocation. If dryRun is true, checks availability without
-// allocating.
-func (a *IPAllocations) AllocateIPOnPool(allocID string, pool *IPPool,
-	dryRun bool) (*AllocatedIP, error) {
-	a.removeExpiredUnits()
-	if poolAlloc, has := a.Allocations[allocID]; has && !dryRun {
-		poolAlloc.Time = time.Now()
-		if a.prfl.TTL > 0 {
-			a.removeAllocFromTTLIndex(allocID)
-		}
-		a.TTLIndex = append(a.TTLIndex, allocID)
-		return &AllocatedIP{
-			ProfileID: a.ID,
-			PoolID:    pool.ID,
-			Message:   pool.Message,
-			Address:   poolAlloc.Address,
-		}, nil
-	}
-	poolRange := a.poolRanges[pool.ID]
-	if !poolRange.IsSingleIP() {
-		return nil, errors.New("only single IP Pools are supported for now")
-	}
-	addr := poolRange.Addr()
-	if _, hasPool := a.poolAllocs[pool.ID]; hasPool {
-		if alcID, inUse := a.poolAllocs[pool.ID][addr]; inUse {
-			return nil, fmt.Errorf("allocation failed for pool %q, IP %q: %w (allocated to %q)",
-				pool.ID, addr, ErrIPAlreadyAllocated, alcID)
-		}
-	}
-	allocIP := &AllocatedIP{
-		ProfileID: a.ID,
-		PoolID:    pool.ID,
-		Message:   pool.Message,
-		Address:   addr,
-	}
-	if dryRun {
-		return allocIP, nil
-	}
-	a.Allocations[allocID] = &PoolAllocation{
-		PoolID:  pool.ID,
-		Address: addr,
-		Time:    time.Now(),
-	}
-	if _, hasPool := a.poolAllocs[pool.ID]; !hasPool {
-		a.poolAllocs[pool.ID] = make(map[netip.Addr]string)
-	}
-	a.poolAllocs[pool.ID][addr] = allocID
-	return allocIP, nil
-}
-
-// removeExpiredUnits removes expired allocations.
-// It stops at first active since TTLIndex is sorted by expiration.
-func (a *IPAllocations) removeExpiredUnits() {
-	expiredCount := 0
-	for _, allocID := range a.TTLIndex {
-		alloc, exists := a.Allocations[allocID]
-		if exists && alloc.IsActive(a.prfl.TTL) {
-			break
-		}
-		if alloc != nil {
-			if poolMap, hasPool := a.poolAllocs[alloc.PoolID]; hasPool {
-				delete(poolMap, alloc.Address)
-			}
-		}
-		delete(a.Allocations, allocID)
-		expiredCount++
-	}
-	if expiredCount > 0 {
-		a.TTLIndex = a.TTLIndex[expiredCount:]
-	}
-}
-
-// removeAllocFromTTLIndex removes an allocationID from TTL index.
-func (a *IPAllocations) removeAllocFromTTLIndex(allocID string) {
-	for i, alID := range a.TTLIndex {
-		if alID == allocID {
-			a.TTLIndex = slices.Delete(a.TTLIndex, i, i+1)
-			break
-		}
-	}
-}
-
-// Lock acquires a guardian lock on the IPAllocations and stores the lock ID.
-// Uses given lockID (assumes already acquired) or creates a new lock.
-func (a *IPAllocations) Lock(lockID string) {
-	if lockID == "" {
-		lockID = guardian.Guardian.GuardIDs("",
-			0, // TODO: find a way to pass timeout without importing config
-			IPAllocationsLockKey(a.Tenant, a.ID))
-	}
-	a.lockID = lockID
-}
-
-// Unlock releases the lock on the IPAllocations and clears the stored lock ID.
-func (a *IPAllocations) Unlock() {
-	if a.lockID == "" {
-		return
-	}
-
-	// Store current lock ID before clearing to prevent race conditions.
-	id := a.lockID
-	a.lockID = ""
-	guardian.Guardian.UnguardIDs(id)
-
-	if a.prfl != nil {
-		a.prfl.Unlock()
-	}
-}
-
-// Config returns the IPAllocations' profile configuration.
-func (a *IPAllocations) Config() *IPProfile {
-	return a.prfl
 }
 
 // AsMapStringInterface converts IPProfile struct to map[string]any
@@ -722,23 +477,15 @@ func (a *IPAllocations) CacheClone() any {
 	return a.Clone()
 }
 
-// Clone creates a deep clone of the IPAllocations object (lockID excluded).
+// Clone creates a deep clone of the IPAllocations object.
 func (a *IPAllocations) Clone() *IPAllocations {
 	if a == nil {
 		return nil
 	}
 	clone := &IPAllocations{
-		Tenant:     a.Tenant,
-		ID:         a.ID,
-		TTLIndex:   slices.Clone(a.TTLIndex),
-		prfl:       a.prfl.Clone(),
-		poolRanges: maps.Clone(a.poolRanges),
-	}
-	if a.poolAllocs != nil {
-		clone.poolAllocs = make(map[string]map[netip.Addr]string)
-		for poolID, allocs := range a.poolAllocs {
-			clone.poolAllocs[poolID] = maps.Clone(allocs)
-		}
+		Tenant:   a.Tenant,
+		ID:       a.ID,
+		TTLIndex: slices.Clone(a.TTLIndex),
 	}
 	if a.Allocations != nil {
 		clone.Allocations = make(map[string]*PoolAllocation, len(a.Allocations))

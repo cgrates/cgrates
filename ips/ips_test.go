@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ips
 
 import (
+	"errors"
 	"net/netip"
 	"sync"
 	"testing"
@@ -623,7 +624,7 @@ func TestStoreIPAllocationsList(t *testing.T) {
 	s.storeIPAllocationsList(context.Background())
 
 	rcv, err := s.dm.GetIPAllocations(context.Background(), "cgrates.org", "alloc1", true, false,
-		utils.NonTransactional, nil)
+		utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -637,4 +638,189 @@ func TestStoreIPAllocationsList(t *testing.T) {
 	}
 
 	engine.Cache.Remove(context.Background(), utils.CacheIPAllocations, "cgrates.org:alloc1", true, utils.NonTransactional)
+}
+
+func newTestMatchedIPAllocs(t *testing.T) *matchedIPAllocs {
+	t.Helper()
+	allocs := &utils.IPAllocations{
+		Tenant:      "cgrates.org",
+		ID:          "IP1",
+		Allocations: map[string]*utils.PoolAllocation{},
+	}
+	profile := &utils.IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "IP1",
+		Pools: []*utils.IPPool{
+			{ID: "pool1", Range: "10.0.0.1/32", Message: "ok"},
+			{ID: "pool2", Range: "10.0.0.2/32"},
+		},
+	}
+	m, err := newMatchedIPAllocs(allocs, profile)
+	if err != nil {
+		t.Fatalf("newMatchedIPAllocs: %v", err)
+	}
+	return m
+}
+
+func TestNewMatchedIPAllocs(t *testing.T) {
+	allocs := &utils.IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "IP1",
+		Allocations: map[string]*utils.PoolAllocation{
+			"a1": {PoolID: "pool1", Address: netip.MustParseAddr("10.0.0.1")},
+		},
+	}
+	profile := &utils.IPProfile{
+		ID:    "IP1",
+		Pools: []*utils.IPPool{{ID: "pool1", Range: "10.0.0.1/32"}},
+	}
+	m, err := newMatchedIPAllocs(allocs, profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := m.poolRanges["pool1"]; got.String() != "10.0.0.1/32" {
+		t.Errorf("poolRanges[pool1] = %v", got)
+	}
+	if got := m.poolAllocs["pool1"][netip.MustParseAddr("10.0.0.1")]; got != "a1" {
+		t.Errorf("poolAllocs reverse index = %q, want a1", got)
+	}
+
+	bad := &utils.IPProfile{ID: "IP1", Pools: []*utils.IPPool{{ID: "pool1", Range: "not-a-cidr"}}}
+	if _, err := newMatchedIPAllocs(allocs, bad); err == nil {
+		t.Error("expected error for invalid pool range")
+	}
+}
+
+func TestMatchedIPAllocsAllocateIPOnPool(t *testing.T) {
+	m := newTestMatchedIPAllocs(t)
+	pool := m.profile.Pools[0] // pool1, 10.0.0.1/32
+
+	ip, err := m.allocateIPOnPool("a1", pool, true) // dry run must not mutate
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ip.Address.String() != "10.0.0.1" {
+		t.Errorf("address = %s", ip.Address)
+	}
+	if len(m.allocs.Allocations) != 0 {
+		t.Errorf("dry run mutated allocations: %v", m.allocs.Allocations)
+	}
+
+	if _, err = m.allocateIPOnPool("a1", pool, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, has := m.allocs.Allocations["a1"]; !has {
+		t.Error("allocation a1 not recorded")
+	}
+	if m.poolAllocs["pool1"][netip.MustParseAddr("10.0.0.1")] != "a1" {
+		t.Error("reverse index not updated")
+	}
+
+	if _, err = m.allocateIPOnPool("a2", pool, false); !errors.Is(err, utils.ErrIPAlreadyAllocated) {
+		t.Errorf("expected ErrIPAlreadyAllocated, got %v", err)
+	}
+
+	// refreshing an existing allocation reuses its record and IP
+	prev := m.allocs.Allocations["a1"]
+	if ip, err = m.allocateIPOnPool("a1", pool, false); err != nil {
+		t.Fatal(err)
+	}
+	if ip.Address.String() != "10.0.0.1" {
+		t.Errorf("refresh address = %s", ip.Address)
+	}
+	if m.allocs.Allocations["a1"] != prev {
+		t.Error("refresh should reuse the existing allocation record")
+	}
+	if len(m.allocs.Allocations) != 1 {
+		t.Errorf("refresh created a new record, got %d allocations", len(m.allocs.Allocations))
+	}
+}
+
+func TestMatchedIPAllocsAllocateIPOnPoolNonSingleIP(t *testing.T) {
+	allocs := &utils.IPAllocations{ID: "IP1", Allocations: map[string]*utils.PoolAllocation{}}
+	profile := &utils.IPProfile{ID: "IP1", Pools: []*utils.IPPool{{ID: "pool1", Range: "10.0.0.0/24"}}}
+	m, err := newMatchedIPAllocs(allocs, profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.allocateIPOnPool("a1", profile.Pools[0], false); err == nil {
+		t.Error("expected error for non single IP pool")
+	}
+}
+
+func TestMatchedIPAllocsReleaseAllocation(t *testing.T) {
+	m := newTestMatchedIPAllocs(t)
+	if _, err := m.allocateIPOnPool("a1", m.profile.Pools[0], false); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.releaseAllocation("a1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, has := m.allocs.Allocations["a1"]; has {
+		t.Error("allocation not released")
+	}
+	if err := m.releaseAllocation("missing"); err == nil {
+		t.Error("expected error releasing unknown allocation")
+	}
+}
+
+func TestMatchedIPAllocsClearAllocations(t *testing.T) {
+	m := newTestMatchedIPAllocs(t)
+	if _, err := m.allocateIPOnPool("a1", m.profile.Pools[0], false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.allocateIPOnPool("a2", m.profile.Pools[1], false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := m.clearAllocations([]string{"a1", "missing"}); err == nil {
+		t.Error("expected error for unknown id")
+	}
+	if len(m.allocs.Allocations) != 2 {
+		t.Errorf("nothing should have been cleared, got %d", len(m.allocs.Allocations))
+	}
+
+	if err := m.clearAllocations([]string{"a1"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, has := m.allocs.Allocations["a1"]; has {
+		t.Error("a1 not cleared")
+	}
+
+	if err := m.clearAllocations(nil); err != nil {
+		t.Fatal(err)
+	}
+	if len(m.allocs.Allocations) != 0 {
+		t.Errorf("clear all left %d allocations", len(m.allocs.Allocations))
+	}
+}
+
+func TestMatchedIPAllocsRemoveExpiredUnits(t *testing.T) {
+	profile := &utils.IPProfile{
+		ID:    "IP1",
+		TTL:   time.Minute,
+		Pools: []*utils.IPPool{{ID: "pool1", Range: "10.0.0.1/32"}},
+	}
+	allocs := &utils.IPAllocations{
+		ID: "IP1",
+		Allocations: map[string]*utils.PoolAllocation{
+			"expired": {PoolID: "pool1", Address: netip.MustParseAddr("10.0.0.1"), Time: time.Now().Add(-2 * time.Minute)},
+			"active":  {PoolID: "pool1", Address: netip.MustParseAddr("10.0.0.2"), Time: time.Now()},
+		},
+		TTLIndex: []string{"expired", "active"},
+	}
+	m, err := newMatchedIPAllocs(allocs, profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.removeExpiredUnits()
+	if _, has := m.allocs.Allocations["expired"]; has {
+		t.Error("expired allocation not removed")
+	}
+	if _, has := m.allocs.Allocations["active"]; !has {
+		t.Error("active allocation wrongly removed")
+	}
+	if len(m.allocs.TTLIndex) != 1 || m.allocs.TTLIndex[0] != "active" {
+		t.Errorf("TTLIndex = %v, want [active]", m.allocs.TTLIndex)
+	}
 }

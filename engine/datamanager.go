@@ -321,13 +321,13 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.IPProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPProfileLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetIPProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.IPAllocationsPrefix:
 			tntID := utils.NewTenantID(dataID)
 			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
-			_, err = dm.GetIPAllocations(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional, nil)
+			_, err = dm.GetIPAllocations(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
@@ -1980,7 +1980,7 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id st
 }
 
 func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string, prfl *utils.IPProfile) (ip *utils.IPAllocations, err error) {
+	transactionID string) (ip *utils.IPAllocations, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheIPAllocations, tntID); ok {
@@ -1988,9 +1988,6 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 				return nil, utils.ErrNotFound
 			}
 			ip = x.(*utils.IPAllocations)
-			if err = ip.ComputeUnexported(prfl); err != nil {
-				return nil, err
-			}
 			return ip, nil
 		}
 	}
@@ -2027,9 +2024,6 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 			}
 			return nil, err
 		}
-	}
-	if err = ip.ComputeUnexported(prfl); err != nil {
-		return nil, err
 	}
 	if cacheWrite {
 		if errCh := Cache.Set(ctx, utils.CacheIPAllocations, tntID, ip, nil,
@@ -2196,7 +2190,7 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 			Allocations: make(map[string]*utils.PoolAllocation),
 		})
 	} else if _, errGet := dm.GetIPAllocations(ctx, ipp.Tenant, ipp.ID, // do not try to get the resource if the configuration changed
-		true, false, utils.NonTransactional, nil); errGet == utils.ErrNotFound { // the resource does not exist
+		true, false, utils.NonTransactional); errGet == utils.ErrNotFound { // the resource does not exist
 		err = dm.SetIPAllocations(ctx, &utils.IPAllocations{
 			Tenant:      ipp.Tenant,
 			ID:          ipp.ID,
