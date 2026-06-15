@@ -1979,3 +1979,112 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventEEs(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbcfg = engine.RedisDBCfg
+	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+			"logger": {"level": 7},
+			"sessions": {
+				"enabled": true,
+				"conns": {
+					"*ees": [{"connIDs": ["*localhost"]}]
+				}
+			},
+			"ees": {
+				"enabled": true,
+				"exporters": [
+					{
+						"id": "LogExporter",
+						"type": "*log",
+						"attempts": 1
+					}
+				]
+			},
+			"chargers": {"enabled": true},
+			"admins": {"enabled": true}
+		}`,
+		DBCfg:    dbcfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 0}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	t.Run("noFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noFlag",
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "OriginID_noFlag",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed: %v", err)
+		}
+		if len(rply.EventExporters) != 0 {
+			t.Errorf("EventExporters should be empty without *ees flag, got: %v", rply.EventExporters)
+		}
+	})
+
+	t.Run("withEEsFlag", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "withEEsFlag",
+				APIOpts: map[string]any{
+					utils.MetaEEs:      true,
+					utils.MetaOriginID: "OriginID_withEEsFlag",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *ees flag failed: %v", err)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+		for runID, eesIDs := range rply.EventExporters {
+			if len(eesIDs) == 0 {
+				t.Errorf("runID %q has no exporter IDs", runID)
+			}
+		}
+	})
+}

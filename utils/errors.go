@@ -198,6 +198,10 @@ func NewErrChargerS(err error) error {
 	return fmt.Errorf("CHARGERS_ERROR:%s", err)
 }
 
+func NewErrEEs(err error) error {
+	return fmt.Errorf("EES_ERROR:%s", err)
+}
+
 func NewErrStatS(err error) error {
 	return fmt.Errorf("STATS_ERROR:%s", err)
 }
