@@ -358,10 +358,11 @@ func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocatio
 
 // storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
 func (s *IPs) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPAllocations) error {
-	if s.cfg.IPsCfg().StoreInterval == 0 {
+	storeInterval := s.cfg.IPsCfg().StoreInterval
+	if storeInterval == 0 {
 		return nil
 	}
-	if s.cfg.IPsCfg().StoreInterval > 0 {
+	if storeInterval > 0 {
 		s.storedMu.Lock()
 		s.storedIPs.Add(matched.TenantID())
 		s.storedMu.Unlock()
