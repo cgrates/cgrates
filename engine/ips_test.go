@@ -10,6 +10,7 @@ import (
 	"testing/synctest"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -165,5 +166,52 @@ func TestIPAllocationsAllocateIPOnPoolNoTTL(t *testing.T) {
 	}
 	if _, has := allocs.Allocations["a1"]; !has {
 		t.Error("a1 wrongly expired without a TTL")
+	}
+}
+
+func TestIPsV1ReleaseIPNotFound(t *testing.T) {
+	tmp := Cache
+	t.Cleanup(func() { Cache = tmp })
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filters := NewFilterS(cfg, nil, dm)
+	s := NewIPService(dm, cfg, filters, nil)
+
+	profile := &IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "IP1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weight:    10,
+		Pools:     []*IPPool{{ID: "pool1", Range: "10.0.0.1/32"}},
+	}
+	if err := dm.SetIPProfile(profile, true); err != nil {
+		t.Fatal(err)
+	}
+
+	allocArgs := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "EventAllocateIP",
+		Event:   map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{utils.OptsIPsAllocationID: "alloc1"},
+	}
+	var allocReply AllocatedIP
+	if err := s.V1AllocateIP(context.Background(), allocArgs, &allocReply); err != nil {
+		t.Fatal(err)
+	}
+
+	releaseArgs := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "EventReleaseIP",
+		Event:   map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{utils.OptsIPsAllocationID: "alloc2"},
+	}
+	var reply string
+	experr := "cannot find allocation record with id: alloc2"
+	if err := s.V1ReleaseIP(context.Background(), releaseArgs, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%v>, received: <%v>", experr, err)
 	}
 }
