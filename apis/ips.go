@@ -185,13 +185,13 @@ func (s *AdminSv1) RemoveIPProfile(ctx *context.Context, arg *utils.TenantIDWith
 }
 
 // NewIPSv1 initializes the IPSv1 object.
-func NewIPSv1(ipS *ips.IPService) *IPSv1 {
+func NewIPSv1(ipS *ips.IPs) *IPSv1 {
 	return &IPSv1{ips: ipS}
 }
 
 // IPSv1 represents the RPC object to register for ips v1 APIs.
 type IPSv1 struct {
-	ips *ips.IPService
+	ips *ips.IPs
 }
 
 // V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
