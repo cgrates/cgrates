@@ -824,3 +824,58 @@ func TestMatchedIPAllocsRemoveExpiredUnits(t *testing.T) {
 		t.Errorf("TTLIndex = %v, want [active]", m.allocs.TTLIndex)
 	}
 }
+
+func TestMatchedIPAllocsAllocateIPOnPoolTTLIndex(t *testing.T) {
+	profile := &utils.IPProfile{
+		ID:  "IP1",
+		TTL: time.Minute,
+		Pools: []*utils.IPPool{
+			{ID: "pool1", Range: "10.0.0.1/32"},
+			{ID: "pool2", Range: "10.0.0.2/32"},
+		},
+	}
+	allocs := &utils.IPAllocations{ID: "IP1", Allocations: map[string]*utils.PoolAllocation{}}
+	m, err := newMatchedIPAllocs(allocs, profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.allocateIPOnPool("a1", profile.Pools[0], false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.allocateIPOnPool("a2", profile.Pools[1], false); err != nil {
+		t.Fatal(err)
+	}
+	if len(m.allocs.TTLIndex) != 2 || m.allocs.TTLIndex[0] != "a1" || m.allocs.TTLIndex[1] != "a2" {
+		t.Fatalf("new allocations not indexed: TTLIndex = %v, want [a1 a2]", m.allocs.TTLIndex)
+	}
+
+	// refreshing a1 moves it to the back of the index
+	if _, err := m.allocateIPOnPool("a1", profile.Pools[0], false); err != nil {
+		t.Fatal(err)
+	}
+	if len(m.allocs.TTLIndex) != 2 || m.allocs.TTLIndex[0] != "a2" || m.allocs.TTLIndex[1] != "a1" {
+		t.Errorf("refresh did not reorder TTLIndex: %v, want [a2 a1]", m.allocs.TTLIndex)
+	}
+}
+
+func TestMatchedIPAllocsAllocateIPOnPoolNoTTL(t *testing.T) {
+	m := newTestMatchedIPAllocs(t) // profile has no TTL
+	pool := m.profile.Pools[0]
+	if _, err := m.allocateIPOnPool("a1", pool, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.allocateIPOnPool("a1", pool, false); err != nil { // refresh
+		t.Fatal(err)
+	}
+	if len(m.allocs.TTLIndex) != 0 {
+		t.Fatalf("TTLIndex should stay empty without a TTL, got %v", m.allocs.TTLIndex)
+	}
+
+	// a stray index entry would make the next allocate wrongly expire a1
+	if _, err := m.allocateIPOnPool("a1", pool, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, has := m.allocs.Allocations["a1"]; !has {
+		t.Error("a1 wrongly expired without a TTL")
+	}
+}
