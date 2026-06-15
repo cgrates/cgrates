@@ -341,7 +341,7 @@ func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
 func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocations) error {
 	if err := s.dm.SetIPAllocations(ctx, allocs); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
-			"<IPs> could not save IP allocations %q: %v", allocs.ID, err))
+			"<%s> could not save IP allocations %q: %v", utils.IPs, allocs.ID, err))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
@@ -349,7 +349,7 @@ func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocatio
 		if err := engine.Cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
-				"<IPs> could not cache IP allocations %q: %v", tntID, err))
+				"<%s> could not cache IP allocations %q: %v", utils.IPs, tntID, err))
 			return err
 		}
 	}
