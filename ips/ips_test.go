@@ -35,7 +35,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 0
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			storedIPs: make(utils.StringSet),
 		}
@@ -61,7 +61,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 10
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			storedIPs: make(utils.StringSet),
 		}
@@ -92,7 +92,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 10
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			storedIPs: make(utils.StringSet),
 		}
@@ -127,7 +127,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = -1
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			dm:        nil,
 			storedIPs: make(utils.StringSet),
@@ -155,7 +155,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg.IPsCfg().StoreInterval = -1
 		dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{}, &config.DbCfg{}), cfg, nil)
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			dm:        dm,
 			storedIPs: make(utils.StringSet),
@@ -188,7 +188,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 		dm := engine.NewDataManager(dbCM, cfg, nil)
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			dm:        dm,
 			storedIPs: make(utils.StringSet),
@@ -211,7 +211,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 0
 
-		s := &IPService{
+		s := &IPs{
 			cfg:       cfg,
 			storedIPs: make(utils.StringSet),
 		}
@@ -234,13 +234,13 @@ func TestNewIPService(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 
-	svc := NewIPService(dm, cfg, fltrs, connMgr)
+	svc := NewIPService(cfg, dm, filters, connMgr)
 
 	if svc == nil {
-		t.Fatalf("expected non-nil IPService")
+		t.Fatalf("expected non-nil IPs")
 	}
 	if svc.dm != dm {
 		t.Errorf("expected dm to be set, got %+v", svc.dm)
@@ -248,8 +248,8 @@ func TestNewIPService(t *testing.T) {
 	if svc.cfg != cfg {
 		t.Errorf("expected cfg to be set, got %+v", svc.cfg)
 	}
-	if svc.fltrs != fltrs {
-		t.Errorf("expected fltrs to be set, got %+v", svc.fltrs)
+	if svc.filters != filters {
+		t.Errorf("expected filters to be set, got %+v", svc.filters)
 	}
 	if svc.cm != connMgr {
 		t.Errorf("expected connMgr to be set, got %+v", svc.cm)
@@ -273,7 +273,7 @@ func TestFilterAndSortPools(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	ctx := context.Background()
 	tenant := "cgrates.org"
 
@@ -281,7 +281,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		pools := []*utils.IPPool{}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err != utils.ErrNotFound {
 			t.Errorf("Expected ErrNotFound, got: %v", err)
@@ -294,7 +294,7 @@ func TestFilterAndSortPools(t *testing.T) {
 	t.Run("NilPools", func(t *testing.T) {
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, nil, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, nil, filters, ev)
 
 		if err != utils.ErrNotFound {
 			t.Errorf("Expected ErrNotFound, got: %v", err)
@@ -315,7 +315,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err != nil {
 			t.Errorf("Expected no error, got: %v", err)
@@ -351,7 +351,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err != nil {
 			t.Errorf("Expected no error, got: %v", err)
@@ -400,7 +400,7 @@ func TestFilterAndSortPools(t *testing.T) {
 			},
 		}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err != utils.ErrNotFound {
 			t.Errorf("Expected ErrNotFound, got: %v", err)
@@ -446,7 +446,7 @@ func TestFilterAndSortPools(t *testing.T) {
 			},
 		}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err != nil {
 			t.Errorf("Expected no error, got: %v", err)
@@ -473,7 +473,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err == nil {
 			t.Error("Expected error for non-existent filter, got nil")
@@ -496,7 +496,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err == nil {
 			t.Error("Expected error for weight calculation, got nil")
@@ -519,7 +519,7 @@ func TestFilterAndSortPools(t *testing.T) {
 		}
 		ev := utils.MapStorage{}
 
-		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+		result, err := filterAndSortPools(ctx, tenant, pools, filters, ev)
 
 		if err == nil {
 			t.Error("Expected error for blocker, got nil")
@@ -568,9 +568,9 @@ func TestIPsReload(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	svc := NewIPService(dm, cfg, fltrs, connMgr)
+	svc := NewIPService(cfg, dm, filters, connMgr)
 
 	ctx := &context.Context{}
 
@@ -643,9 +643,9 @@ func TestIPsShutdown(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	svc := NewIPService(dm, cfg, fltrs, connMgr)
+	svc := NewIPService(cfg, dm, filters, connMgr)
 
 	ctx := &context.Context{}
 
@@ -665,9 +665,9 @@ func TestIPsShutdown(t *testing.T) {
 
 	engine.Cache.Set(ctx, utils.CacheIPAllocations, ipAlloc.ID, ipAlloc, nil, true, utils.NonTransactional)
 
-	svc.storedIPsMux.Lock()
+	svc.storedMu.Lock()
 	svc.storedIPs.Add(ipAlloc.ID)
-	svc.storedIPsMux.Unlock()
+	svc.storedMu.Unlock()
 
 	svc.Shutdown(ctx)
 
@@ -700,12 +700,12 @@ func TestIPsRunBackup(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 	ctx := &context.Context{}
 
 	cfg.IPsCfg().StoreInterval = 0
-	svc := NewIPService(dm, cfg, fltrs, connMgr)
+	svc := NewIPService(cfg, dm, filters, connMgr)
 
 	done1 := make(chan struct{})
 	go func() {
@@ -721,7 +721,7 @@ func TestIPsRunBackup(t *testing.T) {
 	<-done1
 
 	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
-	svc2 := NewIPService(dm, cfg, fltrs, connMgr)
+	svc2 := NewIPService(cfg, dm, filters, connMgr)
 
 	poolAlloc := &utils.PoolAllocation{
 		PoolID:  "pool1",
@@ -778,9 +778,9 @@ func TestIPsStartLoop(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	svc := NewIPService(dm, cfg, fltrs, connMgr)
+	svc := NewIPService(cfg, dm, filters, connMgr)
 
 	ctx := &context.Context{}
 

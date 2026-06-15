@@ -647,9 +647,9 @@ func BenchmarkIPsAuthorize(b *testing.B) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	ipService := NewIPService(dm, cfg, fltrs, cm)
+	ipService := NewIPService(cfg, dm, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -699,9 +699,9 @@ func BenchmarkIPsAllocate(b *testing.B) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	ipService := NewIPService(dm, cfg, fltrs, cm)
+	ipService := NewIPService(cfg, dm, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -749,9 +749,9 @@ func BenchmarkIPsRelease(b *testing.B) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	ipService := NewIPService(dm, cfg, fltrs, cm)
+	ipService := NewIPService(cfg, dm, filters, cm)
 	ctx := context.Background()
 	profile := &utils.IPProfile{
 		Tenant:    "cgrates.org",

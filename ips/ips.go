@@ -35,34 +35,34 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// IPService is the service handling IP allocations
-type IPService struct {
-	dm           *engine.DataManager // So we can load the data in cache and index it
-	fltrs        *engine.FilterS
-	storedIPsMux sync.RWMutex    // protects storedIPs
-	storedIPs    utils.StringSet // keep a record of IP allocations which need saving, map[allocsID]bool
-	cfg          *config.CGRConfig
-	stopBackup   chan struct{} // control storing process
-	loopStopped  chan struct{}
-	cm           *engine.ConnManager
+// IPs is the service handling IP allocations
+type IPs struct {
+	cfg         *config.CGRConfig
+	dm          *engine.DataManager
+	filters     *engine.FilterS
+	cm          *engine.ConnManager
+	stopBackup  chan struct{}
+	loopStopped chan struct{}
+	storedIPs   utils.StringSet // IP allocations that need saving
+	storedMu    sync.RWMutex    // protects storedIPs
 }
 
-// NewIPService  returns a new IPService
-func NewIPService(dm *engine.DataManager, cfg *config.CGRConfig,
-	fltrs *engine.FilterS, cm *engine.ConnManager) *IPService {
-	return &IPService{dm: dm,
-		storedIPs:   make(utils.StringSet),
+// NewIPService returns a new IPs service
+func NewIPService(cfg *config.CGRConfig, dm *engine.DataManager,
+	filters *engine.FilterS, cm *engine.ConnManager) *IPs {
+	return &IPs{
 		cfg:         cfg,
+		dm:          dm,
+		filters:     filters,
 		cm:          cm,
-		fltrs:       fltrs,
-		loopStopped: make(chan struct{}),
 		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}),
+		storedIPs:   make(utils.StringSet),
 	}
-
 }
 
 // Reload stops the backupLoop and restarts it
-func (s *IPService) Reload(ctx *context.Context) {
+func (s *IPs) Reload(ctx *context.Context) {
 	close(s.stopBackup)
 	<-s.loopStopped // wait until the loop is done
 	s.stopBackup = make(chan struct{})
@@ -70,18 +70,18 @@ func (s *IPService) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the gorutine with the backup loop
-func (s *IPService) StartLoop(ctx *context.Context) {
+func (s *IPs) StartLoop(ctx *context.Context) {
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (s *IPService) Shutdown(ctx *context.Context) {
+func (s *IPs) Shutdown(ctx *context.Context) {
 	close(s.stopBackup)
 	s.storeIPAllocationsList(ctx)
 }
 
 // backup will regularly store IP allocations changed to DB
-func (s *IPService) runBackup(ctx *context.Context) {
+func (s *IPs) runBackup(ctx *context.Context) {
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval <= 0 {
 		s.loopStopped <- struct{}{}
@@ -99,15 +99,15 @@ func (s *IPService) runBackup(ctx *context.Context) {
 }
 
 // storeIPAllocationsList represents one task of complete backup
-func (s *IPService) storeIPAllocationsList(ctx *context.Context) {
+func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
 	var failedRIDs []string
 	for { // don't stop until we store all dirty IP allocations
-		s.storedIPsMux.Lock()
+		s.storedMu.Lock()
 		allocsID := s.storedIPs.GetOne()
 		if allocsID != "" {
 			s.storedIPs.Remove(allocsID)
 		}
-		s.storedIPsMux.Unlock()
+		s.storedMu.Unlock()
 		if allocsID == "" {
 			break // no more keys, backup completed
 		}
@@ -128,14 +128,14 @@ func (s *IPService) storeIPAllocationsList(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedRIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		s.storedIPsMux.Lock()
+		s.storedMu.Lock()
 		s.storedIPs.AddSlice(failedRIDs)
-		s.storedIPsMux.Unlock()
+		s.storedMu.Unlock()
 	}
 }
 
 // storeIPAllocations stores the IP allocations in DB.
-func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocations) error {
+func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocations) error {
 	if err := s.dm.SetIPAllocations(ctx, allocs); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<IPs> could not save IP allocations %q: %v", allocs.ID, err))
@@ -154,14 +154,14 @@ func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *utils.IPAll
 }
 
 // storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
-func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPAllocations) error {
+func (s *IPs) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPAllocations) error {
 	if s.cfg.IPsCfg().StoreInterval == 0 {
 		return nil
 	}
 	if s.cfg.IPsCfg().StoreInterval > 0 {
-		s.storedIPsMux.Lock()
+		s.storedMu.Lock()
 		s.storedIPs.Add(matched.TenantID())
-		s.storedIPsMux.Unlock()
+		s.storedMu.Unlock()
 		return nil
 	}
 	if err := s.storeIPAllocations(ctx, matched); err != nil {
@@ -172,7 +172,7 @@ func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched *uti
 
 // matchingIPAllocationsForEvent returns the IP allocation with the highest weight
 // matching the event.
-func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
+func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 	ev *utils.CGREvent, evUUID string) (allocs *utils.IPAllocations, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -234,7 +234,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 		}
 		prfl.Lock(lkPrflID)
 		var pass bool
-		if pass, err = s.fltrs.Pass(ctx, tnt, prfl.FilterIDs, evNm); err != nil {
+		if pass, err = s.filters.Pass(ctx, tnt, prfl.FilterIDs, evNm); err != nil {
 			prfl.Unlock()
 			return nil, err
 		} else if !pass {
@@ -242,7 +242,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			continue
 		}
 		var weight float64
-		if weight, err = engine.WeightFromDynamics(ctx, prfl.Weights, s.fltrs, tnt, evNm); err != nil {
+		if weight, err = engine.WeightFromDynamics(ctx, prfl.Weights, s.filters, tnt, evNm); err != nil {
 			prfl.Unlock()
 			return nil, err
 		}
@@ -278,7 +278,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 // allocateFromPools attempts IP allocation across all pools in priority order.
 // Continues to next pool only if current pool returns ErrIPAlreadyAllocated.
 // Returns first successful allocation or the last allocation error.
-func (s *IPService) allocateFromPools(allocs *utils.IPAllocations, allocID string,
+func (s *IPs) allocateFromPools(allocs *utils.IPAllocations, allocID string,
 	poolIDs []string, dryRun bool) (*utils.AllocatedIP, error) {
 	var err error
 	for _, poolID := range poolIDs {
@@ -311,18 +311,18 @@ func findPoolByID(pools []*utils.IPPool, id string) *utils.IPPool {
 // TODO: check whether pre-allocating filteredPools & poolIDs improves
 // performance or wastes memory when filtering is aggressive.
 func filterAndSortPools(ctx *context.Context, tenant string, pools []*utils.IPPool,
-	fltrs *engine.FilterS, ev utils.DataProvider) ([]string, error) {
+	filters *engine.FilterS, ev utils.DataProvider) ([]string, error) {
 	var filteredPools []*utils.IPPool
 	weights := make(map[string]float64) // stores sorting weights by pool ID
 	for _, pool := range pools {
-		pass, err := fltrs.Pass(ctx, tenant, pool.FilterIDs, ev)
+		pass, err := filters.Pass(ctx, tenant, pool.FilterIDs, ev)
 		if err != nil {
 			return nil, err
 		}
 		if !pass {
 			continue
 		}
-		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, fltrs, tenant, ev)
+		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, filters, tenant, ev)
 		if err != nil {
 			return nil, err
 		}
@@ -340,7 +340,7 @@ func filterAndSortPools(ctx *context.Context, tenant string, pools []*utils.IPPo
 
 	var poolIDs []string
 	for _, pool := range filteredPools {
-		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, fltrs, tenant, ev)
+		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, filters, tenant, ev)
 		if err != nil {
 			return nil, err
 		}
