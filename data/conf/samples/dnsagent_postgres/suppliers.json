@@ -6,10 +6,10 @@
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.QueryName{*e164}:4986517174965"],
 				"flags": ["*message", "*routes","*continue"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "DispatchReply", "type": "*none",
 						"blocker": true}, // enforces continue_on_success so we can check answer with filters
 				],
@@ -21,7 +21,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "NAPTROrder", "path": "*rep.Answer.Order",
 						"type": "*group", "value": "100"},
 					{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference",
@@ -43,7 +43,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "NAPTROrder", "type": "*group", "newBranch": true,
 						"path": "*rep.Answer.Order", "value": "100"},
 					{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference",
@@ -63,10 +63,10 @@
 				"filters": ["*string:~*vars.QueryType:A", 
 					"*string:~*vars.QueryName:go.dev."],
 				"flags": ["*message", "*routes","*continue"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1002"}
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "DispatchReply", "type": "*none", 
 						"blocker": true} 
 				]
@@ -78,7 +78,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"], 
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*group", "value": "go.dev."},
 					{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*group", "value": "300"},
 					{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*group", "value": "1"},
@@ -93,7 +93,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Aname", "path": "*rep.Answer[1].Hdr.Name", "type": "*group", "value": "go.dev."},
 					{"tag": "Attl", "path": "*rep.Answer[1].Hdr.Ttl", "type": "*group", "value": "300"},
 					{"tag": "Aclass", "path": "*rep.Answer[1].Hdr.Class", "type": "*group", "value": "1"},
@@ -106,10 +106,10 @@
 				"filters": ["*string:~*vars.QueryType:SRV", 
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org."],
 				"flags": ["*message", "*routes","*continue"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1003"}
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "DispatchReply", "type": "*none", 
 						"blocker": true}
 				]
@@ -121,7 +121,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
 				"flags": ["*none","*continue"],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*group", "value": "_xmpp-client._tcp.xmpp.org."},
 					{"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*group", "value": "1"},
 					{"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*group", "value": "1"},
@@ -136,7 +136,7 @@
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "SRVHdr", "path": "*rep.Answer[1].Hdr.Name", "type": "*group", "value": "_xmpp-client._tcp.xmpp.org."},
 					{"tag": "SRVPriority", "path": "*rep.Answer[1].Priority", "type": "*group", "value": "1"},
 					{"tag": "SRVWeight", "path": "*rep.Answer[1].Weight", "type": "*group", "value": "1"},

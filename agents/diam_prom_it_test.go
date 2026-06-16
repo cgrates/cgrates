@@ -113,7 +113,7 @@ func TestDiamPrometheus(t *testing.T) {
 			"*daStats:SQ_1&SQ_2",
 			// "*daThresholds:TH_1&TH_2",
 		],
-		"request_fields": [{
+		"requestFields": [{
 				"tag": "ToR",
 				"path": "*cgreq.ToR",
 				"type": "*constant",
@@ -174,7 +174,7 @@ func TestDiamPrometheus(t *testing.T) {
 				"mandatory": true
 			}
 		],
-		"reply_fields": [{
+		"replyFields": [{
 				"tag": "CCATemplate",
 				"type": "*template",
 				"value": "*cca"

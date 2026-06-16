@@ -38,7 +38,7 @@
   "radiusAgent": {
     "enabled": true,
     "conns": {
-    	"*sessions": [{"connIDs": ["*bijson_localhost"]}]
+    	"*sessions": [{"connIDs": ["*bijsonLocalhost"]}]
     },
     "listeners": [
       {

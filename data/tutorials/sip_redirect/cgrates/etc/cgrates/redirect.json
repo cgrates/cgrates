@@ -9,8 +9,8 @@
 				"id": "Register",
 				"filters": ["*notstring:~*vars.Method:INVITE"],
 				"flags": ["*none"],
-				"request_fields":[],
-				"reply_fields":[
+				"requestFields":[],
+				"replyFields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 						"value": "SIP/2.0 405 Method Not Allowed"}
 				]
@@ -19,7 +19,7 @@
 				"id": "RoutesQuery", 
 				"filters": ["*string:~*vars.Method:INVITE"],
 				"flags": ["*event", "*routes","*stir_initiate","*continue"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.From{*sipuri_user}", "mandatory": true},
 					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
@@ -33,7 +33,7 @@
 					{"tag": "STIRPrivateKeyPath", "path": "*opts.*stirPrivateKeyPath", "type": "*constant",
 						"value": "/usr/share/cgrates/stir/stir_privatekey.pem", "mandatory": true},
 				],
-				"reply_fields":[
+				"replyFields":[
 				]
 			},
 			{
@@ -43,7 +43,7 @@
 					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:1",
 				],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 						"value": "SIP/2.0 302 Moved Temporarily"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
@@ -81,7 +81,7 @@
 					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:1",
 				],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":",\"1004\" <sip:"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
@@ -113,7 +113,7 @@
 					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:3",
 				],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":",\"1005\" <sip:"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",

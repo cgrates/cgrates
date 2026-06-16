@@ -11,7 +11,7 @@
 				"*prefix:~*req.Service-Context-Id:simpa"
 			],
 			"flags": ["*message", "*accounts", "*log"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",

@@ -8,7 +8,7 @@
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:4",
 				"*prefix:~*req.Service-Context-Id:simpa"],
 			"flags": ["*message", "*accounts"],
-			"request_fields":[
+			"requestFields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*generic"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},

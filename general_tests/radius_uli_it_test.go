@@ -81,7 +81,7 @@ END-VENDOR 3GPP
             {
                 "id": "uli_extract",
                 "flags": ["*dryRun"],
-                "request_fields": [
+                "requestFields": [
                     {
                         "tag": "DecodedULI",
                         "path": "*cgreq.DecodedULI",
@@ -125,7 +125,7 @@ END-VENDOR 3GPP
                         "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC.Name}"
                     }
                 ],
-                "reply_fields": []
+                "replyFields": []
             }
         ]
     }

@@ -57,7 +57,7 @@ func TestDiamULI(t *testing.T) {
                 "flags": [
                     "*dryRun"
                 ],
-                "request_fields": [
+                "requestFields": [
                     {
                         "tag": "DecodedULI",
                         "path": "*cgreq.DecodedULI",
@@ -125,7 +125,7 @@ func TestDiamULI(t *testing.T) {
                         "value": "~*req.Service-Information.PS-Information.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC.Name}"
                     }
                 ],
-                "reply_fields": []
+                "replyFields": []
             }
         ]
     }

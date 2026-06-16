@@ -180,10 +180,10 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
                          "tenant": "1",
                          "filters": [],
                           "flags": ["1"],
-                         "request_fields": [
+                         "requestFields": [
                             {"path": "randomPath"},
                            ],
-                         "reply_fields": [
+                         "replyFields": [
                               {"path": "randomPath"},
                           ],
                         }

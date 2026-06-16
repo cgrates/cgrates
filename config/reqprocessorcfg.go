@@ -129,8 +129,8 @@ type ReqProcessorJsnCfg struct {
 	Tenant         *string `json:"tenant"`
 	Timezone       *string
 	Flags          *[]string
-	Request_fields *[]*FcTemplateJsonCfg
-	Reply_fields   *[]*FcTemplateJsonCfg
+	Request_fields *[]*FcTemplateJsonCfg `json:"requestFields"`
+	Reply_fields   *[]*FcTemplateJsonCfg `json:"replyFields"`
 }
 
 func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor) *ReqProcessorJsnCfg {

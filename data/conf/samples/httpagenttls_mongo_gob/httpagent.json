@@ -16,9 +16,9 @@
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun"],
-				"request_fields":[
+				"requestFields":[
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
 					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed",
@@ -36,7 +36,7 @@
 				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
 				"flags": [ "*authorize", "*accounts", "*attributes"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
 						"value": "*pseudoprepaid", "mandatory": true},	
@@ -49,7 +49,7 @@
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now", "mandatory": true},
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
 					{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*variable",
@@ -61,7 +61,7 @@
 				"filters": ["*string:~*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
 						"value": "*pseudoprepaid", "mandatory": true},	
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
@@ -79,7 +79,7 @@
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable",
 						"value": "~*req.leg_duration;s", "mandatory": true},
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
 					"path": "*rep.CDR_RESPONSE.RESULT_CODE", "type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "CDR_ID", "path": "*rep.CDR_RESPONSE.CDR_ID", "type": "*variable",
@@ -103,7 +103,7 @@
 				"id": "cdr_from_xml",
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant",
 					 "value": "*data", "mandatory": true},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
@@ -121,7 +121,7 @@
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable",
 						"value": "~*req.complete-datasession-notification.callleg.bytes", "mandatory": true},
 				],
-				"reply_fields":[],
+				"replyFields":[],
 			}
 		],
 	},
@@ -139,9 +139,9 @@
 				"filters": ["*string:~*req.request_type:TextPlainDryRun","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun","*continue"],
-				"request_fields":[
+				"requestFields":[
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Field1", "path": "*rep.Variable1", "type": "*variable",
 						"value": "Hola1", "mandatory": true},
 					{"tag": "Field2", "path": "*rep.Variable2", "type": "*variable",
@@ -159,8 +159,8 @@
 				"filters": ["*string:~*req.request_type:TextPlainDryRun","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun"],
-				"request_fields":[],
-				"reply_fields":[
+				"requestFields":[],
+				"replyFields":[
 					{"tag": "Field1", "path": "*rep.Item1.1", "type": "*group",
 						"value": "Val2", "mandatory": true},
 				],

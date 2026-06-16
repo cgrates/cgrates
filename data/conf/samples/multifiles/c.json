@@ -17,11 +17,11 @@
 				"id": "cdr_from_xml",
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "ToR", "path": "ToR", "type": "*constant",
 					 "value": "*data", "mandatory": true},
 				],
-				"reply_fields":[],
+				"replyFields":[],
 			}
 		],
 	},

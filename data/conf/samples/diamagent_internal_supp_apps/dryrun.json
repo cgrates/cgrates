@@ -9,7 +9,7 @@
 				"*string:~*req.Service-Context-Id:TestDiamItDryRun"
 			],
 			"flags": ["*dryRun","*continue"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -76,7 +76,7 @@
 				},
 				
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "CCATemplate",
 					"type": "*template",
@@ -111,7 +111,7 @@
 			"id": "dryrun2",
 			"filters": ["*notempty:~*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets:"], // make sure the CC-Total-Octets was populated in the previous processor
 			"flags": ["*dryRun"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -177,7 +177,7 @@
 					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(2)]"
 				},			
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "RatingGroup",
 					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",

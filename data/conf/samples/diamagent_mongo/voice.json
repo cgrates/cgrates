@@ -11,7 +11,7 @@
 				"*prefix:~*req.Service-Context-Id:forceDurationVoice"
 			],
 			"flags": ["*initiate", "*fd", "*accounts", "*attributes"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -79,7 +79,7 @@
 					"mandatory": true
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "ResultCode",
 					"filters": ["*notempty:~*cgrep.Error:"],
@@ -111,7 +111,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
 			"flags": ["*initiate", "*accounts", "*attributes","*continue"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -179,7 +179,7 @@
 					"mandatory": true
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "ResultCode",
 					"filters": ["*notempty:~*cgrep.Error:"], 
@@ -208,7 +208,7 @@
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:voice","*eq:~*cgrep.MaxUsage:0"],
 			"flags": ["*terminate", "*accounts", "*attributes"],
-			"request_fields":[
+			"requestFields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
@@ -226,7 +226,7 @@
 				{"tag": "SubscriberID", "path": "*cgreq.SubscriberId", "type": "*variable",
 					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true}
 			],
-			"reply_fields":[
+			"replyFields":[
 				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"],
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
@@ -240,7 +240,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
 			"flags": ["*update", "*accounts", "*attributes"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -314,7 +314,7 @@
 					"mandatory": true
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "ResultCode",
 					"filters": ["*notempty:~*cgrep.Error:"], 
@@ -346,7 +346,7 @@
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
 			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -415,7 +415,7 @@
 					"mandatory": true
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "ResultCode",
 					"filters": ["*notempty:~*cgrep.Error:"], 
