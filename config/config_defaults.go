@@ -549,7 +549,7 @@ const CGRATES_CFG_JSON = `
 				// "amqpExchange": "",			// name of the primary exchange where messages will be published (0.9.1)
 				// "amqpExchangeType": "",		// type of the primary exchange (direct, topic, fanout, headers) (0.9.1)
 				// "amqpPassword": "",			// password for authentication, exclusive to AMQP 1.0
-				// "amqpQueueID": "cgrates_cdrs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
+				// "amqpQueueID": "cgratesCDRs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
 				// "amqpRoutingKey": "",		// key used for routing messages to the primary queue (0.9.1)
 				// "amqpUsername": "",			// username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
 
@@ -586,7 +586,7 @@ const CGRATES_CFG_JSON = `
 				// "natsQueueID": "",			// the queue id the consumer listen to
 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
 				// "natsStreamName": "cdrs",		// the name of the NATS JetStream stream from which the consumer will read messages
-				"natsSubject": "cgrates_cdrs",		// the subject from were the events are read
+				"natsSubject": "cgratesCDRs",		// the subject from were the events are read
 			
 				// Partial
 				// "partialPath": "/",			// the path were the partial events will be sent
@@ -603,11 +603,11 @@ const CGRATES_CFG_JSON = `
 
 				// SQS
 				// "sqsForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
-				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS readers from were the events are read
+				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS readers from were the events are read
 				// "sqsSkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from were the events are read
+				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from were the events are read
 				// "s3ForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
 				// "s3SkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
@@ -679,7 +679,7 @@ const CGRATES_CFG_JSON = `
 				// "amqpExchange": "",			// Exchange, amqp 0.9.1 exclusive
 				// "amqpExchangeType": "",		// ExchangeType, amqp 0.9.1 exclusive	
 				// "amqpPassword": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
-				// "amqpQueueID": "cgrates_cdrs",	// the queue id for AMQP exporters from were the events are exported
+				// "amqpQueueID": "cgratesCDRs",	// the queue id for AMQP exporters from were the events are exported
 				// "amqpRoutingKey": "",		// RoutingKey, amqp 0.9.1 exclusive
 				// "amqpUsername": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
 				
@@ -733,7 +733,7 @@ const CGRATES_CFG_JSON = `
 				// "natsJetStreamMaxWait": "5s",	// the maximum amount of time to wait for a response
 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)				
-				// "natsSubject": "cgrates_cdrs",	// the subject were the events are exported
+				// "natsSubject": "cgratesCDRs",	// the subject were the events are exported
 
 				//RPC
 				// "caPath": "",			// path to CA certificate
@@ -758,10 +758,10 @@ const CGRATES_CFG_JSON = `
 				// "sqlTableName":"cdrs", 		// the name of the table from where the events are exported
 
 				//SQS
-				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS exporters from were the events are exported
+				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS exporters from were the events are exported
 
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from where the events that are  exported
+				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from where the events that are  exported
 				// "s3FolderPath": "",			// S3FolderPath 
 			},
 			"fields":[]					// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value

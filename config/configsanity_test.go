@@ -1924,7 +1924,7 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 			"opts": {
 				"xmlRootPath": "A.B"
 			},
-			"xml_root_path": "A.B",
+			"xmlRootPath": "A.B",
 			"fields":[
 				{"tag": "VariableFldNoReq", "path": "*cgreq.VariableFldNoReq", "type": "*variable", "value": "~*vars.C", "mandatory": true},
 				{"tag": "VariableFld", "path": "*cgreq.VariableFld", "type": "*variable", "value": "~*req.A.B.Value1", "mandatory": true},

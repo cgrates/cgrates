@@ -2240,7 +2240,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 					CSVRowLength:        utils.IntPointer(0),
 					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
 					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
-					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
+					NATSSubject:         utils.StringPointer("cgratesCDRs"),
 				},
 			},
 		},

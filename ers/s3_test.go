@@ -55,7 +55,7 @@ func TestS3ERServe2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	if err := rdr.Serve(); err != nil {
@@ -77,7 +77,7 @@ func TestS3ERProcessMessage(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	expEvent := &utils.CGREvent{
@@ -125,7 +125,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
@@ -159,7 +159,7 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	body := []byte(`{"*originID":"testoriginID"}`)
@@ -190,7 +190,7 @@ func TestS3ERProcessMessageError3(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	body := []byte("invalid_format")
@@ -214,7 +214,7 @@ func TestS3ERParseOpts(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 
@@ -251,7 +251,7 @@ func TestS3ERIsClosed(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {

@@ -81,7 +81,7 @@
 			"type": "*amqpJSONMap",
 			"exportPath": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"amqpQueueID":"cgrates_cdrs",
+				"amqpQueueID":"cgratesCDRs",
 			},
 			"attempts": 1,
 			"fields":[

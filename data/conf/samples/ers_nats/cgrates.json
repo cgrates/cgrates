@@ -44,7 +44,7 @@
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",
                 "natsStreamName": "stream",
-                "natsSubject": "cgrates_cdrs",
+                "natsSubject": "cgratesCDRs",
                 "natsQueueID": "queue",
                 "natsJetStreamMaxWait": "5s"
             },
@@ -63,7 +63,7 @@
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",
                 "natsStreamName": "stream",
-                "natsSubject": "cgrates_cdrs",
+                "natsSubject": "cgratesCDRs",
                 "natsQueueID": "queue",
                 "natsJetStreamMaxWait": "5s"
             },

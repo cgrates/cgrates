@@ -271,7 +271,7 @@ func TestNewS3Reader(t *testing.T) {
 		rdrEvents: nil,
 		rdrExit:   nil,
 		rdrErr:    nil,
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 	}
 	exp.Config().ProcessedPath = ""
 	exp.Config().Opts = &config.EventReaderOpts{}
@@ -298,7 +298,7 @@ func TestNewSQSReader(t *testing.T) {
 		rdrEvents: nil,
 		rdrExit:   nil,
 		rdrErr:    nil,
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 	}
 	exp.Config().SourcePath = "string"
 	// var err error

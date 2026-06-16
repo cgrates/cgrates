@@ -155,7 +155,7 @@ func TestNewS3ER(t *testing.T) {
 		awsID:     "",
 		awsKey:    "",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 		session:   nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
@@ -201,7 +201,7 @@ func TestNewS3ERCase2(t *testing.T) {
 		awsID:     "",
 		awsKey:    "",
 		awsToken:  "",
-		bucket:    "cgrates_cdrs",
+		bucket:    "cgratesCDRs",
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{

@@ -2863,7 +2863,7 @@ const (
 	S3Poster  = "S3Poster"
 
 	// General constants for posters and readers
-	DefaultQueueID = "cgrates_cdrs"
+	DefaultQueueID = "cgratesCDRs"
 
 	// sqs and s3
 	AWSRegion = "awsRegion"
@@ -3042,8 +3042,8 @@ const (
 	HistoryCgr     = "/.cgr_history"
 	RpcEncodingCgr = "rpc_encoding"
 	CertPathCgr    = "crt_path"
-	KeyPathCgr     = "key_path"
-	CAPathCgr      = "ca_path"
+	KeyPathCgr     = "keyPath"
+	CAPathCgr      = "caPath"
 	HelpCgr        = "help"
 	SepCgr         = " "
 	//Cgr engine
