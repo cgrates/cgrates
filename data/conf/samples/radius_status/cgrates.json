@@ -99,7 +99,7 @@
     "radiusAgent": {
         "enabled": true,
         "conns": {
-        	"*sessions": [{"connIDs": ["*bijson_localhost"]}]
+        	"*sessions": [{"connIDs": ["*bijsonLocalhost"]}]
         },
         "listeners": [
       {
@@ -120,7 +120,7 @@
               "flags": [
                 "*none","*log",
               ],
-              "reply_fields": [
+              "replyFields": [
                 {
                   "tag": "ReplyMessage",
                   "path": "*rep.Reply-Message",

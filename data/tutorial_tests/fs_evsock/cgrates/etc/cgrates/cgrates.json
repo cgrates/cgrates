@@ -127,7 +127,7 @@
 	"requestProcessors": [
 		{
 			"id": "FSEvent",
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "BaseTmpl",
 					"type": "*template",

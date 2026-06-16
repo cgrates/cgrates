@@ -11,7 +11,7 @@
           "*chargers",
           "*ips"
         ],
-        "request_fields": [
+        "requestFields": [
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -157,7 +157,7 @@
             "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"
           }
         ],
-        "reply_fields": [
+        "replyFields": [
           {
             "tag": "ProxyState",
             "path": "*rep.Proxy-State",
@@ -175,7 +175,7 @@
         "flags": [
           "*update"
         ],
-        "request_fields": [
+        "requestFields": [
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -287,7 +287,7 @@
             "value": "~*req.Acct-Session-Id"
           }
         ],
-        "reply_fields": [
+        "replyFields": [
           {
             "tag": "ProxyState",
             "path": "*rep.Proxy-State",
@@ -307,7 +307,7 @@
           "*cdrs",
           "*ips"
         ],
-        "request_fields": [
+        "requestFields": [
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -433,7 +433,7 @@
             "value": "~*req.Acct-Session-Id"
           }
         ],
-        "reply_fields": [
+        "replyFields": [
           {
             "tag": "ProxyState",
             "path": "*rep.Proxy-State",

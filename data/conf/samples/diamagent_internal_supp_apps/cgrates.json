@@ -90,7 +90,7 @@
 		"Metaswitch Networks Ltd.4",
 	],
 	"conns": {
-		"*sessions": [{"connIDs": ["*bijson_localhost"]}]
+		"*sessions": [{"connIDs": ["*bijsonLocalhost"]}]
 	},
 	"asrTemplate": "*asr",
 	"rarTemplate": "*rar",

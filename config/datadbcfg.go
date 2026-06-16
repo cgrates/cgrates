@@ -682,7 +682,7 @@ type ItemOptsJson struct {
 	DbConn     *string
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
-	Api_key  *string
+	Api_key  *string `json:"apiKey"`
 }
 
 func diffItemOptJson(d *ItemOptsJson, v1, v2 *ItemOpts) *ItemOptsJson {

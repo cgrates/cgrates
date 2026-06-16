@@ -11,7 +11,7 @@
 				"*string:~*req.CC-Request-Type:4"
 			],
 			"flags": ["*message", "*accounts", "*cdrs","*attributes"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -73,7 +73,7 @@
 					"mandatory": true
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "ResultCode", 
 					"filters": ["*notempty:~*cgrep.Error:"], 

@@ -371,7 +371,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*string:~*req..Field"}
-	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at request_fields"
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -385,7 +385,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.Valid.Field"
 
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~REQ."
-	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of request_fields"
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -399,7 +399,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
 
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*string:~*req..Field"}
-	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at reply_fields"
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -413,7 +413,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.Valid.Field"
 
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~REQ."
-	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of reply_fields"
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -479,14 +479,14 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~req."
-	expected = "<RadiusAgent> Empty field path  for ~req. at Values of request_fields"
+	expected = "<RadiusAgent> Empty field path  for ~req. at Values of requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:*ec"}
-	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_fields"
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -501,14 +501,14 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~req."
-	expected = "<RadiusAgent> Empty field path  for ~req. at Values of reply_fields"
+	expected = "<RadiusAgent> Empty field path  for ~req. at Values of replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
-	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -574,14 +574,14 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~req."
-	expected = "<DNSAgent> Empty field path  for ~req. at Values of request_fields"
+	expected = "<DNSAgent> Empty field path  for ~req. at Values of requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "*req.Value"
 
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~*req"}
-	expected = "<DNSAgent> inline parse error for string: <*empty:~*req> for [*empty:~*req] at request_fields"
+	expected = "<DNSAgent> inline parse error for string: <*empty:~*req> for [*empty:~*req] at requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -610,14 +610,14 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*empty:*ec"
 
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~req."
-	expected = "<DNSAgent> Empty field path  for ~req. at Values of reply_fields"
+	expected = "<DNSAgent> Empty field path  for ~req. at Values of replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "*empty:*ec"
 
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
-	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
+	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -705,7 +705,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
-	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of request_fields"
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -716,7 +716,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_fields"
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -736,7 +736,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
-	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of reply_fields"
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -748,7 +748,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at reply_fields"
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -824,7 +824,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
-	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of request_fields"
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -836,7 +836,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_fields"
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at requestFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -857,7 +857,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
-	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of reply_fields"
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -869,7 +869,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
-	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at reply_fields"
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at replyFields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

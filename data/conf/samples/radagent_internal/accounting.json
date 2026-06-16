@@ -6,7 +6,7 @@
         "id": "KamailioAccountingStart",
         "filters": ["*string:~*req.Acct-Status-Type:Start"],
         "flags": ["*initiate", "*attributes", "*resources", "*accounts"],
-        "request_fields":[
+        "requestFields":[
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},
@@ -27,13 +27,13 @@
           {"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*variable",
             "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"},
         ],
-        "reply_fields":[],
+        "replyFields":[],
       },
       {
         "id": "KamailioAccountingStop",
         "filters": ["*string:~*req.Acct-Status-Type:Stop"],
         "flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
-        "request_fields":[
+        "requestFields":[
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},
@@ -56,7 +56,7 @@
           {"tag": "RemoteAddr" , "path": "*cgreq.RemoteAddr", "type": "*variable",
             "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"},
         ],
-        "reply_fields":[],
+        "replyFields":[],
       },
     ],
   },

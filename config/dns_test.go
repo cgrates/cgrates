@@ -279,8 +279,8 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun"],
                 "timezone": "UTC",
-				"request_fields":[],
-				"reply_fields":[
+				"requestFields":[],
+				"replyFields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
 					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed",

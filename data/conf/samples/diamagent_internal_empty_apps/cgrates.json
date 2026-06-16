@@ -87,7 +87,7 @@
 	"enabled": true,
 	"ceApplications": [],
 	"conns": {
-		"*sessions": [{"connIDs": ["*bijson_localhost"]}]
+		"*sessions": [{"connIDs": ["*bijsonLocalhost"]}]
 	},
 	"asrTemplate": "*asr",
 	"rarTemplate": "*rar",

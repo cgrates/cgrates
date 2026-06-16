@@ -11,7 +11,7 @@
 				"*prefix:~*req.Service-Context-Id:testSessionDisconnect"
 			],
 			"flags": ["*initiate", "*accounts","*attributes"],
-			"request_fields":[
+			"requestFields":[
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -86,7 +86,7 @@
 					"value": "1s"
 				},
 			],
-			"reply_fields":[
+			"replyFields":[
 				{
 					"tag": "CCATemplate",
 					"type": "*template",

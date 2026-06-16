@@ -2913,7 +2913,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
                 "id": "test_proc",
                 "filters": [],
                 "flags": [],
-                "request_fields": [
+                "requestFields": [
                     %s
                 ]
             }

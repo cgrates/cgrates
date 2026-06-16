@@ -196,8 +196,8 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 			"tenant": "cgrates.org",
 			"flags": ["*dryRun"],
-			"request_fields":[],
-			"reply_fields":[
+			"requestFields":[],
+			"replyFields":[
 				{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
 			]
 		}

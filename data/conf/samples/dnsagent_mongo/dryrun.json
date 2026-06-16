@@ -6,10 +6,10 @@
 			"id": "DryRunNAPTR",
 			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174963"],
 			"flags": ["*dryRun","*log"],
-			"request_fields":[
+			"requestFields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
 			],
-			"reply_fields":[
+			"replyFields":[
 				{"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
 				{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
 				{"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
@@ -22,10 +22,10 @@
 			"id": "DryRunA",
 			"filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:cgrates.org."],
 			"flags": ["*dryRun","*log"],
-			"request_fields":[
+			"requestFields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
 			],
-			"reply_fields":[
+			"replyFields":[
 			{"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "cgrates.org."},
 			{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*constant", "value": "300"},
 			{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
@@ -37,10 +37,10 @@
 			"id": "DryRunSRV",
 			"filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_sip._tcp.opensips.org."],
 			"flags": ["*dryRun","*log"],
-			"request_fields":[
+			"requestFields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
 			],
-			"reply_fields":[
+			"replyFields":[
 			{"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "_sip._tcp.opensips.org."},
 			{"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "5060"},
 			{"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*constant", "value": "0"},

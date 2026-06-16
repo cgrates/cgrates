@@ -16,7 +16,7 @@
 				"filters": ["*string:~*req.requestType:Authorization"],
 				"tenant": "cgrates.org",
 				"flags": ["*authorize", "*accounts"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
@@ -26,7 +26,7 @@
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now"}
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
@@ -38,7 +38,7 @@
 				"filters": ["*string:~*req.requestType:Session"],
 				"tenant": "cgrates.org",
 				"flags": ["*session", "*accounts"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
@@ -48,7 +48,7 @@
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now"}
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
@@ -60,7 +60,7 @@
 				"filters": ["*string:~*req.requestType:Terminate"],
 				"tenant": "cgrates.org",
 				"flags": ["*terminate", "*accounts"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
@@ -70,7 +70,7 @@
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now"}
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",

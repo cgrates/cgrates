@@ -39,13 +39,13 @@ func TestCgrConsoleFlags(t *testing.T) {
 		t.Errorf("Expected 192.168.100.2:8080 but received %+v", *server)
 	}
 
-	if err := cgrConsoleFlags.Parse([]string{"-rpc_encoding", "*birpc"}); err != nil {
+	if err := cgrConsoleFlags.Parse([]string{"-rpcEncoding", "*birpc"}); err != nil {
 		t.Fatal(err)
 	} else if *rpcEncoding != "*birpc" {
 		t.Errorf("Expected *birpc but received %+v", *rpcEncoding)
 	}
 
-	if err := cgrConsoleFlags.Parse([]string{"-crt_path", "/tmp"}); err != nil {
+	if err := cgrConsoleFlags.Parse([]string{"-crtPath", "/tmp"}); err != nil {
 		t.Fatal(err)
 	} else if *certificatePath != "/tmp" {
 		t.Errorf("Expected /tmp but received %+v", *rpcEncoding)

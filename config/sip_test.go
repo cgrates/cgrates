@@ -212,9 +212,9 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun"],
                 "timezone":       "",
-				"request_fields":[
+				"requestFields":[
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
 					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed",
@@ -283,8 +283,8 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
             "tenant": "cgrates.org",
 			"flags": ["*none"],
             "timezone": "",
-			"request_fields": [],
-			"reply_fields": [
+			"requestFields": [],
+			"replyFields": [
                {"tag": "Request","path": "*rep.Request","type": "*constant","value": "SIP/2.0 405 Method Not Allowed",},
 			],
 		},

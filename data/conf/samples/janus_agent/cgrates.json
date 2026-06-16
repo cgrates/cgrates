@@ -163,7 +163,7 @@
 	"enabled": true,
 	"url": "/janus",
 	"conns": {
-		"*sessions": [{"connIDs": ["*bijson_localhost"]}]
+		"*sessions": [{"connIDs": ["*bijsonLocalhost"]}]
 	},
 	"janusConns": [{
 		"address": "localhost:8188",

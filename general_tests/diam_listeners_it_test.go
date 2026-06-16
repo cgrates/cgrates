@@ -62,14 +62,14 @@ func TestDiamMultipleListeners(t *testing.T) {
 	"requestProcessors": [{
 		"id": "multilistener",
 		"flags": ["*dryRun"],
-		"request_fields": [{
+		"requestFields": [{
 			"tag": "OriginID",
 			"path": "*cgreq.OriginID",
 			"type": "*variable",
 			"value": "~*req.Session-Id",
 			"mandatory": true
 		}],
-		"reply_fields": [
+		"replyFields": [
 			{"tag": "Result-Code",  "path": "Result-Code",  "type": "*constant", "value": "2001",            "mandatory": true},
 			{"tag": "Origin-Host",  "path": "Origin-Host",  "type": "*variable", "value": "~*req.OriginHost","mandatory": true},
 			{"tag": "Origin-Realm", "path": "Origin-Realm", "type": "*variable", "value": "~*req.OriginRealm","mandatory": true}
@@ -161,14 +161,14 @@ func TestDiamMultipleListenersSessionID(t *testing.T) {
 	"requestProcessors": [{
 		"id": "shared_sessionid",
 		"flags": ["*dryRun"],
-		"request_fields": [{
+		"requestFields": [{
 			"tag": "OriginID",
 			"path": "*cgreq.OriginID",
 			"type": "*variable",
 			"value": "~*req.Session-Id",
 			"mandatory": true
 		}],
-		"reply_fields": [
+		"replyFields": [
 			{"tag": "Result-Code",  "path": "Result-Code",  "type": "*constant", "value": "2001",            "mandatory": true},
 			{"tag": "Origin-Host",  "path": "Origin-Host",  "type": "*variable", "value": "~*req.OriginHost","mandatory": true},
 			{"tag": "Origin-Realm", "path": "Origin-Realm", "type": "*variable", "value": "~*req.OriginRealm","mandatory": true},

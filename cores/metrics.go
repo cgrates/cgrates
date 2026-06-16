@@ -53,14 +53,14 @@ type StatusMetrics struct {
 	Goroutines float64 `json:"goroutines"`
 	Threads    float64 `json:"threads"`
 
-	MemStats        GoMemStats      `json:"mem_stats"`
-	GCDurationStats GCDurationStats `json:"gc_duration_stats"`
-	ProcStats       ProcStats       `json:"proc_stats"`
-	CapsStats       *CapsStats      `json:"caps_stats"`
+	MemStats        GoMemStats      `json:"memStats"`
+	GCDurationStats GCDurationStats `json:"gcDurationStats"`
+	ProcStats       ProcStats       `json:"procStats"`
+	CapsStats       *CapsStats      `json:"capsStats"`
 
 	MaxProcs  float64 `json:"maxprocs"`
-	GCPercent float64 `json:"gc_percent"`
-	MemLimit  float64 `json:"mem_limit"`
+	GCPercent float64 `json:"gcPercent"`
+	MemLimit  float64 `json:"memLimit"`
 }
 
 // toMap converts the StatusMetrics to a map[string]any with all fields.
@@ -127,27 +127,27 @@ func (sm StatusMetrics) toMapCondensed(timezone string) (map[string]any, error) 
 
 type GoMemStats struct {
 	Alloc        float64 `json:"alloc"`
-	TotalAlloc   float64 `json:"total_alloc"`
+	TotalAlloc   float64 `json:"totalAlloc"`
 	Sys          float64 `json:"sys"`
 	Mallocs      float64 `json:"mallocs"`
 	Frees        float64 `json:"frees"`
-	HeapAlloc    float64 `json:"heap_alloc"`
-	HeapSys      float64 `json:"heap_sys"`
-	HeapIdle     float64 `json:"heap_idle"`
-	HeapInuse    float64 `json:"heap_inuse"`
-	HeapReleased float64 `json:"heap_released"`
-	HeapObjects  float64 `json:"heap_objects"`
-	StackInuse   float64 `json:"stack_inuse"`
-	StackSys     float64 `json:"stack_sys"`
+	HeapAlloc    float64 `json:"heapAlloc"`
+	HeapSys      float64 `json:"heapSys"`
+	HeapIdle     float64 `json:"heapIdle"`
+	HeapInuse    float64 `json:"heapInuse"`
+	HeapReleased float64 `json:"heapReleased"`
+	HeapObjects  float64 `json:"heapObjects"`
+	StackInuse   float64 `json:"stackInuse"`
+	StackSys     float64 `json:"stackSys"`
 	MSpanSys     float64 `json:"mspan_sys"`
 	MSpanInuse   float64 `json:"mspan_inuse"`
 	MCacheInuse  float64 `json:"mcache_inuse"`
 	MCacheSys    float64 `json:"mcache_sys"`
 	BuckHashSys  float64 `json:"buckhash_sys"`
-	GCSys        float64 `json:"gc_sys"`
-	OtherSys     float64 `json:"other_sys"`
-	NextGC       float64 `json:"next_gc"`
-	LastGC       float64 `json:"last_gc"`
+	GCSys        float64 `json:"gcSys"`
+	OtherSys     float64 `json:"otherSys"`
+	NextGC       float64 `json:"nextGC"`
+	LastGC       float64 `json:"lastGC"`
 }
 
 func (ms GoMemStats) toMap() map[string]any {
@@ -197,15 +197,15 @@ type Quantile struct {
 }
 
 type ProcStats struct {
-	CPUTime              float64 `json:"cpu_time"`
-	MaxFDs               float64 `json:"max_fds"`
-	OpenFDs              float64 `json:"open_fds"`
-	ResidentMemory       float64 `json:"resident_memory"`
-	StartTime            float64 `json:"start_time"`
-	VirtualMemory        float64 `json:"virtual_memory"`
-	MaxVirtualMemory     float64 `json:"max_virtual_memory"`
-	NetworkReceiveTotal  float64 `json:"network_receive_total"`
-	NetworkTransmitTotal float64 `json:"network_transmit_total"`
+	CPUTime              float64 `json:"cpuTime"`
+	MaxFDs               float64 `json:"maxFDs"`
+	OpenFDs              float64 `json:"openFDs"`
+	ResidentMemory       float64 `json:"residentMemory"`
+	StartTime            float64 `json:"startTime"`
+	VirtualMemory        float64 `json:"virtualMemory"`
+	MaxVirtualMemory     float64 `json:"maxVirtualMemory"`
+	NetworkReceiveTotal  float64 `json:"networkReceiveTotal"`
+	NetworkTransmitTotal float64 `json:"networkTransmitTotal"`
 }
 
 func (ps ProcStats) toMap() map[string]any {

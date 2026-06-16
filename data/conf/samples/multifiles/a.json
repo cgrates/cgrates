@@ -23,9 +23,9 @@
 				"filters": [],
 				"tenant": "cgrates.org",
 				"flags": ["*dryRun"],
-				"request_fields":[
+				"requestFields":[
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Allow", "path": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 				],
@@ -35,11 +35,11 @@
 				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
 				"flags": ["*authorize", "*accounts", "*attributes"],
-				"request_fields":[
+				"requestFields":[
 					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
 				],
-				"reply_fields":[
+				"replyFields":[
 					{"tag": "Allow", "path": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 				],

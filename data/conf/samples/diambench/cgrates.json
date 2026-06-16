@@ -83,7 +83,7 @@
 			"*string:~*req.CC-Request-Type:4"
 		],
 		"flags": ["*message", "*accounts", "*cdrs", "*attributes"],
-		"request_fields": [{
+		"requestFields": [{
 				"tag": "ToR",
 				"path": "*cgreq.ToR",
 				"type": "*constant",
@@ -144,7 +144,7 @@
 				"mandatory": true
 			}
 		],
-		"reply_fields": [{
+		"replyFields": [{
 				"tag": "CCATemplate",
 				"type": "*template",
 				"value": "*cca"

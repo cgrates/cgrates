@@ -10,8 +10,8 @@
           "*none",
           "*continue"
         ],
-        "request_fields": [],
-        "reply_fields": []
+        "requestFields": [],
+        "replyFields": []
       },
       {
         "id": "DataStop",
@@ -22,7 +22,7 @@
           "*cdrs",
           "*continue"
         ],
-        "request_fields": [
+        "requestFields": [
           {
             "tag": "Account",
             "path": "*cgreq.Account",
@@ -64,7 +64,7 @@
             "mandatory": true
           }
         ],
-        "reply_fields": []
+        "replyFields": []
       }
     ]
   }

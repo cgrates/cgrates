@@ -196,7 +196,7 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected true, received %+v", *remove)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-api_key", "14422"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-apiKey", "14422"}); err != nil {
 		t.Error(err)
 	} else if *apiKey != "14422" {
 		t.Errorf("Expected 14422, received %+v", *apiKey)
@@ -220,7 +220,7 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected *internal, received %+v", *schedulerAddress)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-rpc_encoding", "*gob"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-rpcEncoding", "*gob"}); err != nil {
 		t.Error(err)
 	} else if *rpcEncoding != "*gob" {
 		t.Errorf("Expected **gob, received %+v", *rpcEncoding)

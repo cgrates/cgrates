@@ -5,7 +5,7 @@
         "id": "CGRMSCHAPV2PAuth",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585363"],
         "flags": ["*authorize", "*attributes", "*accounts", "*continue"],
-        "request_fields":[
+        "requestFields":[
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},
@@ -24,7 +24,7 @@
           {"tag": "PasswordFromAttributes", "path": "*cgreq.PasswordFromAttributes", "type": "*constant",
             "value": "*attributes"}
         ],
-        "reply_fields":[
+        "replyFields":[
           {"tag": "MaxUsage", "path": "*rep.SIP-AVP", "type": "*composed",
             "value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
         ],
@@ -33,11 +33,11 @@
         "id": "RadiusAuthProcessor",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585363"],
         "flags": ["*radauth", "*mschapv2", "*log"],
-        "request_fields":[
+        "requestFields":[
           {"tag": "UserPassword", "path": "*vars.UserPassword", "type": "*variable",
             "value": "~*cgrep.Attributes.PasswordFromAttributes"},
         ],
-        "reply_fields":[
+        "replyFields":[
           {"tag":"RemoveAddedFields", "filters": ["*notempty:~*cgrep.Error:"], "type": "*removeall", "path": "*rep"},
           {"tag": "Code", "path": "*rep.*radReplyCode", "filters": ["*notempty:~*cgrep.Error:"],
             "type": "*constant", "value": "AccessReject"},
