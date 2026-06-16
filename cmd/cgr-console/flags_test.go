@@ -51,13 +51,13 @@ func TestCgrConsoleFlags(t *testing.T) {
 		t.Errorf("Expected /tmp but received %+v", *rpcEncoding)
 	}
 
-	if err := cgrConsoleFlags.Parse([]string{"-key_path", "/tmp"}); err != nil {
+	if err := cgrConsoleFlags.Parse([]string{"-keyPath", "/tmp"}); err != nil {
 		t.Fatal(err)
 	} else if *keyPath != "/tmp" {
 		t.Errorf("Expected /tmp but received %+v", *rpcEncoding)
 	}
 
-	if err := cgrConsoleFlags.Parse([]string{"-ca_path", "/tmp"}); err != nil {
+	if err := cgrConsoleFlags.Parse([]string{"-caPath", "/tmp"}); err != nil {
 		t.Fatal(err)
 	} else if *caPath != "/tmp" {
 		t.Errorf("Expected /tmp but received %+v", *rpcEncoding)

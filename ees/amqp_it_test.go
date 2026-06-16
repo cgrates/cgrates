@@ -137,7 +137,7 @@ func testAMQPVerifyExport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer ch.Close()
-	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
+	q, err := ch.QueueDeclare("cgratesCDRs", true, false, false, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +158,7 @@ func testAMQPVerifyExport(t *testing.T) {
 	}
 
 	// Delete the queue after verifying if the export was successful
-	_, err = ch.QueueDelete("cgrates_cdrs", false, false, true)
+	_, err = ch.QueueDelete("cgratesCDRs", false, false, true)
 	if err != nil {
 		t.Error(err)
 	}

@@ -503,8 +503,8 @@
 			"type": "*amqpJSONMap",									
 			"exportPath": "amqp://guest:guest@localhost:5672",			
 			"opts": {
-				"amqpQueueID": "cgrates_cdrs",
-				"amqpRoutingKey": "cgrates_cdrs"
+				"amqpQueueID": "cgratesCDRs",
+				"amqpRoutingKey": "cgratesCDRs"
 			}											
 		}
 	]

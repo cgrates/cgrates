@@ -126,7 +126,7 @@ func (e *ElasticEE) parseRequestOpts() {
 		q.Set("refresh", *opts.ElsRefresh)
 	}
 	if opts.ElsOpType != nil {
-		q.Set("op_type", *opts.ElsOpType)
+		q.Set("opType", *opts.ElsOpType)
 	}
 	if opts.ElsPipeline != nil {
 		q.Set("pipeline", *opts.ElsPipeline)

@@ -168,7 +168,7 @@ package general_tests
 // 		t.Fatal(err)
 // 	}
 // 	if err := v.CreateTopics(kafka.TopicConfig{
-// 		Topic:             "cgrates_cdrs",
+// 		Topic:             "cgratesCDRs",
 // 		NumPartitions:     1,
 // 		ReplicationFactor: 1,
 // 	}); err != nil {
@@ -328,7 +328,7 @@ package general_tests
 // 	}
 // 	defer ch.Close()
 
-// 	msgs, err := ch.Consume("cgrates_cdrs", "", true, false, false, false, nil)
+// 	msgs, err := ch.Consume("cgratesCDRs", "", true, false, false, false, nil)
 // 	if err != nil {
 // 		conn.Close()
 // 		t.Fatal(err)
@@ -408,7 +408,7 @@ package general_tests
 // 	}
 // 	defer ch.Close()
 
-// 	if msgs, err = ch.Consume("cgrates_cdrs", "", true, false, false, false, nil); err != nil {
+// 	if msgs, err = ch.Consume("cgratesCDRs", "", true, false, false, false, nil); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	select {
@@ -477,7 +477,7 @@ package general_tests
 // func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 // 	reader := kafka.NewReader(kafka.ReaderConfig{
 // 		Brokers: []string{"localhost:9092"},
-// 		Topic:   "cgrates_cdrs",
+// 		Topic:   "cgratesCDRs",
 // 		GroupID: "tmp",
 // 		MaxWait: time.Millisecond,
 // 	})
@@ -510,7 +510,7 @@ package general_tests
 // 	}
 // 	defer ch.Close()
 
-// 	if _, err = ch.QueueDelete("cgrates_cdrs", false, false, true); err != nil {
+// 	if _, err = ch.QueueDelete("cgratesCDRs", false, false, true); err != nil {
 // 		t.Fatal(err)
 // 	}
 

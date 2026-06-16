@@ -39,7 +39,7 @@ func TestNewSQSER(t *testing.T) {
 		cfgIdx:  0,
 		cache:   cacheS,
 		cap:     nil,
-		queueID: "cgrates_cdrs",
+		queueID: "cgratesCDRs",
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
@@ -131,7 +131,7 @@ func TestSQSERProcessMessage(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	expEvent := &utils.CGREvent{
@@ -179,7 +179,7 @@ func TestSQSERProcessMessageError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
@@ -213,7 +213,7 @@ func TestSQSERProcessMessageError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	body := []byte(`{"OriginID":"testOriginID"}`)
@@ -244,7 +244,7 @@ func TestSQSERProcessMessageError3(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	body := []byte("invalid_format")
@@ -268,7 +268,7 @@ func TestSQSERParseOpts(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 
@@ -302,7 +302,7 @@ func TestSQSERIsClosed(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {
@@ -364,7 +364,7 @@ func TestSQSERReadMsg(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		// queueURL:  utils.StringPointer("url"),
 		session: nil,
 	}
@@ -419,7 +419,7 @@ func TestSQSERReadMsgError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		// queueURL:  utils.StringPointer("url"),
 		session: nil,
 	}
@@ -465,7 +465,7 @@ func TestSQSERReadMsgError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
@@ -515,7 +515,7 @@ func TestSQSERReadLoop(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
 	}
@@ -559,7 +559,7 @@ func TestSQSERReadLoop2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		queueURL:  utils.StringPointer("testQueueURL"),
 		session:   nil,
 	}
@@ -602,7 +602,7 @@ func TestSQSERGetQueueURL(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	// scv := &sqsClientMock{}
@@ -626,7 +626,7 @@ func TestSQSERGetQueueURLWithClient(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	getQueueUrl := func(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
@@ -677,7 +677,7 @@ func TestSQSERGetQueueURLWithClient2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		queueID:   "cgratesCDRs",
 		session:   nil,
 	}
 	getQueueUrl := func(input *sqs.GetQueueUrlInput) (output *sqs.GetQueueUrlOutput, err error) {

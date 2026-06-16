@@ -70,7 +70,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 			}
 			if _, err := js.CreateStream(context.Background(), jetstream.StreamConfig{
 				Name:     "stream",
-				Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+				Subjects: []string{"cgratesCDRs", "cgrates_cdrs_processed"},
 			}); err != nil {
 				t.Fatal(err)
 			}
@@ -90,7 +90,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 		cdr[utils.Subject] = 1001 + i
 		cdr[utils.Destination] = 2001 + i
 		b, _ := json.Marshal(cdr)
-		js.PublishAsync("cgrates_cdrs", b)
+		js.PublishAsync("cgratesCDRs", b)
 	}
 	select {
 	case <-js.PublishAsyncComplete():
@@ -304,7 +304,7 @@ resolver_preload: {
 			for i := 0; i < 3; i++ {
 				key := fmt.Sprintf("key%d", i+1)
 				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
-				if err := nc.Publish("cgrates_cdrs", []byte(expData)); err != nil {
+				if err := nc.Publish("cgratesCDRs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
 				checkNATSExports(t, client, key)
@@ -447,7 +447,7 @@ resolver_preload: {
 					}
 					if _, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
 						Name:     "stream",
-						Subjects: []string{"cgrates_cdrs", "cgrates_cdrs_processed"},
+						Subjects: []string{"cgratesCDRs", "cgrates_cdrs_processed"},
 					}); err != nil {
 						t.Fatal(err)
 					}
@@ -463,7 +463,7 @@ resolver_preload: {
 			for i := 0; i < 3; i++ {
 				key := fmt.Sprintf("key%d", i+1)
 				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
-				if _, err := js.Publish(context.Background(), "cgrates_cdrs", []byte(expData)); err != nil {
+				if _, err := js.Publish(context.Background(), "cgratesCDRs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
 				checkNATSExports(t, client, key)
