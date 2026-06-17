@@ -37,6 +37,7 @@ func NewAgentRequest(req utils.DataProvider,
 	opts utils.MapStorage,
 	tntTpl utils.RSRParsers,
 	dfltTenant, timezone string,
+	cache *engine.CacheS,
 	filterS *engine.FilterS,
 	extraDP map[string]utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
@@ -64,6 +65,7 @@ func NewAgentRequest(req utils.DataProvider,
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
+		cache:      cache,
 		filterS:    filterS,
 		Opts:       opts,
 		Cfg:        config.CgrConfig().GetDataProvider(),
@@ -86,6 +88,7 @@ type AgentRequest struct {
 	Reply      *utils.OrderedNavigableMap
 	Tenant     string
 	Timezone   string
+	cache      *engine.CacheS
 	filterS    *engine.FilterS
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
 	radDAReq   *utils.OrderedNavigableMap // used for building RADIUS server-initiated Disconnect Requests
@@ -156,7 +159,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val any, err error) 
 			val = ar.tmp
 		}
 	case utils.MetaUCH:
-		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+		if cacheVal, ok := ar.cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			err = utils.ErrNotFound
 		} else {
 			val = cacheVal
@@ -299,7 +302,7 @@ func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf)
 	case utils.MetaOpts:
 		return ar.Opts.Set(fullPath.PathSlice[1:], nm.Data)
 	case utils.MetaUCH:
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
+		return ar.cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
 	}
 }
 
@@ -323,7 +326,7 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 	case utils.MetaTmp:
 		ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaUCH:
-		engine.Cache.Clear([]string{utils.CacheUCH})
+		ar.cache.Clear([]string{utils.CacheUCH})
 	case utils.MetaOpts:
 		ar.Opts = make(utils.MapStorage)
 	}
@@ -364,7 +367,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 	case utils.MetaOpts:
 		return ar.Opts.Remove(fullPath.PathSlice[1:])
 	case utils.MetaUCH:
-		return engine.Cache.Remove(context.TODO(), utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
+		return ar.cache.Remove(context.TODO(), utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
 	}
 }
 
@@ -450,7 +453,7 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 	case utils.MetaOpts:
 		return ar.Opts.Set(fullPath.PathSlice[1:], val.Data)
 	case utils.MetaUCH:
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return ar.cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	}
 }
 
@@ -501,11 +504,11 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
 		var prv any
-		if prvI, ok := engine.Cache.Get(utils.CacheUCH, path); !ok {
+		if prvI, ok := ar.cache.Get(utils.CacheUCH, path); !ok {
 			prv = val.Data
 		} else {
 			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
 		}
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+		return ar.cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	}
 }

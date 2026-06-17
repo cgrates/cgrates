@@ -79,7 +79,7 @@ func TestAMQPER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewAMQPER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.Cache, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	connection, err := amqp.Dial("amqp://guest:guest@localhost:5672/")

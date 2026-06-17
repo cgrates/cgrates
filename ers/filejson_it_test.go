@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 )
 
 /*
@@ -223,7 +224,7 @@ case utils.MetaMySQL:
 func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -238,7 +239,7 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
 	rdrErr := make(chan error, 1)
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, rdrErr, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, rdrErr, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -259,7 +260,7 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 func TestFileJSONServeTimeDefault(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -274,7 +275,7 @@ func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
 	rdrExit := make(chan struct{}, 1)
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, rdrExit)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, rdrExit)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -289,7 +290,7 @@ func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
 func TestFileJSONProcessFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -303,7 +304,7 @@ func TestFileJSONProcessFile(t *testing.T) {
 func TestFileJSONProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

@@ -48,11 +48,12 @@ const (
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
 
 	rdr := &SQLEventReader{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		dm:            dm,
 		rdrEvents:     rdrEvents,
@@ -74,6 +75,7 @@ type SQLEventReader struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
+	cache  *engine.CacheS
 	fltrS  *engine.FilterS
 	dm     *engine.DataManager
 
@@ -316,7 +318,7 @@ func (rdr *SQLEventReader) processMessage(ev map[string]any) (err error) {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, nil) // create an AgentRequest
+		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	var pass bool
 	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.lazyFilters,
 		agReq); err != nil || !pass {

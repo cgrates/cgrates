@@ -33,11 +33,12 @@ import (
 	"github.com/cgrates/fsock"
 )
 
-func NewFSsessions(cgrcfg *config.CGRConfig, filterS *engine.FilterS,
+func NewFSsessions(cgrcfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	timezone string, connMgr *engine.ConnManager, caps *engine.Caps) (*FSsessions, error) {
 	fsAgentConfig := cgrcfg.FsAgentCfg()
 	fsa := &FSsessions{
 		cgrcfg:      cgrcfg,
+		cache:       cache,
 		cfg:         fsAgentConfig,
 		conns:       make([]*fsock.FSock, len(fsAgentConfig.EventSocketConns)),
 		senderPools: make([]*fsock.FSockPool, len(fsAgentConfig.EventSocketConns)),
@@ -70,6 +71,7 @@ func NewFSsessions(cgrcfg *config.CGRConfig, filterS *engine.FilterS,
 // and the active sessions
 type FSsessions struct {
 	cgrcfg      *config.CGRConfig
+	cache       *engine.CacheS
 	cfg         *config.FsAgentCfg
 	conns       []*fsock.FSock     // Keep the list here for connection management purposes
 	senderPools []*fsock.FSockPool // Keep sender pools here
@@ -596,7 +598,7 @@ func (fsa *FSsessions) processRequest(fsev FSEvent) (*utils.CGREvent, error) {
 			reqProcessor.Tenant,
 			fsa.cgrcfg.GeneralCfg().DefaultTenant,
 			fsa.cgrcfg.GeneralCfg().DefaultTimezone,
-			fsa.fltrS, nil,
+			fsa.cache, fsa.fltrS, nil,
 		)
 		pass, err := fsa.fltrS.Pass(context.TODO(), agReq.Tenant, reqProcessor.Filters, agReq)
 		if err != nil {

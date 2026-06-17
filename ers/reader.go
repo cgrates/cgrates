@@ -34,30 +34,30 @@ type EventReader interface {
 
 // NewEventReader instantiates the event reader based on configuration at index
 func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
 	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	case utils.MetaFileCSV:
-		return NewCSVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewCSVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaFileXML:
-		return NewXMLFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewXMLFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaFileFWV:
-		return NewFWVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewFWVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaKafkajsonMap:
-		return NewKafkaER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewKafkaER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaSQL:
-		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, dm)
+		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit, dm)
 	case utils.MetaFileJSON:
-		return NewJSONFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewJSONFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaAMQPjsonMap:
-		return NewAMQPER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewAMQPER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaS3jsonMap:
-		return NewS3ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewS3ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaSQSjsonMap:
-		return NewSQSER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewSQSER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaAMQPV1jsonMap:
-		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaNATSJSONMap:
-		return NewNatsER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewNatsER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, cache, fltrS, rdrExit)
 	case utils.MetaCgrcdr:
 		return NewCgrCdr(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, dm)
 	}

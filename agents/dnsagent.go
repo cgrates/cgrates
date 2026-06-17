@@ -32,9 +32,9 @@ import (
 )
 
 // NewDNSAgent is the constructor for DNSAgent
-func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
+func NewDNSAgent(cgrCfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps) (da *DNSAgent, err error) {
-	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, connMgr: connMgr, caps: caps}
+	da = &DNSAgent{cgrCfg: cgrCfg, cache: cache, fltrS: fltrS, connMgr: connMgr, caps: caps}
 	err = da.initDNSServer()
 	return
 }
@@ -43,7 +43,8 @@ func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
 type DNSAgent struct {
 	sync.RWMutex
 	cgrCfg  *config.CGRConfig // loaded CGRateS configuration
-	fltrS   *engine.FilterS   // connection towards FilterS
+	cache   *engine.CacheS
+	fltrS   *engine.FilterS // connection towards FilterS
 	caps    *engine.Caps
 	servers []*dns.Server
 	connMgr *engine.ConnManager
@@ -201,7 +202,7 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 				da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.fltrS, nil),
+				da.cache, da.fltrS, nil),
 			utils.DNSAgent, da.connMgr,
 			sessionsConns, statsConns, thresholdsConns,
 			da.fltrS); err != nil {

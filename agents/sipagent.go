@@ -52,11 +52,12 @@ var (
 
 // NewSIPAgent will construct a SIPAgent
 func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
-	filterS *engine.FilterS, caps *engine.Caps) (sa *SIPAgent, err error) {
-	sa = &SIPAgent{
+	cache *engine.CacheS, filterS *engine.FilterS, caps *engine.Caps) (*SIPAgent, error) {
+	sa := &SIPAgent{
 		connMgr:  connMgr,
 		fltrS:    filterS,
 		cfg:      cfg,
+		cache:    cache,
 		caps:     caps,
 		ackMap:   make(map[string]chan struct{}),
 		stopChan: make(chan struct{}),
@@ -75,7 +76,7 @@ func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 			procsr.ReplyFields = tpls
 		}
 	}
-	return
+	return sa, nil
 }
 
 // SIPAgent is a handler for SIP requests
@@ -83,6 +84,7 @@ type SIPAgent struct {
 	connMgr  *engine.ConnManager
 	fltrS    *engine.FilterS
 	cfg      *config.CGRConfig
+	cache    *engine.CacheS
 	caps     *engine.Caps
 	stopChan chan struct{}
 	ackMap   map[string]chan struct{}
@@ -329,7 +331,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		sa.cfg.TemplatesCfg()[utils.MetaErr],
 		sa.cfg.GeneralCfg().DefaultTenant,
 		sa.cfg.GeneralCfg().DefaultTimezone,
-		sa.fltrS)
+		sa.cache, sa.fltrS)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s building errSIP for message: %s",
@@ -342,7 +344,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			sa.fltrS, nil)
+			sa.cache, sa.fltrS, nil)
 		var lclProcessed bool
 		if lclProcessed, err = sa.processRequest(reqProcessor, agReq); err != nil {
 			utils.Logger.Warning(

@@ -36,6 +36,7 @@ func TestNewSQSER(t *testing.T) {
 	expected := &SQSER{
 		cgrCfg:  cfg,
 		cfgIdx:  0,
+		cache:   engine.Cache,
 		cap:     nil,
 		queueID: "cgrates_cdrs",
 	}
@@ -51,7 +52,7 @@ func TestNewSQSER(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +78,7 @@ func TestSQSERServeRunDelay0(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +103,7 @@ func TestSQSERServe(t *testing.T) {
 			Opts:           &config.EventReaderOpts{},
 		},
 	}
-	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, nil, nil)
+	rdr, err := NewSQSER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

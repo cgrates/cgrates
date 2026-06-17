@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,6 +48,7 @@ func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanag
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.CapS,
 		},
@@ -61,7 +63,7 @@ func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, registry *servmanag
 	fS.Lock()
 	defer fS.Unlock()
 
-	fS.fS, err = agents.NewFSsessions(fs.cfg, fs.FilterS(), fS.cfg.GeneralCfg().DefaultTimezone, cms.ConnManager(), caps)
+	fS.fS, err = agents.NewFSsessions(fs.cfg, engine.Cache, fs.FilterS(), fS.cfg.GeneralCfg().DefaultTimezone, cms.ConnManager(), caps)
 	if err != nil {
 		return
 	}

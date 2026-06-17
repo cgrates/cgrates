@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -48,6 +49,7 @@ func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.CapS,
 		},
@@ -62,7 +64,7 @@ func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	rad.mu.Lock()
 	defer rad.mu.Unlock()
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs, cms, caps); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, engine.Cache, fs, cms, caps); err != nil {
 		return
 	}
 	rad.stopChan = make(chan struct{})

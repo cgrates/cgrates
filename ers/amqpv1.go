@@ -34,10 +34,11 @@ import (
 // NewAMQPv1ER return a new amqpv1 event reader
 func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
 	rdr := &AMQPv1ER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		rdrEvents:     rdrEvents,
 		partialEvents: partialEvents,
@@ -63,6 +64,7 @@ type AMQPv1ER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
+	cache  *engine.CacheS
 	fltrS  *engine.FilterS
 
 	queueID string
@@ -167,7 +169,7 @@ func (rdr *AMQPv1ER) processMessage(msg []byte) (err error) {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, nil) // create an AgentRequest
+		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	var pass bool
 	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {

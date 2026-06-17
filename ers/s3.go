@@ -38,11 +38,12 @@ import (
 // NewS3ER return a new s3 event reader
 func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
 	rdr := &S3ER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		rdrEvents:     rdrEvents,
 		partialEvents: partialEvents,
@@ -61,6 +62,7 @@ type S3ER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
+	cache  *engine.CacheS
 	fltrS  *engine.FilterS
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
@@ -118,7 +120,7 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, nil) // create an AgentRequest
+		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	var pass bool
 	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {

@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -31,6 +32,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 	expected := &XMLFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
+		cache:     engine.Cache,
 		fltrS:     nil,
 		sourceDir: "/var/spool/cgrates/ers/in",
 		rdrEvents: nil,
@@ -38,7 +40,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil,
 	}
-	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
+	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -60,7 +62,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 		Filters:        []string{},
 		Opts:           &config.EventReaderOpts{},
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -82,7 +84,7 @@ func TestERSXMLFileERServeNil(t *testing.T) {
 		Filters:        []string{},
 		Opts:           &config.EventReaderOpts{},
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}

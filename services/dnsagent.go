@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -49,6 +50,7 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.CapS,
 		},
@@ -62,7 +64,7 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 
 	dns.mu.Lock()
 	defer dns.mu.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager(), caps)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, engine.Cache, fs.FilterS(), cms.ConnManager(), caps)
 	if err != nil {
 		dns.dns = nil
 		return
@@ -77,6 +79,7 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Re
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.CapS,
 		},
@@ -95,7 +98,7 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Re
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager(), caps)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, engine.Cache, fs.FilterS(), cms.ConnManager(), caps)
 	if err != nil {
 		dns.dns = nil
 		return

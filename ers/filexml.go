@@ -38,7 +38,7 @@ import (
 
 func NewXMLFileER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
@@ -46,6 +46,7 @@ func NewXMLFileER(cfg *config.CGRConfig, cfgIdx int,
 	xmlER := &XMLFileER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		sourceDir:     srcPath,
 		rdrEvents:     rdrEvents,
@@ -62,6 +63,7 @@ type XMLFileER struct {
 	sync.RWMutex
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
+	cache         *engine.CacheS
 	fltrS         *engine.FilterS
 	sourceDir     string        // path to the directory monitored by the reader for new events
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
@@ -182,7 +184,7 @@ func (rdr *XMLFileER) processFile(fName string) error {
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.fltrS, nil) // create an AgentRequest
+			rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(

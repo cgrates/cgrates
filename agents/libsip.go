@@ -46,19 +46,19 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
 	reqVars *utils.DataNode,
 	tpl []*config.FCTemplate, tnt, tmz string,
-	filterS *engine.FilterS) (a sipingo.Message, err error) {
+	cache *engine.CacheS, filterS *engine.FilterS) (sipingo.Message, error) {
 	aReq := NewAgentRequest(
 		m, reqVars,
 		nil, nil, nil, nil,
-		tnt, tmz, filterS, nil)
-	if err = aReq.SetFields(tpl); err != nil {
-		return
+		tnt, tmz, cache, filterS, nil)
+	if err := aReq.SetFields(tpl); err != nil {
+		return nil, err
 	}
-	if err = updateSIPMsgFromNavMap(sipMessage, aReq.Reply); err != nil {
+	if err := updateSIPMsgFromNavMap(sipMessage, aReq.Reply); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s encoding out %s",
 				utils.SIPAgent, err.Error(), utils.ToJSON(aReq.Reply)))
-		return
+		return nil, err
 	}
 	sipMessage.PrepareReply()
 	return sipMessage, nil

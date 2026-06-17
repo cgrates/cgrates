@@ -356,9 +356,11 @@ func TestNewXMLFileER(t *testing.T) {
 	cfg.ERsCfg().Readers[0].SourcePath = "/tmp/xmlErs/out/"
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
 	fltrs := &engine.FilterS{}
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	expEr := &XMLFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
+		cache:     cacheS,
 		fltrS:     fltrs,
 		sourceDir: "/tmp/xmlErs/out",
 		rdrEvents: nil,
@@ -366,7 +368,7 @@ func TestNewXMLFileER(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil,
 	}
-	eR, err := NewXMLFileER(cfg, 0, nil, nil, nil, fltrs, nil)
+	eR, err := NewXMLFileER(cfg, 0, nil, nil, nil, cacheS, fltrs, nil)
 	expEr.conReqs = nil
 	eR.(*XMLFileER).conReqs = nil
 	if err != nil {
