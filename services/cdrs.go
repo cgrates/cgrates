@@ -49,6 +49,7 @@ func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.DB,
 		},
@@ -64,7 +65,7 @@ func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager())
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), engine.Cache, fs, cms.ConnManager())
 	runtime.Gosched()
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {

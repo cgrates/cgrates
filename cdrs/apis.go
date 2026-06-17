@@ -44,14 +44,14 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*string)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer cdrS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -79,14 +79,14 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, args *utils.C
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*evs = *cachedResp.Result.(*[]*utils.EventsWithOpts)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer cdrS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: evs, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -115,14 +115,14 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *utils.C
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey)
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*string)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer cdrS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}

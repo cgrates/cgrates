@@ -50,7 +50,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -128,7 +128,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -209,7 +209,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -296,7 +296,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -379,7 +379,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -443,7 +443,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -491,7 +491,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -544,7 +544,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -603,7 +603,7 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -675,7 +675,7 @@ func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
