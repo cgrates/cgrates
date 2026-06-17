@@ -105,7 +105,7 @@ func TestProcessRequest(t *testing.T) {
 				Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 			{Tag: "GrantedUnits",
 				Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-				Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep),
 				Mandatory: true},
 		},
 	}
@@ -469,7 +469,7 @@ func TestProcessRequest(t *testing.T) {
 			Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 		{Tag: "GrantedUnits",
 			Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep),
 			Mandatory: true},
 	}
 	for _, v := range tmpls {

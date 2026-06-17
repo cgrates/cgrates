@@ -29,8 +29,8 @@ import (
 type PrometheusAgentJsonCfg struct {
 	Enabled               *bool                      `json:"enabled"`
 	Path                  *string                    `json:"path"`
-	CollectGoMetrics      *bool                      `json:"collect_go_metrics"`
-	CollectProcessMetrics *bool                      `json:"collect_process_metrics"`
+	CollectGoMetrics      *bool                      `json:"collectGoMetrics"`
+	CollectProcessMetrics *bool                      `json:"collectProcessMetrics"`
 	Conns                 map[string][]*DynamicConns `json:"conns,omitempty"`
 	CacheIDs              *[]string                  `json:"cacheIDs"`
 	StatQueueIDs          *[]string                  `json:"statQueueIDs"`

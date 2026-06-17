@@ -1382,7 +1382,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
           "sessionTTLMaxDelay": "3h0m0s",
           "sessionTTLLastUsed": "0s",
           "sessionTTLUsage": "1s",
-          "session_ttl_last_usage": "10s",
            "sessions": {
 			"stir": {
 				"payloadMaxduration": "-1",

@@ -869,46 +869,6 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  2.,
 			"Groups": 0.,
 		},
-		"*tp_accounts": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_action_profiles": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_attributes": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_chargers": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_filters": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_rate_profiles": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_resources": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_routes": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_stats": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_thresholds": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
 		"*uch": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,

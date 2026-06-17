@@ -348,10 +348,10 @@ type FcTemplateJsonCfg struct {
 	Timezone             *string
 	Blocker              *bool
 	Layout               *string
-	Cost_shift_digits    *int
-	Rounding_decimals    *int `json:"roundingDecimals"`
-	Mask_destinationd_id *string
-	Mask_length          *int
+	Cost_shift_digits    *int    `json:"costShiftDigits"`
+	Rounding_decimals    *int    `json:"roundingDecimals"`
+	Mask_destinationd_id *string `json:"maskDestinationdID"`
+	Mask_length          *int    `json:"maskLength"`
 }
 
 func fcTemplatesEqual(v1, v2 []*FCTemplate) bool {

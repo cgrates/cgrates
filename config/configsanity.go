@@ -1267,7 +1267,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		if len(cfg.prometheusAgentCfg.Conns[utils.MetaCores]) > 0 {
 			if cfg.prometheusAgentCfg.CollectGoMetrics || cfg.prometheusAgentCfg.CollectProcessMetrics {
-				return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
+				return fmt.Errorf("<%s> collectGoMetrics and collect_process_metrics cannot be enabled when using CoreSConns",
 					utils.PrometheusAgent)
 			}
 		}

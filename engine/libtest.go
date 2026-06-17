@@ -529,7 +529,7 @@ type DBParams struct {
 	Items   map[string]Item   `json:"items,omitempty"`
 }
 
-// DBCfg holds the configurations for data_db and/or stor_db.
+// DBCfg holds the configurations for data_db and/or storDB.
 type DBCfg struct {
 	DB *DBParams `json:"db,omitempty"`
 }

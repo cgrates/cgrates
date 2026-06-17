@@ -27,7 +27,7 @@
         ],
         "replyFields":[
           {"tag": "MaxUsage", "path": "*rep.SIP-AVP", "type": "*composed",
-            "value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+            "value": "session_max_time#;~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true},
         ],
       },
       {

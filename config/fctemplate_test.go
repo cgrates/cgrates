@@ -381,10 +381,10 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
                 "timezone": "Local",
                 "blocker": true,
                 "layout": "",
-                "cost_shift_digits": 10,
+                "costShiftDigits": 10,
                 "roundingDecimals": 1,
-                "mask_destinationd_id": "randomVal",
-                "mask_length": 10,
+                "maskDestinationdID": "randomVal",
+                "maskLength": 10,
             },
            ],
      }

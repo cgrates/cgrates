@@ -83,17 +83,17 @@ func TestAgReqSetFields(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*voice"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_seconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationSeconds}", utils.InfieldSep)},
 		{Tag: "RequestedUsageData",
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*data"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationNanoseconds}", utils.InfieldSep)},
 		{Tag: "RequestedUsageSMS",
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*sms"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationNanoseconds}", utils.InfieldSep)},
 
 		{Tag: "AttrPaypalAccount",
 			Path: utils.MetaRep + utils.NestingSep + "PaypalAccount", Type: utils.MetaVariable,
@@ -104,7 +104,7 @@ func TestAgReqSetFields(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + "MaxUsage", Type: utils.MetaVariable,
 			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep)},
+				"~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep)},
 		{Tag: "Error",
 			Path: utils.MetaRep + utils.NestingSep + "Error", Type: utils.MetaVariable,
 			Filters: []string{"*rsr:~*cgrep.Error:!^$"},
@@ -491,7 +491,7 @@ func TestAgReqMaxCost(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + "MaxUsage", Type: utils.MetaVariable,
 			Filters: []string{"*rsr:~*cgrep.MaxUsage:>0s"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep)},
+				"~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep)},
 	}
 	tplFlds[0].ComputePath()
 	eMp := utils.NewOrderedNavigableMap()
@@ -2095,17 +2095,17 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*voice"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_seconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationSeconds}", utils.InfieldSep)},
 		{Tag: "RequestedUsageData",
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*data"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationNanoseconds}", utils.InfieldSep)},
 		{Tag: "RequestedUsageSMS",
 			Path: utils.MetaRep + utils.NestingSep + "RequestedUsage", Type: utils.MetaVariable,
 			Filters: []string{"*string:~*cgreq.ToR:*sms"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", utils.InfieldSep)},
+				"~*cgreq.Usage{*durationNanoseconds}", utils.InfieldSep)},
 
 		{Tag: "AttrPaypalAccount",
 			Path: utils.MetaRep + utils.NestingSep + "PaypalAccount", Type: utils.MetaVariable,
@@ -2116,7 +2116,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + "MaxUsage", Type: utils.MetaVariable,
 			Filters: []string{"*empty:~*cgrep.Error:"},
 			Value: utils.NewRSRParsersMustCompile(
-				"~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep)},
+				"~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep)},
 		{Tag: "Error",
 			Path: utils.MetaRep + utils.NestingSep + "Error", Type: utils.MetaVariable,
 			Filters: []string{"*rsr:~*cgrep.Error:!^$"},
@@ -2722,11 +2722,11 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
-	tntTpl := utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep)
+	tntTpl := utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep)
 	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
-		Value:    utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -2736,7 +2736,7 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthly_estimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}

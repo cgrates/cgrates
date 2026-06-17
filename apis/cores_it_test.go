@@ -77,8 +77,8 @@ func TestCoreSProfilingFlags(t *testing.T) {
 		DBCfg:      dbCfg,
 	}
 	client, _ := ng.Run(t,
-		"-cpuprof_dir", profDir,
-		"-memprof_dir", profDir, "-memprof_interval", "50ms", "-memprof_maxfiles", "2", "-memprof_timestamp")
+		"-cpuProfDir", profDir,
+		"-memProfDir", profDir, "-memProfInterval", "50ms", "-memProfMaxFiles", "2", "-memProfTimestamp")
 
 	t.Run("err cpu prof already started", func(t *testing.T) {
 		expectedErr := "start CPU profiling: already started"

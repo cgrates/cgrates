@@ -10,8 +10,8 @@
 		"conns": {
 		"*sessions": [{"connIDs": ["*localhost"]}]
 			},
-		"request_payload":	"*xml",
-		"reply_payload":	"*xml",
+		"requestPayload":	"*xml",
+		"replyPayload":	"*xml",
 		"requestProcessors": [
 			{
 				"id": "cdr_from_xml",

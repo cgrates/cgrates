@@ -111,7 +111,7 @@ func TestDiamConnStats(t *testing.T) {
 					TTL:         ttl,
 					Metrics: []*utils.MetricWithFilters{
 						{
-							MetricID: "*sum#~*req.ConnectionStatus{*conn_status}",
+							MetricID: "*sum#~*req.ConnectionStatus{*connStatus}",
 						},
 					},
 					Stored:   true,
@@ -171,7 +171,7 @@ func TestDiamConnStats(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		metricID := "*sum#~*req.ConnectionStatus{*conn_status}"
+		metricID := "*sum#~*req.ConnectionStatus{*connStatus}"
 		got, ok := metrics[metricID]
 		if !ok {
 			t.Errorf("could not find metric %q", metricID)

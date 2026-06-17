@@ -139,7 +139,7 @@ func testDCWriteCSVs(t *testing.T) {
 	if err := writeFile(utils.AttributesCsv, `
 #Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
 cgrates.org,ATTR_DC,*string:~*req.Account:1001,;20,,,,,,
-cgrates.org,ATTR_DC,,,,,,*req.VariableInSeconds,*variable,~*opts.variable01{*duration_seconds}
+cgrates.org,ATTR_DC,,,,,,*req.VariableInSeconds,*variable,~*opts.variable01{*durationSeconds}
 cgrates.org,ATTR_DC,,,,,,*req.MultipliedVariable,*variable,~*opts.variable02{*multiply:2.5}
 cgrates.org,ATTR_DC,,,,,,*req.DivideVariable,*variable,~*opts.variable03{*divide:1.2}
 cgrates.org,ATTR_DC,,,,,,*req.RoundVariable,*variable,~*opts.variable04{*round:2}
@@ -158,11 +158,11 @@ cgrates.org,ATTR_DC,,,,,,*req.Float64Variable,*variable,~*opts.variable15{*float
 
 // cgrates.org,ATTR_DC,,,,,,*req.SIPURIHostVariable,*variable,~*opts.variable09{*sipuri_host}
 // cgrates.org,ATTR_DC,,,,,,*req.SIPURIUserVariable,*variable,~*opts.variable10{*sipuri_user}
-// cgrates.org,ATTR_DC,,,,,,*req.SIPURIMethodVariable,*variable,~*opts.variable11{*sipuri_method}
+// cgrates.org,ATTR_DC,,,,,,*req.SIPURIMethodVariable,*variable,~*opts.variable11{*sipuriMethod}
 // cgrates.org,ATTR_DC,,,,,,*req.E164DomainVariable,*variable,~*opts.variable16{*e164Domain}
 // cgrates.org,ATTR_DC,,,,,,*req.E164Variable,*variable,~*opts.variable17{*e164}
 // cgrates.org,ATTR_DC,,,,,,*req.LibphonenumberVariable,*variable,~*opts.variable18{*libphonenumber}
-// cgrates.org,ATTR_DC,,,,,,*req.TimeStringVariable,*variable,~*opts.variable19{*time_string}
+// cgrates.org,ATTR_DC,,,,,,*req.TimeStringVariable,*variable,~*opts.variable19{*timeString}
 // cgrates.org,ATTR_DC,,,,,,*req.RandomVariable,*variable,~*opts.variable20{*random}
 // cgrates.org,ATTR_DC,,,,,,*req.JoinVariable,*variable,~*opts.variable21{*join}
 // cgrates.org,ATTR_DC,,,,,,*req.SplitVariable,*variable,~*opts.variable22{*split}

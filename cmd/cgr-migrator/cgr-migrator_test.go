@@ -31,7 +31,7 @@ func TestFlags(t *testing.T) {
 	} else if *cfgPath != "true" {
 		t.Errorf("Expected true received:%v ", *cfgPath)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-print_config", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-printConfig", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *printConfig != true {
 		t.Errorf("Expected true, received %+v", *printConfig)
@@ -96,13 +96,13 @@ func TestFlags(t *testing.T) {
 	} else if *dbRedisCACertificate != "true" {
 		t.Errorf("Expected true received:%v ", *dbRedisCACertificate)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_redis_sentinel", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-outRedisSentinel", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *outDataDBRedisSentinel != "true" {
 		t.Errorf("Expected true received:%v ", *outDataDBRedisSentinel)
 	}
 
-	if err := cgrMigratorFlags.Parse([]string{"-dry_run", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-dryRun", "true"}); err != nil {
 		t.Fatal(err)
 	} else if !*dryRun {
 		t.Errorf("Expected true received:%v ", *dryRun)

@@ -442,8 +442,8 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 			"*stats": [{"connIDs": ["*birpc_internal", "*localhost", "conn1"]}],
 			"*thresholds": [{"connIDs": ["*birpc_internal", "*localhost", "conn1"]}]
 		},
-		"request_payload":	"*url",
-		"reply_payload":	"*xml",
+		"requestPayload":	"*url",
+		"replyPayload":	"*xml",
 		"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -712,8 +712,8 @@ func TestDiffHttpAgentJson(t *testing.T) {
 			utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 			utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 		},
-		RequestPayload: "request_payload",
-		ReplyPayload:   "reply_payload",
+		RequestPayload: "requestPayload",
+		ReplyPayload:   "replyPayload",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID: "req_processors",
@@ -730,7 +730,7 @@ func TestDiffHttpAgentJson(t *testing.T) {
 			utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds"}}},
 		},
 		RequestPayload:    "request_payload2",
-		ReplyPayload:      "reply_payload2",
+		ReplyPayload:      "replyPayload2",
 		RequestProcessors: []*RequestProcessor{},
 	}
 
@@ -743,7 +743,7 @@ func TestDiffHttpAgentJson(t *testing.T) {
 			utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 		},
 		RequestPayload:    utils.StringPointer("request_payload2"),
-		ReplyPayload:      utils.StringPointer("reply_payload2"),
+		ReplyPayload:      utils.StringPointer("replyPayload2"),
 		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 
@@ -774,8 +774,8 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
-			RequestPayload: "request_payload",
-			ReplyPayload:   "reply_payload",
+			RequestPayload: "requestPayload",
+			ReplyPayload:   "replyPayload",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID: "req_processors",
@@ -794,7 +794,7 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 				utils.MetaThresholds: {{ConnIDs: []string{"*internal:*thresholds"}}},
 			},
 			RequestPayload:    "request_payload2",
-			ReplyPayload:      "reply_payload2",
+			ReplyPayload:      "replyPayload2",
 			RequestProcessors: []*RequestProcessor{},
 		},
 	}
@@ -809,7 +809,7 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 				utils.MetaThresholds: {{ConnIDs: []string{"*internal"}}},
 			},
 			RequestPayload:    utils.StringPointer("request_payload2"),
-			ReplyPayload:      utils.StringPointer("reply_payload2"),
+			ReplyPayload:      utils.StringPointer("replyPayload2"),
 			RequestProcessors: &[]*ReqProcessorJsnCfg{},
 		},
 	}
@@ -858,8 +858,8 @@ func TestHttpAgentCloneSection(t *testing.T) {
 				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
-			RequestPayload: "request_payload",
-			ReplyPayload:   "reply_payload",
+			RequestPayload: "requestPayload",
+			ReplyPayload:   "replyPayload",
 		},
 	}
 
@@ -872,8 +872,8 @@ func TestHttpAgentCloneSection(t *testing.T) {
 				utils.MetaStats:      {{ConnIDs: []string{"*localhost"}}},
 				utils.MetaThresholds: {{ConnIDs: []string{"*localhost"}}},
 			},
-			RequestPayload:    "request_payload",
-			ReplyPayload:      "reply_payload",
+			RequestPayload:    "requestPayload",
+			ReplyPayload:      "replyPayload",
 			RequestProcessors: []*RequestProcessor{},
 		},
 	}

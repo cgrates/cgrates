@@ -15,7 +15,7 @@
 			{
 				"id": "RoutesQuery", 
 				"filters": ["*string:~*vars.Method:INVITE"],
-				"flags": ["*event","*chargers", "*routes", "*attributes:*derived_reply","*continue"],
+				"flags": ["*event","*chargers", "*routes", "*attributes:*derivedReply","*continue"],
 				"requestFields":[
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.From{*sipuri_user}", "mandatory": true},

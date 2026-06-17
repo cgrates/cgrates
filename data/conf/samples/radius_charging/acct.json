@@ -40,7 +40,7 @@
             "tag": "Country",
             "path": "*cgreq.Country",
             "type": "*variable",
-            "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}"
+            "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.MCC.Name}"
           },
           {
             "tag": "OriginID",

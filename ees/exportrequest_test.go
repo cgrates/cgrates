@@ -121,7 +121,7 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -130,7 +130,7 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthly_estimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}

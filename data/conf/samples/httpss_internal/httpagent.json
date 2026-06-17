@@ -8,8 +8,8 @@
 		"conns": {
 			"*sessions": [{"connIDs": ["*localhost"]}]
 		},
-		"request_payload":	"*url",
-		"reply_payload":	"*text",
+		"requestPayload":	"*url",
+		"replyPayload":	"*text",
 		"requestProcessors": [
 			{
 				"id": "Authorization",
@@ -30,7 +30,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true}
 				]
 			},
 			{
@@ -52,7 +52,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true}
 				]
 			},
 			{
@@ -74,7 +74,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true}
 				]
 			}
 		]

@@ -156,8 +156,8 @@ type HttpAgentJsonCfg struct {
 	ID                *string                    `json:"id"`
 	URL               *string                    `json:"url"`
 	Conns             map[string][]*DynamicConns `json:"conns"`
-	RequestPayload    *string                    `json:"request_payload"`
-	ReplyPayload      *string                    `json:"reply_payload"`
+	RequestPayload    *string                    `json:"requestPayload"`
+	ReplyPayload      *string                    `json:"replyPayload"`
 	RequestProcessors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 

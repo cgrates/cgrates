@@ -86,43 +86,43 @@ END-VENDOR 3GPP
                         "tag": "DecodedULI",
                         "path": "*cgreq.DecodedULI",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI}"
                     },
                     {
                         "tag": "TAI-MCC",
                         "path": "*cgreq.TAI-MCC",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.MCC}"
                     },
                     {
                         "tag": "TAI-MNC",
                         "path": "*cgreq.TAI-MNC",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.MNC}"
                     },
                     {
                         "tag": "TAI-TAC",
                         "path": "*cgreq.TAI-TAC",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.TAC}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.TAC}"
                     },
                     {
                         "tag": "ECGI-ECI",
                         "path": "*cgreq.ECGI-ECI",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:ECGI.ECI}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:ECGI.ECI}"
                     },
                     {
                         "tag": "MCC-Name",
                         "path": "*cgreq.MCC-Name",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MCC.Name}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.MCC.Name}"
                     },
                     {
                         "tag": "MNC-Name",
                         "path": "*cgreq.MNC-Name",
                         "type": "*variable",
-                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gpp_uli:TAI.MNC.Name}"
+                        "value": "~*req.3GPP.3GPP-User-Location-Info{*3gppULI:TAI.MNC.Name}"
                     }
                 ],
                 "replyFields": []

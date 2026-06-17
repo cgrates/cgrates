@@ -15,8 +15,8 @@
 		"conns": {
 		"*sessions": [{"connIDs": ["*localhost"]}]
 			},
-		"request_payload":	"*url",
-		"reply_payload":	"*xml",
+		"requestPayload":	"*url",
+		"replyPayload":	"*xml",
 		"requestProcessors": [
 			{
 				"id": "mtcall_cdr",

@@ -85,7 +85,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 			Value: utils.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", utils.InfieldSep)},
 		{Tag: "Acct-Session-Time", Path: utils.MetaRep + utils.NestingSep + "Acct-Session-Time",
 			Type:  utils.MetaVariable,
-			Value: utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep)},
 	}
 	for _, v := range rplyFlds {
 		v.ComputePath()

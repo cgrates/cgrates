@@ -469,7 +469,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	}
 
 	expected = time.Now().AddDate(0, 1, 0)
-	if date, err := ParseTimeDetectLayout("*monthly_estimated", ""); err != nil {
+	if date, err := ParseTimeDetectLayout("*monthlyEstimated", ""); err != nil {
 		t.Error(err)
 	} else {
 		initialMnt := time.Now().Month()
@@ -501,18 +501,18 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	}
 
 	expected = GetEndOfMonth(time.Now())
-	if date, err := ParseTimeDetectLayout("*month_end", ""); err != nil {
+	if date, err := ParseTimeDetectLayout("*monthEnd", ""); err != nil {
 		t.Error(err)
 	} else if !date.Equal(expected) {
 		t.Errorf("received: %+v", date)
 	}
 	expected = GetEndOfMonth(time.Now()).Add(time.Hour).Add(2 * time.Minute)
-	if date, err := ParseTimeDetectLayout("*month_end+1h2m", ""); err != nil {
+	if date, err := ParseTimeDetectLayout("*monthEnd+1h2m", ""); err != nil {
 		t.Error(err)
 	} else if !date.Equal(expected) {
 		t.Errorf("expecting: %+v, received: %+v", expected, date)
 	}
-	if date, err := ParseTimeDetectLayout("*month_end+xyz", ""); err == nil {
+	if date, err := ParseTimeDetectLayout("*monthEnd+xyz", ""); err == nil {
 		t.Error("Expecting error 'time: invalid time duration', received: nil")
 	} else if date != nilTime {
 		t.Errorf("Expecting nilTime, received: %+v", date)

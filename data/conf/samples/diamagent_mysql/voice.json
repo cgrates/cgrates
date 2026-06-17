@@ -98,7 +98,7 @@
 					"tag": "GrantedUnits",
 					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable",
-					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"value": "~*cgrep.MaxUsage{*durationSeconds}",
 					"mandatory": true
 				},
 			],
@@ -198,7 +198,7 @@
 					"tag": "GrantedUnits",
 					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable", 
-					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"value": "~*cgrep.MaxUsage{*durationSeconds}",
 					"mandatory": true
 				},
 			],
@@ -333,7 +333,7 @@
 					"tag": "GrantedUnits",
 					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable", 
-					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"value": "~*cgrep.MaxUsage{*durationSeconds}",
 					"mandatory": true
 				},
 			],
