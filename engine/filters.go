@@ -49,7 +49,12 @@ func NewFilterS(cfg *config.CGRConfig, connMgr *ConnManager, dm *DataManager) (f
 type FilterS struct {
 	cfg     *config.CGRConfig
 	dm      *DataManager
+	cache   *CacheS
 	connMgr *ConnManager
+}
+
+func (fS *FilterS) SetCache(cache *CacheS) {
+	fS.cache = cache
 }
 
 // Pass will check all filters wihin filterIDs and require them passing for dataProvider
@@ -798,7 +803,11 @@ func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvi
 	if fltr.Values[0] != utils.MetaNumber && fltr.Values[0] != utils.MetaIP {
 		return false, fmt.Errorf("invalid value for sentrypeer filter: <%s>", fltr.Values[0])
 	}
-	return GetSentryPeer(ctx, strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])
+	dynDP, ok := dDP.(*DynamicDP)
+	if !ok {
+		return false, fmt.Errorf("sentrypeer filter requires a dynamic data provider")
+	}
+	return GetSentryPeer(ctx, dynDP.cacheS(), strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])
 }
 
 func parseTime(rsr *utils.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {

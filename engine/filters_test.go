@@ -2820,10 +2820,9 @@ func TestCheckFilter(t *testing.T) {
 
 func TestFilterRulepassSentryPeer(t *testing.T) {
 	ctx := context.TODO()
-
-	dp := utils.MapStorage{
-		"IPAddr": "192.165.56.1",
-	}
+	cfg := config.NewDefaultCGRConfig()
+	fS := NewFilterS(cfg, nil, nil)
+	fS.SetCache(Cache)
 
 	rsrParse := &utils.RSRParser{
 		Path: "IPAddr",
@@ -2837,13 +2836,25 @@ func TestFilterRulepassSentryPeer(t *testing.T) {
 		Values:     []string{utils.MetaIP},
 	}
 
+	// cache the lookup result so we don't hit the sentrypeer API
+	if err := Cache.Set(ctx, utils.MetaSentryPeer,
+		utils.ConcatenatedKey(utils.MetaIP, "192.165.56.1"), true,
+		nil, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	dp := NewDynamicDP(ctx, cfg, "cgrates.org", utils.MapStorage{
+		"IPAddr": "192.165.56.1",
+	}, fS)
 	pass, err := fltr.passSentryPeer(ctx, dp)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+	if !pass {
+		t.Errorf("Expected pass to be true")
+	}
 
 	fltr.Values = []string{"invalidValue"}
-
 	pass, err = fltr.passSentryPeer(ctx, dp)
 	if err == nil {
 		t.Errorf("Expected error for invalid sentrypeer value, got nil")
@@ -2852,15 +2863,12 @@ func TestFilterRulepassSentryPeer(t *testing.T) {
 		t.Errorf("Expected pass to be false on error")
 	}
 
-	dpEmpty := utils.MapStorage{}
-
+	dpEmpty := NewDynamicDP(ctx, cfg, "cgrates.org", utils.MapStorage{}, fS)
 	fltr.Values = []string{utils.MetaNumber}
-
 	pass, err = fltr.passSentryPeer(ctx, dpEmpty)
 	if err != nil {
 		t.Errorf("Unexpected error when data not found: %v", err)
 	}
-
 }
 
 func TestFilterClone(t *testing.T) {

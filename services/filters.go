@@ -64,6 +64,7 @@ func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	defer s.mu.Unlock()
 
 	s.fltrS = engine.NewFilterS(s.cfg, cms.ConnManager(), dbs.DataManager())
+	s.fltrS.SetCache(engine.Cache)
 	return nil
 }
 

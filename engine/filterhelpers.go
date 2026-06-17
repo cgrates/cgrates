@@ -173,18 +173,18 @@ func BlockerFromDynamics(ctx *context.Context, dBs []*utils.DynamicBlocker,
 	return false, nil
 }
 
-func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
+func GetSentryPeer(ctx *context.Context, cache *CacheS, val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
 	itemId := utils.ConcatenatedKey(dataType, val)
 	var (
 		isCached bool
 		apiUrl   string
 		token    string
 	)
-	if x, ok := Cache.Get(utils.MetaSentryPeer, itemId); ok && x != nil { // Attempt to find in cache first
+	if x, ok := cache.Get(utils.MetaSentryPeer, itemId); ok && x != nil { // Attempt to find in cache first
 		return x.(bool), nil
 	}
 	var cachedToken any
-	if cachedToken, isCached = Cache.Get(utils.MetaSentryPeer,
+	if cachedToken, isCached = cache.Get(utils.MetaSentryPeer,
 		utils.MetaToken); isCached && cachedToken != nil {
 		token = cachedToken.(string)
 	}
@@ -203,7 +203,7 @@ func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.Sentr
 			utils.Logger.Err(fmt.Sprintf("sentrypeer token auth got err <%v> ", err.Error()))
 			return
 		}
-		if err = Cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken,
+		if err = cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken,
 			token, nil, true, utils.NonTransactional); err != nil {
 			return
 		}
@@ -211,7 +211,7 @@ func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.Sentr
 
 	for i := 0; i < 2; i++ {
 		if found, err = sentrypeerHasData(itemId, token, apiUrl); err == nil {
-			if err = Cache.Set(ctx, utils.MetaSentryPeer, itemId, found,
+			if err = cache.Set(ctx, utils.MetaSentryPeer, itemId, found,
 				nil, true, ""); err != nil {
 				return
 			}
@@ -221,12 +221,12 @@ func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.Sentr
 			break
 		}
 		utils.Logger.Warning("Sentrypeer token expired !Getting new one.")
-		Cache.Remove(ctx, utils.MetaSentryPeer, utils.MetaToken, true, utils.EmptyString)
+		cache.Remove(ctx, utils.MetaSentryPeer, utils.MetaToken, true, utils.EmptyString)
 		if token, err = sentrypeerGetToken(sentryPeerCfg.TokenUrl, sentryPeerCfg.ClientID, sentryPeerCfg.ClientSecret,
 			sentryPeerCfg.Audience, sentryPeerCfg.GrantType); err != nil {
 			return
 		}
-		if err = Cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken, token,
+		if err = cache.Set(ctx, utils.MetaSentryPeer, utils.MetaToken, token,
 			nil, true, utils.NonTransactional); err != nil {
 			return
 		}
