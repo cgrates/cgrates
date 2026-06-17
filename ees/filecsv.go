@@ -34,17 +34,18 @@ import (
 )
 
 func NewFileCSVee(cfg *config.EventExporterCfg,
-	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
+	cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	em *utils.ExporterMetrics, wrtr io.WriteCloser) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
 		cfg:     cfg,
 		em:      em,
 		wrtr:    wrtr,
 		cgrCfg:  cgrCfg,
+		cache:   cache,
 		filterS: filterS,
 	}
 	err = fCsv.init(wrtr)
-	return
+	return fCsv, err
 }
 
 // FileCSVee implements EventExporter interface for .csv files
@@ -57,6 +58,7 @@ type FileCSVee struct {
 	slicePreparing
 	// for header and trailer composing
 	cgrCfg  *config.CGRConfig
+	cache   *engine.CacheS
 	filterS *engine.FilterS
 }
 
@@ -84,7 +86,7 @@ func (fCsv *FileCSVee) init(wrtr io.WriteCloser) (err error) {
 func (fCsv *FileCSVee) composeHeader() (err error) {
 	if len(fCsv.Cfg().HeaderFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.em, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.em, fCsv.cgrCfg, fCsv.cache, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
@@ -96,7 +98,7 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 func (fCsv *FileCSVee) composeTrailer() (err error) {
 	if len(fCsv.Cfg().TrailerFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.em, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.em, fCsv.cgrCfg, fCsv.cache, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())

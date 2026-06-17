@@ -33,7 +33,7 @@ import (
 )
 
 func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
-	fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
 	data := cgrEv.AsDataProvider()
@@ -69,14 +69,14 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 			utils.IfaceAsString(actD.Opts[utils.MetaURL]),
 			cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir,
 			attempts, nil)
-		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, nil, nil)
+		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, cache, nil, nil)
 		if blocker, err := engine.BlockerFromDynamics(ctx, actD.Blockers, aL.fltrS, aL.config.GeneralCfg().DefaultTenant, data); err != nil {
 			return nil, err
 		} else if blocker {
 			break
 		}
 	}
-	return
+	return aL, nil
 }
 
 type actHTTPPost struct {

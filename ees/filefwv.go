@@ -31,16 +31,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFileFWVee(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS, em *utils.ExporterMetrics, writer io.Writer) (fFwv *FileFWVee, err error) {
+func NewFileFWVee(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS, em *utils.ExporterMetrics, writer io.Writer) (fFwv *FileFWVee, err error) {
 	fFwv = &FileFWVee{
 		cfg: cfg,
 		em:  em,
 
 		cgrCfg:  cgrCfg,
+		cache:   cache,
 		filterS: filterS,
 	}
 	err = fFwv.init(writer)
-	return
+	return fFwv, err
 }
 
 // FileFWVee implements EventExporter interface for .fwv files
@@ -53,6 +54,7 @@ type FileFWVee struct {
 
 	// for header and trailer composing
 	cgrCfg  *config.CGRConfig
+	cache   *engine.CacheS
 	filterS *engine.FilterS
 }
 
@@ -76,7 +78,7 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.em, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.em, fFwv.cgrCfg, fFwv.cache, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {
@@ -94,7 +96,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.em, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.em, fFwv.cgrCfg, fFwv.cache, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {

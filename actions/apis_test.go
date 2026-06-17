@@ -50,7 +50,7 @@ func TestActionsAPIs(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	aS := NewActionS(cfg, fltrs, dm, nil)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
 	if err := dm.SetActionProfile(context.Background(),
 		&utils.ActionProfile{
 			Tenant:    "cgrates.org",
@@ -130,7 +130,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -218,7 +218,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -304,7 +304,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -390,7 +390,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -458,7 +458,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	aS := NewActionS(cfg, fltrs, dm, nil)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -540,7 +540,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs), utils.CDRsV1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -626,7 +626,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, fltrs, dm, cM)
+	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{

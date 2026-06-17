@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +51,7 @@ func TestHttpJsonMapExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -80,7 +81,7 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 	}))
 	defer srv.Close()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -114,7 +115,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
+	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -155,7 +156,7 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
+	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

@@ -60,7 +60,7 @@ func TestNatsEEJetStream(t *testing.T) {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil, nil)
+	evExp, err := NewEventExporter(cfg, cgrCfg, engine.Cache, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func TestNatsEEJetStream(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, new(engine.FilterS), "cgrates.org"); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, engine.Cache, new(engine.FilterS), "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)
@@ -154,7 +154,7 @@ func TestNatsEE(t *testing.T) {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, cgrCfg, nil, nil, nil)
+	evExp, err := NewEventExporter(cfg, cgrCfg, engine.Cache, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestNatsEE(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, new(engine.FilterS), "cgrates.org"); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, engine.Cache, new(engine.FilterS), "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)

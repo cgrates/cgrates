@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
+func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	em *utils.ExporterMetrics) (pstrJSON *HTTPjsonMapEE, err error) {
 	pstrJSON = &HTTPjsonMapEE{
 		cfg:    cfg,
@@ -41,8 +41,8 @@ func NewHTTPjsonMapEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 		client: &http.Client{Transport: cgrCfg.HTTPCfg().ClientOpts, Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
 		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
-	pstrJSON.hdr, err = pstrJSON.composeHeader(cgrCfg, filterS)
-	return
+	pstrJSON.hdr, err = pstrJSON.composeHeader(cgrCfg, cache, filterS)
+	return pstrJSON, err
 }
 
 // HTTPjsonMapEE implements EventExporter interface for .csv files
@@ -56,14 +56,14 @@ type HTTPjsonMapEE struct {
 }
 
 // Compose and cache the header
-func (httpEE *HTTPjsonMapEE) composeHeader(cgrCfg *config.CGRConfig, filterS *engine.FilterS) (hdr http.Header, err error) {
+func (httpEE *HTTPjsonMapEE) composeHeader(cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS) (hdr http.Header, err error) {
 	hdr = make(http.Header)
 	if len(httpEE.Cfg().HeaderFields()) == 0 {
-		return
+		return hdr, nil
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpEE.Cfg().HeaderFields(), httpEE.em, cgrCfg, filterS); err != nil {
-		return
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpEE.Cfg().HeaderFields(), httpEE.em, cgrCfg, cache, filterS); err != nil {
+		return hdr, err
 	}
 	for el := exp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
@@ -71,7 +71,7 @@ func (httpEE *HTTPjsonMapEE) composeHeader(cgrCfg *config.CGRConfig, filterS *en
 		path = utils.StripTrailingIndex(path)
 		hdr.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
-	return
+	return hdr, nil
 }
 
 func (httpEE *HTTPjsonMapEE) Cfg() *config.EventExporterCfg { return httpEE.cfg }

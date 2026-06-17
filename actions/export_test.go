@@ -45,7 +45,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 		},
 	}
 	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
-		new(engine.FilterS), cfg, apAction)
+		engine.Cache, new(engine.FilterS), cfg, apAction)
 	if err != nil {
 		t.Error(err)
 	}
@@ -109,7 +109,7 @@ func TestACHTTPPostValues(t *testing.T) {
 		},
 	}
 	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
-		new(engine.FilterS), cfg, apAction)
+		engine.Cache, new(engine.FilterS), cfg, apAction)
 	if err != nil {
 		t.Error(err)
 	}

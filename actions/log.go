@@ -50,6 +50,7 @@ func (actLog) execute(_ *context.Context, data utils.MapStorage, _ string) (err 
 // actCDRLog will log data to CGRateS logger
 type actCDRLog struct {
 	config  *config.CGRConfig
+	cache   *engine.CacheS
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	aCfg    *utils.APAction
@@ -92,7 +93,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt st
 		utils.MetaOpts: optsMS,
 		utils.MetaCfg:  aL.config.GetDataProvider(),
 	}, aL.config.GeneralCfg().DefaultTenant,
-		aL.fltrS, oNm)
+		aL.cache, aL.fltrS, oNm)
 
 	if err = cdrLogReq.SetFields(ctx, template); err != nil {
 		return
