@@ -177,7 +177,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableR
 	}
 	dbcManager := NewDBConnManager(dataDBs, dm.cfg.DbCfg())
 	loader, err := NewTpReader(dbcManager, csvStorage, "",
-		timezone, cacheConns, schedConns, nil)
+		timezone, cacheConns, schedConns, Cache, nil)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -31,7 +31,7 @@ var (
 )
 
 func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
-	cfg *config.CGRConfig) (db map[string]MigratorDataDB, err error) {
+	cfg *config.CGRConfig, cache *engine.CacheS) (db map[string]MigratorDataDB, err error) {
 	dataDBs := make(map[string]engine.DataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		dbCon, err := engine.NewDBConn(cfg.DbCfg().DBConns[dbConnID].Type,
@@ -48,7 +48,7 @@ func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 	}
 	dbcManager := engine.NewDBConnManager(dataDBs, cfg.DbCfg())
 	dm := engine.NewDataManager(dbcManager, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cache)
 	d := make(map[string]MigratorDataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		switch cfg.DbCfg().DBConns[dbConnID].Type {
