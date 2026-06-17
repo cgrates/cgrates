@@ -116,24 +116,26 @@ type UnregisterArgs struct {
 	IDs    []string
 }
 
-// Registrar handdle for httpServer to register the dispatcher hosts
-func Registrar(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	w.Header().Set("Content-Type", "application/json")
-	var result any = utils.OK
-	var errMessage any
-	var err error
-	var id *json.RawMessage
-	if id, err = register(r); err != nil {
-		result, errMessage = nil, err.Error()
-	}
-	if err := utils.WriteServerResponse(w, id, result, errMessage); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
-			utils.RegistrarC, err))
+// Registrar returns the httpServer handler to register the dispatcher hosts.
+func Registrar(cache *engine.CacheS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		w.Header().Set("Content-Type", "application/json")
+		var result any = utils.OK
+		var errMessage any
+		var err error
+		var id *json.RawMessage
+		if id, err = register(r, cache); err != nil {
+			result, errMessage = nil, err.Error()
+		}
+		if err := utils.WriteServerResponse(w, id, result, errMessage); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
+				utils.RegistrarC, err))
+		}
 	}
 }
 
-func register(req *http.Request) (*json.RawMessage, error) {
+func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error) {
 	id := json.RawMessage("0")
 	sReq, err := utils.DecodeServerRequest(req.Body)
 	if err != nil {
@@ -160,7 +162,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		rpcConns := config.CgrConfig().RPCConns()
 		config.CgrConfig().LockSections(config.RPCConnsJSON)
 		for connID := range config.RemoveRPCCons(rpcConns, utils.NewStringSet(args.IDs)) {
-			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
+			if err = cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove connection <%s> in cache because: %s",
 					utils.RegistrarC, connID, err))
@@ -180,7 +182,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		rpcConns := config.CgrConfig().RPCConns()
 		config.CgrConfig().LockSections(config.RPCConnsJSON)
 		for connID := range config.UpdateRPCCons(rpcConns, cfgHosts) {
-			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
+			if err = cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove connection <%s> in cache because: %s",
 					utils.RegistrarC, connID, err))

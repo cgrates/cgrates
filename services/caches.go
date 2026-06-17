@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -43,7 +44,7 @@ type CacheService struct {
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -76,7 +77,10 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.CacheS, srv)
-	return
+	if len(cS.cfg.HTTPCfg().RegistrarSURL) != 0 {
+		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(engine.Cache))
+	}
+	return nil
 }
 
 // Reload handles the change of config

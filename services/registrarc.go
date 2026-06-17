@@ -48,14 +48,20 @@ func (dspS *RegistrarCService) Start(shutdown *utils.SyncedChan, registry *servm
 	dspS.mu.Lock()
 	defer dspS.mu.Unlock()
 
-	cms, err := registry.WaitForService(shutdown, utils.ConnManager, utils.StateServiceUP, dspS.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.CacheS,
+		},
+		dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	dspS.stopChan = make(chan struct{})
 	dspS.rldChan = make(chan struct{})
-	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, cms.(*ConnManagerService).ConnManager())
+	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, cms.ConnManager())
 	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
 	return
 }

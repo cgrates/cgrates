@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -52,9 +51,6 @@ func (s *CommonListenerService) Start(shutdown *utils.SyncedChan, registry *serv
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cls = commonlisteners.NewCommonListenerS(cs.(*CapService).Caps())
-	if len(s.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		s.cls.RegisterHTTPFunc(s.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
-	}
 	if s.cfg.ConfigSCfg().Enabled {
 		s.cls.RegisterHTTPFunc(s.cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
