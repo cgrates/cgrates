@@ -2221,7 +2221,6 @@ func TestDfEventReaderCfg(t *testing.T) {
 				ProcessedPath:        utils.StringPointer("/var/spool/cgrates/ers/out"),
 				Tenant:               utils.StringPointer(utils.EmptyString),
 				Timezone:             utils.StringPointer(utils.EmptyString),
-				EEsIds:               &[]string{},
 				EEsSuccessIDs:        &[]string{},
 				EEsFailedIDs:         &[]string{},
 				Filters:              &[]string{},

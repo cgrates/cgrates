@@ -621,7 +621,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
       },
       "flags": ["*log"],
       "fields": [
-        {"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.Id"},
+        {"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.id"},
         {"tag": "Tenant", "path": "*exp.tenant", "type": "*constant", "value": "updatedTenant"}
       ]
     }
@@ -634,7 +634,8 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "flags": ["*dryRun", "*export"],
+	  "eesSuccessIDs": ["SQLExporter"],
+      "flags": ["*dryRun"],
       "fields": [
         {"tag": "*cdrID", "path": "*opts.*cdrID", "type": "*variable", "value": "~*req.opts.*cdrID", "mandatory": true},
         {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.event.ToR", "mandatory": true},

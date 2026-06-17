@@ -262,7 +262,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone, utils.MetaExport} {
+		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
 		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -367,26 +367,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		}
 	case utils.MetaCDRs: // allow CDR processing
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-	case utils.MetaExport: // allow event exporting
 	}
 	if err != nil {
 		return
-	}
-	if rdrCfg.Flags.Has(utils.MetaExport) {
-		var reply map[string]map[string]any
-		var eesConns []string
-		eesConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaEEs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		if err := erS.connMgr.Call(context.TODO(), eesConns, utils.EeSv1ProcessEvent,
-			&utils.CGREventWithEeIDs{
-				EeIDs:    rdrCfg.EEsIDs,
-				CGREvent: cgrEv,
-			}, &reply); err != nil {
-			replyState = utils.ErrReplyStateExport
-			return err
-		}
 	}
 	if rdrCfg.Flags.Has(utils.MetaDryRun) {
 		return nil

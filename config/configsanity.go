@@ -733,7 +733,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, rdr := range cfg.ersCfg.Readers {
-			if len(rdr.EEsSuccessIDs) != 0 || len(rdr.EEsFailedIDs) != 0 || len(rdr.EEsIDs) != 0 {
+			if len(rdr.EEsSuccessIDs) != 0 || len(rdr.EEsFailedIDs) != 0 {
 				if len(cfg.ersCfg.Conns[utils.MetaEEs]) == 0 || !cfg.eesCfg.Enabled {
 					return fmt.Errorf("<%s> connection to <%s> required due to exporter ID references", utils.ERs, utils.EEs)
 				}
@@ -748,11 +748,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			if hasInternalConnOpt {
-				for _, eesID := range rdr.EEsIDs {
-					if !slices.Contains(exporterIDs, eesID) {
-						return fmt.Errorf("<%s> exporter with id %s not defined", utils.ERs, eesID)
-					}
-				}
 				for _, eesID := range rdr.EEsSuccessIDs {
 					if !slices.Contains(exporterIDs, eesID) {
 						return fmt.Errorf("<%s> exporter with id %s not defined", utils.ERs, eesID)

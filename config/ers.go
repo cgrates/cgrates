@@ -204,7 +204,6 @@ type EventReaderCfg struct {
 	ProcessedPath        string
 	Tenant               utils.RSRParsers
 	Timezone             string
-	EEsIDs               []string
 	EEsSuccessIDs        []string
 	EEsFailedIDs         []string
 	Filters              []string
@@ -405,10 +404,6 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Timezone != nil {
 		er.Timezone = *jsnCfg.Timezone
-	}
-	if jsnCfg.EEsIds != nil {
-		er.EEsIDs = make([]string, len(*jsnCfg.EEsIds))
-		copy(er.EEsIDs, *jsnCfg.EEsIds)
 	}
 	if jsnCfg.EEsSuccessIDs != nil {
 		er.EEsSuccessIDs = make([]string, len(*jsnCfg.EEsSuccessIDs))
@@ -666,7 +661,6 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ProcessedPath:        er.ProcessedPath,
 		Tenant:               er.Tenant.Clone(),
 		Timezone:             er.Timezone,
-		EEsIDs:               slices.Clone(er.EEsIDs),
 		EEsSuccessIDs:        slices.Clone(er.EEsSuccessIDs),
 		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
 		Filters:              slices.Clone(er.Filters),
@@ -854,9 +848,6 @@ func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
 	}
-	if er.EEsIDs != nil {
-		initialMP[utils.EEsIDsCfg] = er.EEsIDs
-	}
 	if er.EEsSuccessIDs != nil {
 		initialMP[utils.EEsSuccessIDsCfg] = er.EEsSuccessIDs
 	}
@@ -962,7 +953,6 @@ type EventReaderJsonCfg struct {
 	ProcessedPath        *string               `json:"processedPath"`
 	Tenant               *string               `json:"tenant"`
 	Timezone             *string               `json:"timezone"`
-	EEsIds               *[]string             `json:"eesIDs"`
 	EEsSuccessIDs        *[]string             `json:"eesSuccessIDs"`
 	EEsFailedIDs         *[]string             `json:"eesFailedIDs"`
 	Filters              *[]string             `json:"filters"`
@@ -1387,9 +1377,6 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg) *Even
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
-	}
-	if !slices.Equal(v1.EEsIDs, v2.EEsIDs) {
-		d.EEsIds = &v2.EEsIDs
 	}
 	if !slices.Equal(v1.EEsSuccessIDs, v2.EEsSuccessIDs) {
 		d.EEsSuccessIDs = &v2.EEsSuccessIDs

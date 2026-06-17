@@ -2555,7 +2555,6 @@ const (
 	ProcessedPathCfg       = "processedPath"
 	TenantCfg              = "tenant"
 	FilterIDsCfg           = "filterIDs"
-	EEsIDsCfg              = "eesIDs"
 	EEsSuccessIDsCfg       = "eesSuccessIDs"
 	EEsFailedIDsCfg        = "eesFailedIDs"
 	FlagsCfg               = "flags"
