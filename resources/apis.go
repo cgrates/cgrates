@@ -61,7 +61,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 		refID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := s.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*[]*utils.Resource)
@@ -69,7 +69,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 			return cachedResp.Error
 		}
 		defer func() {
-			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = s.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -132,7 +132,7 @@ func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREv
 		refID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := s.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*string)
@@ -140,7 +140,7 @@ func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREv
 			return cachedResp.Error
 		}
 		defer func() {
-			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = s.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -210,7 +210,7 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 		refID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := s.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*string)
@@ -218,7 +218,7 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 			return cachedResp.Error
 		}
 		defer func() {
-			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = s.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
@@ -284,7 +284,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 		refID := guardian.Guardian.GuardIDs("",
 			s.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := s.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*reply = *cachedResp.Result.(*string)
@@ -292,7 +292,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 			return cachedResp.Error
 		}
 		defer func() {
-			_ = engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+			_ = s.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 				&utils.CachedRPCResponse{Result: reply, Error: err},
 				nil, true, utils.NonTransactional)
 		}()
