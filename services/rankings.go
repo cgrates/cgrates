@@ -70,7 +70,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 
 	ran.mu.Lock()
 	defer ran.mu.Unlock()
-	ran.ran = rankings.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
+	ran.ran = rankings.NewRankingS(dbs.DataManager(), engine.Cache, cms.ConnManager(), fs.FilterS(), ran.cfg)
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}

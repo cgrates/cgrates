@@ -34,6 +34,7 @@ import (
 // RankingS implements the logic for processing and managing rankings based on stat metrics.
 type RankingS struct {
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	connMgr *engine.ConnManager
 	fltrS   *engine.FilterS
 	cgrcfg  *config.CGRConfig
@@ -49,11 +50,13 @@ type RankingS struct {
 
 // NewRankingS creates a new RankingS service.
 func NewRankingS(dm *engine.DataManager,
+	cache *engine.CacheS,
 	connMgr *engine.ConnManager,
 	filterS *engine.FilterS,
 	cgrcfg *config.CGRConfig) *RankingS {
 	return &RankingS{
 		dm:             dm,
+		cache:          cache,
 		connMgr:        connMgr,
 		fltrS:          filterS,
 		cgrcfg:         cgrcfg,
@@ -263,7 +266,7 @@ func (r *RankingS) storeRankings(ctx *context.Context) {
 		if rkID == utils.EmptyString {
 			break // no more keys, backup completed
 		}
-		rkIf, ok := engine.Cache.Get(utils.CacheRankings, rkID)
+		rkIf, ok := r.cache.Get(utils.CacheRankings, rkID)
 		if !ok || rkIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache Ranking with ID: %q",
