@@ -435,7 +435,6 @@ const CGRATES_CFG_JSON = `
 			"filters": [],						// limit parsing based on the filters
 			"flags": [],						// flags to influence the event processing
 			"reconnects": -1,					// number of retries in case of connection lost
-			"ees_ids": [], 						// ids of exporters used for moving the processed event to EEs
 			"ees_success_ids": [],					// ids of exporters used for moving the raw event to EEs
 			"ees_failed_ids": [],					// ids of exporters used for moving the failed raw event to EEs
 			"max_reconnect_interval": "5m", 			// time to wait in between reconnect attempts

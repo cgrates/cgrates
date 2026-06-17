@@ -312,7 +312,7 @@ func (rdr *SQLEventReader) processMessage(ev map[string]any) (err error) {
 		rdrEv = rdr.partialEvents
 	}
 	rawEvent := make(map[string]any, len(ev))
-	if len(rdr.Config().EEsSuccessIDs) != 0 {
+	if len(rdr.Config().EEsSuccessIDs) != 0 || len(rdr.Config().EEsFailedIDs) != 0 {
 		for key, value := range ev {
 			if val, ok := value.([]uint8); ok { // convert byte values to string to comply with the INSERT INTO query on SQL exporter. Converted before sent to rpc call to avoid unnecesary decoding and converting on SQL exporter side
 				rawEvent[key] = string(val)

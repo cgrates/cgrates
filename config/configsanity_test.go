@@ -1756,13 +1756,12 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Opts: &EventReaderOpts{
 			PartialCacheAction: utils.StringPointer(utils.MetaNone),
 		},
-		EEsIDs:        []string{"exp1", "exp2"},
 		EEsSuccessIDs: []string{"exp1"},
 		EEsFailedIDs:  []string{"exp2"},
 	}}
 
 	cfg.ersCfg.EEsConns = []string{}
-	cfg.ersCfg.Readers[0].EEsIDs = []string{"exp1"}
+	cfg.ersCfg.Readers[0].EEsSuccessIDs = []string{"exp1"}
 	expected = "<ERs> connection to <EEs> required due to exporter ID references"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1776,14 +1775,6 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 	cfg.eesCfg.Enabled = true
 	cfg.ersCfg.EEsConns = []string{utils.MetaInternal}
-
-	cfg.ersCfg.Readers[0].EEsIDs = []string{"noexp", utils.MetaInternal}
-	expected = "<ERs> exporter with id noexp not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.ersCfg.Readers[0].EEsIDs = []string{"exp1"}
 	cfg.ersCfg.Readers[0].EEsSuccessIDs = []string{"noexp"}
 	expected = "<ERs> exporter with id noexp not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1799,7 +1790,6 @@ func TestConfigSanityEventReader(t *testing.T) {
 
 	cfg.sessionSCfg.Enabled = true
 	cfg.ersCfg.EEsConns = []string{"noexp"}
-	cfg.ersCfg.Readers[0].EEsIDs = []string{"exp1"}
 	cfg.ersCfg.Readers[0].EEsFailedIDs = []string{}
 	cfg.ersCfg.Readers[0].EEsSuccessIDs = []string{}
 	expected = "<ERs> connection with id: <noexp> not defined"
