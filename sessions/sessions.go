@@ -394,11 +394,11 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 					utils.SessionS, err.Error(), s.ID))
 		}
 	}
-	replConns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaReplication], utils.MetaAny, utils.MapStorage{}, sS.fltrS)
-	if err != nil {
-		return
+	if errRpl := sS.replicateSessions(ctx, s.ID, false); errRpl != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: <%s> replicating session: <%s>",
+				utils.SessionS, errRpl.Error(), s.ID))
 	}
-	sS.replicateSessions(ctx, s.ID, false, replConns)
 	if clnt := sS.biJClnt(s.ClientConnID); clnt != nil {
 		go func() {
 			var rply string
@@ -554,20 +554,26 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 	return
 }
 
-// replicateSessions will replicate sessions with or without originID specified
-func (sS *SessionS) replicateSessions(ctx *context.Context, originID string, psv bool, connIDs []string) {
-	if len(connIDs) == 0 {
-		return
-	}
-	ss := sS.getSessions(originID, psv)
+// replicateSessions will replicate sessions with or without sID specified
+func (sS *SessionS) replicateSessions(ctx *context.Context, sID string, psv bool) (err error) {
+	ss := sS.getSessions(sID, psv)
 	if len(ss) == 0 {
 		// emulate the Session, so it can be also removed from remote
-		ss = []*Session{{ID: originID}}
+		ss = []*Session{{ID: sID}}
 	}
 	for _, s := range ss {
 		sCln := s.Clone()
+		var conns []string // ToDo: cache per session
+		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaReplication],
+			s.OriginCGREvent.Tenant, s.OriginCGREvent.AsDataProvider(), sS.fltrS); err != nil {
+			return
+		}
+		if len(conns) == 0 {
+			err = utils.NewErrNotConnected(utils.MetaReplication)
+			return
+		}
 		var rply string
-		if err := sS.connMgr.Call(ctx, connIDs,
+		if err = sS.connMgr.Call(ctx, conns,
 			utils.SessionSv1SetPassiveSession,
 			sCln, &rply); err != nil {
 			utils.Logger.Warning(
@@ -575,7 +581,7 @@ func (sS *SessionS) replicateSessions(ctx *context.Context, originID string, psv
 					utils.SessionS, sCln.ID, err.Error()))
 		}
 	}
-
+	return
 }
 
 // registerSession will register an active or passive Session
@@ -1109,6 +1115,26 @@ func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
 	return
 }
 
+// relocateSession will change the SessionID of an active session
+func (sS *SessionS) relocateSession(ctx *context.Context, oldSID, newSID string) (s *Session) {
+	ss := sS.getSessions(oldSID, false)
+	if len(ss) == 0 {
+		return
+	}
+	s = ss[0]
+	s.lk.Lock()
+	sS.unregisterSession(oldSID, false)
+	s.ID = newSID
+	for _, sRun := range s.SRuns {
+		sRun.CGREvent.APIOpts[utils.MetaCGRid] = newSID
+	}
+	sS.registerSession(s, false)
+	s.lk.Unlock()
+	sS.replicateSessions(ctx, oldSID, false)
+	sS.replicateSessions(ctx, newSID, false)
+	return
+}
+
 // getActivateSession returns the session from active list or moves from passive
 func (sS *SessionS) getActivateSession(sID string) (s *Session) {
 	ss := sS.getSessions(sID, false)
@@ -1118,42 +1144,13 @@ func (sS *SessionS) getActivateSession(sID string) (s *Session) {
 	return sS.transitSState(sID, false)
 }
 
-// relocateSession will change the originID of a session (ie: prefix based session group)
-func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID, originHost string) (s *Session) {
-	/*
-		if initOriginID == "" {
-			return
-		}
-		initOptOriginID := utils.Sha1(initOriginID, originHost)
-		newOptOriginID := utils.Sha1(originID, originHost)
-		s = sS.getActivateSession(initOptOriginID)
-		if s == nil {
-			return
-		}
-		sS.unregisterSession(utils.IfaceAsString(s.ID), false)
-		s.lk.Lock()
-		// Overwrite initial originID with new one
-		s.ID = newOptOriginID
-		s.OriginCGREvent.APIOpts[utils.MetaOriginID] = newOptOriginID // Overwrite optOriginID for final CDR
-		for _, sRun := range s.SRuns {
-			//sRun.Event[utils.MetaOriginID] = newOptOriginID // needed for CDR generation
-			sRun.Event[utils.OriginID] = originID
-		}
-		s.Unlock()
-		sS.registerSession(s, false)
-		sS.replicateSessions(ctx, initOptOriginID, false, sS.cfg.SessionSCfg().ReplicationConns)
-	*/
-	return
-}
-
 // getRelocateSession will relocate a session if it cannot find originID and initialOriginID is present
-func (sS *SessionS) getRelocateSession(ctx *context.Context, optOriginID string, initOriginID,
-	originID, originHost string) (s *Session) {
-	if s = sS.getActivateSession(optOriginID); s != nil ||
-		initOriginID == "" {
+func (sS *SessionS) getRelocateSession(ctx *context.Context, sID string, oldSID string) (s *Session) {
+	if s = sS.getActivateSession(sID); s != nil ||
+		oldSID == utils.EmptyString {
 		return
 	}
-	return sS.relocateSession(ctx, initOriginID, originID, originHost)
+	return sS.relocateSession(ctx, oldSID, sID)
 }
 
 // syncSessions synchronizes the active sessions with the one in the clients
@@ -1271,8 +1268,7 @@ func (sS *SessionS) initSession(ctx *context.Context, cgrEv *utils.CGREvent,
 func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts engine.MapEvent,
 	dbtItvl time.Duration) (maxUsage map[string]time.Duration, err error) {
 	defer func() {
-		replConns, _ := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaReplication], utils.MetaAny, utils.MapStorage{}, sS.fltrS)
-		sS.replicateSessions(ctx, s.ID, false, replConns)
+		sS.replicateSessions(ctx, s.ID, false)
 	}()
 	s.lk.Lock()
 	defer s.lk.Unlock()
@@ -1347,10 +1343,9 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 	if !isInstantEvent {
 		//check if we have replicate connection and close the session there
 		defer func() {
-			replConns, _ := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaReplication], utils.MetaAny, utils.MapStorage{}, sS.fltrS)
-			sS.replicateSessions(ctx, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaOriginID]), true, replConns)
+			sS.replicateSessions(ctx, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaCGRid]), false) // FixMe
 		}()
-		sS.unregisterSession(utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaOriginID]), false)
+		sS.unregisterSession(utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaCGRid]), false)
 		s.stopSTerminator()
 		//s.stopDebitLoops()  // TODO: debit loops functionality will be implemented in future versions
 	}
@@ -1539,7 +1534,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 // args.Filter is used to filter the sessions which are replicated, originID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	sS.replicateSessions(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaOriginID]), args.Passive, args.ConnIDs)
+	sS.replicateSessions(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCGRid]), args.Passive)
 	*reply = utils.OK
 	return
 }
@@ -1676,9 +1671,8 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 	ev := engine.MapEvent(cgrEv.Event)
 	originID := GetSetOptsOriginID(ev, cgrEv.APIOpts)
 	s := sS.getRelocateSession(ctx, originID,
-		ev.GetStringIgnoreErrors(utils.InitialOriginID),
-		ev.GetStringIgnoreErrors(utils.OriginID),
-		ev.GetStringIgnoreErrors(utils.OriginHost))
+		utils.Sha1(ev.GetStringIgnoreErrors(utils.InitialOriginID),
+			ev.GetStringIgnoreErrors(utils.OriginHost)))
 	if s != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> ProcessCDR called for active session with originID: <%s>",
