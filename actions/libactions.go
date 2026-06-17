@@ -106,27 +106,27 @@ func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
 }
 
 // newActionersFromActions constructs multiple actioners out of APAction configurations
-func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
+func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
 	connMgr *engine.ConnManager, aCfgs []*utils.APAction, tnt string) (acts []actioner, err error) {
 	acts = make([]actioner, len(aCfgs))
 	for i, aCfg := range aCfgs {
-		if acts[i], err = newActioner(ctx, cgrEv, cfg, fltrS, dm, connMgr, aCfg, tnt); err != nil {
+		if acts[i], err = newActioner(ctx, cgrEv, cfg, cache, fltrS, dm, connMgr, aCfg, tnt); err != nil {
 			return nil, err
 		}
 	}
-	return
+	return acts, nil
 }
 
 // newAction is the constructor to create actioner
-func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
+func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
 	connMgr *engine.ConnManager, aCfg *utils.APAction, tnt string) (act actioner, err error) {
 	switch aCfg.Type {
 	case utils.MetaLog:
 		return &actLog{aCfg}, nil
 	case utils.CDRLog:
-		return &actCDRLog{cfg, fltrS, connMgr, aCfg}, nil
+		return &actCDRLog{cfg, cache, fltrS, connMgr, aCfg}, nil
 	case utils.MetaHTTPPost:
-		return newActHTTPPost(ctx, tnt, cgrEv, fltrS, cfg, aCfg)
+		return newActHTTPPost(ctx, tnt, cgrEv, cache, fltrS, cfg, aCfg)
 	case utils.MetaExport:
 		return &actExport{tnt, cfg, connMgr, fltrS, aCfg}, nil
 	case utils.MetaResetStatQueue:

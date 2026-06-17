@@ -48,6 +48,7 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.DB,
 		},
@@ -63,7 +64,7 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, fs, cms.ConnManager(), dbs.DataManager())
+	es.eeS, err = ees.NewEventExporterS(es.cfg, engine.Cache, fs, cms.ConnManager(), dbs.DataManager())
 	if err != nil {
 		return err
 	}

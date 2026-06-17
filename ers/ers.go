@@ -515,7 +515,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
-				erS.fltrS, map[string]*utils.OrderedNavigableMap{
+				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
 				})
 
@@ -583,7 +583,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
-				erS.fltrS, map[string]*utils.OrderedNavigableMap{
+				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
 				})
 

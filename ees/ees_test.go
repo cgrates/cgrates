@@ -80,7 +80,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, clientConn)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, clientConn)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,7 +198,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +244,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +287,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, clientConn)
-	eeS, err := NewEventExporterS(cfg, filterS, connMngr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMngr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,7 +297,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 				onCacheEvicted,
 			}),
 	}
-	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS, connMngr, nil)
+	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, engine.Cache, filterS, connMngr, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -367,7 +367,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -424,7 +424,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -446,7 +446,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -592,7 +592,7 @@ func TestEeSProcessEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -651,7 +651,7 @@ func TestArchiveEventsInReply(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
-	eeS, err := NewEventExporterS(cfg, filterS, connMgr, nil)
+	eeS, err := NewEventExporterS(cfg, engine.Cache, filterS, connMgr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

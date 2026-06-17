@@ -45,7 +45,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	evNM := utils.MapStorage{
 		utils.MetaReq: map[string]any{
@@ -160,7 +160,7 @@ func TestScheduledActions(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -229,7 +229,7 @@ func TestScheduleAction(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -300,7 +300,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -344,7 +344,7 @@ func TestV1ScheduleActions(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -404,7 +404,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -454,7 +454,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newData}, cfg.DbCfg())
 	newDm := engine.NewDataManager(dbCm, cfg, nil)
 	newDm.SetCache(engine.Cache)
-	newActs := NewActionS(cfg, filters, newDm, nil)
+	newActs := NewActionS(cfg, engine.Cache, filters, newDm, nil)
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
 	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -589,6 +589,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
+		cache:   engine.Cache,
 		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
@@ -700,6 +701,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
+		cache:   engine.Cache,
 		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
@@ -1069,7 +1071,7 @@ func TestACScheduledActions(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	acts := NewActionS(cfg, fltrs, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
 	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
@@ -1141,14 +1143,14 @@ func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
 	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Fatal(err)
 	}
-	acts := NewActionS(cfg, fltrs, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
 
 	evData := utils.MapStorage{
 		utils.MetaReq:  map[string]any{utils.Destination: "1005"},
 		utils.MetaOpts: map[string]any{},
 	}
 	cdrLog := []actioner{
-		&actCDRLog{cfg, fltrs, nil, &utils.APAction{ID: "TEST_CDRLOG", Type: utils.CDRLog}},
+		&actCDRLog{cfg, engine.Cache, fltrs, nil, &utils.APAction{ID: "TEST_CDRLOG", Type: utils.CDRLog}},
 	}
 
 	tmpLogger := utils.Logger
@@ -1199,7 +1201,7 @@ func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
 	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Fatal(err)
 	}
-	acts := NewActionS(cfg, fltrs, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
 
 	evData := utils.MapStorage{
 		utils.MetaReq:  map[string]any{"Counter": 15},
@@ -1214,7 +1216,7 @@ func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
 	drainUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
 		false, evData, []actioner{dropCounter{}})
 	logUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
-		false, evData, []actioner{&actCDRLog{cfg, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.CDRLog}}})
+		false, evData, []actioner{&actCDRLog{cfg, engine.Cache, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.CDRLog}}})
 
 	acts.cronExecuteActions([]*scheduledActs{drainUnit, logUnit})
 
@@ -1234,7 +1236,7 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	dm.SetCache(engine.Cache)
 
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -1291,7 +1293,7 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
+	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{

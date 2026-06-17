@@ -88,7 +88,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.fltrS, eeS.connMgr, eeS.dm); err != nil {
+			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.cache, eeS.fltrS, eeS.connMgr, eeS.dm); err != nil {
 				return fmt.Errorf("failed to init EventExporter %q: %v", eeCfg.ID, err)
 			}
 			if hasCache {
@@ -120,7 +120,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv.CGREvent, evict, eeS.cfg, eeS.fltrS, cgrEv.Tenant); err != nil {
+			if err := exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv.CGREvent, evict, eeS.cfg, eeS.cache, eeS.fltrS, cgrEv.Tenant); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> Exporter <%s> error : <%s>",
 						utils.EEs, ee.Cfg().ID, err.Error()))
@@ -176,7 +176,7 @@ type ArchiveEventsArgs struct {
 }
 
 func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *engine.ConnManager,
-	ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS, tnt string) (err error) {
+	ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS, tnt string) (err error) {
 	defer func() {
 		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
 			cfg.GeneralCfg().DefaultTimezone))
@@ -189,7 +189,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 	exp.GetMetrics().IncrementEvents()
 	if len(exp.Cfg().ContentFields()) == 0 {
 		if eEv, err = exp.PrepareMap(ev); err != nil {
-			return
+			return err
 		}
 	} else {
 		expNM := utils.NewOrderedNavigableMap()
@@ -200,10 +200,10 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 			utils.MetaCfg:  cfg.GetDataProvider(),
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
-			filterS,
+			cache, filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(ctx, exp.Cfg().ContentFields())
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
-			return
+			return err
 		}
 	}
 	extraData := exp.ExtraData(ev)
@@ -260,9 +260,9 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	switch eeCfg.Type {
 	case utils.MetaFileCSV:
-		ee, err = NewFileCSVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
+		ee, err = NewFileCSVee(eeCfg, eeS.cfg, eeS.cache, eeS.fltrS, em, &buffer{wrtr})
 	case utils.MetaFileFWV:
-		ee, err = NewFileFWVee(eeCfg, eeS.cfg, eeS.fltrS, em, &buffer{wrtr})
+		ee, err = NewFileFWVee(eeCfg, eeS.cfg, eeS.cache, eeS.fltrS, em, &buffer{wrtr})
 	default:
 		err = fmt.Errorf("unsupported exporter type: %s>", eeCfg.Type)
 	}
@@ -314,7 +314,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 
 		// exported will be true if there will be at least one exporter archived
 		exported = true
-		if err = exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv, false, eeS.cfg, eeS.fltrS, cgrEv.Tenant); err != nil {
+		if err = exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv, false, eeS.cfg, eeS.cache, eeS.fltrS, cgrEv.Tenant); err != nil {
 			return err
 		}
 	}

@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
+func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	em *utils.ExporterMetrics) (httpPost *HTTPPostEE, err error) {
 	httpPost = &HTTPPostEE{
 		cfg:    cfg,
@@ -37,8 +37,8 @@ func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filte
 		client: &http.Client{Transport: cgrCfg.HTTPCfg().ClientOpts, Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
 		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
-	httpPost.hdr, err = httpPost.composeHeader(cgrCfg, filterS)
-	return
+	httpPost.hdr, err = httpPost.composeHeader(cgrCfg, cache, filterS)
+	return httpPost, err
 }
 
 // FileCSVee implements EventExporter interface for .csv files
@@ -56,14 +56,14 @@ type HTTPPosterRequest struct {
 }
 
 // Compose and cache the header
-func (httpPost *HTTPPostEE) composeHeader(cgrCfg *config.CGRConfig, filterS *engine.FilterS) (hdr http.Header, err error) {
+func (httpPost *HTTPPostEE) composeHeader(cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS) (hdr http.Header, err error) {
 	hdr = make(http.Header)
 	if len(httpPost.Cfg().HeaderFields()) == 0 {
-		return
+		return hdr, nil
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpPost.Cfg().HeaderFields(), httpPost.em, cgrCfg, filterS); err != nil {
-		return
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, httpPost.Cfg().HeaderFields(), httpPost.em, cgrCfg, cache, filterS); err != nil {
+		return hdr, err
 	}
 	for el := exp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
@@ -71,7 +71,7 @@ func (httpPost *HTTPPostEE) composeHeader(cgrCfg *config.CGRConfig, filterS *eng
 		path = utils.StripTrailingIndex(path)
 		hdr.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
-	return
+	return hdr, nil
 }
 
 func (httpPost *HTTPPostEE) Cfg() *config.EventExporterCfg { return httpPost.cfg }

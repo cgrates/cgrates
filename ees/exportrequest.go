@@ -33,14 +33,14 @@ import (
 // NewExportRequest returns a new EventRequest
 func NewExportRequest(inData map[string]utils.DataStorage,
 	tnt string,
-	filterS *engine.FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *ExportRequest) {
-	eeR = &ExportRequest{
+	cache *engine.CacheS, filterS *engine.FilterS, oNM map[string]*utils.OrderedNavigableMap) *ExportRequest {
+	return &ExportRequest{
 		inData:  inData,
+		cache:   cache,
 		filterS: filterS,
 		tnt:     tnt,
 		ExpData: oNM,
 	}
-	return
 }
 
 // ExportRequest represents data related to one request towards agent
@@ -49,6 +49,7 @@ type ExportRequest struct {
 	inData  map[string]utils.DataStorage          // request
 	ExpData map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
 	tnt     string
+	cache   *engine.CacheS
 	filterS *engine.FilterS
 }
 
@@ -71,7 +72,7 @@ func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val any, err error
 		val, err = dp.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:
 		var ok bool
-		if val, ok = engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+		if val, ok = eeR.cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			return nil, utils.ErrNotFound
 		}
 	case utils.MetaTenant:
@@ -155,7 +156,7 @@ func (eeR *ExportRequest) SetFields(ctx *context.Context, tplFlds []*config.FCTe
 func (eeR *ExportRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return eeR.cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -199,7 +200,7 @@ func (eeR *ExportRequest) ParseField(
 func (eeR *ExportRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return eeR.cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -221,12 +222,12 @@ func (eeR *ExportRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf)
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
 		var prv any
-		if prvI, ok := engine.Cache.Get(utils.CacheUCH, path); !ok {
+		if prvI, ok := eeR.cache.Get(utils.CacheUCH, path); !ok {
 			prv = val.Data
 		} else {
 			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
 		}
-		return engine.Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+		return eeR.cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		var prv any
 		if prv, err = eeR.inData[utils.MetaOpts].FieldAsInterface(fullPath.PathSlice[1:]); err != nil {

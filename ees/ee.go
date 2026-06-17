@@ -42,7 +42,7 @@ type EventExporter interface {
 
 // NewEventExporter produces exporters
 func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
-	filterS *engine.FilterS, connMngr *engine.ConnManager, dm *engine.DataManager) (ee EventExporter, err error) {
+	cache *engine.CacheS, filterS *engine.FilterS, connMngr *engine.ConnManager, dm *engine.DataManager) (ee EventExporter, err error) {
 	timezone := utils.FirstNonEmpty(cfg.Timezone, cgrCfg.GeneralCfg().DefaultTimezone)
 	em, err := utils.NewExporterMetrics(cfg.MetricsResetSchedule, timezone)
 	if err != nil {
@@ -51,13 +51,13 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 
 	switch cfg.Type {
 	case utils.MetaFileCSV:
-		return NewFileCSVee(cfg, cgrCfg, filterS, em, nil)
+		return NewFileCSVee(cfg, cgrCfg, cache, filterS, em, nil)
 	case utils.MetaFileFWV:
-		return NewFileFWVee(cfg, cgrCfg, filterS, em, nil)
+		return NewFileFWVee(cfg, cgrCfg, cache, filterS, em, nil)
 	case utils.MetaHTTPPost:
-		return NewHTTPPostEE(cfg, cgrCfg, filterS, em)
+		return NewHTTPPostEE(cfg, cgrCfg, cache, filterS, em)
 	case utils.MetaHTTPjsonMap:
-		return NewHTTPjsonMapEE(cfg, cgrCfg, filterS, em)
+		return NewHTTPjsonMapEE(cfg, cgrCfg, cache, filterS, em)
 	case utils.MetaNATSJSONMap:
 		return NewNatsEE(cfg, cgrCfg.GeneralCfg().NodeID,
 			cgrCfg.GeneralCfg().ConnectTimeout, em)
@@ -116,14 +116,14 @@ func (c *concReq) done() {
 }
 
 // composeHeaderTrailer will return the orderNM for *hdr or *trl
-func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FCTemplate, em utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
-	r = utils.NewOrderedNavigableMap()
-	err = NewExportRequest(map[string]utils.DataStorage{
+func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FCTemplate, em utils.DataStorage, cfg *config.CGRConfig, cache *engine.CacheS, fltS *engine.FilterS) (*utils.OrderedNavigableMap, error) {
+	r := utils.NewOrderedNavigableMap()
+	err := NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaEM:  em,
 		utils.MetaCfg: cfg.GetDataProvider(),
-	}, cfg.GeneralCfg().DefaultTenant, fltS,
+	}, cfg.GeneralCfg().DefaultTenant, cache, fltS,
 		map[string]*utils.OrderedNavigableMap{prfx: r}).SetFields(ctx, fields)
-	return
+	return r, err
 }
 
 func updateEEMetrics(em *utils.ExporterMetrics, originID string, ev engine.MapEvent, hasError bool, timezone string) {

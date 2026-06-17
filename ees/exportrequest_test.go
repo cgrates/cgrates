@@ -31,7 +31,7 @@ import (
 )
 
 func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -59,7 +59,7 @@ func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -87,7 +87,7 @@ func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
@@ -114,7 +114,7 @@ func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
@@ -141,7 +141,7 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
@@ -168,7 +168,7 @@ func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
@@ -195,7 +195,7 @@ func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("", utils.InfieldSep),
@@ -222,7 +222,7 @@ func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
@@ -249,7 +249,7 @@ func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeError(t *testing.T) {
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
@@ -274,7 +274,7 @@ func TestExportReqParseFieldDateTimeError2(t *testing.T) {
 			utils.Usage:        "20m",
 		},
 	}
-	EventReq := NewExportRequest(mS, "", nil, nil)
+	EventReq := NewExportRequest(mS, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    prsr,
@@ -294,7 +294,7 @@ func TestExportReqFieldAsInterface(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
 	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
@@ -335,9 +335,10 @@ func TestExportReqNewEventExporter(t *testing.T) {
 		inData:  inData,
 		filterS: nil,
 		tnt:     "cgrates.org",
+		cache:   engine.Cache,
 		ExpData: expData,
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 	if !reflect.DeepEqual(expected, eventReq) {
 		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
 	}
@@ -356,7 +357,7 @@ func TestExportRequestString(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	exp := utils.ToIJSON(eeR)
 
@@ -373,7 +374,7 @@ func TestExportReqFieldAsInterfaceBadPrefix(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 
 	fldPath := []string{"inexistant"}
 	expErr := "unsupported field prefix: <inexistant>"
@@ -390,7 +391,7 @@ func TestExportReqFieldAsInterfaceMetaUCHErr(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 
 	fldPath := []string{utils.MetaUCH}
 	if _, err := eventReq.FieldAsInterface(fldPath); err != utils.ErrNotFound {
@@ -416,7 +417,7 @@ func TestExportReqFieldAsInterfaceNMSliceType(t *testing.T) {
 		},
 	}
 
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 	fldPath := []string{utils.MetaReq, "Slice"}
 	expVal := "cgrates.org"
 	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
@@ -434,7 +435,7 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
 	if rcv, err := eventReq.FieldAsString(fldPath); err != nil {
@@ -446,7 +447,7 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 
 func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaFiller,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -465,7 +466,7 @@ func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 
 func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", engine.Cache, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaGroup,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -500,7 +501,7 @@ func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -532,7 +533,7 @@ func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -567,7 +568,7 @@ func TestExportRequestSetAsSliceExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -593,7 +594,7 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -639,7 +640,7 @@ func TestExportRequestAppendMetaUCH(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -671,7 +672,7 @@ func TestExportRequestAppendMetaOpts(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -706,7 +707,7 @@ func TestExportRequestAppendExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -732,7 +733,7 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -782,7 +783,7 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -821,7 +822,7 @@ func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -858,7 +859,7 @@ func TestExportRequestComposeMetaOptsOK(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -892,7 +893,7 @@ func TestExportRequestComposeMetaOptsFoundOK(t *testing.T) {
 		},
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, nil)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -929,7 +930,7 @@ func TestExportRequestComposeDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -967,7 +968,7 @@ func TestExportRequestComposeExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, nil, expData)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -1010,7 +1011,7 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 		},
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", fltr, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, fltr, expData)
 
 	expErr := "NOT_FOUND:inexistant"
 	if err := eeR.SetFields(context.Background(), tplFlds); err == nil || err.Error() != expErr {
@@ -1048,7 +1049,7 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 		},
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", fltr, expData)
+	eeR := NewExportRequest(inData, "cgrates.org", engine.Cache, fltr, expData)
 	pastEeR := eeR
 	if err := eeR.SetFields(context.Background(), tplFlds); err != nil {
 		t.Error(err)
