@@ -141,6 +141,7 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
 	tmp := Cache
 	Cache = NewCacheS(cfg, nil, nil, cs)
+	cs.SetCache(Cache)
 
 	cs.addSample("1", 10)
 	expAvg := 10.
