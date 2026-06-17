@@ -77,6 +77,7 @@ func TestOnStorIT(t *testing.T) {
 		}
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 		onStor = NewDataManager(dbCM, cfg, nil)
+		onStor.SetCache(Cache)
 	case utils.MetaRedis:
 		cfg := config.NewDefaultCGRConfig()
 		var err error
@@ -90,6 +91,7 @@ func TestOnStorIT(t *testing.T) {
 		onStorCfg = cfg.DbCfg().DBConns[utils.MetaDefault].Name
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: rdsITdb}, cfg.DbCfg())
 		onStor = NewDataManager(dbCM, cfg, nil)
+		onStor.SetCache(Cache)
 	case utils.MetaMySQL:
 		t.SkipNow()
 	case utils.MetaPostgres, utils.MetaMongo:

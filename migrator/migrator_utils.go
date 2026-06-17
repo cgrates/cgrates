@@ -48,6 +48,7 @@ func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 	}
 	dbcManager := engine.NewDBConnManager(dataDBs, cfg.DbCfg())
 	dm := engine.NewDataManager(dbcManager, cfg, nil)
+	dm.SetCache(engine.Cache)
 	d := make(map[string]MigratorDataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		switch cfg.DbCfg().DBConns[dbConnID].Type {

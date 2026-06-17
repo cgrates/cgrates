@@ -44,6 +44,7 @@ func newTestResourceS(t *testing.T) (*ResourceS, *engine.DataManager) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -61,7 +62,9 @@ func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(cfg, dm, fltrs, nil)
 	return rS, dm
@@ -449,6 +452,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmRES = engine.NewDataManager(dbCM, cfg, nil)
+	dmRES.SetCache(engine.Cache)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -1356,8 +1360,10 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	rS := NewResourceService(cfg, dm, nil, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(engine.Cache)
 	r := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RES1",
@@ -1638,6 +1644,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -1723,6 +1730,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -1748,6 +1756,7 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tnt := "cgrates.org"
 	resID := "Res1"
 	rS := &ResourceS{
@@ -1835,7 +1844,9 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	rS := NewResourceService(cfg, dm, fltrs, connMgr)
@@ -1876,7 +1887,9 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	rsPrf := &utils.ResourceProfile{
@@ -1984,6 +1997,7 @@ func TestStoreMatchedResources(t *testing.T) {
 		data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 		dm := engine.NewDataManager(dbCM, cfg, nil)
+		dm.SetCache(engine.Cache)
 		rS := &ResourceS{dm: dm, cfg: cfg, storedResources: utils.NewStringSet(nil)}
 		return rS, dm
 	}

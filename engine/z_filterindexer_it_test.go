@@ -101,6 +101,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		}
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 		dataManager = NewDataManager(dbCM, cfg, nil)
+		dataManager.SetCache(Cache)
 	case utils.MetaRedis:
 		cfg := config.NewDefaultCGRConfig()
 		redisDB, err := NewRedisStorage("127.0.0.1:6379", 4,
@@ -118,6 +119,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		defer redisDB.Close()
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: redisDB}, cfg.DbCfg())
 		dataManager = NewDataManager(dbCM, cfg, nil)
+		dataManager.SetCache(Cache)
 	case utils.MetaMySQL:
 		t.SkipNow()
 	case utils.MetaPostgres, utils.MetaMongo:

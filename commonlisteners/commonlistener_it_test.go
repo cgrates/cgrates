@@ -174,6 +174,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil)
+	dm.SetCache(engine.Cache)
 
 	ss := sessions.NewSessionS(cfgDflt, dm, nil, nil)
 
@@ -196,6 +197,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil)
+	dm.SetCache(engine.Cache)
 
 	ss := sessions.NewSessionS(cfgDflt, dm, nil, nil)
 

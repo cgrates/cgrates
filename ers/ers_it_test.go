@@ -736,6 +736,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -790,6 +791,7 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -844,6 +846,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -937,6 +940,7 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1020,6 +1024,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1109,6 +1114,7 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1190,6 +1196,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1271,6 +1278,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1349,6 +1357,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1436,6 +1445,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -1507,6 +1517,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,

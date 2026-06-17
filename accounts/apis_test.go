@@ -35,6 +35,7 @@ func TestAccountsRefundCharges(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	acc := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	var reply string
 
@@ -59,6 +60,7 @@ func TestAccountsActionRemoveBalance(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	argsSet := &utils.ArgsActSetBalance{
@@ -107,6 +109,7 @@ func TestAccountsDebitConcretes(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	if err := dm.SetAccount(context.Background(),
@@ -194,6 +197,7 @@ func TestAccountsMaxConcretes(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	if err := dm.SetAccount(context.Background(),
@@ -445,6 +449,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
+	dm.SetCache(newCache)
 	if err := dm.SetAccount(context.Background(),
 		&utils.Account{
 			Tenant: "cgrates.org",
@@ -573,6 +578,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	engine.Cache = newCache
+	dm.SetCache(newCache)
 	err := dm.SetAccount(context.Background(),
 		&utils.Account{
 			Tenant: "cgrates.org",
@@ -701,6 +707,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
+	dm.SetCache(newCache)
 	err := dm.SetAccount(context.Background(),
 		&utils.Account{
 			Tenant: "cgrates.org",
@@ -832,6 +839,7 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
+	dm.SetCache(newCache)
 	err := dm.SetAccount(context.Background(),
 		&utils.Account{
 			Tenant: "cgrates.org",
@@ -917,6 +925,7 @@ func TestV1GetAccount(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -964,6 +973,7 @@ func TestV1RefundCharges(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	accnts := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
 	ctx := context.Background()

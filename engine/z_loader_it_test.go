@@ -98,6 +98,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dbConn}, lCfg.DbCfg())
 	dataDbCsv = NewDataManager(dbCM, lCfg, nil)
+	dataDbCsv.SetCache(Cache)
 	if lCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		chIDs := []string{}
 		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB

@@ -349,6 +349,7 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
 	cb := &concreteBalance{
@@ -389,6 +390,7 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor match)
 	cb := &concreteBalance{
@@ -428,6 +430,7 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
 	cb := &concreteBalance{
@@ -468,6 +471,7 @@ func TestCBDebitWithBalanceFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 3 units from a balance (the filter match)
 	cb := &concreteBalance{
@@ -499,6 +503,7 @@ func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// filter doesn't match )
 	cb := &concreteBalance{
@@ -526,6 +531,7 @@ func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
 	cb := &concreteBalance{
@@ -553,6 +559,7 @@ func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
 	cb := &concreteBalance{
@@ -585,6 +592,7 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
 	cb := &concreteBalance{
@@ -641,6 +649,7 @@ func TestCBSDebitAbstractsInvalidFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -670,6 +679,7 @@ func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -706,6 +716,7 @@ func TestCBSDebitAbstractsInvalidCostIncrementFilter(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -735,6 +746,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage pur
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	engine.Cache.Clear(nil)
@@ -780,6 +792,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	engine.Cache.Clear(nil)

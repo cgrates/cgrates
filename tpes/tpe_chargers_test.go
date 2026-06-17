@@ -50,6 +50,7 @@ func TestTPEnewTPChargers(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
+	dm.SetCache(engine.Cache)
 	exp := &TPChargers{
 		dm: dm,
 	}
@@ -65,6 +66,7 @@ func TestTPEExportItemsChargers(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpChgr := TPChargers{
 		dm: dm,
 	}
@@ -116,6 +118,7 @@ func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpChgr := TPChargers{
 		dm: dm,
 	}

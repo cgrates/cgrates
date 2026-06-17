@@ -718,6 +718,7 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
+		dm.SetCache(Cache)
 		fS := NewFilterS(cfg, nil, dm)
 		NewConnManager(cfg)
 
@@ -750,6 +751,7 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
+		dm.SetCache(Cache)
 		cM := NewConnManager(cfg)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 		fS := NewFilterS(cfg, cM, dm)
@@ -780,6 +782,7 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
+		dm.SetCache(Cache)
 		fS := NewFilterS(cfg, nil, dm)
 		cM := NewConnManager(cfg)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))

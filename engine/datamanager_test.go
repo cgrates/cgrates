@@ -88,6 +88,7 @@ func TestDatamanagerCacheDataFromDBMustBeCached(t *testing.T) {
 	dm := NewDataManager(&DBConnManager{
 		dbCfg: cfg.DbCfg(),
 	}, cfg, nil)
+	dm.SetCache(Cache)
 	dm.cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
 		utils.CachePrefixToInstance[utils.AttributeProfilePrefix]: {
 			Limit: 1,
@@ -132,6 +133,7 @@ func TestDataManagerSetFilterErrConnID(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "fltr1",
@@ -164,6 +166,7 @@ func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
@@ -200,6 +203,7 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
@@ -238,6 +242,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
@@ -290,6 +295,7 @@ func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotImplemented
@@ -320,6 +326,7 @@ func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
@@ -350,6 +357,7 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
@@ -381,6 +389,7 @@ func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
@@ -418,6 +427,7 @@ func TestDataManagerRemoveFilterErrNilOldFltr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var fltrId string
 	var tnt string
@@ -447,6 +457,7 @@ func TestDataManagerRemoveFilterReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
@@ -493,6 +504,7 @@ func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
@@ -523,6 +535,7 @@ func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
@@ -556,6 +569,7 @@ func TestDataManagerRemoveAccountErrNiloldRpp(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var fltrId string
 	var tnt string
@@ -583,6 +597,7 @@ func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
@@ -621,6 +636,7 @@ func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
@@ -663,6 +679,7 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
@@ -698,6 +715,7 @@ func TestDMRemoveAccountReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
@@ -736,6 +754,7 @@ func TestDMSetAccountcheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.Account{
 		Tenant: "cgrates.org",
@@ -793,6 +812,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
@@ -855,6 +875,7 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
@@ -922,6 +943,7 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
@@ -994,6 +1016,7 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
@@ -1066,6 +1089,7 @@ func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
@@ -1090,6 +1114,7 @@ func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
@@ -1115,6 +1140,7 @@ func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
@@ -1140,6 +1166,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
@@ -1178,6 +1205,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
@@ -1224,6 +1252,7 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
@@ -1262,6 +1291,7 @@ func TestDMSetThresholdErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetThresholdDrvF: func(ctx *context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
 	}
@@ -1294,6 +1324,7 @@ func TestDMSetThresholdReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -1323,6 +1354,7 @@ func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -1366,6 +1398,7 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheThresholds, utils.ConcatenatedKey(utils.CGRateSorg, "TH_1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1459,7 +1492,9 @@ func TestDMGetThresholdSetThCacheSetErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -1480,6 +1515,7 @@ func TestDMSetStatQueueNewErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	experr := "marshal mock error"
 	dm.ms = mockMarshal(experr)
 
@@ -1506,6 +1542,7 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
 			return utils.ErrNotImplemented
@@ -1550,6 +1587,7 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sq := &utils.StatQueue{
 
@@ -1591,6 +1629,7 @@ func TestDMRemoveStatQueueErrDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
@@ -1633,6 +1672,7 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sq := &utils.StatQueue{
 		Tenant: utils.CGRateSorg,
@@ -1690,6 +1730,7 @@ func TestDMGetStatQueueProfileErrNilCacheRead(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	tntID := utils.ConcatenatedKey(utils.CGRateSorg, "sqp99")
 
@@ -1737,6 +1778,7 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
@@ -1800,6 +1842,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
@@ -1828,6 +1871,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Error(err)
@@ -1865,6 +1909,7 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "sqp99",
@@ -1891,6 +1936,7 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Error(err)
@@ -1929,6 +1975,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
 			return &utils.Threshold{}, nil
@@ -1936,6 +1983,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -1956,6 +2004,7 @@ func TestDMGetThresholdGetThProflErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheThresholdProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "TH_1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2066,7 +2115,9 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -2105,12 +2156,14 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{}, nil
 		},
 	}
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -2131,6 +2184,7 @@ func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -2179,6 +2233,7 @@ func TestDMCacheDataFromDBResourcesPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rs := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -2224,6 +2279,7 @@ func TestDMCacheDataFromDBStatQueueProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sQP := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -2278,6 +2334,7 @@ func TestDMCacheDataFromDBStatQueuePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2322,6 +2379,7 @@ func TestDMCacheDataFromDBThresholdProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	thP := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -2370,6 +2428,7 @@ func TestDMCacheDataFromDBThresholdPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -2409,6 +2468,7 @@ func TestDMCacheDataFromDBFilterPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	fltr := &Filter{
 		Tenant: cfg.GeneralCfg().DefaultTenant,
@@ -2454,6 +2514,7 @@ func TestDMCacheDataFromDBRouteProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	routeProf := &utils.RouteProfile{
 
@@ -2512,6 +2573,7 @@ func TestDMCacheDataFromDBChargerProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -2558,6 +2620,7 @@ func TestDMCacheDataFromDBRateProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "RP1",
@@ -2610,6 +2673,7 @@ func TestDMCacheDataFromDBActionProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -2658,6 +2722,7 @@ func TestDMCacheDataFromDBAttributeFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2695,6 +2760,7 @@ func TestDMCacheDataFromDBResourceFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2732,6 +2798,7 @@ func TestDMCacheDataFromDBStatFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2769,6 +2836,7 @@ func TestDMCacheDataFromDBThresholdFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2806,6 +2874,7 @@ func TestDMCacheDataFromDBRouteFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2843,6 +2912,7 @@ func TestDMCacheDataFromDBChargerFilterIndexes(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2880,6 +2950,7 @@ func TestDMCacheDataFromDBRateProfilesFilterIndexPrfx(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2917,6 +2988,7 @@ func TestDMCacheDataFromDBRateFilterIndexPrfx(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2954,6 +3026,7 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfx(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -2991,6 +3064,7 @@ func TestDMCacheDataFromDBFilterIndexPrfx(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -3028,6 +3102,7 @@ func TestDMCacheDataFromDBAttributeFilterIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3047,6 +3122,7 @@ func TestDMCacheDataFromDBResourceFilterIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3066,6 +3142,7 @@ func TestDMCacheDataFromDBStatFilterIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.StatFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3085,6 +3162,7 @@ func TestDMCacheDataFromDBThresholdFilterIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3104,6 +3182,7 @@ func TestDMCacheDataFromDBRouteFilterIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.RouteFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3123,6 +3202,7 @@ func TestDMCacheDataFromDBChargerFilterIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerFilterIndexes, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3142,6 +3222,7 @@ func TestDMCacheDataFromDBRateProfilesFilterIndexPrfxErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilesFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3161,6 +3242,7 @@ func TestDMCacheDataFromDBRateFilterIndexPrfxErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.RateFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3180,6 +3262,7 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -3226,6 +3309,7 @@ func TestDMGetAccountReplicate(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, rpcInternal)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.Account{
 		Tenant: "cgrates.org",
@@ -3305,6 +3389,7 @@ func TestDMGetRateProfileRatesOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rps := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -3378,6 +3463,7 @@ func TestDMSetLoadIDsDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
@@ -3411,6 +3497,7 @@ func TestDMSetLoadIDsReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	itmLIDs := map[string]int64{
 		"ID_1": 21,
@@ -3425,6 +3512,7 @@ func TestDMCheckFiltersErrBadReference(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{dbs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
+	dm.SetCache(Cache)
 	expErr := "broken reference to filter: <*string:~*req.Account>"
 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~*req.Account"}); expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -3436,6 +3524,7 @@ func TestDMCheckFiltersErrBadPath(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(&DBConnManager{dbs: map[string]DataDB{utils.MetaDefault: &DataDBMock{}}}, cfg, nil)
+	dm.SetCache(Cache)
 	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"*string:~missing path:chp1","Rules":[{"Type":"*string","Element":"~missing path","Values":["chp1"]}]}>`
 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~missing path:chp1"}); expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -3456,6 +3545,7 @@ func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var val any
 	if err := Cache.Set(context.Background(), utils.CacheFilters, utils.ConcatenatedKey(utils.CGRateSorg, "fltr1"), val, []string{}, true, utils.NonTransactional); err != nil {
@@ -3486,6 +3576,7 @@ func TestDMCheckFiltersErrCall(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		HasDataDrvF: func(ctx *context.Context, category, subject, tenant string) (bool, error) {
@@ -3564,7 +3655,9 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, true, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -3635,7 +3728,9 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -3707,7 +3802,9 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.254", []string{}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -3737,6 +3834,7 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		RemoveIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
@@ -3768,6 +3866,7 @@ func TestDMRemoveIndexesReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -3835,6 +3934,7 @@ func TestDMSetIndexesReplicate(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -3879,6 +3979,7 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes2 := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -3928,7 +4029,9 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.NonTransactional, false, true, "idxKey"); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -3966,7 +4069,9 @@ func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -4003,6 +4108,7 @@ func TestDMRemoveActionProfileErrGetActionProf(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
@@ -4029,6 +4135,7 @@ func TestDMRemoveActionProfileErrRemvProfDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -4072,6 +4179,7 @@ func TestDMCacheDataFromDBPrefixKeysErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
@@ -4097,6 +4205,7 @@ func TestDMGetFilterCacheReadGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheFilters, utils.ConcatenatedKey(utils.CGRateSorg, "fltr_for_prf"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4145,6 +4254,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -4209,6 +4319,7 @@ func TestDMSetThresholdProfileWithIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -4245,6 +4356,7 @@ func TestDMSetThresholdProfileGetThPrfErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
@@ -4286,6 +4398,7 @@ func TestDMSetThresholdProfileSetThPrflDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -4328,6 +4441,7 @@ func TestDMSetThresholdProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
@@ -4387,6 +4501,7 @@ func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	th := &utils.ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -4422,6 +4537,7 @@ func TestDMGetStatQueueCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheStatQueues, utils.ConcatenatedKey(utils.CGRateSorg, "SQ1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4479,6 +4595,7 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	experr := "marshal mock error"
 	dm.ms = mockMarshal(experr)
@@ -4536,6 +4653,7 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -4573,6 +4691,7 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ssq := &StoredStatQueue{
 		Tenant: "cgrates.org",
@@ -4604,6 +4723,7 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotImplemented, err)
@@ -4623,6 +4743,7 @@ func TestDMCacheDataFromDBAccountFilterIndexPrfx(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -4660,6 +4781,7 @@ func TestDMCacheDataFromDBAccountFilterIndexPrfxErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:badtype:field>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.AccountFilterIndexPrfx, []string{"tntCtx:badtype:field"}, false); errExp != err.Error() {
@@ -4692,6 +4814,7 @@ func TestDMSetStatQueueProfileCheckFiltrsErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -4734,6 +4857,7 @@ func TestDMSetStatQueueProfileGetStatQProflErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -4782,6 +4906,7 @@ func TestDMSetStatQueueProfileSetStatQPrflDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -4829,6 +4954,7 @@ func TestDMGetResourceCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheResources, utils.ConcatenatedKey(utils.CGRateSorg, "rsrc1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4885,6 +5011,7 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResource(context.Background(), utils.CGRateSorg, "ResGroup2", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -4921,8 +5048,10 @@ func TestDMGetResourceCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResource(context.Background(), utils.CGRateSorg, "ResGroup2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -4959,6 +5088,7 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rs := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -4977,6 +5107,7 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResource(context.Background(), utils.CGRateSorg, "ResGroup2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -4999,6 +5130,7 @@ func TestDMSetResourceSetResourceDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rs := &utils.Resource{
 		Tenant: "cgrates.org",
@@ -5043,6 +5175,7 @@ func TestDMRemoveResourceRemoveResourceDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResource(context.Background(), "cgrates.org", "ResGroup2"); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5081,6 +5214,7 @@ func TestDMRemoveResourceReplicateErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// test replicate
 	if err := dm.RemoveResource(context.Background(), "cgrates.org", "ResGroup2"); err != nil {
@@ -5102,6 +5236,7 @@ func TestDMGetResourceProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheResourceProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rsrc1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -5158,6 +5293,7 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResourceProfile(context.Background(), utils.CGRateSorg, "rsrc1", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5194,8 +5330,10 @@ func TestDMGetResourceProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResourceProfile(context.Background(), utils.CGRateSorg, "ResGroup2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5232,6 +5370,7 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -5252,6 +5391,7 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetResourceProfile(context.Background(), utils.CGRateSorg, "RL2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5291,6 +5431,7 @@ func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetFilter(context.Background(), "cgrates.org", "fltr2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5327,8 +5468,10 @@ func TestDMGetFilterCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetFilter(context.Background(), utils.CGRateSorg, "fltr2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5365,6 +5508,7 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	f := &Filter{
 		Tenant: utils.CGRateSorg,
@@ -5383,6 +5527,7 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetFilter(context.Background(), utils.CGRateSorg, "fltr2", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5424,6 +5569,7 @@ func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetThreshold(context.Background(), "cgrates.org", "TH1", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5458,6 +5604,7 @@ func TestDMSetResourceProfileGetResourceProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5482,6 +5629,7 @@ func TestDMSetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5507,6 +5655,7 @@ func TestDMSetResourceProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -5558,6 +5707,7 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5592,6 +5742,7 @@ func TestDMRemoveResourceProfileGetResourceProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5617,6 +5768,7 @@ func TestDMRemoveResourceProfileRemoveResourceProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5637,6 +5789,7 @@ func TestDMRemoveResourceProfileOldResErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
@@ -5677,6 +5830,7 @@ func TestDMRemoveResourceProfileRemoveItemFromFilterIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5716,6 +5870,7 @@ func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -5770,6 +5925,7 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, false); err != utils.ErrNotImplemented {
@@ -5801,6 +5957,7 @@ func TestDMHasDataOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	fltrTh1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -5838,6 +5995,7 @@ func TestDMGetRouteProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheRouteProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rsrc1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -5915,6 +6073,7 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, false, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -5981,8 +6140,10 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -6019,6 +6180,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rp := &utils.RouteProfile{
 
@@ -6050,6 +6212,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -6078,6 +6241,7 @@ func TestDMSetRouteProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6126,6 +6290,7 @@ func TestDMSetRouteProfileGetRouteProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6174,6 +6339,7 @@ func TestDMSetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6222,6 +6388,7 @@ func TestDMSetRouteProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6307,6 +6474,7 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetRouteProfile(context.Background(), rpp, false); err != utils.ErrNotImplemented {
@@ -6340,6 +6508,7 @@ func TestDMRemoveRouteProfileGetRouteProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6385,6 +6554,7 @@ func TestDMRemoveRouteProfileRemoveRouteProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6426,6 +6596,7 @@ func TestDMRemoveRouteProfileNilOldRppErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -6450,6 +6621,7 @@ func TestDMRemoveRouteProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6518,6 +6690,7 @@ func TestDMRemoveRouteProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveRouteProfile(context.Background(), rpp.Tenant, rpp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -6579,6 +6752,7 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveRouteProfile(context.Background(), rpp.Tenant, rpp.ID, false)
@@ -6606,6 +6780,7 @@ func TestDMRemoveAttributeProfileGetAttributeProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6640,6 +6815,7 @@ func TestDMRemoveAttributeProfileRemoveAttributeProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6670,6 +6846,7 @@ func TestDMRemoveAttributeProfileNilOldAttrErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -6694,6 +6871,7 @@ func TestDMRemoveAttributeProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6742,6 +6920,7 @@ func TestDMRemoveAttributeProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveAttributeProfile(context.Background(), attrPrfl.Tenant, attrPrfl.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -6794,6 +6973,7 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveAttributeProfile(context.Background(), attrPrfl.Tenant, attrPrfl.ID, false)
@@ -6821,6 +7001,7 @@ func TestDMRemoveChargerProfileGetChargerProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -6855,6 +7036,7 @@ func TestDMRemoveChargerProfileRemoveChargerProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -6885,6 +7067,7 @@ func TestDMRemoveChargerProfileNilOldCppErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -6909,6 +7092,7 @@ func TestDMRemoveChargerProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -6958,6 +7142,7 @@ func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -7010,6 +7195,7 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, false)
@@ -7037,6 +7223,7 @@ func TestDMRemoveRateProfileGetRateProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -7077,6 +7264,7 @@ func TestDMRemoveRateProfileRemoveRateProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -7113,6 +7301,7 @@ func TestDMRemoveRateProfileNilOldRppErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -7157,6 +7346,7 @@ func TestDMRemoveRateProfileRemoveIndexFiltersItemErr1(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -7185,6 +7375,7 @@ func TestDMRemoveRateProfileRemoveIndexFiltersItemErr2(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -7207,6 +7398,7 @@ func TestDMRemoveRateProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -7268,6 +7460,7 @@ func TestDMRemoveRateProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -7326,6 +7519,7 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, false)
@@ -7341,6 +7535,7 @@ func TestDMRemoveActionProfileNilOldActErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -7365,6 +7560,7 @@ func TestDMRemoveActionProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -7416,6 +7612,7 @@ func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -7468,6 +7665,7 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, false)
@@ -7489,6 +7687,7 @@ func TestDMSetAttributeProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7520,6 +7719,7 @@ func TestDMSetAttributeProfileGetAttributeProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7551,6 +7751,7 @@ func TestDMSetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7583,6 +7784,7 @@ func TestDMSetAttributeProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7646,6 +7848,7 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != utils.ErrNotImplemented {
@@ -7708,6 +7911,7 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, attrPrfl.ID, false, false, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -7726,6 +7930,7 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	value := utils.NewRSRParsersMustCompile("31 0a 0a 32 0a 0a 33 0a 0a 34 0a 0a 35 0a 0a 36 0a 0a 37 0a 0a 38 0a 0a 39 0a 0a 31 30 0a 0a 31", utils.RSRSep)
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7763,6 +7968,7 @@ func TestDMSetChargerProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -7796,6 +8002,7 @@ func TestDMSetChargerProfileGetChargerProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -7827,6 +8034,7 @@ func TestDMSetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -7859,6 +8067,7 @@ func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -7922,6 +8131,7 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
@@ -7947,6 +8157,7 @@ func TestDMSetActionProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -7981,6 +8192,7 @@ func TestDMSetActionProfileGetActionProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -8014,6 +8226,7 @@ func TestDMSetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -8048,6 +8261,7 @@ func TestDMSetActionProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -8115,6 +8329,7 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetActionProfile(context.Background(), ap, false); err != utils.ErrNotImplemented {
@@ -8140,6 +8355,7 @@ func TestDMSetRateProfileRatesProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -8177,6 +8393,7 @@ func TestDMSetRateProfileRatesCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -8216,6 +8433,7 @@ func TestDMSetRateProfileGetRateProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -8254,6 +8472,7 @@ func TestDMSetRateProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -8298,6 +8517,7 @@ func TestDMSetRateProfileRatesSetRateProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.SetRateProfile(context.Background(), rpp, false, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -8342,6 +8562,7 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetRateProfile(context.Background(), rpp, false, false); err != utils.ErrNotImplemented {
@@ -8359,6 +8580,7 @@ func TestDMGetActionProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheActionProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "ap1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -8379,6 +8601,7 @@ func TestDMGetActionProfileCacheGet(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	val := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
@@ -8460,6 +8683,7 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetActionProfile(context.Background(), utils.CGRateSorg, ap.ID, false, false, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -8516,8 +8740,10 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetActionProfile(context.Background(), utils.CGRateSorg, ap.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -8552,6 +8778,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 
@@ -8573,6 +8800,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetActionProfile(context.Background(), utils.CGRateSorg, ap.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -8589,6 +8817,7 @@ func TestDMGetAttributeProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheAttributeProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "ap1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -8647,8 +8876,10 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, attrPrfl.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -8683,6 +8914,7 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -8702,6 +8934,7 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, attrPrfl.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -8718,6 +8951,7 @@ func TestDMGGetChargerProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheChargerProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "chp1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -8753,6 +8987,7 @@ func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -8834,6 +9069,7 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err != utils.ErrNotImplemented {
@@ -8876,6 +9112,7 @@ func TestDMSetStatQueueProfileNewStatQueueNilOldStsErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	experr := fmt.Sprintf("unsupported metric type <%s>", sqp.Metrics[0].MetricID)
 
@@ -8918,6 +9155,7 @@ func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := dm.dbConns.dbs[utils.MetaDefault].SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
 		t.Error(err)
@@ -8956,6 +9194,7 @@ func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveStatQueueProfile(context.Background(), "tnt", "Id", false)
 	if err != utils.ErrNotImplemented {
@@ -8979,6 +9218,7 @@ func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -9019,6 +9259,7 @@ func TestDMRemoveStatQueueProfileNilOldStsErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	var Id string
 	var tnt string
@@ -9045,6 +9286,7 @@ func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -9112,6 +9354,7 @@ func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	err := dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, true)
 	if err != utils.ErrNotImplemented {
@@ -9172,6 +9415,7 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	// tests replicate
 	dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, false)
@@ -9223,8 +9467,10 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, sq.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -9276,6 +9522,7 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, false, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -9330,8 +9577,10 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -9366,6 +9615,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -9385,6 +9635,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	if _, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -9437,6 +9688,7 @@ func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, false)
 	if err != utils.ErrNotImplemented {
@@ -9483,8 +9735,10 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, true)
 	if err != utils.ErrNotImplemented {
@@ -9519,6 +9773,7 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	itmLIDs := map[string]int64{
 		"ID_1": 21,
@@ -9529,6 +9784,7 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 	}
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(Cache)
 
 	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, true)
 	if err != utils.ErrNotImplemented {
@@ -9548,6 +9804,7 @@ func TestDMGetRateProfileCacheGetOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	rP := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -9590,6 +9847,7 @@ func TestDMGetRateProfileCacheGetErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if err := Cache.Set(context.Background(), utils.CacheRateProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rp1"), nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -9619,6 +9877,7 @@ func TestDMResourcesUpdateResource(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 	Cache.Clear(nil)
 	res := &utils.ResourceProfile{
 		Tenant:   "cgrates.org",
@@ -9759,6 +10018,7 @@ func TestDMGetTrend(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm = NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	tntID := utils.ConcatenatedKey(utils.CGRateSorg, "TrendCacheNil")
 	if err := Cache.Set(context.Background(), utils.CacheTrends, tntID, nil, []string{}, true, utils.NonTransactional); err != nil {
@@ -9820,6 +10080,7 @@ func TestDMGetTrend(t *testing.T) {
 
 	dbCM = NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm = NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	if _, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendRemote", false, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		t.Errorf("expected ErrNotFound or nil, got %v", err)
 	}

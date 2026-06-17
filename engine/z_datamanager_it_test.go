@@ -69,6 +69,7 @@ func TestDMitinitDB(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm2 = NewDataManager(dbCM, cfg, nil)
+	dm2.SetCache(Cache)
 
 	for _, stest := range sTestsDMit {
 		t.Run(*utils.DBType, stest)

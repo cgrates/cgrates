@@ -34,6 +34,7 @@ func TestNewTPeS(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpExporterTypes.Add("not_valid")
 	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
 	// if err != nil {
@@ -55,6 +56,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 
 	//Attributes
 	attr := &utils.AttributeProfile{
@@ -364,6 +366,7 @@ func TestV1ExportTariffPlan(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
@@ -407,6 +410,7 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -425,6 +429,7 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -445,6 +450,7 @@ func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{

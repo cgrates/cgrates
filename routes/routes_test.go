@@ -225,6 +225,7 @@ func TestRoutesCache(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	prepareRoutesData(t, dmSPP)
@@ -239,6 +240,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -266,6 +268,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -375,6 +378,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -427,6 +431,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -470,6 +475,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -571,6 +577,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	cfg.RouteSCfg().IndexedSelects = false
@@ -669,6 +676,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
@@ -740,6 +748,7 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
@@ -762,6 +771,7 @@ func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
@@ -784,6 +794,7 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
@@ -807,6 +818,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, nil)
+	dmSPP.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
@@ -832,6 +844,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
+	dmSPP.SetCache(engine.Cache)
 	routeService := NewRouteService(dmSPP, nil, cfg, connMng)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
@@ -855,6 +868,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
+	dmSPP.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*utils.RouteProfile
@@ -878,6 +892,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
+	dmSPP.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*utils.RouteProfile
@@ -901,6 +916,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
+	dmSPP.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*utils.RouteProfile
@@ -925,6 +941,7 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
+	dmSPP.SetCache(engine.Cache)
 	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 
 	var reply *[]string
@@ -950,6 +967,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1025,6 +1043,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1046,6 +1065,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	}
 
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(engine.Cache)
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1096,6 +1116,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1171,6 +1192,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1260,6 +1282,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1349,6 +1372,7 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1379,6 +1403,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1409,6 +1434,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1439,6 +1465,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1473,6 +1500,7 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1503,6 +1531,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -1589,6 +1618,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -1673,6 +1703,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -1760,6 +1791,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -1844,6 +1876,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, nil)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -1923,6 +1956,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	routeService := NewRouteService(dm, fS, cfg, cM)
 
@@ -2002,6 +2036,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2068,6 +2103,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -2139,6 +2175,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rpS := NewRouteService(dm, fltrs, cfg, nil)
 
@@ -2195,6 +2232,7 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2257,6 +2295,7 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2325,6 +2364,7 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2391,6 +2431,7 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2462,6 +2503,7 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
@@ -2532,6 +2574,7 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
@@ -2585,6 +2628,7 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 

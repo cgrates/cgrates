@@ -48,7 +48,9 @@ func TestCMgetConnNotFound(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -360,7 +362,9 @@ func TestCMCallErrgetConn(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -553,7 +557,9 @@ func TestCMReload(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
 		"value of 2nd item", nil, true, utils.NonTransactional)
 

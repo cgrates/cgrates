@@ -65,6 +65,7 @@ func TestTPEnewTPAccounts(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
+	dm.SetCache(engine.Cache)
 	exp := &TPAccounts{
 		dm: dm,
 	}
@@ -92,6 +93,7 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}
@@ -223,6 +225,7 @@ func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}

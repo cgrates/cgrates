@@ -48,6 +48,7 @@ func TestNewLoaderService(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -155,6 +156,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -239,6 +241,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -362,6 +365,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -426,6 +430,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -582,6 +587,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)

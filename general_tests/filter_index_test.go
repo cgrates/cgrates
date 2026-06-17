@@ -137,6 +137,7 @@ func TestFilterIndexUpdates(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbConn}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 
 	checkIndexes := func(want map[string]utils.StringSet) {
 		t.Helper()
@@ -482,6 +483,7 @@ func benchmarkFilterUpdate(b *testing.B, profileCount, initialValueCount int, fi
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbConn}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 
 	initialValues := generateValues(0, initialValueCount)
 	initialFilter := &engine.Filter{

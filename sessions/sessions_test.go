@@ -68,6 +68,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	//connect BiJSON
@@ -99,6 +100,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	client := &birpc.Service{}
@@ -1287,6 +1289,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
 	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS.dm.SetCache(engine.Cache)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1308,6 +1311,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		"ToR": {},
 	}
 	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS.dm.SetCache(engine.Cache)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1321,6 +1325,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		ID:     "FLTR1",
 	})
 	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS.dm.SetCache(engine.Cache)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1897,6 +1902,7 @@ func TestWarnSession(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -1999,6 +2005,7 @@ func TestBiJClntID(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	sessions := NewSessionS(cfg, dm, nil)
 	sessions.biJClnts = map[birpc.ClientConnector]string{
 		client: "First_connector",
