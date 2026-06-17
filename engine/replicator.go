@@ -132,11 +132,8 @@ func replicate(ctx *context.Context, connMgr *ConnManager, connIDs []string, fil
 	}
 	// is partial so get all the replicationHosts from cache based on object Type and ID
 	// alp_cgrates.org:ATTR1
-	rplcHostIDsIfaces := Cache.tCache.GetGroupItems(utils.CacheReplicationHosts, objType+objID)
 	rplcHostIDs := make(utils.StringSet)
-	for _, hostID := range rplcHostIDsIfaces {
-		rplcHostIDs.Add(hostID.(string))
-	}
+	rplcHostIDs.AddSlice(Cache.ReplicationHostIDs(objType + objID))
 	// using the replication hosts call the method
 	return utils.CastRPCErr(connMgr.CallWithConnIDs(connIDs, ctx, rplcHostIDs,
 		method, args, &reply))
@@ -242,10 +239,7 @@ func replicateMultipleIDs(ctx *context.Context, connMgr *ConnManager, connIDs []
 	// send all list to that hos
 	rplcHostIDs := make(utils.StringSet)
 	for _, objID := range objIDs {
-		rplcHostIDsIfaces := Cache.tCache.GetGroupItems(utils.CacheReplicationHosts, objType+objID)
-		for _, hostID := range rplcHostIDsIfaces {
-			rplcHostIDs.Add(hostID.(string))
-		}
+		rplcHostIDs.AddSlice(Cache.ReplicationHostIDs(objType + objID))
 	}
 	// using the replication hosts call the method
 	return utils.CastRPCErr(connMgr.CallWithConnIDs(connIDs, ctx, rplcHostIDs,

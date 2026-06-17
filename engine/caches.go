@@ -271,6 +271,16 @@ func (chS *CacheS) GetItemIDs(chID, prfx string) (itmIDs []string) {
 	return chS.tCache.GetItemIDs(chID, prfx)
 }
 
+// ReplicationHostIDs returns the host IDs registered for the given object group.
+func (chS *CacheS) ReplicationHostIDs(grpID string) []string {
+	items := chS.tCache.GetGroupItems(utils.CacheReplicationHosts, grpID)
+	hostIDs := make([]string, len(items))
+	for i, item := range items {
+		hostIDs[i] = item.(string)
+	}
+	return hostIDs
+}
+
 // Remove is an exported method from TransCache
 func (chS *CacheS) Remove(ctx *context.Context, chID, itmID string, commit bool, transID string) (err error) {
 	chS.tCache.Remove(chID, itmID, commit, transID)
