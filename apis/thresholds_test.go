@@ -586,7 +586,7 @@ func TestThresholdsNewThresholdSv1(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	tS := thresholds.NewThresholdService(cfg, dm, nil, nil)
+	tS := thresholds.NewThresholdService(cfg, dm, engine.Cache, nil, nil)
 
 	exp := &ThresholdSv1{
 		tS: tS,
@@ -648,7 +648,7 @@ func TestThresholdsAPIs(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, rpcInternal)
 
-	tS := thresholds.NewThresholdService(cfg, dm, fltrs, cM)
+	tS := thresholds.NewThresholdService(cfg, dm, engine.Cache, fltrs, cM)
 	adms := &AdminSv1{
 		dm:  dm,
 		cfg: cfg,

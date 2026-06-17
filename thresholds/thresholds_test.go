@@ -286,7 +286,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ = NewThresholdService(cfg, dmTH, engine.NewFilterS(cfg, nil, dmTH), nil)
+	thServ = NewThresholdService(cfg, dmTH, engine.Cache, engine.NewFilterS(cfg, nil, dmTH), nil)
 
 	fltrTh1 := &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -525,7 +525,7 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	tS := NewThresholdService(cfg, dm, nil, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, nil, nil)
 
 	exp := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -560,7 +560,7 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
-	tS := NewThresholdService(cfg, nil, nil, nil)
+	tS := NewThresholdService(cfg, nil, engine.Cache, nil, nil)
 
 	value := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -603,7 +603,7 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	tS := NewThresholdService(cfg, dm, nil, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, nil, nil)
 
 	value := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -632,7 +632,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -703,9 +703,9 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, cM)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(engine.Cache)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, cM)
 
 	defer func() {
 		engine.Cache = tmpC
@@ -767,7 +767,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 
 	thPrf := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -829,7 +829,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	tS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm, engine.Cache,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -912,7 +912,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	tS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm, engine.Cache,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -954,7 +954,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"test"}
 	cfg.DbCfg().Items[utils.CacheThresholds].Remote = true
 	config.SetCgrConfig(cfg)
-	tS := NewThresholdService(cfg, dm,
+	tS := NewThresholdService(cfg, dm, engine.Cache,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -994,7 +994,8 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	tnt := "cgrates.org"
 	thID := "Th1"
 	tS := &ThresholdS{
-		dm: dm,
+		dm:    dm,
+		cache: engine.Cache,
 		storedThresholds: utils.StringSet{
 			thID: struct{}{},
 		},
@@ -1029,7 +1030,7 @@ func TestThresholdsReload(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS := NewThresholdService(cfg, nil, engine.Cache, nil, nil)
 		tS.StartLoop(context.Background())
 		tS.Reload(context.Background())
 		tS.Shutdown(context.Background())
@@ -1042,7 +1043,7 @@ func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS := NewThresholdService(cfg, nil, engine.Cache, nil, nil)
 		tS.StartLoop(context.Background())
 		var wg sync.WaitGroup
 		wg.Go(func() { tS.Reload(context.Background()) })
@@ -1054,7 +1055,7 @@ func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
 func TestThresholdsStartLoop(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
-		tS := NewThresholdService(cfg, nil, nil, nil)
+		tS := NewThresholdService(cfg, nil, engine.Cache, nil, nil)
 		tS.StartLoop(context.Background())
 		tS.backupLoop.Wait()
 	})
@@ -1076,7 +1077,7 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1134,7 +1135,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, cM)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, cM)
 
 	th := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -1167,7 +1168,7 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 
 	thPrf1 := &utils.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1209,7 +1210,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
@@ -1274,7 +1275,7 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(cfg, dm, filterS, nil)
+	tS := NewThresholdService(cfg, dm, engine.Cache, filterS, nil)
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
