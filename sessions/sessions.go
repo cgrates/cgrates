@@ -1887,7 +1887,7 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
 			return
 		}
 	}
-	if err = AuthStirShaken(ctx, args.Identity, args.OriginatorTn, args.OriginatorURI,
+	if err = AuthStirShaken(ctx, sS.cache, args.Identity, args.OriginatorTn, args.OriginatorURI,
 		args.DestinationTn, args.DestinationURI, attest, stirMaxDur); err != nil {
 		return utils.NewSTIRError(err.Error())
 	}
@@ -1909,6 +1909,7 @@ func (sS *SessionS) BiRPCv1STIRIdentity(ctx *context.Context,
 	}
 	if *identity, err = NewSTIRIdentity(
 		ctx,
+		sS.cache,
 		utils.NewPASSporTHeader(utils.FirstNonEmpty(args.PublicKeyPath,
 			sS.cfg.SessionSCfg().STIRCfg.PublicKeyPath)),
 		args.Payload, utils.FirstNonEmpty(args.PrivateKeyPath,

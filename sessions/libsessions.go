@@ -197,18 +197,18 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 }
 
 // VerifySignature returns if the signature is valid
-func (pi *ProcessedStirIdentity) VerifySignature(ctx *context.Context, timeoutVal time.Duration) (err error) {
-	var pubkey any
-	var ok bool
-	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
+func (pi *ProcessedStirIdentity) VerifySignature(ctx *context.Context, cache *engine.CacheS, timeoutVal time.Duration) error {
+	pubkey, ok := cache.Get(utils.CacheSTIR, pi.Header.X5u)
+	if !ok {
+		var err error
 		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
-			if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, nil,
+			if errCh := cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
 				return errCh
 			}
-			return
+			return err
 		}
-		if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, pubkey,
+		if errCh := cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, pubkey,
 			nil, false, utils.NonTransactional); errCh != nil {
 			return errCh
 		}
@@ -246,53 +246,54 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 }
 
 // NewSTIRIdentity returns the identiy for stir header
-func NewSTIRIdentity(ctx *context.Context, header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
-	var prvKey any
-	var ok bool
-	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
+func NewSTIRIdentity(ctx *context.Context, cache *engine.CacheS, header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (string, error) {
+	prvKey, ok := cache.Get(utils.CacheSTIR, prvkeyPath)
+	if !ok {
+		var err error
 		if prvKey, err = utils.NewECDSAPrvKey(prvkeyPath, timeout); err != nil {
-			if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, prvkeyPath, nil,
+			if errCh := cache.Set(ctx, utils.CacheSTIR, prvkeyPath, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
-				return utils.EmptyString, errCh
+				return "", errCh
 			}
-			return
+			return "", err
 		}
-		if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, prvkeyPath, prvKey,
+		if errCh := cache.Set(ctx, utils.CacheSTIR, prvkeyPath, prvKey,
 			nil, false, utils.NonTransactional); errCh != nil {
-			return utils.EmptyString, errCh
+			return "", errCh
 		}
 	}
-	var headerStr, payloadStr string
-	if headerStr, err = utils.EncodeBase64JSON(header); err != nil {
-		return
+	headerStr, err := utils.EncodeBase64JSON(header)
+	if err != nil {
+		return "", err
 	}
-	if payloadStr, err = utils.EncodeBase64JSON(payload); err != nil {
-		return
+	payloadStr, err := utils.EncodeBase64JSON(payload)
+	if err != nil {
+		return "", err
 	}
-	identity = headerStr + utils.NestingSep + payloadStr
+	identity := headerStr + utils.NestingSep + payloadStr
 
 	sigMethod := jwt.GetSigningMethod(header.Alg)
-	var signature string
-	if signature, err = sigMethod.Sign(identity, prvKey); err != nil {
-		return
+	signature, err := sigMethod.Sign(identity, prvKey)
+	if err != nil {
+		return "", err
 	}
 	identity += utils.NestingSep + signature
 	identity += utils.STIRExtraInfoPrefix + header.X5u + utils.STIRExtraInfoSuffix
-	return
+	return identity, nil
 }
 
 // AuthStirShaken autentificates the given identity using STIR/SHAKEN
-func AuthStirShaken(ctx *context.Context, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
-	attest utils.StringSet, hdrMaxDur time.Duration) (err error) {
-	var pi *ProcessedStirIdentity
-	if pi, err = NewProcessedIdentity(identity); err != nil {
-		return
+func AuthStirShaken(ctx *context.Context, cache *engine.CacheS, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
+	attest utils.StringSet, hdrMaxDur time.Duration) error {
+	pi, err := NewProcessedIdentity(identity)
+	if err != nil {
+		return err
 	}
 	if !pi.VerifyHeader() {
 		return errors.New("wrong header")
 	}
-	if err = pi.VerifySignature(ctx, config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
-		return
+	if err = pi.VerifySignature(ctx, cache, config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
+		return err
 	}
 	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest)
 }
