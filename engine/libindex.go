@@ -134,7 +134,7 @@ func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt
 	for indxKey, index := range indexes {
 		index.Add(itemID)
 		// remove from cache in order to corectly update the index
-		if err = Cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
+		if err = dm.cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 			return
 		}
 	}
@@ -166,7 +166,7 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 			indexes[idxKey] = nil // this will not be set in DB(handled by driver)
 		}
 		// remove from cache in order to corectly update the index
-		if err = Cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, idxKey), true, utils.NonTransactional); err != nil {
+		if err = dm.cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, idxKey), true, utils.NonTransactional); err != nil {
 			return
 		}
 	}
@@ -264,7 +264,7 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 	indexes = make(utils.StringSet)
 	var profilesIDs []string
 	if IDs == nil { // get all items
-		Cache.Clear([]string{idxItmType})
+		dm.cache.Clear([]string{idxItmType})
 		db, _, err := dm.dbConns.GetConn(idxItmType)
 		if err != nil {
 			return nil, err
@@ -336,7 +336,7 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 		}
 		indexes[idxItmType].Add(itemID)
 		for indxKey := range indexes {
-			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
+			if err = dm.cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 				guardian.Guardian.UnguardIDs(refID)
 				return
 			}
@@ -372,7 +372,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 		indexes[idxItmType].Remove(itemID)
 
 		for indxKey := range indexes {
-			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
+			if err = dm.cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 				guardian.Guardian.UnguardIDs(refID)
 				return
 			}
