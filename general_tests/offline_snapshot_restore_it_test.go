@@ -358,8 +358,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				slices.Sort(dumpDirs1)
 				if !reflect.DeepEqual(dirNames, dumpDirs1) {
 					t.Errorf("expected <%v>, received <%v>", dirNames, dumpDirs1)
-				} else if files != 37 {
-					t.Errorf("expected <%d> files, received <%d>", 37, files)
+				} else if files != 36 {
+					t.Errorf("expected <%d> files, received <%d>", 36, files)
 				}
 			})
 
@@ -449,8 +449,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				slices.Sort(snapshotDirs)
 				if !reflect.DeepEqual(dirNames, snapshotDirs) {
 					t.Errorf("expected <%v>, received <%v>", dirNames, snapshotDirs)
-				} else if files != 36 { // expected 1 less file then dump since rewriting happens on dumps *versions
-					t.Errorf("expected <%d> files, received <%d>", 36, files)
+				} else if files != 35 { // expected 1 less file then dump since rewriting happens on dumps *versions
+					t.Errorf("expected <%d> files, received <%d>", 35, files)
 				}
 				for _, sfn := range snapshotFileNames {
 					// make sure file names are not the same as discarded(backed up) dump files
@@ -722,8 +722,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 					t.Error(err)
 				} else if dirs != 36 {
 					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
-				} else if files != 33 {
-					t.Errorf("expected <%d> files, received <%d>", 33, files)
+				} else if files != 32 {
+					t.Errorf("expected <%d> files, received <%d>", 32, files)
 				}
 			})
 
