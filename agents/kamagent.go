@@ -483,13 +483,17 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam st
 	if sent == 0 {
 		return errors.New("failed sending dialog list to any connection")
 	}
-	tm := time.NewTimer(config.CgrConfig().GeneralCfg().ReplyTimeout)
-	defer tm.Stop()
+	var tmC <-chan time.Time
+	if timeout := config.CgrConfig().SessionSCfg().ChannelSyncTimeout; timeout > 0 {
+		tm := time.NewTimer(timeout)
+		defer tm.Stop()
+		tmC = tm.C
+	}
 	for range sent {
 		select {
 		case sIDs := <-ka.replyCh:
 			*sessionIDs = append(*sessionIDs, sIDs...)
-		case <-tm.C:
+		case <-tmC:
 			return errors.New("timeout executing dialog list")
 		}
 	}

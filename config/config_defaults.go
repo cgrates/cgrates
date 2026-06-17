@@ -699,6 +699,7 @@ const CGRATES_CFG_JSON = `
 	"session_indexes": [],			// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 2.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0","2.0">
 	"channel_sync_interval": "0",		// sync channels to detect stale sessions (0 to disable)
+	"channel_sync_timeout": "60s",		// max time to wait for a client's active sessions during sync (0 for unlimited)
 	"stale_chan_max_extra_usage": "0",	// add random usage below max for stale channels
 	"terminate_attempts": 5,		// attempts to get the session before terminating it
 	"alterable_fields": [],			// the session fields that can be updated

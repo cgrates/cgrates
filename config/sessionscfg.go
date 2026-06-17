@@ -126,6 +126,7 @@ type SessionSCfg struct {
 	SessionIndexes         utils.StringSet
 	ClientProtocol         float64
 	ChannelSyncInterval    time.Duration
+	ChannelSyncTimeout     time.Duration
 	StaleChanMaxExtraUsage time.Duration
 	TerminateAttempts      int
 	AlterableFields        utils.StringSet
@@ -262,6 +263,11 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.ChannelSyncTimeout != nil {
+		if scfg.ChannelSyncTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ChannelSyncTimeout); err != nil {
+			return err
+		}
+	}
 	if jsnCfg.StaleChanMaxExtraUsage != nil {
 		if scfg.StaleChanMaxExtraUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.StaleChanMaxExtraUsage); err != nil {
 			return err
@@ -335,6 +341,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.STIRCfg:                   scfg.STIRCfg.AsMapInterface(),
 		utils.MinDurLowBalanceCfg:       "0",
 		utils.ChannelSyncIntervalCfg:    "0",
+		utils.ChannelSyncTimeoutCfg:     "0",
 		utils.StaleChanMaxExtraUsageCfg: "0",
 		utils.DebitIntervalCfg:          "0",
 		utils.SessionTTLCfg:             "0",
@@ -361,6 +368,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		initialMP[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
+	}
+	if scfg.ChannelSyncTimeout != 0 {
+		initialMP[utils.ChannelSyncTimeoutCfg] = scfg.ChannelSyncTimeout.String()
 	}
 	if scfg.StaleChanMaxExtraUsage != 0 {
 		initialMP[utils.StaleChanMaxExtraUsageCfg] = scfg.StaleChanMaxExtraUsage.String()
@@ -389,6 +399,7 @@ func (scfg *SessionSCfg) Clone() (cln *SessionSCfg) {
 		BackupInterval:         scfg.BackupInterval,
 		ClientProtocol:         scfg.ClientProtocol,
 		ChannelSyncInterval:    scfg.ChannelSyncInterval,
+		ChannelSyncTimeout:     scfg.ChannelSyncTimeout,
 		StaleChanMaxExtraUsage: scfg.StaleChanMaxExtraUsage,
 		TerminateAttempts:      scfg.TerminateAttempts,
 		MinDurLowBalance:       scfg.MinDurLowBalance,

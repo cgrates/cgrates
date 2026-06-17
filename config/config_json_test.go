@@ -959,6 +959,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		SessionIndexes:         &[]string{},
 		ClientProtocol:         utils.Float64Pointer(2.0),
 		ChannelSyncInterval:    utils.StringPointer("0"),
+		ChannelSyncTimeout:     utils.StringPointer("60s"),
 		StaleChanMaxExtraUsage: utils.StringPointer("0"),
 		TerminateAttempts:      utils.IntPointer(5),
 		AlterableFields:        &[]string{},
