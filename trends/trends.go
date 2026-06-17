@@ -34,6 +34,7 @@ import (
 // TrendS implements the logic for processing and managing trends based on stat metrics.
 type TrendS struct {
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	cfg     *config.CGRConfig
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
@@ -49,10 +50,11 @@ type TrendS struct {
 }
 
 // NewTrendService creates a new TrendS service.
-func NewTrendService(dm *engine.DataManager,
+func NewTrendService(dm *engine.DataManager, cache *engine.CacheS,
 	cgrcfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) *TrendS {
 	return &TrendS{
 		dm:             dm,
+		cache:          cache,
 		cfg:            cgrcfg,
 		fltrS:          filterS,
 		connMgr:        connMgr,
@@ -280,7 +282,7 @@ func (t *TrendS) storeTrends(ctx *context.Context) {
 		if trndID == utils.EmptyString {
 			break // no more keys, backup completed
 		}
-		trndIf, ok := engine.Cache.Get(utils.CacheTrends, trndID)
+		trndIf, ok := t.cache.Get(utils.CacheTrends, trndID)
 		if !ok || trndIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache Trend with ID: %q",

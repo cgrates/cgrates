@@ -27,11 +27,12 @@ import (
 
 func TestNewTrendService(t *testing.T) {
 	dm := &engine.DataManager{}
+	cache := &engine.CacheS{}
 	cfg := &config.CGRConfig{}
 	filterS := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 
-	trendService := NewTrendService(dm, cfg, filterS, connMgr)
+	trendService := NewTrendService(dm, cache, cfg, filterS, connMgr)
 
 	if trendService == nil {
 		t.Errorf("Expected non-nil TrendS, got nil")
@@ -39,6 +40,10 @@ func TestNewTrendService(t *testing.T) {
 
 	if trendService.dm != dm {
 		t.Errorf("Expected dm to be %v, got %v", dm, trendService.dm)
+	}
+
+	if trendService.cache != cache {
+		t.Errorf("Expected cache to be %v, got %v", cache, trendService.cache)
 	}
 
 	if trendService.cfg != cfg {
