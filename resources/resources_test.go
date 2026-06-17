@@ -49,7 +49,7 @@ func newTestResourceS(t *testing.T) (*ResourceS, *engine.DataManager) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, nil)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 	return rS, dm
 }
 
@@ -66,7 +66,7 @@ func newTestResourceSWithCache(t *testing.T) (*ResourceS, *engine.DataManager) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, nil)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 	return rS, dm
 }
 
@@ -1282,7 +1282,8 @@ func TestResourcesStoreResources(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 	cfg := config.NewDefaultCGRConfig()
 	rS := &ResourceS{
-		cfg: cfg,
+		cfg:   cfg,
+		cache: engine.Cache,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -1299,7 +1300,8 @@ func TestResourcesStoreResources(t *testing.T) {
 	explog := fmt.Sprintf("CGRateS <> [WARNING] <%s> failed saving Resource with ID: %s, error: %s\n",
 		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
 	exp := &ResourceS{
-		cfg: cfg,
+		cfg:   cfg,
+		cache: engine.Cache,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -1325,7 +1327,8 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	rS := &ResourceS{
-		dm: engine.NewDataManager(dbCM, cfg, nil),
+		dm:    engine.NewDataManager(dbCM, cfg, nil),
+		cache: engine.Cache,
 	}
 	r := &utils.Resource{}
 
@@ -1362,9 +1365,9 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
-	rS := NewResourceService(cfg, dm, nil, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(engine.Cache)
+	rS := NewResourceService(cfg, dm, engine.Cache, nil, nil)
 	r := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RES1",
@@ -1652,7 +1655,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm,
+	rS := NewResourceService(cfg, dm, engine.Cache,
 		fltrs, nil)
 	engine.Cache.Clear(nil)
 
@@ -1738,7 +1741,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm,
+	rS := NewResourceService(cfg, dm, engine.Cache,
 		fltrs, nil)
 
 	ids := make([]string, 0, 10)
@@ -1763,7 +1766,8 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	tnt := "cgrates.org"
 	resID := "Res1"
 	rS := &ResourceS{
-		dm: dm,
+		dm:    dm,
+		cache: engine.Cache,
 		storedResources: utils.StringSet{
 			resID: struct{}{},
 		},
@@ -1798,7 +1802,7 @@ func TestResourcesReload(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-		rS := NewResourceService(cfg, nil, nil, nil)
+		rS := NewResourceService(cfg, nil, engine.Cache, nil, nil)
 		rS.StartLoop(context.Background())
 		rS.Reload(context.Background())
 		rS.Shutdown(context.Background())
@@ -1811,7 +1815,7 @@ func TestResourcesReloadShutdownConcurrent(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-		rS := NewResourceService(cfg, nil, nil, nil)
+		rS := NewResourceService(cfg, nil, engine.Cache, nil, nil)
 		rS.StartLoop(context.Background())
 		var wg sync.WaitGroup
 		wg.Go(func() { rS.Reload(context.Background()) })
@@ -1823,7 +1827,7 @@ func TestResourcesReloadShutdownConcurrent(t *testing.T) {
 func TestResourcesStartLoop(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
-		rS := NewResourceService(cfg, nil, nil, nil)
+		rS := NewResourceService(cfg, nil, engine.Cache, nil, nil)
 		rS.StartLoop(context.Background())
 		rS.backupLoop.Wait()
 	})
@@ -1853,7 +1857,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	rS := NewResourceService(cfg, dm, fltrs, connMgr)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
@@ -1917,7 +1921,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rS := NewResourceService(cfg, dm, fltrs, connMgr)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestMatchingResourcesForEvent",
@@ -2003,7 +2007,7 @@ func TestStoreMatchedResources(t *testing.T) {
 		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 		dm := engine.NewDataManager(dbCM, cfg, nil)
 		dm.SetCache(engine.Cache)
-		rS := &ResourceS{dm: dm, cfg: cfg, storedResources: utils.NewStringSet(nil)}
+		rS := &ResourceS{dm: dm, cache: engine.Cache, cfg: cfg, storedResources: utils.NewStringSet(nil)}
 		return rS, dm
 	}
 

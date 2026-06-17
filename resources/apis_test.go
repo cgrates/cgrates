@@ -44,7 +44,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmRES)
-	resService := NewResourceService(cfg, dmRES,
+	resService := NewResourceService(cfg, dmRES, engine.Cache,
 		fltrs, nil)
 	var reply *string
 	argsMissingTenant := &utils.CGREvent{
@@ -96,7 +96,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	fltS := engine.NewFilterS(cfg, nil, dm)
-	rs := NewResourceService(cfg, dm, fltS, nil)
+	rs := NewResourceService(cfg, dm, engine.Cache, fltS, nil)
 	if err := dm.SetResourceProfile(context.TODO(), rProf, true); err != nil {
 		t.Fatal(err)
 	}
@@ -376,7 +376,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	}
 
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, nil)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 
 	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
@@ -471,7 +471,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	}
 
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, nil)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 
 	args := &utils.CGREvent{
 		ID: "ResourcesForEventTest",
@@ -862,7 +862,7 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			}
 
 			fltrs := engine.NewFilterS(cfg, nil, dm)
-			rS := NewResourceService(cfg, dm, fltrs, nil)
+			rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 
 			args := &utils.CGREvent{
 				ID:    tc.eventID,
@@ -987,7 +987,7 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			}
 
 			fltrs := engine.NewFilterS(cfg, nil, dm)
-			rS := NewResourceService(cfg, dm, fltrs, nil)
+			rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 
 			args := &utils.CGREvent{
 				ID:    tc.eventID,
@@ -1269,7 +1269,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, cM)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, cM)
 
 	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
@@ -1477,7 +1477,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	}
 
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rS := NewResourceService(cfg, dm, fltrs, cM)
+	rS := NewResourceService(cfg, dm, engine.Cache, fltrs, cM)
 
 	args := &utils.CGREvent{
 		ID: "EventAuthorizeResource",
@@ -1528,7 +1528,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 
-	rS := NewResourceService(cfg, dm, engine.NewFilterS(cfg, nil, dm), nil)
+	rS := NewResourceService(cfg, dm, engine.Cache, engine.NewFilterS(cfg, nil, dm), nil)
 
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -1664,7 +1664,7 @@ func TestErrRetrieveOpts(t *testing.T) {
 			engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 			dm.SetCache(engine.Cache)
 			fltrs := engine.NewFilterS(cfg, nil, dm)
-			rS := NewResourceService(cfg, dm, fltrs, nil)
+			rS := NewResourceService(cfg, dm, engine.Cache, fltrs, nil)
 
 			experr := `NOT_FOUND:FLTR_Invalid`
 			if err := tc.call(rS); err == nil || err.Error() != experr {

@@ -166,10 +166,11 @@ func (rs matchedResources) allocateResource(ru *utils.ResourceUsage, dryRun bool
 
 // NewResourceService returns a new ResourceService
 func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
-	filters *engine.FilterS, cm *engine.ConnManager) *ResourceS {
+	cache *engine.CacheS, filters *engine.FilterS, cm *engine.ConnManager) *ResourceS {
 	return &ResourceS{
 		cfg:             cfg,
 		dm:              dm,
+		cache:           cache,
 		filters:         filters,
 		cm:              cm,
 		storedResources: make(utils.StringSet),
@@ -181,6 +182,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
 type ResourceS struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	filters *engine.FilterS
 	cm      *engine.ConnManager
 
@@ -254,7 +256,7 @@ func (s *ResourceS) storeResources(ctx *context.Context) {
 		if rID == "" {
 			break // no more keys, backup completed
 		}
-		rIf, ok := engine.Cache.Get(utils.CacheResources, rID)
+		rIf, ok := s.cache.Get(utils.CacheResources, rID)
 		if !ok || rIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
 			continue
@@ -286,8 +288,8 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := r.TenantID(); engine.Cache.HasItem(utils.CacheResources, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheResources, tntID, r, nil,
+	if tntID := r.TenantID(); s.cache.HasItem(utils.CacheResources, tntID) { // only cache if previously there
+		if err := s.cache.Set(ctx, utils.CacheResources, tntID, r, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed caching Resource with ID: %s, error: %v",
@@ -387,7 +389,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		utils.MetaOpts: ev.APIOpts,
 	}
 	var itemIDs []string
-	if x, ok := engine.Cache.Get(utils.CacheEventResources, evUUID); ok {
+	if x, ok := s.cache.Get(utils.CacheEventResources, evUUID); ok {
 		if x == nil {
 			return nil, nil, utils.ErrNotFound
 		}
@@ -397,7 +399,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 				// TODO: Consider using RemoveWithoutReplicate instead, as
 				// partitions with Replicate=true call ReplicateRemove in
 				// onEvict by default.
-				if errCh := engine.Cache.Remove(ctx, utils.CacheEventResources, evUUID,
+				if errCh := s.cache.Remove(ctx, utils.CacheEventResources, evUUID,
 					true, utils.NonTransactional); errCh != nil {
 					err = errCh
 				}
@@ -417,7 +419,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
+				if errCh := s.cache.Set(ctx, utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
 					return nil, nil, errCh
 				}
 			}
@@ -504,7 +506,7 @@ func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, 
 			break
 		}
 	}
-	if errCh := engine.Cache.Set(ctx, utils.CacheEventResources, evUUID, itemIDs, nil, true, ""); errCh != nil {
+	if errCh := s.cache.Set(ctx, utils.CacheEventResources, evUUID, itemIDs, nil, true, ""); errCh != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> failed caching event resources: %v", utils.ResourceS, errCh))
 	}
 	return rs, unlockAll, nil
