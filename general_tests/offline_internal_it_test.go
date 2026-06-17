@@ -22,6 +22,7 @@ package general_tests
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -32,13 +33,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestOfflineInternal(t *testing.T) { // run with sudo
+func TestOfflineInternal(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres, utils.MetaRedis:
 		t.SkipNow()
@@ -58,13 +58,19 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal_ms_rewrite_ms_limit"), // dump ms and rewrite ms and limit passed
 	}
 	for i, pth := range paths {
-		dfltCfg := config.NewDefaultCGRConfig()
-		if err := os.MkdirAll(dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, 0755); err != nil {
+		dumpBase := t.TempDir()
+		dataDumpPath := filepath.Join(dumpBase, "db")
+		configDumpPath := filepath.Join(dumpBase, "configdb")
+		if err := os.MkdirAll(dataDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+		if err := os.MkdirAll(configDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
+		cfgJSON := fmt.Sprintf(`{
+"db": {"dbConns": {"*default": {"opts": {"internalDBDumpPath": %q}}}},
+"configDB": {"opts": {"internalDBDumpPath": %q}}
+}`, dataDumpPath, configDumpPath)
 		buf := &bytes.Buffer{} // to print logs
 		// t.Cleanup(func() {
 		// 	fmt.Println(buf)
@@ -72,6 +78,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		t.Run("OfflineInternal"+strconv.Itoa(i), func(t *testing.T) {
 			ng := engine.TestEngine{
 				ConfigPath:       pth,
+				ConfigJSON:       cfgJSON,
 				GracefulShutdown: true,
 				Encoding:         *utils.Encoding,
 				LogBuffer:        buf,
@@ -630,9 +637,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					t.Errorf("Expected Accounts to be the same. Before shutdown \n<%v>\nAfter rebooting <%v>", utils.ToJSON(acnts), utils.ToJSON(rcv))
 				}
 			})
-			if err := os.RemoveAll("/var/lib/cgrates/internal_db"); err != nil {
-				t.Error(err)
-			}
 		})
 	}
 }

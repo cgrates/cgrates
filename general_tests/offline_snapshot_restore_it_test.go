@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,13 +35,12 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
+func TestOfflineInternalSnapshotAndRestore(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres, utils.MetaRedis:
 		t.SkipNow()
@@ -66,23 +66,32 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 			"*accountFilterIndexes", "*reverseFilterIndexes", "*cdrs",
 		}
 		slices.Sort(dirNames)
-		dfltCfg := config.NewDefaultCGRConfig()
-		if err := os.MkdirAll(dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBDumpPath, 0755); err != nil {
-			t.Fatal(err)
-		}
-		backupPath := dfltCfg.DbCfg().DBConns[utils.MetaDefault].Opts.InternalDBBackupPath
+		dumpBase := t.TempDir()
+		dataDumpPath := filepath.Join(dumpBase, "db")
+		configDumpPath := filepath.Join(dumpBase, "configdb")
+		backupPath := filepath.Join(dumpBase, "backup", "db")
+		cfgJSON := fmt.Sprintf(`{
+"db": {"dbConns": {"*default": {"opts": {"internalDBDumpPath": %q, "internalDBBackupPath": %q}}}},
+"configDB": {"opts": {"internalDBDumpPath": %q}}
+}`, dataDumpPath, backupPath, configDumpPath)
 		if i == 3 {
+			// engine keeps the temp backup path above, snapshot below gets a
+			// custom one, so the test proves the explicit path is honored
 			backupPath = "/tmp/customBackupPath"
+		}
+		if err := os.MkdirAll(dataDumpPath, 0755); err != nil {
+			t.Fatal(err)
 		}
 		if err := os.MkdirAll(backupPath, 0755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+		if err := os.MkdirAll(configDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
 		t.Run("OfflineInternal"+strconv.Itoa(i), func(t *testing.T) {
 			ng := engine.TestEngine{
 				ConfigPath:       pth,
+				ConfigJSON:       cfgJSON,
 				GracefulShutdown: true,
 				Encoding:         *utils.Encoding,
 				// LogBuffer:        &bytes.Buffer{},
@@ -1286,10 +1295,6 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				if err := os.RemoveAll(backupPath); err != nil {
 					t.Error(err)
 				}
-			}
-
-			if err := os.RemoveAll("/var/lib/cgrates/internal_db"); err != nil {
-				t.Error(err)
 			}
 
 		})
