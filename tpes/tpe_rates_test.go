@@ -33,6 +33,7 @@ func TestTPEnewTPRates(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetRateProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.RateProfile, error) {
 			rt := &utils.RateProfile{

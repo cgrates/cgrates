@@ -1636,6 +1636,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
@@ -2154,6 +2155,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
@@ -2687,6 +2689,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 
 	// get the connMngr
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {

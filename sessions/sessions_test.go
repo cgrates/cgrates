@@ -1951,6 +1951,7 @@ func TestInitSession(t *testing.T) {
 	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
+	conMng.SetCache(engine.Cache)
 	sS := NewSessionS(cfg, nil, conMng)
 	s, err := sS.initSession(&utils.CGREvent{
 		Tenant: "cgrates.org",

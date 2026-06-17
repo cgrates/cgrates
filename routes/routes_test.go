@@ -842,6 +842,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 		t.Error(err)
 	}
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
 	dmSPP.SetCache(engine.Cache)
@@ -866,6 +867,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 		t.Error(err)
 	}
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
 	dmSPP.SetCache(engine.Cache)
@@ -890,6 +892,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 		t.Error(err)
 	}
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
 	dmSPP.SetCache(engine.Cache)
@@ -914,6 +917,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 		t.Error(err)
 	}
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
 	dmSPP.SetCache(engine.Cache)
@@ -939,6 +943,7 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 		t.Error(err)
 	}
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng)
 	dmSPP.SetCache(engine.Cache)
@@ -965,6 +970,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 		t.Error(err)
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -1039,6 +1045,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -1114,6 +1121,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 		t.Error(err)
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -1190,6 +1198,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 		t.Error(err)
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -1280,6 +1289,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 		t.Error(err)
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -1952,6 +1962,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, cc)
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -2101,6 +2112,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 		t.Error(err)
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)

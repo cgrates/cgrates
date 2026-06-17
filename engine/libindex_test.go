@@ -2627,6 +2627,7 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -2661,6 +2662,7 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 		},
 	}
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(Cache)
@@ -2705,6 +2707,7 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -2735,6 +2738,7 @@ func TestAddIndexFiltersItemSetIndexesErr(t *testing.T) {
 		},
 	}
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(Cache)
@@ -2755,6 +2759,7 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(Cache)
@@ -2779,6 +2784,7 @@ func TestNewFilterIndexGetIdxErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(Cache)
@@ -2828,6 +2834,7 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -2879,6 +2886,7 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
@@ -2934,6 +2942,7 @@ func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(Cache)

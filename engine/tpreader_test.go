@@ -41,6 +41,7 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	args := map[string][]string{
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 		utils.CacheResources: {},
@@ -92,6 +93,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -160,6 +162,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -254,6 +257,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaLoad
 	args := map[string][]string{
@@ -323,6 +327,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaRemove
 	args := map[string][]string{
@@ -374,6 +379,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaClear
 	args := map[string][]string{
@@ -607,6 +613,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 	}
 	cnMgr := NewConnManager(cfg)
+	cnMgr.SetCache(Cache)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
 	cnMgr.AddInternalConn(connID, utils.CacheSv1, rpcInternal)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())

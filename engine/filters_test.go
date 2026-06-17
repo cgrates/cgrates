@@ -2625,6 +2625,7 @@ func TestFilterTrends(t *testing.T) {
 	}
 	now3 := time.Now().Add(-time.Second * 3).Format(time.RFC3339)
 	cM := NewConnManager(config.NewDefaultCGRConfig())
+	cM.SetCache(Cache)
 
 	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends): clientConn,
@@ -2716,6 +2717,7 @@ func TestFilterRanking(t *testing.T) {
 		}}
 
 	cM := NewConnManager(config.NewDefaultCGRConfig())
+	cM.SetCache(Cache)
 	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
 	}

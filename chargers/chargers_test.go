@@ -1050,6 +1050,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
+	cS.connMgr.SetCache(engine.Cache)
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1133,6 +1134,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
+	cS.connMgr.SetCache(engine.Cache)
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1233,6 +1235,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
+	cS.connMgr.SetCache(engine.Cache)
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
@@ -1304,6 +1307,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
+	cS.connMgr.SetCache(engine.Cache)
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
@@ -1388,6 +1392,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
+	cS.connMgr.SetCache(engine.Cache)
 	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",

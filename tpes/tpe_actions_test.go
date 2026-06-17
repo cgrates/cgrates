@@ -33,6 +33,7 @@ func TestTPEnewTPActions(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetActionProfileDrvF: func(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error) {
 			act := &utils.ActionProfile{

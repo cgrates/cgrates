@@ -241,6 +241,7 @@ func TestNewIPService(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 
 	svc := NewIPService(cfg, dm, filters, connMgr)
 

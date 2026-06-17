@@ -763,6 +763,7 @@ dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
+	connMgr.SetCache(engine.Cache)
 
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -827,6 +828,7 @@ dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
+	connMgr.SetCache(engine.Cache)
 
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{

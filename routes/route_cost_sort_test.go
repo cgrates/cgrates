@@ -67,6 +67,7 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	lcs := NewLeastCostSorter(cfg, cM, fltrS)
 
@@ -102,6 +103,7 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -177,6 +179,7 @@ func TestHightCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
 
@@ -211,6 +214,7 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -304,6 +308,7 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	cfg.RouteSCfg().Opts.Usage = dynOpts
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -348,6 +353,7 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -408,6 +414,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -474,6 +481,7 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -540,6 +548,7 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -631,6 +640,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -698,6 +708,7 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)

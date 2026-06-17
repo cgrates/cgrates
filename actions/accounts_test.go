@@ -33,6 +33,7 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccounts",
@@ -87,6 +88,7 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",
@@ -133,6 +135,7 @@ func TestACExecuteAccountsParseError(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
+	connMngr.SetCache(engine.Cache)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",

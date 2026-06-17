@@ -54,6 +54,7 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 	}
 	expErr := []string{"dial tcp [::1]:6012: connect: connection refused", "dial tcp 127.0.0.1:6012: connect: connection refused"}
 	cM := NewConnManager(config.NewDefaultCGRConfig())
+	cM.SetCache(Cache)
 	ctx := context.Background()
 
 	_, err := NewRPCConnection(ctx, cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
@@ -83,6 +84,7 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		ClientKey:       "key1",
 	}
 	cM := NewConnManager(config.NewDefaultCGRConfig())
+	cM.SetCache(Cache)
 	exp, err := rpcclient.NewRPCClient(context.Background(), "", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.MaxReconnectInterval, utils.FibDuration,
 		cfg.ConnectTimeout, cfg.ReplyTimeout, rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
@@ -399,6 +401,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
 	ev := &utils.CGREvent{

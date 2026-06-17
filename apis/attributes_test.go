@@ -150,6 +150,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	attrPrf.Attributes[0].Path = "*req.RequestType"
 
 	admS.connMgr = engine.NewConnManager(cfg)
+	admS.connMgr.SetCache(engine.Cache)
 	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = "SERVER_ERROR: context deadline exceeded"
@@ -257,6 +258,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	admS.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
 	admS.connMgr = engine.NewConnManager(cfg)
+	admS.connMgr.SetCache(engine.Cache)
 	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	expected := "SERVER_ERROR: context deadline exceeded"
 	if err := admS.RemoveAttributeProfile(ctx,
@@ -487,6 +489,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -629,6 +632,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)

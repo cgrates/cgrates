@@ -921,6 +921,7 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -979,6 +980,7 @@ func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1129,6 +1131,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1225,6 +1228,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -4784,6 +4788,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -4912,6 +4917,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	engine.Cache.Clear(nil)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5013,6 +5019,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -5113,6 +5120,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	engine.Cache.Clear(nil)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5785,6 +5793,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -5919,6 +5928,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -6020,6 +6030,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -6110,6 +6121,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	conMng := engine.NewConnManager(cfg)
+	conMng.SetCache(engine.Cache)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

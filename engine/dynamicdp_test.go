@@ -468,6 +468,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -532,6 +533,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -602,6 +604,7 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -651,6 +654,7 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -753,6 +757,7 @@ func TestDPFilterSConns(t *testing.T) {
 		dm := NewDataManager(dbCM, cfg, nil)
 		dm.SetCache(Cache)
 		cM := NewConnManager(cfg)
+		cM.SetCache(Cache)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 		fS := NewFilterS(cfg, cM, dm)
 
@@ -785,6 +790,7 @@ func TestDPFilterSConns(t *testing.T) {
 		dm.SetCache(Cache)
 		fS := NewFilterS(cfg, nil, dm)
 		cM := NewConnManager(cfg)
+		cM.SetCache(Cache)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 
 		got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)

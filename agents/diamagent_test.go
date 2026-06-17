@@ -453,6 +453,7 @@ func TestProcessRequest(t *testing.T) {
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
 	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	da := &DiameterAgent{

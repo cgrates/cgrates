@@ -33,6 +33,7 @@ func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
 	if _, err := populatStatsForQOSRoute(context.Background(), cfg, cM, nil, []string{"stat1", "stat2"}, "cgrates.org"); err == nil || err.Error() != expErr {
@@ -73,6 +74,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 
 	exp := map[string]*utils.Decimal{
@@ -91,6 +93,7 @@ func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
 	prflID := "prfId"
@@ -143,6 +146,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
@@ -225,6 +229,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
@@ -283,6 +288,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
@@ -343,6 +349,7 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
