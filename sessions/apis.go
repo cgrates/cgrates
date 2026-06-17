@@ -119,7 +119,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -360,7 +360,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -937,7 +937,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaRunID].(string) == utils.MetaPrimary && len(cgrEvs) < 2 { // initial event, not inherited from Session
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
 			utils.MetaSessionS, apiArgs); err != nil {
 			return
 		}
