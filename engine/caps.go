@@ -78,9 +78,16 @@ func NewCapsStats(sampleinterval time.Duration, caps *Caps, stopChan chan struct
 
 // CapsStats stores the stats for caps
 type CapsStats struct {
-	sync.RWMutex
-	st   utils.StatMetric
-	peak int
+	mu    sync.RWMutex
+	cache *CacheS
+	st    utils.StatMetric
+	peak  int
+}
+
+func (cs *CapsStats) SetCache(cache *CacheS) {
+	cs.mu.Lock()
+	cs.cache = cache
+	cs.mu.Unlock()
 }
 
 // OnEvict the function that should be called on cache eviction
@@ -102,28 +109,30 @@ func (cs *CapsStats) loop(intr time.Duration, stopChan chan struct{}, caps *Caps
 }
 
 func (cs *CapsStats) addSample(evID string, val int) {
-	cs.Lock()
-	Cache.SetWithoutReplicate(utils.CacheCapsEvents, evID, val, nil, true, utils.NonTransactional)
+	cs.mu.Lock()
+	if cs.cache != nil {
+		cs.cache.SetWithoutReplicate(utils.CacheCapsEvents, evID, val, nil, true, utils.NonTransactional)
+	}
 	cs.st.AddEvent(evID, floatDP(val))
 	if val > cs.peak {
 		cs.peak = val
 	}
-	cs.Unlock()
+	cs.mu.Unlock()
 }
 
 // GetPeak returns the maximum allocated caps
 func (cs *CapsStats) GetPeak() (peak int) {
-	cs.RLock()
+	cs.mu.RLock()
 	peak = cs.peak
-	cs.RUnlock()
+	cs.mu.RUnlock()
 	return
 }
 
 // GetAverage returns the average allocated caps
 func (cs *CapsStats) GetAverage() (avg float64) {
-	cs.RLock()
+	cs.mu.RLock()
 	avg, _ = cs.st.GetValue().Float64()
-	cs.RUnlock()
+	cs.mu.RUnlock()
 	return
 }
 
