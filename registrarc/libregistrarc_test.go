@@ -307,7 +307,7 @@ func TestLibRegistrarcRegister(t *testing.T) {
 		Cancel:           nil,
 		Response:         nil,
 	}
-	result, err := register(req)
+	result, err := register(req, engine.Cache)
 	expected := &json.RawMessage{}
 	if reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
@@ -376,7 +376,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	if rplyID, err := register(req); err != nil {
+	if rplyID, err := register(req, engine.Cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
@@ -422,7 +422,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
 	engine.Cache = engine.NewCacheS(cfg, nil, connMgr, nil)
-	_, err = register(req)
+	_, err = register(req, engine.Cache)
 	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}
@@ -464,7 +464,7 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 		t.Fatal(err)
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
-	if rplyID, err := register(req); err != nil {
+	if rplyID, err := register(req, engine.Cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
@@ -524,7 +524,7 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"errCon1"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
 	engine.Cache = engine.NewCacheS(cfg, nil, connMgr, nil)
-	_, err = register(req)
+	_, err = register(req, engine.Cache)
 	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}
