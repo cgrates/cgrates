@@ -57,10 +57,11 @@ type matchedThreshold struct {
 }
 
 // NewThresholdService the constructor for ThresholdS service
-func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engine.FilterS, cm *engine.ConnManager) *ThresholdS {
+func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager, cache *engine.CacheS, filters *engine.FilterS, cm *engine.ConnManager) *ThresholdS {
 	return &ThresholdS{
 		cfg:              cfg,
 		dm:               dm,
+		cache:            cache,
 		filters:          filters,
 		cm:               cm,
 		storedThresholds: make(utils.StringSet),
@@ -72,6 +73,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager, filters 
 type ThresholdS struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	filters *engine.FilterS
 	cm      *engine.ConnManager
 
@@ -145,7 +147,7 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 		if tID == "" {
 			break // no more keys, backup completed
 		}
-		tIf, ok := engine.Cache.Get(utils.CacheThresholds, tID)
+		tIf, ok := s.cache.Get(utils.CacheThresholds, tID)
 		if !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache threshold with ID: %s", utils.ThresholdS, tID))
 			continue
@@ -177,8 +179,8 @@ func (s *ThresholdS) storeThreshold(ctx *context.Context, t *utils.Threshold) er
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := t.TenantID(); engine.Cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheThresholds, tntID, t, nil,
+	if tntID := t.TenantID(); s.cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
+		if err := s.cache.Set(ctx, utils.CacheThresholds, tntID, t, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed caching Threshold with ID: %s, error: %v",
