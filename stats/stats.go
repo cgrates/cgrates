@@ -44,10 +44,11 @@ type matchedStatQueue struct {
 }
 
 // NewStatService initializes a StatService
-func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engine.FilterS, cm *engine.ConnManager) *StatS {
+func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager, cache *engine.CacheS, filters *engine.FilterS, cm *engine.ConnManager) *StatS {
 	return &StatS{
 		cfg:              cfg,
 		dm:               dm,
+		cache:            cache,
 		filters:          filters,
 		cm:               cm,
 		storedStatQueues: make(utils.StringSet),
@@ -59,6 +60,7 @@ func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager, filters *engi
 type StatS struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	filters *engine.FilterS
 	cm      *engine.ConnManager
 
@@ -132,7 +134,7 @@ func (s *StatS) storeStats(ctx *context.Context) {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		sqIf, ok := engine.Cache.Get(utils.CacheStatQueues, sID)
+		sqIf, ok := s.cache.Get(utils.CacheStatQueues, sID)
 		if !ok || sqIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -166,8 +168,8 @@ func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) error 
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := sq.TenantID(); engine.Cache.HasItem(utils.CacheStatQueues, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
+	if tntID := sq.TenantID(); s.cache.HasItem(utils.CacheStatQueues, tntID) { // only cache if previously there
+		if err := s.cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed caching StatQueue with ID: %s, error: %v",
