@@ -421,7 +421,6 @@ type EventReaderCfg struct {
 	Flags                utils.FlagsWithParams
 	Reconnects           int
 	MaxReconnectInterval time.Duration
-	EEsIDs               []string
 	EEsSuccessIDs        []string
 	EEsFailedIDs         []string
 	Opts                 *EventReaderOpts
@@ -522,10 +521,6 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		if er.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return err
 		}
-	}
-	if jsnCfg.Ees_ids != nil {
-		er.EEsIDs = make([]string, len(*jsnCfg.Ees_ids))
-		copy(er.EEsIDs, *jsnCfg.Ees_ids)
 	}
 	if jsnCfg.Ees_success_ids != nil {
 		er.EEsSuccessIDs = make([]string, len(*jsnCfg.Ees_success_ids))
@@ -825,7 +820,6 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Flags:                er.Flags.Clone(),
 		Reconnects:           er.Reconnects,
 		MaxReconnectInterval: er.MaxReconnectInterval,
-		EEsIDs:               slices.Clone(er.EEsIDs),
 		EEsSuccessIDs:        slices.Clone(er.EEsSuccessIDs),
 		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
 		Opts:                 er.Opts.Clone(),
@@ -1026,9 +1020,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.OptsCfg:                 opts,
 	}
 
-	if len(er.EEsIDs) != 0 {
-		initialMP[utils.EEsIDsCfg] = er.EEsIDs
-	}
 	if len(er.EEsSuccessIDs) != 0 {
 		initialMP[utils.EEsSuccessIDsCfg] = er.EEsSuccessIDs
 	}

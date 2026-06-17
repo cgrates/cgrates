@@ -49,7 +49,7 @@
                 "id": "file_reader1",
                 "run_delay": "-1",
                 "type": "*file_csv",
-                "flags": ["*log","*cdrs", "*rals", "*rerate","*attributes", "*export"],
+                "flags": ["*log","*cdrs"],
                 "source_path": "/tmp/ers/in",
                 "processed_path": "/tmp/ers/out",
                 "fields":[
@@ -66,7 +66,8 @@
                     {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.10", "mandatory": true},
                     {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.11", "mandatory": true},
                     {"tag": "RunID", "path": "*cgreq.RunID", "type": "*variable", "value": "~*req.12", "mandatory": true},
-                    {"tag": "Cost", "path": "*cgreq.Cost", "type": "*variable", "value": "~*req.13", "mandatory": true}
+                    {"tag": "Cost", "path": "*cgreq.Cost", "type": "*variable", "value": "~*req.13", "mandatory": true},
+                    {"tag": "OptsRerate", "path": "*opts.*rerate", "type": "*constant", "value": "true"}
                 ]
             }
         ]

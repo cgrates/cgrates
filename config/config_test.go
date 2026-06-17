@@ -2291,7 +2291,6 @@ func TestERSConfig(t *testing.T) {
 				PartialCommitFields:  make([]*FCTemplate, 0),
 				Reconnects:           -1,
 				MaxReconnectInterval: 300000000000,
-				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
@@ -4941,7 +4940,6 @@ func TestCgrCdfEventReader(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 300000000000,
-				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
@@ -5094,7 +5092,6 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 		Flags:                utils.FlagsWithParams{},
 		Reconnects:           -1,
 		MaxReconnectInterval: 300000000000,
-		EEsIDs:               []string{},
 		EEsSuccessIDs:        []string{},
 		EEsFailedIDs:         []string{},
 		Fields: []*FCTemplate{

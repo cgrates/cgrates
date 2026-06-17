@@ -679,9 +679,9 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
       "flags": ["*log"],
       "fields": [
         {"tag": "SetupTime", "path": "*exp.setup_time", "type": "*constant", "value": "2018-11-27 14:21:26"},
-        {"tag": "Account", "path": "*exp.account", "type": "*variable", "value": "~*req.ExtraInfo"},
-        {"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.Id"},
-        {"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"}
+        {"tag": "Account", "path": "*exp.account", "type": "*variable", "value": "~*req.extra_info"},
+        {"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.id"},
+        {"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.cgrid"}
       ]
     }
   ]
@@ -691,8 +691,8 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
   "readers": [
     {
       "id": "mysql",
-      "ees_ids": ["SQLExporter"],
-      "flags": ["*dryrun", "*export"],
+      "ees_success_ids": ["SQLExporter"],
+      "flags": ["*dryrun"],
       "fields": [
         {"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
         {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.tor", "mandatory": true},

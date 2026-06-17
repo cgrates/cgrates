@@ -64,7 +64,6 @@ var (
 )
 
 func TestReRateCDRsERs(t *testing.T) {
-	t.Skip() // unfinished, should be able to rerate cdrs using ERs
 	for _, stest := range rrErsCdrsTests {
 		t.Run("ers_rerate", stest)
 	}
@@ -82,7 +81,6 @@ func testRerateCDRsERsCreateFolders(t *testing.T) {
 }
 
 func testRerateCDRsERsDeleteFolders(t *testing.T) {
-	time.Sleep(5 * time.Second)
 	folders := []string{"/tmp/ers/in", "/tmp/ees/mv", "/tmp/ers/out"}
 
 	for _, folder := range folders {
@@ -239,6 +237,7 @@ func testRerateCDRsERsGetCDRs1(t *testing.T) {
 
 }
 
+// use EEs to generate the csv to be put in ERs to rerate with the different usage
 func testRerateCDRsERsExport(t *testing.T) {
 	cgrEv := &engine.CGREventWithEeIDs{
 		CGREvent: cdrEvent,
@@ -263,7 +262,6 @@ func testRerateCDRsERsMoveFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error reading source directory: %v", err)
 	}
-
 	for _, fileInfo := range fileInfos {
 		srcPath := filepath.Join(srcDir, fileInfo.Name())
 		destPath := filepath.Join(destDir, fileInfo.Name())

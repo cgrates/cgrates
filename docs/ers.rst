@@ -183,6 +183,7 @@ source_path
 
 processed_path
 	Optional path for moving the events source to after processing.
+	Specificaly for SQL reader, a **\*delete** string can be written as the value of this field in order to delete the sql row after it has been processed. 
 
 tenant
 	Will auto-populate the Tenant within the API calls sent to CGRateS. It has the form of a RSRParser. If undefined, default one from *general* section will be used.
@@ -271,10 +272,6 @@ reconnects
 
 max_reconnect_interval
 	The duration to wait in between retries to reconnect on a connection loss for AMQP.
-
-
-ees_ids
-	The IDs of exporters in EEs which you want to make use of, when `*export` flag is present in the reader. When an event is read and processed from the reader in use, the processed event will be sent to those specific IDs in EEs.
 
 
 ees_success_ids
@@ -389,7 +386,7 @@ opts
 		Number of SQL rows that can be selected at a time. 0 or lower for unlimited.
 
 	**sqlDeleteIndexedFields**
-		List of fields to DELETE from the table.
+		List of fields to DELETE from the table. (combining *delete functionality with EEs and EEs **sqlUpdateIndexedFields**, you can achive moving or updating rows after they are read and proccessed)
 
 	**pgSSLMode**
 		The SSL mode for postgres db.
