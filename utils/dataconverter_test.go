@@ -162,7 +162,7 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
 
-	tm, err = NewDataConverter("*time_string:020106150400")
+	tm, err = NewDataConverter("*timeString:020106150400")
 	if err != nil {
 		t.Error(err)
 	}

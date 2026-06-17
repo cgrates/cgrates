@@ -32,7 +32,7 @@ const (
 	ListenJSON          = "listen"
 	HTTPJSON            = "http"
 	DBJSON              = "db"
-	StorDBJSON          = "stor_db"
+	StorDBJSON          = "storDB"
 	FilterSJSON         = "filters"
 	CDRsJSON            = "cdrs"
 	SessionSJSON        = "sessions"

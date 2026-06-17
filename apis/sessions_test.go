@@ -583,7 +583,7 @@ func TestSTIRAuthenticate(t *testing.T) {
 		DestinationTn: "dest_tn",
 		Identity:      "identity",
 	}
-	errExpect := "*stir_authenticate: missing parts of the message header"
+	errExpect := "*stirAuthenticate: missing parts of the message header"
 	if err := ssv1.STIRAuthenticate(context.Background(), args, &reply); err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}
@@ -616,7 +616,7 @@ func TestSTIRIdentity(t *testing.T) {
 			ATTest: "at_Test",
 		},
 	}
-	errExpect := "*stir_authenticate: open PKP_PRIVATE: no such file or directory"
+	errExpect := "*stirAuthenticate: open PKP_PRIVATE: no such file or directory"
 	if err := ssv1.STIRIdentity(context.Background(), args, &reply); err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}

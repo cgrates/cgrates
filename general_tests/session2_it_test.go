@@ -208,15 +208,15 @@ func testSes2StirAuthenticate(t *testing.T) {
 	// altered originator
 	args.APIOpts[utils.OptsStirOriginatorTn] = "1005"
 	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
-		args, &rply); err == nil || err.Error() != "*stir_authenticate: wrong originatorTn" {
-		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: wrong originatorTn", err)
+		args, &rply); err == nil || err.Error() != "*stirAuthenticate: wrong originatorTn" {
+		t.Errorf("Expected error :%q ,receved: %v", "*stirAuthenticate: wrong originatorTn", err)
 	}
 
 	// altered identity
 	args.APIOpts[utils.OptsStirIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
 	if err := ses2RPC.Call(context.Background(), utils.SessionSv1ProcessEvent,
-		args, &rply); err == nil || err.Error() != "*stir_authenticate: crypto/ecdsa: verification error" {
-		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: crypto/ecdsa: verification error", err)
+		args, &rply); err == nil || err.Error() != "*stirAuthenticate: crypto/ecdsa: verification error" {
+		t.Errorf("Expected error :%q ,receved: %v", "*stirAuthenticate: crypto/ecdsa: verification error", err)
 	}
 }
 

@@ -85,8 +85,8 @@ func TestAgentCapsIT(t *testing.T) {
 		"conns": {
 			"*sessions": [{"connIDs": ["*internal"]}]
 		},
-		"request_payload": "*url",
-		"reply_payload": "*xml",
+		"requestPayload": "*url",
+		"replyPayload": "*xml",
 		"requestProcessors": []
 	}
 ],

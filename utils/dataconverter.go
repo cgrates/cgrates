@@ -867,7 +867,7 @@ type ULIConverter struct {
 }
 
 // NewULIConverter creates a ULI converter. The path after the colon specifies
-// which field to extract (e.g. "*3gpp_uli:TAI.MCC"). Empty path returns the
+// which field to extract (e.g. "*3gppULI:TAI.MCC"). Empty path returns the
 // full ULI object.
 func NewULIConverter(params string) (*ULIConverter, error) {
 	_, path, _ := strings.Cut(params, InInFieldSep)

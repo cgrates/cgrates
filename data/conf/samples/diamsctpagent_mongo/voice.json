@@ -98,7 +98,7 @@
 					"tag": "GrantedUnits",
 					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable",
-					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"value": "~*cgrep.MaxUsage{*durationSeconds}",
 					"mandatory": true
 				},
 			],
@@ -131,7 +131,7 @@
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable",
-					"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+					"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true},
 			],
 		},
 		{
@@ -193,7 +193,7 @@
 					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable",
-					"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+					"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true},
 			],
 		},
 		{

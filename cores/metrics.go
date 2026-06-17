@@ -139,11 +139,11 @@ type GoMemStats struct {
 	HeapObjects  float64 `json:"heapObjects"`
 	StackInuse   float64 `json:"stackInuse"`
 	StackSys     float64 `json:"stackSys"`
-	MSpanSys     float64 `json:"mspan_sys"`
-	MSpanInuse   float64 `json:"mspan_inuse"`
-	MCacheInuse  float64 `json:"mcache_inuse"`
-	MCacheSys    float64 `json:"mcache_sys"`
-	BuckHashSys  float64 `json:"buckhash_sys"`
+	MSpanSys     float64 `json:"mSpanSys"`
+	MSpanInuse   float64 `json:"mSpanInuse"`
+	MCacheInuse  float64 `json:"mCacheInuse"`
+	MCacheSys    float64 `json:"mCacheSys"`
+	BuckHashSys  float64 `json:"buckHashSys"`
 	GCSys        float64 `json:"gcSys"`
 	OtherSys     float64 `json:"otherSys"`
 	NextGC       float64 `json:"nextGC"`

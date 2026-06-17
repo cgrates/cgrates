@@ -211,7 +211,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	//Here converter will be consider part of path and will get error : NOT_FOUND
 	ev = utils.MapStorage{}
 	ev.Set([]string{"ASR"}, 20)
-	rf, err = NewFilterRule("*gte", "~ASR{*duration_seconds}", []string{"10"})
+	rf, err = NewFilterRule("*gte", "~ASR{*durationSeconds}", []string{"10"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -223,7 +223,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	//Here converter will be consider part of path and will get error : NOT_FOUND
 	ev = utils.MapStorage{}
 	ev.Set([]string{"ASR"}, 20)
-	rf, err = NewFilterRule("*gte", "~ASR{*duration_seconds}", []string{"10s"})
+	rf, err = NewFilterRule("*gte", "~ASR{*durationSeconds}", []string{"10s"})
 	if err != nil {
 		t.Error(err)
 	}

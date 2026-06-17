@@ -158,7 +158,7 @@ func (fwp FlagsWithParams) SliceFlags() (sls []string) {
 			continue
 		}
 		for opt, values := range sub {
-			if len(values) == 0 { // it's an option without values(e.g *derived_reply)
+			if len(values) == 0 { // it's an option without values(e.g *derivedReply)
 				sls = append(sls, ConcatenatedKey(key, opt))
 				continue
 			}

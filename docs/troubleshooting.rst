@@ -45,15 +45,15 @@ You can also control profiling with runtime flags when starting ``cgr-engine``:
 
    $ cgr-engine -help
    Usage of cgr-engine:
-    -cpuprof_dir string
+    -cpuProfDir string
           Directory for CPU profiles
-    -memprof_dir string
+    -memProfDir string
           Directory for memory profiles
-    -memprof_interval duration
+    -memProfInterval duration
           Interval between memory profile saves (default 15s)
-    -memprof_maxfiles int
+    -memProfMaxFiles int
           Number of memory profiles to keep (most recent) (default 1)
-    -memprof_timestamp
+    -memProfTimestamp
           Add timestamp to memory profile files
 
 Generating Profile Data
@@ -95,11 +95,11 @@ Here's how to generate CPU profile data:
          "id": 1
      }
 
-- **Startup Profiling**: Profile the entire runtime by specifying a directory with the ``-cpuprof_dir`` flag:
+- **Startup Profiling**: Profile the entire runtime by specifying a directory with the ``-cpuProfDir`` flag:
 
   .. code-block:: console
 
-     cgr-engine -cpuprof_dir=/tmp [other flags]
+     cgr-engine -cpuProfDir=/tmp [other flags]
 
 Memory Profiling
 ^^^^^^^^^^^^^^^^

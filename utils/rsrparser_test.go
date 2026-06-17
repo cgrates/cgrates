@@ -25,23 +25,23 @@ import (
 )
 
 func TestNewRSRParsers(t *testing.T) {
-	ruleStr := `Value1;Value2;~Header3;~Header4:s/a/${1}b/{*duration_seconds&*round:2};Value5{*duration_seconds&*round:2}`
+	ruleStr := `Value1;Value2;~Header3;~Header4:s/a/${1}b/{*durationSeconds&*round:2};Value5{*durationSeconds&*round:2}`
 	eRSRParsers := RSRParsers{
 		&RSRParser{Rules: "Value1", Path: "Value1"},
 		&RSRParser{Rules: "Value2", Path: "Value2"},
 		&RSRParser{Rules: "~Header3", Path: "~Header3", rsrRules: make([]*ReSearchReplace, 0)},
-		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
+		&RSRParser{Rules: "~Header4:s/a/${1}b/{*durationSeconds&*round:2}",
 			Path: "~Header4",
 			rsrRules: []*ReSearchReplace{{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b"}},
-			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+			converters: DataConverters{NewDataConverterMustCompile("*durationSeconds"),
 				NewDataConverterMustCompile("*round:2")},
 		},
 
-		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}",
+		&RSRParser{Rules: "Value5{*durationSeconds&*round:2}",
 			Path: "Value5",
-			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+			converters: DataConverters{NewDataConverterMustCompile("*durationSeconds"),
 				NewDataConverterMustCompile("*round:2")},
 		},
 	}
@@ -54,16 +54,16 @@ func TestNewRSRParsers(t *testing.T) {
 
 func TestRSRParserCompile(t *testing.T) {
 	ePrsr := &RSRParser{
-		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
+		Rules: "~Header4:s/a/${1}b/{*durationSeconds&*round:2}",
 		Path:  "~Header4",
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`a`),
 			ReplaceTemplate: "${1}b"}},
-		converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+		converters: DataConverters{NewDataConverterMustCompile("*durationSeconds"),
 			NewDataConverterMustCompile("*round:2")},
 	}
 	prsr := &RSRParser{
-		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
+		Rules: "~Header4:s/a/${1}b/{*durationSeconds&*round:2}",
 	}
 	if err := prsr.Compile(); err != nil {
 		t.Error(err)
@@ -602,7 +602,7 @@ func TestNewRSRParser(t *testing.T) {
 	}
 
 	// with dataConverters
-	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*duration_seconds&*round:5:*middle}`
+	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*durationSeconds&*round:5:*middle}`
 	expRSRField := &RSRParser{
 		Path:  "~sip_redirected_to",
 		Rules: rulesStr,
@@ -844,7 +844,7 @@ func TestRSRCostDetails(t *testing.T) {
 
 func TestRSRFldParse(t *testing.T) {
 	// with dataConverters
-	rulesStr := `~Usage:s/(\d+)/${1}ms/{*duration_seconds&*round:1:*middle}`
+	rulesStr := `~Usage:s/(\d+)/${1}ms/{*durationSeconds&*round:1:*middle}`
 	rsrField, err := NewRSRParser(rulesStr)
 	if err != nil {
 		t.Fatal(err)
@@ -855,7 +855,7 @@ func TestRSRFldParse(t *testing.T) {
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
-	rulesStr = `~Usage:s/(\d+)/${1}ms/{*duration_seconds&*round}`
+	rulesStr = `~Usage:s/(\d+)/${1}ms/{*durationSeconds&*round}`
 	if rsrField, err = NewRSRParser(rulesStr); err != nil {
 		t.Error(err)
 	}
@@ -865,7 +865,7 @@ func TestRSRFldParse(t *testing.T) {
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
-	rulesStr = `~Usage{*duration_seconds}`
+	rulesStr = `~Usage{*durationSeconds}`
 	rsrField, err = NewRSRParser(rulesStr)
 	if err != nil {
 		t.Error(err)

@@ -22,7 +22,7 @@
     {
       "id": "Rates_Loader",
       "enabled": true,
-      "dry_run": false,
+      "dryRun": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
       "lockfilePath": ".cgr.lock",
@@ -61,7 +61,7 @@
     {
       "id": "Accounts_Loader",
       "enabled": true,
-      "dry_run": false,
+      "dryRun": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
       "lockfilePath": ".cgr2.lock",
@@ -101,7 +101,7 @@
     {
       "id": "Actions_Loader",
       "enabled": true,
-      "dry_run": false,
+      "dryRun": false,
       "tenant": "cgrates.org",
       "runDelay": "0",
       "lockfilePath": ".cgr3.lock",

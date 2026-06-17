@@ -95,7 +95,7 @@ func TestNewErrThresholdS(t *testing.T) {
 }
 
 func TestNewSTIRError(t *testing.T) {
-	expected := `*stir_authenticate: wrong header`
+	expected := `*stirAuthenticate: wrong header`
 	if rcv := NewSTIRError("wrong header"); rcv.Error() != expected {
 		t.Errorf("Expecting: %q, received: %q", expected, rcv.Error())
 	}

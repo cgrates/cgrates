@@ -346,55 +346,55 @@ func TestULIConverter(t *testing.T) {
 	}{
 		{
 			name:     "Extract TAI.MCC",
-			params:   "*3gpp_uli:TAI.MCC",
+			params:   "*3gppULI:TAI.MCC",
 			hex:      "8245f750000145f75000000101",
 			expected: "547",
 		},
 		{
 			name:     "Extract TAI.MNC",
-			params:   "*3gpp_uli:TAI.MNC",
+			params:   "*3gppULI:TAI.MNC",
 			hex:      "8245f750000145f75000000101",
 			expected: "05",
 		},
 		{
 			name:     "Extract TAI.TAC",
-			params:   "*3gpp_uli:TAI.TAC",
+			params:   "*3gppULI:TAI.TAC",
 			hex:      "8245f750000145f75000000101",
 			expected: uint16(1),
 		},
 		{
 			name:     "Extract ECGI.ECI",
-			params:   "*3gpp_uli:ECGI.ECI",
+			params:   "*3gppULI:ECGI.ECI",
 			hex:      "8245f750000145f75000000101",
 			expected: uint32(257),
 		},
 		{
 			name:     "Extract TAI5GS.MCC from 5GS TAI",
-			params:   "*3gpp_uli:TAI5GS.MCC",
+			params:   "*3gppULI:TAI5GS.MCC",
 			hex:      "88130062123456",
 			expected: "310",
 		},
 		{
 			name:     "Extract TAI5GS.TAC from 5GS TAI",
-			params:   "*3gpp_uli:TAI5GS.TAC",
+			params:   "*3gppULI:TAI5GS.TAC",
 			hex:      "88130062123456",
 			expected: uint32(0x123456),
 		},
 		{
 			name:     "Extract NCGI.NCI from NCGI",
-			params:   "*3gpp_uli:NCGI.NCI",
+			params:   "*3gppULI:NCGI.NCI",
 			hex:      "871300620123456789",
 			expected: uint64(0x123456789),
 		},
 		{
 			name:     "Extract TAI5GS.MCC.Name",
-			params:   "*3gpp_uli:TAI5GS.MCC.Name",
+			params:   "*3gppULI:TAI5GS.MCC.Name",
 			hex:      "88130062123456",
 			expected: "United States",
 		},
 		{
 			name:     "Extract NCGI.MNC.Name",
-			params:   "*3gpp_uli:NCGI.MNC.Name",
+			params:   "*3gppULI:NCGI.MNC.Name",
 			hex:      "871300620123456789",
 			expected: "T-Mobile USA",
 		},
@@ -465,7 +465,7 @@ func TestDecodeULI_UnsupportedType(t *testing.T) {
 }
 
 func TestULIConverter_EmptyPath(t *testing.T) {
-	conv, err := NewULIConverter("*3gpp_uli")
+	conv, err := NewULIConverter("*3gppULI")
 	if err != nil {
 		t.Fatalf("NewULIConverter failed: %v", err)
 	}
@@ -490,7 +490,7 @@ func TestULIConverter_EmptyPath(t *testing.T) {
 }
 
 func TestULIConverter_Errors(t *testing.T) {
-	conv, err := NewULIConverter("*3gpp_uli:TAI.MCC")
+	conv, err := NewULIConverter("*3gppULI:TAI.MCC")
 	if err != nil {
 		t.Fatalf("NewULIConverter failed: %v", err)
 	}

@@ -105,7 +105,7 @@
 					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"filters": ["*gte:~*cgrep.MaxUsage:0s"],
 					"type": "*variable",
-					"value": "~*cgrep.MaxUsage{*duration_seconds&*round:0}",
+					"value": "~*cgrep.MaxUsage{*durationSeconds&*round:0}",
 					"mandatory": true
 				},
 			],

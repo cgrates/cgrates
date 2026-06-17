@@ -68,7 +68,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
 			}
 		case utils.MetaEnsureIndexes:
-			mongoDBFound := false // track if no mongo DBs were found for case *ensure_indexes
+			mongoDBFound := false // track if no mongo DBs were found for case *ensureIndexes
 			for _, db := range m.dmTo.DB() {
 				if db.GetStorageType() == utils.MetaMongo {
 					mgo := db.(*engine.MongoStorage)

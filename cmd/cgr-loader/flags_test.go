@@ -29,42 +29,42 @@ func TestCGRLoaderFlags(t *testing.T) {
 	} else if *cfgPath != "/etc/cgrates" {
 		t.Errorf("Expected /etc/cgrates, received %+v", *cfgPath)
 	}
-	if err := cgrLoaderFlags.Parse([]string{"-print_config", "true"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-printConfig", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *printConfig != true {
 		t.Errorf("Expected true, received %+v", *printConfig)
 	}
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_type", "*redis"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBType", "*redis"}); err != nil {
 		t.Error(err)
 	} else if *dataDBType != "*redis" {
 		t.Errorf("Expected *redis, received %+v", *dataDBType)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_host", "CGRATES"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBHost", "CGRATES"}); err != nil {
 		t.Error(err)
 	} else if *dataDBHost != "CGRATES" {
 		t.Errorf("Expected CGRATES, received %+v", *dataDBHost)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_port", "6379"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBPort", "6379"}); err != nil {
 		t.Error(err)
 	} else if *dataDBPort != "6379" {
 		t.Errorf("Expected 6379, received %+v", *dataDBPort)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_name", "cgrates1"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBName", "cgrates1"}); err != nil {
 		t.Error(err)
 	} else if *dataDBName != "cgrates1" {
 		t.Errorf("Expected cgrates1, received %+v", *dataDBName)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_user", "USER1"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBUser", "USER1"}); err != nil {
 		t.Error(err)
 	} else if *dataDBUser != "USER1" {
 		t.Errorf("Expected USER1, received %+v", *dataDBUser)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-datadb_passwd", "cgrates.org"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dataDBPasswd", "cgrates.org"}); err != nil {
 		t.Error(err)
 	} else if *dataDBPasswd != "cgrates.org" {
 		t.Errorf("Expected cgrates.org, received %+v", *dataDBPasswd)
@@ -160,19 +160,19 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected /etc/tariffplans, received %+v", *verbose)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-dry_run", "true"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-dryRun", "true"}); err != nil {
 		t.Error(err)
 	} else if *dryRun != true {
 		t.Errorf("Expected /etc/tariffplans, received %+v", *dryRun)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-field_sep", ","}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-fieldSep", ","}); err != nil {
 		t.Error(err)
 	} else if *fieldSep != "," {
 		t.Errorf("Expected , , received %+v", *fieldSep)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-import_id", "unique_id"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-importID", "unique_id"}); err != nil {
 		t.Error(err)
 	} else if *importID != "unique_id" {
 		t.Errorf("Expected unique_id, received %+v", *importID)
@@ -184,7 +184,7 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected UTC, received %+v", *timezone)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-disable_reverse_mappings", "true"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-disableReverseMappings", "true"}); err != nil {
 		t.Error(err)
 	} else if *disableReverse != true {
 		t.Errorf("Expected true, received %+v", *disableReverse)
@@ -202,7 +202,7 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected 14422, received %+v", *apiKey)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-route_id", "route_idss"}); err != nil {
+	if err := cgrLoaderFlags.Parse([]string{"-routeID", "route_idss"}); err != nil {
 		t.Error(err)
 	} else if *routeID != "route_idss" {
 		t.Errorf("Expected route_idss, received %+v", *routeID)

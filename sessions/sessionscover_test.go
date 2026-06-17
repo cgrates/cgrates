@@ -4080,7 +4080,7 @@ dm.SetCache(engine.Cache)
 	args.Flags = []string{utils.MetaSTIRAuthenticate}
 	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
-	expected = "*stir_authenticate: missing parts of the message header"
+	expected = "*stirAuthenticate: missing parts of the message header"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
@@ -4088,7 +4088,7 @@ dm.SetCache(engine.Cache)
 	args.Flags = []string{utils.MetaSTIRInitiate}
 	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
-	expected = "*stir_authenticate: open : no such file or directory"
+	expected = "*stirAuthenticate: open : no such file or directory"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}

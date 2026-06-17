@@ -8,8 +8,8 @@
 		"conns": {
 			"*sessions": [{"connIDs": ["*localhost"]}]
 		},
-		"request_payload":	"*url",
-		"reply_payload":	"*xml",
+		"requestPayload":	"*url",
+		"replyPayload":	"*xml",
 		"requestProcessors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -53,7 +53,7 @@
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
 						"value": "1", "mandatory": true},
 					{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true},
 				],
 			},
 			{
@@ -96,8 +96,8 @@
 		"conns": {
 			"*sessions": [{"connIDs": ["*localhost"]}]
 		},
-		"request_payload":	"*xml",
-		"reply_payload":	"*xml",
+		"requestPayload":	"*xml",
+		"replyPayload":	"*xml",
 		"requestProcessors": [
 			{
 				"id": "cdr_from_xml",
@@ -131,8 +131,8 @@
 		"conns": {
 			"*sessions": [{"connIDs": ["*localhost"]}]
 		},
-		"request_payload":	"*url",
-		"reply_payload":	"*text",
+		"requestPayload":	"*url",
+		"replyPayload":	"*text",
 		"requestProcessors": [
 			{
 				"id": "TextPlainDryRun",
