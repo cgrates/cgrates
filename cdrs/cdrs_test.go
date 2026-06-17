@@ -42,10 +42,11 @@ func TestCDRsNewCDRServer(t *testing.T) {
 	dm := &engine.DataManager{}
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	expected := &CDRServer{
 		cfg:     cfg,
 		dm:      dm,
+		cache:   engine.Cache,
 		guard:   guardian.Guardian,
 		fltrS:   fltrs,
 		connMgr: connMng,
@@ -65,7 +66,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -98,7 +99,7 @@ func TestCDRsAttrSProcessEventNoOpts(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -129,7 +130,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -163,7 +164,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -197,7 +198,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -231,7 +232,7 @@ func TestCDRsThdSProcessEventErr(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -263,7 +264,7 @@ func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -298,7 +299,7 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 	dm.SetCache(engine.Cache)
 	fltrs := &engine.FilterS{}
 	connMng := &engine.ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	cgrEv := &utils.CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
@@ -377,7 +378,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -456,7 +457,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -537,7 +538,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -635,7 +636,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -704,7 +705,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply any) error {
@@ -782,7 +783,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply any) error {
@@ -862,7 +863,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -934,7 +935,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1005,7 +1006,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1077,7 +1078,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1153,7 +1154,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1226,7 +1227,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1316,7 +1317,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1377,7 +1378,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1439,7 +1440,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1501,7 +1502,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1564,7 +1565,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1626,7 +1627,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1689,7 +1690,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1751,7 +1752,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1814,7 +1815,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1876,7 +1877,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1939,7 +1940,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2000,7 +2001,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2063,7 +2064,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2125,7 +2126,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2185,7 +2186,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2242,7 +2243,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply any) error {
@@ -2321,7 +2322,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -2422,7 +2423,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 
@@ -2485,7 +2486,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 
@@ -2527,7 +2528,7 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(engine.Cache)
 	connMng.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 

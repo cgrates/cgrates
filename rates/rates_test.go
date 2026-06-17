@@ -1099,7 +1099,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, connMgr, dm)
-	cdrs := cdrs.NewCDRServer(cfg, dm, filters, connMgr)
+	cdrs := cdrs.NewCDRServer(cfg, dm, engine.Cache, filters, connMgr)
 	ratesConns := make(chan birpc.ClientConnector, 1)
 	rateSrv, err := birpc.NewServiceWithMethodsRename(NewRateS(cfg, filters, dm), utils.RateSv1, true, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, utils.V1Prfx)

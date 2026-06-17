@@ -46,10 +46,11 @@ func newMapEventFromReqForm(r *http.Request) (mp engine.MapEvent, err error) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager) *CDRServer {
+func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, cache *engine.CacheS, filterS *engine.FilterS, connMgr *engine.ConnManager) *CDRServer {
 	return &CDRServer{
 		cfg:     cfg,
 		dm:      dm,
+		cache:   cache,
 		guard:   guardian.Guardian,
 		fltrS:   filterS,
 		connMgr: connMgr,
@@ -60,6 +61,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine
 type CDRServer struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	guard   *guardian.GuardianLocker
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
