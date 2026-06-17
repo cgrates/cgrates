@@ -108,11 +108,11 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgIn.GeneralCfg().DBDataEncoding, stsCfgIn)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgIn.GeneralCfg().DBDataEncoding, stsCfgIn, engine.Cache)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgOut.GeneralCfg().DBDataEncoding, stsCfgOut)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgOut.GeneralCfg().DBDataEncoding, stsCfgOut, engine.Cache)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -336,11 +336,13 @@ func main() {
 	}
 	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
 		utils.MetaDefault: dataDB}, ldrCfg.DbCfg())
+	cacheS := engine.NewCacheS(ldrCfg, nil, cM, nil)
+	cM.SetCache(cacheS)
 	var tpReader *engine.TpReader
 	if tpReader, err = engine.NewTpReader(dbcManager, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
-		ldrCfg.LoaderCgrCfg().ActionSConns, cM); err != nil {
+		ldrCfg.LoaderCgrCfg().ActionSConns, cacheS, cM); err != nil {
 		log.Fatal(err)
 	}
 	if err = tpReader.LoadAll(); err != nil {

@@ -216,13 +216,7 @@ func TestNewS3ERCase2(t *testing.T) {
 		},
 	}
 
-<<<<<<< HEAD
-	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
-||||||| parent of 8798806f4 (fixup! add cache field to AgentRequest)
-	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil), nil, nil)
-=======
 	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
->>>>>>> 8798806f4 (fixup! add cache field to AgentRequest)
 	if err != nil {
 		t.Fatal(err)
 	}

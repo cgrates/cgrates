@@ -33,6 +33,7 @@ type TpReader struct {
 	tpid              string
 	timezone          string
 	dm                *DataManager
+	cache             *CacheS
 	lr                LoadReader
 	connMgr           *ConnManager
 	resProfiles       map[utils.TenantID]*utils.TPResourceProfile
@@ -53,17 +54,18 @@ type TpReader struct {
 }
 
 func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
-	cacheConns, schedulerConns []string, connMgr *ConnManager) (*TpReader, error) {
+	cacheConns, schedulerConns []string, cache *CacheS, connMgr *ConnManager) (*TpReader, error) {
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
 		dm:         NewDataManager(db, config.CgrConfig(), connMgr), // ToDo: add CGRConfig as parameter to the NewTpReader
+		cache:      cache,
 		lr:         lr,
 		connMgr:    connMgr,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,
 	}
-	tpr.dm.SetCache(Cache)
+	tpr.dm.SetCache(cache)
 	tpr.Init()
 
 	return tpr, nil
@@ -1059,7 +1061,7 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs)
 	for key, val := range cacheLoadIDs {
-		if err = Cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
+		if err = tpr.cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 			return
 		}
