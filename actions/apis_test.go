@@ -48,6 +48,7 @@ func TestActionsAPIs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	aS := NewActionS(cfg, fltrs, dm, nil)
 	if err := dm.SetActionProfile(context.Background(),
@@ -97,6 +98,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -184,6 +186,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -271,6 +274,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -355,6 +359,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -446,6 +451,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	aS := NewActionS(cfg, fltrs, dm, nil)
@@ -503,6 +509,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// expArgs := &utils.CGREvent{
@@ -587,6 +594,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActRemoveBalances{

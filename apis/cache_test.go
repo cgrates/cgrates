@@ -35,8 +35,10 @@ func TestCacheHasItemAndGetItem(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetAttributeProfile", nil, nil, true, utils.NonTransactional)
 	cache := NewCacheSv1(ch)
 
@@ -73,8 +75,10 @@ func TestCacheSetAndRemoveItem(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheSetAndRemoveItem", nil, nil, true, utils.NonTransactional)
 	cache := NewCacheSv1(ch)
 
@@ -133,8 +137,10 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheSetAndRemoveItems1", nil, nil, true, utils.NonTransactional)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheSetAndRemoveItems2", nil, nil, true, utils.NonTransactional)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheSetAndRemoveItems3", nil, nil, true, utils.NonTransactional)
@@ -193,8 +199,10 @@ func TestCacheClear(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheClearAttributes", nil, nil, true, utils.NonTransactional)
 	ch.SetWithoutReplicate(utils.CacheRateProfiles, "cgrates.org:TestCacheClearRates", nil, nil, true, utils.NonTransactional)
 	cache := NewCacheSv1(ch)
@@ -235,8 +243,10 @@ func TestCacheLoadCache(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply string
@@ -265,8 +275,10 @@ func TestCacheReloadCache(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply string
@@ -295,8 +307,10 @@ func TestGetCacheStats(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetCacheStats", nil, nil, true, utils.NonTransactional)
 	var reply engine.CacheStatsWithMetadata
@@ -321,8 +335,10 @@ func TestPrecacheStatus(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply map[string]string
@@ -349,8 +365,10 @@ func TestHasGroup(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply bool
@@ -377,8 +395,10 @@ func TestGetGroupItemIDs(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetCacheStats", nil, []string{"AttrGroup"}, true, utils.NonTransactional)
@@ -409,8 +429,10 @@ func TestRemoveGroup(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply string
@@ -438,8 +460,10 @@ func TestReplicateSet(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply string
@@ -463,8 +487,10 @@ func TestReplicateRemove(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply string
@@ -488,8 +514,10 @@ func TestGetItemExpiryTime(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}}}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(engine.Cache)
 	cache := NewCacheSv1(ch)
 
 	var reply time.Time

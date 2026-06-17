@@ -156,6 +156,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = -1
 		dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{}, &config.DbCfg{}), cfg, nil)
+		dm.SetCache(engine.Cache)
 
 		s := &IPs{
 			cfg:       cfg,
@@ -189,6 +190,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		}
 		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 		dm := engine.NewDataManager(dbCM, cfg, nil)
+		dm.SetCache(engine.Cache)
 
 		s := &IPs{
 			cfg:       cfg,
@@ -236,6 +238,7 @@ func TestNewIPService(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 
@@ -272,6 +275,7 @@ func TestFilterAndSortPools(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	ctx := context.Background()
 	tenant := "cgrates.org"
@@ -605,6 +609,7 @@ func TestStoreIPAllocationsList(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	s := NewIPService(cfg, dm, nil, nil)
 
 	exp := &utils.IPAllocations{

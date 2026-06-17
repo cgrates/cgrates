@@ -64,6 +64,7 @@ func TestTPEnewTPFilters(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
+	dm.SetCache(engine.Cache)
 	exp := &TPFilters{
 		dm: dm,
 	}
@@ -79,6 +80,7 @@ func TestTPEExportItemsFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpFltr := TPFilters{
 		dm: dm,
 	}
@@ -158,6 +160,7 @@ func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpFltr := TPFilters{
 		dm: dm,
 	}

@@ -42,7 +42,9 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -111,7 +113,9 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -177,7 +181,9 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -266,7 +272,9 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -323,7 +331,9 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -368,7 +378,9 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -424,7 +436,9 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -493,7 +507,9 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -556,7 +572,9 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	data := &engine.DataDBMock{}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -581,7 +599,9 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -628,7 +648,9 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -664,7 +686,9 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, nil)
 
@@ -708,7 +732,9 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, nil, filterS, nil)
 
@@ -750,7 +776,9 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
+	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, filterS, cM)
 	th := &utils.Threshold{

@@ -99,6 +99,10 @@ func NewDataManager(dbConns *DBConnManager, cfg *config.CGRConfig, connMgr *Conn
 	}
 }
 
+func (dm *DataManager) SetCache(cache *CacheS) {
+	dm.cache = cache
+}
+
 // DBConnManager is the storage manager for all CGRateS DBs
 // transparently manages data retrieval, further serialization and caching
 type DBConnManager struct {
@@ -157,6 +161,7 @@ func (dbConns *DBConnManager) AddDBDriver(dbID string, d DBDriver) {
 type DataManager struct {
 	dbConns *DBConnManager
 	cfg     *config.CGRConfig
+	cache   *CacheS
 	connMgr *ConnManager
 	ms      utils.Marshaler
 }
@@ -278,7 +283,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		ids = []string{utils.EmptyString}
 	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
-			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
+			ids = dm.cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
 			db, err := dm.dbConns.getDBForPrefix(prfx)
 			if err != nil {
@@ -305,7 +310,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 	}
 	for _, dataID := range ids {
 		if mustBeCached &&
-			!Cache.HasItem(utils.CachePrefixToInstance[prfx], dataID) { // only cache if previously there
+			!dm.cache.HasItem(utils.CachePrefixToInstance[prfx], dataID) { // only cache if previously there
 			continue
 		}
 		switch prfx {
@@ -463,7 +468,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 					fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
 			}
 			err = nil
-			// if err = Cache.Remove(ctx, utils.CachePrefixToInstance[prfx], dataID,
+			// if err = dm.cache.Remove(ctx, utils.CachePrefixToInstance[prfx], dataID,
 			// cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 			// return
 			// }
@@ -476,8 +481,8 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (fltr *Filter, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheFilters, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheFilters, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -512,7 +517,7 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 			if err != nil {
 				err = utils.CastRPCErr(err)
 				if err == utils.ErrNotFound && cacheWrite {
-					if errCh := Cache.Set(ctx, utils.CacheFilters, tntID, nil, nil,
+					if errCh := dm.cache.Set(ctx, utils.CacheFilters, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
 					}
@@ -524,8 +529,8 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 			return nil, err
 		}
 	}
-	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheFilters, tntID, fltr, nil,
+	if cacheWrite && dm != nil {
+		if errCh := dm.cache.Set(ctx, utils.CacheFilters, tntID, fltr, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -617,8 +622,8 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (th *utils.Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheThresholds, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheThresholds, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -649,7 +654,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheThresholds, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -658,7 +663,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheThresholds, tntID, th, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheThresholds, tntID, th, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -717,8 +722,8 @@ func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id string) 
 func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (th *utils.ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheThresholdProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheThresholdProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -750,7 +755,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheThresholdProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -760,7 +765,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheThresholdProfiles, tntID, th, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheThresholdProfiles, tntID, th, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -878,8 +883,8 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id s
 func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (sq *utils.StatQueue, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheStatQueues, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheStatQueues, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -916,7 +921,7 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 		}
 		if err != nil {
 			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -926,7 +931,7 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -994,8 +999,8 @@ func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string) 
 func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (sqp *utils.StatQueueProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheStatQueueProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheStatQueueProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1027,7 +1032,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1037,7 +1042,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, sqp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, sqp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1189,8 +1194,8 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (tr *utils.Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheTrends, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheTrends, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1229,7 +1234,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 		// have Trend or ErrNotFound
 		if err == utils.ErrNotFound {
 			if cacheWrite {
-				if errCache := Cache.Set(ctx, utils.CacheTrends, tntID, nil, nil,
+				if errCache := dm.cache.Set(ctx, utils.CacheTrends, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCache != nil {
 					return nil, errCache
 				}
@@ -1241,7 +1246,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 		return nil, err
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheTrends, tntID, tr, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheTrends, tntID, tr, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1310,8 +1315,8 @@ func (dm *DataManager) RemoveTrend(ctx *context.Context, tenant, id string) (err
 func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (trp *utils.TrendProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheTrendProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheTrendProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1343,7 +1348,7 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheTrendProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheTrendProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1352,7 +1357,7 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheTrendProfiles, tntID, trp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheTrendProfiles, tntID, trp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1465,8 +1470,8 @@ func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id strin
 
 func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *utils.RankingProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheRankingProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheRankingProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1498,7 +1503,7 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheRankingProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheRankingProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1507,7 +1512,7 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheRankingProfiles, tntID, rgp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheRankingProfiles, tntID, rgp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1617,8 +1622,8 @@ func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id str
 }
 func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *utils.Ranking, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheRankings, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheRankings, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1652,7 +1657,7 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheRankings, tntID, nil, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+				if errCh := dm.cache.Set(ctx, utils.CacheRankings, tntID, nil, nil, cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
 			}
@@ -1660,7 +1665,7 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+		if errCh := dm.cache.Set(ctx, utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
 	}
@@ -1722,8 +1727,8 @@ func (dm *DataManager) RemoveRanking(ctx *context.Context, tenant, id string) (e
 func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rs *utils.Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheResources, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheResources, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1755,7 +1760,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheResources, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheResources, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1765,7 +1770,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheResources, tntID, rs, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheResources, tntID, rs, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1824,8 +1829,8 @@ func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id string) (
 func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rp *utils.ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheResourceProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheResourceProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -1856,7 +1861,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheResourceProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheResourceProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1866,7 +1871,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheResourceProfiles, tntID, rp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheResourceProfiles, tntID, rp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1905,7 +1910,7 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.Resour
 			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs, false); err != nil {
 			return err
 		}
-		Cache.Clear([]string{utils.CacheEventResources})
+		dm.cache.Clear([]string{utils.CacheEventResources})
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaResourceProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
@@ -1982,8 +1987,8 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id st
 func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ip *utils.IPAllocations, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheIPAllocations, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheIPAllocations, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2016,7 +2021,7 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheIPAllocations, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheIPAllocations, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2026,7 +2031,7 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheIPAllocations, tntID, ip, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheIPAllocations, tntID, ip, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2085,8 +2090,8 @@ func (dm *DataManager) RemoveIPAllocations(ctx *context.Context, tenant, id stri
 func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ipp *utils.IPProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheIPProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheIPProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2117,7 +2122,7 @@ func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cac
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheIPProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheIPProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2127,7 +2132,7 @@ func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cac
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheIPProfiles, tntID, ipp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheIPProfiles, tntID, ipp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2166,7 +2171,7 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 			utils.EmptyString, ipp.ID, oldFiltersIDs, ipp.FilterIDs, false); err != nil {
 			return err
 		}
-		Cache.Clear([]string{utils.CacheEventIPs})
+		dm.cache.Clear([]string{utils.CacheEventIPs})
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaIPProfiles]; itm.Replicate {
 		var rpl *replicator
@@ -2256,8 +2261,8 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *utils.RouteProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheRouteProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheRouteProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2288,7 +2293,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheRouteProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheRouteProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2302,7 +2307,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 		return nil, err
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheRouteProfiles, tntID, rpp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheRouteProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2400,8 +2405,8 @@ func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id strin
 func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (attrPrfl *utils.AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheAttributeProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheAttributeProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2435,7 +2440,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 			if err != nil {
 				err = utils.CastRPCErr(err)
 				if err == utils.ErrNotFound && cacheWrite {
-					if errCh := Cache.Set(ctx, utils.CacheAttributeProfiles, tntID, nil, nil,
+					if errCh := dm.cache.Set(ctx, utils.CacheAttributeProfiles, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
 					}
@@ -2449,7 +2454,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2557,8 +2562,8 @@ func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id s
 func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (cpp *utils.ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheChargerProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheChargerProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2590,7 +2595,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheChargerProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2600,7 +2605,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheChargerProfiles, tntID, cpp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheChargerProfiles, tntID, cpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2722,7 +2727,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				for key := range loadIDs {
-					if errCh := Cache.Set(ctx, utils.CacheLoadIDs, key, nil, nil,
+					if errCh := dm.cache.Set(ctx, utils.CacheLoadIDs, key, nil, nil,
 						cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 						return nil, errCh
 					}
@@ -2734,7 +2739,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 	}
 	if cacheWrite {
 		for key, val := range loadIDs {
-			if errCh := Cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
+			if errCh := dm.cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 				return nil, errCh
 			}
@@ -2776,8 +2781,8 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *utils.RateProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheRateProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheRateProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -2810,7 +2815,7 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheRateProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheRateProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2823,7 +2828,7 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 		return nil, err
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheRateProfiles, tntID, rpp, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheRateProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -3028,8 +3033,8 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ap *utils.ActionProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheActionProfiles, tntID); ok {
+	if cacheRead && dm != nil {
+		if x, ok := dm.cache.Get(utils.CacheActionProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
@@ -3061,7 +3066,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(ctx, utils.CacheActionProfiles, tntID, nil, nil,
+				if errCh := dm.cache.Set(ctx, utils.CacheActionProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -3071,7 +3076,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheActionProfiles, tntID, ap, nil,
+		if errCh := dm.cache.Set(ctx, utils.CacheActionProfiles, tntID, ap, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -3219,7 +3224,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 		indexes = make(map[string]utils.StringSet, len(idxKeys))
 		allFound := true
 		for _, key := range idxKeys {
-			x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, key))
+			x, ok := dm.cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, key))
 			if !ok {
 				allFound = false
 				break
@@ -3262,7 +3267,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 			if err == utils.ErrNotFound && cacheWrite &&
 				len(idxKeys) > 0 {
 				for _, key := range idxKeys {
-					if errCh := Cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, key), nil, []string{tntCtx},
+					if errCh := dm.cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, key), nil, []string{tntCtx},
 						true, utils.NonTransactional); errCh != nil {
 						return nil, errCh
 					}
@@ -3273,7 +3278,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 	}
 	if cacheWrite {
 		for k, v := range indexes {
-			if err = Cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},
+			if err = dm.cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},
 				true, utils.NonTransactional); err != nil {
 				return nil, err
 			}
@@ -3393,7 +3398,7 @@ func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []s
 			} else if err := CheckFilter(fltr); err != nil {
 				return err
 			}
-		} else if x, has := Cache.Get(utils.CacheFilters, // because the method HasDataDrv doesn't use cache
+		} else if x, has := dm.cache.Get(utils.CacheFilters, // because the method HasDataDrv doesn't use cache
 			utils.ConcatenatedKey(tenant, id)); has && x == nil { // check to see if filter is already in cache
 			return fmt.Errorf("broken reference to filter: <%s>", id)
 		} else if has, err := db.HasDataDrv(ctx, utils.FilterPrefix, // check in local DB if we have the filter

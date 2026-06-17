@@ -70,6 +70,7 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// Create ConnManager and register mock internal connections

@@ -132,6 +132,7 @@ func TestStoreRanking(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB([]string{}, []string{}, &ltcache.TransCacheOpts{}, map[string]*config.ItemOpts{})
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	rkg := NewRankingS(dm, nil, nil, cfg)
 	ranking := &utils.Ranking{}
 	ranking.SetConfig(&utils.RankingProfile{

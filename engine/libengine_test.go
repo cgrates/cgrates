@@ -365,6 +365,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 	fS := NewFilterS(cfg, nil, dm)
 
 	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{

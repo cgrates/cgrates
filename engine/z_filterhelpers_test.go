@@ -40,6 +40,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch = NewDataManager(dbCM, cfg, nil)
+	dmMatch.SetCache(Cache)
 	Cache.Clear(nil)
 	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.Field", []string{"profile"})
@@ -148,6 +149,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch = NewDataManager(dbCM, cfg, nil)
+	dmMatch.SetCache(Cache)
 	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.CallCost.Account", []string{"1001"})
 	if err != nil {

@@ -48,6 +48,7 @@ func TestFileFwvComposeHeader(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -111,6 +112,7 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -174,6 +176,7 @@ func TestFileFwvExportEvent(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -212,6 +215,7 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	em, err := utils.NewExporterMetrics("", "Local")
@@ -235,6 +239,7 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
@@ -268,6 +273,7 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
@@ -300,6 +306,7 @@ func TestFileFwvOnEvictedTrailer(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
@@ -339,6 +346,7 @@ func TestFileFwvOnEvictedClose(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{

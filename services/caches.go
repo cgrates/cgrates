@@ -64,6 +64,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	defer cS.mu.Unlock()
 
 	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
+	dbs.DataManager().SetCache(engine.Cache)
 	go engine.Cache.Precache(shutdown)
 
 	cS.cacheCh <- engine.Cache

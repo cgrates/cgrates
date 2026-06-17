@@ -36,6 +36,7 @@ func TestHealthFilterAttributes(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -80,6 +81,7 @@ func TestHealthReverseFilter(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -157,6 +159,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this threshold but without indexing
 	thPrf := &utils.ThresholdProfileWithAPIOpts{
@@ -272,6 +275,7 @@ func TestHealthIndexCharger(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this charger but without indexing
 	chPrf := &utils.ChargerProfile{
@@ -397,6 +401,7 @@ func TestHealthIndexResources(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this resource but without indexing
 	rsPrf := &utils.ResourceProfile{
@@ -530,6 +535,7 @@ func TestHealthIndexStats(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this statQueue but without indexing
 	sqPrf := &utils.StatQueueProfile{
@@ -687,6 +693,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this routes but without indexing
 	rtPrf := &utils.RouteProfile{
@@ -880,6 +887,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
 	chPrf1 := &utils.ChargerProfile{
@@ -981,6 +989,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
 	chPrf1 := &utils.ChargerProfile{
@@ -1114,6 +1123,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	filter1 := &Filter{
 		Tenant: "cgrates.org",

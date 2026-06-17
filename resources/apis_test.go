@@ -39,6 +39,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmRES = engine.NewDataManager(dbCM, cfg, nil)
+	dmRES.SetCache(engine.Cache)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -93,6 +94,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	fltS := engine.NewFilterS(cfg, nil, dm)
 	rs := NewResourceService(cfg, dm, fltS, nil)
 	if err := dm.SetResourceProfile(context.TODO(), rProf, true); err != nil {
@@ -333,7 +335,9 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
 		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
 	rsPrf := &utils.ResourceProfile{
@@ -426,7 +430,9 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
 		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
 	rsPrf := &utils.ResourceProfile{
@@ -818,7 +824,9 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, nil)
+			dm.SetCache(engine.Cache)
 			engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+			dm.SetCache(engine.Cache)
 
 			cacheKey := utils.ConcatenatedKey(tc.method,
 				utils.ConcatenatedKey("cgrates.org", tc.eventID))
@@ -941,7 +949,9 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, nil)
+			dm.SetCache(engine.Cache)
 			engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+			dm.SetCache(engine.Cache)
 
 			cacheKey := utils.ConcatenatedKey(tc.method,
 				utils.ConcatenatedKey("cgrates.org", tc.eventID))
@@ -1206,7 +1216,9 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -1407,7 +1419,9 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -1508,6 +1522,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, engine.NewConnManager(cfg))
+	dm.SetCache(engine.Cache)
 
 	rS := NewResourceService(cfg, dm, engine.NewFilterS(cfg, nil, dm), nil)
 
@@ -1641,7 +1656,9 @@ func TestErrRetrieveOpts(t *testing.T) {
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, nil)
+			dm.SetCache(engine.Cache)
 			engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+			dm.SetCache(engine.Cache)
 			fltrs := engine.NewFilterS(cfg, nil, dm)
 			rS := NewResourceService(cfg, dm, fltrs, nil)
 

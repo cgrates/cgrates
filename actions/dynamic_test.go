@@ -157,6 +157,7 @@ func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 	data := utils.MapStorage{
@@ -469,6 +470,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -973,6 +975,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1338,6 +1341,7 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1768,6 +1772,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -2117,6 +2122,7 @@ func TestActDynamicTrendExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -2403,6 +2409,7 @@ func TestActDynamicRankingExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -2665,6 +2672,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -2958,6 +2966,7 @@ func TestActDynamicRouteExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -3257,6 +3266,7 @@ func TestActDynamicIPExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -3729,6 +3739,7 @@ func TestActDynamicRateExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -4153,6 +4164,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
+			dm.SetCache(engine.Cache)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			if len(cfg.ActionSCfg().Conns[utils.MetaAdminS]) > 0 {
@@ -4300,6 +4312,7 @@ func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM

@@ -196,6 +196,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	anz, err := NewAnalyzerS(cfg)
 
 	if err != nil {

@@ -51,6 +51,7 @@ func TestTPEnewTPResources(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
+	dm.SetCache(engine.Cache)
 	exp := &TPResources{
 		dm: dm,
 	}
@@ -66,6 +67,7 @@ func TestTPEExportItemsResources(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -119,6 +121,7 @@ func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	tpRsc := TPResources{
 		dm: dm,
 	}

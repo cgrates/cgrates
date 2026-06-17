@@ -835,6 +835,7 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// we expect to receive an error because it will try calculate the cost from rates
 	aB := &abstractBalance{
@@ -881,6 +882,7 @@ func TestABCostWithFilters(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -1227,6 +1229,7 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
+dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	aB := &abstractBalance{

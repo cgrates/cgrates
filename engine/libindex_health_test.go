@@ -35,6 +35,7 @@ func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 	rt := &utils.RateProfile{
 		Tenant:          utils.CGRateSorg,
 		ID:              "TEST_RATE_TEST",
@@ -79,6 +80,7 @@ func TestGetFiltersRateProfilesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -93,6 +95,7 @@ func TestGetFiltersActionProfilesOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
@@ -143,6 +146,7 @@ func TestGetFiltersActionProfilesErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -157,6 +161,7 @@ func TestGetFiltersAccountsOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	ap := &utils.Account{
 		Tenant:    "cgrates.org",
@@ -219,6 +224,7 @@ func TestGetFiltersAccountsErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheAccountsFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -233,6 +239,7 @@ func TestGetFiltersDefault(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM)
+	dm.SetCache(Cache)
 
 	expErr := `unsupported index type:<"inexistent">`
 	if _, err := getFilters(context.Background(), dm, "inexistent", utils.CGRateSorg, "fltrID"); err == nil || err.Error() != expErr {
@@ -247,6 +254,7 @@ func TestGetFilterAsIndexSetDynamicVal(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -275,6 +283,7 @@ func TestGetFilterAsIndexSetElementNotDynamic(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -309,6 +318,7 @@ func TestGetFilterAsIndexSetGetIHFltrIdxFromCacheErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -337,6 +347,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache1Err(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -359,6 +370,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache2Err(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -378,6 +390,7 @@ func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	rply := &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:ATTR2"},
@@ -409,6 +422,7 @@ func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	rply := &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:ATTR2"},
@@ -452,6 +466,7 @@ func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -487,6 +502,7 @@ func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 
@@ -507,6 +523,7 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
@@ -533,6 +550,7 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
@@ -561,6 +579,7 @@ func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 
@@ -581,6 +600,7 @@ func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
@@ -611,6 +631,7 @@ func TestGetRevFltrIdxHealthFromReverseGetKeysForPrefixErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 	objCaches := make(map[string]*ltcache.Cache)
@@ -630,6 +651,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 
@@ -650,6 +672,7 @@ func TestGetRatesFromCacheObjValNil(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache.Set("cgrates.org:ATTR1", nil, []string{})
 
@@ -669,6 +692,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(0, 0, false, false, nil)
 
@@ -689,6 +713,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -743,6 +768,7 @@ func TestGetFltrIdxHealthForRateRatesGetKeysForPrefixErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(Cache)
 
 	useLtcache := ltcache.NewCache(-1, 0, false, false, nil)
 

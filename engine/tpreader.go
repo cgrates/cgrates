@@ -63,6 +63,7 @@ func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,
 	}
+	tpr.dm.SetCache(Cache)
 	tpr.Init()
 
 	return tpr, nil

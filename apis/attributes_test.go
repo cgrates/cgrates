@@ -37,6 +37,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -114,6 +115,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -178,6 +180,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
+	admS.dm.SetCache(engine.Cache)
 	expected = "SERVER_ERROR: NOT_IMPLEMENTED"
 	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -193,6 +196,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -227,6 +231,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -294,6 +299,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	}
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
+	admS.dm.SetCache(engine.Cache)
 
 	engine.Cache.Clear(nil)
 	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
@@ -331,6 +337,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -373,6 +380,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -400,6 +408,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -440,6 +449,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -462,6 +472,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	expected = "NOT_FOUND"
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMockNew}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
+	admS.dm.SetCache(engine.Cache)
 	if err := admS.GetAttributeProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -479,6 +490,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
@@ -620,6 +632,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm.SetCache(engine.Cache)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
@@ -683,6 +696,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -726,6 +740,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -772,6 +787,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -801,6 +817,7 @@ func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.Cache)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

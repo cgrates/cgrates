@@ -73,6 +73,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
@@ -103,6 +104,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
@@ -130,6 +132,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -187,6 +190,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -230,6 +234,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -267,6 +272,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMngr := engine.NewConnManager(cfg)
 	clientConn := make(chan birpc.ClientConnector, 1)
@@ -348,6 +354,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -402,6 +409,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -421,6 +429,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -564,6 +573,7 @@ func TestEeSProcessEvent(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
@@ -620,6 +630,7 @@ func TestArchiveEventsInReply(t *testing.T) {
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil)
+	newDM.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil, nil)
 	if err != nil {
