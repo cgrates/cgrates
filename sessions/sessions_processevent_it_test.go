@@ -1893,3 +1893,183 @@ func TestSessionSv1ProcessEventEEs(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventEEsWithRates(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+			"logger": {"level": 7},
+			"sessions": {
+				"enabled": true,
+				"conns": {
+					"*accounts": [{"connIDs": ["*localhost"]}],
+					"*rates":    [{"connIDs": ["*localhost"]}],
+					"*ees":      [{"connIDs": ["*localhost"]}]
+				}
+			},
+			"accounts": {
+				"enabled": true,
+				"conns": {
+					"*rates": [{"connIDs": ["*localhost"]}]
+				}
+			},
+			"rates":  {"enabled": true},
+			"ees": {
+				"enabled": true,
+				"exporters": [
+					{
+						"id": "LogExporter",
+						"type": "*log",
+						"attempts": 1
+					}
+				]
+			},
+			"chargers": {"enabled": true},
+			"admins": {"enabled": true}
+		}`,
+		TpFiles: map[string]string{
+			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * *",;10,false,0s,0,1,1m,1m,`,
+		},
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+	}
+
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
+
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 0}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	t.Run("setAccount", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 20}},
+					Balances: map[string]*utils.Balance{
+						"AbstractBalance": {
+							ID:             "AbstractBalance",
+							Type:           utils.MetaAbstract,
+							Weights:        utils.DynamicWeights{{Weight: 10}},
+							Units:          utils.NewDecimal(int64(10*time.Minute), 0),
+							RateProfileIDs: []string{"RP_SIMPLE"},
+						},
+						"ConcreteBalance": {
+							ID:      "ConcreteBalance",
+							Type:    utils.MetaConcrete,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							Units:   utils.NewDecimal(10, 0),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetAccount failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetAccount reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("ratesAndEEs", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ratesAndEEs",
+				APIOpts: map[string]any{
+					utils.MetaRates:    true,
+					utils.MetaEEs:      true,
+					utils.MetaUsage:    10 * time.Minute,
+					utils.MetaOriginID: "OriginID_ratesAndEEs",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *rates+*ees failed: %v", err)
+		}
+		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("RateSCost missing *primary, got: %v", rply.RateSCost)
+		}
+		if cost != 10.0 {
+			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+		for runID, eesIDs := range rply.EventExporters {
+			if len(eesIDs) == 0 {
+				t.Errorf("runID %q has no exporter IDs", runID)
+			}
+		}
+	})
+
+	t.Run("accountsAuthorizeRatesAndEEs", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "accountsAuthorizeRatesAndEEs",
+				APIOpts: map[string]any{
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
+					utils.MetaRates:     true,
+					utils.MetaEEs:       true,
+					utils.MetaUsage:     10 * time.Minute,
+					utils.MetaOriginID:  "OriginID_accountsAuthorizeRatesAndEEs",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *accounts+*authorize+*rates+*ees failed: %v", err)
+		}
+		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("AccountSUsage missing *default, got: %v", rply.AccountSUsage)
+		}
+		if usage != 10*time.Minute {
+			t.Errorf("AccountSUsage[*default] = %v, want %v", usage, 10*time.Minute)
+		}
+		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("RateSCost missing *default, got: %v", rply.RateSCost)
+		}
+		if cost != 10.0 {
+			t.Errorf("RateSCost[*default] = %g, want 10.0", cost)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+		for runID, eesIDs := range rply.EventExporters {
+			if len(eesIDs) == 0 {
+				t.Errorf("runID %q has no exporter IDs", runID)
+			}
+		}
+	})
+}
