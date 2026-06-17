@@ -96,7 +96,7 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 		config.NewDynamicBoolOpt(nil, "", enableChargers, nil),
 	}
 
-	return NewSessionS(cfg, dm, fltrs, connMgr)
+	return NewSessionS(cfg, dm, engine.Cache, fltrs, connMgr)
 }
 
 // BenchmarkProcessEventChargersOnly benchmarks a full BiRPCv1ProcessEvent
