@@ -51,6 +51,8 @@ type DynamicDP struct {
 
 func (dDP *DynamicDP) String() string { return dDP.initialDP.String() }
 
+func (dDP *DynamicDP) cacheS() *CacheS { return dDP.fs.cache }
+
 func (dDP *DynamicDP) Timezone() string {
 	return dDP.cfg.GeneralCfg().DefaultTimezone
 }
