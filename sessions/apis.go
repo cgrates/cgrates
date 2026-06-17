@@ -58,14 +58,14 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*authReply = *cachedResp.Result.(*V1AuthorizeReply)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: authReply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -119,7 +119,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -283,14 +283,14 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*rply = *cachedResp.Result.(*V1InitSessionReply)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -360,7 +360,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -512,14 +512,14 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*rply = *cachedResp.Result.(*V1UpdateSessionReply)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -609,14 +609,14 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*rply = *cachedResp.Result.(*string)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -784,14 +784,14 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*rply = *cachedResp.Result.(*string)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -825,14 +825,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			sS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
-		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
 				*apiRply = *cachedResp.Result.(*V1ProcessEventReply)
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
+		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: apiRply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -937,7 +937,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaRunID].(string) == utils.MetaPrimary && len(cgrEvs) < 2 { // initial event, not inherited from Session
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
 			utils.MetaSessionS, apiArgs); err != nil {
 			return
 		}

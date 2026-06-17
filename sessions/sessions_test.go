@@ -69,7 +69,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	sessions := NewSessionS(cfg, dm, nil, nil)
+	sessions := NewSessionS(cfg, dm, engine.Cache, nil, nil)
 
 	//connect BiJSON
 	client := &birpc.Service{}
@@ -79,7 +79,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions.biJClnts[client] = "test_conn"
 	sessions.biJIDs = nil
 
-	expected := NewSessionS(cfg, dm, nil, nil)
+	expected := NewSessionS(cfg, dm, engine.Cache, nil, nil)
 	expected.biJClnts[client] = "test_conn"
 	expected.biJIDs = nil
 
@@ -101,7 +101,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	sessions := NewSessionS(cfg, dm, nil, nil)
+	sessions := NewSessionS(cfg, dm, engine.Cache, nil, nil)
 
 	client := &birpc.Service{}
 
@@ -1288,7 +1288,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
-	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
 	sS.dm.SetCache(engine.Cache)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
@@ -1310,7 +1310,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
 	sS.dm.SetCache(engine.Cache)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
@@ -1324,7 +1324,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
 	sS.dm.SetCache(engine.Cache)
 	expIndx = map[string][]string{}
 	expUindx = nil

@@ -43,13 +43,14 @@ var (
 )
 
 // NewSessionS constructs  a new SessionS instance
-func NewSessionS(cgrCfg *config.CGRConfig, dm *engine.DataManager, fltrS *engine.FilterS,
+func NewSessionS(cgrCfg *config.CGRConfig, dm *engine.DataManager, cache *engine.CacheS, fltrS *engine.FilterS,
 	connMgr *engine.ConnManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes.Add(utils.OriginID) // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 
 	return &SessionS{
 		cfg:           cgrCfg,
 		dm:            dm,
+		cache:         cache,
 		fltrS:         fltrS,
 		connMgr:       connMgr,
 		biJClnts:      make(map[birpc.ClientConnector]string),
@@ -73,6 +74,7 @@ type biJClient struct {
 type SessionS struct {
 	cfg     *config.CGRConfig // Separate from smCfg since there can be multiple
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 
@@ -921,7 +923,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
 			utils.MetaSessionS, cgrEv); err != nil {
 			return
 		}
@@ -1444,7 +1446,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 			sr.CGREvent.Event[utils.AnswerTime] = *aTime
 		}
 	}
-	if errCh := engine.Cache.Set(ctx, utils.CacheClosedSessions, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaOriginID]), s,
+	if errCh := sS.cache.Set(ctx, utils.CacheClosedSessions, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaOriginID]), s,
 		nil, true, utils.NonTransactional); errCh != nil {
 		return errCh
 	}
@@ -1702,7 +1704,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 				utils.SessionS, originID))
 		s.lk.Lock() // events update session panic
 		defer s.lk.Unlock()
-	} else if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, originID); has {
+	} else if sIface, has := sS.cache.Get(utils.CacheClosedSessions, originID); has {
 		// found in cache
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs

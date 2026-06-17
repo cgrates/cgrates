@@ -53,6 +53,7 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 			utils.DB,
 		},
@@ -68,7 +69,7 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs, fs, cms.ConnManager())
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs, engine.Cache, fs, cms.ConnManager())
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
