@@ -36,7 +36,7 @@ import (
 
 func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
@@ -44,6 +44,7 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 	csvEr := &CSVFileER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		sourceDir:     srcPath,
 		rdrEvents:     rdrEvents,
@@ -60,6 +61,7 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 type CSVFileER struct {
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
+	cache         *engine.CacheS
 	fltrS         *engine.FilterS
 	sourceDir     string        // path to the directory monitored by the reader for new events
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
@@ -190,7 +192,7 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.fltrS, nil) // create an AgentRequest
+			rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(

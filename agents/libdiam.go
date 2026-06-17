@@ -457,11 +457,11 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 // diamErr handles Diameter error scenarios by attempting to build a customized error answer
 // based on the *err template.
 func diamErr(c diam.Conn, m *diam.Message, resCode uint32, reqVars *utils.DataNode, cfg *config.CGRConfig,
-	filterS *engine.FilterS) {
+	cache *engine.CacheS, filterS *engine.FilterS) {
 	tnt := cfg.GeneralCfg().DefaultTenant
 	tmz := cfg.GeneralCfg().DefaultTimezone
 	aReq := NewAgentRequest(newDADataProvider(nil, m), reqVars,
-		nil, nil, nil, nil, tnt, tmz, filterS, nil)
+		nil, nil, nil, nil, tnt, tmz, cache, filterS, nil)
 	if err := aReq.SetFields(cfg.TemplatesCfg()[utils.MetaErr]); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> message: %s - failed to parse *err template: %v",

@@ -47,10 +47,11 @@ const (
 )
 
 // NewDiameterAgent initializes a new DiameterAgent
-func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
+func NewDiameterAgent(cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps) (*DiameterAgent, error) {
 	da := &DiameterAgent{
 		cgrCfg:     cgrCfg,
+		cache:      cache,
 		fltrS:      filterS,
 		connMgr:    connMgr,
 		caps:       caps,
@@ -93,6 +94,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 // DiameterAgent describes the diameter server
 type DiameterAgent struct {
 	cgrCfg  *config.CGRConfig
+	cache   *engine.CacheS
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	caps    *engine.Caps
@@ -261,7 +263,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	if da.caps.IsLimited() {
 		if err := da.caps.Allocate(); err != nil {
-			diamErr(c, m, diam.TooBusy, reqVars, da.cgrCfg, da.fltrS)
+			diamErr(c, m, diam.TooBusy, reqVars, da.cgrCfg, da.cache, da.fltrS)
 			return
 		}
 		defer da.caps.Deallocate()
@@ -275,14 +277,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
 					utils.DiameterAgent, err.Error(), m))
-			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.cache, da.fltrS)
 			return
 		}
 		// cache message data needed for building up the ASR
-		if errCh := engine.Cache.Set(context.TODO(), utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
+		if errCh := da.cache.Set(context.TODO(), utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
 			nil, true, utils.NonTransactional); errCh != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed message: %s to set Cache: %s", utils.DiameterAgent, m, errCh.Error()))
-			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.cache, da.fltrS)
 			return
 		}
 	}
@@ -304,7 +306,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.fltrS, nil),
+				da.cache, da.fltrS, nil),
 			utils.DiameterAgent, da.connMgr,
 			sessConns,
 			statConns,
@@ -322,14 +324,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.cache, da.fltrS)
 		return
 	}
 	if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.cache, da.fltrS)
 		return
 	}
 	a, err := diamAnswer(m, 0, false,
@@ -338,7 +340,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> err: %s, replying to message: %+v",
 				utils.DiameterAgent, err.Error(), m))
-		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.fltrS)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.cache, da.fltrS)
 		return
 	}
 	writeOnConn(c, a)
@@ -373,7 +375,7 @@ func (da *DiameterAgent) V1GetActiveSessionIDs(*context.Context, string, *[]*ses
 }
 
 func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
-	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, originID)
+	msg, has := da.cache.Get(utils.CacheDiameterMessages, originID)
 	if !has {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
@@ -385,7 +387,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.fltrS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cache, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
@@ -420,7 +422,7 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 				utils.DiameterAgent))
 		return utils.ErrMandatoryIeMissing
 	}
-	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, originID)
+	msg, has := da.cache.Get(utils.CacheDiameterMessages, originID)
 	if !has {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
@@ -432,7 +434,7 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.fltrS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cache, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().RARTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot send RAR with OriginID: <%s>, err: %s",

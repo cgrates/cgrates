@@ -1156,7 +1156,7 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		cfg, nil)
 	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
 
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*exists:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(99)]:"}, agReq); err != nil {

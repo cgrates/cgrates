@@ -50,10 +50,11 @@ const (
 	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )
 
-func NewRadiusAgent(cfg *config.CGRConfig, fltrS *engine.FilterS, cm *engine.ConnManager,
+func NewRadiusAgent(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, cm *engine.ConnManager,
 	caps *engine.Caps) (*RadiusAgent, error) {
 	ra := &RadiusAgent{
 		cfg:   cfg,
+		cache: cache,
 		fltrS: fltrS,
 		cm:    cm,
 		caps:  caps,
@@ -108,6 +109,7 @@ type RadiusAgent struct {
 	mu     sync.RWMutex
 	wg     sync.WaitGroup
 	cfg    *config.CGRConfig // reference for future config reloads
+	cache  *engine.CacheS
 	cm     *engine.ConnManager
 	caps   *engine.Caps
 	fltrS  *engine.FilterS
@@ -179,7 +181,7 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.fltrS, nil)
+			ra.cache, ra.fltrS, nil)
 		var lclProcessed bool
 		if lclProcessed, processReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
 			processed = lclProcessed
@@ -245,7 +247,7 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 				reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone,
 			),
-			ra.fltrS, nil,
+			ra.cache, ra.fltrS, nil,
 		)
 		lclProcessed, err := ra.processRequest(reqPacket,
 			reqProcessor, agReq, replyPacket)
@@ -271,7 +273,7 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 
 	// Cache the RADIUS Packet for future CoA/Disconnect Requests.
 	if cacheKeyTpl := raCfg.RequestsCacheKey; cacheKeyTpl != nil {
-		err := cacheRadiusPacket(reqPacket, remoteAddr, raCfg,
+		err := cacheRadiusPacket(reqPacket, remoteAddr, raCfg, ra.cache,
 			utils.MapStorage{
 				utils.MetaReq:  radDP,
 				utils.MetaVars: varsDataNode,
@@ -291,7 +293,7 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 
 // cacheRadiusPacket caches a RADIUS packet if there are client options found for its source address.
 func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.RadiusAgentCfg,
-	dp utils.DataProvider) error {
+	cache *engine.CacheS, dp utils.DataProvider) error {
 	// Match address against configured client DA addresses.
 	if _, _, err := daRequestAddress(address, cfg.ClientDaAddresses); err != nil {
 		return nil // Address did not match any client; proceed without caching.
@@ -300,7 +302,7 @@ func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.Radius
 	if err != nil {
 		return fmt.Errorf("failed to parse the RADIUS packet cache key: %w", err)
 	}
-	if err = engine.Cache.Set(context.TODO(), utils.CacheRadiusPackets, cacheKey, packet,
+	if err = cache.Set(context.TODO(), utils.CacheRadiusPackets, cacheKey, packet,
 		nil, true, utils.NonTransactional); err != nil {
 		return fmt.Errorf("failed to cache RADIUS packet: %w", err)
 	}
@@ -658,7 +660,7 @@ func (ra *RadiusAgent) V1AlterSession(_ *context.Context, cgrEv utils.CGREvent, 
 // sendRadDaReq prepares and sends a Radius CoA/Disconnect Request and returns the reply code or an error.
 func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string,
 	requestEv utils.DataProvider, requestVars *utils.DataNode) (radigo.PacketCode, error) {
-	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, sessionID)
+	cachedPacket, has := ra.cache.Get(utils.CacheRadiusPackets, sessionID)
 	if !has {
 		return 0, fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
 	}
@@ -668,7 +670,7 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 		requestEv, requestVars, nil, nil, nil, nil,
 		ra.cfg.GeneralCfg().DefaultTenant,
 		ra.cfg.GeneralCfg().DefaultTimezone,
-		ra.fltrS, map[string]utils.DataProvider{
+		ra.cache, ra.fltrS, map[string]utils.DataProvider{
 			utils.MetaOReq: newRADataProvider(packet),
 		})
 	err := agReq.SetFields(ra.cfg.TemplatesCfg()[requestTemplate])

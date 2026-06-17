@@ -54,6 +54,7 @@ func (s *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		[]string{
 			utils.CapS,
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 		},
 		s.cfg.GeneralCfg().ConnectTimeout)
@@ -72,7 +73,7 @@ func (s *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
 	shutdown *utils.SyncedChan) error {
 	var err error
-	s.da, err = agents.NewDiameterAgent(s.cfg, filterS, cm, caps)
+	s.da, err = agents.NewDiameterAgent(s.cfg, engine.Cache, filterS, cm, caps)
 	if err != nil {
 		return err
 	}
@@ -101,6 +102,7 @@ func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager
 		[]string{
 			utils.CapS,
 			utils.ConnManager,
+			utils.CacheS,
 			utils.FilterS,
 		},
 		s.cfg.GeneralCfg().ConnectTimeout)

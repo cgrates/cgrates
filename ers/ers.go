@@ -47,8 +47,8 @@ type erEvent struct {
 }
 
 // NewERService instantiates the ERService
-func NewERService(dm *engine.DataManager, cfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) (ers *ERService) {
-	ers = &ERService{
+func NewERService(dm *engine.DataManager, cfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS, connMgr *engine.ConnManager) *ERService {
+	ers := &ERService{
 		cfg:           cfg,
 		rdrs:          make(map[string]EventReader),
 		rdrPaths:      make(map[string]string),
@@ -56,13 +56,14 @@ func NewERService(dm *engine.DataManager, cfg *config.CGRConfig, filterS *engine
 		rdrEvents:     make(chan *erEvent),
 		partialEvents: make(chan *erEvent),
 		rdrErr:        make(chan error),
+		cache:         cache,
 		fltrS:         filterS,
 		connMgr:       connMgr,
 		dm:            dm,
 	}
 	ers.partialCache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().PartialCacheTTL, false, false,
 		[]func(itmID string, value any){ers.onEvicted})
-	return
+	return ers
 }
 
 // ERService is managing the EventReaders
@@ -76,6 +77,7 @@ type ERService struct {
 	partialEvents chan *erEvent            // receive here the partial events from readers
 	rdrErr        chan error               // receive here errors which should stop the app
 
+	cache   *engine.CacheS
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 	dm      *engine.DataManager
@@ -180,7 +182,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
 		erS.rdrEvents, erS.partialEvents, erS.rdrErr,
-		erS.fltrS, erS.stopLsn[rdrID], erS.dm); err != nil {
+		erS.cache, erS.fltrS, erS.stopLsn[rdrID], erS.dm); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr
@@ -445,7 +447,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 
 	var cgrEv *utils.CGREvent
-	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.fltrS, // merge the events
+	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.cache, erS.fltrS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
 		erS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -478,7 +480,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 	switch action {
 	case utils.MetaNone: // do nothing with the events
 	case utils.MetaPostCDR: // merge the events and post the to erS
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS,
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS,
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -496,7 +498,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -564,7 +566,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.fltrS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {

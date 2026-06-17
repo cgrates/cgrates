@@ -37,6 +37,7 @@ import (
 type AMQPER struct {
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of current config instance within ERsCfg.Readers
+	cache  *engine.CacheS
 	fltrS  *engine.FilterS
 
 	eventChan     chan *erEvent // channel to dispatch the events created
@@ -69,10 +70,11 @@ type amqpClient struct {
 
 // NewAMQPER returns a new AMQP EventReader with the provided configurations.
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int, eventChan, partialEvChan chan *erEvent, errChan chan error,
-	fltrS *engine.FilterS, exitChan chan struct{}) (EventReader, error) {
+	cache *engine.CacheS, fltrS *engine.FilterS, exitChan chan struct{}) (EventReader, error) {
 	rdr := &AMQPER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
+		cache:         cache,
 		fltrS:         fltrS,
 		eventChan:     eventChan,
 		partialEvChan: partialEvChan,
@@ -128,7 +130,7 @@ func (rdr *AMQPER) processMessage(msg []byte) error {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, nil) // create an AgentRequest
+		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant,
 		rdr.Config().Filters, agReq)
 	if err != nil || !pass {

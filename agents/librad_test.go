@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -89,7 +90,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	for _, v := range rplyFlds {
 		v.ComputePath()
 	}
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, nil, nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, utils.NewLeafNode(time.Hour))
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, utils.NewLeafNode("AccessAccept"))
 	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.AccountField}, utils.NewLeafNode("1001"))

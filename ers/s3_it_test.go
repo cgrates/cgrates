@@ -89,7 +89,7 @@ func TestS3ER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewS3ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.Cache, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	s3Rdr := rdr.(*S3ER)
@@ -141,9 +141,11 @@ func TestS3ER(t *testing.T) {
 
 func TestNewS3ER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	expected := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    1,
+		cache:     cacheS,
 		fltrS:     nil,
 		rdrEvents: nil,
 		rdrExit:   nil,
@@ -179,7 +181,7 @@ func TestNewS3ER(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 1, nil, nil, nil, nil, nil)
+	rdr, err := NewS3ER(cfg, 1, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,9 +192,11 @@ func TestNewS3ER(t *testing.T) {
 
 func TestNewS3ERCase2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	expected := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
+		cache:     cacheS,
 		awsRegion: "",
 		awsID:     "",
 		awsKey:    "",
@@ -212,7 +216,13 @@ func TestNewS3ERCase2(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, nil, nil)
+<<<<<<< HEAD
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
+||||||| parent of 8798806f4 (fixup! add cache field to AgentRequest)
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil), nil, nil)
+=======
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
+>>>>>>> 8798806f4 (fixup! add cache field to AgentRequest)
 	if err != nil {
 		t.Fatal(err)
 	}

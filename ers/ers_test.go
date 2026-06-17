@@ -32,7 +32,7 @@ import (
 
 func TestERsProcessPartialEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	erS := NewERService(nil, cfg, nil, nil)
+	erS := NewERService(nil, cfg, engine.Cache, nil, nil)
 	event := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventERsProcessPartial",

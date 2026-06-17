@@ -88,7 +88,7 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 			"Field4": "Value4",
 		},
 	}
-	if rcv, err := mergePartialEvents(cgrEvs, confg.ERsCfg().Readers[0], fltrS, confg.GeneralCfg().DefaultTenant,
+	if rcv, err := mergePartialEvents(cgrEvs, confg.ERsCfg().Readers[0], engine.Cache, fltrS, confg.GeneralCfg().DefaultTenant,
 		confg.GeneralCfg().DefaultTimezone); err != nil {
 		t.Error(err)
 	} else {

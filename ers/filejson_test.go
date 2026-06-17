@@ -23,6 +23,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -35,6 +36,7 @@ func TestNewJSONFileER(t *testing.T) {
 		RWMutex:   sync.RWMutex{},
 		cgrCfg:    cfg,
 		cfgIdx:    0,
+		cache:     engine.Cache,
 		fltrS:     nil,
 		rdrEvents: nil,
 		rdrError:  nil,
@@ -43,7 +45,7 @@ func TestNewJSONFileER(t *testing.T) {
 	}
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
 	cfg.ERsCfg().Readers[0].SourcePath = "/"
-	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
