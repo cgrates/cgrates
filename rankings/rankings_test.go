@@ -100,11 +100,12 @@ func TestRankingProfileLockKey(t *testing.T) {
 
 func TestNewRankingService(t *testing.T) {
 	dm := &engine.DataManager{}
+	cache := &engine.CacheS{}
 	cgrcfg := &config.CGRConfig{}
 	filterS := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 
-	rankingService := NewRankingS(dm, connMgr, filterS, cgrcfg)
+	rankingService := NewRankingS(dm, cache, connMgr, filterS, cgrcfg)
 
 	if rankingService == nil {
 		t.Fatal("NewRankingService() returned nil")
@@ -112,6 +113,10 @@ func TestNewRankingService(t *testing.T) {
 
 	if rankingService.dm != dm {
 		t.Errorf("Expected dm to be %v, got %v", dm, rankingService.dm)
+	}
+
+	if rankingService.cache != cache {
+		t.Errorf("Expected cache to be %v, got %v", cache, rankingService.cache)
 	}
 
 	if rankingService.cgrcfg != cgrcfg {
@@ -133,7 +138,7 @@ func TestStoreRanking(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	rkg := NewRankingS(dm, nil, nil, cfg)
+	rkg := NewRankingS(dm, engine.Cache, nil, nil, cfg)
 	ranking := &utils.Ranking{}
 	ranking.SetConfig(&utils.RankingProfile{
 		Tenant:            "cgrates.org",
