@@ -28,27 +28,28 @@ import (
 // cfg.SessionSCfg().Conns[utils.MetaChargers]
 // ChargerScProcessEvent is a wrapper to unify processing from the client side from multiple subsystems
 func ChargerScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
-	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
-	cgrEv *utils.CGREvent) (chrgrs []*ChrgSProcessEventReply, err error) {
-	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, connsCfg,
-		cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS); err != nil {
-		return
+	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, cache *engine.CacheS, subsys string,
+	cgrEv *utils.CGREvent) ([]*ChrgSProcessEventReply, error) {
+	conns, err := engine.GetConnIDs(ctx, connsCfg,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS)
+	if err != nil {
+		return nil, err
 	}
 	if len(conns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.ChargerS)
 	}
-	if x, ok := engine.Cache.Get(utils.CacheEventCharges, cgrEv.ID); ok && x != nil {
+	if x, ok := cache.Get(utils.CacheEventCharges, cgrEv.ID); ok && x != nil {
 		return x.([]*ChrgSProcessEventReply), nil
 	}
+	var chrgrs []*ChrgSProcessEventReply
 	if err = connMgr.Call(ctx, conns,
 		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
 		err = utils.NewErrChargerS(err)
 	}
 
-	if errCh := engine.Cache.Set(ctx, utils.CacheEventCharges, cgrEv.ID, chrgrs, nil,
+	if errCh := cache.Set(ctx, utils.CacheEventCharges, cgrEv.ID, chrgrs, nil,
 		true, utils.NonTransactional); errCh != nil {
 		return nil, errCh
 	}
-	return
+	return chrgrs, err
 }

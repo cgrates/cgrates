@@ -915,7 +915,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr,
+			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, engine.Cache,
 			utils.MetaSessionS, cgrEv); err != nil {
 			return
 		}
