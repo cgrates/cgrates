@@ -1266,6 +1266,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(cfg, dm, fltrs, cM)
@@ -1432,6 +1433,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	rsPrf := &utils.ResourceProfile{
@@ -1521,7 +1523,9 @@ func TestResourcesStoreResourceError(t *testing.T) {
 
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, engine.NewConnManager(cfg))
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 
 	rS := NewResourceService(cfg, dm, engine.NewFilterS(cfg, nil, dm), nil)

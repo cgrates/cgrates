@@ -698,6 +698,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -942,7 +943,9 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, engine.NewConnManager(cfg))
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -1125,6 +1128,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
@@ -1321,6 +1325,7 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -1365,6 +1370,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 		config.NewDynamicBoolOpt(nil, "cgrates.org", true, nil),
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	db := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{

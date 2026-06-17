@@ -43,6 +43,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -120,6 +121,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -200,6 +202,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -286,6 +289,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -368,6 +372,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -591,6 +596,7 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
@@ -662,6 +668,7 @@ func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)

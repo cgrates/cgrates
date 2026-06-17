@@ -67,6 +67,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	dm.SetCache(Cache)
 
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}
@@ -94,6 +95,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(Cache)
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}

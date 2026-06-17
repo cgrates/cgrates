@@ -33,6 +33,7 @@ func TestTPEnewTPResources(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ResourceProfile, error) {
 			rsc := &utils.ResourceProfile{

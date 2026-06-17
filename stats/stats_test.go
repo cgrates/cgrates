@@ -1047,6 +1047,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
@@ -2152,6 +2153,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -2237,6 +2239,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -4080,6 +4083,7 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -4127,6 +4131,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
@@ -4179,6 +4184,7 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)

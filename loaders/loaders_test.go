@@ -42,6 +42,7 @@ func TestNewLoaderService(t *testing.T) {
 	cfg.LoaderCfg()[0].RunDelay = -1
 	cfg.LoaderCfg()[0].TpInDir = "notAFolder"
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -150,6 +151,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -235,6 +237,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -359,6 +362,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -424,6 +428,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -581,6 +586,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	defer os.RemoveAll(inPath)
 
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

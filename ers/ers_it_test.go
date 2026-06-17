@@ -684,6 +684,7 @@ func TestERsProcessEvent11(t *testing.T) {
 	clientChan := make(chan birpc.ClientConnector, 1)
 	clientChan <- testMockClient
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	connMng.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, clientChan)
 	srv := NewERService(nil, cfg, fltrS, connMng)
 	rdrCfg := &config.EventReaderCfg{

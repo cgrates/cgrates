@@ -75,6 +75,7 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 
 	// Create ConnManager and register mock internal connections
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	mockCh := make(chan birpc.ClientConnector, 1)
 	mockCh <- benchMockClient{}
 

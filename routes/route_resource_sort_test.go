@@ -33,6 +33,7 @@ import (
 func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -52,6 +53,7 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
 			Route: &utils.Route{},
@@ -102,6 +104,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -164,6 +167,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -239,6 +243,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -276,6 +281,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 func TestResourceDescendentSorterSortRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{}
@@ -297,6 +303,7 @@ func TestResourceDescendentSorterSortRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{
@@ -381,6 +388,7 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
@@ -464,6 +472,7 @@ func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
@@ -529,6 +538,7 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)

@@ -33,6 +33,7 @@ func TestTPEnewTPFilters(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
+	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*engine.Filter, error) {
 			fltr := &engine.Filter{

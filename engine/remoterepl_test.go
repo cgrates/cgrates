@@ -74,6 +74,7 @@ func TestReplicateNnReplicatorSv1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
@@ -102,6 +103,7 @@ func TestReplicateMultipleIDs(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}

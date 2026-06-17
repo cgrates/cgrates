@@ -32,6 +32,7 @@ import (
 func TestAuthorizeEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -56,6 +57,7 @@ func TestAuthorizeEvent(t *testing.T) {
 func TestAuthorizeEventWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -103,6 +105,7 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 func TestInitiateSessionWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -127,6 +130,7 @@ func TestInitiateSessionWithDigest(t *testing.T) {
 func TestUpdateSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -151,6 +155,7 @@ func TestUpdateSession(t *testing.T) {
 func TestSyncSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -174,6 +179,7 @@ func TestSyncSessions(t *testing.T) {
 func TestTerminateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -198,6 +204,7 @@ func TestTerminateSessions(t *testing.T) {
 func TestProcessCDR(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -231,6 +238,7 @@ func TestProcessCDR(t *testing.T) {
 func TestProcessMessage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -259,6 +267,7 @@ func TestProcessMessage(t *testing.T) {
 func TestProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -291,6 +300,7 @@ func TestProcessEvent(t *testing.T) {
 func TestGetActiveSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -318,6 +328,7 @@ func TestGetActiveSessions(t *testing.T) {
 func TestGetActiveSessionsCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -348,6 +359,7 @@ func TestGetActiveSessionsCount(t *testing.T) {
 func TestForceDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -375,6 +387,7 @@ func TestForceDisconnect(t *testing.T) {
 func TestGetPassiveSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -402,6 +415,7 @@ func TestGetPassiveSessions(t *testing.T) {
 func TestGetPassiveSessionsCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -453,6 +467,7 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 func TestActivateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -477,6 +492,7 @@ func TestActivateSessions(t *testing.T) {
 func TestDeactivateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -501,6 +517,7 @@ func TestDeactivateSessions(t *testing.T) {
 func TestDisconnectPeer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -529,6 +546,7 @@ func TestDisconnectPeer(t *testing.T) {
 func TestSTIRAuthenticate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -557,6 +575,7 @@ func TestSTIRIdentity(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
@@ -587,6 +606,7 @@ func TestSTIRIdentity(t *testing.T) {
 func TestRegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)

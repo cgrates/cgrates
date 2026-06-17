@@ -34,6 +34,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{
 			ConnIDs: []string{"*internal"},
@@ -276,6 +277,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{
 			ConnIDs: []string{"*internal"},
@@ -419,6 +421,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -555,6 +558,7 @@ func TestGetFilterIndexes(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -717,6 +721,7 @@ func TestGetReverseFilterHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -746,6 +751,7 @@ func TestGetThresholdsIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -775,6 +781,7 @@ func TestGetResourcesIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -804,6 +811,7 @@ func TestGetStatsIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -833,6 +841,7 @@ func TestGetRoutesIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -862,6 +871,7 @@ func TestGetAttributesIndexHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -891,6 +901,7 @@ func TestGetChargersIndexHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -920,6 +931,7 @@ func TestGetRateProfilesIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -949,6 +961,7 @@ func TestGetActionsIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -978,6 +991,7 @@ func TestGetAccountsIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,
@@ -1007,6 +1021,7 @@ func TestGetRateRatesIndexesHealth(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{{ConnIDs: []string{"*internal"}}}
 	adms := &AdminSv1{
 		cfg:     cfg,

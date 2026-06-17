@@ -74,6 +74,7 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
 
 	stopchan := make(chan struct{}, 1)
@@ -132,6 +133,7 @@ func TestCacheSSetWithReplicateFalse(t *testing.T) {
 	dm.SetCache(Cache)
 
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 
 	stopchan := make(chan struct{}, 1)
 	close(stopchan)
@@ -178,6 +180,7 @@ func TestCacheSGetWithRemote(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
 
 	stopchan := make(chan struct{}, 1)
@@ -229,6 +232,7 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 	}
 
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 
 	stopchan := make(chan struct{}, 1)
 	close(stopchan)
@@ -253,6 +257,7 @@ func TestRemoveWithoutReplicate(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(Cache)
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	chS := NewCacheS(cfg, dm, connMgr, nil)
 	dm.SetCache(Cache)
 
@@ -387,6 +392,7 @@ func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -431,6 +437,7 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -475,6 +482,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -518,6 +526,7 @@ func TestCacheSReplicateRemove(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)

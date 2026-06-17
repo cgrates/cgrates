@@ -115,6 +115,7 @@ func TestProcessAttributeS(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -145,6 +146,7 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -183,6 +185,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -309,6 +312,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
@@ -643,6 +647,7 @@ dm.SetCache(engine.Cache)
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rpcClientConn,
 	})
+	connMngr.SetCache(engine.Cache)
 	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
 	//AccountS
 	accnts := NewAccountS(cfg, fltr, connMngr, dm)

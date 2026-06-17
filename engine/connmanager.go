@@ -40,9 +40,14 @@ func NewConnManager(cfg *config.CGRConfig) *ConnManager {
 	}
 }
 
+func (cM *ConnManager) SetCache(cache *CacheS) {
+	cM.cache = cache
+}
+
 // ConnManager handle the RPC connections
 type ConnManager struct {
 	cfg         *config.CGRConfig
+	cache       *CacheS
 	rpcInternal map[string]chan birpc.ClientConnector
 	disp        map[string]chan birpc.ClientConnector
 	dispIntCh   RPCClientSet
@@ -54,7 +59,7 @@ type ConnManager struct {
 // in case this doesn't exist create it and cache it
 func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.ClientConnector, err error) {
 	//try to get the connection from cache
-	if x, ok := Cache.Get(utils.CacheRPCConnections, connID); ok {
+	if x, ok := cM.cache.Get(utils.CacheRPCConnections, connID); ok {
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -84,7 +89,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan, isInternalRPC); err != nil {
 		return
 	}
-	err = Cache.Set(context.TODO(), utils.CacheRPCConnections, connID, conn, nil,
+	err = cM.cache.Set(context.TODO(), utils.CacheRPCConnections, connID, conn, nil,
 		true, utils.NonTransactional)
 	return
 }
@@ -208,8 +213,8 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, s
 
 // Reload will clear all RPC related caches
 func (cM *ConnManager) Reload() {
-	Cache.Clear([]string{utils.CacheRPCConnections})
-	Cache.Clear([]string{utils.CacheReplicationHosts})
+	cM.cache.Clear([]string{utils.CacheRPCConnections})
+	cM.cache.Clear([]string{utils.CacheReplicationHosts})
 	cM.connCache.Clear()
 }
 

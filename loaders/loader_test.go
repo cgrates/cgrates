@@ -323,6 +323,7 @@ func TestSetToDB(t *testing.T) {
 func TestLoaderProcess(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -409,6 +410,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	var reloadCache, clearCache any
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCache)
 	tntID := "cgrates.org:ID"
 	iCh := make(chan birpc.ClientConnector, 1)
@@ -722,6 +724,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 func TestLoaderProcessData(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -773,6 +776,7 @@ func (mockReader) Read([]byte) (int, error) { return 0, utils.ErrNotFound }
 func TestLoaderProcessDataErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -823,6 +827,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
 func TestLoaderProcessFileURL(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -890,6 +895,7 @@ func (mockLock) IsLockFile(string) (_ bool) { return }
 func TestLoaderProcessIFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -986,6 +992,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 func TestLoaderProcessFolder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1112,6 +1119,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 func TestLoaderProcessFolderErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1332,6 +1340,7 @@ func TestLoaderListenAndServeI(t *testing.T) {
 func TestLoaderProcessZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

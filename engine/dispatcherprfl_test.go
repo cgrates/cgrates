@@ -504,6 +504,7 @@ func TestDispatcherHostGetConnExistingConn(t *testing.T) {
 		rcvM: "testM",
 	}
 	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(Cache)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 	dH := &DispatcherHost{
 		Tenant: "cgrates.org",

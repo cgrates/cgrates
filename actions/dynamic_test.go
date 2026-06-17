@@ -153,6 +153,7 @@ func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{"admins"}}}
 
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
@@ -467,6 +468,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -972,6 +974,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -1338,6 +1341,7 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -1769,6 +1773,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -2119,6 +2124,7 @@ func TestActDynamicTrendExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -2406,6 +2412,7 @@ func TestActDynamicRankingExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -2669,6 +2676,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -2963,6 +2971,7 @@ func TestActDynamicRouteExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -3263,6 +3272,7 @@ func TestActDynamicIPExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -3736,6 +3746,7 @@ func TestActDynamicRateExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -4161,6 +4172,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
+			connMgr.SetCache(engine.Cache)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
@@ -4309,6 +4321,7 @@ func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)

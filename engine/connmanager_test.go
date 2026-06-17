@@ -51,6 +51,7 @@ func TestCMgetConnNotFound(t *testing.T) {
 	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(Cache)
+	cM.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -85,6 +86,7 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 		},
 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
+	cM.SetCache(Cache)
 
 	experr := rpcclient.ErrUnsupportedBiRPC
 	exp, err := NewRPCPool(context.Background(), utils.MetaFirst, "", "", "", cfg.GeneralCfg().ConnectAttempts,
@@ -129,6 +131,7 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 		},
 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
+	cM.SetCache(Cache)
 
 	cM.connCache.Set(connID, nil, nil)
 
@@ -365,6 +368,7 @@ func TestCMCallErrgetConn(t *testing.T) {
 	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(Cache)
+	cM.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -560,6 +564,7 @@ func TestCMReload(t *testing.T) {
 	dm.SetCache(Cache)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	dm.SetCache(Cache)
+	cM.SetCache(Cache)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
 		"value of 2nd item", nil, true, utils.NonTransactional)
 
@@ -615,6 +620,7 @@ func TestCMGetInternalChan(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.dispIntCh = cM.rpcInternal
 
 	exp := make(chan context.ClientConnector, 1)
@@ -631,6 +637,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)
+	cM.SetCache(Cache)
 	cM.dispIntCh = cM.rpcInternal
 
 	exp := make(chan context.ClientConnector, 1)

@@ -1359,6 +1359,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
+	cM.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
 	dm.SetCache(engine.Cache)
 	rS := NewResourceService(cfg, dm, nil, nil)
@@ -1472,6 +1473,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		cfg: cfg,
 		cm:  engine.NewConnManager(cfg),
 	}
+	rS.cm.SetCache(engine.Cache)
 	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
 		resource: &utils.Resource{
@@ -1538,6 +1540,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 		cfg: cfg,
 		cm:  engine.NewConnManager(cfg),
 	}
+	rS.cm.SetCache(engine.Cache)
 	rS.cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &matchedResource{
 		resource: &utils.Resource{
@@ -1843,6 +1846,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
@@ -1886,6 +1890,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	dm.SetCache(engine.Cache)
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)

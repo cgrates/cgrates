@@ -116,6 +116,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 	})
 	cacheChan <- srv
 	loaderConnMgr = NewConnManager(lCfg)
+	loaderConnMgr.SetCache(Cache)
 	loaderConnMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
 }
 

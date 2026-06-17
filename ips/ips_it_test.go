@@ -650,6 +650,7 @@ func BenchmarkIPsAuthorize(b *testing.B) {
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
+	cm.SetCache(engine.Cache)
 	ipService := NewIPService(cfg, dm, filters, cm)
 
 	ctx := context.Background()
@@ -703,6 +704,7 @@ func BenchmarkIPsAllocate(b *testing.B) {
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
+	cm.SetCache(engine.Cache)
 	ipService := NewIPService(cfg, dm, filters, cm)
 
 	ctx := context.Background()
@@ -754,6 +756,7 @@ func BenchmarkIPsRelease(b *testing.B) {
 	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
+	cm.SetCache(engine.Cache)
 	ipService := NewIPService(cfg, dm, filters, cm)
 	ctx := context.Background()
 	profile := &utils.IPProfile{
