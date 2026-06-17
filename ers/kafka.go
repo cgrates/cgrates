@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"time"
 
@@ -207,8 +208,13 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
+	rawEvent := make(map[string]any, len(decodedMessage))
+	if len(rdr.Config().EEsSuccessIDs) != 0 || len(rdr.Config().EEsFailedIDs) != 0 {
+		maps.Copy(rawEvent, decodedMessage)
+	}
 	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
+		rawEvent: rawEvent,
 		rdrCfg:   rdr.Config(),
 	}
 	return

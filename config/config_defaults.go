@@ -536,7 +536,6 @@ const CGRATES_CFG_JSON = `
 			"processedPath": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "",					// tenant used by import
 			"timezone": "",					// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-			"eesIDs": [], 						// ids of exporters used for moving the processed event to EEs
 			"eesSuccessIDs": [],					// ids of exporters used for moving the raw event to EEs
 			"eesFailedIDs": [],					// ids of exporters used for moving the failed raw event to EEs
 			"filters": [],					// limit parsing based on the filters
@@ -875,7 +874,7 @@ const CGRATES_CFG_JSON = `
 		// 	{
 		// 		"tenant": "*any",
 		// 		"filterIDs": [],
-		// 		"value": ""
+		// 		"value": false
 		// 	}
 		// ],
 		// "*eesIDs": [

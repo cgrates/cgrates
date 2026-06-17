@@ -284,9 +284,6 @@ maxReconnectInterval
 	The duration to wait in between retries to reconnect on a connection loss for AMQP.
 
 
-eesIDs
-	The IDs of exporters in EEs which you want to make use of, when `*export` flag is present in the reader. When an event is read and processed from the reader in use, the processed event will be sent to those specific IDs in EEs.
-
 
 eesSuccessIDs
 	When an ERs reader processes an event successfuly, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `eesSuccessIDs`.

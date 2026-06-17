@@ -43,7 +43,7 @@ func TestCgrCDRInitDialectorUnsupported(t *testing.T) {
 
 func TestCgrCDRInitDialectorMySQL(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = new("cgrates")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	cgr := &CgrCDR{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
