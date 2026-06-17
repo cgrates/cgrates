@@ -1778,6 +1778,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
 	sS := new(SessionS)
 	sS.cfg = config.CgrConfig()
+	sS.cache = engine.Cache
 	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
 aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
@@ -1819,6 +1820,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 func TestBiRPCv1STIRIdentity(t *testing.T) {
 	sS := new(SessionS)
 	sS.cfg = config.CgrConfig()
+	sS.cache = engine.Cache
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
 		IAT:    1587019822,
@@ -1874,7 +1876,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		OverwriteIAT:   true,
 	}, &rcv); err != nil {
 		t.Error(err)
-	} else if err := AuthStirShaken(context.Background(), rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
+	} else if err := AuthStirShaken(context.Background(), engine.Cache, rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
 }

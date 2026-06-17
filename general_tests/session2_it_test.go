@@ -243,7 +243,7 @@ func testSes2StirInit(t *testing.T) {
 		args, &rply); err != nil { // no error verificated with success
 		t.Error(err)
 	}
-	if err := sessions.AuthStirShaken(context.Background(), rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(context.Background(), engine.Cache, rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -282,7 +282,7 @@ func testSes2STIRIdentity(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if err := sessions.AuthStirShaken(context.Background(), rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(context.Background(), engine.Cache, rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)
 	}
 }
