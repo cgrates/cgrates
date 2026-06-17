@@ -2569,6 +2569,7 @@ const (
 	SessionIndexesCfg         = "session_indexes"
 	ClientProtocolCfg         = "client_protocol"
 	ChannelSyncIntervalCfg    = "channel_sync_interval"
+	ChannelSyncTimeoutCfg     = "channel_sync_timeout"
 	StaleChanMaxExtraUsageCfg = "stale_chan_max_extra_usage"
 	TerminateAttemptsCfg      = "terminate_attempts"
 	AlterableFieldsCfg        = "alterable_fields"

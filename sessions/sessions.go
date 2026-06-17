@@ -1478,11 +1478,15 @@ func (sS *SessionS) syncSessions() {
 			utils.SessionS, len(activeCGRIDs)))
 	}
 	results := make(chan []*SessionID, len(biJClnts))
-	timeout := sS.cgrCfg.GeneralCfg().ReplyTimeout
+	timeout := sS.cgrCfg.SessionSCfg().ChannelSyncTimeout
 	for _, clnt := range biJClnts {
 		go func(clnt *utils.BiJClient) {
-			ctx, cancel := context.WithTimeout(context.TODO(), timeout)
-			defer cancel()
+			ctx := context.TODO()
+			if timeout > 0 {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, timeout)
+				defer cancel()
+			}
 			servMethod := utils.AgentV1GetActiveSessionIDs
 			if clnt.Proto() < 2.0 {
 				// ensure compatibility with OpenSIPS

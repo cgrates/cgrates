@@ -180,6 +180,19 @@ func TestKamailioAgentV1GetActiveSessionIDs(t *testing.T) {
 		}
 	})
 
+	t.Run("does not time out when channel_sync_timeout is zero", func(t *testing.T) {
+		addr := startMockKamailio(t, buildDlgList("call-1"), 0)
+		ka := dialMockKamailio(t, addr, 0)
+
+		var sIDs []*sessions.SessionID
+		if err := ka.V1GetActiveSessionIDs(context.Background(), "", &sIDs); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(sIDs) != 1 {
+			t.Fatalf("expected 1 session ID, got %d", len(sIDs))
+		}
+	})
+
 	t.Run("returns ErrNoActiveSession when the dialog list is empty", func(t *testing.T) {
 		addr := startMockKamailio(t, buildDlgList(), 0)
 		ka := dialMockKamailio(t, addr, time.Second)
@@ -205,10 +218,10 @@ func TestKamailioAgentV1GetActiveSessionIDs(t *testing.T) {
 	})
 }
 
-func dialMockKamailio(tb testing.TB, addr string, replyTimeout time.Duration) *KamailioAgent {
+func dialMockKamailio(tb testing.TB, addr string, syncTimeout time.Duration) *KamailioAgent {
 	tb.Helper()
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().ReplyTimeout = replyTimeout
+	cfg.SessionSCfg().ChannelSyncTimeout = syncTimeout
 	config.SetCgrConfig(cfg)
 	ka := &KamailioAgent{
 		conns:   make([]*kamevapi.KamEvapi, 1),

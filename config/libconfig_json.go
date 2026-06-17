@@ -444,6 +444,7 @@ type SessionSJsonCfg struct {
 	SessionIndexes         *[]string          `json:"session_indexes"`
 	ClientProtocol         *float64           `json:"client_protocol"`
 	ChannelSyncInterval    *string            `json:"channel_sync_interval"`
+	ChannelSyncTimeout     *string            `json:"channel_sync_timeout"`
 	StaleChanMaxExtraUsage *string            `json:"stale_chan_max_extra_usage"`
 	TerminateAttempts      *int               `json:"terminate_attempts"`
 	AlterableFields        *[]string          `json:"alterable_fields"`
