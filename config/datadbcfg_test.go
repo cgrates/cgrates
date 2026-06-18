@@ -620,7 +620,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		},					
 		"items":{
 			"*accounts":{"remote":true, "replicate":false, "apiKey": "randomVal", "route_id": "randomVal"}, 					
-			"*reverse_destinations": {"remote":false, "replicate":false, "apiKey": "randomVal", "route_id": "randomVal"},
+			"*reverseDestinations": {"remote":false, "replicate":false, "apiKey": "randomVal", "route_id": "randomVal"},
 		},
 	},		
 }`

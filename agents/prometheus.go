@@ -35,46 +35,46 @@ import (
 // Prometheus metric names
 const (
 	// Gauge metrics
-	promGoGoroutines                 = "go_goroutines"
-	promGoThreads                    = "go_threads"
-	promProcessOpenFds               = "process_open_fds"
-	promProcessMaxFds                = "process_max_fds"
-	promProcessResidentMemoryBytes   = "process_resident_memory_bytes"
-	promProcessVirtualMemoryBytes    = "process_virtual_memory_bytes"
-	promProcessVirtualMemoryMaxBytes = "process_virtual_memory_max_bytes"
-	promProcessStartTimeSeconds      = "process_start_time_seconds"
-	promGoMemstatsAllocBytes         = "go_memstats_alloc_bytes"
-	promGoMemstatsHeapAllocBytes     = "go_memstats_heap_alloc_bytes"
-	promGoMemstatsHeapIdleBytes      = "go_memstats_heap_idle_bytes"
-	promGoMemstatsHeapInuseBytes     = "go_memstats_heap_inuse_bytes"
-	promGoMemstatsHeapObjects        = "go_memstats_heap_objects"
-	promGoMemstatsHeapReleasedBytes  = "go_memstats_heap_released_bytes"
-	promGoMemstatsHeapSysBytes       = "go_memstats_heap_sys_bytes"
-	promGoMemstatsBuckHashSysBytes   = "go_memstats_buck_hash_sys_bytes"
-	promGoMemstatsGCSysBytes         = "go_memstats_gc_sys_bytes"
-	promGoMemstatsMCacheInuseBytes   = "go_memstats_mcache_inuse_bytes"
-	promGoMemstatsMCacheSysBytes     = "go_memstats_mcache_sys_bytes"
-	promGoMemstatsMSpanInuseBytes    = "go_memstats_mspan_inuse_bytes"
-	promGoMemstatsMSpanSysBytes      = "go_memstats_mspan_sys_bytes"
-	promGoMemstatsNextGCBytes        = "go_memstats_next_gc_bytes"
-	promGoMemstatsOtherSysBytes      = "go_memstats_other_sys_bytes"
-	promGoMemstatsStackInuseBytes    = "go_memstats_stack_inuse_bytes"
-	promGoMemstatsStackSysBytes      = "go_memstats_stack_sys_bytes"
-	promGoMemstatsSysBytes           = "go_memstats_sys_bytes"
-	promGoMemstatsLastGCTimeSeconds  = "go_memstats_last_gc_time_seconds"
-	promGoGCGogcPercent              = "go_gc_gogc_percent"
-	promGoGCGomemlimitBytes          = "go_gc_gomemlimit_bytes"
-	promGoSchedGomaxprocsThreads     = "go_sched_gomaxprocs_threads"
-	promGoInfo                       = "go_info"
-	promGoGCDurationSeconds          = "go_gc_duration_seconds"
+	promGoGoroutines                 = "goGoroutines"
+	promGoThreads                    = "goThreads"
+	promProcessOpenFds               = "processOpenFds"
+	promProcessMaxFds                = "processMaxFds"
+	promProcessResidentMemoryBytes   = "processResidentMemoryBytes"
+	promProcessVirtualMemoryBytes    = "processVirtualMemoryBytes"
+	promProcessVirtualMemoryMaxBytes = "processVirtualMemoryMaxBytes"
+	promProcessStartTimeSeconds      = "processStartTimeSeconds"
+	promGoMemstatsAllocBytes         = "goMemstatsAllocBytes"
+	promGoMemstatsHeapAllocBytes     = "goMemstatsHeapAllocBytes"
+	promGoMemstatsHeapIdleBytes      = "goMemstatsHeapIdleBytes"
+	promGoMemstatsHeapInuseBytes     = "goMemstatsHeapInuseBytes"
+	promGoMemstatsHeapObjects        = "goMemstatsHeapObjects"
+	promGoMemstatsHeapReleasedBytes  = "goMemstatsHeapReleasedBytes"
+	promGoMemstatsHeapSysBytes       = "goMemstatsHeapSysBytes"
+	promGoMemstatsBuckHashSysBytes   = "goMemstatsBuckHashSysBytes"
+	promGoMemstatsGCSysBytes         = "goMemstatsGCSysBytes"
+	promGoMemstatsMCacheInuseBytes   = "goMemstatsMCacheInuseBytes"
+	promGoMemstatsMCacheSysBytes     = "goMemstatsMCacheSysBytes"
+	promGoMemstatsMSpanInuseBytes    = "goMemstatsMSpanInuseBytes"
+	promGoMemstatsMSpanSysBytes      = "goMemstatsMSpanSysBytes"
+	promGoMemstatsNextGCBytes        = "goMemstatsNextGCBytes"
+	promGoMemstatsOtherSysBytes      = "goMemstatsOtherSysBytes"
+	promGoMemstatsStackInuseBytes    = "goMemstatsStackInuseBytes"
+	promGoMemstatsStackSysBytes      = "goMemstatsStackSysBytes"
+	promGoMemstatsSysBytes           = "goMemstatsSysBytes"
+	promGoMemstatsLastGCTimeSeconds  = "goMemstatsLastGCTimeSeconds"
+	promGoGCGogcPercent              = "goGCGogcPercent"
+	promGoGCGomemlimitBytes          = "goGCGomemlimitBytes"
+	promGoSchedGomaxprocsThreads     = "goSchedGomaxprocsThreads"
+	promGoInfo                       = "goInfo"
+	promGoGCDurationSeconds          = "goGCDurationSeconds"
 
 	// Counter metrics
-	promProcessCPUSecondsTotal          = "process_cpu_seconds_total"
-	promProcessNetworkReceiveByteTotal  = "process_network_receive_bytes_total"
-	promProcessNetworkTransmitByteTotal = "process_network_transmit_bytes_total"
-	promGoMemstatsAllocBytesTotal       = "go_memstats_alloc_bytes_total"
-	promGoMemstatsMallocsTotal          = "go_memstats_mallocs_total"
-	promGoMemstatsFreesTotal            = "go_memstats_frees_total"
+	promProcessCPUSecondsTotal          = "processCPUSecondsTotal"
+	promProcessNetworkReceiveByteTotal  = "processNetworkReceiveBytesTotal"
+	promProcessNetworkTransmitByteTotal = "processNetworkTransmitBytesTotal"
+	promGoMemstatsAllocBytesTotal       = "goMemstatsAllocBytesTotal"
+	promGoMemstatsMallocsTotal          = "goMemstatsMallocsTotal"
+	promGoMemstatsFreesTotal            = "goMemstatsFreesTotal"
 )
 
 // Prometheus metrics mappings
@@ -322,7 +322,7 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager, fltr
 		promProcessVirtualMemoryMaxBytes: "Maximum amount of virtual memory available in bytes.",
 		promProcessStartTimeSeconds:      "Start time of the process since unix epoch in seconds.",
 		promGoMemstatsAllocBytes:         "Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.",
-		promGoMemstatsHeapAllocBytes:     "Number of heap bytes allocated and currently in use, same as go_memstats_alloc_bytes. Equals to /memory/classes/heap/objects:bytes.",
+		promGoMemstatsHeapAllocBytes:     "Number of heap bytes allocated and currently in use, same as goMemstatsAllocBytes. Equals to /memory/classes/heap/objects:bytes.",
 		promGoMemstatsHeapIdleBytes:      "Number of heap bytes waiting to be used. Equals to /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.",
 		promGoMemstatsHeapInuseBytes:     "Number of heap bytes that are in use. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes",
 		promGoMemstatsHeapObjects:        "Number of currently allocated objects. Equals to /gc/heap/objects:objects.",
@@ -353,7 +353,7 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager, fltr
 		promProcessNetworkReceiveByteTotal:  "Number of bytes received by the process over the network.",
 		promProcessNetworkTransmitByteTotal: "Number of bytes sent by the process over the network.",
 		promGoMemstatsAllocBytesTotal:       "Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.",
-		promGoMemstatsMallocsTotal:          "Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.",
+		promGoMemstatsMallocsTotal:          "Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for goMemstatsHeapObjects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.",
 		promGoMemstatsFreesTotal:            "Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.",
 	}
 	for name, help := range counterMetrics {

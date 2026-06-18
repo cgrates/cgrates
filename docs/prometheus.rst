@@ -87,25 +87,25 @@ The PrometheusAgent exposes the following metrics:
     StatQueue metrics don't include nodeID labels since StatQueues can be shared between CGRateS instances. Users should ensure StatQueue IDs are unique across their environment.
 
 2. **Core Metrics** (when /*cores is configured)
-    - Standard Go runtime metrics (go_goroutines, go_memstats_*, etc.)
-    - Standard process metrics (process_cpu_seconds_total, process_open_fds, etc.)
+    - Standard Go runtime metrics (goGoroutines, go_memstats_*, etc.)
+    - Standard process metrics (processCPUSecondsTotal, process_open_fds, etc.)
     - Node identification via "nodeID" label, allowing multiple CGRateS engines to be monitored
 
     Example of core metrics output:
 
     .. code-block:: none
 
-        # HELP go_goroutines Number of goroutines that currently exist.
-        # TYPE go_goroutines gauge
-        go_goroutines{nodeID="e94160b"} 40
+        # HELP goGoroutines Number of goroutines that currently exist.
+        # TYPE goGoroutines gauge
+        goGoroutines{nodeID="e94160b"} 40
 
-        # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
-        # TYPE process_cpu_seconds_total counter
-        process_cpu_seconds_total{nodeID="e94160b"} 0.34
+        # HELP processCPUSecondsTotal Total user and system CPU time spent in seconds.
+        # TYPE processCPUSecondsTotal counter
+        processCPUSecondsTotal{nodeID="e94160b"} 0.34
 
-        # HELP go_memstats_alloc_bytes Number of bytes allocated in heap and currently in use.
-        # TYPE go_memstats_alloc_bytes gauge
-        go_memstats_alloc_bytes{nodeID="e94160b"} 1.1360808e+07
+        # HELP goMemstatsAllocBytes Number of bytes allocated in heap and currently in use.
+        # TYPE goMemstatsAllocBytes gauge
+        goMemstatsAllocBytes{nodeID="e94160b"} 1.1360808e+07
 
 3. **Cache Metrics** (when /*caches is configured)
     - Two separate metrics for cache statistics: ``cgrates_cache_groups_total`` and ``cgrates_cache_items_total`` with cache partition ID and nodeID labels

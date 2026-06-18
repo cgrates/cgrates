@@ -142,8 +142,8 @@ func TestFlags(t *testing.T) {
 			want:       true,
 		},
 		{
-			name:       "set_versions",
-			flags:      []string{"-set_versions"},
+			name:       "setVersions",
+			flags:      []string{"-setVersions"},
 			flagVar:    &flags.data.setVersions,
 			defaultVal: false,
 			want:       true,

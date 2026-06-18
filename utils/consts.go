@@ -2319,10 +2319,9 @@ const (
 
 // From Config
 const (
-	AddressCfg       = "address"
-	Password         = "password"
-	AliasCfg         = "alias"
-	AccountSConnsCfg = "accounts_conns"
+	AddressCfg = "address"
+	Password   = "password"
+	AliasCfg   = "alias"
 
 	// KamAgentCfg
 	EvapiConnsCfg = "evapiConns"
@@ -3022,7 +3021,7 @@ const (
 	ScheduledShutdownCgr = "scheduledShutdown"
 	SingleCpuCgr         = "singleCPU"
 	PreloadCgr           = "preload"
-	SetVersionsCgr       = "set_versions"
+	SetVersionsCgr       = "setVersions"
 	MemProfFinalFile     = "mem_final.prof"
 	CpuPathCgr           = "cpu.prof"
 	//Cgr loader
