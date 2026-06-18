@@ -10,9 +10,9 @@
 .. _SQS: https://aws.amazon.com/sqs/
 .. _NATS: https://nats.io/
 
-.. EventReaderService:
+.. _ERs:
 
-EventReaderService
+ERs
 ==================
 
 
