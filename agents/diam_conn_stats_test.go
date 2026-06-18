@@ -50,7 +50,9 @@ func TestDiamConnStats(t *testing.T) {
 },
 // "prometheusAgent": {
 // 	"enabled": true,
-// 	"stats_conns": ["*internal"],
+//  "conns": {
+// 	 "*stats": [{"connIDs": ["*localhost"]}]
+//  },
 // 	"statQueueIDs": [
 // 		"SQ_CONN_1",
 // 		"SQ_CONN_2",

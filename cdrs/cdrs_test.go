@@ -2133,7 +2133,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.AccountSConnsCfg)}}}
+	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ConnsCfg)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -2155,11 +2155,11 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
+		utils.ConnsCfg), utils.AccountSv1, rpcInternal)
 
 	apiOpts := map[string]any{
 		utils.MetaAccountsCost: &utils.EventCharges{},
-		utils.MetaSubsys:       utils.AccountSConnsCfg,
+		utils.MetaSubsys:       utils.ConnsCfg,
 	}
 	eChrgs := &utils.EventCharges{
 		Abstracts: utils.NewDecimal(500, 0),
@@ -2208,7 +2208,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.AccountSConnsCfg)}}}
+	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ConnsCfg)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
@@ -2230,11 +2230,11 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
+		utils.ConnsCfg), utils.AccountSv1, rpcInternal)
 
 	apiOpts := map[string]any{
 		utils.MetaAccountsCost: &utils.EventCharges{},
-		utils.MetaSubsys:       utils.AccountSConnsCfg,
+		utils.MetaSubsys:       utils.ConnsCfg,
 	}
 	eChrgs := &utils.EventCharges{
 		Abstracts: utils.NewDecimal(500, 0),

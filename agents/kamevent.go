@@ -37,12 +37,12 @@ const (
 	CGR_CALL_END           = "CGR_CALL_END"
 	CGR_PROCESS_MESSAGE    = "CGR_PROCESS_MESSAGE"
 	CGR_PROCESS_CDR        = "CGR_PROCESS_CDR"
-	KamTRIndex             = "tr_index"
-	KamTRLabel             = "tr_label"
-	KamHashEntry           = "h_entry"
-	KamHashID              = "h_id"
-	KamReplyRoute          = "reply_route"
-	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
+	KamTRIndex             = "trIndex"
+	KamTRLabel             = "trLabel"
+	KamHashEntry           = "hEntry"
+	KamHashID              = "hID"
+	KamReplyRoute          = "replyRoute"
+	EvapiConnID            = "evapiConnID" // used to share connID info in event for remote disconnects
 	CGR_DLG_LIST           = "CGR_DLG_LIST"
 )
 
@@ -311,7 +311,7 @@ type kamDlgInfo struct {
 	Caller    *kamCallerDlg
 	Variables []struct {
 		CgrOriginID   string `json:"cgrOriginID,omitempty"`
-		CgrOriginHost string `json:"cgrOriginHost,omitempty"`
+		CgrOriginHost string `json:"cgr_originhost,omitempty"`
 	} `json:"variables"`
 }
 

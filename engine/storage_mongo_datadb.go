@@ -46,16 +46,16 @@ import (
 // Collection names in MongoDB.
 const (
 	ColDst  = "destinations"
-	ColRds  = "reverse_destinations"
+	ColRds  = "reverseDestinations"
 	ColAct  = "actions"
-	ColApl  = "action_plans"
-	ColAAp  = "account_action_plans"
+	ColApl  = "actionPlans"
+	ColAAp  = "accountActionPlans"
 	ColTsk  = "tasks"
-	ColAtr  = "action_triggers"
-	ColRpl  = "rating_plans"
-	ColRpf  = "rating_profiles"
+	ColAtr  = "actionTriggers"
+	ColRpl  = "ratingPlans"
+	ColRpf  = "ratingProfiles"
 	ColAcc  = "accounts"
-	ColShg  = "shared_groups"
+	ColShg  = "sharedGroups"
 	ColLht  = "load_history"
 	ColVer  = "versions"
 	ColRsP  = "resourceProfiles"
@@ -79,7 +79,7 @@ const (
 	ColRpp  = "rateProfiles"
 	ColApp  = "actionProfiles"
 	ColLID  = "load_ids"
-	ColAnp  = "account_profiles"
+	ColAnp  = "accountProfiles"
 )
 
 var (

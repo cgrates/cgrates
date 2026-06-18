@@ -77,7 +77,9 @@ func TestDiamPrometheus(t *testing.T) {
 },
 "cdrs": {
 	"enabled": true,
-	"store_cdrs": false
+	"opts": {
+		"*stats": [{"value": "false"}],
+	},
 },
 "prometheusAgent": {
 	"enabled": true,
