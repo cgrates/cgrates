@@ -546,7 +546,8 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		SchedulerConns:     []string{},
+		ChannelSyncTimeout: 60 * time.Second,
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -1000,7 +1001,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		SchedulerConns:     []string{},
+		ChannelSyncTimeout: 60 * time.Second,
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -1063,7 +1065,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		SchedulerConns:     []string{},
+		ChannelSyncTimeout: 60 * time.Second,
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -1126,7 +1129,8 @@ func testCGRConfigReloadAll(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		SchedulerConns:     []string{},
+		ChannelSyncTimeout: 60 * time.Second,
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
