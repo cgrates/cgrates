@@ -94,7 +94,7 @@ func (cS *CacheService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (_ 
 // Shutdown stops the service
 func (cS *CacheService) Shutdown(registry *servmanager.Registry) (_ error) {
 	cS.mu.Lock()
-	cS.mu.Unlock()
+	defer cS.mu.Unlock()
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.CacheSv1)
 	return
