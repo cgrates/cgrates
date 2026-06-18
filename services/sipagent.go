@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -60,11 +59,12 @@ func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	caps := srvDeps[utils.CapS].(*CapService).Caps()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	sip.mu.Lock()
 	defer sip.mu.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, engine.Cache, fs, caps)
+	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, cacheS.CacheS(), fs, caps)
 	if err != nil {
 		return
 	}

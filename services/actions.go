@@ -68,7 +68,7 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
-	acts.acts = actions.NewActionS(acts.cfg, engine.Cache, fs, dbs, cms.ConnManager())
+	acts.acts = actions.NewActionS(acts.cfg, cacheS.CacheS(), fs, dbs, cms.ConnManager())
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
 	if err != nil {
 		return

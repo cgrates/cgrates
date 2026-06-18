@@ -456,7 +456,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(ctx, utils.EmptyString, true)
 		case utils.MetaAPIBan:
-			_, err = GetAPIBan(ctx, utils.EmptyString, dm.cfg.APIBanCfg().Keys, false, false, true)
+			_, err = GetAPIBan(ctx, dm.cache, "", dm.cfg.APIBanCfg().Keys, false, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound &&
@@ -3343,43 +3343,43 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx st
 	return
 }
 
-func GetAPIBan(ctx *context.Context, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
+func GetAPIBan(ctx *context.Context, cache *CacheS, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
 	if cacheRead {
-		if x, ok := Cache.Get(utils.MetaAPIBan, ip); ok && x != nil { // Attempt to find in cache first
+		if x, ok := cache.Get(utils.MetaAPIBan, ip); ok && x != nil { // Attempt to find in cache first
 			return x.(bool), nil
 		}
 	}
 	if single {
 		if banned, err = baningo.CheckIP(ctx, ip, apiKeys...); err != nil {
-			return
+			return banned, err
 		}
 		if cacheWrite {
-			if err = Cache.Set(ctx, utils.MetaAPIBan, ip, banned, nil, true, utils.NonTransactional); err != nil {
+			if err = cache.Set(ctx, utils.MetaAPIBan, ip, banned, nil, true, utils.NonTransactional); err != nil {
 				return false, err
 			}
 		}
-		return
+		return banned, err
 	}
 	var bannedIPs []string
 	if bannedIPs, err = baningo.GetBannedIPs(ctx, apiKeys...); err != nil {
-		return
+		return banned, err
 	}
 	for _, bannedIP := range bannedIPs {
 		if bannedIP == ip {
 			banned = true
 		}
 		if cacheWrite {
-			if err = Cache.Set(ctx, utils.MetaAPIBan, bannedIP, true, nil, true, utils.NonTransactional); err != nil {
+			if err = cache.Set(ctx, utils.MetaAPIBan, bannedIP, true, nil, true, utils.NonTransactional); err != nil {
 				return false, err
 			}
 		}
 	}
 	if len(ip) != 0 && !banned && cacheWrite {
-		if err = Cache.Set(ctx, utils.MetaAPIBan, ip, false, nil, true, utils.NonTransactional); err != nil {
+		if err = cache.Set(ctx, utils.MetaAPIBan, ip, false, nil, true, utils.NonTransactional); err != nil {
 			return false, err
 		}
 	}
-	return
+	return banned, err
 }
 
 // checkFilters returns the id of the first Filter that is not valid

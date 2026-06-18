@@ -60,11 +60,12 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DB].(*DBService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, engine.Cache, fs, cms.ConnManager(), dbs.DataManager())
+	es.eeS, err = ees.NewEventExporterS(es.cfg, cacheS.CacheS(), fs, cms.ConnManager(), dbs.DataManager())
 	if err != nil {
 		return err
 	}

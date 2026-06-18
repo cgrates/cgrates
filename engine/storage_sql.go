@@ -1506,14 +1506,6 @@ func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			return tx.Table(utils.LoadInstKey).Save(&newMdl).Error
 		})
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
-
-	if err != nil {
-		return err
-	}
-	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, utils.EmptyString,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
-	}
 	return err
 }
 
@@ -1523,22 +1515,6 @@ func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
 	if limit == 0 {
 		return nil, nil
 	}
-	if !skipCache {
-		x, ok := Cache.Get(utils.LoadInstKey, utils.EmptyString)
-		if ok {
-			if x != nil {
-				items, ok := x.([]*utils.LoadInstance)
-				if !ok {
-					return nil, utils.ErrCastFailed
-				}
-				if len(items) < limit || limit == -1 {
-					return items, nil
-				}
-				return items[:limit], nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	var mdl []*LoadInstanceMdl
 	if err := sqls.db.Table(utils.LoadInstKey).Where(&LoadInstanceMdl{Key: utils.LoadInstKey}).Find(&mdl).Error; err != nil {
 		return nil, err
@@ -1546,13 +1522,6 @@ func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
 		return nil, utils.ErrNotFound
 	}
 	loadInstances := utils.MapStringInterfaceToLoadInstances(mdl[0].LoadInstance)
-	cCommit := cacheCommit(transactionID)
-	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, utils.EmptyString, cCommit, transactionID); errCh != nil {
-		return nil, errCh
-	}
-	if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, utils.EmptyString, loadInstances, nil, cCommit, transactionID); errCh != nil {
-		return nil, errCh
-	}
 	if len(loadInstances) < limit || limit == -1 {
 		return loadInstances, nil
 	}

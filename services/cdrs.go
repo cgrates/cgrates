@@ -61,11 +61,12 @@ func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DB].(*DBService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), engine.Cache, fs, cms.ConnManager())
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), cacheS.CacheS(), fs, cms.ConnManager())
 	runtime.Gosched()
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {

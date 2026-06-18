@@ -44,6 +44,10 @@ func (cM *ConnManager) SetCache(cache *CacheS) {
 	cM.cache = cache
 }
 
+func (cM *ConnManager) replicationHostIDs(grpID string) []string {
+	return cM.cache.ReplicationHostIDs(grpID)
+}
+
 // ConnManager handle the RPC connections
 type ConnManager struct {
 	cfg         *config.CGRConfig

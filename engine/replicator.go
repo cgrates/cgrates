@@ -133,7 +133,7 @@ func replicate(ctx *context.Context, connMgr *ConnManager, connIDs []string, fil
 	// is partial so get all the replicationHosts from cache based on object Type and ID
 	// alp_cgrates.org:ATTR1
 	rplcHostIDs := make(utils.StringSet)
-	rplcHostIDs.AddSlice(Cache.ReplicationHostIDs(objType + objID))
+	rplcHostIDs.AddSlice(connMgr.replicationHostIDs(objType + objID))
 	// using the replication hosts call the method
 	return utils.CastRPCErr(connMgr.CallWithConnIDs(connIDs, ctx, rplcHostIDs,
 		method, args, &reply))
@@ -216,11 +216,11 @@ func (r *replicator) close() {
 }
 
 // UpdateReplicationFilters will set the connID in cache
-func UpdateReplicationFilters(objType, objID, connID string) {
-	if connID == utils.EmptyString {
+func (dm *DataManager) UpdateReplicationFilters(objType, objID, connID string) {
+	if connID == "" {
 		return
 	}
-	Cache.SetWithoutReplicate(utils.CacheReplicationHosts, objType+objID+utils.ConcatenatedKeySep+connID, connID, []string{objType + objID},
+	dm.cache.SetWithoutReplicate(utils.CacheReplicationHosts, objType+objID+utils.ConcatenatedKeySep+connID, connID, []string{objType + objID},
 		true, utils.NonTransactional)
 }
 
@@ -239,7 +239,7 @@ func replicateMultipleIDs(ctx *context.Context, connMgr *ConnManager, connIDs []
 	// send all list to that hos
 	rplcHostIDs := make(utils.StringSet)
 	for _, objID := range objIDs {
-		rplcHostIDs.AddSlice(Cache.ReplicationHostIDs(objType + objID))
+		rplcHostIDs.AddSlice(connMgr.replicationHostIDs(objType + objID))
 	}
 	// using the replication hosts call the method
 	return utils.CastRPCErr(connMgr.CallWithConnIDs(connIDs, ctx, rplcHostIDs,

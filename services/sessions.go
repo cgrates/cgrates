@@ -65,11 +65,12 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DB].(*DBService).DataManager()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs, engine.Cache, fs, cms.ConnManager())
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)

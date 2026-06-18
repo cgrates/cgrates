@@ -66,7 +66,7 @@ func (s *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	ts := thresholds.NewThresholdService(s.cfg, dbs.DataManager(), engine.Cache, fs.FilterS(), cms.ConnManager())
+	ts := thresholds.NewThresholdService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	srv, err := engine.NewService(ts)
 	if err != nil {
 		return err

@@ -3740,7 +3740,7 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(Cache)
 
-	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, true, false, true); err != utils.ErrNotImplemented {
+	if _, err := GetAPIBan(context.Background(), Cache, "1.2.3.251", []string{"testKey"}, true, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -3814,7 +3814,7 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(Cache)
 
-	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, false, false, true); err != utils.ErrNotImplemented {
+	if _, err := GetAPIBan(context.Background(), Cache, "1.2.3.251", []string{"testKey"}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -3889,7 +3889,7 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, cM, nil)
 	dm.SetCache(Cache)
 
-	if _, err := GetAPIBan(context.Background(), "1.2.3.254", []string{}, false, false, true); err != utils.ErrNotImplemented {
+	if _, err := GetAPIBan(context.Background(), Cache, "1.2.3.254", []string{}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
