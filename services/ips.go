@@ -71,7 +71,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Regi
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.ips = ips.NewIPService(s.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	s.ips = ips.NewIPService(s.cfg, dbs.DataManager(), engine.Cache, fs.FilterS(), cms.ConnManager())
 	s.ips.StartLoop(context.TODO())
 	srv, err := engine.NewServiceWithPing(s.ips, utils.IPsV1, utils.V1Prfx)
 	if err != nil {

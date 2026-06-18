@@ -226,6 +226,7 @@ func (m *matchedIPAllocs) allocateFromPools(allocID string, poolIDs []string,
 type IPs struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
+	cache   *engine.CacheS
 	filters *engine.FilterS
 	cm      *engine.ConnManager
 
@@ -239,10 +240,11 @@ type IPs struct {
 
 // NewIPService returns a new IPs service
 func NewIPService(cfg *config.CGRConfig, dm *engine.DataManager,
-	filters *engine.FilterS, cm *engine.ConnManager) *IPs {
+	cache *engine.CacheS, filters *engine.FilterS, cm *engine.ConnManager) *IPs {
 	return &IPs{
 		cfg:        cfg,
 		dm:         dm,
+		cache:      cache,
 		filters:    filters,
 		cm:         cm,
 		storedIPs:  make(utils.StringSet),
@@ -312,7 +314,7 @@ func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
 		if allocsID == "" {
 			break // no more keys, backup completed
 		}
-		allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, allocsID)
+		allocIf, ok := s.cache.Get(utils.CacheIPAllocations, allocsID)
 		if !ok || allocIf == nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<%s> failed retrieving from cache IP allocations with ID %q", utils.IPs, allocsID))
@@ -345,8 +347,8 @@ func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocatio
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := allocs.TenantID(); engine.Cache.HasItem(utils.CacheIPAllocations, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs, nil,
+	if tntID := allocs.TenantID(); s.cache.HasItem(utils.CacheIPAllocations, tntID) { // only cache if previously there
+		if err := s.cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<%s> could not cache IP allocations %q: %v", utils.IPs, tntID, err))
@@ -383,7 +385,7 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 		utils.MetaOpts: ev.APIOpts,
 	}
 	var itemIDs []string
-	if x, ok := engine.Cache.Get(utils.CacheEventIPs, evUUID); ok {
+	if x, ok := s.cache.Get(utils.CacheEventIPs, evUUID); ok {
 		if x == nil {
 			return nil, nil, utils.ErrNotFound
 		}
@@ -393,7 +395,7 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 				// TODO: Consider using RemoveWithoutReplicate instead, as
 				// partitions with Replicate=true call ReplicateRemove in
 				// onEvict by default.
-				if errCh := engine.Cache.Remove(ctx, utils.CacheEventIPs, evUUID,
+				if errCh := s.cache.Remove(ctx, utils.CacheEventIPs, evUUID,
 					true, utils.NonTransactional); errCh != nil {
 					err = errCh
 				}
@@ -412,7 +414,7 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				if errCh := engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
+				if errCh := s.cache.Set(ctx, utils.CacheEventIPs, evUUID,
 					nil, nil, true, ""); errCh != nil { // cache negative match
 					return nil, nil, errCh
 				}
@@ -482,7 +484,7 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 		return nil, nil, err
 	}
 	matched.lockID = matchedLockID
-	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, allocs.ID, nil, true, ""); err != nil {
+	if err = s.cache.Set(ctx, utils.CacheEventIPs, evUUID, allocs.ID, nil, true, ""); err != nil {
 		guardian.Guardian.UnguardIDs(matchedLockID)
 		return nil, nil, err
 	}

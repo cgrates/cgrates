@@ -651,7 +651,7 @@ func BenchmarkIPsAuthorize(b *testing.B) {
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, filters, cm)
+	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -705,7 +705,7 @@ func BenchmarkIPsAllocate(b *testing.B) {
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, filters, cm)
+	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -757,7 +757,7 @@ func BenchmarkIPsRelease(b *testing.B) {
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
 	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, filters, cm)
+	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
 	ctx := context.Background()
 	profile := &utils.IPProfile{
 		Tenant:    "cgrates.org",

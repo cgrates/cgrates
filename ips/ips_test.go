@@ -195,6 +195,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		s := &IPs{
 			cfg:       cfg,
 			dm:        dm,
+			cache:     engine.Cache,
 			storedIPs: make(utils.StringSet),
 		}
 
@@ -243,13 +244,16 @@ func TestNewIPService(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(engine.Cache)
 
-	svc := NewIPService(cfg, dm, filters, connMgr)
+	svc := NewIPService(cfg, dm, engine.Cache, filters, connMgr)
 
 	if svc == nil {
 		t.Fatalf("expected non-nil IPs")
 	}
 	if svc.dm != dm {
 		t.Errorf("expected dm to be set, got %+v", svc.dm)
+	}
+	if svc.cache != engine.Cache {
+		t.Errorf("expected cache to be set, got %+v", svc.cache)
 	}
 	if svc.cfg != cfg {
 		t.Errorf("expected cfg to be set, got %+v", svc.cfg)
@@ -569,7 +573,7 @@ func TestIPsReload(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 5 * time.Millisecond
-		s := NewIPService(cfg, nil, nil, nil)
+		s := NewIPService(cfg, nil, nil, nil, nil)
 		s.StartLoop(context.Background())
 		s.Reload(context.Background())
 		s.Shutdown(context.Background())
@@ -582,7 +586,7 @@ func TestIPsReloadShutdownConcurrent(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = 5 * time.Millisecond
-		s := NewIPService(cfg, nil, nil, nil)
+		s := NewIPService(cfg, nil, nil, nil, nil)
 		s.StartLoop(context.Background())
 		var wg sync.WaitGroup
 		wg.Go(func() { s.Reload(context.Background()) })
@@ -594,7 +598,7 @@ func TestIPsReloadShutdownConcurrent(t *testing.T) {
 func TestIPsStartLoop(t *testing.T) {
 	synctest.Test(t, func(*testing.T) {
 		cfg := config.NewDefaultCGRConfig()
-		s := NewIPService(cfg, nil, nil, nil)
+		s := NewIPService(cfg, nil, nil, nil, nil)
 		s.StartLoop(context.Background())
 		s.backupLoop.Wait()
 	})
@@ -611,7 +615,7 @@ func TestStoreIPAllocationsList(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.Cache)
-	s := NewIPService(cfg, dm, nil, nil)
+	s := NewIPService(cfg, dm, engine.Cache, nil, nil)
 
 	exp := &utils.IPAllocations{
 		Tenant: "cgrates.org",
@@ -895,8 +899,9 @@ func TestIPsV1ReleaseIPNotFound(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(engine.Cache)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	s := NewIPService(cfg, dm, filters, nil)
+	s := NewIPService(cfg, dm, engine.Cache, filters, nil)
 
 	profile := &utils.IPProfile{
 		Tenant:    "cgrates.org",
