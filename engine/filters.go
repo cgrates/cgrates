@@ -789,7 +789,11 @@ func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider)
 		fltr.Values[0] != utils.MetaSingle { // force only valid values
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
-	return GetAPIBan(ctx, strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+	dynDP, ok := dDP.(*DynamicDP)
+	if !ok {
+		return false, fmt.Errorf("apiban filter requires a dynamic data provider")
+	}
+	return GetAPIBan(ctx, dynDP.cacheS(), strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
 func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvider) (bool, error) {

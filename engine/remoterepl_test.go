@@ -39,6 +39,8 @@ func TestUpdateReplicationFilters(t *testing.T) {
 	}
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, nil, nil, nil)
+	dm := &DataManager{}
+	dm.SetCache(Cache)
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant: "cgrates.org",
@@ -49,13 +51,13 @@ func TestUpdateReplicationFilters(t *testing.T) {
 	}
 	var reply []string
 
-	UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.EmptyString)
+	dm.UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", "")
 	if err := Cache.V1GetGroupItemIDs(context.Background(), args,
 		&reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v, received %v", utils.ErrNotFound, err)
 	}
 
-	UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.MetaLocalHost)
+	dm.UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.MetaLocalHost)
 	expected := []string{utils.AccountPrefix + "cgrates.org:acc1:" + utils.MetaLocalHost}
 	if err := Cache.V1GetGroupItemIDs(context.Background(), args, &reply); err != nil {
 		t.Error(err)

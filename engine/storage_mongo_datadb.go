@@ -617,22 +617,6 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	if limit == 0 {
 		return nil, nil
 	}
-	if !skipCache {
-		x, ok := Cache.Get(utils.LoadInstKey, "")
-		if ok {
-			if x != nil {
-				items, ok := x.([]*utils.LoadInstance)
-				if !ok {
-					return nil, utils.ErrCastFailed
-				}
-				if len(items) < limit || limit == -1 {
-					return items, nil
-				}
-				return items[:limit], nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	var kv struct {
 		Key   string
 		Value []*utils.LoadInstance
@@ -645,14 +629,8 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 		}
 		return decodeErr
 	})
-	cCommit := cacheCommit(transactionID)
-	if err == nil {
-		if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "", cCommit, transactionID); errCh != nil {
-			return nil, errCh
-		}
-		if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, "", kv.Value, nil, cCommit, transactionID); errCh != nil {
-			return nil, errCh
-		}
+	if err != nil {
+		return nil, err
 	}
 	if len(kv.Value) < limit || limit == -1 {
 		return kv.Value, nil
@@ -711,11 +689,6 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			return err
 		})
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
-
-	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "",
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
-	}
 	return err
 }
 

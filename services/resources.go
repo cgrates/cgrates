@@ -66,7 +66,7 @@ func (s *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanage
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	rs := resources.NewResourceService(s.cfg, dbs.DataManager(), engine.Cache, fs.FilterS(), cms.ConnManager())
+	rs := resources.NewResourceService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	srv, err := engine.NewService(rs)
 	if err != nil {
 		return err

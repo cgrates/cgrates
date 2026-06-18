@@ -324,43 +324,19 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 		return nil, nil
 	}
 
-	if !skipCache {
-		if x, ok := Cache.Get(utils.LoadInstKey, ""); ok {
-			if x != nil {
-				items := x.([]*utils.LoadInstance)
-				if len(items) < limit || limit == -1 {
-					return items, nil
-				}
-				return items[:limit], nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	if limit != -1 {
 		limit -= -1 // Decrease limit to match redis approach on lrange
 	}
-	cCommit := cacheCommit(transactionID)
 	var marshaleds [][]byte
 	if err = rs.Cmd(&marshaleds, redisLRANGE,
 		utils.LoadInstKey, "0", strconv.Itoa(limit)); err != nil {
-		if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, "", nil, nil,
-			cCommit, transactionID); errCh != nil {
-			return nil, errCh
-		}
-		return
+		return nil, err
 	}
 	loadInsts = make([]*utils.LoadInstance, len(marshaleds))
 	for idx, marshaled := range marshaleds {
 		if err = rs.ms.Unmarshal(marshaled, loadInsts[idx]); err != nil {
 			return nil, err
 		}
-	}
-	if err = Cache.Remove(context.TODO(), utils.LoadInstKey, "", cCommit, transactionID); err != nil {
-		return nil, err
-	}
-	if err := Cache.Set(context.TODO(), utils.LoadInstKey, "", loadInsts, nil,
-		cCommit, transactionID); err != nil {
-		return nil, err
 	}
 	if len(loadInsts) < limit || limit == -1 {
 		return loadInsts, nil
@@ -389,12 +365,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		}
 		return rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
-
-	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "",
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
-	}
-	return
+	return err
 }
 
 func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {

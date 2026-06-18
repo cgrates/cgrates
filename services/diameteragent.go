@@ -64,16 +64,17 @@ func (s *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	caps := srvDeps[utils.CapS].(*CapService).Caps()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.start(fs, cm, caps, shutdown)
+	return s.start(cacheS.CacheS(), fs, cm, caps, shutdown)
 }
 
-func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
+func (s *DiameterAgent) start(cache *engine.CacheS, filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
 	shutdown *utils.SyncedChan) error {
 	var err error
-	s.da, err = agents.NewDiameterAgent(s.cfg, engine.Cache, filterS, cm, caps)
+	s.da, err = agents.NewDiameterAgent(s.cfg, cache, filterS, cm, caps)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,8 @@ func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager
 	caps := srvDeps[utils.CapS].(*CapService).Caps()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	return s.start(fs, cm, caps, shutdown)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	return s.start(cacheS.CacheS(), fs, cm, caps, shutdown)
 }
 
 // Shutdown stops the service

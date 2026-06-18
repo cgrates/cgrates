@@ -66,7 +66,7 @@ func (s *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	ss := stats.NewStatService(s.cfg, dbs.DataManager(), engine.Cache, fs.FilterS(), cms.ConnManager())
+	ss := stats.NewStatService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	srv, err := engine.NewService(ss)
 	if err != nil {
 		return err

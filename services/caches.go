@@ -64,24 +64,24 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
 
-	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
-	dbs.DataManager().SetCache(engine.Cache)
-	cms.ConnManager().SetCache(engine.Cache)
+	cache := engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
+	dbs.DataManager().SetCache(cache)
+	cms.ConnManager().SetCache(cache)
 	if capsStats := cs.CoreS().CapsStats; capsStats != nil {
-		capsStats.SetCache(engine.Cache)
+		capsStats.SetCache(cache)
 	}
-	go engine.Cache.Precache(shutdown)
+	go cache.Precache(shutdown)
 
-	cS.cacheCh <- engine.Cache
+	cS.cacheCh <- cache
 
-	srv, _ := engine.NewService(engine.Cache)
-	// srv, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
+	srv, _ := engine.NewService(cache)
+	// srv, _ := birpc.NewService(apis.NewCacheSv1(cache), "", false)
 	for _, s := range srv {
 		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.CacheS, srv)
 	if len(cS.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(engine.Cache))
+		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(cache))
 	}
 	return nil
 }
@@ -110,9 +110,11 @@ func (cS *CacheService) ShouldRun() bool {
 	return true
 }
 
-// GetDMChan returns the CacheS chanel
-func (cS *CacheService) GetCacheSChan() chan *engine.CacheS {
-	return cS.cacheCh
+// CacheS returns the cache, blocking until Start has built it.
+func (cS *CacheService) CacheS() *engine.CacheS {
+	c := <-cS.cacheCh
+	cS.cacheCh <- c
+	return c
 }
 
 func (cS *CacheService) WaitToPrecache(shutdown *utils.SyncedChan, cacheIDs ...string) (err error) {

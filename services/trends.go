@@ -69,7 +69,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 
 	trs.mu.Lock()
 	defer trs.mu.Unlock()
-	trs.trs = trends.NewTrendService(dbs.DataManager(), engine.Cache, trs.cfg, fs.FilterS(), cms.ConnManager())
+	trs.trs = trends.NewTrendService(dbs.DataManager(), cacheS.CacheS(), trs.cfg, fs.FilterS(), cms.ConnManager())
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}

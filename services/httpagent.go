@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -63,6 +62,7 @@ func (ha *HTTPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	caps := srvDeps[utils.CapS].(*CapService).Caps()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	ha.mu.Lock()
 	defer ha.mu.Unlock()
@@ -70,7 +70,7 @@ func (ha *HTTPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(cm, agntCfg.Conns, engine.Cache,
+			agents.NewHTTPAgent(cm, agntCfg.Conns, cacheS.CacheS(),
 				fs, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload, agntCfg.ReplyPayload,
 				agntCfg.RequestProcessors, caps))
 	}

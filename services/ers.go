@@ -64,6 +64,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DB].(*DBService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 
 	erS.mu.Lock()
 	defer erS.mu.Unlock()
@@ -72,7 +73,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	erS.stopChan = make(chan struct{})
 
 	// build the service
-	erS.ers = ers.NewERService(dbs.DataManager(), erS.cfg, engine.Cache, fs.FilterS(), cms.ConnManager())
+	erS.ers = ers.NewERService(dbs.DataManager(), erS.cfg, cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
