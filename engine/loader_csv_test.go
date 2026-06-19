@@ -143,7 +143,7 @@ cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*string:~*req.Account:1002
 cgrates.org,Charger1,*string:~*req.Account:1001,;20,,*rated,ATTR_1001_SIMPLEAUTH
 `
 	DispatcherCSVContent := `
-#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,
 cgrates.org,D1,*string:~*req.Account:1001,20,*first,,C1,*gt:~*req.Usage:10,10,false,192.168.56.203
 cgrates.org,D1,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204
 `

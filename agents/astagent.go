@@ -37,7 +37,7 @@ import (
 
 // constants used by AsteriskAgent
 const (
-	CGRAuthAPP               = "cgrates_auth"
+	CGRAuthAPP               = "cgratesAuth"
 	CGRMaxSessionTime        = "CGRMaxSessionTime"
 	CGRRoute                 = "CGRRoute"
 	ARIStasisStart           = "StasisStart"
