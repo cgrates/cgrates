@@ -185,7 +185,6 @@ type ElsOpts struct {
 	CAPath                   *string
 	DiscoverNodesOnStart     *bool
 	DiscoverNodeInterval     *time.Duration
-	Cloud                    *bool
 	APIKey                   *string
 	CertificateFingerprint   *string
 	ServiceToken             *string
@@ -318,9 +317,6 @@ func NewEventExporterCfg(ID, exportType, exportPath, failedPostsDir string, atte
 	}
 }
 func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
-	if jsnCfg.ElsCloud != nil {
-		elsOpts.Cloud = jsnCfg.ElsCloud
-	}
 	if jsnCfg.ElsAPIKey != nil {
 		elsOpts.APIKey = jsnCfg.ElsAPIKey
 	}
@@ -768,10 +764,6 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 		cln.DiscoverNodeInterval = new(time.Duration)
 		*cln.DiscoverNodeInterval = *elsOpts.DiscoverNodeInterval
 	}
-	if elsOpts.Cloud != nil {
-		cln.Cloud = new(bool)
-		*cln.Cloud = *elsOpts.Cloud
-	}
 	if elsOpts.APIKey != nil {
 		cln.APIKey = new(string)
 		*cln.APIKey = *elsOpts.APIKey
@@ -1167,9 +1159,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 		if elsOpts.DiscoverNodeInterval != nil {
 			opts[utils.ElsDiscoverNodeInterval] = *elsOpts.DiscoverNodeInterval
-		}
-		if elsOpts.Cloud != nil {
-			opts[utils.ElsCloud] = *elsOpts.Cloud
 		}
 		if elsOpts.APIKey != nil {
 			opts[utils.ElsAPIKey] = *elsOpts.APIKey

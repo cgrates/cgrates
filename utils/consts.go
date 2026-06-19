@@ -3158,7 +3158,6 @@ const (
 	ElsCAPath                   = "elsCAPath"
 	ElsDiscoverNodesOnStart     = "elsDiscoverNodesOnStart"
 	ElsDiscoverNodeInterval     = "elsDiscoverNodeInterval"
-	ElsCloud                    = "elsCloud"
 	ElsAPIKey                   = "elsAPIKey"
 	ElsCertificateFingerprint   = "elsCertificateFingerprint"
 	ElsServiceToken             = "elsServiceToken"

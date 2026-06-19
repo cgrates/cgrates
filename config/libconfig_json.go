@@ -327,7 +327,6 @@ type EEsJsonCfg struct {
 
 type EventExporterOptsJson struct {
 	CSVFieldSeparator           *string           `json:"csvFieldSeparator"`
-	ElsCloud                    *bool             `json:"elsCloud"`
 	ElsAPIKey                   *string           `json:"elsApiKey"`
 	ElsServiceToken             *string           `json:"elsServiceToken"`
 	ElsCertificateFingerprint   *string           `json:"elsCertificateFingerPrint"`
