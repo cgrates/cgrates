@@ -24,6 +24,7 @@ package ees
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -38,9 +39,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	elasticsearch "github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 
 	"github.com/cgrates/cgrates/engine"
 )
@@ -62,9 +60,8 @@ func TestElasticsearchIT(t *testing.T) {
 	// defer fmt.Println(ng.LogBuffer)
 	client, cfg := ng.Run(t)
 
-	// Initialize separate clients for each exporter.
-	esClBasic := initElsClient(t, cfg, "basic")
-	esClFields := initElsClient(t, cfg, "fields")
+	addrBasic := initElsIndex(t, cfg, "basic")
+	addrFields := initElsIndex(t, cfg, "fields")
 
 	n := 2 // number of events to export
 	var wg sync.WaitGroup
@@ -80,12 +77,12 @@ func TestElasticsearchIT(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	verifyElsExports(t, esClBasic, "basic", n, map[string]any{
+	verifyElsExports(t, addrBasic, "basic", n, map[string]any{
 		utils.AccountField: "1001",
 		utils.ToR:          utils.MetaData,
 		utils.RequestType:  utils.MetaPostpaid,
 	})
-	verifyElsExports(t, esClFields, "fields", n, map[string]any{
+	verifyElsExports(t, addrFields, "fields", n, map[string]any{
 		utils.AccountField: "1001",
 		utils.Source:       "test",
 	})
@@ -119,112 +116,96 @@ func exportElsEvent(t *testing.T, client *birpc.Client, exporterSuffix string, i
 //
 // Read all documents (default limit is 10)
 // curl localhost:9200/cdrs_basic/_search
-func verifyElsExports(t *testing.T, client *elasticsearch.TypedClient, exporterType string, n int, expSource map[string]any) {
+func verifyElsExports(t *testing.T, addr, exporterType string, n int, expSource map[string]any) {
 	t.Helper()
-	req := search.Request{
-		Query: &types.Query{MatchAll: &types.MatchAllQuery{}},
-	}
-	if n > 10 && n <= 10_000 {
-		// Return more than the default 10 results limit if needed.
-		// Max limit is 10_000.
-		req.Size = &n
-	}
 	index := fmt.Sprintf("cdrs_%s", exporterType)
-	resp, err := client.Search().
-		Index(index).
-		Request(&req).
-		Do(context.TODO())
+	resp, err := http.Get(fmt.Sprintf("%s/%s/_search?size=%d", addr, index, n))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if hc := len(resp.Hits.Hits); hc != n {
-		t.Fatalf("len(resp.Hits.Hits)=%d, want %d", hc, n)
+	defer resp.Body.Close()
+	var result struct {
+		Hits struct {
+			Hits []elsHit `json:"hits"`
+		} `json:"hits"`
 	}
-	slices.SortFunc(resp.Hits.Hits, func(a, b types.Hit) int {
-		switch {
-		case *a.Id_ < *b.Id_:
-			return -1
-		case *a.Id_ > *b.Id_:
-			return 1
-		}
-		return 0
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatal(err)
+	}
+	hits := result.Hits.Hits
+	if hc := len(hits); hc != n {
+		t.Fatalf("len(hits)=%d, want %d", hc, n)
+	}
+	slices.SortFunc(hits, func(a, b elsHit) int {
+		return strings.Compare(a.ID, b.ID)
 	})
-	for i, hit := range resp.Hits.Hits {
+	for i, hit := range hits {
 		wantUsage := i + 1
 		wantCGRID := fmt.Sprintf("%s%03d", exporterType, wantUsage)
 
-		if strings.HasPrefix(*hit.Id_, "basic") {
+		if strings.HasPrefix(hit.ID, "basic") {
 			expSource[utils.Usage] = float64(wantUsage)
 		} else {
 			expSource[utils.Usage] = strconv.Itoa(wantUsage)
 		}
 		expSource[utils.CGRID] = wantCGRID
 		wantDocID := wantCGRID + ":*default"
-		if *hit.Id_ != wantDocID {
-			t.Errorf("hit.Id_ = %s, want %s", *hit.Id_, wantDocID)
+		if hit.ID != wantDocID {
+			t.Errorf("hit.ID = %s, want %s", hit.ID, wantDocID)
 		}
 		var got map[string]any
-		if err := json.Unmarshal(hit.Source_, &got); err != nil {
+		if err := json.Unmarshal(hit.Source, &got); err != nil {
 			t.Error(err)
 		}
 
-		if strings.HasPrefix(*hit.Id_, "fields") {
+		if strings.HasPrefix(hit.ID, "fields") {
 			// Check if @timestamp field exists and has the correct format.
 			// No need to test the exact value.
 			timestamp, has := got["@timestamp"]
 			if !has {
-				t.Fatalf("timestamp missing in document with ID %s", *hit.Id_)
+				t.Fatalf("timestamp missing in document with ID %s", hit.ID)
 			}
 			if _, err := time.Parse(time.RFC3339, utils.IfaceAsString(timestamp)); err != nil {
-				t.Fatalf("failed to parse @timestamp field in document with ID %s", *hit.Id_)
+				t.Fatalf("failed to parse @timestamp field in document with ID %s", hit.ID)
 			}
 			expSource["@timestamp"] = timestamp
 		}
 
 		if diff := cmp.Diff(expSource, got); diff != "" {
-			t.Errorf("SearchAll(index=%q) returned unexpected result (-want +got): \n%s", index, diff)
+			t.Errorf("search(index=%q) returned unexpected result (-want +got): \n%s", index, diff)
 		}
 	}
 }
 
-func initElsClient(t *testing.T, cfg *config.CGRConfig, exporterType string) *elasticsearch.TypedClient {
+type elsHit struct {
+	ID     string          `json:"_id"`
+	Source json.RawMessage `json:"_source"`
+}
+
+func initElsIndex(t *testing.T, cfg *config.CGRConfig, exporterType string) string {
 	eeCfg := cfg.EEsCfg().ExporterCfg(fmt.Sprintf("els_%s", exporterType))
-	tmp := &ElasticEE{
-		cfg: eeCfg,
-	}
-	if err := tmp.parseClientOpts(); err != nil {
-		t.Fatal(err)
-	}
-	client, err := elasticsearch.NewTypedClient(tmp.clientCfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// info, err := client.Info().Do(context.TODO())
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// fmt.Println(utils.ToJSON(info))
-
-	// Ensure index is removed at the end. No need to create beforehand, as
-	// it gets created automatically.
 	if eeCfg.Opts.Els.Index == nil {
 		t.Fatal("elsIndex opt cannot be nil")
 	}
+	addr := strings.Split(eeCfg.ExportPath, utils.InfieldSep)[0]
 	index := *eeCfg.Opts.Els.Index
 
-	// resp, err := client.Indices.Create(index).Do(context.TODO())
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// fmt.Println(utils.ToJSON(resp))
-
+	// The index is created automatically on first export. Remove it at the end.
 	t.Cleanup(func() {
-		resp, err := client.Indices.Delete(index).Do(context.TODO())
-		if err != nil || !resp.Acknowledged {
+		req, err := http.NewRequest(http.MethodDelete, addr+"/"+index, nil)
+		if err != nil {
 			t.Errorf("failed to delete index %s: %v", index, err)
+			return
 		}
-
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Errorf("failed to delete index %s: %v", index, err)
+			return
+		}
+		resp.Body.Close()
+		if resp.StatusCode >= http.StatusMultipleChoices {
+			t.Errorf("failed to delete index %s: %s", index, resp.Status)
+		}
 	})
-	return client
+	return addr
 }

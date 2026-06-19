@@ -19,18 +19,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package ees
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/elastic/elastic-transport-go/v8/elastictransport"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/optype"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/refresh"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
 
 // ElasticEE implements EventExporter interface for ElasticSearch export.
@@ -40,8 +43,11 @@ type ElasticEE struct {
 	em   *utils.ExporterMetrics
 	reqs *concReq
 
-	client    *elasticsearch.TypedClient
-	clientCfg elasticsearch.Config
+	client    *elastictransport.Client
+	clientCfg elastictransport.Config
+
+	docURL   string // host left empty, the transport fills it in
+	rawQuery string
 }
 
 func NewElasticEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*ElasticEE, error) {
@@ -53,17 +59,12 @@ func NewElasticEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*Ela
 	if err := el.parseClientOpts(); err != nil {
 		return nil, err
 	}
+	el.parseRequestOpts()
 	return el, nil
 }
 
-// init will create all the necessary dependencies, including opening the file
 func (e *ElasticEE) parseClientOpts() error {
 	opts := e.cfg.Opts.Els
-	if opts.Cloud != nil && *opts.Cloud {
-		e.clientCfg.CloudID = e.Cfg().ExportPath
-	} else {
-		e.clientCfg.Addresses = strings.Split(e.Cfg().ExportPath, utils.InfieldSep)
-	}
 	if opts.Username != nil {
 		e.clientCfg.Username = *opts.Username
 	}
@@ -86,39 +87,13 @@ func (e *ElasticEE) parseClientOpts() error {
 	if opts.ServiceToken != nil {
 		e.clientCfg.ServiceToken = *opts.ServiceToken
 	}
-	if opts.DiscoverNodesOnStart != nil {
-		e.clientCfg.DiscoverNodesOnStart = *opts.DiscoverNodesOnStart
-	}
 	if opts.DiscoverNodeInterval != nil {
 		e.clientCfg.DiscoverNodesInterval = *opts.DiscoverNodeInterval
 	}
 	if opts.EnableDebugLogger != nil {
 		e.clientCfg.EnableDebugLogger = *opts.EnableDebugLogger
 	}
-	if loggerType := opts.Logger; loggerType != nil {
-		var logger elastictransport.Logger
-		switch *loggerType {
-		case utils.ElsJson:
-			logger = &elastictransport.JSONLogger{
-				Output:             os.Stdout,
-				EnableRequestBody:  true,
-				EnableResponseBody: true,
-			}
-		case utils.ElsColor:
-			logger = &elastictransport.ColorLogger{
-				Output:             os.Stdout,
-				EnableRequestBody:  true,
-				EnableResponseBody: true,
-			}
-		case utils.ElsText:
-			logger = &elastictransport.TextLogger{
-				Output:             os.Stdout,
-				EnableRequestBody:  true,
-				EnableResponseBody: true,
-			}
-		}
-		e.clientCfg.Logger = logger
-	}
+	e.clientCfg.Logger = elasticLogger(opts.Logger)
 	if opts.CompressRequestBody != nil {
 		e.clientCfg.CompressRequestBody = *opts.CompressRequestBody
 	}
@@ -137,16 +112,80 @@ func (e *ElasticEE) parseClientOpts() error {
 	return nil
 }
 
+func (e *ElasticEE) parseRequestOpts() {
+	opts := e.cfg.Opts.Els
+	indexName := utils.CDRsTBL
+	if opts.Index != nil {
+		indexName = *opts.Index
+	}
+	e.docURL = "http:///" + indexName + "/_doc/"
+
+	q := make(url.Values)
+	if opts.Refresh != nil {
+		q.Set("refresh", *opts.Refresh)
+	}
+	if opts.OpType != nil {
+		q.Set("op_type", *opts.OpType)
+	}
+	if opts.Pipeline != nil {
+		q.Set("pipeline", *opts.Pipeline)
+	}
+	if opts.Routing != nil {
+		q.Set("routing", *opts.Routing)
+	}
+	if opts.Timeout != nil {
+		q.Set("timeout", (*opts.Timeout).String())
+	}
+	if opts.WaitForActiveShards != nil {
+		q.Set("wait_for_active_shards", *opts.WaitForActiveShards)
+	}
+	e.rawQuery = q.Encode()
+}
+
+func elasticLogger(loggerType *string) elastictransport.Logger {
+	if loggerType == nil {
+		return nil
+	}
+	switch *loggerType {
+	case utils.ElsJson:
+		return &elastictransport.JSONLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+	case utils.ElsColor:
+		return &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+	case utils.ElsText:
+		return &elastictransport.TextLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true}
+	}
+	return nil
+}
+
 func (e *ElasticEE) Cfg() *config.EventExporterCfg { return e.cfg }
 
-func (e *ElasticEE) Connect() (err error) {
+func (e *ElasticEE) Connect() error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	if e.client != nil { // check if connection is cached
-		return
+		return nil
 	}
-	e.client, err = elasticsearch.NewTypedClient(e.clientCfg)
-	return
+	addrs := strings.Split(e.Cfg().ExportPath, utils.InfieldSep)
+	urls := make([]*url.URL, len(addrs))
+	for i, addr := range addrs {
+		u, err := url.Parse(addr)
+		if err != nil {
+			return err
+		}
+		urls[i] = u
+	}
+	e.clientCfg.URLs = urls
+	client, err := elastictransport.New(e.clientCfg)
+	if err != nil {
+		return err
+	}
+	if opts := e.cfg.Opts.Els; opts.DiscoverNodesOnStart != nil && *opts.DiscoverNodesOnStart {
+		if err = client.DiscoverNodes(); err != nil {
+			return err
+		}
+	}
+	e.client = client
+	return nil
 }
 
 // ExportEvent implements EventExporter
@@ -161,35 +200,28 @@ func (e *ElasticEE) ExportEvent(event any, key string) error {
 		return utils.ErrDisconnected
 	}
 
-	// Build and send index request.
-	opts := e.cfg.Opts.Els
-	indexName := utils.CDRsTBL
-	if opts.Index != nil {
-		indexName = *opts.Index
+	body, err := json.Marshal(event)
+	if err != nil {
+		return err
 	}
-	req := e.client.Index(indexName).
-		Id(key).
-		Request(event)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPut,
+		e.docURL+url.PathEscape(key), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.URL.RawQuery = e.rawQuery
 
-	if opts.Refresh != nil {
-		req.Refresh(refresh.Refresh{Name: *opts.Refresh})
+	resp, err := e.client.Perform(req)
+	if err != nil {
+		return err
 	}
-	if opts.OpType != nil {
-		req.OpType(optype.OpType{Name: *opts.OpType})
+	defer resp.Body.Close()
+	if resp.StatusCode >= http.StatusMultipleChoices {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("elasticsearch index failed: %s: %s", resp.Status, respBody)
 	}
-	if opts.Pipeline != nil {
-		req.Pipeline(*opts.Pipeline)
-	}
-	if opts.Routing != nil {
-		req.Routing(*opts.Routing)
-	}
-	if opts.Timeout != nil {
-		req.Timeout((*opts.Timeout).String())
-	}
-	if opts.WaitForActiveShards != nil {
-		req.WaitForActiveShards(*opts.WaitForActiveShards)
-	}
-	_, err := req.Do(context.TODO())
+	_, err = io.Copy(io.Discard, resp.Body)
 	return err
 }
 

@@ -23,7 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	elasticsearch "github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/elastic-transport-go/v8/elastictransport"
 )
 
 func TestGetMetrics(t *testing.T) {
@@ -53,7 +53,7 @@ func TestInitClient(t *testing.T) {
 	if err := ee.parseClientOpts(); err != nil {
 		t.Error(err)
 	}
-	errExpect := `cannot create client: cannot parse url: parse "/\x00": net/url: invalid control character in URL`
+	errExpect := `parse "/\x00": net/url: invalid control character in URL`
 	if err := ee.Connect(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
@@ -72,7 +72,7 @@ func TestElasticExportEventErr(t *testing.T) {
 	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
-	errExpect := `an error happened during the Index query execution: unsupported protocol scheme ""`
+	errExpect := `unsupported protocol scheme ""`
 	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
@@ -80,7 +80,7 @@ func TestElasticExportEventErr(t *testing.T) {
 
 func TestElasticClose(t *testing.T) {
 	elasticEE := &ElasticEE{
-		client: &elasticsearch.TypedClient{},
+		client: &elastictransport.Client{},
 	}
 	err := elasticEE.Close()
 	if elasticEE.client != nil {
@@ -95,7 +95,7 @@ func TestElasticConnect(t *testing.T) {
 	t.Run("ClientAlreadyExists", func(t *testing.T) {
 
 		elasticEE := &ElasticEE{
-			client: &elasticsearch.TypedClient{},
+			client: &elastictransport.Client{},
 		}
 
 		err := elasticEE.Connect()
@@ -110,7 +110,14 @@ func TestElasticConnect(t *testing.T) {
 
 	t.Run("ClientDoesNotExist", func(t *testing.T) {
 
-		elasticEE := &ElasticEE{}
+		elasticEE := &ElasticEE{
+			cfg: &config.EventExporterCfg{
+				ExportPath: "http://localhost:9200",
+				Opts: &config.EventExporterOpts{
+					Els: &config.ElsOpts{},
+				},
+			},
+		}
 
 		err := elasticEE.Connect()
 
