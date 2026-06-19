@@ -129,7 +129,7 @@ func TestProcessRequest(t *testing.T) {
 		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ any) error {
 			return nil
 		},
-		utils.SessionSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -163,8 +163,9 @@ func TestProcessRequest(t *testing.T) {
 				t.Errorf("Wrong argument type : %T", rply)
 				return nil
 			}
+			maxUsage := utils.NewDecimalFromFloat64(10)
 			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: utils.NewDecimalFromFloat64(-1),
+				MaxUsage: maxUsage,
 			}
 			return nil
 		},
