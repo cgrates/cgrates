@@ -150,10 +150,8 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Event:   kamEv.AsMapStringInterface(),
 		APIOpts: kamEv.GetOptions(),
 	}
-	authRply := &sessions.V1ProcessEventReply{
-		AccountSUsage: map[string]time.Duration{
-			utils.MetaPrimary: 5 * time.Second,
-		},
+	authRply := &sessions.V1AuthorizeReply{
+		MaxUsage: utils.NewDecimalFromFloat64(5 * float64(time.Second)),
 	}
 	expected := &KamReply{
 		Event:    CGR_AUTH_REPLY,
@@ -175,28 +173,27 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Event:   kamEv.AsMapStringInterface(),
 		APIOpts: kamEv.GetOptions(),
 	}
-	authRply = &sessions.V1ProcessEventReply{
-		Attributes: map[string]*attributes.ProcessEventReply{
-			utils.MetaPrimary: {
-				AlteredFields: []*attributes.FieldsAltered{
-					{
-						MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
-						Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
-					},
+	authRply = &sessions.V1AuthorizeReply{
+		Attributes: &attributes.ProcessEventReply{
+			AlteredFields: []*attributes.FieldsAltered{
+				{
+					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
+					Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
 				},
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "TestKamEvAsKamAuthReply",
-					Event: map[string]any{
-						utils.Tenant:       "cgrates.org",
-						utils.AccountField: "1001",
-						"Password":         "check123",
-						utils.RequestType:  utils.MetaPrepaid,
-					},
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestKamEvAsKamAuthReply",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1001",
+					"Password":         "check123",
+					utils.RequestType:  utils.MetaPrepaid,
 				},
 			},
 		},
 	}
+
 	expected = &KamReply{
 		Event:      "CGR_PROFILE_REPLY",
 		Attributes: "Password:check123,RequestType:*prepaid",

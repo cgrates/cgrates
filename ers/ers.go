@@ -284,14 +284,14 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
-		rply := new(sessions.V1ProcessEventReply)
+		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		var sessionConns []string
 		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
 		if err != nil {
 			return
 		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessEvent,
+		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
@@ -394,13 +394,13 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 
 	// separate request so we can capture the Terminate/Event also here
 	if rdrCfg.Flags.Has(utils.MetaCDRs) {
-		var replyCDRs sessions.V1ProcessEventReply
+		var replyCDRs string
 		var sessionConns []string
 		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
 		if err != nil {
 			return
 		}
-		if err := erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessEvent,
+		if err := erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &replyCDRs); err != nil {
 			replyState = utils.ErrReplyStateCDRs
 			return err
