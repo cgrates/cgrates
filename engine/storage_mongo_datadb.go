@@ -78,7 +78,7 @@ const (
 	ColCpp  = "chargerProfiles"
 	ColRpp  = "rateProfiles"
 	ColApp  = "actionProfiles"
-	ColLID  = "load_ids"
+	ColLID  = "loadIDs"
 	ColAnp  = "accountProfiles"
 )
 

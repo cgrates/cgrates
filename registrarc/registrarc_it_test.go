@@ -109,7 +109,7 @@ package registrarc
 // 	client, cfg := disp.Run(t)
 
 // 	tpFiles := map[string]string{
-// 		utils.DispatcherProfilesCsv: `#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+// 		utils.DispatcherProfilesCsv: `#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,
 // cgrates.org,dsp_test,,,*weight,,hostA,,20,,
 // cgrates.org,dsp_test,,,,,hostB,,10,,`,
 // 	}
