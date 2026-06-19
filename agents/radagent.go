@@ -353,18 +353,19 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaAuthorize:
-		rply := new(sessions.V1ProcessEventReply)
+		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
 		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
 		if err != nil {
 			return
 		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessEvent,
+		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		if err != nil {
 			replyState = utils.ErrReplyStateAuthorize
 		}
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
@@ -465,10 +466,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
-		var rplyCDRs sessions.V1ProcessEventReply
+		var rplyCDRs string
 		sessConns, _ := engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
 		if err = ra.cm.Call(ra.ctx, sessConns,
-			utils.SessionSv1ProcessEvent, cgrEv, &rplyCDRs); err != nil {
+			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 			if replyState == utils.OK {
 				replyState = utils.ErrReplyStateCDRs

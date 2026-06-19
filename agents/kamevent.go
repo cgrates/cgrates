@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -172,7 +171,7 @@ func (kev KamEvent) String() string {
 
 // AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
 func (kev KamEvent) AsKamAuthReply(authArgs *utils.CGREvent,
-	authReply *sessions.V1ProcessEventReply, rplyErr error) (kar *KamReply, err error) {
+	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_AUTH_REPLY
 	if kamRouReply, has := kev[KamReplyRoute]; has {
 		evName = kamRouReply
@@ -185,30 +184,28 @@ func (kev KamEvent) AsKamAuthReply(authArgs *utils.CGREvent,
 		kar.Error = rplyErr.Error()
 		return
 	}
-	if attrs, has := authReply.Attributes[utils.MetaPrimary]; has {
-		kar.Attributes = attrs.Digest()
+	if authReply.Attributes != nil {
+		kar.Attributes = authReply.Attributes.Digest()
 	}
-	if alloc, has := authReply.ResourceAllocation[utils.MetaPrimary]; has {
-		kar.ResourceAllocation = alloc
+	if authReply.ResourceAllocation != nil {
+		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
-	if len(authReply.AccountSUsage) != 0 {
-		var maxDur *time.Duration
-		for _, usage := range authReply.AccountSUsage {
-			u := usage
-			if maxDur == nil || u < *maxDur {
-				maxDur = &u
-			}
+	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
+		if authReply.MaxUsage != nil {
+			maxDur, _ := authReply.MaxUsage.Duration()
+			kar.MaxUsage = maxDur.Seconds()
+		} else {
+			kar.MaxUsage = 0
 		}
-		kar.MaxUsage = maxDur.Seconds()
 	}
-	if rts, has := authReply.RouteProfiles[utils.MetaPrimary]; has {
-		kar.Routes = rts.Digest()
+	if authReply.RouteProfiles != nil {
+		kar.Routes = authReply.RouteProfiles.Digest()
 	}
-	if thIDs, has := authReply.ThresholdIDs[utils.MetaPrimary]; has {
-		kar.Thresholds = strings.Join(thIDs, utils.FieldsSep)
+	if authReply.ThresholdIDs != nil {
+		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FieldsSep)
 	}
-	if stIDs, has := authReply.StatQueueIDs[utils.MetaPrimary]; has {
-		kar.StatQueues = strings.Join(stIDs, utils.FieldsSep)
+	if authReply.StatQueueIDs != nil {
+		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return
 }
@@ -251,7 +248,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 
 // AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
 func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREvent,
-	rply *sessions.V1ProcessEventReply, rplyErr error) (kar *KamReply, err error) {
+	rply *string, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_CDR
 	if kamRouReply, has := kev[KamReplyRoute]; has {
 		evName = kamRouReply

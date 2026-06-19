@@ -158,15 +158,13 @@ func TestProcessRequest(t *testing.T) {
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
 			}
-			prply, can := rply.(*sessions.V1ProcessEventReply)
+			prply, can := rply.(*sessions.V1AuthorizeReply)
 			if !can {
 				t.Errorf("Wrong argument type : %T", rply)
 				return nil
 			}
-			*prply = sessions.V1ProcessEventReply{
-				AccountSUsage: map[string]time.Duration{
-					utils.MetaPrimary: -1,
-				},
+			*prply = sessions.V1AuthorizeReply{
+				MaxUsage: utils.NewDecimalFromFloat64(-1),
 			}
 			return nil
 		},
@@ -470,7 +468,7 @@ func TestProcessRequest(t *testing.T) {
 			Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 		{Tag: "GrantedUnits",
 			Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage[*primary]{*duration_seconds}", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep),
 			Mandatory: true},
 	}
 	for _, v := range tmpls {
