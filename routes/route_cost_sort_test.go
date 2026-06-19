@@ -67,7 +67,8 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	lcs := NewLeastCostSorter(cfg, cM, fltrS)
 
@@ -103,7 +104,8 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -179,7 +181,8 @@ func TestHightCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
 
@@ -214,7 +217,8 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -308,7 +312,8 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	cfg.RouteSCfg().Opts.Usage = dynOpts
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -339,10 +344,6 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
@@ -353,7 +354,8 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
@@ -385,10 +387,6 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 
 func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
@@ -414,7 +412,8 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -455,10 +454,6 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 
 func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
@@ -481,7 +476,8 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -512,10 +508,6 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 
 }
 func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
@@ -548,7 +540,8 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -583,10 +576,6 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 }
 
 func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
@@ -640,7 +629,8 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)
@@ -686,10 +676,6 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 
 func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
@@ -708,7 +694,8 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, cc)
 
 	fltrS := engine.NewFilterS(cfg, cM, nil)

@@ -32,8 +32,9 @@ func TestTPEnewTPRoutes(t *testing.T) {
 	// dataDB := &engine.DataDBM
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetRouteProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.RouteProfile, error) {
 			rte := &utils.RouteProfile{
@@ -61,7 +62,7 @@ func TestTPEnewTPRoutes(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	exp := &TPRoutes{
 		dm: dm,
 	}
@@ -74,10 +75,11 @@ func TestTPEnewTPRoutes(t *testing.T) {
 func TestTPEExportRoutes(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpRte := TPRoutes{
 		dm: dm,
 	}
@@ -110,7 +112,6 @@ func TestTPEExportRoutes(t *testing.T) {
 }
 
 func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
-	engine.Cache.Clear(nil)
 	wrtr := new(bytes.Buffer)
 	tpRte := TPRoutes{
 		dm: nil,
@@ -146,10 +147,11 @@ func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
 func TestTPEExportItemsRoutesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpRte := TPRoutes{
 		dm: dm,
 	}

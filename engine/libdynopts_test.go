@@ -35,7 +35,7 @@ func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -67,7 +67,7 @@ func TestLibFiltersGetFloat64OptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -96,7 +96,7 @@ func TestLibFiltersGetFloat64OptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -125,7 +125,7 @@ func TestLibFiltersGetFloat64OptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -157,7 +157,7 @@ func TestLibFiltersGetStringOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -190,7 +190,7 @@ func TestLibFiltersGetStringOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -218,7 +218,7 @@ func TestLibFiltersGetStringOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -246,7 +246,7 @@ func TestLibFiltersGetStringOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -278,7 +278,7 @@ func TestLibFiltersGetDurationOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -310,7 +310,7 @@ func TestLibFiltersGetDurationOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -338,7 +338,7 @@ func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -367,7 +367,7 @@ func TestLibFiltersGetDurationPointerOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -398,7 +398,7 @@ func TestLibFiltersGetDurationPointerOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -430,7 +430,7 @@ func TestLibFiltersGetDurationPointerOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -458,7 +458,7 @@ func TestLibFiltersGetDurationPointerOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -487,7 +487,7 @@ func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -519,7 +519,7 @@ func TestLibFiltersGetIntOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -551,7 +551,7 @@ func TestLibFiltersGetIntOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -579,7 +579,7 @@ func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -608,7 +608,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -640,7 +640,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -670,7 +670,7 @@ func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -702,7 +702,7 @@ func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -730,7 +730,7 @@ func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -763,7 +763,7 @@ func TestLibFiltersGetTimeOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -801,7 +801,7 @@ func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -833,7 +833,7 @@ func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -861,7 +861,7 @@ func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -889,7 +889,7 @@ func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -921,7 +921,7 @@ func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -965,7 +965,7 @@ func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -997,7 +997,7 @@ func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1032,7 +1032,7 @@ func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1068,7 +1068,7 @@ func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1112,7 +1112,7 @@ func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1144,7 +1144,7 @@ func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1176,7 +1176,7 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1212,7 +1212,7 @@ func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2359,7 +2359,7 @@ func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2391,7 +2391,7 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2426,7 +2426,7 @@ func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2464,7 +2464,7 @@ func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2496,7 +2496,7 @@ func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2524,7 +2524,7 @@ func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2552,7 +2552,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2584,7 +2584,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2614,7 +2614,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnConfigOpt(t *testing.T) 
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2643,7 +2643,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2668,7 +2668,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsErrNotFound(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2693,7 +2693,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *test
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2722,7 +2722,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *tes
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2749,7 +2749,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsOK(t *te
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2778,7 +2778,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsErr(t *t
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2805,7 +2805,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnConfigOpt(t *test
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2834,7 +2834,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testi
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2859,7 +2859,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnDft(t *testing.T)
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2882,7 +2882,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsOK(
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2911,7 +2911,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsErr
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2938,7 +2938,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsO
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -2967,7 +2967,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsE
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
 		utils.AccountField: 1001,
@@ -3009,7 +3009,7 @@ func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	dynOpts := []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt([]string{"*string:~*req.Account:1"}, "cgrates.org", false, nil),
@@ -3027,7 +3027,7 @@ func TestGetBoolOptsCantCastErr(t *testing.T) {
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fS := NewFilterS(cfg, nil, dm)
 	dynOpts := []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt([]string{"*string:~*req.Account:1001"}, "cgrates.org", false, nil),

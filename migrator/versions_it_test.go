@@ -74,7 +74,8 @@ func TestVersionITMongo(t *testing.T) {
 }
 
 func testVrsITConnect(t *testing.T) {
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, vrsCfg.GeneralCfg().DBDataEncoding, vrsCfg, engine.Cache)
+	cacheS := engine.NewCacheS(vrsCfg, nil, nil, nil)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, vrsCfg.GeneralCfg().DBDataEncoding, vrsCfg, cacheS)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -32,8 +32,9 @@ func TestTPEnewTPResources(t *testing.T) {
 	// dataDB := &engine.DataDBM
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ResourceProfile, error) {
 			rsc := &utils.ResourceProfile{
@@ -52,7 +53,7 @@ func TestTPEnewTPResources(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	exp := &TPResources{
 		dm: dm,
 	}
@@ -65,10 +66,11 @@ func TestTPEnewTPResources(t *testing.T) {
 func TestTPEExportItemsResources(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -92,7 +94,6 @@ func TestTPEExportItemsResources(t *testing.T) {
 }
 
 func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
-	engine.Cache.Clear(nil)
 	wrtr := new(bytes.Buffer)
 	tpRsc := TPResources{
 		dm: nil,
@@ -119,10 +120,11 @@ func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
 func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpRsc := TPResources{
 		dm: dm,
 	}

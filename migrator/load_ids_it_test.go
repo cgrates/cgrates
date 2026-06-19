@@ -76,11 +76,13 @@ func testLoadIdsStart(testName string, t *testing.T) {
 }
 
 func testLoadIdsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn, engine.Cache)
+	cacheIn := engine.NewCacheS(loadCfgIn, nil, nil, nil)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn, cacheIn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgOut.GeneralCfg().DBDataEncoding, loadCfgOut, engine.Cache)
+	cacheOut := engine.NewCacheS(loadCfgOut, nil, nil, nil)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgOut.GeneralCfg().DBDataEncoding, loadCfgOut, cacheOut)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -67,9 +67,10 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sessions := NewSessionS(cfg, dm, engine.Cache, nil, nil)
+	dm.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
 	//connect BiJSON
 	client := &birpc.Service{}
@@ -79,7 +80,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions.biJClnts[client] = "test_conn"
 	sessions.biJIDs = nil
 
-	expected := NewSessionS(cfg, dm, engine.Cache, nil, nil)
+	expected := NewSessionS(cfg, dm, cacheS, nil, nil)
 	expected.biJClnts[client] = "test_conn"
 	expected.biJIDs = nil
 
@@ -99,9 +100,10 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sessions := NewSessionS(cfg, dm, engine.Cache, nil, nil)
+	dm.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
 	client := &birpc.Service{}
 
@@ -1288,8 +1290,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
-	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
-	sS.dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	sS.dm.SetCache(cacheS)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1310,8 +1313,8 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
-	sS.dm.SetCache(engine.Cache)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	sS.dm.SetCache(cacheS)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1324,8 +1327,8 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), engine.Cache, nil, nil)
-	sS.dm.SetCache(engine.Cache)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	sS.dm.SetCache(cacheS)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1776,9 +1779,10 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 */
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
 	sS := new(SessionS)
 	sS.cfg = config.CgrConfig()
-	sS.cache = engine.Cache
+	sS.cache = cacheS
 	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
 aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
@@ -1788,7 +1792,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := cacheS.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -1818,9 +1822,10 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 }
 
 func TestBiRPCv1STIRIdentity(t *testing.T) {
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
 	sS := new(SessionS)
 	sS.cfg = config.CgrConfig()
-	sS.cache = engine.Cache
+	sS.cache = cacheS
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
 		IAT:    1587019822,
@@ -1847,11 +1852,11 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := cacheS.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+	if err := cacheS.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", nil,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -1865,7 +1870,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}, &rcv); err == nil {
 		t.Error("Expected error")
 	}
-	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+	if err := cacheS.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -1876,7 +1881,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		OverwriteIAT:   true,
 	}, &rcv); err != nil {
 		t.Error(err)
-	} else if err := AuthStirShaken(context.Background(), engine.Cache, rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
+	} else if err := AuthStirShaken(context.Background(), cacheS, rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
 }

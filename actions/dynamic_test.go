@@ -153,12 +153,13 @@ func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{"admins"}}}
 
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 	data := utils.MapStorage{
@@ -224,8 +225,6 @@ func TestActDynamicThresholdExecuteSort(t *testing.T) {
 }
 
 func TestActDynamicThresholdExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var tpwo *utils.ThresholdProfileWithAPIOpts
 	ccM := &ccMock{
@@ -468,11 +467,12 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -578,8 +578,6 @@ func TestActDynamicStatsCfg(t *testing.T) {
 }
 
 func TestActDynamicStatsExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var sqpwo *utils.StatQueueProfileWithAPIOpts
 	ccM := &ccMock{
@@ -974,11 +972,12 @@ func TestActDynamicStatsExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1085,8 +1084,6 @@ func TestActDynamicAttributeCfg(t *testing.T) {
 }
 
 func TestActDynamicAttributeExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var apwo *utils.APIAttributeProfileWithAPIOpts
 	ccM := &ccMock{
@@ -1341,11 +1338,12 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1491,8 +1489,6 @@ func TestActDynamicResourceCfg(t *testing.T) {
 }
 
 func TestActDynamicResourceExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var rpwo *utils.ResourceProfileWithAPIOpts
 	ccM := &ccMock{
@@ -1773,11 +1769,12 @@ func TestActDynamicResourceExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -1876,8 +1873,6 @@ func TestActDynamicTrendCfg(t *testing.T) {
 }
 
 func TestActDynamicTrendExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var tpwo *utils.TrendProfileWithAPIOpts
 	ccM := &ccMock{
@@ -2124,11 +2119,12 @@ func TestActDynamicTrendExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			rpcInternal := make(chan birpc.ClientConnector, 1)
@@ -2236,8 +2232,6 @@ func TestActDynamicRankingCfg(t *testing.T) {
 }
 
 func TestActDynamicRankingExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var rpwo *utils.RankingProfileWithAPIOpts
 	ccM := &ccMock{
@@ -2412,11 +2406,12 @@ func TestActDynamicRankingExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -2522,8 +2517,6 @@ func TestActDynamicFilterCfg(t *testing.T) {
 }
 
 func TestActDynamicFilterExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var fwo *engine.FilterWithAPIOpts
 	ccM := &ccMock{
@@ -2676,11 +2669,12 @@ func TestActDynamicFilterExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -2785,8 +2779,6 @@ func TestActDynamicRouteCfg(t *testing.T) {
 }
 
 func TestActDynamicRouteExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var rpo *utils.RouteProfileWithAPIOpts
 	ccM := &ccMock{
@@ -2971,11 +2963,12 @@ func TestActDynamicRouteExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -3084,8 +3077,6 @@ func TestActDynamicRateCfg(t *testing.T) {
 }
 
 func TestActDynamicIPExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var ipo *utils.IPProfileWithAPIOpts
 	ccM := &ccMock{
@@ -3272,11 +3263,12 @@ func TestActDynamicIPExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -3387,8 +3379,6 @@ func TestActDynamicIPCfg(t *testing.T) {
 }
 
 func TestActDynamicRateExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var rateProfile *utils.APIRateProfile
 	ccM := &ccMock{
@@ -3746,11 +3736,12 @@ func TestActDynamicRateExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 			rpcInternal := make(chan birpc.ClientConnector, 1)
 			rpcInternal <- ccM
@@ -3805,8 +3796,6 @@ func TestActDynamicRateExecute(t *testing.T) {
 }
 
 func TestActDynamicActionExecute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 
 	var actionProfile *utils.ActionProfileWithAPIOpts
 	ccM := &ccMock{
@@ -4172,11 +4161,12 @@ func TestActDynamicActionExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			connMgr.SetCache(engine.Cache)
+			cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 			dm := engine.NewDataManager(dbCM, cfg, connMgr)
-			dm.SetCache(engine.Cache)
+			dm.SetCache(cacheS)
 			fltrS := engine.NewFilterS(cfg, connMgr, dm)
 
 			if len(cfg.ActionSCfg().Conns[utils.MetaAdminS]) > 0 {
@@ -4300,9 +4290,6 @@ func TestActDynamicActionCfg(t *testing.T) {
 }
 
 func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
-
 	var rpo *utils.RouteProfileWithAPIOpts
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -4321,11 +4308,12 @@ func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM

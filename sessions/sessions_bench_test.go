@@ -69,13 +69,14 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 		b.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// Create ConnManager and register mock internal connections
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	mockCh := make(chan birpc.ClientConnector, 1)
 	mockCh <- benchMockClient{}
 
@@ -96,7 +97,7 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 		config.NewDynamicBoolOpt(nil, "", enableChargers, nil),
 	}
 
-	return NewSessionS(cfg, dm, engine.Cache, fltrs, connMgr)
+	return NewSessionS(cfg, dm, cacheS, fltrs, connMgr)
 }
 
 // BenchmarkProcessEventChargersOnly benchmarks a full BiRPCv1ProcessEvent

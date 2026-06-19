@@ -48,9 +48,10 @@ func TestActionsAPIs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, nil)
 	if err := dm.SetActionProfile(context.Background(),
 		&utils.ActionProfile{
 			Tenant:    "cgrates.org",
@@ -91,14 +92,14 @@ func TestActionsAPIs(t *testing.T) {
 }
 
 func TestActionsExecuteActionsResetTH(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -127,10 +128,10 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -180,14 +181,14 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 }
 
 func TestActionsExecuteActionsResetSQ(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.TenantIDWithAPIOpts{
@@ -215,10 +216,10 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -269,14 +270,14 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 }
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -301,10 +302,10 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -355,14 +356,14 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 func TestActionsExecuteActionsAddBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActSetBalance{
@@ -387,10 +388,10 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -442,7 +443,6 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 }
 
 func TestActionsExecuteActionsLog(t *testing.T) {
-	engine.Cache.Clear(nil)
 	tmpLogger := utils.Logger
 	defer func() {
 		utils.Logger = tmpLogger
@@ -455,10 +455,11 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, nil)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -506,14 +507,14 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 }
 
 func TestActionsExecuteActionsLogCDRs(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// expArgs := &utils.CGREvent{
@@ -537,10 +538,10 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs), utils.CDRsV1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{
@@ -592,14 +593,14 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 }
 
 func TestActionsExecuteActionsRemBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expArgs := &utils.ArgsActRemoveBalances{
@@ -623,10 +624,10 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
-	aS := NewActionS(cfg, engine.Cache, fltrs, dm, cM)
+	aS := NewActionS(cfg, cacheS, fltrs, dm, cM)
 
 	// Set ActionProfile
 	actPrf := &utils.ActionProfile{

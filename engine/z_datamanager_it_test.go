@@ -32,7 +32,8 @@ import (
 )
 
 var (
-	dm2 *DataManager
+	dm2      *DataManager
+	dm2Cache *CacheS
 
 	sTestsDMit = []func(t *testing.T){
 		testDMitDataFlush,
@@ -69,7 +70,8 @@ func TestDMitinitDB(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm2 = NewDataManager(dbCM, cfg, nil)
-	dm2.SetCache(Cache)
+	dm2Cache = NewCacheS(cfg, nil, nil, nil)
+	dm2.SetCache(dm2Cache)
 
 	for _, stest := range sTestsDMit {
 		t.Run(*utils.DBType, stest)
@@ -80,7 +82,7 @@ func testDMitDataFlush(t *testing.T) {
 	if err := dm2.dbConns.dbs[utils.MetaDefault].Flush(utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	Cache.Clear(nil)
+	dm2Cache.Clear(nil)
 }
 
 func testDMitCRUDStatQueue(t *testing.T) {
@@ -110,13 +112,13 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, rcvErr := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
+	if _, ok := dm2Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
 	if err := dm2.SetStatQueue(context.TODO(), sq); err != nil {
 		t.Error(err)
 	}
-	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
+	if _, ok := dm2Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
 	if rcv, err := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, true, utils.EmptyString); err != nil {
@@ -124,14 +126,14 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("expecting: %v, received: %v", sq, rcv)
 	}
-	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
+	if _, ok := dm2Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
 		t.Error("should be in cache")
 	}
 	if err := dm2.RemoveStatQueue(context.TODO(), sq.Tenant, sq.ID); err != nil {
 		t.Error(err)
 	}
-	Cache.Clear(nil)
-	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
+	dm2Cache.Clear(nil)
+	if _, ok := dm2Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
 	if _, rcvErr := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {

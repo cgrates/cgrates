@@ -32,8 +32,9 @@ func TestTPEnewTPThresholds(t *testing.T) {
 	// dataDB := &engine.DataDBM
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ThresholdProfile, error) {
 			thd := &utils.ThresholdProfile{
@@ -54,7 +55,7 @@ func TestTPEnewTPThresholds(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	exp := &TPThresholds{
 		dm: dm,
 	}
@@ -67,10 +68,11 @@ func TestTPEnewTPThresholds(t *testing.T) {
 func TestTPEExportThresholds(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpThd := TPThresholds{
 		dm: dm,
 	}
@@ -96,7 +98,6 @@ func TestTPEExportThresholds(t *testing.T) {
 }
 
 func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
-	engine.Cache.Clear(nil)
 	wrtr := new(bytes.Buffer)
 	tpThd := TPThresholds{
 		dm: nil,
@@ -125,10 +126,11 @@ func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
 func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpThd := TPThresholds{
 		dm: dm,
 	}

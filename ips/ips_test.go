@@ -155,8 +155,9 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 	t.Run("StoreInterval is negative, with DataManager no DB", func(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = -1
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 		dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{}, &config.DbCfg{}), cfg, nil)
-		dm.SetCache(engine.Cache)
+		dm.SetCache(cacheS)
 
 		s := &IPs{
 			cfg:       cfg,
@@ -190,12 +191,13 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		}
 		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 		dm := engine.NewDataManager(dbCM, cfg, nil)
-		dm.SetCache(engine.Cache)
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+		dm.SetCache(cacheS)
 
 		s := &IPs{
 			cfg:       cfg,
 			dm:        dm,
-			cache:     engine.Cache,
+			cache:     cacheS,
 			storedIPs: make(utils.StringSet),
 		}
 
@@ -239,12 +241,13 @@ func TestNewIPService(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 
-	svc := NewIPService(cfg, dm, engine.Cache, filters, connMgr)
+	svc := NewIPService(cfg, dm, cacheS, filters, connMgr)
 
 	if svc == nil {
 		t.Fatalf("expected non-nil IPs")
@@ -252,7 +255,7 @@ func TestNewIPService(t *testing.T) {
 	if svc.dm != dm {
 		t.Errorf("expected dm to be set, got %+v", svc.dm)
 	}
-	if svc.cache != engine.Cache {
+	if svc.cache != cacheS {
 		t.Errorf("expected cache to be set, got %+v", svc.cache)
 	}
 	if svc.cfg != cfg {
@@ -280,7 +283,8 @@ func TestFilterAndSortPools(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	ctx := context.Background()
 	tenant := "cgrates.org"
@@ -605,17 +609,13 @@ func TestIPsStartLoop(t *testing.T) {
 }
 
 func TestStoreIPAllocationsList(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	s := NewIPService(cfg, dm, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
+	s := NewIPService(cfg, dm, cacheS, nil, nil)
 
 	exp := &utils.IPAllocations{
 		Tenant: "cgrates.org",
@@ -628,7 +628,7 @@ func TestStoreIPAllocationsList(t *testing.T) {
 			},
 		},
 	}
-	engine.Cache.SetWithoutReplicate(utils.CacheIPAllocations, "cgrates.org:alloc1", exp, nil, true,
+	cacheS.SetWithoutReplicate(utils.CacheIPAllocations, "cgrates.org:alloc1", exp, nil, true,
 		utils.NonTransactional)
 	s.storedIPs.Add("cgrates.org:alloc1")
 	s.storeIPAllocationsList(context.Background())
@@ -647,7 +647,7 @@ func TestStoreIPAllocationsList(t *testing.T) {
 		t.Errorf("expected address 192.168.1.10, got %s", pa.Address.String())
 	}
 
-	engine.Cache.Remove(context.Background(), utils.CacheIPAllocations, "cgrates.org:alloc1", true, utils.NonTransactional)
+	cacheS.Remove(context.Background(), utils.CacheIPAllocations, "cgrates.org:alloc1", true, utils.NonTransactional)
 }
 
 func newTestMatchedIPAllocs(t *testing.T) *matchedIPAllocs {
@@ -891,17 +891,14 @@ func TestMatchedIPAllocsAllocateIPOnPoolNoTTL(t *testing.T) {
 }
 
 func TestIPsV1ReleaseIPNotFound(t *testing.T) {
-	tmp := engine.Cache
-	t.Cleanup(func() { engine.Cache = tmp })
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	s := NewIPService(cfg, dm, engine.Cache, filters, nil)
+	s := NewIPService(cfg, dm, cacheS, filters, nil)
 
 	profile := &utils.IPProfile{
 		Tenant:    "cgrates.org",

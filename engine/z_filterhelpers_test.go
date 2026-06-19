@@ -37,11 +37,11 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	prefixFilterID := "prefixFilterID"
 	suffixFilterID := "suffixFilterID"
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch = NewDataManager(dbCM, cfg, nil)
-	dmMatch.SetCache(Cache)
-	Cache.Clear(nil)
+	dmMatch.SetCache(cacheS)
 	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.Field", []string{"profile"})
 	if err != nil {
@@ -146,10 +146,11 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch = NewDataManager(dbCM, cfg, nil)
-	dmMatch.SetCache(Cache)
+	dmMatch.SetCache(cacheS)
 	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.CallCost.Account", []string{"1001"})
 	if err != nil {

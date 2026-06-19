@@ -83,7 +83,7 @@ func TestAMQPERv1(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewAMQPv1ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.Cache, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	amqpv1Rdr := rdr.(*AMQPv1ER)

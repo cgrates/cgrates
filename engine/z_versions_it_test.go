@@ -86,7 +86,8 @@ func testInitDataDB(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dbConn}, vrsCfg.DbCfg())
 	dm3 = NewDataManager(dbCM, vrsCfg, nil)
-	dm3.SetCache(Cache)
+	cacheS := NewCacheS(vrsCfg, nil, nil, nil)
+	dm3.SetCache(cacheS)
 
 	if err != nil {
 		log.Fatal(err)

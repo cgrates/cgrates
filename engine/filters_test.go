@@ -38,7 +38,7 @@ func TestRatesCostFiltering(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -429,7 +429,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -682,7 +682,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -792,7 +792,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -846,7 +846,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -946,7 +946,7 @@ func TestPassPartial(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -1028,7 +1028,7 @@ func TestActivationIntervalPass(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -1215,11 +1215,12 @@ func TestAPIBan(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	dmFilterPass.SetCache(cacheS)
 	filterS := FilterS{
 		cfg:   cfg,
 		dm:    dmFilterPass,
-		cache: Cache,
+		cache: cacheS,
 	}
 	config.CgrConfig().APIBanCfg().Keys = []string{"testKey"}
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
@@ -1238,7 +1239,7 @@ func TestAPIBan(t *testing.T) {
 	} else if pass {
 		t.Error("Expected not to pass")
 	}
-	Cache.Clear([]string{utils.MetaAPIBan})
+	cacheS.Clear([]string{utils.MetaAPIBan})
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.bannedIP:*single"}, dp); err != nil {
 		t.Fatal(err)
 	} else if !pass {
@@ -1289,7 +1290,7 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	flts := NewFilterS(cfg, nil, dm)
 	if passes, err := flts.Pass(context.Background(), "cgrate.org", []string{"*rsr:~*req.23:dan|1001"}, ev); err != nil {
 		t.Error(err)
@@ -1317,7 +1318,7 @@ func TestFilterPassCronExpOK(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1342,7 +1343,7 @@ func TestFilterPassCronExpNotActive(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1365,7 +1366,7 @@ func TestFilterPassCronExpParseErrWrongPath(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fltr := NewFilterS(cfg, nil, dm)
 	experr := utils.ErrWrongPath
 
@@ -1387,7 +1388,7 @@ func TestFilterPassCronExpErrNotFound(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fltr := NewFilterS(cfg, nil, dm)
 
 	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
@@ -1412,7 +1413,7 @@ func TestFilterPassCronExpConvertTimeErr(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 	fltr := NewFilterS(cfg, nil, dm)
 	experr := "Unsupported time format"
 
@@ -2166,7 +2167,7 @@ func TestPassPartialErr(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil)
-	dmFilterPass.SetCache(Cache)
+	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil))
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -2626,7 +2627,7 @@ func TestFilterTrends(t *testing.T) {
 	}
 	now3 := time.Now().Add(-time.Second * 3).Format(time.RFC3339)
 	cM := NewConnManager(config.NewDefaultCGRConfig())
-	cM.SetCache(Cache)
+	cM.SetCache(NewCacheS(cM.cfg, nil, nil, nil))
 
 	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends): clientConn,
@@ -2718,7 +2719,7 @@ func TestFilterRanking(t *testing.T) {
 		}}
 
 	cM := NewConnManager(config.NewDefaultCGRConfig())
-	cM.SetCache(Cache)
+	cM.SetCache(NewCacheS(cM.cfg, nil, nil, nil))
 	cM.rpcInternal = map[string]chan context.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
 	}
@@ -2765,7 +2766,7 @@ func TestGetFilters(t *testing.T) {
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
 
 	fltID := "fltTest"
 	tenant := "cgrates.org"
@@ -2822,8 +2823,9 @@ func TestCheckFilter(t *testing.T) {
 func TestFilterRulepassSentryPeer(t *testing.T) {
 	ctx := context.TODO()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	fS := NewFilterS(cfg, nil, nil)
-	fS.SetCache(Cache)
+	fS.SetCache(cacheS)
 
 	rsrParse := &utils.RSRParser{
 		Path: "IPAddr",
@@ -2838,7 +2840,7 @@ func TestFilterRulepassSentryPeer(t *testing.T) {
 	}
 
 	// cache the lookup result so we don't hit the sentrypeer API
-	if err := Cache.Set(ctx, utils.MetaSentryPeer,
+	if err := cacheS.Set(ctx, utils.MetaSentryPeer,
 		utils.ConcatenatedKey(utils.MetaIP, "192.165.56.1"), true,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)

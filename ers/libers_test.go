@@ -29,6 +29,7 @@ import (
 
 func TestLibErsMergePartialEvents(t *testing.T) {
 	confg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(confg, nil, nil, nil)
 	fltrS := engine.NewFilterS(confg, nil, nil)
 	cgrEvs := []*utils.CGREvent{
 		{
@@ -88,7 +89,7 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 			"Field4": "Value4",
 		},
 	}
-	if rcv, err := mergePartialEvents(cgrEvs, confg.ERsCfg().Readers[0], engine.Cache, fltrS, confg.GeneralCfg().DefaultTenant,
+	if rcv, err := mergePartialEvents(cgrEvs, confg.ERsCfg().Readers[0], cacheS, fltrS, confg.GeneralCfg().DefaultTenant,
 		confg.GeneralCfg().DefaultTimezone); err != nil {
 		t.Error(err)
 	} else {

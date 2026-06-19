@@ -434,8 +434,6 @@ func TestDynamicDPfieldAsInterfaceErrMetaLibPhoneNumber(t *testing.T) {
 }
 
 func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
-	Cache.Clear(nil)
-
 	ms := utils.MapStorage{}
 	dDp := NewDynamicDP(context.Background(), config.CgrConfig(), "cgrates.org", ms, nil)
 
@@ -446,6 +444,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
 	}
@@ -468,7 +467,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -479,6 +478,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}},
 	}
@@ -533,7 +533,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -547,9 +547,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 }
 
 func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
-	Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}},
 	}
@@ -604,7 +603,7 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -618,9 +617,8 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 }
 
 func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
-	Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cfg.FilterSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}},
 	}
@@ -654,7 +652,7 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 	dDP.fs = NewFilterS(cfg, cM, nil)
 
@@ -722,7 +720,8 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
-		dm.SetCache(Cache)
+		cacheS := NewCacheS(cfg, nil, nil, nil)
+		dm.SetCache(cacheS)
 		fS := NewFilterS(cfg, nil, dm)
 		NewConnManager(cfg)
 
@@ -755,9 +754,10 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
-		dm.SetCache(Cache)
+		cacheS := NewCacheS(cfg, nil, nil, nil)
+		dm.SetCache(cacheS)
 		cM := NewConnManager(cfg)
-		cM.SetCache(Cache)
+		cM.SetCache(cacheS)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 		fS := NewFilterS(cfg, cM, dm)
 
@@ -787,10 +787,11 @@ func TestDPFilterSConns(t *testing.T) {
 		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil)
-		dm.SetCache(Cache)
+		cacheS := NewCacheS(cfg, nil, nil, nil)
+		dm.SetCache(cacheS)
 		fS := NewFilterS(cfg, nil, dm)
 		cM := NewConnManager(cfg)
-		cM.SetCache(Cache)
+		cM.SetCache(cacheS)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 
 		got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)

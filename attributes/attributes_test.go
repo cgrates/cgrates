@@ -37,6 +37,7 @@ var (
 	expTimeAttributes = time.Now().Add(20 * time.Minute)
 	attrS             *AttributeS
 	dmAtr             *engine.DataManager
+	cacheAtr          *engine.CacheS
 	attrEvs           = []*utils.CGREvent{
 		{ //matching AttributeProfile1
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -545,20 +546,15 @@ func TestUniqueAlteredFields(t *testing.T) {
 }
 
 func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
-	engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -620,17 +616,15 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 }
 
 func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -696,19 +690,15 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 }
 
 func TestAttributeSProcessEventPassErr(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -766,18 +756,15 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 }
 
 func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -833,18 +820,15 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 }
 
 func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -914,21 +898,17 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 }
 
 func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
@@ -972,22 +952,18 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 }
 
 func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
@@ -1130,15 +1106,16 @@ func TestAttributeFromHTTP(t *testing.T) {
 func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	aA := NewAttributeService(dm, filterS, nil, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
@@ -1227,15 +1204,16 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1318,13 +1296,14 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().StringIndexedFields = nil
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
+	cacheAtr = engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
+	dmAtr.SetCache(cacheAtr)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 }
@@ -1624,7 +1603,7 @@ func TestAttributeIndexer(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -1829,7 +1808,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -1950,7 +1929,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2065,7 +2044,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2167,7 +2146,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2286,7 +2265,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2399,7 +2378,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2473,7 +2452,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2553,7 +2532,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2628,7 +2607,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2710,7 +2689,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2797,7 +2776,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2876,7 +2855,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -2957,7 +2936,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -3035,20 +3014,21 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		b.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
+	dmAtr.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	//refresh the DM
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		b.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
@@ -3101,13 +3081,14 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		b.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
+	dmAtr.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
@@ -3115,7 +3096,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		b.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
@@ -3171,7 +3152,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheAtr.Clear(nil)
 	if test, err := dmAtr.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
@@ -3198,13 +3179,14 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 
 func TestProcessAttributeConstant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
+	dmAtr.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3267,14 +3249,15 @@ func TestProcessAttributeConstant(t *testing.T) {
 
 func TestProcessAttributeVariable(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3339,14 +3322,15 @@ func TestProcessAttributeVariable(t *testing.T) {
 
 func TestProcessAttributeComposed(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3417,14 +3401,15 @@ func TestProcessAttributeComposed(t *testing.T) {
 
 func TestProcessAttributeUsageDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3490,14 +3475,15 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 
 func TestProcessAttributeSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3563,14 +3549,15 @@ func TestProcessAttributeSum(t *testing.T) {
 
 func TestProcessAttributeDiff(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3636,14 +3623,15 @@ func TestProcessAttributeDiff(t *testing.T) {
 
 func TestProcessAttributeMultiply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3709,14 +3697,15 @@ func TestProcessAttributeMultiply(t *testing.T) {
 
 func TestProcessAttributeDivide(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3782,14 +3771,15 @@ func TestProcessAttributeDivide(t *testing.T) {
 
 func TestProcessAttributeValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3855,14 +3845,15 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 
 func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -3928,14 +3919,15 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 
 func TestProcessAttributePrefix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -4000,14 +3992,15 @@ func TestProcessAttributePrefix(t *testing.T) {
 
 func TestProcessAttributeSuffix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -4076,13 +4069,14 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	cfg.AttributeSCfg().StringIndexedFields = nil
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
+	dmAtr.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 
@@ -4136,14 +4130,15 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 
 func TestProcessAttributeWithSameWeight(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf := &utils.AttributeProfile{
@@ -4231,14 +4226,15 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf1Exists := &utils.AttributeProfile{
@@ -4342,14 +4338,15 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmAtr = engine.NewDataManager(dbCM, cfg, nil)
-	dmAtr.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dmAtr.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmAtr)
 	attrS = NewAttributeService(dmAtr, fltrs, nil, cfg)
 	attrPrf1NotEmpty := &utils.AttributeProfile{
@@ -4453,14 +4450,15 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 func TestAttributeMetaTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dm.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	attrS = NewAttributeService(dm, fltrs, nil, cfg)
 	attr1 := &utils.AttributeProfile{
@@ -4518,17 +4516,18 @@ func TestAttributeMetaTenant(t *testing.T) {
 }
 
 func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS.Clear(nil)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	fltr := &engine.Filter{
 		Tenant: "cgrates.org",
@@ -4635,14 +4634,15 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 func TestAttributeMultipleProfileRunns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	dm.SetCache(cacheS)
+	cacheS.Clear(nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	attrS = NewAttributeService(dm, fltrs, nil, cfg)
 	attrPrf1Exists := &utils.AttributeProfile{
@@ -4787,15 +4787,16 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -4916,16 +4917,17 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	conMng.SetCache(cacheS)
+	cacheS.Clear(nil)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5018,15 +5020,16 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5119,16 +5122,17 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
-	engine.Cache.Clear(nil)
+	conMng.SetCache(cacheS)
+	cacheS.Clear(nil)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5219,11 +5223,6 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5231,9 +5230,8 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -5306,11 +5304,6 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5318,9 +5311,8 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -5350,11 +5342,6 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5362,9 +5349,8 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -5539,11 +5525,6 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 }
 
 func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -5552,10 +5533,9 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := NewAttributeService(dm, filterS, nil, cfg)
 
 	postpaid := utils.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
@@ -5655,11 +5635,6 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 }
 
 func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -5668,10 +5643,9 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := NewAttributeService(dm, filterS, nil, cfg)
 
 	postpaid := utils.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
@@ -5792,15 +5766,16 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5927,15 +5902,16 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6029,15 +6005,16 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6120,15 +6097,16 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	conMng := engine.NewConnManager(cfg)
-	conMng.SetCache(engine.Cache)
+	conMng.SetCache(cacheS)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, conMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, conMng, dm)
 	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6220,13 +6198,14 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 }
 func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, nil, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
@@ -6330,13 +6309,14 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 
 func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, nil, cfg)
 	args2 := &utils.CGREvent{
@@ -6361,13 +6341,14 @@ func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 
 func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, nil, cfg)
 	args2 := &utils.CGREvent{
@@ -6438,13 +6419,14 @@ func TestAttributesParseAttributeMetaCCUsageError(t *testing.T) {
 
 func TestAttributesProcessEventSetError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, nil, cfg)
 	acPrf := &utils.AttributeProfile{
@@ -6484,11 +6466,6 @@ func TestAttributesProcessEventSetError(t *testing.T) {
 	}
 }
 func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -6497,10 +6474,9 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := NewAttributeService(dm, filterS, nil, cfg)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
@@ -6542,11 +6518,6 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 }
 
 func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -6555,10 +6526,9 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	alS := NewAttributeService(dm, filterS, nil, cfg)
 	pw := utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
@@ -6631,10 +6601,8 @@ func TestAttributesParseAttributeError(t *testing.T) {
 }
 
 func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
-	tmp := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -6645,9 +6613,8 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, nil, cfg)
 
@@ -6743,10 +6710,8 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 }
 
 func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
-	tmp := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -6757,9 +6722,8 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 
 	value := utils.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 	attrPrf := &utils.AttributeProfile{

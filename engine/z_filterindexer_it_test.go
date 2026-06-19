@@ -32,8 +32,9 @@ import (
 )
 
 var (
-	dataManager *DataManager
-	cfgDBName   string
+	dataManager      *DataManager
+	dataManagerCache *CacheS
+	cfgDBName        string
 )
 
 // subtests to be executed for each confDIR
@@ -101,7 +102,8 @@ func TestFilterIndexerIT(t *testing.T) {
 		}
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 		dataManager = NewDataManager(dbCM, cfg, nil)
-		dataManager.SetCache(Cache)
+		dataManagerCache = NewCacheS(cfg, nil, nil, nil)
+		dataManager.SetCache(dataManagerCache)
 	case utils.MetaRedis:
 		cfg := config.NewDefaultCGRConfig()
 		redisDB, err := NewRedisStorage("127.0.0.1:6379", 4,
@@ -119,7 +121,8 @@ func TestFilterIndexerIT(t *testing.T) {
 		defer redisDB.Close()
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: redisDB}, cfg.DbCfg())
 		dataManager = NewDataManager(dbCM, cfg, nil)
-		dataManager.SetCache(Cache)
+		dataManagerCache = NewCacheS(cfg, nil, nil, nil)
+		dataManager.SetCache(dataManagerCache)
 	case utils.MetaMySQL:
 		t.SkipNow()
 	case utils.MetaPostgres, utils.MetaMongo:
@@ -136,7 +139,7 @@ func testITFlush(t *testing.T) {
 	if err := dataManager.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	Cache.Clear(nil)
+	dataManagerCache.Clear(nil)
 }
 
 func testITIsDBEmpty(t *testing.T) {

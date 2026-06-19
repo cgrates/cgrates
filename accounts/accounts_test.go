@@ -36,7 +36,6 @@ import (
 )
 
 func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
@@ -77,7 +76,8 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
 		t.Error(err)
@@ -100,7 +100,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	dataDB := &dataDBMockError{}
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	newDm := engine.NewDataManager(dbCm, cfg, nil)
-	newDm.SetCache(engine.Cache)
+	newDm.SetCache(cacheS)
 	accnts = NewAccountS(cfg, fltr, nil, newDm)
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
 		[]string{}, false, true); err == nil || err != utils.ErrNotImplemented {
@@ -109,12 +109,12 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 }
 
 func TestMatchingAccountsForEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -198,12 +198,12 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 }
 
 func TestAccountDebit(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -291,12 +291,12 @@ func TestAccountDebit(t *testing.T) {
 }
 
 func TestAccountsDebitGetUsage(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -418,12 +418,12 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 }
 
 func TestAccountsDebit(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -541,12 +541,12 @@ func TestAccountsDebit(t *testing.T) {
 }
 
 func TestV1AccountsForEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -599,12 +599,12 @@ func TestV1AccountsForEvent(t *testing.T) {
 }
 
 func TestV1MaxAbstracts(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -728,12 +728,12 @@ func TestV1MaxAbstracts(t *testing.T) {
 }
 
 func TestV1MaxAbstractsNoMatchingBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -788,12 +788,12 @@ func TestV1MaxAbstractsNoMatchingBalance(t *testing.T) {
 }
 
 func TestV1DebitAbstractsForceUsage(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -880,12 +880,12 @@ func TestV1DebitAbstractsForceUsage(t *testing.T) {
 }
 
 func TestV1DebitAbstracts1(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1025,12 +1025,12 @@ func TestV1DebitAbstracts1(t *testing.T) {
 }
 
 func TestV1MaxConcretes(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1173,12 +1173,12 @@ func TestV1MaxConcretes(t *testing.T) {
 }
 
 func TestV1DebitConcretes(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1332,12 +1332,12 @@ func TestV1DebitConcretes(t *testing.T) {
 }
 
 func TestMultipleAccountsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1465,12 +1465,12 @@ func TestMultipleAccountsErr(t *testing.T) {
 }
 
 func TestV1ActionSetBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1551,12 +1551,12 @@ func TestV1ActionSetBalance(t *testing.T) {
 }
 
 func TestV1ActionRemoveBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -1602,7 +1602,7 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 	}
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	accnts.dm = engine.NewDataManager(dbCm, cfg, nil)
-	accnts.dm.SetCache(engine.Cache)
+	accnts.dm.SetCache(cacheS)
 
 	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err != nil {
 		t.Error(err)
@@ -1613,12 +1613,12 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 
 // TestV1DebitAbstractsEventCharges is designed to cover multiple EventCharges merges
 func TestV1DebitAbstractsEventCharges(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 
 	// set the internal AttributeS within connMngr
@@ -1636,7 +1636,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
-	connMngr.SetCache(engine.Cache)
+	connMngr.SetCache(cacheS)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
@@ -2132,12 +2132,12 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 }
 
 func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 
 	// set the internal AttributeS within connMngr
@@ -2155,7 +2155,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
 	connMngr := engine.NewConnManager(cfg)
-	connMngr.SetCache(engine.Cache)
+	connMngr.SetCache(cacheS)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
@@ -2457,12 +2457,12 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 }
 
 func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltrS, nil, dm)
 
@@ -2607,9 +2607,6 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 
 func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	// this test will call maxDebitAbstractsFromConcretes but without any concreteBal and not calling rates
-	cache := engine.Cache
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -2617,7 +2614,8 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	acnts := NewAccountS(cfg, filterS, nil, dm)
@@ -2674,13 +2672,10 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	} else if !reflect.DeepEqual(eEc, expEcCh) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expEcCh), utils.ToJSON(eEc))
 	}
-
-	engine.Cache = cache
 }
 
 func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	// get the config
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Enabled = true
 	cfg.AccountSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
@@ -2689,7 +2684,6 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 
 	// get the connMngr
 	connMngr := engine.NewConnManager(cfg)
-	connMngr.SetCache(engine.Cache)
 
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -2698,7 +2692,9 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	// data manager
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMngr)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, connMngr, nil)
+	connMngr.SetCache(cacheS)
+	dm.SetCache(cacheS)
 
 	// configure filters
 	fltrs := engine.NewFilterS(cfg, connMngr, dm)
@@ -3000,12 +2996,12 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 }
 
 func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
@@ -3077,7 +3073,6 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3085,7 +3080,8 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3211,7 +3207,6 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3219,7 +3214,8 @@ func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3252,7 +3248,6 @@ func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 }
 
 func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3260,7 +3255,8 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3402,7 +3398,6 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3410,7 +3405,8 @@ func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3480,7 +3476,6 @@ func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 }
 
 func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3488,7 +3483,8 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3633,7 +3629,6 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3641,7 +3636,8 @@ func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3675,7 +3671,6 @@ func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 }
 
 func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3683,7 +3678,8 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
@@ -3840,7 +3836,6 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -3848,7 +3843,8 @@ func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 

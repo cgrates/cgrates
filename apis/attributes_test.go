@@ -34,10 +34,11 @@ import (
 func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -105,17 +106,18 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 			}}, &reply); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -150,7 +152,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	attrPrf.Attributes[0].Path = "*req.RequestType"
 
 	admS.connMgr = engine.NewConnManager(cfg)
-	admS.connMgr.SetCache(engine.Cache)
+	admS.connMgr.SetCache(cacheS)
 	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = "SERVER_ERROR: context deadline exceeded"
@@ -181,23 +183,24 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
-	admS.dm.SetCache(engine.Cache)
+	admS.dm.SetCache(cacheS)
 	expected = "SERVER_ERROR: NOT_IMPLEMENTED"
 	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -221,18 +224,18 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -258,7 +261,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	admS.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
 	admS.connMgr = engine.NewConnManager(cfg)
-	admS.connMgr.SetCache(engine.Cache)
+	admS.connMgr.SetCache(cacheS)
 	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	expected := "SERVER_ERROR: context deadline exceeded"
 	if err := admS.RemoveAttributeProfile(ctx,
@@ -301,15 +304,16 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	}
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
-	admS.dm.SetCache(engine.Cache)
+	admS.dm.SetCache(cacheS)
 
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
@@ -339,7 +343,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -355,13 +359,14 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
@@ -382,7 +387,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -396,13 +401,14 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -410,7 +416,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -424,13 +430,14 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
@@ -451,7 +458,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -474,26 +481,27 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	expected = "NOT_FOUND"
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMockNew}, cfg.DbCfg())
 	admS.dm = engine.NewDataManager(dbCm, cfg, nil)
-	admS.dm.SetCache(engine.Cache)
+	admS.dm.SetCache(cacheS)
 	if err := admS.GetAttributeProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	engine.Cache.Clear(nil)
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	cacheS.Clear(nil)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
@@ -631,12 +639,13 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
@@ -683,9 +692,9 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 }
 
 func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
 			return nil
@@ -700,7 +709,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -716,13 +725,13 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
 			attrPrf := &utils.AttributeProfile{
@@ -744,7 +753,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -763,13 +772,13 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
 			attrPrf := &utils.AttributeProfile{
@@ -791,7 +800,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -812,16 +821,17 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)
+	dm.DB()[utils.MetaDefault].Flush("")
 }
 
 func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

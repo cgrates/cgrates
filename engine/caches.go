@@ -31,11 +31,7 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-var Cache *CacheS
-
 func init() {
-	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
-
 	// Register objects for cache replication/remotes
 	// AttributeS
 	gob.Register(new(utils.AttributeProfile))

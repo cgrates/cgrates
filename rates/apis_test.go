@@ -42,7 +42,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil))
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rts := NewRateS(cfg, fltrs, dm)
 
@@ -149,15 +149,15 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 }
 
 func TestRatesCostForEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	rateS := NewRateS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -200,7 +200,7 @@ func TestV1RateProfilesForEvent(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil))
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewRateS(cfg, fltrs, dm)
 
@@ -269,7 +269,7 @@ func TestV1RateProfileRatesForEvent(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil))
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewRateS(cfg, fltrs, dm)
 

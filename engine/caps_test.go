@@ -139,9 +139,8 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	cs := &CapsStats{st: utils.NewStatAverage(1, utils.MetaDynReq, nil)}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
-	tmp := Cache
-	Cache = NewCacheS(cfg, nil, nil, cs)
-	cs.SetCache(Cache)
+	cacheS := NewCacheS(cfg, nil, nil, cs)
+	cs.SetCache(cacheS)
 
 	cs.addSample("1", 10)
 	expAvg := 10.
@@ -170,5 +169,4 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	if pk := cs.GetPeak(); pk != expPk {
 		t.Errorf("Expected: %v ,received:%v", expPk, pk)
 	}
-	Cache = tmp
 }

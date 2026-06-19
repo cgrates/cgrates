@@ -31,12 +31,13 @@ import (
 
 func TestNewJSONFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	cfgIdx := 0
 	expected := &JSONFileER{
 		RWMutex:   sync.RWMutex{},
 		cgrCfg:    cfg,
 		cfgIdx:    0,
-		cache:     engine.Cache,
+		cache:     cacheS,
 		fltrS:     nil,
 		rdrEvents: nil,
 		rdrError:  nil,
@@ -45,7 +46,7 @@ func TestNewJSONFileER(t *testing.T) {
 	}
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
 	cfg.ERsCfg().Readers[0].SourcePath = "/"
-	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.Cache, nil, nil)
+	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

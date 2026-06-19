@@ -167,16 +167,17 @@ func TestRegisterRPCHosts(t *testing.T) {
 			},
 		},
 	}
+	cache := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
 	regist := &RegistrarCService{
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
-	regist.connMgr.SetCache(engine.Cache)
+	regist.connMgr.SetCache(cache)
 	registCmp := &RegistrarCService{
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),
 	}
-	registCmp.connMgr.SetCache(engine.Cache)
+	registCmp.connMgr.SetCache(cache)
 	regist.registerRPCHosts()
 	if !reflect.DeepEqual(regist, registCmp) {
 		t.Errorf("Expected: %+v ,received: %+v", registCmp, regist)
