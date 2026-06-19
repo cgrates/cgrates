@@ -27,12 +27,12 @@ import (
 )
 
 func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
-	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 	//set 4 attr profiles with different filters to index them
 
 	attrPrf1 := &utils.AttributeProfile{
@@ -166,12 +166,12 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 }
 
 func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
-	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 
 	// set 1 charger profile with different *libphonenumber filter to index
 	cghPfr := &utils.ChargerProfile{

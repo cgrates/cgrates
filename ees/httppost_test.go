@@ -52,7 +52,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrEv := new(utils.CGREvent)
-	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
+	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +82,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	}))
 	defer srv.Close()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
-	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
+	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -120,7 +120,7 @@ func TestHttpPostSync(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
+	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -196,7 +196,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.Cache, nil, nil)
+	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

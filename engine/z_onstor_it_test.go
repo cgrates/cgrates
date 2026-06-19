@@ -33,10 +33,11 @@ import (
 )
 
 var (
-	rdsITdb   *RedisStorage
-	mgoITdb   *MongoStorage
-	onStor    *DataManager
-	onStorCfg string
+	rdsITdb     *RedisStorage
+	mgoITdb     *MongoStorage
+	onStor      *DataManager
+	onStorCache *CacheS
+	onStorCfg   string
 
 	// subtests to be executed for each confDIR
 	sTestsOnStorIT = []func(t *testing.T){
@@ -77,7 +78,8 @@ func TestOnStorIT(t *testing.T) {
 		}
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 		onStor = NewDataManager(dbCM, cfg, nil)
-		onStor.SetCache(Cache)
+		onStorCache = NewCacheS(cfg, nil, nil, nil)
+		onStor.SetCache(onStorCache)
 	case utils.MetaRedis:
 		cfg := config.NewDefaultCGRConfig()
 		var err error
@@ -91,7 +93,8 @@ func TestOnStorIT(t *testing.T) {
 		onStorCfg = cfg.DbCfg().DBConns[utils.MetaDefault].Name
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: rdsITdb}, cfg.DbCfg())
 		onStor = NewDataManager(dbCM, cfg, nil)
-		onStor.SetCache(Cache)
+		onStorCache = NewCacheS(cfg, nil, nil, nil)
+		onStor.SetCache(onStorCache)
 	case utils.MetaMySQL:
 		t.SkipNow()
 	case utils.MetaPostgres, utils.MetaMongo:
@@ -109,7 +112,7 @@ func testOnStorITFlush(t *testing.T) {
 	if err := onStor.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	Cache.Clear(nil)
+	onStorCache.Clear(nil)
 }
 
 func testOnStorITIsDBEmpty(t *testing.T) {

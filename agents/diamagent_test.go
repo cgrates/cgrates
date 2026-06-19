@@ -60,7 +60,8 @@ func TestProcessRequest(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, config.CgrConfig().DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
@@ -448,12 +449,12 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, engine.Cache, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
 
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	da := &DiameterAgent{
@@ -504,7 +505,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, engine.Cache, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -533,7 +534,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, engine.Cache, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -564,7 +565,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, engine.Cache, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {
@@ -592,7 +593,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, engine.Cache, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {

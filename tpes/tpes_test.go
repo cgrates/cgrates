@@ -30,12 +30,13 @@ import (
 
 func TestNewTPeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpExporterTypes.Add("not_valid")
 	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
 	// if err != nil {
@@ -54,10 +55,11 @@ func TestNewTPeS(t *testing.T) {
 
 func TestGetTariffPlansKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 
 	//Attributes
 	attr := &utils.AttributeProfile{
@@ -363,12 +365,13 @@ func TestGetTariffPlansKeys(t *testing.T) {
 
 func TestV1ExportTariffPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
@@ -408,12 +411,13 @@ func TestV1ExportTariffPlan(t *testing.T) {
 
 func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -428,12 +432,13 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 
 func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -450,12 +455,13 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 
 func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{

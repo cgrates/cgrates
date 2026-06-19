@@ -647,11 +647,12 @@ func BenchmarkIPsAuthorize(b *testing.B) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
+	cm.SetCache(cacheS)
+	ipService := NewIPService(cfg, dm, cacheS, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -701,11 +702,12 @@ func BenchmarkIPsAllocate(b *testing.B) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
+	cm.SetCache(cacheS)
+	ipService := NewIPService(cfg, dm, cacheS, filters, cm)
 
 	ctx := context.Background()
 	profile := &utils.IPProfile{
@@ -753,11 +755,12 @@ func BenchmarkIPsRelease(b *testing.B) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cm := engine.NewConnManager(cfg)
-	cm.SetCache(engine.Cache)
-	ipService := NewIPService(cfg, dm, engine.Cache, filters, cm)
+	cm.SetCache(cacheS)
+	ipService := NewIPService(cfg, dm, cacheS, filters, cm)
 	ctx := context.Background()
 	profile := &utils.IPProfile{
 		Tenant:    "cgrates.org",

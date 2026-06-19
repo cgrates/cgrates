@@ -31,10 +31,8 @@ import (
 )
 
 func TestCDRsV1ProcessEventMock(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -43,14 +41,13 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -109,10 +106,8 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventMockErr(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -121,14 +116,13 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -190,10 +184,8 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventMockCache(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -202,14 +194,13 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -274,10 +265,8 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -289,14 +278,13 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -360,10 +348,8 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -372,14 +358,13 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -426,10 +411,8 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -439,11 +422,10 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -453,7 +435,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	}
 
 	rply := "string"
-	engine.Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
+	cacheS.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
 		&utils.CachedRPCResponse{Result: &rply, Error: nil},
 		nil, true, utils.NonTransactional)
 
@@ -474,10 +456,8 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -487,11 +467,10 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -501,7 +480,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	}
 
 	rply := []*utils.EventsWithOpts{}
-	engine.Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
+	cacheS.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
 		&utils.CachedRPCResponse{Result: &rply, Error: nil},
 		nil, true, utils.NonTransactional)
 
@@ -525,13 +504,10 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 
 func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
-	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
@@ -540,11 +516,10 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, nil)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -562,7 +537,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 			},
 		},
 	}
-	engine.Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID",
+	cacheS.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID",
 		&utils.CachedRPCResponse{Result: &evs, Error: nil},
 		nil, true, utils.NonTransactional)
 	var reply []*utils.EventsWithOpts
@@ -584,10 +559,8 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 }
 
 func TestCDRsV1ProcessStoredEvents(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -596,14 +569,13 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -656,10 +628,8 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 }
 
 func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
-	testCache := engine.Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		engine.Cache = testCache
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -668,14 +638,13 @@ func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
-	newCDRSrv := NewCDRServer(cfg, dm, engine.Cache, fltrs, connMng)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
+	connMng.SetCache(cacheS)
+	newCDRSrv := NewCDRServer(cfg, dm, cacheS, fltrs, connMng)
 
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{

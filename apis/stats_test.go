@@ -34,13 +34,13 @@ import (
 )
 
 func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -100,7 +100,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	if err := adms.RemoveStatQueueProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 
 	if err := adms.GetStatQueueProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
@@ -111,13 +111,13 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -147,13 +147,13 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -182,7 +182,7 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 
 	sqPrf.FilterIDs = []string{}
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
@@ -212,10 +212,10 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err == nil ||
@@ -227,13 +227,13 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -259,7 +259,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	adms.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	experr := "SERVER_ERROR: context deadline exceeded"
 
@@ -333,7 +333,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveStatQueueProfile(context.Background(),
@@ -348,9 +348,9 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
@@ -369,7 +369,7 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -389,9 +389,9 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -399,7 +399,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -418,9 +418,9 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 }
 
 func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
@@ -442,7 +442,7 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -465,9 +465,9 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 }
 
 func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
@@ -489,7 +489,7 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -514,9 +514,9 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
@@ -534,7 +534,7 @@ func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -551,9 +551,9 @@ func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -561,7 +561,7 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -578,13 +578,13 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 }
 
 func TestStatsNewStatsv1(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sS := stats.NewStatService(cfg, dm, engine.Cache, nil, nil)
+	dm.SetCache(cacheS)
+	sS := stats.NewStatService(cfg, dm, cacheS, nil, nil)
 
 	exp := &StatSv1{
 		sS: sS,
@@ -607,9 +607,9 @@ func TestStatsSv1Ping(t *testing.T) {
 }
 
 func TestStatsAPIs(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	// cfg.FilterSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
 	// cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	// cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
@@ -649,19 +649,19 @@ func TestStatsAPIs(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- mCC
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	adms := &AdminSv1{
 		dm:  dm,
 		cfg: cfg,
 	}
-	sS := stats.NewStatService(cfg, dm, engine.Cache, fltrs, cM)
+	sS := stats.NewStatService(cfg, dm, cacheS, fltrs, cM)
 	stV1 := NewStatSv1(sS)
 	var reply string
 
@@ -885,12 +885,13 @@ func TestStatsAPIs(t *testing.T) {
 func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &utils.StatQueueProfile{
@@ -1041,12 +1042,13 @@ func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
 func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &utils.StatQueueProfile{
@@ -1095,9 +1097,9 @@ func TestStatQueuesGetStatQueueProfilesGetIDsErr(t *testing.T) {
 }
 
 func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
 			return nil
@@ -1112,7 +1114,7 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

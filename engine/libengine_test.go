@@ -36,11 +36,6 @@ import (
 // For the purpose of this test, we don't need our client to establish a connection
 // we only want to check if the client loaded with the given config where needed
 func TestLibengineNewRPCConnection(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := &config.RemoteHost{
 		ID:              "a4f3f",
 		Address:         "localhost:6012",
@@ -53,8 +48,10 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 		ClientKey:       "key1",
 	}
 	expErr := []string{"dial tcp [::1]:6012: connect: connection refused", "dial tcp 127.0.0.1:6012: connect: connection refused"}
-	cM := NewConnManager(config.NewDefaultCGRConfig())
-	cM.SetCache(Cache)
+	cgrCfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cgrCfg, nil, nil, nil)
+	cM := NewConnManager(cgrCfg)
+	cM.SetCache(cacheS)
 	ctx := context.Background()
 
 	_, err := NewRPCConnection(ctx, cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
@@ -67,11 +64,6 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 }
 
 func TestLibengineNewRPCConnectionInternal(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := &config.RemoteHost{
 		ID:              "a4f3f",
 		Address:         rpcclient.InternalRPC,
@@ -83,8 +75,10 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		TLS:             true,
 		ClientKey:       "key1",
 	}
-	cM := NewConnManager(config.NewDefaultCGRConfig())
-	cM.SetCache(Cache)
+	cgrCfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cgrCfg, nil, nil, nil)
+	cM := NewConnManager(cgrCfg)
+	cM.SetCache(cacheS)
 	exp, err := rpcclient.NewRPCClient(context.Background(), "", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.MaxReconnectInterval, utils.FibDuration,
 		cfg.ConnectTimeout, cfg.ReplyTimeout, rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
@@ -209,11 +203,6 @@ func (TestRPCDspMock) LoaderSv1Do(*context.Context, any, *string) error        {
 func (TestRPCDspMock) ServiceManagerv1Do(*context.Context, any, *string) error { return nil }
 
 func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	connID := rpcclient.BiRPCInternal + "connID"
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
@@ -299,15 +288,12 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 // }
 
 func TestRPCClientSetCallErrCtxTimeOut(t *testing.T) {
-	tmp := Cache
 	cfgtmp := config.CgrConfig()
 
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(cfgtmp)
 
 	}()
-	Cache.Clear(nil)
 
 	connChan := make(chan birpc.ClientConnector, 1)
 	s := &RPCClientSet{
@@ -359,15 +345,15 @@ func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
 }
 
 func TestDynamicFiltersConns2(t *testing.T) {
-	Cache.Clear(nil)
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 	fS := NewFilterS(cfg, nil, dm)
 
 	cfg.FilterSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
@@ -401,7 +387,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
 	ev := &utils.CGREvent{

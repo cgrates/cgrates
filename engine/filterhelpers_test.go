@@ -61,13 +61,14 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}
@@ -90,12 +91,13 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 	cM := NewConnManager(cfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}
@@ -119,9 +121,10 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch := NewDataManager(dbCM, cfg, nil)
-	dmMatch.SetCache(Cache)
+	dmMatch.SetCache(cacheS)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 
@@ -138,10 +141,11 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 		"Fiel..d":        "profile",
 	}}
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch := NewDataManager(dbCM, cfg, nil)
-	dmMatch.SetCache(Cache)
+	dmMatch.SetCache(cacheS)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 
@@ -224,7 +228,8 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(Cache)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 
 	tnt := cfg.GeneralCfg().DefaultTenant
 	contextKey := utils.MetaRating

@@ -33,7 +33,8 @@ import (
 func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -53,7 +54,8 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
 			Route: &utils.Route{},
@@ -74,10 +76,6 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 }
 
 func TestPopulateResourcesForRoutesOK(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
@@ -104,7 +102,8 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -147,10 +146,6 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 
 func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
@@ -167,7 +162,8 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -214,10 +210,6 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 
 func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
@@ -243,7 +235,8 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
@@ -281,7 +274,8 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 func TestResourceDescendentSorterSortRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{}
@@ -303,7 +297,8 @@ func TestResourceDescendentSorterSortRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
 
 	routes := map[string]*RouteWithWeight{
@@ -326,10 +321,6 @@ func TestResourceDescendentSorterSortRoutesNoResourceIDs(t *testing.T) {
 }
 
 func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
-
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
@@ -388,7 +379,8 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
@@ -472,7 +464,8 @@ func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)
@@ -505,10 +498,6 @@ func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 
 func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}}}
 
@@ -538,7 +527,8 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	rds := NewResourceDescendentSorter(cfg, cM, nil)

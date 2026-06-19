@@ -103,11 +103,13 @@ func testFltrStart(testName, action string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn, engine.Cache)
+	cacheIn := engine.NewCacheS(fltrCfgIn, nil, nil, nil)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn, cacheIn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgOut.GeneralCfg().DBDataEncoding, fltrCfgOut, engine.Cache)
+	cacheOut := engine.NewCacheS(fltrCfgOut, nil, nil, nil)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgOut.GeneralCfg().DBDataEncoding, fltrCfgOut, cacheOut)
 	if err != nil {
 		log.Fatal(err)
 	}

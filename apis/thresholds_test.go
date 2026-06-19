@@ -33,13 +33,13 @@ import (
 )
 
 func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -102,7 +102,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	if err := adms.GetThresholdProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -112,13 +112,13 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -148,13 +148,13 @@ func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 }
 
 func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -183,7 +183,7 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 
 	thPrf.FilterIDs = []string{}
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
@@ -215,7 +215,7 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err == nil ||
@@ -227,13 +227,13 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 }
 
 func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -260,7 +260,7 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	adms.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	experr := "SERVER_ERROR: context deadline exceeded"
 
@@ -332,10 +332,10 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveThresholdProfile(context.Background(),
@@ -350,9 +350,9 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
 			thPrf := &utils.ThresholdProfile{
@@ -371,7 +371,7 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -391,9 +391,9 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -401,7 +401,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -420,9 +420,9 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
 			thPrf := &utils.ThresholdProfile{
@@ -444,7 +444,7 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -467,9 +467,9 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
 			thPrf := &utils.ThresholdProfile{
@@ -491,7 +491,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -516,9 +516,9 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(*context.Context, string, string) (*utils.ThresholdProfile, error) {
 			thPrf := &utils.ThresholdProfile{
@@ -536,7 +536,7 @@ func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -553,9 +553,9 @@ func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfilesCountErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -563,7 +563,7 @@ func TestThresholdsGetThresholdProfilesCountErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -580,13 +580,13 @@ func TestThresholdsGetThresholdProfilesCountErrKeys(t *testing.T) {
 }
 
 func TestThresholdsNewThresholdSv1(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	tS := thresholds.NewThresholdService(cfg, dm, engine.Cache, nil, nil)
+	dm.SetCache(cacheS)
+	tS := thresholds.NewThresholdService(cfg, dm, cacheS, nil, nil)
 
 	exp := &ThresholdSv1{
 		tS: tS,
@@ -609,16 +609,16 @@ func TestThresholdsSv1Ping(t *testing.T) {
 }
 
 func TestThresholdsAPIs(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	cfg.ThresholdSCfg().Conns[utils.MetaActions] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}},
 	}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	expEv := &utils.CGREvent{
@@ -645,10 +645,10 @@ func TestThresholdsAPIs(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- mCC
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, rpcInternal)
 
-	tS := thresholds.NewThresholdService(cfg, dm, engine.Cache, fltrs, cM)
+	tS := thresholds.NewThresholdService(cfg, dm, cacheS, fltrs, cM)
 	adms := &AdminSv1{
 		dm:  dm,
 		cfg: cfg,
@@ -804,12 +804,13 @@ func TestThresholdsAPIs(t *testing.T) {
 func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &utils.ThresholdProfile{
@@ -927,12 +928,13 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &utils.ThresholdProfile{
@@ -975,9 +977,9 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 }
 
 func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		SetThresholdProfileDrvF: func(*context.Context, *utils.ThresholdProfile) error {
 			return nil
@@ -992,7 +994,7 @@ func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

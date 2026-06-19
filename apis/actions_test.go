@@ -31,13 +31,13 @@ import (
 )
 
 func TestActionsSetGetRemActionProfile(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -98,7 +98,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	if err := adms.RemoveActionProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	result = utils.ActionProfile{}
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
@@ -109,13 +109,13 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 }
 
 func TestActionsGetActionProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -145,13 +145,13 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 }
 
 func TestActionsSetActionProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -181,7 +181,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 
 	actPrf.FilterIDs = []string{}
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
@@ -213,7 +213,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err == nil ||
@@ -225,13 +225,13 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 }
 
 func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -258,7 +258,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	adms.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
 	adms.connMgr = engine.NewConnManager(cfg)
-	adms.connMgr.SetCache(engine.Cache)
+	adms.connMgr.SetCache(cacheS)
 	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	experr := "SERVER_ERROR: context deadline exceeded"
 
@@ -325,10 +325,10 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	adms.dm = engine.NewDataManager(dbCm, cfg, nil)
-	adms.dm.SetCache(engine.Cache)
+	adms.dm.SetCache(cacheS)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveActionProfile(context.Background(),
@@ -343,9 +343,9 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 }
 
 func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
@@ -364,7 +364,7 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -384,9 +384,9 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 }
 
 func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -394,7 +394,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -413,9 +413,9 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 }
 
 func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
@@ -433,7 +433,7 @@ func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -450,9 +450,9 @@ func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 }
 
 func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
@@ -460,7 +460,7 @@ func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -479,12 +479,13 @@ func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
 func TestActionsGetActionProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.ActionProfileWithAPIOpts{
 		ActionProfile: &utils.ActionProfile{
@@ -612,12 +613,13 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.ActionProfileWithAPIOpts{
 		ActionProfile: &utils.ActionProfile{
@@ -662,9 +664,9 @@ func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 }
 
 func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
@@ -679,7 +681,7 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -699,9 +701,9 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 }
 
 func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
 			actionPrf := &utils.ActionProfile{
@@ -723,7 +725,7 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -746,9 +748,9 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 }
 
 func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dbMock := &engine.DataDBMock{
 		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
 			actionPrf := &utils.ActionProfile{
@@ -770,7 +772,7 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

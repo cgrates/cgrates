@@ -174,9 +174,10 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfgDflt, nil, nil, nil)
+	dm.SetCache(cacheS)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, engine.Cache, nil, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, cacheS, nil, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
 	if err := server.ServeBiRPC("invalid_port_format", "", ss.OnBiJSONConnect,
@@ -197,9 +198,10 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfgDflt, nil, nil, nil)
+	dm.SetCache(cacheS)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, engine.Cache, nil, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, cacheS, nil, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
 	if err := server.ServeBiRPC("", "invalid_port_format", ss.OnBiJSONConnect,

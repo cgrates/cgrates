@@ -32,7 +32,8 @@ import (
 
 func TestERsProcessPartialEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	erS := NewERService(nil, cfg, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	erS := NewERService(nil, cfg, cacheS, nil, nil)
 	event := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventERsProcessPartial",
@@ -163,7 +164,8 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -215,7 +217,8 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -275,7 +278,8 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,
@@ -315,7 +319,8 @@ func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
 		cfg:       cfg,

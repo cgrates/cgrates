@@ -268,7 +268,8 @@ func TestNewStatService(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	sSrv := &StatS{
 		dm:               dm,
@@ -276,7 +277,7 @@ func TestNewStatService(t *testing.T) {
 		cfg:              cfg,
 		storedStatQueues: make(utils.StringSet),
 	}
-	result := NewStatService(cfg, dm, engine.Cache, fltrS, nil)
+	result := NewStatService(cfg, dm, cacheS, fltrS, nil)
 	if !reflect.DeepEqual(sSrv.dm, result.dm) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.dm, result.dm)
 	}
@@ -296,12 +297,13 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 	prepareStatsData(t, dmSTS)
 	msq, unlock, err := statService.matchingStatQueuesForEvent(context.TODO(), testStatsArgs[0].Tenant, testStatsArgs[0])
@@ -343,17 +345,17 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 }
 
 func TestStatQueuesProcessEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 
 	prepareStatsData(t, dmSTS)
@@ -403,12 +405,13 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 	prepareStatsData(t, dmSTS)
 
@@ -452,17 +455,17 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 }
 
 func TestStatQueuesV1ProcessEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 	prepareStatsData(t, dmSTS)
 
@@ -524,7 +527,8 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "THUP1",
@@ -718,21 +722,19 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := engine.Cache
 
 	defer func() {
-		engine.Cache = tmp
 		guardian.Guardian = guardian.New()
 	}()
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	sS := NewStatService(cfg, dm, engine.Cache,
+	sS := NewStatService(cfg, dm, cacheS,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -766,17 +768,15 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := engine.Cache
-	defer func() { engine.Cache = tmp }()
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	sS := NewStatService(cfg, dm, engine.Cache,
+	sS := NewStatService(cfg, dm, cacheS,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -828,9 +828,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := engine.Cache
-	defer func() { engine.Cache = tmp }()
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	db := &engine.DataDBMock{
 		GetStatQueueProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.StatQueueProfile, error) {
 			if id == "STS1" {
@@ -848,7 +846,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 				},
 				ThresholdIDs: []string{utils.MetaNone},
 			}
-			engine.Cache.Set(ctx, utils.CacheStatQueues, sqPrf.TenantID(), &utils.StatQueue{
+			cacheS.Set(ctx, utils.CacheStatQueues, sqPrf.TenantID(), &utils.StatQueue{
 				Tenant:    sqPrf.Tenant,
 				ID:        sqPrf.ID,
 				SQMetrics: make(map[string]utils.StatMetric),
@@ -858,11 +856,11 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	sS := NewStatService(cfg, dm, engine.Cache,
+	sS := NewStatService(cfg, dm, cacheS,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
 	ids := utils.StringSet{}
@@ -881,10 +879,11 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 }
 
 func TestStatQueueReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	synctest.Test(t, func(*testing.T) {
-		cfg := config.NewDefaultCGRConfig()
-		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-		sS := NewStatService(cfg, nil, engine.Cache, nil, nil)
+		sS := NewStatService(cfg, nil, cacheS, nil, nil)
 		sS.StartLoop(context.Background())
 		sS.Reload(context.Background())
 		sS.Shutdown(context.Background())
@@ -894,10 +893,11 @@ func TestStatQueueReload(t *testing.T) {
 }
 
 func TestStatQueueReloadShutdownConcurrent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	synctest.Test(t, func(*testing.T) {
-		cfg := config.NewDefaultCGRConfig()
-		cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-		sS := NewStatService(cfg, nil, engine.Cache, nil, nil)
+		sS := NewStatService(cfg, nil, cacheS, nil, nil)
 		sS.StartLoop(context.Background())
 		var wg sync.WaitGroup
 		wg.Go(func() { sS.Reload(context.Background()) })
@@ -907,33 +907,30 @@ func TestStatQueueReloadShutdownConcurrent(t *testing.T) {
 }
 
 func TestStatQueueStartLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	synctest.Test(t, func(*testing.T) {
-		cfg := config.NewDefaultCGRConfig()
-		sS := NewStatService(cfg, nil, engine.Cache, nil, nil)
+		sS := NewStatService(cfg, nil, cacheS, nil, nil)
 		sS.StartLoop(context.Background())
 		sS.backupLoop.Wait()
 	})
 }
 
 func TestStatQueueStoreStatsOK(t *testing.T) {
-	tmp := engine.Cache
-	defer func() {
-		engine.Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sS := NewStatService(cfg, dm, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
+	sS := NewStatService(cfg, dm, cacheS, nil, nil)
 
 	exp := &utils.StatQueue{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
-	engine.Cache.SetWithoutReplicate(utils.CacheStatQueues, "cgrates.org:SQ1", exp, nil, true,
+	cacheS.SetWithoutReplicate(utils.CacheStatQueues, "cgrates.org:SQ1", exp, nil, true,
 		utils.NonTransactional)
 	sS.storedStatQueues.Add("cgrates.org:SQ1")
 	sS.storeStats(context.Background())
@@ -946,14 +943,12 @@ func TestStatQueueStoreStatsOK(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
-	engine.Cache.Remove(context.Background(), utils.CacheStatQueues, "cgrates.org:SQ1", true, utils.NonTransactional)
+	cacheS.Remove(context.Background(), utils.CacheStatQueues, "cgrates.org:SQ1", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
-	tmp := engine.Cache
 	tmpLogger := utils.Logger
 	defer func() {
-		engine.Cache = tmp
 		utils.Logger = tmpLogger
 	}()
 
@@ -961,7 +956,8 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
-	sS := NewStatService(cfg, nil, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	sS := NewStatService(cfg, nil, cacheS, nil, nil)
 
 	value := &utils.StatQueue{
 		Tenant:    "cgrates.org",
@@ -969,7 +965,7 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
-	engine.Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ1", value, nil, true,
+	cacheS.SetWithoutReplicate(utils.CacheStatQueues, "SQ1", value, nil, true,
 		utils.NonTransactional)
 	sS.storedStatQueues.Add("SQ1")
 	exp := utils.StringSet{
@@ -985,15 +981,13 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
 	}
 
-	engine.Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
+	cacheS.Remove(context.Background(), utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
-	tmp := engine.Cache
 	tmpLogger := utils.Logger
 	defer func() {
 		utils.Logger = tmpLogger
-		engine.Cache = tmp
 	}()
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
@@ -1002,8 +996,9 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sS := NewStatService(cfg, dm, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
+	sS := NewStatService(cfg, dm, cacheS, nil, nil)
 
 	value := &utils.StatQueue{
 		Tenant:    "cgrates.org",
@@ -1011,7 +1006,7 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
-	engine.Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ2", value, nil, true,
+	cacheS.SetWithoutReplicate(utils.CacheStatQueues, "SQ2", value, nil, true,
 		utils.NonTransactional)
 	sS.storedStatQueues.Add("SQ1")
 	expLog := `[WARNING] <StatS> failed retrieving from cache stat queue with ID: SQ1`
@@ -1021,7 +1016,7 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
 	}
 
-	engine.Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
+	cacheS.Remove(context.Background(), utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
@@ -1032,12 +1027,8 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
-	tmp := engine.Cache
 	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
+	defer config.SetCgrConfig(tmpC)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
@@ -1047,20 +1038,19 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
 	dm := engine.NewDataManager(dbCM, cfg, cM)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, cM, nil)
+	cM.SetCache(cacheS)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, cM)
+	sS := NewStatService(cfg, dm, cacheS, filterS, cM)
 
 	sq := &utils.StatQueue{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
-	engine.Cache.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), sq, nil, true, utils.NonTransactional)
+	cacheS.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), sq, nil, true, utils.NonTransactional)
 	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
 	if err := sS.storeStatQueue(context.Background(), sq); err == nil ||
 		err.Error() != utils.ErrDisconnected.Error() {
@@ -1075,8 +1065,9 @@ func TestStatQueueStoreStatQueueOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	sS := NewStatService(cfg, dm, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
+	sS := NewStatService(cfg, dm, cacheS, nil, nil)
 
 	sq := &utils.StatQueue{
 		Tenant:    "cgrates.org",
@@ -1094,9 +1085,10 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1162,14 +1154,14 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 }
 
 func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1218,22 +1210,14 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 }
 
 func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1314,22 +1298,14 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1400,22 +1376,14 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data := &engine.DataDBMock{}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	var qIDs []string
 	if err := sS.V1GetQueueIDs(context.Background(), &utils.TenantWithAPIOpts{}, &qIDs); err == nil ||
@@ -1425,22 +1393,14 @@ func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1495,22 +1455,14 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	var reply utils.StatQueue
 	if err := sS.V1GetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
@@ -1523,22 +1475,14 @@ func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1589,22 +1533,14 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf1 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1673,22 +1609,14 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1729,22 +1657,14 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -1805,23 +1725,15 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -1845,7 +1757,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	expStored := utils.StringSet{
 		"cgrates.org:SQ1": {},
 	}
@@ -1883,23 +1795,15 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -1935,23 +1839,15 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -1985,23 +1881,15 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2039,24 +1927,16 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2108,21 +1988,13 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -2153,11 +2025,11 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, cM)
+	sS := NewStatService(cfg, dm, cacheS, filterS, cM)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2209,12 +2081,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
 	tmpLogger := utils.Logger
 	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
 		utils.Logger = tmpLogger
 	}()
 	var buf bytes.Buffer
@@ -2225,9 +2093,8 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -2239,11 +2106,11 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, cM)
+	sS := NewStatService(cfg, dm, cacheS, filterS, cM)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2299,23 +2166,15 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2354,23 +2213,15 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2404,23 +2255,15 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2454,18 +2297,11 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, nil)
-	sS := NewStatService(cfg, nil, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, nil, cacheS, filterS, nil)
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]float64{}
@@ -2475,23 +2311,15 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2530,23 +2358,15 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2578,23 +2398,15 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2628,18 +2440,11 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, nil)
-	sS := NewStatService(cfg, nil, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, nil, cacheS, filterS, nil)
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]string{}
@@ -2649,23 +2454,15 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 }
 
 func TestStatQueueGetStatQueueOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2713,14 +2510,14 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	}
 }
 func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
@@ -2791,9 +2588,10 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
@@ -2839,13 +2637,6 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
@@ -2853,11 +2644,10 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf1 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -2907,23 +2697,15 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestStatSV1GetQueueDecimalMetricsOK(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -2962,23 +2744,15 @@ func TestStatSV1GetQueueDecimalMetricsOK(t *testing.T) {
 }
 
 func TestStatSV1GetQueueDecimalMetricsErrNotFound(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -3012,23 +2786,15 @@ func TestStatSV1GetQueueDecimalMetricsErrNotFound(t *testing.T) {
 }
 
 func TestStatV1GetQueueDecimalMetricsMissingArgs(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -3062,18 +2828,11 @@ func TestStatV1GetQueueDecimalMetricsMissingArgs(t *testing.T) {
 }
 
 func TestStatV1GetQueueDecimalMetricsErrGetStats(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
-	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, nil)
-	sS := NewStatService(cfg, nil, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, nil, cacheS, filterS, nil)
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	var reply map[string]*utils.Decimal
@@ -3083,12 +2842,12 @@ func TestStatV1GetQueueDecimalMetricsErrGetStats(t *testing.T) {
 }
 
 func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
@@ -3097,7 +2856,7 @@ func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 		// function will return error after trying to parse the filter
 		config.NewDynamicIntOpt([]string{"*string.invalid:filter"}, "cgrates.org", 4, nil),
 	}
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 
 	prepareStatsData(t, dmSTS)
@@ -3114,13 +2873,6 @@ func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 }
 
 func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		// function will return error after trying to parse the filter
@@ -3133,11 +2885,10 @@ func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf1 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -3201,13 +2952,6 @@ func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
 }
 
 func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
-	tmp := engine.Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		engine.Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		// function will return error after trying to parse the filter
@@ -3216,11 +2960,10 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf1 := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -3284,17 +3027,17 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 }
 
 func TestStatQueuesProcessEventidsErr(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 
 	prepareStatsData(t, dmSTS)
@@ -3318,13 +3061,14 @@ func TestStatSMatchingStatQueuesForEventNoSqs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
 
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 	prepareStatsData(t, dmSTS)
 	ev := testStatsArgs[0].Clone()
@@ -3340,12 +3084,13 @@ func TestStatQueuesMatchingStatQueuesForEventWeightErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil)
-	dmSTS.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmSTS.SetCache(cacheS)
 
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	statService := NewStatService(cfg, dmSTS, engine.Cache,
+	statService := NewStatService(cfg, dmSTS, cacheS,
 		engine.NewFilterS(cfg, nil, dmSTS), nil)
 	prepareStatsData(t, dmSTS)
 
@@ -3388,9 +3133,10 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -3422,7 +3168,6 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 	tmpl := utils.Logger
 	defer func() {
 		utils.Logger = tmpl
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	buf := new(bytes.Buffer)
@@ -3432,9 +3177,10 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -3507,17 +3253,14 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
 func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 
-	defer func() {
-		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	sS := NewStatService(cfg, dm, engine.Cache, filterS, nil)
+	sS := NewStatService(cfg, dm, cacheS, filterS, nil)
 
 	sqPrf := &utils.StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -4036,7 +3779,8 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	evNm := utils.MapStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -4083,10 +3827,11 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
+	dm.SetCache(cacheS)
 
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 
@@ -4131,10 +3876,11 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
+	dm.SetCache(cacheS)
 
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 
@@ -4184,10 +3930,11 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
-	cM.SetCache(engine.Cache)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cM.SetCache(cacheS)
+	dm.SetCache(cacheS)
 
 	fltrS := engine.NewFilterS(cfg, cM, dm)
 

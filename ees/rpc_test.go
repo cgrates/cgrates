@@ -34,7 +34,7 @@ func TestNewRpcEE(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
 
 	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -108,7 +108,7 @@ func TestRPCConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -151,7 +151,7 @@ func TestRPCClose(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -173,7 +173,7 @@ func TestRPCGetMetrics(t *testing.T) {
 		},
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -191,7 +191,7 @@ func TestRPCPrepareMap(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)

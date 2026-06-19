@@ -496,15 +496,14 @@ func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply any) 
 	return nil
 }
 func TestDispatcherHostGetConnExistingConn(t *testing.T) {
-	Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- &cMock{
 		rcvM: "testM",
 	}
 	connMgr := NewConnManager(cfg)
-	connMgr.SetCache(Cache)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 	dH := &DispatcherHost{
 		Tenant: "cgrates.org",

@@ -33,15 +33,10 @@ import (
 )
 
 func TestTPReaderCallCacheNoCaching(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	args := map[string][]string{
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 		utils.CacheResources: {},
@@ -60,13 +55,8 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 }
 
 func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -93,7 +83,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -126,13 +116,8 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 }
 
 func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -162,7 +147,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -207,13 +192,8 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 }
 
 func TestTPReaderCallCacheLoadCache(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -257,7 +237,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaLoad
 	args := map[string][]string{
@@ -277,13 +257,8 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 }
 
 func TestTPReaderCallCacheRemoveItems(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -327,7 +302,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaRemove
 	args := map[string][]string{
@@ -347,13 +322,8 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 }
 
 func TestTPReaderCallCacheClear(t *testing.T) {
-	tmpCache := Cache
-	defer func() {
-		Cache = tmpCache
-	}()
-
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil, nil)
+	cacheS := NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -379,7 +349,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	client <- mCC
 
 	cM := NewConnManager(defaultCfg)
-	cM.SetCache(Cache)
+	cM.SetCache(cacheS)
 	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaClear
 	args := map[string][]string{
@@ -613,7 +583,8 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 	}
 	cnMgr := NewConnManager(cfg)
-	cnMgr.SetCache(Cache)
+	cacheS := NewCacheS(cfg, nil, cnMgr, nil)
+	cnMgr.SetCache(cacheS)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
 	cnMgr.AddInternalConn(connID, utils.CacheSv1, rpcInternal)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -649,7 +620,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
 		},
 		dm:         NewDataManager(dbCM, cfg, cnMgr),
-		cache:      Cache,
+		cache:      cacheS,
 		connMgr:    cnMgr,
 		cacheConns: []string{connID},
 	}
@@ -663,11 +634,12 @@ func TestTpReaderLoadAll(t *testing.T) {
 	storeCSV := &CSVStorage{}
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, Cache, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, cacheS, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, Cache, nil)
+	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, cacheS, nil)
 	if err != nil {
 		t.Error(err)
 	}

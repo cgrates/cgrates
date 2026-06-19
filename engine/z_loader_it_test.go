@@ -40,6 +40,7 @@ var (
 	dataDbCsv       *DataManager // Each dataDb will have it's own sources to collect data
 	lCfg            *config.CGRConfig
 	loaderConnMgr   *ConnManager
+	loaderCache     *CacheS
 	loader          *TpReader
 	loaderConfigDIR string
 	loaderCfgPath   string
@@ -98,25 +99,26 @@ func testLoaderITInitDataDB(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dbConn}, lCfg.DbCfg())
 	dataDbCsv = NewDataManager(dbCM, lCfg, nil)
-	dataDbCsv.SetCache(Cache)
+	loaderConnMgr = NewConnManager(lCfg)
+	loaderCache = NewCacheS(lCfg, dataDbCsv, loaderConnMgr, nil)
+	dataDbCsv.SetCache(loaderCache)
 	if lCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		chIDs := []string{}
 		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB
 			chIDs = append(chIDs, dbKey)
 		}
-		Cache.Clear(chIDs)
+		loaderCache.Clear(chIDs)
 	} else {
 		if err = dbConn.Flush(path.Join(lCfg.DataFolderPath, "storage", strings.Trim(lCfg.DbCfg().DBConns[utils.MetaDefault].Type, "*"))); err != nil {
 			t.Fatal("Error when flushing datadb: ", err)
 		}
 	}
 	cacheChan := make(chan birpc.ClientConnector, 1)
-	srv, _ := birpc.NewServiceWithMethodsRename(NewCacheS(lCfg, dataDbCsv, nil, nil), "", false, func(key string) (newKey string) {
+	srv, _ := birpc.NewServiceWithMethodsRename(loaderCache, "", false, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, "V1")
 	})
 	cacheChan <- srv
-	loaderConnMgr = NewConnManager(lCfg)
-	loaderConnMgr.SetCache(Cache)
+	loaderConnMgr.SetCache(loaderCache)
 	loaderConnMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
 }
 
@@ -134,7 +136,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, Cache, loaderConnMgr)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderCache, loaderConnMgr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -181,7 +183,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
 	loader, err = NewTpReader(dbCM, csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, Cache, loaderConnMgr)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderCache, loaderConnMgr)
 	if err != nil {
 		t.Error(err)
 	}

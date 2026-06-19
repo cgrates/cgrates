@@ -29,18 +29,17 @@ import (
 )
 
 func TestUpdateReplicationFilters(t *testing.T) {
-	tmp := Cache
 	cfgTmp := config.CgrConfig()
+	defer config.SetCgrConfig(cfgTmp)
 
-	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
 	dm := &DataManager{}
-	dm.SetCache(Cache)
+	dm.SetCache(cacheS)
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant: "cgrates.org",
@@ -52,65 +51,57 @@ func TestUpdateReplicationFilters(t *testing.T) {
 	var reply []string
 
 	dm.UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", "")
-	if err := Cache.V1GetGroupItemIDs(context.Background(), args,
+	if err := cacheS.V1GetGroupItemIDs(context.Background(), args,
 		&reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v, received %v", utils.ErrNotFound, err)
 	}
 
 	dm.UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.MetaLocalHost)
 	expected := []string{utils.AccountPrefix + "cgrates.org:acc1:" + utils.MetaLocalHost}
-	if err := Cache.V1GetGroupItemIDs(context.Background(), args, &reply); err != nil {
+	if err := cacheS.V1GetGroupItemIDs(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %v, received %v", expected, reply)
 	}
-
-	Cache = tmp
-	config.SetCgrConfig(cfgTmp)
 }
 
 func TestReplicateNnReplicatorSv1(t *testing.T) {
-	tmp := Cache
 	cfgTmp := config.CgrConfig()
-	Cache.Clear(nil)
+	defer config.SetCgrConfig(cfgTmp)
 
 	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg)
-	connMgr.SetCache(Cache)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10))
 	connId := []string{}
 	objIds := "cgrates.org:acc1"
 	objType := utils.AccountPrefix
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
 
-	Cache.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
+	cacheS.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
 	if err := replicate(ctx, connMgr, connId, true, utils.AccountPrefix, objIds, "GET", "args"); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 	cancel()
-
-	Cache = tmp
-	config.SetCgrConfig(cfgTmp)
 }
 
 func TestReplicateMultipleIDs(t *testing.T) {
-	tmp := Cache
 	cfgTmp := config.CgrConfig()
-	Cache.Clear(nil)
+	defer config.SetCgrConfig(cfgTmp)
 
 	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg)
-	connMgr.SetCache(Cache)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil, nil)
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	connMgr := NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10))
 	connId := []string{}
 	objIds := []string{"cgrates.org:acc1"}
@@ -121,12 +112,9 @@ func TestReplicateMultipleIDs(t *testing.T) {
 	}
 	cancel()
 
-	Cache.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
+	cacheS.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
 	if err := replicateMultipleIDs(ctx, connMgr, connId, true, utils.AccountPrefix, objIds, "GET", "args"); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 	cancel()
-
-	Cache = tmp
-	config.SetCgrConfig(cfgTmp)
 }

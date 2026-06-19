@@ -99,11 +99,12 @@ func TestKafkasetOpts(t *testing.T) {
 
 func TestKafkaERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	fltrS := new(engine.FilterS)
 	rdrEvents := make(chan *erEvent, 1)
 	rdrExit := make(chan struct{}, 1)
 	rdrErr := make(chan error, 1)
-	rdr, err := NewKafkaER(cfg, 0, rdrEvents, make(chan *erEvent, 1), rdrErr, engine.Cache, fltrS, rdrExit)
+	rdr, err := NewKafkaER(cfg, 0, rdrEvents, make(chan *erEvent, 1), rdrErr, cacheS, fltrS, rdrExit)
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,7 +219,8 @@ func TestKafkaERProcessMessageError2(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rdr := &KafkaER{
 		cgrCfg:    cfg,

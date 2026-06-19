@@ -89,7 +89,7 @@ func TestS3ER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewS3ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.Cache, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	s3Rdr := rdr.(*S3ER)

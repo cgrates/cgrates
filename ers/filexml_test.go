@@ -29,10 +29,11 @@ import (
 
 func TestERSNewXMLFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	expected := &XMLFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
-		cache:     engine.Cache,
+		cache:     cacheS,
 		fltrS:     nil,
 		sourceDir: "/var/spool/cgrates/ers/in",
 		rdrEvents: nil,
@@ -40,7 +41,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil,
 	}
-	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
+	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -52,6 +53,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 
 func TestERSXMLFileERConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
 		ID:             utils.MetaDefault,
 		Type:           utils.MetaNone,
@@ -62,7 +64,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 		Filters:        []string{},
 		Opts:           &config.EventReaderOpts{},
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -74,6 +76,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 
 func TestERSXMLFileERServeNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
 		ID:             utils.MetaDefault,
 		Type:           utils.MetaNone,
@@ -84,7 +87,7 @@ func TestERSXMLFileERServeNil(t *testing.T) {
 		Filters:        []string{},
 		Opts:           &config.EventReaderOpts{},
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}

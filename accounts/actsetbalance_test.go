@@ -32,8 +32,8 @@ import (
 )
 
 func TestActSetAccountBalance(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	acntID := "TestActSetAccount"
@@ -51,7 +51,7 @@ func TestActSetAccountBalance(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 
 	expected = "WRONG_PATH"
 	if err := actSetAccount(context.Background(), dm, "cgrates.org",
@@ -110,12 +110,12 @@ func TestActSetAccountBalance(t *testing.T) {
 }
 
 func TestActSetAccount(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 
 	acntID := "TestActSetAccount"
 	diktats := []*utils.BalDiktat{

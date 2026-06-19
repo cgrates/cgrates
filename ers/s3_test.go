@@ -30,7 +30,8 @@ import (
 
 func TestS3ERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -142,7 +143,8 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rdr := &S3ER{

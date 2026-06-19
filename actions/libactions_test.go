@@ -34,7 +34,8 @@ func TestACExecuteCDRLog(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
 	actCfg := []*utils.APAction{
@@ -42,7 +43,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 	}
 
 	expectedErr := "unsupported action type: <not_a_type>"
-	if _, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, engine.Cache, fltr, dm, nil,
+	if _, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, cacheS, fltr, dm, nil,
 		actCfg, utils.CGRateSorg); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -62,14 +63,14 @@ func TestACExecuteCDRLog(t *testing.T) {
 		{Type: utils.MetaDynamicResource},
 	}
 
-	actHttp, err := newActHTTPPost(context.Background(), cfg.GeneralCfg().DefaultTenant, new(utils.CGREvent), engine.Cache, new(engine.FilterS),
+	actHttp, err := newActHTTPPost(context.Background(), cfg.GeneralCfg().DefaultTenant, new(utils.CGREvent), cacheS, new(engine.FilterS),
 		cfg, &utils.APAction{Type: utils.MetaHTTPPost})
 	if err != nil {
 		t.Error(err)
 	}
 
 	expectedActs := []actioner{
-		&actCDRLog{cfg, engine.Cache, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
+		&actCDRLog{cfg, cacheS, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
 		actHttp,
 		&actExport{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaExport}},
 		&actResetStat{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaResetStatQueue}},
@@ -83,7 +84,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 		&actDynamicResource{cfg, nil, fltr, &utils.APAction{Type: utils.MetaDynamicResource}, utils.CGRateSorg, new(utils.CGREvent)},
 	}
 
-	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, engine.Cache, fltr, dm, nil, actCfg, utils.CGRateSorg)
+	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, cacheS, fltr, dm, nil, actCfg, utils.CGRateSorg)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acts, expectedActs) {
@@ -213,7 +214,8 @@ func TestNewActioner(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
 	ctx := context.Background()
@@ -317,7 +319,7 @@ func TestNewActioner(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			act, err := newActioner(ctx, cgrEv, cfg, engine.Cache, fltr, dm, connMgr, tt.aCfg, tnt)
+			act, err := newActioner(ctx, cgrEv, cfg, cacheS, fltr, dm, connMgr, tt.aCfg, tnt)
 			if tt.wantErr != "" {
 				if err == nil || err.Error() != tt.wantErr {
 					t.Errorf("Expected error: %q, got: %v", tt.wantErr, err)

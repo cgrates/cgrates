@@ -144,7 +144,6 @@ func testLoaderResetDataDB(t *testing.T) {
 	if err := engine.InitDB(loaderCfg); err != nil {
 		t.Fatal(err)
 	}
-	engine.Cache.Clear(nil)
 }
 
 // Start CGR Engine

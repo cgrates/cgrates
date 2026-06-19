@@ -32,8 +32,9 @@ func TestTPEnewTPChargers(t *testing.T) {
 	// dataDB := &engine.DataDBM
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMng := engine.NewConnManager(cfg)
-	connMng.SetCache(engine.Cache)
+	connMng.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			chgr := &utils.ChargerProfile{
@@ -51,7 +52,7 @@ func TestTPEnewTPChargers(t *testing.T) {
 		},
 	}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMng)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	exp := &TPChargers{
 		dm: dm,
 	}
@@ -64,10 +65,11 @@ func TestTPEnewTPChargers(t *testing.T) {
 func TestTPEExportItemsChargers(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpChgr := TPChargers{
 		dm: dm,
 	}
@@ -90,7 +92,6 @@ func TestTPEExportItemsChargers(t *testing.T) {
 }
 
 func TestTPEExportItemsChargersNoDbConn(t *testing.T) {
-	engine.Cache.Clear(nil)
 	wrtr := new(bytes.Buffer)
 	tpChgr := TPChargers{
 		dm: nil,
@@ -116,10 +117,11 @@ func TestTPEExportItemsChargersNoDbConn(t *testing.T) {
 func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	dm.SetCache(cacheS)
 	tpChgr := TPChargers{
 		dm: dm,
 	}

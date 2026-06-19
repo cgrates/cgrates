@@ -37,15 +37,14 @@ import (
 )
 
 func TestMatchingActionProfilesForEvent(t *testing.T) {
-	defer engine.Cache.Clear(nil)
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	evNM := utils.MapStorage{
 		utils.MetaReq: map[string]any{
@@ -133,13 +132,13 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	acts.dm = engine.NewDataManager(dbCm, cfg, nil)
-	acts.dm.SetCache(engine.Cache)
+	acts.dm.SetCache(cacheS)
 	actPrf.FilterIDs = []string{"invalid_filters"}
 	//Set in database and invalid filter, so it won t pass
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, false); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	expected := "NOT_FOUND:invalid_filters"
 	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
 		evNM, actPrfIDs, false); err == nil || err.Error() != expected {
@@ -153,14 +152,14 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 }
 
 func TestScheduledActions(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -221,15 +220,14 @@ func TestScheduledActions(t *testing.T) {
 }
 
 func TestScheduleAction(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -282,7 +280,7 @@ func TestScheduleAction(t *testing.T) {
 	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	//Cannot execute the action if the cron is invalid
 	actPrf.Schedule = "* * * *"
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
@@ -298,9 +296,10 @@ func TestAsapExecuteActions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newData}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -328,7 +327,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	acts.dm = engine.NewDataManager(dbCm, cfg, nil)
-	acts.dm.SetCache(engine.Cache)
+	acts.dm.SetCache(cacheS)
 	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, "",
 		"", false, evNM, nil)
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
@@ -337,14 +336,14 @@ func TestAsapExecuteActions(t *testing.T) {
 }
 
 func TestV1ScheduleActions(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -397,14 +396,14 @@ func TestV1ScheduleActions(t *testing.T) {
 }
 
 func TestV1ExecuteActions(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -453,8 +452,8 @@ func TestV1ExecuteActions(t *testing.T) {
 	newData := &dataDBMockError{}
 	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newData}, cfg.DbCfg())
 	newDm := engine.NewDataManager(dbCm, cfg, nil)
-	newDm.SetCache(engine.Cache)
-	newActs := NewActionS(cfg, engine.Cache, filters, newDm, nil)
+	newDm.SetCache(cacheS)
+	newActs := NewActionS(cfg, cacheS, filters, newDm, nil)
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
 	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -578,10 +577,11 @@ func TestCDRLogActionExecute(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG",
@@ -589,7 +589,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
-		cache:   engine.Cache,
+		cache:   cacheS,
 		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
@@ -610,8 +610,6 @@ func TestCDRLogActionExecute(t *testing.T) {
 }
 
 func TestCDRLogActionWithOpts(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply any) error {
@@ -687,10 +685,11 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
@@ -701,7 +700,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	}
 	cdrLogAction := &actCDRLog{
 		config:  cfg,
-		cache:   engine.Cache,
+		cache:   cacheS,
 		fltrS:   filterS,
 		connMgr: connMgr,
 		aCfg:    apA,
@@ -724,8 +723,6 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 }
 
 func TestExportAction(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
@@ -746,7 +743,8 @@ func TestExportAction(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
@@ -776,8 +774,6 @@ func TestExportAction(t *testing.T) {
 }
 
 func TestExportActionWithEeIDs(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
@@ -801,7 +797,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
@@ -834,8 +831,6 @@ func TestExportActionWithEeIDs(t *testing.T) {
 }
 
 func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
@@ -859,7 +854,8 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
 	apA := &utils.APAction{
 		ID:      "ACT_RESET_TH",
@@ -881,8 +877,6 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 }
 
 func TestExportActionResetThresholdStaticID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
@@ -906,7 +900,8 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
 	apA := &utils.APAction{
 		ID:      "ACT_RESET_TH",
@@ -928,8 +923,6 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 }
 
 func TestExportActionResetStatStaticTenantID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
@@ -953,7 +946,8 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
 	apA := &utils.APAction{
 		ID:      "ACT_RESET_ST",
@@ -975,8 +969,6 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 }
 
 func TestExportActionResetStatStaticID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
@@ -1000,7 +992,8 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
 	apA := &utils.APAction{
 		ID:   "ACT_RESET_ST",
@@ -1026,13 +1019,12 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 }
 
 func TestACScheduledActions(t *testing.T) {
-	engine.Cache.Clear(nil)
-	defer engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
@@ -1071,7 +1063,7 @@ func TestACScheduledActions(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
+	acts := NewActionS(cfg, cacheS, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
 	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
@@ -1085,7 +1077,7 @@ func TestACScheduledActions(t *testing.T) {
 			"ID_TEST": {},
 		},
 	}
-	engine.Cache.Clear(nil)
+	cacheS.Clear(nil)
 	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -1126,13 +1118,12 @@ func TestACScheduledActions(t *testing.T) {
 }
 
 func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
-	t.Cleanup(func() { engine.Cache.Clear(nil) })
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	actPrf := &utils.ActionProfile{
@@ -1143,14 +1134,14 @@ func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
 	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Fatal(err)
 	}
-	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
+	acts := NewActionS(cfg, cacheS, fltrs, dm, nil)
 
 	evData := utils.MapStorage{
 		utils.MetaReq:  map[string]any{utils.Destination: "1005"},
 		utils.MetaOpts: map[string]any{},
 	}
 	cdrLog := []actioner{
-		&actCDRLog{cfg, engine.Cache, fltrs, nil, &utils.APAction{ID: "TEST_CDRLOG", Type: utils.CDRLog}},
+		&actCDRLog{cfg, cacheS, fltrs, nil, &utils.APAction{ID: "TEST_CDRLOG", Type: utils.CDRLog}},
 	}
 
 	tmpLogger := utils.Logger
@@ -1184,13 +1175,12 @@ func (dropCounter) execute(ctx *context.Context, data utils.MapStorage, trgID st
 }
 
 func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
-	engine.Cache.Clear(nil)
-	t.Cleanup(func() { engine.Cache.Clear(nil) })
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	actPrf := &utils.ActionProfile{
@@ -1201,7 +1191,7 @@ func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
 	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Fatal(err)
 	}
-	acts := NewActionS(cfg, engine.Cache, fltrs, dm, nil)
+	acts := NewActionS(cfg, cacheS, fltrs, dm, nil)
 
 	evData := utils.MapStorage{
 		utils.MetaReq:  map[string]any{"Counter": 15},
@@ -1216,7 +1206,7 @@ func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
 	drainUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
 		false, evData, []actioner{dropCounter{}})
 	logUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
-		false, evData, []actioner{&actCDRLog{cfg, engine.Cache, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.CDRLog}}})
+		false, evData, []actioner{&actCDRLog{cfg, cacheS, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.CDRLog}}})
 
 	acts.cronExecuteActions([]*scheduledActs{drainUnit, logUnit})
 
@@ -1233,10 +1223,11 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
@@ -1291,9 +1282,10 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, engine.Cache, filters, dm, nil)
+	acts := NewActionS(cfg, cacheS, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{

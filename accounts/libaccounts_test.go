@@ -103,7 +103,6 @@ func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply any
 
 func TestProcessAttributeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{ // coverage purpose
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -115,7 +114,8 @@ func TestProcessAttributeS(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -134,7 +134,6 @@ func TestProcessAttributeS(t *testing.T) {
 
 func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -146,7 +145,8 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -163,7 +163,6 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 
 func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -185,7 +184,8 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -201,13 +201,12 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 }
 
 func TestDebitUsageFromConcretes(t *testing.T) {
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -285,13 +284,10 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 }
 
 func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply any) error {
@@ -312,7 +308,9 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, chanInternal)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
@@ -408,13 +406,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 }
 
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
@@ -447,13 +444,12 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 }
 
 func TestMaxDebitUsageFromConcretes(t *testing.T) {
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	cfg.AccountSCfg().MaxIterations = 100
 	config.SetCgrConfig(cfg)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -507,13 +503,12 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 }
 
 func TestRestoreAccount(t *testing.T) { //coverage purpose
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
@@ -554,12 +549,11 @@ type dataDBMockError struct {
 }
 
 func TestRestoreAccount2(t *testing.T) { //coverage purpose
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &dataDBMockError{}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
@@ -597,13 +591,12 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 }
 
 func TestRestoreAccount3(t *testing.T) { //coverage purpose
-	engine.Cache.Clear(nil)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
@@ -769,12 +762,12 @@ dm.SetCache(engine.Cache)
 */
 
 func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
-	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cncrtBlncs := []*concreteBalance{
 		{

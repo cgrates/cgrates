@@ -180,10 +180,11 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 		t.Fatal(err)
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, config.CgrConfig().DbCfg())
+	cacheS := NewCacheS(config.CgrConfig(), nil, nil, nil)
 	csvr, err := NewTpReader(dbCM, NewStringCSVStorage(utils.CSVSep,
 		ResourcesCSVContent, IPCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, Cache, nil)
+		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, cacheS, nil)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}

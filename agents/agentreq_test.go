@@ -43,9 +43,10 @@ func TestAgReqSetFields(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.Opts.Set([]string{utils.MetaOriginID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
@@ -149,10 +150,11 @@ func TestAgentRequestSetFields(t *testing.T) {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	ar := NewAgentRequest(utils.MapStorage(req), nil,
 		nil, nil, nil, utils.NewRSRParsersMustCompile("", utils.NestingSep),
-		"cgrates.org", "", engine.Cache, engine.NewFilterS(cfg, nil, dm),
+		"cgrates.org", "", cacheS, engine.NewFilterS(cfg, nil, dm),
 		map[string]utils.DataProvider{utils.MetaHdr: utils.MapStorage(req), utils.MetaTrl: utils.MapStorage(req)})
 	input := []*config.FCTemplate{}
 	if err := ar.SetFields(input); err != nil {
@@ -473,9 +475,10 @@ func TestAgReqMaxCost(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CapMaxUsage, PathSlice: []string{utils.CapMaxUsage}}, utils.NewLeafNode("120s"))
 
@@ -527,7 +530,8 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 		cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
@@ -579,10 +583,11 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.MetaComposed,
@@ -620,10 +625,11 @@ Host: api.cgrates.org
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.MetaComposed,
@@ -700,7 +706,8 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
 			Path: "MandatoryFalse", Type: utils.MetaComposed,
@@ -728,9 +735,10 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.Opts.Set([]string{utils.MetaOriginID}, utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -772,8 +780,9 @@ func TestAgReqMetaExponent(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "Value", PathSlice: []string{"Value"}}, utils.NewLeafNode("2"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "Exponent", PathSlice: []string{"Exponent"}}, utils.NewLeafNode("2"))
 
@@ -798,9 +807,10 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -840,8 +850,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -878,9 +889,10 @@ func TestAgReqSetField2(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -935,8 +947,9 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
 	agReq.CGRRequest.Set(&utils.FullPath{
@@ -1010,9 +1023,10 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 	aqReq.Opts.Set([]string{utils.MetaOriginID}, utils.NewLeafNode("CGRATES_ID1"))
 	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
 	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
@@ -1038,6 +1052,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathVars(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dN := &utils.DataNode{
 		Type: utils.NMMapType,
@@ -1052,7 +1067,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathVars(t *testing.T) {
 		},
 	}
 	aqReq := NewAgentRequest(nil, dN, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	path := []string{utils.MetaVars}
 	if rply, err := aqReq.FieldAsInterface(path); err != nil {
@@ -1071,6 +1086,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReply(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dN := &utils.DataNode{
 		Type: utils.NMMapType,
@@ -1085,7 +1101,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReply(t *testing.T) {
 		},
 	}
 	aqReq := NewAgentRequest(nil, nil, dN, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	path := []string{utils.MetaCgrep}
 	if rply, err := aqReq.FieldAsInterface(path); err != nil {
@@ -1104,6 +1120,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathTmp(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dN := &utils.DataNode{
 		Type: utils.NMMapType,
@@ -1118,7 +1135,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathTmp(t *testing.T) {
 		},
 	}
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 	aqReq.tmp = dN
 
 	path := []string{utils.MetaTmp}
@@ -1138,6 +1155,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dP := &utils.MapStorage{
 		utils.AccountField: "1002",
@@ -1147,7 +1165,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 		utils.MetaOriginID: "CGRATES_ID1",
 	}
 	aqReq := NewAgentRequest(dP, nil, nil, nil, opts, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	path := []string{utils.MetaReq}
 
@@ -1171,9 +1189,10 @@ func TestAgReqFieldAsInterfaceForOneFldPathDiamReq(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 	aqReq.Opts.Set([]string{utils.MetaOriginID}, utils.NewLeafNode("CGRATES_ID1"))
 	aqReq.diamreq.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
 	aqReq.diamreq.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
@@ -1198,9 +1217,10 @@ func TestAgReqFieldAsInterfaceForOneFldPathReply(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	aqReq.Reply.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
 	aqReq.Reply.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
@@ -1226,13 +1246,14 @@ func TestAgReqFieldAsInterfaceForOneFldPathOpts(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	opts := utils.MapStorage{
 		utils.AccountField: "1002",
 		utils.Usage:        "30m",
 	}
 	aqReq := NewAgentRequest(nil, nil, nil, nil, opts, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	path := []string{utils.MetaOpts}
 	expOpts := utils.MapStorage{
@@ -1258,9 +1279,10 @@ func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
-		"cgrates.org", utils.EmptyString, engine.Cache, filterS, nil)
+		"cgrates.org", "", cacheS, filterS, nil)
 
 	path := []string{utils.MetaCfg}
 
@@ -1279,7 +1301,8 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
@@ -1294,7 +1317,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 		utils.Error:       utils.NewLeafNode(""),
 	}}
 
-	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, cgrRply, rply, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Fld1",
@@ -1330,13 +1353,14 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
 	rply.Set(&utils.FullPath{
 		Path:      "FirstLevel.SecondLevel.Fld1",
 		PathSlice: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
-	agReq := NewAgentRequest(nil, nil, nil, rply, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, rply, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
 
@@ -1369,7 +1393,8 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	rply := utils.NewOrderedNavigableMap()
@@ -1386,7 +1411,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	}
 
 	agReq := NewAgentRequest(nil, nil, nil, rply, nil,
-		nil, "cgrates.org", "", engine.Cache, filterS, nil)
+		nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	agReq.setCGRReply(myEv, nil)
 
@@ -1436,9 +1461,10 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "CCUsage", Filters: []string{},
@@ -1526,9 +1552,10 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Usage", Filters: []string{},
@@ -1594,10 +1621,11 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Sum", Filters: []string{},
@@ -1644,9 +1672,10 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Diff", Filters: []string{},
@@ -1689,10 +1718,11 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Multiply", Filters: []string{},
@@ -1735,10 +1765,11 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Divide", Filters: []string{},
@@ -1781,10 +1812,11 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "ValExp", Filters: []string{},
@@ -1838,9 +1870,10 @@ func TestAgReqOverwrite(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -1887,9 +1920,10 @@ func TestAgReqGroupType(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -1933,9 +1967,10 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
@@ -1965,9 +2000,10 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "IP", PathSlice: []string{"IP"}}, utils.NewLeafNode("62.87.114.244"))
 
 	tplFlds := []*config.FCTemplate{
@@ -1993,9 +2029,10 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "CustomField", PathSlice: []string{"CustomField"}}, utils.NewLeafNode(string([]byte{0x94, 0x71, 0x02, 0x31, 0x01, 0x59})))
 
 	tplFlds := []*config.FCTemplate{
@@ -2021,9 +2058,10 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.Opts.Set([]string{utils.MetaOriginID}, utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
@@ -2150,12 +2188,13 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
-	engine.NewCacheS(cfg, dm, connMgr, nil)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	connMgr.SetCache(cacheS)
+	cacheS = engine.NewCacheS(cfg, dm, connMgr, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
@@ -2195,15 +2234,16 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
-	connMgr.SetCache(engine.Cache)
+	connMgr.SetCache(cacheS)
 
 	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 5 * time.Millisecond
-	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
-	dm.SetCache(engine.Cache)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	cacheS = engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm.SetCache(cacheS)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
@@ -2244,7 +2284,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 
 		// Check item expiry time just in case.
 		var expiryTime time.Time
-		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+		if err := cacheS.V1GetItemExpiryTime(context.Background(),
 			&utils.ArgsGetCacheItemWithAPIOpts{
 				ArgsGetCacheItem: utils.ArgsGetCacheItem{
 					CacheID: utils.MetaUCH,
@@ -2261,7 +2301,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 			utils.MetaUCH, utils.AccountField, err, utils.ErrNotFound)
 		// Check item expiry time just in case.
 		var expiryTime time.Time
-		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+		if err := cacheS.V1GetItemExpiryTime(context.Background(),
 			&utils.ArgsGetCacheItemWithAPIOpts{
 				ArgsGetCacheItem: utils.ArgsGetCacheItem{
 					CacheID: utils.MetaUCH,
@@ -2324,10 +2364,11 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
-	agReq := NewAgentRequest(newDADataProvider(nil, m), nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(newDADataProvider(nil, m), nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Usage",
@@ -2357,9 +2398,10 @@ func TestAgReqDynamicPath(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -2421,9 +2463,10 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -2470,7 +2513,8 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -2493,7 +2537,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+		agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 		// populate request, emulating the way will be done in HTTPAgent
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -2533,10 +2577,11 @@ func TestAgReqSetFieldsFromCfg(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "CfgField",
@@ -2590,7 +2635,8 @@ func TestFieldAsInterface(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -2619,7 +2665,8 @@ func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2647,7 +2694,8 @@ func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2675,7 +2723,8 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2703,7 +2752,8 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2731,7 +2781,8 @@ func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2759,7 +2810,8 @@ func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2787,7 +2839,8 @@ func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2815,7 +2868,8 @@ func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2834,7 +2888,8 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, prsr, "", "", engine.Cache, nil, nil)
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, prsr, "", "", cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    prsr,
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -3017,6 +3072,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 			err:       utils.ErrNotFound,
 		},
 	}
+	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fullConf := fmt.Sprintf(configTemplate, tc.fieldConfig)
@@ -3024,7 +3080,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Config parsing failed: %v", err)
 			}
-			agReq := NewAgentRequest(tc.inputDP, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, nil, nil)
+			agReq := NewAgentRequest(tc.inputDP, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, nil, nil)
 			fieldDef := cgrconf.DiameterAgentCfg().RequestProcessors[0].RequestFields[0]
 			out, err := agReq.ParseField(fieldDef)
 			if tc.expectErr {
@@ -3057,9 +3113,10 @@ func newBenchAgReq(b *testing.B) *AgentRequest {
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.Cache)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", engine.Cache, filterS, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, filterS, nil)
 	agReq.CGRRequest.Set(
 		&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}},
 		utils.NewLeafNode("1001"))
