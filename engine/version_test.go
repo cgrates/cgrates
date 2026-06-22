@@ -25,36 +25,26 @@ import (
 )
 
 func TestVersionCompare(t *testing.T) {
-	x := Versions{utils.AccountsStr: 2, utils.Actions: 2,
-		utils.Attributes: 2, utils.Chargers: 2,
-		utils.CostDetails: 2}
-	y := Versions{utils.AccountsStr: 1, utils.Actions: 2,
-		utils.Attributes: 2, utils.Chargers: 2,
-		utils.CostDetails: 2}
+	current := Versions{utils.AccountsStr: 1, utils.Actions: 1}
+	stored := Versions{utils.AccountsStr: 0, utils.Actions: 1}
 
-	message1 := y.Compare(x, utils.MetaMongo)
-	if message1 != "cgr-migrator -exec=*accounts" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
-	}
-	message7 := y.Compare(x, utils.MetaRedis)
-	if message7 != "cgr-migrator -exec=*accounts" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message7)
+	if subsys := stored.Compare(current); subsys != utils.AccountsStr {
+		t.Errorf("expected mismatch on %s, received %q", utils.AccountsStr, subsys)
 	}
 
-	y[utils.AccountsStr] = 2
-	message8 := y.Compare(x, utils.MetaRedis)
-	if message8 != utils.EmptyString {
-		t.Errorf("Expected %+v, received %+v", utils.EmptyString, message8)
+	stored[utils.AccountsStr] = 1
+	if subsys := stored.Compare(current); subsys != "" {
+		t.Errorf("expected no mismatch, received %q", subsys)
 	}
 }
 
 func TestCurrentDBVersions(t *testing.T) {
 	expVersDataDB := Versions{
-		utils.Stats: 4, utils.AccountsStr: 3, utils.Actions: 2,
-		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 7,
-		utils.RQF: 5, utils.ResourceStr: 1,
+		utils.Stats: 1, utils.AccountsStr: 1, utils.Actions: 1,
+		utils.Thresholds: 1, utils.Routes: 1, utils.Attributes: 1,
+		utils.RQF: 1, utils.ResourceStr: 1,
 		utils.Subscribers: 1,
-		utils.Chargers:    2,
+		utils.Chargers:    1,
 		utils.LoadIDsVrs:  1, utils.RateProfiles: 1,
 		utils.ActionProfiles: 1,
 	}
@@ -75,16 +65,16 @@ func TestCurrentDBVersions(t *testing.T) {
 
 func TestCurrentAllDBVersions(t *testing.T) {
 	expected := Versions{
-		utils.Stats:          4,
-		utils.AccountsStr:    3,
-		utils.Actions:        2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
-		utils.Attributes:     7,
-		utils.RQF:            5,
+		utils.Stats:          1,
+		utils.AccountsStr:    1,
+		utils.Actions:        1,
+		utils.Thresholds:     1,
+		utils.Routes:         1,
+		utils.Attributes:     1,
+		utils.RQF:            1,
 		utils.ResourceStr:    1,
 		utils.Subscribers:    1,
-		utils.Chargers:       2,
+		utils.Chargers:       1,
 		utils.LoadIDsVrs:     1,
 		utils.RateProfiles:   1,
 		utils.ActionProfiles: 1,

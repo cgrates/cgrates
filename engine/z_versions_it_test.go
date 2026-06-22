@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -21,10 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"fmt"
 	"log"
-	"os/exec"
 	"path"
 	"strings"
 	"testing"
@@ -118,14 +114,13 @@ func testVersion(t *testing.T) {
 	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
-		testVersion[utils.AccountsStr] = 1
-		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
+		testVersion[utils.AccountsStr] = 2
+		test = "datadb version mismatch for Accounts (have 2, want 1): back up your data, flush the datadb and reload"
 	case utils.MetaMongo, utils.MetaRedis, utils.MetaMySQL, utils.MetaPostgres:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
-		testVersion[utils.AccountsStr] = 1
-
-		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
+		testVersion[utils.AccountsStr] = 2
+		test = "datadb version mismatch for Accounts (have 2, want 1): back up your data, flush the datadb and reload"
 	}
 
 	//dataDB
@@ -154,256 +149,5 @@ func testVersion(t *testing.T) {
 	}
 	if err := dm3.DB()[utils.MetaDefault].RemoveVersions(testVersion); err != nil {
 		t.Error(err)
-	}
-	switch storType {
-	case utils.MetaInternal:
-		currentVersion = allVersions
-		testVersion = allVersions
-		testVersion[utils.AccountsStr] = 1
-		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
-	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
-		testVersion = allVersions
-		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*cost_details>"
-	}
-
-}
-
-func testUpdateVersionsAccounts(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.AccountsStr] = 2
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsActions(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Actions] = 1
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*actions>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsChargers(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Chargers] = 1
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*chargers>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsDestinations(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Destination] = 0
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := utils.EmptyString
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-func testUpdateVersionsAttributes(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Attributes] = 3
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*attributes>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsLoadIDs(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	delete(newVersions, utils.LoadIDsVrs)
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := utils.EmptyString
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsRQF(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.RQF] = 2
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*filters>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsResource(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.ResourceStr] = 0
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := utils.EmptyString
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsRoutes(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Routes] = 1
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*routes>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsStats(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Stats] = 3
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*stats>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsSubscribers(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Subscribers] = 0
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := utils.EmptyString
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsThresholds(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Thresholds] = 2
-	if err := dm3.DB()[utils.MetaDefault].SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*thresholds>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
