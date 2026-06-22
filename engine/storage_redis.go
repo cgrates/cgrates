@@ -62,8 +62,6 @@ const (
 	redisLLEN     = "LLEN"
 	redisRPOP     = "RPOP"
 	redisLPUSH    = "LPUSH"
-	redisRPUSH    = "RPUSH"
-	redisLPOP     = "LPOP"
 	redisHMGET    = "HMGET"
 	redisHDEL     = "HDEL"
 	redisHGET     = "HGET"

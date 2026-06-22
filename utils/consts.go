@@ -1885,17 +1885,17 @@ const (
 const (
 	CGRAccount         = "cgrAccount"
 	CGRRoute           = "cgr_route"
-	CGRDestination     = "cgr_destination"
-	CGRSubject         = "cgr_subject"
-	CGRCategory        = "cgr_category"
+	CGRDestination     = "cgrDestination"
+	CGRSubject         = "cgrSubject"
+	CGRCategory        = "cgrCategory"
 	CGRReqType         = "cgr_reqtype"
-	CGRTenant          = "cgr_tenant"
-	CGRPdd             = "cgr_pdd"
-	CGRDisconnectCause = "cgr_disconnectcause"
-	CGRComputeLCR      = "cgr_computelcr"
+	CGRTenant          = "cgrTenant"
+	CGRPdd             = "cgrPdd"
+	CGRDisconnectCause = "cgrDisconnectCause"
+	CGRComputeLCR      = "cgrComputeLCR"
 	CGRRoutes          = "cgr_routes"
 	CGRFlags           = "cgr_flags"
-	CGROpts            = "cgr_opts"
+	CGROpts            = "cgrOpts"
 )
 
 // CSV file name
