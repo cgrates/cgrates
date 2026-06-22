@@ -223,7 +223,7 @@ func TestSMAEventTenant(t *testing.T) {
 	if smaEv.Tenant() != "" {
 		t.Error("Received:", smaEv.Tenant())
 	}
-	ev = map[string]any{"args": []any{"cgr_tenant=cgrates.org"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgrTenant=cgrates.org"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Tenant() != "cgrates.org" {
 		t.Error("Received:", smaEv.Tenant())
@@ -239,7 +239,7 @@ func TestSMAEventCategory(t *testing.T) {
 	if smaEv.Category() != "" {
 		t.Error("Received:", smaEv.Category())
 	}
-	ev = map[string]any{"args": []any{"cgr_category=premium_call"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgrCategory=premium_call"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Category() != "premium_call" {
 		t.Error("Received:", smaEv.Category())
@@ -255,7 +255,7 @@ func TestSMAEventSubject(t *testing.T) {
 	if smaEv.Subject() != "" {
 		t.Error("Received:", smaEv.Subject())
 	}
-	ev = map[string]any{"args": []any{"cgr_subject=dan"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgrSubject=dan"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Subject() != "dan" {
 		t.Error("Received:", smaEv.Subject())
@@ -271,7 +271,7 @@ func TestSMAEventPDD(t *testing.T) {
 	if smaEv.PDD() != "" {
 		t.Error("Received:", smaEv.PDD())
 	}
-	ev = map[string]any{"args": []any{"cgr_pdd=2.1"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgrPdd=2.1"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.PDD() != "2.1" {
 		t.Error("Received:", smaEv.PDD())
@@ -303,7 +303,7 @@ func TestSMAEventDisconnectCause(t *testing.T) {
 	if smaEv.DisconnectCause() != "" {
 		t.Error("Received:", smaEv.DisconnectCause())
 	}
-	ev = map[string]any{"args": []any{"cgr_disconnectcause=NORMAL_DISCONNECT"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgrDisconnectCause=NORMAL_DISCONNECT"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.DisconnectCause() != "NORMAL_DISCONNECT" {
 		t.Error("Received:", smaEv.DisconnectCause())
