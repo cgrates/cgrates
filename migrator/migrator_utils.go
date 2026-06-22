@@ -26,12 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	SUPPLIER = "Supplier"
-)
-
 func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
-	cfg *config.CGRConfig, cache *engine.CacheS) (db map[string]MigratorDataDB, err error) {
+	cfg *config.CGRConfig, cache *engine.CacheS) (db *engine.DataManager, err error) {
 	dataDBs := make(map[string]engine.DataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		dbCon, err := engine.NewDBConn(cfg.DbCfg().DBConns[dbConnID].Type,
@@ -49,33 +45,15 @@ func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 	dbcManager := engine.NewDBConnManager(dataDBs, cfg.DbCfg())
 	dm := engine.NewDataManager(dbcManager, cfg, nil)
 	dm.SetCache(cache)
-	d := make(map[string]MigratorDataDB, len(dbConnIDList))
-	for _, dbConnID := range dbConnIDList {
-		switch cfg.DbCfg().DBConns[dbConnID].Type {
-		case utils.MetaRedis:
-			d[dbConnID] = newRedisMigrator(dm)
-		case utils.MetaMongo:
-			d[dbConnID] = newMongoMigrator(dm)
-		case utils.MetaInternal:
-			d[dbConnID] = newInternalMigrator(dm)
-		default:
-			err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-				cfg.DbCfg().DBConns[dbConnID].Type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal)
-		}
-	}
-	return d, nil
+	return dm, nil
 }
 
-func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
-	mInDB, err := m.GetINConn(utils.CacheVersions)
+func (m *Migrator) getVersions(str string) (engine.Versions, error) {
+	dataDB, _, err := m.dmFrom.DBConns().GetConn(utils.CacheVersions)
 	if err != nil {
 		return nil, err
 	}
-	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.CacheVersions)
-	if err != nil {
-		return nil, err
-	}
-	vrs, err = dataDB.GetVersions(utils.EmptyString)
+	vrs, err := dataDB.GetVersions("")
 	if err != nil {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -87,25 +65,20 @@ func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for "+str)
 	}
-	return
+	return vrs, nil
 }
 
-func (m *Migrator) setVersions(str string) (err error) {
-	mOutDB, err := m.GetOUTConn(utils.CacheVersions)
-	if err != nil {
-		return err
-	}
-	dataDB, _, err := mOutDB.DataManager().DBConns().GetConn(utils.CacheVersions)
+func (m *Migrator) setVersions(str string) error {
+	dataDB, _, err := m.dmTo.DBConns().GetConn(utils.CacheVersions)
 	if err != nil {
 		return err
 	}
 	vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
-	err = dataDB.SetVersions(vrs, false)
-	if err != nil {
-		err = utils.NewCGRError(utils.Migrator,
+	if err = dataDB.SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
 			fmt.Sprintf("error: <%s> when updating %s version into DataDB", err.Error(), str))
 	}
-	return
+	return nil
 }

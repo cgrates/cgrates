@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -22,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"log"
 	"path"
 	"reflect"
 	"testing"
@@ -40,13 +38,12 @@ var (
 	chrgCfgIn    *config.CGRConfig
 	chrgCfgOut   *config.CGRConfig
 	chrgMigrator *Migrator
-	chrgAction   string
 )
 
 var sTestsChrgIT = []func(t *testing.T){
 	testChrgITConnect,
 	testChrgITFlush,
-	testChrgITMigrateAndMove,
+	testChrgITMove,
 }
 
 func TestChargersITMove1(t *testing.T) {
@@ -61,7 +58,6 @@ func TestChargersITMove1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgAction = utils.Move
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMove", stest)
 	}
@@ -80,7 +76,6 @@ func TestChargersITMove2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgAction = utils.Move
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMove", stest)
 	}
@@ -99,7 +94,6 @@ func TestChargersITMoveEncoding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgAction = utils.Move
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMoveEncoding", stest)
 	}
@@ -118,7 +112,6 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	chrgAction = utils.Move
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMoveEncoding2", stest)
 	}
@@ -129,51 +122,42 @@ func testChrgITConnect(t *testing.T) {
 	cacheIn := engine.NewCacheS(chrgCfgIn, nil, nil, nil)
 	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgIn.GeneralCfg().DBDataEncoding, chrgCfgIn, cacheIn)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	cacheOut := engine.NewCacheS(chrgCfgOut, nil, nil, nil)
 	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgOut.GeneralCfg().DBDataEncoding, chrgCfgOut, cacheOut)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
-	if reflect.DeepEqual(chrgPathIn, chrgPathOut) {
-		chrgMigrator, err = NewMigrator(chrgCfgOut.DbCfg(), dataDBIn, dataDBOut,
-			false, true)
-	} else {
-		chrgMigrator, err = NewMigrator(chrgCfgOut.DbCfg(), dataDBIn, dataDBOut,
-			false, false)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
+	chrgMigrator = NewMigrator(dataDBIn, dataDBOut, false, chrgPathIn == chrgPathOut)
 }
 
 func testChrgITFlush(t *testing.T) {
-	if err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := chrgMigrator.dmTo.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if isEmpty, err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if isEmpty, err := chrgMigrator.dmTo.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("Expecting: true got :%+v", isEmpty)
 	}
-	if err := engine.SetDBVersions(chrgMigrator.dmTo[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
+	if err := engine.SetDBVersions(chrgMigrator.dmTo.DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	if err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].Flush(""); err != nil {
+	if err := chrgMigrator.dmFrom.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
 	}
-	if isEmpty, err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
+	if isEmpty, err := chrgMigrator.dmFrom.DB()[utils.MetaDefault].IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("Expecting: true got :%+v", isEmpty)
 	}
-	if err := engine.SetDBVersions(chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault]); err != nil {
+	if err := engine.SetDBVersions(chrgMigrator.dmFrom.DB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
 
-func testChrgITMigrateAndMove(t *testing.T) {
+func testChrgITMove(t *testing.T) {
 	chrgPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHRG_1",
@@ -196,52 +180,48 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			},
 		},
 	}
-	switch chrgAction {
-	case utils.Migrate: // for the momment only one version of chargers exists
-	case utils.Move:
-		if err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().SetChargerProfile(context.Background(), chrgPrf, false); err != nil {
-			t.Error(err)
-		}
-		if err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().SetChargerProfile(context.Background(), chrgPrf2, false); err != nil {
-			t.Error(err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := chrgMigrator.dmFrom[utils.MetaDefault].DataManager().DB()[utils.MetaDefault].SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Chargers ", err.Error())
-		}
+	if err := chrgMigrator.dmFrom.SetChargerProfile(context.Background(), chrgPrf, false); err != nil {
+		t.Error(err)
+	}
+	if err := chrgMigrator.dmFrom.SetChargerProfile(context.Background(), chrgPrf2, false); err != nil {
+		t.Error(err)
+	}
+	currentVersion := engine.CurrentDataDBVersions()
+	err := chrgMigrator.dmFrom.DB()[utils.MetaDefault].SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for Chargers ", err.Error())
+	}
 
-		_, err = chrgMigrator.dmTo[utils.MetaDefault].DataManager().GetChargerProfile(context.Background(), "cgrates.org",
-			"CHRG_1", false, false, utils.NonTransactional)
-		if err != utils.ErrNotFound {
-			t.Error(err)
-		}
+	_, err = chrgMigrator.dmTo.GetChargerProfile(context.Background(), "cgrates.org",
+		"CHRG_1", false, false, utils.NonTransactional)
+	if err != utils.ErrNotFound {
+		t.Error(err)
+	}
 
-		err, _ = chrgMigrator.Migrate([]string{utils.MetaChargers})
-		if err != nil {
-			t.Error("Error when migrating Chargers ", err.Error())
-		}
-		if result, err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().GetChargerProfile(context.Background(), "cgrates.org",
-			"CHRG_1", false, false, utils.NonTransactional); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(result, chrgPrf) {
-			t.Errorf("Expecting: %+v, received: %+v", chrgPrf, result)
-		}
-		if result, err := chrgMigrator.dmTo[utils.MetaDefault].DataManager().GetChargerProfile(context.Background(), "cgrates.com",
-			"CHRG_1", false, false, utils.NonTransactional); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(result, chrgPrf2) {
-			t.Errorf("Expecting: %+v, received: %+v", chrgPrf2, result)
-		}
-		if _, err = chrgMigrator.dmFrom[utils.MetaDefault].DataManager().GetChargerProfile(context.Background(), "cgrates.org",
-			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
-			t.Error(err)
-		}
-		if _, err = chrgMigrator.dmFrom[utils.MetaDefault].DataManager().GetChargerProfile(context.Background(), "cgrates.com",
-			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
-			t.Error(err)
-		} else if chrgMigrator.stats[utils.Chargers] != 2 {
-			t.Errorf("Expected 2, received: %v", chrgMigrator.stats[utils.Chargers])
-		}
+	err, _ = chrgMigrator.Migrate([]string{utils.MetaChargers})
+	if err != nil {
+		t.Error("Error when migrating Chargers ", err.Error())
+	}
+	if result, err := chrgMigrator.dmTo.GetChargerProfile(context.Background(), "cgrates.org",
+		"CHRG_1", false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(result, chrgPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", chrgPrf, result)
+	}
+	if result, err := chrgMigrator.dmTo.GetChargerProfile(context.Background(), "cgrates.com",
+		"CHRG_1", false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(result, chrgPrf2) {
+		t.Errorf("Expecting: %+v, received: %+v", chrgPrf2, result)
+	}
+	if _, err = chrgMigrator.dmFrom.GetChargerProfile(context.Background(), "cgrates.org",
+		"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = chrgMigrator.dmFrom.GetChargerProfile(context.Background(), "cgrates.com",
+		"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if chrgMigrator.stats[utils.Chargers] != 2 {
+		t.Errorf("Expected 2, received: %v", chrgMigrator.stats[utils.Chargers])
 	}
 }

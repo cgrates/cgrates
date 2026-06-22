@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -28,17 +27,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentCharger() (err error) {
-	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
+func (m *Migrator) migrateCurrentCharger() error {
+	dataDB, _, err := m.dmFrom.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
 	}
-	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
-	if err != nil {
-		return err
-	}
-	var ids []string
-	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, utils.EmptyString)
+	ids, err := dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix, "")
 	if err != nil {
 		return err
 	}
@@ -47,99 +41,39 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating chargers", id)
 		}
-		cpp, err := mInDB.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := m.dmFrom.GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if cpp == nil || m.dryRun {
 			continue
 		}
-		mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
-		if err != nil {
+		if err := m.dmTo.SetChargerProfile(context.TODO(), cpp, true); err != nil {
 			return err
 		}
-		if err := mOutDB.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
-			return err
-		}
-		if err := mInDB.DataManager().RemoveChargerProfile(context.TODO(), tntID[0],
-			tntID[1], false); err != nil {
+		if err := m.dmFrom.RemoveChargerProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.Chargers]++
 	}
-	return
+	return nil
 }
 
-func (m *Migrator) migrateChargers() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.Chargers); err != nil {
-		return
+func (m *Migrator) migrateChargers() error {
+	vrs, err := m.getVersions(utils.Chargers)
+	if err != nil {
+		return err
 	}
-	migrated := true
-	var v2 *utils.ChargerProfile
-	for {
-		version := vrs[utils.Chargers]
-		for {
-			switch version {
-			default:
-				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.Chargers]:
-				migrated = false
-				if m.sameDataDB {
-					break
-				}
-				if err = m.migrateCurrentCharger(); err != nil {
-					return
-				}
-			case 1:
-				if v2, err = m.migrateV1ToV2Chargers(); err != nil && err != utils.ErrNoMoreData {
-					return
-				} else if err == utils.ErrNoMoreData {
-					break
-				}
-				version = 2
-			}
-			if version == current[utils.Chargers] || err == utils.ErrNoMoreData {
-				break
-			}
-		}
-		if err == utils.ErrNoMoreData || !migrated {
-			break
-		}
-
-		if !m.dryRun {
-			//set action plan
-			mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
-			if err != nil {
-				return err
-			}
-			if err = mOutDB.DataManager().SetChargerProfile(context.TODO(), v2, true); err != nil {
-				return err
-			}
-		}
-		m.stats[utils.Chargers]++
+	if vrs[utils.Chargers] != engine.CurrentDataDBVersions()[utils.Chargers] {
+		return fmt.Errorf("Unsupported version %v", vrs[utils.Chargers])
 	}
-	// All done, update version wtih current one
+	if !m.sameDataDB {
+		if err = m.migrateCurrentCharger(); err != nil {
+			return err
+		}
+	}
 	if err = m.setVersions(utils.Chargers); err != nil {
-		return
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColCpp)
-}
-
-func (m *Migrator) migrateV1ToV2Chargers() (v4Cpp *utils.ChargerProfile, err error) {
-	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
-	if err != nil {
-		return
-	}
-	v4Cpp, err = mInDB.getV1ChargerProfile()
-	if err != nil {
-		return nil, err
-	} else if v4Cpp == nil {
-		return nil, errors.New("Charger NIL")
-	}
-	if v4Cpp.FilterIDs, err = migrateInlineFilterV4(v4Cpp.FilterIDs); err != nil {
-		return nil, err
-	}
-	return
 }
