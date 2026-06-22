@@ -262,8 +262,8 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		t.Error(err)
 	}
 	vrs := Versions{
-		utils.AccountsStr: 3,
-		utils.Actions:     2,
+		utils.AccountsStr: 1,
+		utils.Actions:     1,
 		utils.CostDetails: 1,
 	}
 	if err := onStor.DB()[utils.MetaDefault].SetVersions(vrs, false); err != nil {

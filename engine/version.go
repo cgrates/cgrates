@@ -25,26 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dataDBVers = map[string]string{
-		utils.AccountsStr: "cgr-migrator -exec=*accounts",
-		utils.Attributes:  "cgr-migrator -exec=*attributes",
-		utils.Actions:     "cgr-migrator -exec=*actions",
-		utils.Thresholds:  "cgr-migrator -exec=*thresholds",
-		utils.LoadIDsVrs:  "cgr-migrator -exec=*load_ids",
-		utils.RQF:         "cgr-migrator -exec=*filters",
-		utils.Routes:      "cgr-migrator -exec=*routes",
-	}
-	allVers map[string]string // init will fill this with a merge of data+stor
-)
-
-func init() {
-	allVers = make(map[string]string)
-	for k, v := range dataDBVers {
-		allVers[k] = v
-	}
-}
-
 // Versions will keep trac of various item versions
 type Versions map[string]int64 // map[item]versionNr
 
@@ -69,10 +49,9 @@ func CheckVersions(storage Storage) error {
 	} else if err != nil {
 		return err
 	}
-	// Compare db versions with current versions.
-	message := dbVersions.Compare(currentVersions, storType)
-	if message != "" {
-		return fmt.Errorf("Migration needed: please backup cgr data and run: <%s>", message)
+	if subsys := dbVersions.Compare(currentVersions); subsys != "" {
+		return fmt.Errorf("datadb version mismatch for %s (have %d, want %d): back up your data, flush the datadb and reload",
+			subsys, dbVersions[subsys], currentVersions[subsys])
 	}
 	return nil
 }
@@ -97,20 +76,12 @@ func OverwriteDBVersions(storage Storage) (err error) {
 	return setDBVersions(storage, true)
 }
 
-// Compare returns the migration message if the versions are not the latest
-func (vers Versions) Compare(curent Versions, storType string) string {
-	var message map[string]string
-	switch storType {
-	case utils.MetaMongo:
-		message = dataDBVers
-	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
-		message = allVers
-	case utils.MetaRedis:
-		message = dataDBVers
-	}
-	for subsis, reason := range message {
-		if vers[subsis] != curent[subsis] {
-			return reason
+// Compare returns the name of the first subsystem whose stored version differs
+// from the current one, or "" when every version matches.
+func (vers Versions) Compare(current Versions) string {
+	for subsys, curVer := range current {
+		if vers[subsys] != curVer {
+			return subsys
 		}
 	}
 	return ""
@@ -119,16 +90,16 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 // CurrentDataDBVersions returns the needed DataDB versions
 func CurrentDataDBVersions() Versions {
 	return Versions{
-		utils.Stats:          4,
-		utils.AccountsStr:    3,
-		utils.Actions:        2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
-		utils.Attributes:     7,
-		utils.RQF:            5,
+		utils.Stats:          1,
+		utils.AccountsStr:    1,
+		utils.Actions:        1,
+		utils.Thresholds:     1,
+		utils.Routes:         1,
+		utils.Attributes:     1,
+		utils.RQF:            1,
 		utils.ResourceStr:    1,
 		utils.Subscribers:    1,
-		utils.Chargers:       2,
+		utils.Chargers:       1,
 		utils.LoadIDsVrs:     1,
 		utils.RateProfiles:   1,
 		utils.ActionProfiles: 1,
@@ -137,9 +108,9 @@ func CurrentDataDBVersions() Versions {
 
 func CurrentStorDBVersions() Versions {
 	return Versions{
-		utils.CostDetails:      2,
-		utils.SessionSCosts:    3,
-		utils.CDRs:             2,
+		utils.CostDetails:      1,
+		utils.SessionSCosts:    1,
+		utils.CDRs:             1,
 		utils.TpFilters:        1,
 		utils.TpThresholds:     1,
 		utils.TpRoutes:         1,
