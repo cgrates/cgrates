@@ -33,7 +33,7 @@ import (
 func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	fltrS *engine.FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
 	extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
-	rateSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaRates], ev.Tenant, ev.AsDataProvider(), fltrS)
+	rateSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaRates, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 		}
 		var cost *utils.Decimal
 		var acctSConns []string
-		acctSConns, err = engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaAccounts], ev.Tenant, ev.AsDataProvider(), fltrS)
+		acctSConns, err = engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaAccounts, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
 		if err != nil {
 			return nil, err
 		}

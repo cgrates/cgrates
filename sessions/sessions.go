@@ -113,7 +113,7 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
-	replConns, err := engine.GetConnIDs(context.TODO(), sS.cfg.SessionSCfg().Conns[utils.MetaReplication], utils.MetaAny, utils.MapStorage{}, sS.fltrS)
+	replConns, err := engine.GetConnIDs(context.TODO(), sS.cfg.SessionSCfg().Conns, utils.MetaReplication, utils.MetaAny, utils.MapStorage{}, nil, sS.fltrS)
 	if len(replConns) == 0 {
 		var hasErr bool
 		for _, s := range sS.getSessions("", false) { // Force sessions shutdown
@@ -336,7 +336,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 	tenant := s.OriginCGREvent.Tenant
 	dP := s.OriginCGREvent.AsDataProvider()
 	// post the CDRs
-	if cdrsConns, errC := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaCDRs], tenant, dP, sS.fltrS); errC != nil {
+	if cdrsConns, errC := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaCDRs, tenant, dP, nil, sS.fltrS); errC != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error resolving CDRs connections: %s", utils.SessionS, errC.Error()))
 	} else if len(cdrsConns) != 0 {
@@ -362,7 +362,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		}
 	}
 	// release the resources for the session
-	if resSConns, errR := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], tenant, dP, sS.fltrS); errR != nil {
+	if resSConns, errR := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, tenant, dP, nil, sS.fltrS); errR != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error resolving ResourceS connections: %s", utils.SessionS, errR.Error()))
 	} else if len(resSConns) != 0 {
@@ -380,7 +380,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		}
 	}
 	// release the ips for the session
-	if ipsConns, errI := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], tenant, dP, sS.fltrS); errI != nil {
+	if ipsConns, errI := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, tenant, dP, nil, sS.fltrS); errI != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error resolving IPs connections: %s", utils.SessionS, errI.Error()))
 	} else if len(ipsConns) != 0 {
@@ -566,8 +566,8 @@ func (sS *SessionS) replicateSessions(ctx *context.Context, sID string, psv bool
 	for _, s := range ss {
 		sCln := s.Clone()
 		var conns []string // ToDo: cache per session
-		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaReplication],
-			s.OriginCGREvent.Tenant, s.OriginCGREvent.AsDataProvider(), sS.fltrS); err != nil {
+		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaReplication,
+			s.OriginCGREvent.Tenant, s.OriginCGREvent.AsDataProvider(), nil, sS.fltrS); err != nil {
 			return
 		}
 		if len(conns) == 0 {
@@ -923,7 +923,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
 			utils.MetaSessionS, cgrEv); err != nil {
 			return
 		}
@@ -975,7 +975,7 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 // ipsAuthorize will authorize the event with the IPs subsystem
 func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1000,7 +1000,7 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 // resourcesAuthorize will authorize the event with the Resources subsystem
 func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (resID string, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1031,8 +1031,8 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 // accountsMaxAbstracts will query the AccountS cost for Event
 func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts],
-		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1051,8 +1051,8 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 // if session is provided, it will try to debit first out of reserved balance
 func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent, s *Session) (eEc *utils.EventCharges, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts],
-		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1458,7 +1458,7 @@ func (sS *SessionS) accountSMaxAbstracts(ctx *context.Context, cgrEvs map[string
 	// resolve AccountS connections using the first event for tenant/dP context
 	var acctConns []string
 	for _, cgrEv := range cgrEvs {
-		if acctConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+		if acctConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 			return
 		}
 		break
@@ -1687,7 +1687,7 @@ func (sS *SessionS) hasSession(ctx *context.Context, sID string) bool {
 
 func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	var cdrsConns []string
-	if cdrsConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaCDRs], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if cdrsConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaCDRs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(cdrsConns) == 0 {
@@ -1743,7 +1743,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (tIDs []string, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1758,8 +1758,8 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 // processStats will receive the event and send it to StatS to be processed
 func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaStats],
-		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaStats,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1774,8 +1774,8 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply routes.SortedRoutesList, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaRoutes],
-		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaRoutes,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {
@@ -1794,8 +1794,8 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 // eesProcessEvent will send the CGREvent to EEs
 func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eesIDs []string, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaEEs],
-		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaEEs,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {

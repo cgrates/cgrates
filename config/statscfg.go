@@ -108,6 +108,9 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) error {
 		st.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Conns != nil {
+		if st.Conns == nil {
+			st.Conns = make(map[string][]*DynamicConns)
+		}
 		maps.Copy(st.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {

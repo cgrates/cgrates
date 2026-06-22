@@ -114,6 +114,9 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) error {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Conns != nil {
+		if t.Conns == nil {
+			t.Conns = make(map[string][]*DynamicConns)
+		}
 		maps.Copy(t.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {

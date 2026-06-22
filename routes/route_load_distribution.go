@@ -108,7 +108,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 // first metric found is always returned
 func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, statIDs []string, tenant string) (result *utils.Decimal, err error) {
-	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaStats], tenant, utils.MapStorage{}, fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaStats, tenant, utils.MapStorage{}, nil, fltrS)
 	if err != nil {
 		return
 	}

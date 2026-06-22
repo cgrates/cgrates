@@ -68,7 +68,7 @@ func TestNewLoaderService(t *testing.T) {
 				filterS:    fS,
 				connMgr:    cM,
 				dataCache:  cache,
-				cacheConns: cfg.LoaderCfg()[0].CacheSConns,
+				cacheConns: cfg.LoaderCfg()[0].Conns[utils.MetaCaches][0].ConnIDs,
 				Locker:     newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
 			},
 		},

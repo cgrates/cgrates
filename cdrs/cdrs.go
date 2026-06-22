@@ -71,7 +71,7 @@ type CDRServer struct {
 func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
 	var chrgrs []*chargers.ChrgSProcessEventReply
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaChargers], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaChargers, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -101,7 +101,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaCDRs)
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaAttributes], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaAttributes, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -123,7 +123,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var rpCost utils.RateProfileCost
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaRates], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaRates, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -140,7 +140,7 @@ func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGRE
 func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	acntCost := new(utils.EventCharges)
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaAccounts], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaAccounts, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -161,7 +161,7 @@ func (cdrS *CDRServer) accountSRefundCharges(ctx *context.Context, tnt string, e
 		APIOpts:      apiOpts,
 		EventCharges: eChrgs,
 	}
-	connIDs, err := engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaAccounts], tnt, eChrgs, cdrS.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaAccounts, tnt, eChrgs, nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -179,7 +179,7 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 	cgrEv = cgrEv.Clone()
 	cgrEv.APIOpts[utils.MetaEventType] = utils.CDRKey
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err = cdrS.connMgr.Call(ctx, conns,
 		utils.ThresholdSv1ProcessEvent,
 		cgrEv, &tIDs); err != nil &&
@@ -193,7 +193,7 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var reply []string
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaStats, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err != nil {
 		return
 	}
@@ -212,7 +212,7 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 		reply map[string]map[string]any
 		conns []string
 	)
-	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns[utils.MetaEEs], cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS)
+	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaEEs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
 	if err = cdrS.connMgr.Call(ctx, conns,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&

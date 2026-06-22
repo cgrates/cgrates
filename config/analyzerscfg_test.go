@@ -41,7 +41,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		CleanupInterval: time.Hour,
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaScorch,
-		EEsConns:        []string{},
+		Conns:           map[string][]*DynamicConns{},
 		TTL:             24 * time.Hour,
 		Opts: &AnalyzerSOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{
@@ -73,7 +73,7 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
-		utils.EEsConnsCfg:        []string{},
+		utils.ConnsCfg:           map[string][]*DynamicConns{},
 		utils.TTLCfg:             "24h0m0s",
 		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
@@ -89,8 +89,8 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"analyzers":{
-            "enabled": true,  
-			"eesConns": ["*localhost"],
+            "enabled": true,
+			"conns": {"*ees": [{"connIDs": ["*localhost"]}]},
         },
     }
 }`
@@ -99,7 +99,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
-		utils.EEsConnsCfg:        []string{"*localhost"},
+		utils.ConnsCfg:           map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"*localhost"}}}},
 		utils.TTLCfg:             "24h0m0s",
 		utils.OptsCfg: map[string]any{
 			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
@@ -135,7 +135,7 @@ func TestAnalyzerSCfgClone(t *testing.T) {
 		CleanupInterval: time.Hour,
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaScorch,
-		EEsConns:        []string{"*internal"},
+		Conns:           map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"*internal"}}}},
 		TTL:             24 * time.Hour,
 	}
 	rcv := cS.Clone()
@@ -164,7 +164,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaString,
 		TTL:             3 * time.Minute,
-		EEsConns:        []string{"*internal"},
+		Conns:           map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"*internal"}}}},
 		CleanupInterval: 30 * time.Minute,
 		Opts:            &AnalyzerSOpts{},
 	}
@@ -174,7 +174,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
 		Index_type:       utils.StringPointer(utils.MetaString),
 		Ttl:              utils.StringPointer("3m0s"),
-		Ees_conns:        &[]string{"*internal"},
+		Conns:            map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"*internal"}}}},
 		Cleanup_interval: utils.StringPointer("30m0s"),
 		Opts:             &AnalyzerSOptsJson{},
 	}

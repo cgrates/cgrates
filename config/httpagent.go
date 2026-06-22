@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -102,11 +104,12 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg.URL != nil {
 		ha.URL = *jsnCfg.URL
 	}
-	for connType, opts := range jsnCfg.Conns {
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
 		if ha.Conns == nil {
 			ha.Conns = make(map[string][]*DynamicConns)
 		}
-		ha.Conns[connType] = tagInternalConnsOpt(opts, connType)
+		maps.Copy(ha.Conns, tagged)
 	}
 	if jsnCfg.RequestPayload != nil {
 		ha.RequestPayload = *jsnCfg.RequestPayload

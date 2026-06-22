@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -97,9 +98,7 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 	}
 	if jc.Conns != nil {
 		tagged := tagConns(jc.Conns)
-		for connType, opts := range tagged {
-			da.Conns[connType] = opts
-		}
+		maps.Copy(da.Conns, tagged)
 	}
 	if jc.OriginHost != nil {
 		da.OriginHost = *jc.OriginHost

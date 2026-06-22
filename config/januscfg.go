@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -100,11 +102,9 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err erro
 	if jsnCfg.Url != nil {
 		jaCfg.URL = *jsnCfg.Url
 	}
-	for connType, opts := range jsnCfg.Conns {
-		if jaCfg.Conns == nil {
-			jaCfg.Conns = make(map[string][]*DynamicConns)
-		}
-		jaCfg.Conns[connType] = tagInternalConnsOpt(opts, connType)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		maps.Copy(jaCfg.Conns, tagged)
 	}
 	if jsnCfg.Janus_conns != nil {
 		jaCfg.JanusConns = make([]*JanusConn, len(*jsnCfg.Janus_conns))

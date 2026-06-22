@@ -51,7 +51,7 @@ func (aL *actResetStat) execute(ctx *context.Context, data utils.MapStorage, trg
 		args.Tenant = aL.tnt
 	}
 	var statsConns []string
-	if statsConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaStats], aL.tnt, data, aL.fltrS); err != nil {
+	if statsConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaStats, aL.tnt, data, nil, aL.fltrS); err != nil {
 		return
 	}
 	var rply string
@@ -85,7 +85,7 @@ func (aL *actResetThreshold) execute(ctx *context.Context, data utils.MapStorage
 		args.Tenant = aL.tnt
 	}
 	var threshConns []string
-	if threshConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaThresholds], aL.tnt, data, aL.fltrS); err != nil {
+	if threshConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaThresholds, aL.tnt, data, nil, aL.fltrS); err != nil {
 		return
 	}
 	var rply string

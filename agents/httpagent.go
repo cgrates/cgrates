@@ -85,9 +85,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.cache, ha.filterS, nil)
-		sessConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaSessionS], agReq.Tenant, agReq, ha.filterS)
-		statConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaStats], agReq.Tenant, agReq, ha.filterS)
-		thConns, _ := engine.GetConnIDs(context.TODO(), ha.conns[utils.MetaThresholds], agReq.Tenant, agReq, ha.filterS)
+		sessConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaSessionS, agReq.Tenant, agReq, nil, ha.filterS)
+		statConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaStats, agReq.Tenant, agReq, nil, ha.filterS)
+		thConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaThresholds, agReq.Tenant, agReq, nil, ha.filterS)
 		lclProcessed, err := processRequest(context.TODO(),
 			reqProcessor, agReq, utils.HTTPAgent, ha.connMgr,
 			sessConns, statConns, thConns,

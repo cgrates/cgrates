@@ -182,13 +182,13 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 		statsConns      []string
 		thresholdsConns []string
 	)
-	if sessionsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaSessionS], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+	if sessionsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns, utils.MetaSessionS, utils.MetaAny, dnsDP, nil, da.fltrS); err != nil {
 		return
 	}
-	if statsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaStats], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+	if statsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns, utils.MetaStats, utils.MetaAny, dnsDP, nil, da.fltrS); err != nil {
 		return
 	}
-	if thresholdsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns[utils.MetaThresholds], utils.MetaAny, dnsDP, da.fltrS); err != nil {
+	if thresholdsConns, err = engine.GetConnIDs(context.TODO(), da.cgrCfg.DNSAgentCfg().Conns, utils.MetaThresholds, utils.MetaAny, dnsDP, nil, da.fltrS); err != nil {
 		return
 	}
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {

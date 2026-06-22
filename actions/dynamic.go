@@ -32,11 +32,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// getAdminConns resolves the AdminS connection IDs for an action context.
-func getAdminConns(ctx *context.Context, cfg *config.CGRConfig, tnt string, data utils.MapStorage, fltrS *engine.FilterS) ([]string, error) {
-	return engine.GetConnIDs(ctx, cfg.ActionSCfg().Conns[utils.MetaAdminS], tnt, data, fltrS)
-}
-
 // parseParamStringToMap parses a string containing key-value pairs separated by "&" and assigns
 // these pairs to a given map. Each pair is expected to be in the format "key:value".
 func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
@@ -90,7 +85,7 @@ func (aL *actDynamicThreshold) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -273,7 +268,7 @@ func (aL *actDynamicStats) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -488,7 +483,7 @@ func (aL *actDynamicAttribute) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -668,7 +663,7 @@ func (aL *actDynamicResource) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -835,7 +830,7 @@ func (aL *actDynamicTrend) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -991,7 +986,7 @@ func (aL *actDynamicRanking) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -1122,7 +1117,7 @@ func (aL *actDynamicFilter) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -1252,7 +1247,7 @@ func (aL *actDynamicRoute) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -1569,7 +1564,7 @@ func (aL *actDynamicRate) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -1793,7 +1788,7 @@ func (aL *actDynamicIP) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -1999,7 +1994,7 @@ func (aL *actDynamicAction) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
-	adminConns, err := getAdminConns(ctx, aL.config, aL.tnt, data, aL.fltrS)
+	adminConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAdminS, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}

@@ -196,7 +196,14 @@ func (ldrS *LoaderS) createLoaders(dm *engine.DataManager,
 	ldrS.ldrs = make(map[string]*loader)
 	for _, ldrCfg := range ldrS.cfg.LoaderCfg() {
 		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, filterS, connMgr, ldrCfg.CacheSConns)
+			cacheSConns, err := engine.GetConnIDs(context.TODO(), ldrCfg.Conns, utils.MetaCaches,
+				utils.MetaAny, utils.MapStorage{}, nil, filterS)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> failed resolving caches connections for loader <%s>: %v",
+					utils.LoaderS, ldrCfg.ID, err))
+				continue
+			}
+			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, filterS, connMgr, cacheSConns)
 		}
 	}
 }

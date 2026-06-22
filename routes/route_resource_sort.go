@@ -31,7 +31,7 @@ import (
 func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
-	resSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaResources], ev.Tenant, ev.AsDataProvider(), fltrS)
+	resSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaResources, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
 	if err != nil {
 		return nil, err
 	}

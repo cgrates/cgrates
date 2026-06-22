@@ -402,7 +402,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 		},
 	}
 
-	got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+	got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns, utils.MetaAccounts, "cgrates.org", ev.AsDataProvider(), nil, fS)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -415,7 +415,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 		{ConnIDs: []string{utils.MetaLocalHost}, FilterIDs: []string{"*gte:~*accounts.1001.Balances[Concrete1].Units:20"}},
 	}
 
-	got2, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+	got2, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns, utils.MetaAccounts, "cgrates.org", ev.AsDataProvider(), nil, fS)
 	if err != nil {
 		t.Fatal(err)
 	}

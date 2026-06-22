@@ -88,7 +88,7 @@ func (r *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfil
 	rk.LastUpdate = time.Now()
 	rk.Metrics = make(map[string]map[string]float64) // reset previous values
 	rk.SortedStatIDs = make([]string, 0)
-	statConns, err := engine.GetConnIDs(ctx, r.cgrcfg.RankingSCfg().Conns[utils.MetaStats], rk.Tenant, rkP, r.fltrS)
+	statConns, err := engine.GetConnIDs(ctx, r.cgrcfg.RankingSCfg().Conns, utils.MetaStats, rk.Tenant, rkP, nil, r.fltrS)
 	if err != nil {
 		return
 	}
@@ -153,7 +153,7 @@ func (r *RankingS) processThresholds(rk *utils.Ranking) (err error) {
 	if len(rk.SortedStatIDs) == 0 {
 		return
 	}
-	threshConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns[utils.MetaThresholds], rk.Tenant, rk.Config(), r.fltrS)
+	threshConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns, utils.MetaThresholds, rk.Tenant, rk.Config(), nil, r.fltrS)
 	if len(threshConns) == 0 {
 		return
 	}
@@ -202,7 +202,7 @@ func (r *RankingS) processEEs(rk *utils.Ranking) (err error) {
 	if len(rk.SortedStatIDs) == 0 {
 		return
 	}
-	eesConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns[utils.MetaEEs], rk.Tenant, rk.Config(), r.fltrS)
+	eesConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns, utils.MetaEEs, rk.Tenant, rk.Config(), nil, r.fltrS)
 	if len(eesConns) == 0 {
 		return
 	}

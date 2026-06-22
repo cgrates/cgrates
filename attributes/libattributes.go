@@ -28,11 +28,11 @@ import (
 // cfg.SessionSCfg().Conns[utils.MetaAttributes]
 // AttributeCProcessEvent is a wrapper to unify processing from the client side from multiple subsystems
 func AttributeScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
-	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
+	connsCfg map[string][]*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
 	cgrEv *utils.CGREvent) (reply *ProcessEventReply, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, connsCfg,
-		cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, connsCfg, utils.MetaAttributes,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, fltrS); err != nil {
 		return
 	} else if len(conns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)

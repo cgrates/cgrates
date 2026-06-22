@@ -356,7 +356,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -371,7 +371,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1InitSessionReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -386,7 +386,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1UpdateSessionReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -401,7 +401,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		var rply string
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -414,7 +414,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -434,7 +434,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -467,7 +467,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
-		sessConns, _ := engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		sessConns, _ := engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err = ra.cm.Call(ra.ctx, sessConns,
 			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
@@ -525,7 +525,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
 		var statConns []string
-		statConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		statConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaStats, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}
@@ -542,7 +542,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
 		var thresholdConns []string
-		thresholdConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), ra.fltrS)
+		thresholdConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
 		if err != nil {
 			return
 		}

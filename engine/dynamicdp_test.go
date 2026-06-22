@@ -725,7 +725,7 @@ func TestDPFilterSConns(t *testing.T) {
 		fS := NewFilterS(cfg, nil, dm)
 		NewConnManager(cfg)
 
-		got, err := GetConnIDs(context.TODO(), cfg.SessionSCfg().Conns[utils.MetaAttributes], "cgrates.org", ev.AsDataProvider(), fS)
+		got, err := GetConnIDs(context.TODO(), cfg.SessionSCfg().Conns, utils.MetaAttributes, "cgrates.org", ev.AsDataProvider(), nil, fS)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -761,7 +761,7 @@ func TestDPFilterSConns(t *testing.T) {
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 		fS := NewFilterS(cfg, cM, dm)
 
-		got, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns[utils.MetaAttributes], "cgrates.org", ev.AsDataProvider(), fS)
+		got, err := GetConnIDs(context.TODO(), cfg.ChargerSCfg().Conns, utils.MetaAttributes, "cgrates.org", ev.AsDataProvider(), nil, fS)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -794,7 +794,7 @@ func TestDPFilterSConns(t *testing.T) {
 		cM.SetCache(cacheS)
 		registerAccountsMock(cM, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts))
 
-		got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns[utils.MetaAccounts], "cgrates.org", ev.AsDataProvider(), fS)
+		got, err := GetConnIDs(context.TODO(), cfg.FilterSCfg().Conns, utils.MetaAccounts, "cgrates.org", ev.AsDataProvider(), nil, fS)
 		if err != nil {
 			t.Fatal(err)
 		}

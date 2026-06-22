@@ -377,11 +377,11 @@ func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *u
 
 // AccountScDebitAbstracts is a wrapper to unify processing from the client side from multiple subsystems
 func AccountScDebitAbstracts(ctx *context.Context, fltrS *engine.FilterS,
-	connsCfg []*config.DynamicConns, connMgr *engine.ConnManager,
+	connsCfg map[string][]*config.DynamicConns, connMgr *engine.ConnManager,
 	cgrEv *utils.CGREvent) (dbt *utils.EventCharges, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, connsCfg,
-		cgrEv.Tenant, cgrEv.AsDataProvider(), fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, connsCfg, utils.MetaAccounts,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {

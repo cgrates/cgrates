@@ -97,7 +97,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		// split the field name in 3 parts
 		// fieldNameType (~*accounts), accountID(1001) and queried part (Balances.Balances[Concrete1].Units)
 		var acctConns []string
-		acctConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns[utils.MetaAccounts], dDP.tenant, dDP.initialDP, dDP.fs)
+		acctConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns, utils.MetaAccounts, dDP.tenant, dDP.initialDP, dDP.fs)
 		if err != nil {
 			return false, err
 		}
@@ -113,7 +113,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
 		var resConns []string
-		resConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns[utils.MetaResources], dDP.tenant, dDP.initialDP, dDP.fs)
+		resConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns, utils.MetaResources, dDP.tenant, dDP.initialDP, dDP.fs)
 		if err != nil {
 			return false, err
 		}
@@ -128,7 +128,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaStats:
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statConns []string
-		statConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns[utils.MetaStats], dDP.tenant, dDP.initialDP, dDP.fs)
+		statConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns, utils.MetaStats, dDP.tenant, dDP.initialDP, dDP.fs)
 		if err != nil {
 			return false, err
 		}
@@ -146,7 +146,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaTrends:
 		//sample of fieldName : ~*trends.TrendID.Metrics.*acd.Value
 		var trendConns []string
-		trendConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns[utils.MetaTrends], dDP.tenant, dDP.initialDP, dDP.fs)
+		trendConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns, utils.MetaTrends, dDP.tenant, dDP.initialDP, dDP.fs)
 		if err != nil {
 			return false, err
 		}
@@ -160,7 +160,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	case utils.MetaRankings:
 		// sample of fieldName : ~*rankings.RankingID.SortedStatIDs[0]
 		var rnkConns []string
-		rnkConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns[utils.MetaRankings], dDP.tenant, dDP.initialDP, dDP.fs)
+		rnkConns, err = getConnIDsWithDP(dDP.ctx, dDP.cfg.FilterSCfg().Conns, utils.MetaRankings, dDP.tenant, dDP.initialDP, dDP.fs)
 		if err != nil {
 			return false, err
 		}

@@ -301,7 +301,7 @@ func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (*utils.StatQ
 
 // processThresholds will pass the event for statQueue to ThresholdS
 func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
-	threshConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaThresholds], tnt, dP, s.filters)
+	threshConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns, utils.MetaThresholds, tnt, dP, nil, s.filters)
 	if err != nil {
 		return err
 	}
@@ -349,7 +349,7 @@ func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue,
 
 // processEEs will pass the event for statQueue to EEs
 func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
-	eesConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns[utils.MetaEEs], tnt, dP, s.filters)
+	eesConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns, utils.MetaEEs, tnt, dP, nil, s.filters)
 	if err != nil {
 		return err
 	}

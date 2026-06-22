@@ -72,7 +72,7 @@ func NewTrendService(dm *engine.DataManager, cache *engine.CacheS,
 // Called by Cron service at scheduled intervals.
 func (t *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 	var floatMetrics map[string]float64
-	statConns, err := engine.GetConnIDs(ctx, t.cfg.TrendSCfg().Conns[utils.MetaStats], tP.Tenant, tP, t.fltrS)
+	statConns, err := engine.GetConnIDs(ctx, t.cfg.TrendSCfg().Conns, utils.MetaStats, tP.Tenant, tP, nil, t.fltrS)
 	if err != nil {
 		return
 	}
@@ -163,7 +163,7 @@ func (t *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	threshConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns[utils.MetaThresholds], trnd.Tenant, trnd.Config(), t.fltrS)
+	threshConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns, utils.MetaThresholds, trnd.Tenant, trnd.Config(), nil, t.fltrS)
 	if err != nil {
 		return
 	}
@@ -215,7 +215,7 @@ func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	eesConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns[utils.MetaEEs], trnd.Tenant, trnd.Config(), t.fltrS)
+	eesConns, err := engine.GetConnIDs(context.TODO(), t.cfg.TrendSCfg().Conns, utils.MetaEEs, trnd.Tenant, trnd.Config(), nil, t.fltrS)
 	if len(eesConns) == 0 {
 		return
 	}

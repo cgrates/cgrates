@@ -431,7 +431,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), sa.fltrS)
+		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sa.fltrS)
 		if err != nil {
 			return
 		}
@@ -445,7 +445,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), sa.fltrS)
+		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sa.fltrS)
 		if err != nil {
 			return
 		}
@@ -509,7 +509,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
 		var statConns []string
-		statConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns[utils.MetaStats], ev.Tenant, ev.AsDataProvider(), sa.fltrS)
+		statConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaStats, ev.Tenant, ev.AsDataProvider(), nil, sa.fltrS)
 		if err != nil {
 			return
 		}
@@ -526,7 +526,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
 		var thrConns []string
-		thrConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns[utils.MetaThresholds], ev.Tenant, ev.AsDataProvider(), sa.fltrS)
+		thrConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaThresholds, ev.Tenant, ev.AsDataProvider(), nil, sa.fltrS)
 		if err != nil {
 			return
 		}

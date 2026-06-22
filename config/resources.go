@@ -103,6 +103,9 @@ func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) error {
 		c.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Conns != nil {
+		if c.Conns == nil {
+			c.Conns = make(map[string][]*DynamicConns)
+		}
 		maps.Copy(c.Conns, tagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Store_interval != nil {
