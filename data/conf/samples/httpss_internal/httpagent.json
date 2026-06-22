@@ -30,7 +30,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage.*primary{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
 				]
 			},
 			{
@@ -52,7 +52,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage.*primary{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
 				]
 			},
 			{
@@ -74,7 +74,7 @@
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
 					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage.*primary{*duration_seconds}", "mandatory": true}
+						"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true}
 				]
 			}
 		]

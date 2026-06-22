@@ -7,7 +7,7 @@
       "*accounts": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ]
@@ -22,7 +22,7 @@
       "*rates": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ]
@@ -34,14 +34,14 @@
       "*accounts": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ],
       "*cdrs": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ]
@@ -60,7 +60,7 @@
       "*accounts": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ]
@@ -79,14 +79,14 @@
       "*accounts": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ],
       "*cdrs": [
         {
           "ConnIDs": [
-            "*internal"
+            "*localhost"
           ]
         }
       ]
@@ -98,7 +98,7 @@
       "*sessions": [
         {
           "ConnIDs": [
-            "*birpc_internal"
+            "*localhost"
           ]
         }
       ]
