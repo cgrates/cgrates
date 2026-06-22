@@ -24,21 +24,15 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentAccounts() (err error) {
-	mInDB, err := m.GetINConn(utils.MetaAccounts)
+func (m *Migrator) migrateCurrentAccounts() error {
+	db, _, err := m.dmFrom.DBConns().GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
 	}
-	db, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaAccounts)
-	if err != nil {
-		return err
-	}
-	var ids []string
-	ids, err = db.GetKeysForPrefix(context.TODO(), utils.AccountPrefix, utils.EmptyString)
+	ids, err := db.GetKeysForPrefix(context.TODO(), utils.AccountPrefix, "")
 	if err != nil {
 		return err
 	}
@@ -47,62 +41,39 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating from account ", id)
 		}
-		ap, err := mInDB.DataManager().GetAccount(context.TODO(), tntID[0], tntID[1])
+		ap, err := m.dmFrom.GetAccount(context.TODO(), tntID[0], tntID[1])
 		if err != nil {
 			return err
 		}
 		if ap == nil || m.dryRun {
 			continue
 		}
-		mOutDB, err := m.GetOUTConn(utils.MetaAccounts)
-		if err != nil {
+		if err := m.dmTo.SetAccount(context.TODO(), ap, true); err != nil {
 			return err
 		}
-		if err := mOutDB.DataManager().SetAccount(context.TODO(), ap, true); err != nil {
-			return err
-		}
-		if err := mInDB.DataManager().RemoveAccount(context.TODO(), tntID[0], tntID[1], false); err != nil {
+		if err := m.dmFrom.RemoveAccount(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.AccountsString]++
 	}
-	return
+	return nil
 }
 
-func (m *Migrator) migrateAccounts() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.AccountsString); err != nil {
-		return
+func (m *Migrator) migrateAccounts() error {
+	vrs, err := m.getVersions(utils.AccountsString)
+	if err != nil {
+		return err
 	}
-	migrated := true
-	for {
-		version := vrs[utils.AccountsString]
-		for {
-			switch version {
-			default:
-				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.AccountsString]:
-				migrated = false
-				if m.sameDataDB {
-					break
-				}
-				if err = m.migrateCurrentAccounts(); err != nil {
-					return
-				}
-			}
-			if version == current[utils.AccountsString] || err == utils.ErrNoMoreData {
-				break
-			}
-		}
-		if err == utils.ErrNoMoreData || !migrated {
-			break
-		}
-		m.stats[utils.AccountsString]++
+	if vrs[utils.AccountsString] != engine.CurrentDataDBVersions()[utils.AccountsString] {
+		return fmt.Errorf("Unsupported version %v", vrs[utils.AccountsString])
 	}
-	//All done, update version with current one
+	if !m.sameDataDB {
+		if err = m.migrateCurrentAccounts(); err != nil {
+			return err
+		}
+	}
 	if err = m.setVersions(utils.AccountsString); err != nil {
-		return
+		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColApp)
 }

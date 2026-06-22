@@ -29,7 +29,6 @@ require (
 	github.com/elastic/elastic-transport-go/v8 v8.6.0
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/go-cmp v0.7.0
 	github.com/mediocregopher/radix/v3 v3.8.1
 	github.com/miekg/dns v1.1.62
@@ -90,6 +89,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/golang/geo v0.0.0-20210211234256-740aa86cb551 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect

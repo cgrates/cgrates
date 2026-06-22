@@ -19,21 +19,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateLoadIDs() (err error) {
-	var vrs engine.Versions
-	if vrs, err = m.getVersions(utils.LoadIDsVrs); err != nil {
-		return
+func (m *Migrator) migrateLoadIDs() error {
+	vrs, err := m.getVersions(utils.LoadIDsVrs)
+	if err != nil {
+		return err
 	}
 	if vrs[utils.LoadIDs] != 1 {
-		mOutDB, err := m.GetOUTConn(utils.MetaLoadIDs)
-		if err != nil {
-			return err
-		}
-		dataDB, _, err := mOutDB.DataManager().DBConns().GetConn(utils.MetaLoadIDs)
+		dataDB, _, err := m.dmTo.DBConns().GetConn(utils.MetaLoadIDs)
 		if err != nil {
 			return err
 		}
@@ -44,6 +39,5 @@ func (m *Migrator) migrateLoadIDs() (err error) {
 			return err
 		}
 	}
-
-	return
+	return nil
 }

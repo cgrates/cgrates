@@ -22,63 +22,26 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDBCfg *config.DbCfg, dmFrom, dmTo map[string]MigratorDataDB,
-	dryRun, sameDataDB bool) (m *Migrator, err error) {
-	stats := make(map[string]int)
-
-	m = &Migrator{
-		dataDBCfg:  dataDBCfg,
-		dmTo:       dmTo,
+func NewMigrator(dmFrom, dmTo *engine.DataManager, dryRun, sameDataDB bool) *Migrator {
+	return &Migrator{
 		dmFrom:     dmFrom,
+		dmTo:       dmTo,
 		dryRun:     dryRun,
 		sameDataDB: sameDataDB,
-		stats:      stats,
+		stats:      make(map[string]int),
 	}
-	return m, err
 }
 
 type Migrator struct {
-	dataDBCfg  *config.DbCfg
-	dmFrom     map[string]MigratorDataDB
-	dmTo       map[string]MigratorDataDB
+	dmFrom     *engine.DataManager
+	dmTo       *engine.DataManager
 	dryRun     bool
 	sameDataDB bool
 	stats      map[string]int
-}
-
-// GetINConn returns the IN MigratorDataDB where the provided itemID is stored.
-// Returns the *default MigratorDataDB conn if it can't find the item's corresponding DB
-func (m *Migrator) GetINConn(itemID string) (db MigratorDataDB, err error) {
-	var ok bool
-	dbConnID, ok := m.dataDBCfg.Items[itemID]
-	if !ok {
-		return nil, fmt.Errorf("couldn't find item with ID: <%v>", itemID)
-	}
-	if db, ok = m.dmFrom[dbConnID.DBConn]; !ok {
-		// return *default db if DBConn is not found
-		return m.dmFrom[utils.MetaDefault], nil
-	}
-	return
-}
-
-// GetOUTConn returns the OUT MigratorDataDB where the provided itemID is stored.
-// Returns the *default MigratorDataDB conn if it can't find the item's corresponding DB
-func (m *Migrator) GetOUTConn(itemID string) (db MigratorDataDB, err error) {
-	var ok bool
-	dbConnID, ok := m.dataDBCfg.Items[itemID]
-	if !ok {
-		return nil, fmt.Errorf("couldn't find item with ID: <%v>", itemID)
-	}
-	if db, ok = m.dmTo[dbConnID.DBConn]; !ok {
-		// return *default db if DBConn is not found
-		return m.dmTo[utils.MetaDefault], nil
-	}
-	return
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -96,21 +59,17 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("Cannot dryRun SetVersions!")
 				return
 			}
-			if dmTo, err := m.GetOUTConn(utils.CacheVersions); err != nil {
+			dataDB, _, err := m.dmTo.DBConns().GetConn(utils.CacheVersions)
+			if err != nil {
 				return err, nil
-			} else {
-				if dataDB, _, err := dmTo.DataManager().DBConns().GetConn(utils.CacheVersions); err != nil {
-					return err, nil
-				} else if err = engine.OverwriteDBVersions(dataDB); err != nil {
-					return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-						fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
-				}
+			}
+			if err = engine.OverwriteDBVersions(dataDB); err != nil {
+				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
 			}
 		case utils.MetaEnsureIndexes:
 			mongoDBFound := false // track if no mongo DBs were found for case *ensure_indexes
-			// since DataManager is the same in all OUT migratorDataDBs, taking the default
-			// migratorDataDB will suffice
-			for _, db := range m.dmTo[utils.MetaDefault].DataManager().DB() {
+			for _, db := range m.dmTo.DB() {
 				if db.GetStorageType() == utils.MetaMongo {
 					mgo := db.(*engine.MongoStorage)
 					if err = mgo.EnsureIndexes(); err != nil {
@@ -157,9 +116,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 }
 
 func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
-	// since DataManager is the same in all OUT migratorDataDBs, taking the default
-	// migratorDataDB will suffice
-	for _, db := range m.dmTo[utils.MetaDefault].DataManager().DB() {
+	for _, db := range m.dmTo.DB() {
 		if db.GetStorageType() == utils.MetaMongo {
 			mgo := db.(*engine.MongoStorage)
 			if err := mgo.EnsureIndexes(cols...); err != nil {
@@ -173,13 +130,13 @@ func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
 // closes all opened DBs
 func (m *Migrator) Close() {
 	if m.dmFrom != nil {
-		for _, dm := range m.dmFrom {
-			dm.close()
+		for _, db := range m.dmFrom.DB() {
+			db.Close()
 		}
 	}
-	if m.dmTo != nil {
-		for _, dm := range m.dmTo {
-			dm.close()
+	if m.dmTo != nil && !m.sameDataDB {
+		for _, db := range m.dmTo.DB() {
+			db.Close()
 		}
 	}
 }

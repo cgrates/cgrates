@@ -37,15 +37,15 @@ var (
 	cgrMigratorFlags = flag.NewFlagSet(utils.CgrMigrator, flag.ContinueOnError)
 
 	sameDataDB bool
-	dmFrom     = make(map[string]migrator.MigratorDataDB)
-	dmTo       = make(map[string]migrator.MigratorDataDB)
+	dmFrom     *engine.DataManager
+	dmTo       *engine.DataManager
 	err        error
 	dfltCfg    = config.NewDefaultCGRConfig()
 	cfgPath    = cgrMigratorFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 	printConfig = cgrMigratorFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
 	exec        = cgrMigratorFlags.String(utils.ExecCgr, utils.EmptyString, "fire up automatic migration "+
-		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*datadb>")
+		"<*set_versions|*ensure_indexes|*stats|*filters|*accounts|*chargers|*loadIDs|*datadb>")
 	version = cgrMigratorFlags.Bool(utils.VersionCgr, false, "prints the application version")
 
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
@@ -222,10 +222,7 @@ func main() {
 		}
 	}
 
-	m, err := migrator.NewMigrator(mgrCfg.DbCfg(), dmFrom, dmTo, *dryRun, sameDataDB)
-	if err != nil {
-		log.Fatal(err)
-	}
+	m := migrator.NewMigrator(dmFrom, dmTo, *dryRun, sameDataDB)
 	defer m.Close()
 	config.SetCgrConfig(mgrCfg)
 	if exec != nil && *exec != utils.EmptyString { // Run migrator
