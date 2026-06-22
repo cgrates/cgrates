@@ -92,7 +92,7 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 		}
 
 	}
-	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns[utils.MetaCaches], tnt, utils.MapStorage{}, admS.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns, utils.MetaCaches, tnt, utils.MapStorage{}, nil, admS.fltrS)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt s
 			APIOpts:  opts,
 		}
 	}
-	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns[utils.MetaCaches], tnt, utils.MapStorage{}, admS.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns, utils.MetaCaches, tnt, utils.MapStorage{}, nil, admS.fltrS)
 	if err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt,
 			APIOpts:  opts,
 		}
 	}
-	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns[utils.MetaCaches], tnt, utils.MapStorage{}, admS.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns, utils.MetaCaches, tnt, utils.MapStorage{}, nil, admS.fltrS)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cac
 			APIOpts:  opts,
 		}
 	}
-	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns[utils.MetaCaches], tnt, utils.MapStorage{}, admS.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns, utils.MetaCaches, tnt, utils.MapStorage{}, nil, admS.fltrS)
 	if err != nil {
 		return err
 	}

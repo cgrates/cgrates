@@ -217,7 +217,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
-	sessionConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), sma.fltrS)
+	sessionConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, sma.fltrS)
 	if err != nil {
 		return
 	}
@@ -326,7 +326,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	//initit Session
 	var initReply sessions.V1InitSessionReply
 	var sessionConns []string
-	sessionConns, err = engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], cgrEvDisp.Tenant, ev.AsCGREvent().AsDataProvider(), sma.fltrS)
+	sessionConns, err = engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, cgrEvDisp.Tenant, ev.AsCGREvent().AsDataProvider(), nil, sma.fltrS)
 	if err != nil {
 		return
 	}
@@ -378,7 +378,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 
 	var reply string
-	sessConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS], cgrEvDisp.Tenant, cgrEvDisp.AsDataProvider(), sma.fltrS)
+	sessConns, err := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS, cgrEvDisp.Tenant, cgrEvDisp.AsDataProvider(), nil, sma.fltrS)
 	if err := sma.connMgr.Call(sma.ctx, sessConns,
 		utils.SessionSv1TerminateSession,
 		cgrEvDisp, &reply); err != nil {

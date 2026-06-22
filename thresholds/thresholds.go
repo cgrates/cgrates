@@ -345,7 +345,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 					args = rplyAttrS.CGREvent
 				}
 			}
-			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaActions], tnt, evNm, s.filters)
+			actionConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns, utils.MetaActions, tnt, evNm, nil, s.filters)
 			if err != nil {
 				withErrors = true
 				utils.Logger.Warning(fmt.Sprintf("<%s> failed resolving action connections for threshold: %s, error: %v", utils.ThresholdS, mt.threshold.TenantID(), err))
@@ -392,7 +392,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 
 // processAttributeS will process the event with AttributeS
 func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*attributes.ProcessEventReply, error) {
-	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaAttributes], tnt, cgrEv.AsDataProvider(), s.filters)
+	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns, utils.MetaAttributes, tnt, cgrEv.AsDataProvider(), nil, s.filters)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *m
 	} else {
 		targetEeIDs = s.cfg.ThresholdSCfg().EEsExporterIDs
 	}
-	eesConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns[utils.MetaEEs], tnt, dP, s.filters)
+	eesConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns, utils.MetaEEs, tnt, dP, nil, s.filters)
 	if err != nil {
 		return err
 	}

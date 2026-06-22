@@ -199,7 +199,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	}
 	authArgs.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	sessionsConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], authArgs.Tenant, authArgs.AsDataProvider(), fsa.fltrS)
+	sessionsConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, fsa.fltrS)
 	if err := fsa.connMgr.Call(fsa.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
@@ -314,7 +314,7 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
 	}
 	cgrEv.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
-	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), fsa.fltrS)
+	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, fsa.fltrS)
 	var initReply sessions.V1InitSessionReply
 	if err := fsa.connMgr.Call(fsa.ctx, sessConns, utils.SessionSv1InitiateSession,
 		cgrEv, &initReply); err != nil {
@@ -356,7 +356,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		return // do not process this request
 	}
 
-	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), fsa.fltrS)
+	sessConns, _ := engine.GetConnIDs(fsa.ctx, fsa.cfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, fsa.fltrS)
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
 		if cgrEv.APIOpts == nil {
 			cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}

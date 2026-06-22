@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
+	"golang.org/x/exp/slices"
 )
 
 func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
@@ -3366,4 +3367,121 @@ func TestConvertOptsToMapStringAny(t *testing.T) {
 			t.Errorf("Expected Weight=20.0, got %v", result["Weight"])
 		}
 	})
+}
+
+func TestGetConnIDsFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(NewCacheS(cfg, nil, nil, nil))
+	fS := NewFilterS(cfg, nil, dm)
+	testCases := []struct {
+		name      string
+		connID    string
+		dnConnsMp map[string][]*config.DynamicConns
+		exp       []string
+		isErr     bool
+	}{
+		{
+			name:   "FilterPass1",
+			connID: utils.MetaChargers,
+			dnConnsMp: map[string][]*config.DynamicConns{
+				utils.MetaChargers: {
+					{
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Tenant:    "cgrates.org",
+						ConnIDs:   []string{"*internal"}},
+				},
+			},
+			exp: []string{"*internal"},
+		},
+		{
+			name:   "FilterPass2",
+			connID: utils.MetaAttributes,
+			dnConnsMp: map[string][]*config.DynamicConns{
+				utils.MetaAttributes: {
+
+					{FilterIDs: []string{"*string:~*req.Account:1002"}, Tenant: "cgrates.org", ConnIDs: []string{"*internal"}},
+					{Tenant: "cgrates.org", ConnIDs: []string{"*localhost"}},
+				},
+			},
+			exp: []string{"*localhost"},
+		},
+		{
+			name:   "FilterPassErr",
+			connID: utils.MetaRates,
+			dnConnsMp: map[string][]*config.DynamicConns{
+				utils.MetaRates: {
+					{FilterIDs: []string{"*let:*opts.*cost:2"}, Tenant: "cgrates.org", ConnIDs: []string{"*internal"}},
+				},
+			},
+			isErr: true,
+		},
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event:  map[string]any{utils.AccountField: 1001},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rcv, err := GetConnIDs(context.Background(), tc.dnConnsMp, tc.connID, ev.Tenant,
+				ev.AsDataProvider(), nil, fS)
+			if tc.isErr {
+				if err == nil {
+					t.Fatal("expected error, received nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Error(err)
+			}
+			if !slices.Equal(rcv, tc.exp) {
+				t.Errorf("expected: <%+v>, received: <%+v>", tc.exp, rcv)
+			}
+		})
+	}
+
+}
+
+func TestGetConnIDsCacheHit(t *testing.T) {
+	dynConnsMp := map[string][]*config.DynamicConns{
+		utils.MetaAttributes: {
+			{Tenant: "cgrates.org", ConnIDs: []string{"*internal"}},
+		},
+	}
+	cch := map[string][]string{
+		utils.ConcatenatedKey(utils.MetaConnID, utils.MetaAttributes): {"*internal"},
+	}
+	if rcv, err := GetConnIDs(context.Background(), dynConnsMp, utils.MetaAttributes, "",
+		utils.MapStorage{}, cch, nil); err != nil {
+		t.Error(err)
+	} else if !slices.Equal(rcv, cch[utils.ConcatenatedKey(utils.MetaConnID, utils.MetaAttributes)]) {
+		t.Errorf("expected: <%+v>, received: <%+v>", cch[utils.ConcatenatedKey(utils.MetaConnID, utils.MetaAttributes)], rcv)
+	}
+}
+
+func TestGetConnIDsCacheStore(t *testing.T) {
+	dynConnsMp := map[string][]*config.DynamicConns{
+		utils.MetaThresholds: {
+			{Tenant: "cgrates.org", ConnIDs: []string{"*internal"}},
+		},
+	}
+	cch := make(map[string][]string)
+	key := utils.ConcatenatedKey(utils.MetaConnID, utils.MetaThresholds)
+	exp := []string{"*internal"}
+	if rcv, err := GetConnIDs(context.Background(), dynConnsMp, utils.MetaThresholds, "cgrates.org",
+		utils.MapStorage{}, cch, nil); err != nil {
+		t.Error(err)
+	} else if !slices.Equal(rcv, exp) {
+		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv)
+	}
+	if stored, has := cch[key]; !has {
+		t.Errorf("expected cache to contain key <%s>", key)
+	} else if !slices.Equal(stored, exp) {
+		t.Errorf("expected cached: <%+v>, received: <%+v>", exp, stored)
+	}
 }

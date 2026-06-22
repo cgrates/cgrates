@@ -144,7 +144,7 @@ func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)
 	}
 	var eesConns []string
-	if eesConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaEEs], aL.tnt, data, aL.fltrS); err != nil {
+	if eesConns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaEEs, aL.tnt, data, nil, aL.fltrS); err != nil {
 		return
 	}
 	var rply map[string]map[string]any

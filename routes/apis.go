@@ -39,7 +39,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	if args.APIOpts == nil {
 		args.APIOpts = make(map[string]any)
 	}
-	attrConns, err := engine.GetConnIDs(ctx, rpS.cfg.RouteSCfg().Conns[utils.MetaAttributes], tnt, args.AsDataProvider(), rpS.fltrS)
+	attrConns, err := engine.GetConnIDs(ctx, rpS.cfg.RouteSCfg().Conns, utils.MetaAttributes, tnt, args.AsDataProvider(), nil, rpS.fltrS)
 	if err != nil {
 		return err
 	}

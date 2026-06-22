@@ -174,48 +174,42 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider,
 }
 
 // GetConnIDs resolves dynamic connection IDs.
-// If optNames are provided, *opts in dP are checked first.
-func GetConnIDs(ctx *context.Context, dynConns []*config.DynamicConns,
-	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
-	if len(optNames) > 0 {
-		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
-			return utils.IfaceAsStringSlice(opt)
-		} else if !errors.Is(err, utils.ErrNotFound) {
-			return nil, err
+func GetConnIDs(ctx *context.Context, dynConnsMp map[string][]*config.DynamicConns, connID string,
+	tnt string, dP utils.DataProvider, cch map[string][]string, fltrS *FilterS) (conns []string, err error) {
+	if cch != nil {
+		var ok bool
+		if conns, ok = cch[utils.ConcatenatedKey(utils.MetaConnID, connID)]; ok {
+			return
 		}
 	}
-	if len(dynConns) == 0 {
-		return nil, nil
-	}
-	for _, opt := range dynConns {
+	for _, opt := range dynConnsMp[connID] {
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
 			continue
 		}
 		if len(opt.FilterIDs) == 0 {
-			return opt.ConnIDs, nil
+			conns = opt.ConnIDs
+			if cch != nil {
+				cch[utils.ConcatenatedKey(utils.MetaConnID, connID)] = conns
+			}
+			return
 		}
-		if pass, err := fltrS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil {
+		var pass bool
+		if pass, err = fltrS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil {
 			return nil, err
 		} else if pass {
-			return opt.ConnIDs, nil
+			conns = opt.ConnIDs
+			if cch != nil {
+				cch[utils.ConcatenatedKey(utils.MetaConnID, connID)] = conns
+			}
+			return
 		}
 	}
-	return nil, nil
+	return
 }
 
-func getConnIDsWithDP(ctx *context.Context, dynConns []*config.DynamicConns,
-	tnt string, dP utils.DataProvider, fltrS *FilterS, optNames ...string) ([]string, error) {
-	if len(optNames) > 0 {
-		if opt, err := optIfaceFromDP(dP, nil, optNames); err == nil {
-			return utils.IfaceAsStringSlice(opt)
-		} else if !errors.Is(err, utils.ErrNotFound) {
-			return nil, err
-		}
-	}
-	if len(dynConns) == 0 {
-		return nil, nil
-	}
-	for _, opt := range dynConns {
+func getConnIDsWithDP(ctx *context.Context, dynConnsMp map[string][]*config.DynamicConns, connID string,
+	tnt string, dP utils.DataProvider, fltrS *FilterS) ([]string, error) {
+	for _, opt := range dynConnsMp[connID] {
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
 			continue
 		}

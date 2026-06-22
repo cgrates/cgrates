@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -107,7 +108,7 @@ type LoaderSCfg struct {
 	Tenant         string
 	RunDelay       time.Duration
 	LockFilePath   string
-	CacheSConns    []string
+	Conns          map[string][]*DynamicConns
 	FieldSeparator string
 	TpInDir        string
 	TpOutDir       string
@@ -191,8 +192,12 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Caches_conns != nil {
-		l.CacheSConns = tagInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
+	if jsnCfg.Conns != nil {
+		tagged := tagConns(jsnCfg.Conns)
+		if l.Conns == nil {
+			l.Conns = make(map[string][]*DynamicConns)
+		}
+		maps.Copy(l.Conns, tagged)
 	}
 	if jsnCfg.Field_separator != nil {
 		l.FieldSeparator = *jsnCfg.Field_separator
@@ -284,7 +289,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		Tenant:         l.Tenant,
 		RunDelay:       l.RunDelay,
 		LockFilePath:   l.LockFilePath,
-		CacheSConns:    slices.Clone(l.CacheSConns),
+		Conns:          CloneConnsMap(l.Conns),
 		FieldSeparator: l.FieldSeparator,
 		TpInDir:        l.TpInDir,
 		TpOutDir:       l.TpOutDir,
@@ -347,9 +352,7 @@ func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 	if l.RunDelay != 0 {
 		mp[utils.RunDelayCfg] = l.RunDelay.String()
 	}
-	if l.CacheSConns != nil {
-		mp[utils.CachesConnsCfg] = stripInternalConns(l.CacheSConns)
-	}
+	mp[utils.ConnsCfg] = stripConns(l.Conns)
 	if l.Cache != nil {
 		cache := make(map[string]any, len(l.Cache))
 		for key, value := range l.Cache {
@@ -378,13 +381,13 @@ type LoaderJsonOptsCfg struct {
 type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
-	Tenant          *string   `json:"tenant"`
-	Run_delay       *string   `json:"runDelay"`
-	Lockfile_path   *string   `json:"lockfilePath"`
-	Caches_conns    *[]string `json:"cachesConns"`
-	Field_separator *string   `json:"fieldSeparator"`
-	Tp_in_path      *string   `json:"tpInPath"`
-	Tp_out_path     *string   `json:"tpOutPath"`
+	Tenant          *string                    `json:"tenant"`
+	Run_delay       *string                    `json:"runDelay"`
+	Lockfile_path   *string                    `json:"lockfilePath"`
+	Conns           map[string][]*DynamicConns `json:"conns,omitempty"`
+	Field_separator *string                    `json:"fieldSeparator"`
+	Tp_in_path      *string                    `json:"tpInPath"`
+	Tp_out_path     *string                    `json:"tpOutPath"`
 	Data            *[]*LoaderJsonDataType
 
 	Action *string
@@ -441,8 +444,8 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg) (d *LoaderJsonCfg) {
 	if v1.LockFilePath != v2.LockFilePath {
 		d.Lockfile_path = utils.StringPointer(v2.LockFilePath)
 	}
-	if !slices.Equal(v1.CacheSConns, v2.CacheSConns) {
-		d.Caches_conns = utils.SliceStringPointer(stripInternalConns(v2.CacheSConns))
+	if !ConnsMapEqual(v1.Conns, v2.Conns) {
+		d.Conns = stripConns(v2.Conns)
 	}
 	if v1.FieldSeparator != v2.FieldSeparator {
 		d.Field_separator = utils.StringPointer(v2.FieldSeparator)
@@ -486,7 +489,7 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 			v1[i].Tenant != v2[i].Tenant ||
 			v1[i].RunDelay != v2[i].RunDelay ||
 			v1[i].LockFilePath != v2[i].LockFilePath ||
-			!slices.Equal(v1[i].CacheSConns, v2[i].CacheSConns) ||
+			!ConnsMapEqual(v1[i].Conns, v2[i].Conns) ||
 			v1[i].FieldSeparator != v2[i].FieldSeparator ||
 			v1[i].TpInDir != v2[i].TpInDir ||
 			v1[i].TpOutDir != v2[i].TpOutDir ||

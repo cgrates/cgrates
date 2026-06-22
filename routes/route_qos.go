@@ -41,7 +41,7 @@ type QOSRouteSorter struct {
 
 func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	statSConns, err := engine.GetConnIDs(ctx, qos.cfg.RouteSCfg().Conns[utils.MetaStats], ev.Tenant, ev.AsDataProvider(), qos.fltrS)
+	statSConns, err := engine.GetConnIDs(ctx, qos.cfg.RouteSCfg().Conns, utils.MetaStats, ev.Tenant, ev.AsDataProvider(), nil, qos.fltrS)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
 		sum *utils.Decimal
 		len int
 	}
-	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns[utils.MetaStats], tenant, utils.MapStorage{}, fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaStats, tenant, utils.MapStorage{}, nil, fltrS)
 	if err != nil {
 		return
 	}

@@ -43,9 +43,6 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	}
 	if jsnCfg.Conns != nil {
 		tagged := tagConns(jsnCfg.Conns)
-		if fSCfg.Conns == nil {
-			fSCfg.Conns = make(map[string][]*DynamicConns)
-		}
 		for connType, opts := range tagged {
 			fSCfg.Conns[connType] = opts
 		}

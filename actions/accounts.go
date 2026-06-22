@@ -50,7 +50,7 @@ func (aL *actSetBalance) cfg() *utils.APAction {
 // execute implements actioner interface
 func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaAccounts], aL.tnt, data, aL.fltrS)
+	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAccounts, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
@@ -128,7 +128,7 @@ func (aL *actRemBalance) cfg() *utils.APAction {
 // execute implements actioner interface
 func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	var conns []string
-	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaAccounts], aL.tnt, data, aL.fltrS)
+	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAccounts, aL.tnt, data, nil, aL.fltrS)
 	if len(conns) == 0 {
 		return fmt.Errorf("no connection with AccountS")
 	}

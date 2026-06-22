@@ -130,7 +130,7 @@ func (ja *JanusAgent) authSession(origIP string) (err error) {
 		},
 	}
 	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
-	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
 	if err != nil {
 		return
 	}
@@ -155,7 +155,7 @@ func (ja *JanusAgent) acntStartSession(s *janus.Session) (err error) {
 	}
 
 	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
-	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
 	if err != nil {
 		return
 	}
@@ -181,7 +181,7 @@ func (ja *JanusAgent) acntStopSession(s *janus.Session) (err error) {
 		},
 	}
 	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
-	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
 	if err != nil {
 		return
 	}
@@ -206,7 +206,7 @@ func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
 		},
 	}
 	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
-	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns[utils.MetaSessionS], tnt, utils.MapStorage{}, ja.filterS)
+	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
 	if err != nil {
 		return
 	}

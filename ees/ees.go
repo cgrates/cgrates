@@ -121,7 +121,7 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 		utils.MetaEEs)
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 
-	attrConns, err := engine.GetConnIDs(ctx, eeS.cfg.EEsNoLksCfg().Conns[utils.MetaAttributes], cgrEv.Tenant, cgrEv.AsDataProvider(), eeS.fltrS)
+	attrConns, err := engine.GetConnIDs(ctx, eeS.cfg.EEsNoLksCfg().Conns, utils.MetaAttributes, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, eeS.fltrS)
 	if err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv any, key an
 					APIOpts:   exp.Cfg().Opts.AsMapInterface(),
 				}
 				var reply string
-				efsConns, errConn := engine.GetConnIDs(ctx, exp.Cfg().Conns[utils.MetaEFs], tnt, utils.MapStorage{}, fltrS)
+				efsConns, errConn := engine.GetConnIDs(ctx, exp.Cfg().Conns, utils.MetaEFs, tnt, utils.MapStorage{}, nil, fltrS)
 				if errConn != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> Exporter <%s> could not resolve connections for <%s> service because err: <%s>",

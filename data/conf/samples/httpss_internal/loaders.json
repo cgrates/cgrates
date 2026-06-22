@@ -4,7 +4,9 @@
             "id": "*default",
             "enabled": true,
             "runDelay": "0",
-            "cachesConns": ["*internal"],
+            "conns": {
+                "*caches": [{"connIDs": ["*internal"]}]
+            },
             "tpInPath": "/tmp/TestHttpSessionsIt/loader/in",
             "tpOutPath": "",
             "data": []

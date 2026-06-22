@@ -1883,7 +1883,7 @@ func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 		IndexType:       utils.MetaInternal,
 		TTL:             1,
 		CleanupInterval: 1,
-		EEsConns:        []string{utils.MetaInternal},
+		Conns:           map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{utils.MetaInternal}}}},
 	}
 
 	expErr := "<EEs> not enabled but requested by <AnalyzerS> component"
@@ -1901,7 +1901,7 @@ func TestCGRConfigcheckConfigSanityAnalyzerSErr(t *testing.T) {
 		Enabled:   true,
 		IndexType: utils.MetaInternal,
 		TTL:       1,
-		EEsConns:  []string{"test"},
+		Conns:     map[string][]*DynamicConns{utils.MetaEEs: {{ConnIDs: []string{"test"}}}},
 	}
 
 	expErr := "<AnalyzerS> connection with id: <test> not defined"

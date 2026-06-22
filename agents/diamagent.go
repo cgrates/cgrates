@@ -292,9 +292,9 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	opts := utils.MapStorage{}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
-	sessConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaSessionS], utils.MetaAny, diamDP, da.fltrS)
-	statConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaStats], utils.MetaAny, diamDP, da.fltrS)
-	thrConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns[utils.MetaThresholds], utils.MetaAny, diamDP, da.fltrS)
+	sessConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns, utils.MetaSessionS, utils.MetaAny, diamDP, nil, da.fltrS)
+	statConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns, utils.MetaStats, utils.MetaAny, diamDP, nil, da.fltrS)
+	thrConns, _ := engine.GetConnIDs(da.ctx, da.cgrCfg.DiameterAgentCfg().Conns, utils.MetaThresholds, utils.MetaAny, diamDP, nil, da.fltrS)
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
@@ -506,9 +506,16 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 // sendConnStatusReport reports connection status changes to StatS and ThresholdS.
 func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status, localAddr, remoteAddr string) {
 	daCfg := da.cgrCfg.DiameterAgentCfg()
-	statConns, _ := engine.GetConnIDs(da.ctx, daCfg.Conns[utils.MetaStats], utils.MetaAny, utils.MapStorage{}, da.fltrS)
-	threshConns, _ := engine.GetConnIDs(da.ctx, daCfg.Conns[utils.MetaThresholds], utils.MetaAny, utils.MapStorage{}, da.fltrS)
-	if len(statConns) == 0 && len(threshConns) == 0 {
+	statConns, err := engine.GetConnIDs(da.ctx, daCfg.Conns, utils.MetaStats, utils.MetaAny, utils.MapStorage{}, nil, da.fltrS)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("failed to process %s conns for %s: %v",
+			utils.EventConnectionStatusReport, utils.StatS, err))
+		return // nothing to do
+	}
+	threshConns, err := engine.GetConnIDs(da.ctx, daCfg.Conns, utils.MetaThresholds, utils.MetaAny, utils.MapStorage{}, nil, da.fltrS)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("failed to process %s conns for %s: %v",
+			utils.EventConnectionStatusReport, utils.ThresholdS, err))
 		return // nothing to do
 	}
 

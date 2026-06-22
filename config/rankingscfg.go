@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package config
 
 import (
+	"maps"
 	"slices"
 	"time"
 
@@ -53,9 +54,7 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 		if rnk.Conns == nil {
 			rnk.Conns = make(map[string][]*DynamicConns)
 		}
-		for connType, opts := range tagged {
-			rnk.Conns[connType] = opts
-		}
+		maps.Copy(rnk.Conns, tagged)
 	}
 	if jsnCfg.Scheduled_ids != nil {
 		rnk.ScheduledIDs = jsnCfg.Scheduled_ids

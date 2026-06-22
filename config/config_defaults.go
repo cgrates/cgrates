@@ -68,7 +68,7 @@ const CGRATES_CFG_JSON = `
 "logger": {
 	"type": "*syslog",						// controls the destination of logs <*syslog|*stdout|*kafkaLog>
 	"level": 6,							// system level precision for floats
-	"efsConns": ["*internal"],					// connID to efs service 
+	"efsConns": ["*internal"],					// connID to efs service
 	"opts": {
 		"failedPostsDir": "/var/spool/cgrates/failed_posts",	// path where fail logs are exported
 		"kafkaAttempts": 1,					// number of attempts of connecting
@@ -1848,7 +1848,9 @@ const CGRATES_CFG_JSON = `
 		"tenant": "",					// tenant used in filterS.Pass
 		"runDelay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 		"lockfilePath": ".cgr.lck",			// Filename containing concurrency lock in case of delayed processing
-		"cachesConns": ["*internal"],
+		"conns": {
+			"*caches": [{"connIDs": ["*internal"]}]
+		},
 		"fieldSeparator": ",",				// separator used in case of csv files
 		"tpInPath": "/var/spool/cgrates/loader/in",	// absolute path towards the directory where the TPs are stored
 		"tpOutPath": "",	// absolute path towards the directory where processed TPs will be moved
@@ -2210,7 +2212,15 @@ const CGRATES_CFG_JSON = `
  	"dbPath": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
 	"indexType": "*scorch",			// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
 	"ttl": "24h",					// time to wait before removing the API capture
-	"eesConns": [],				// connections to EEs
+	"conns": {
+		// "*ees": [	// connections to EEs
+		// 	{
+		// 		"tenant": "",
+		// 		"filterIDs": [],
+		// 		"connIDs": ["*internal"]
+		// 	}
+		// ],
+	},				
 	"cleanupInterval": "1h",			// the interval we clean the db
 	"opts":{
 		// "*exporterIDs": [

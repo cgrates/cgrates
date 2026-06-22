@@ -71,6 +71,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	// end of RPC caching
 	dP := args.AsDataProvider()
+	cacheConns := make(map[string][]string)
 	var attrS bool
 	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
 		utils.MetaAttributes); err != nil {
@@ -101,7 +102,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if attrS {
 		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			authReply.Attributes = rplyAttr
@@ -119,7 +120,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -137,7 +138,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.MaxUsage = getMaxUsageFromRuns(maxAbstracts)
 	}
 	if resourceS {
-		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -158,7 +159,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.ResourceAllocation = &allocMsg
 	}
 	if ipS {
-		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -307,6 +308,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 
 	dP := args.AsDataProvider()
+	cacheConns := make(map[string][]string)
 
 	// TODO: accounting not yet functional for InitiateSession API.
 	// var acntS bool
@@ -341,7 +343,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	if attrS {
 		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = rplyAttr
@@ -360,7 +362,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	if chrgS {
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
 			utils.MetaSessionS, args); err != nil {
 			return
 		}
@@ -372,7 +374,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 
 	if resourceS {
-		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -401,7 +403,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 
 	}
 	if ipS {
-		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -545,7 +547,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 
 	if attrS {
 		rplyAttr, err := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, args)
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, utils.MetaSessionS, args)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = rplyAttr
@@ -624,6 +626,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 
 	var withErrors bool
 	dP := args.AsDataProvider()
+	cacheConns := make(map[string][]string)
 	var ipsRelease bool
 	if ipsRelease, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsRelease,
 		utils.MetaIPs); err != nil {
@@ -695,7 +698,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 	}
 	if resourcesRelease {
-		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaResources], args.Tenant, dP, sS.fltrS)
+		resSConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -712,7 +715,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	}
 
 	if ipsRelease {
-		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaIPs], args.Tenant, dP, sS.fltrS)
+		ipsConns, errConn := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, args.Tenant, dP, cacheConns, sS.fltrS)
 		if errConn != nil {
 			return errConn
 		}
@@ -865,7 +868,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	if cch[utils.MetaAttributes].(bool) {
 		if rplyAttr, errProc := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaAttributes], sS.connMgr, utils.MetaSessionS, apiArgs); errProc != nil {
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, utils.MetaSessionS, apiArgs); errProc != nil {
 			if errProc.Error() != utils.ErrNotFound.Error() {
 				return utils.NewErrAttributeS(errProc)
 			}
@@ -937,7 +940,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaRunID].(string) == utils.MetaPrimary && len(cgrEvs) < 2 { // initial event, not inherited from Session
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
-			sS.cfg.SessionSCfg().Conns[utils.MetaChargers], sS.connMgr, sS.cache,
+			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
 			utils.MetaSessionS, apiArgs); err != nil {
 			return
 		}
@@ -1095,7 +1098,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if rtS {
 			var rtsCost *utils.RateProfileCost
 			if rtsCost, err = rates.RateScCostForEvent(ctx, sS.fltrS,
-				sS.cfg.SessionSCfg().Conns[utils.MetaRates], sS.connMgr,
+				sS.cfg.SessionSCfg().Conns, sS.connMgr,
 				utils.MetaSessionS, cgrEv); err != nil {
 				if cch[utils.OptsSesBlockerError].(bool) {
 					return

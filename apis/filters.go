@@ -71,7 +71,7 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns[utils.MetaCaches], arg.Tenant, arg, adms.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns, utils.MetaCaches, arg.Tenant, arg, nil, adms.fltrS)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -171,7 +171,7 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns[utils.MetaCaches], arg.Tenant, utils.MapStorage{}, adms.fltrS)
+	connIDs, err := engine.GetConnIDs(ctx, adms.cfg.AdminSCfg().Conns, utils.MetaCaches, arg.Tenant, utils.MapStorage{}, nil, adms.fltrS)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}

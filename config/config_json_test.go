@@ -1098,7 +1098,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			Tenant:          utils.StringPointer(""),
 			Run_delay:       utils.StringPointer("0"),
 			Lockfile_path:   utils.StringPointer(".cgr.lck"),
-			Caches_conns:    &[]string{utils.MetaInternal},
+			Conns:           map[string][]*DynamicConns{utils.MetaCaches: {{ConnIDs: []string{utils.MetaInternal}}}},
 			Field_separator: utils.StringPointer(","),
 			Tp_in_path:      utils.StringPointer("/var/spool/cgrates/loader/in"),
 			Tp_out_path:     utils.StringPointer(""),
@@ -2150,7 +2150,7 @@ func TestDfAnalyzerCfg(t *testing.T) {
 		Cleanup_interval: utils.StringPointer("1h"),
 		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
 		Index_type:       utils.StringPointer(utils.MetaScorch),
-		Ees_conns:        &[]string{},
+		Conns:            map[string][]*DynamicConns{},
 		Ttl:              utils.StringPointer("24h"),
 		Opts:             &AnalyzerSOptsJson{},
 	}

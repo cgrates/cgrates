@@ -746,6 +746,7 @@ const (
 	MetaSIPURIHost          = "*sipuriHost"
 	MetaSIPURIUser          = "*sipuriUser"
 	MetaConnStatus          = "*connStatus"
+	MetaConnID              = "*connID"
 	E164DomainConverter     = "*e164Domain"
 	E164Converter           = "*e164"
 	MetaJoin                = "*join"

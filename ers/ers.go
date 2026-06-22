@@ -230,7 +230,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 			var reply []string
 			var statConns []string
-			statConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaStats], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+			statConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaStats, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 			if err != nil {
 				return
 			}
@@ -245,7 +245,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 			var reply []string
 			var thresholdConns []string
-			thresholdConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaThresholds], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+			thresholdConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 			if err != nil {
 				return
 			}
@@ -287,7 +287,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rply := new(sessions.V1AuthorizeReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -300,7 +300,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rply := new(sessions.V1InitSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -313,7 +313,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rply := new(sessions.V1UpdateSessionReply)
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -326,7 +326,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rply := utils.StringPointer("")
 		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -338,7 +338,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -356,7 +356,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -375,7 +375,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	if rdrCfg.Flags.Has(utils.MetaExport) {
 		var reply map[string]map[string]any
 		var eesConns []string
-		eesConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaEEs], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		eesConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaEEs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -396,7 +396,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	if rdrCfg.Flags.Has(utils.MetaCDRs) {
 		var replyCDRs string
 		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaSessionS], cgrEv.Tenant, cgrEv.AsDataProvider(), erS.fltrS)
+		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
@@ -642,7 +642,7 @@ func (erS *ERService) exportRawEvent(event *erEvent, processingFailed bool) erro
 
 	var reply map[string]map[string]any
 
-	eesConns, err := engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns[utils.MetaEEs], event.cgrEvent.Tenant, event.cgrEvent.AsDataProvider(), erS.fltrS)
+	eesConns, err := engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaEEs, event.cgrEvent.Tenant, event.cgrEvent.AsDataProvider(), nil, erS.fltrS)
 	if err != nil {
 		return err
 	}

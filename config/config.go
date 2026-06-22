@@ -141,6 +141,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Store:      []*DynamicBoolOpt{{value: CDRsStoreDftOpt}},
 		}},
 		analyzerSCfg: &AnalyzerSCfg{
+			Conns: make(map[string][]*DynamicConns),
 			Opts: &AnalyzerSOpts{
 				ExporterIDs: []*DynamicStringSliceOpt{},
 			},
@@ -206,45 +207,55 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ClientSecrets:      make(map[string]string),
 		},
 		dnsAgentCfg:        &DNSAgentCfg{Conns: make(map[string][]*DynamicConns)},
-		janusAgentCfg:      new(JanusAgentCfg),
+		janusAgentCfg:      &JanusAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		prometheusAgentCfg: &PrometheusAgentCfg{Conns: make(map[string][]*DynamicConns)},
-		attributeSCfg: &AttributeSCfg{Conns: make(map[string][]*DynamicConns), Opts: &AttributesOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
-			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
-		}},
+		attributeSCfg: &AttributeSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &AttributesOpts{
+				ProfileIDs:           []*DynamicStringSliceOpt{},
+				ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+				ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
+			}},
 		chargerSCfg: &ChargerSCfg{Conns: make(map[string][]*DynamicConns)},
-		resourceSCfg: &ResourceSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ResourcesOpts{
-			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
-			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
-			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
-		}},
+		resourceSCfg: &ResourceSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &ResourcesOpts{
+				UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
+				UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
+				Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
+			}},
 		ipsCfg: &IPsCfg{Opts: &IPsOpts{
 			AllocationID: []*DynamicStringOpt{{value: IPsAllocationIDDftOpt}},
 			TTL:          []*DynamicDurationOpt{{value: IPsTTLDftOpt}},
 		}},
 		trendSCfg:   &TrendSCfg{Conns: make(map[string][]*DynamicConns)},
 		rankingSCfg: &RankingSCfg{Conns: make(map[string][]*DynamicConns)},
-		statsCfg: &StatSCfg{Conns: make(map[string][]*DynamicConns), Opts: &StatsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
-			RoundingDecimals:     []*DynamicIntOpt{},
-		}},
-		thresholdSCfg: &ThresholdSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ThresholdsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
-		}},
-		routeSCfg: &RouteSCfg{Conns: make(map[string][]*DynamicConns), Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
-			IgnoreErrors: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
-			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
-			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
-			Limit:        []*DynamicIntPointerOpt{},
-			Offset:       []*DynamicIntPointerOpt{},
-			MaxItems:     []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
-		}},
+		statsCfg: &StatSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &StatsOpts{
+				ProfileIDs:           []*DynamicStringSliceOpt{},
+				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
+				RoundingDecimals:     []*DynamicIntOpt{},
+			}},
+		thresholdSCfg: &ThresholdSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &ThresholdsOpts{
+				ProfileIDs:           []*DynamicStringSliceOpt{},
+				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
+			}},
+		routeSCfg: &RouteSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &RoutesOpts{
+				Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+				IgnoreErrors: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
+				MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
+				ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+				Limit:        []*DynamicIntPointerOpt{},
+				Offset:       []*DynamicIntPointerOpt{},
+				MaxItems:     []*DynamicIntPointerOpt{},
+				Usage:        []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
+			}},
 		tpeSCfg:    new(TpeSCfg),
 		sureTaxCfg: new(SureTaxCfg),
 		registrarCCfg: &RegistrarCCfgs{
@@ -268,21 +279,25 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		}},
 		efsCfg: new(EFsCfg),
-		actionSCfg: &ActionSCfg{Conns: make(map[string][]*DynamicConns), Opts: &ActionsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
-			PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
-		}},
+		actionSCfg: &ActionSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &ActionsOpts{
+				ProfileIDs:           []*DynamicStringSliceOpt{},
+				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
+				PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
+			}},
 		sipAgentCfg:   &SIPAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		configSCfg:    new(ConfigSCfg),
 		apiBanCfg:     new(APIBanCfg),
 		sentryPeerCfg: new(SentryPeerCfg),
 		coreSCfg:      &CoreSCfg{Conns: make(map[string][]*DynamicConns)},
-		accountSCfg: &AccountSCfg{Conns: make(map[string][]*DynamicConns), Opts: &AccountsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			Usage:                []*DynamicDecimalOpt{{value: AccountsUsageDftOpt}},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
-		}},
+		accountSCfg: &AccountSCfg{
+			Conns: make(map[string][]*DynamicConns),
+			Opts: &AccountsOpts{
+				ProfileIDs:           []*DynamicStringSliceOpt{},
+				Usage:                []*DynamicDecimalOpt{{value: AccountsUsageDftOpt}},
+				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
+			}},
 		configDBCfg: &ConfigDBCfg{
 			Opts: &DBOpts{},
 		},

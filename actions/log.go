@@ -66,7 +66,7 @@ func (aL *actCDRLog) cfg() *utils.APAction {
 
 // execute implements actioner interface
 func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt string) (err error) {
-	cdrsConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns[utils.MetaCDRs], tnt, data, aL.fltrS)
+	cdrsConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaCDRs, tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
