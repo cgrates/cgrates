@@ -24,6 +24,7 @@ import (
 	"errors"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -733,6 +734,20 @@ func testAccITCountAccounts(t *testing.T) {
 		t.Error(err)
 	} else if reply != 12 {
 		t.Errorf("Expecting: %v, received: %v", 12, reply)
+	}
+	var ids []string
+	if err := accRPC.Call(context.Background(), utils.APIerSv1GetAccountIDs,
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &ids); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(ids)
+	expected := []string{
+		"AddBalanceWithNegative", "account1", "account2", "account3", "account4",
+		"refundAcc", "test", "testAccAddBalance", "testAccITSetBalanceWithExtraData",
+		"testAccITSetBalanceWithExtraData2", "testAccSetBalance", "testrandomAccoutSetBalance",
+	}
+	if !reflect.DeepEqual(ids, expected) {
+		t.Errorf("expected %v, received %v", expected, ids)
 	}
 }
 func testAccITCountAccountsWithoutTenant(t *testing.T) {
