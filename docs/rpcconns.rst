@@ -17,7 +17,6 @@ Example configuration in the JSON file:
 	"rpc_conns": {
 		"conn1": {
 			"strategy": "*first",
-			"pool_size": 0,
 			"conns": [{
 				"address": "192.168.122.210:2012",
 				"transport": "*json",
@@ -75,14 +74,10 @@ Strategy
     * ``*broadcast``: Sends to all connections, returns first successful response
     * ``*broadcast_sync``: Sends to all, waits for completion, logs errors that wouldn't trigger failover in ``*first``
     * ``*broadcast_async``: Sends to all without waiting for responses
-    * ``*parallel``: Pool that creates and reuses connections up to a limit
+    * ``*parallel``: Not a selection strategy like the others. It keeps a pool of connections to a single engine (only the first one listed) so concurrent callers don't all share one connection, growing on demand up to ``general.max_parallel_conns``.
 
 .. note::
     Connections attempt failover to the next available connection in the pool on connection errors, timeouts, or service errors. Service errors (usually referring to "can't find service" errors) occur when attempting to reach services that are either temporarily unavailable during engine initialization or disabled in that particular instance.
-
-PoolSize
-    Sets the connection limit for ``*parallel`` strategy (0 means unlimited)
-
 
 Connection Parameters
 ^^^^^^^^^^^^^^^^^^^^^
