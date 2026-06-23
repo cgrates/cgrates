@@ -95,9 +95,244 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			Privatekey_path:     utils.StringPointer("randomPath"),
 		},
 		Opts: &SessionsOptsJson{
+			Accounts: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			AccountsForceUsage: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  false,
+				},
+			},
+			Attributes: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			AttributesDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			BlockerError: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			CDRs: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			CDRsDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Chargeable: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Chargers: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
 			AutoChargeInterval: []*DynamicInterfaceOpt{
 				{
-					Value: 2 * time.Second,
+					Tenant: "cgrates.net",
+					Value:  2 * time.Second,
+				},
+			},
+			EEs: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  false,
+				},
+			},
+			EEsIDs: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  "eesid1",
+				},
+			},
+			ForceUsage: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Initiate: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			IPs: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			IPsAllocate: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			IPsAuthorize: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			IPsRelease: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			MaxUsage: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Message: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			OriginID: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  "originId1",
+				},
+			},
+			Rates: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Resources: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			ResourcesAllocate: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			ResourcesAuthorize: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			ResourcesDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			ResourcesRelease: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Routes: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			RoutesDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Stats: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			StatsDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Terminate: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Thresholds: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			ThresholdsDerivedReply: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			TTL: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  4 * time.Second,
+				},
+			},
+			TTLLastUsage: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  utils.DurationPointer(6 * time.Second),
+				},
+			},
+			TTLLastUsed: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  utils.DurationPointer(6 * time.Second),
+				},
+			},
+			TTLMaxDelay: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  4 * time.Second,
+				},
+			},
+			TTLUsage: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  utils.DurationPointer(4 * time.Second),
+				},
+			},
+			Update: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
 				},
 			},
 		},
@@ -140,63 +375,287 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MetaReplication: {{ConnIDs: []string{"*conn1"}}},
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{{}},
-			Rates:                  []*DynamicBoolOpt{{}},
-			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
-			Chargers:               []*DynamicBoolOpt{{}},
-			Resources:              []*DynamicBoolOpt{{}},
-			IPs:                    []*DynamicBoolOpt{{}},
-			Routes:                 []*DynamicBoolOpt{{}},
-			Stats:                  []*DynamicBoolOpt{{}},
-			Thresholds:             []*DynamicBoolOpt{{}},
-			Initiate:               []*DynamicBoolOpt{{}},
-			Update:                 []*DynamicBoolOpt{{}},
-			Terminate:              []*DynamicBoolOpt{{}},
-			Message:                []*DynamicBoolOpt{{}},
-			AttributesDerivedReply: []*DynamicBoolOpt{{}},
-			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
-			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
-			ResourcesAllocate:      []*DynamicBoolOpt{{}},
-			ResourcesRelease:       []*DynamicBoolOpt{{}},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
-			IPsAuthorize:           []*DynamicBoolOpt{{}},
-			IPsAllocate:            []*DynamicBoolOpt{{}},
-			IPsRelease:             []*DynamicBoolOpt{{}},
-			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
-			StatsDerivedReply:      []*DynamicBoolOpt{{}},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
-			MaxUsage:               []*DynamicBoolOpt{{}},
-			InterimUsage:           []*DynamicDecimalOpt{},
-			TotalUsage:             []*DynamicDecimalOpt{},
-			AccountsDebit:          []*DynamicBoolOpt{{}},
-			Session:                []*DynamicBoolOpt{{}},
-			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
-			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
-			ForceUsage:             []*DynamicBoolOpt{},
+			Accounts: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			AccountsDebit: []*DynamicBoolOpt{{}},
+			Session:       []*DynamicBoolOpt{{}},
+			InterimUsage:  []*DynamicDecimalOpt{},
+			TotalUsage:    []*DynamicDecimalOpt{},
+			AccountsForceUsage: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  false},
+			},
+			Attributes: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			AttributesDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			BlockerError: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			CDRs: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			CDRsDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Chargeable: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Chargers: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
 			AutoChargeInterval: []*DynamicDurationOpt{
 				{
-					value: 2 * time.Second,
+					Tenant: "cgrates.net",
+					value:  2 * time.Second,
 				},
+				{},
+			},
+			EEs: []*DynamicBoolOpt{
 				{
-					value: SessionsAutoChargeIntervalDftOpt,
+					Tenant: "cgrates.net",
+					value:  false,
 				},
 			},
-			TTLLastUsage:       []*DynamicDurationPointerOpt{},
-			TTLLastUsed:        []*DynamicDurationPointerOpt{},
-			TTLMaxDelay:        []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
-			TTLUsage:           []*DynamicDurationPointerOpt{},
-			OriginID:           []*DynamicStringOpt{},
-			AccountsForceUsage: []*DynamicBoolOpt{},
-			EEs:                []*DynamicBoolOpt{},
-			EEsIDs:             []*DynamicStringOpt{},
+			EEsIDs: []*DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  "eesid1",
+				},
+			},
+			ForceUsage: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+			},
+			Initiate: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			IPs: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			IPsAllocate: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			IPsAuthorize: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			IPsRelease: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			MaxUsage: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Message: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			OriginID: []*DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  "originId1",
+				},
+			},
+			Rates: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Resources: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			ResourcesAllocate: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			ResourcesAuthorize: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			ResourcesDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			ResourcesRelease: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Routes: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			RoutesDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Stats: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			StatsDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Terminate: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			Thresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
+			TTL: []*DynamicDurationOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  4 * time.Second,
+				},
+				{},
+			},
+			TTLLastUsage: []*DynamicDurationPointerOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  utils.DurationPointer(6 * time.Second),
+				},
+			},
+			TTLLastUsed: []*DynamicDurationPointerOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  utils.DurationPointer(6 * time.Second),
+				},
+			},
+			TTLMaxDelay: []*DynamicDurationOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  4 * time.Second,
+				},
+				{},
+			},
+			TTLUsage: []*DynamicDurationPointerOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  utils.DurationPointer(4 * time.Second),
+				},
+			},
+			Update: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+				{},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, jsonCfg.sessionSCfg) {
+	} else if !reflect.DeepEqual(utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg)) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
 	}
 	cfgJSON = nil
@@ -290,6 +749,422 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
 	cfgJSON.Opts.TTLMaxDelay = nil
+
+	/////
+	cfgJSON.Opts.Accounts = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Accounts = nil
+
+	/////
+	cfgJSON.Opts.Attributes = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Attributes = nil
+
+	/////
+	cfgJSON.Opts.CDRs = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.CDRs = nil
+
+	/////
+	cfgJSON.Opts.Chargers = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Chargers = nil
+
+	/////
+	cfgJSON.Opts.ForceUsage = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ForceUsage = nil
+
+	/////
+	cfgJSON.Opts.IPs = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.IPs = nil
+
+	/////
+	cfgJSON.Opts.IPsAuthorize = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.IPsAuthorize = nil
+
+	/////
+	cfgJSON.Opts.IPsRelease = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.IPsRelease = nil
+
+	/////
+	cfgJSON.Opts.IPsAllocate = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.IPsAllocate = nil
+
+	/////
+	cfgJSON.Opts.Resources = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Resources = nil
+
+	/////
+	cfgJSON.Opts.Routes = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Routes = nil
+
+	/////
+	cfgJSON.Opts.Stats = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Stats = nil
+
+	/////
+	cfgJSON.Opts.Thresholds = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Thresholds = nil
+
+	/////
+	cfgJSON.Opts.Initiate = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Initiate = nil
+
+	/////
+	cfgJSON.Opts.Update = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Update = nil
+
+	/////
+	cfgJSON.Opts.Terminate = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Terminate = nil
+
+	/////
+	cfgJSON.Opts.Message = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Message = nil
+
+	/////
+	cfgJSON.Opts.AttributesDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.AttributesDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.BlockerError = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.BlockerError = nil
+
+	/////
+	cfgJSON.Opts.CDRsDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.CDRsDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.Rates = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Rates = nil
+
+	/////
+	cfgJSON.Opts.ResourcesAuthorize = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ResourcesAuthorize = nil
+
+	/////
+	cfgJSON.Opts.ResourcesAllocate = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ResourcesAllocate = nil
+
+	/////
+	cfgJSON.Opts.ResourcesRelease = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ResourcesRelease = nil
+
+	/////
+	cfgJSON.Opts.ResourcesDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ResourcesDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.RoutesDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.RoutesDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.StatsDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.StatsDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.ThresholdsDerivedReply = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ThresholdsDerivedReply = nil
+
+	/////
+	cfgJSON.Opts.MaxUsage = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.MaxUsage = nil
+
+	/////
+	cfgJSON.Opts.Chargeable = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Chargeable = nil
+
+	/////
+	cfgJSON.Opts.AccountsForceUsage = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.AccountsForceUsage = nil
+
+	/////
+	cfgJSON.Opts.EEs = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.EEs = nil
 }
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -1740,6 +2615,14 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaLocalHost, utils.MetaCDRs)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaLocalHost, utils.MetaChargers)}}},
+		},
 		Opts: &SessionsOpts{
 			AutoChargeInterval: []*DynamicDurationOpt{
 				{
@@ -1799,6 +2682,14 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path/2",
 			PrivateKeyPath:     "/private/key/path/2",
 		},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
+		},
 		Opts: &SessionsOpts{
 			AutoChargeInterval: []*DynamicDurationOpt{
 				{
@@ -1830,6 +2721,12 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 					value: utils.DurationPointer(2 * time.Second),
 				},
 			},
+			IPsAuthorize: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+			},
 		},
 	}
 
@@ -1853,6 +2750,14 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			Default_attest:      utils.StringPointer("default_attest2"),
 			Publickey_path:      utils.StringPointer("/public/key/path/2"),
 			Privatekey_path:     utils.StringPointer("/private/key/path/2"),
+		},
+		Conns: map[string][]*DynamicConns{
+			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
+			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal)}}},
+			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal)}}},
 		},
 		Opts: &SessionsOptsJson{
 			AutoChargeInterval: []*DynamicInterfaceOpt{
@@ -1883,6 +2788,12 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			TTLUsage: []*DynamicInterfaceOpt{
 				{
 					Value: utils.DurationPointer(2 * time.Second),
+				},
+			},
+			IPsAuthorize: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
 				},
 			},
 		},
@@ -2058,6 +2969,60 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				value:  false,
+			},
+		},
+		Rates: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		IPs: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		IPsAllocate: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		IPsRelease: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		ForceUsage: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		OriginID: []*DynamicStringOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  "originId1",
+			},
+		},
+		AccountsForceUsage: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		EEs: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		EEsIDs: []*DynamicStringOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  "eesid1",
 			},
 		},
 		Stats: []*DynamicBoolOpt{
@@ -2243,6 +3208,60 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  true,
 			},
 		},
+		Rates: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		IPs: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		IPsAllocate: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		IPsRelease: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		ForceUsage: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		OriginID: []*DynamicStringOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  "originId2",
+			},
+		},
+		AccountsForceUsage: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		EEs: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		EEsIDs: []*DynamicStringOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  "eesid2",
+			},
+		},
 		Stats: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
@@ -2424,6 +3443,60 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			{
 				Tenant: "cgrates.net",
 				Value:  true,
+			},
+		},
+		Rates: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		IPs: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		IPsAllocate: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		IPsRelease: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		ForceUsage: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		OriginID: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  "originId2",
+			},
+		},
+		AccountsForceUsage: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		EEs: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		EEsIDs: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  "eesid2",
 			},
 		},
 		Stats: []*DynamicInterfaceOpt{

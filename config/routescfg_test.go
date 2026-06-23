@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -43,7 +44,22 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		},
 		Default_ratio: utils.IntPointer(10),
 		Nested_fields: utils.BoolPointer(true),
-		Opts:          &RoutesOptsJson{},
+		Opts: &RoutesOptsJson{
+			Context:      []*DynamicInterfaceOpt{{Value: utils.MetaSessionS}},
+			IgnoreErrors: []*DynamicInterfaceOpt{{Value: false}},
+			MaxCost:      []*DynamicInterfaceOpt{{Value: 6}},
+			Limit:        []*DynamicInterfaceOpt{{Value: utils.IntPointer(3)}},
+			Offset:       []*DynamicInterfaceOpt{{Value: utils.IntPointer(3)}},
+			ProfileCount: []*DynamicInterfaceOpt{{Value: utils.IntPointer(2)}},
+			Usage:        []*DynamicInterfaceOpt{{Value: 2}},
+			MaxItems: []*DynamicInterfaceOpt{
+				{
+					FilterIDs: []string{"id2"},
+					Tenant:    "cgrates.org",
+					Value:     utils.IntPointer(2),
+				},
+			},
+		},
 	}
 	expected := &RouteSCfg{
 		Enabled:                true,
@@ -63,20 +79,26 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		DefaultRatio: 10,
 		NestedFields: true,
 		Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
-			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
-			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
-			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
-			Limit:        []*DynamicIntPointerOpt{},
-			Offset:       []*DynamicIntPointerOpt{},
-			MaxItems:     []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			Context:      []*DynamicStringOpt{{value: utils.MetaSessionS}, {}},
+			IgnoreErrors: []*DynamicBoolOpt{{value: false}, {}},
+			MaxCost:      []*DynamicInterfaceOpt{{Value: 6}, {Value: ""}},
+			Limit:        []*DynamicIntPointerOpt{{value: utils.IntPointer(3)}},
+			Offset:       []*DynamicIntPointerOpt{{value: utils.IntPointer(3)}},
+			ProfileCount: []*DynamicIntPointerOpt{{value: utils.IntPointer(2)}, {}},
+			Usage:        []*DynamicDecimalOpt{{value: decimal.New(2, 0)}, {}},
+			MaxItems: []*DynamicIntPointerOpt{
+				{
+					FilterIDs: []string{"id2"},
+					Tenant:    "cgrates.org",
+					value:     utils.IntPointer(2),
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
+	} else if !reflect.DeepEqual(utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg)) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
 
@@ -87,6 +109,17 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	errExpect := "can't convert <error> to decimal"
+	if err := jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+
+	cfgJSON.Opts.IgnoreErrors = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
 	if err := jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
