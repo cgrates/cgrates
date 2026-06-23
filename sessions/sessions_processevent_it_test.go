@@ -23,6 +23,7 @@ package sessions
 
 import (
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -2065,6 +2066,172 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		}
 		if len(rply.EventExporters) == 0 {
 			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+		for runID, eesIDs := range rply.EventExporters {
+			if len(eesIDs) == 0 {
+				t.Errorf("runID %q has no exporter IDs", runID)
+			}
+		}
+	})
+}
+
+func TestSessionSv1ProcessEventAttributesAndEEs(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaRedis:
+		dbcfg = engine.RedisDBCfg
+	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+			"logger": {"level": 7},
+			"sessions": {
+				"enabled": true,
+				"conns": {
+					"*attributes": [{"connIDs": ["*localhost"]}],
+					"*ees":        [{"connIDs": ["*localhost"]}]
+				}
+			},
+			"attributes": {"enabled": true},
+			"ees": {
+				"enabled": true,
+				"exporters": [
+					{
+						"id": "LogExporter",
+						"type": "*log",
+						"attempts": 1
+					}
+				]
+			},
+			"chargers": {"enabled": true},
+			"admins": {"enabled": true}
+		}`,
+		DBCfg:    dbcfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       utils.CGRateSorg,
+				ID:           "CGR_DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+				Weights:      utils.DynamicWeights{{Weight: 0}},
+				Blockers:     utils.DynamicBlockers{{Blocker: false}},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+	}
+
+	var reply string
+
+	if err := client.Call(
+		context.Background(),
+		utils.AdminSv1SetAttributeProfile,
+		&utils.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &utils.APIAttributeProfile{
+				Tenant:    utils.CGRateSorg,
+				ID:        "ATTR_MODIFY_ACCOUNT",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights:   utils.DynamicWeights{{Weight: 10}},
+				Attributes: []*utils.ExternalAttribute{
+					{
+						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
+						Type:  utils.MetaConstant,
+						Value: "1002",
+					},
+				},
+			},
+		},
+		&reply,
+	); err != nil {
+		t.Fatalf("AdminSv1SetAttributeProfile failed: %v", err)
+	}
+
+	t.Run("attributesModifyEvent", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: utils.CGRateSorg,
+				ID:     "attributesModifyEvent",
+				APIOpts: map[string]any{
+					utils.MetaAttributes: true,
+					utils.MetaEEs:        true,
+					utils.MetaOriginID:   "OriginID_attributesModifyEvent",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *attributes+*ees failed: %v", err)
+		}
+		if len(rply.Attributes) == 0 {
+			t.Fatal("Attributes should not be empty with *attributes flag")
+		}
+		attrRply, ok := rply.Attributes[utils.MetaPrimary]
+		if !ok {
+			t.Fatalf("Attributes missing *primary runID, got: %v", rply.Attributes)
+		}
+		if len(attrRply.AlteredFields) == 0 {
+			t.Fatal("AlteredFields should not be empty")
+		}
+		altered := attrRply.AlteredFields[0]
+		if altered.MatchedProfileID != utils.ConcatenatedKey(utils.CGRateSorg, "ATTR_MODIFY_ACCOUNT") {
+			t.Errorf("MatchedProfileID = %q, want %q", altered.MatchedProfileID,
+				utils.ConcatenatedKey(utils.CGRateSorg, "ATTR_MODIFY_ACCOUNT"))
+		}
+		if !slices.Contains(altered.Fields, utils.MetaReq+utils.NestingSep+utils.AccountField) {
+			t.Errorf("expected %q in Fields, got: %v",
+				utils.MetaReq+utils.NestingSep+utils.AccountField, altered.Fields)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+		for runID, eesIDs := range rply.EventExporters {
+			if len(eesIDs) == 0 {
+				t.Errorf("runID %q has no exporter IDs", runID)
+			}
+		}
+	})
+
+	t.Run("attributesNoMatch", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: utils.CGRateSorg,
+				ID:     "attributesNoMatch",
+				APIOpts: map[string]any{
+					utils.MetaAttributes: true,
+					utils.MetaEEs:        true,
+					utils.MetaOriginID:   "OriginID_attributesNoMatch",
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+					utils.Destination:  "1003",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent attributesNoMatch failed: %v", err)
+		}
+		if rply.Attributes != nil {
+			t.Errorf("Attributes should be nil when no profile matches, got: %v", rply.Attributes)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should still be populated even when attributes do not match")
 		}
 		for runID, eesIDs := range rply.EventExporters {
 			if len(eesIDs) == 0 {
