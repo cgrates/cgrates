@@ -1626,6 +1626,7 @@ const (
 	APIerSv1DebitBalance                      = "APIerSv1.DebitBalance"
 	APIerSv1SetAccount                        = "APIerSv1.SetAccount"
 	APIerSv1GetAccountsCount                  = "APIerSv1.GetAccountsCount"
+	APIerSv1GetAccountIDs                     = "APIerSv1.GetAccountIDs"
 	APIerSv1GetDataDBVersions                 = "APIerSv1.GetDataDBVersions"
 	APIerSv1GetStorDBVersions                 = "APIerSv1.GetStorDBVersions"
 	APIerSv1GetCDRs                           = "APIerSv1.GetCDRs"

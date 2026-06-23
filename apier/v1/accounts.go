@@ -783,3 +783,25 @@ func (apierSv1 *APIerSv1) GetAccountsCount(ctx *context.Context, attr *utils.Ten
 	*reply = len(accountKeys)
 	return
 }
+
+// GetAccountIDs returns list of account IDs registered for a tenant.
+func (apierSv1 *APIerSv1) GetAccountIDs(ctx *context.Context, args *utils.PaginatorWithTenant, accIDs *[]string) error {
+	tnt := args.Tenant
+	if tnt == "" {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx, args.Search)
+	if err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*accIDs = args.PaginateStringSlice(retIDs)
+	return nil
+}
