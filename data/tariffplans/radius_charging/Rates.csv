@@ -1,4 +1,4 @@
 #Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP_US_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,15,1073741824,1073741824
-cgrates.org,RP_EU_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,16.5,1073741824,1073741824
-cgrates.org,RP_GLOBAL_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,45,1073741824,1073741824
+cgrates.org,RP_US_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,15,1073741824,1048576
+cgrates.org,RP_EU_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,16.5,1073741824,1048576
+cgrates.org,RP_GLOBAL_OVERAGE,,;10,,,,overage,,"* * * * *",;10,false,0,,45,1073741824,1048576
