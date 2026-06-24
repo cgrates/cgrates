@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -463,5 +464,114 @@ func TestJanusAgentCfgClone(t *testing.T) {
 				t.Errorf("Clone returned the same instance, expected a new instance")
 			}
 		})
+	}
+}
+
+func TestLoadJanusAgentCfgError(t *testing.T) {
+	cfgJSONStr := `{
+"janusAgent": [
+		{},
+	],	
+}`
+	expected := "json: cannot unmarshal array into Go value of type config.JanusAgentJsonCfg"
+	cgrConfig := NewDefaultCGRConfig()
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.janusAgentCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestJanusAgentCfgCloneSection(t *testing.T) {
+	janusAgent := &JanusAgentCfg{
+		Enabled: false,
+		URL:     "/janus",
+		Conns: map[string][]*DynamicConns{
+			utils.MetaSessionS: {{ConnIDs: []string{"*internal:*sessions"}}},
+		},
+		JanusConns: []*JanusConn{
+			{
+				Address:       "127.0.0.1:8088",
+				AdminAddress:  "localhost:7188",
+				AdminPassword: "",
+				Type:          "*ws",
+			},
+		},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+				Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{{
+					Tag:       "Allow",
+					Path:      "response.Allow",
+					Type:      utils.MetaConstant,
+					Value:     utils.NewRSRParsersMustCompile("1", utils.InfieldSep),
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				}},
+			},
+			{
+				ID:      "mtcall_cdr",
+				Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
+				Tenant:  utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+				Flags:   utils.FlagsWithParams{utils.MetaCDRs: {}},
+				RequestFields: []*FCTemplate{{
+					Tag:       "RequestType",
+					Path:      "RequestType",
+					Type:      utils.MetaConstant,
+					Value:     utils.NewRSRParsersMustCompile("*pseudoprepaid", utils.InfieldSep),
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				}},
+				ReplyFields: []*FCTemplate{{
+					Tag:       "CDR_ID",
+					Path:      "CDR_RESPONSE.CDR_ID",
+					Type:      utils.MetaComposed,
+					Value:     utils.NewRSRParsersMustCompile("~*req.CDR_ID", utils.InfieldSep),
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				}},
+			},
+		},
+	}
+
+	rcv := janusAgent.CloneSection()
+	if !reflect.DeepEqual(janusAgent, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(janusAgent), utils.ToJSON(rcv))
+	}
+}
+
+func TestGetJanusConnJsnCfg(t *testing.T) {
+	janusAgent := []*JanusConnJsonCfg{
+		{
+			Address:       utils.StringPointer("127.0.0.1:8088"),
+			AdminAddress:  utils.StringPointer("localhost:7188"),
+			AdminPassword: utils.StringPointer(""),
+			Type:          utils.StringPointer("*ws"),
+		},
+	}
+
+	expected := &JanusConnJsonCfg{
+		Address:       utils.StringPointer("127.0.0.1:8088"),
+		AdminAddress:  utils.StringPointer("localhost:7188"),
+		AdminPassword: utils.StringPointer(""),
+		Type:          utils.StringPointer("*ws"),
+	}
+
+	rcv, idx := getJanusConnJsnCfg(janusAgent, "127.0.0.1:8088")
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v \n but received \n %+v", expected, rcv)
+	} else if idx != 0 {
+		t.Errorf("Expected %+v \n but received \n %+v", 0, idx)
+	}
+
+	rcv, idx = getJanusConnJsnCfg(janusAgent, "127.0.0.1:8087")
+	if rcv != nil {
+		t.Errorf("Expected %+v \n but received \n %+v", expected, rcv)
+	} else if idx != -1 {
+		t.Errorf("Expected %+v \n but received \n %+v", 0, idx)
 	}
 }

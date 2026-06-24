@@ -40,6 +40,32 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Notexists_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:            utils.BoolPointer(true),
+		Opts: &AttributesOptsJson{
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"prf2"},
+				},
+			},
+			ProcessRuns: []*DynamicInterfaceOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+			ProfileRuns: []*DynamicInterfaceOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
+				},
+			},
+		},
 	}
 	expected := &AttributeSCfg{
 		Enabled: true,
@@ -56,10 +82,39 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		NotExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:           true,
 		Opts: &AttributesOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
-			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"prf2"},
+				},
+			},
+			ProcessRuns: []*DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					value:     2,
+				},
+				{
+					value: AttributesProcessRunsDftOpt,
+				},
+			},
+			ProfileRuns: []*DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					value:     2,
+				},
+				{
+					value: AttributesProfileRunsDftOpt,
+				},
+			},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+				{
+					value: ActionsProfileIgnoreFiltersDftOpt,
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
