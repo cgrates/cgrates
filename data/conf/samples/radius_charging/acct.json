@@ -31,10 +31,11 @@
             "mandatory": true
           },
           {
-            "tag": "AccountIDs",
-            "path": "*opts.*acntProfileIDs",
+            "tag": "IMSI",
+            "path": "*cgreq.IMSI",
             "type": "*variable",
-            "value": "~*req.User-Name"
+            "value": "~*req.User-Name",
+            "mandatory": true
           },
           {
             "tag": "Country",

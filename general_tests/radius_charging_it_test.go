@@ -245,21 +245,19 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 
 	const usIMSI = "310150123456789"
 
-	// monetary carries the region filter too, otherwise it stays eligible
-	// everywhere and auth accepts a request from outside the region.
 	var reply string
 	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
 		&utils.AccountWithAPIOpts{
 			Account: &utils.Account{
-				Tenant: "cgrates.org",
-				ID:     usIMSI,
+				Tenant:    "cgrates.org",
+				ID:        usIMSI,
+				FilterIDs: []string{"*string:~*req.IMSI:" + usIMSI, "FLTR_US"},
 				Balances: map[string]*utils.Balance{
 					"monetary": {
-						ID:        "monetary",
-						Type:      utils.MetaConcrete,
-						Weights:   utils.DynamicWeights{{Weight: 5}},
-						FilterIDs: []string{"FLTR_US"},
-						Units:     utils.NewDecimalFromFloat64(100),
+						ID:      "monetary",
+						Type:    utils.MetaConcrete,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						Units:   utils.NewDecimalFromFloat64(100),
 					},
 				},
 			},
@@ -269,8 +267,6 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 
 	// Weights and CostIncrements are wrapped in backticks because the diktat
 	// value splits on ";", which is also the separator inside those fields.
-	// The overage increment has no fee, otherwise the usage is free and never
-	// falls through to the overage rate.
 	dk := func(id, path string, value any) *utils.APDiktat {
 		return &utils.APDiktat{
 			ID: id,
@@ -295,15 +291,13 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 						Diktats: []*utils.APDiktat{
 							dk("alw_type", "*balance.data_allowance.Type", utils.MetaAbstract),
 							dk("alw_weight", "*balance.data_allowance.Weights", "`;20`"),
-							dk("alw_filter", "*balance.data_allowance.FilterIDs", "FLTR_US"),
 							dk("alw_cost", "*balance.data_allowance.CostIncrements", "`;1;0;0`"),
 							dk("alw_units", "*balance.data_allowance.Units", gb),
 							dk("ovg_type", "*balance.data_overage.Type", utils.MetaAbstract),
 							dk("ovg_weight", "*balance.data_overage.Weights", "`;10`"),
-							dk("ovg_filter", "*balance.data_overage.FilterIDs", "FLTR_US"),
-							dk("ovg_cost", "*balance.data_overage.CostIncrements", "`;1;;`"),
 							dk("ovg_rate", "*balance.data_overage.RateProfileIDs", "RP_US_OVERAGE"),
-							dk("ovg_units", "*balance.data_overage.Units", 100*gb),
+							dk("ovg_units", "*balance.data_overage.Units", 0),
+							dk("ovg_unlimited", "*balance.data_overage.Opts.*balanceUnlimited", true),
 						},
 					},
 				},
@@ -460,19 +454,20 @@ func setOverageRate(t *testing.T, c *birpc.Client, id string, feePerGB *utils.De
 
 func setDataAccount(t *testing.T, c *birpc.Client, acctID string, regionFilter []string, overageRPID string, monetary *utils.Decimal) {
 	t.Helper()
+	filterIDs := append([]string{"*string:~*req.IMSI:" + acctID}, regionFilter...)
 	var reply string
 	if err := c.Call(context.Background(), utils.AdminSv1SetAccount,
 		&utils.AccountWithAPIOpts{
 			Account: &utils.Account{
-				Tenant: "cgrates.org",
-				ID:     acctID,
+				Tenant:    "cgrates.org",
+				ID:        acctID,
+				FilterIDs: filterIDs,
 				Balances: map[string]*utils.Balance{
 					"data_allowance": {
-						ID:        "data_allowance",
-						Type:      utils.MetaAbstract,
-						Weights:   utils.DynamicWeights{{Weight: 20}},
-						FilterIDs: regionFilter,
-						Units:     utils.NewDecimal(0, 0),
+						ID:      "data_allowance",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 20}},
+						Units:   utils.NewDecimal(0, 0),
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment:    utils.NewDecimal(1, 0),
@@ -485,16 +480,15 @@ func setDataAccount(t *testing.T, c *birpc.Client, acctID string, regionFilter [
 						ID:             "data_overage",
 						Type:           utils.MetaAbstract,
 						Weights:        utils.DynamicWeights{{Weight: 10}},
-						FilterIDs:      regionFilter,
-						Units:          utils.NewDecimal(100*gb, 0),
+						Units:          utils.NewDecimal(0, 0),
+						Opts:           map[string]any{utils.MetaBalanceUnlimited: true},
 						RateProfileIDs: []string{overageRPID},
 					},
 					"monetary": {
-						ID:        "monetary",
-						Type:      utils.MetaConcrete,
-						Weights:   utils.DynamicWeights{{Weight: 5}},
-						FilterIDs: regionFilter,
-						Units:     monetary,
+						ID:      "monetary",
+						Type:    utils.MetaConcrete,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						Units:   monetary,
 					},
 				},
 			},
