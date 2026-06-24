@@ -42,6 +42,26 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Notexists_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Nested_fields:            utils.BoolPointer(true),
+		Opts: &StatsOptsJson{
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"statsid2"},
+				},
+			},
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
+				},
+			},
+			RoundingDecimals: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  2,
+				},
+			},
+		},
 	}
 	expected := &StatSCfg{
 		Enabled:                true,
@@ -60,9 +80,25 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NotExistsIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
-			RoundingDecimals:     []*DynamicIntOpt{},
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"statsid2"},
+				},
+			},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+				{},
+			},
+			RoundingDecimals: []*DynamicIntOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  2,
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -75,6 +111,44 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	if err := jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestStatSCfgloadFromJsonCfgErrors(t *testing.T) {
+	cfgJSON := &StatServJsonCfg{
+		Opts: &StatsOptsJson{
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"statsid2"},
+				},
+			},
+		},
+	}
+	jsonCfg := NewDefaultCGRConfig()
+	cfgJSON.Opts.ProfileIgnoreFilters = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect := "cannot convert field: 4s to bool"
+	if err := jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.ProfileIgnoreFilters = nil
+
+	cfgJSON.Opts.RoundingDecimals = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field<*time.Duration>: 4s to int"
+	if err := jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.RoundingDecimals = nil
+
 }
 
 func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
@@ -210,6 +284,7 @@ func TestStatSCfgClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		NestedFields:        true,
+		EEsExporterIDs:      []string{"eesID"},
 		Opts:                &StatsOpts{},
 	}
 	rcv := ban.Clone()
@@ -283,6 +358,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index22"},
 		SuffixIndexedFields: &[]string{"*req.index33"},
 		NestedFields:        true,
+		EEsExporterIDs:      []string{"eesID"},
 		Opts: &StatsOpts{
 			ProfileIDs: []*DynamicStringSliceOpt{
 				{
@@ -319,6 +395,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index22"},
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
+		Ees_exporter_ids:      &[]string{"eesID"},
 		Opts: &StatsOptsJson{
 			ProfileIDs: []*DynamicStringSliceOpt{
 				{
