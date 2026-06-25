@@ -275,11 +275,13 @@ func TestCacheCfgloadFromJSONCfg(t *testing.T) {
 	cCfg := &CacheCfg{}
 
 	jsnCfg := &CacheJsonCfg{
-		Remote_conns: &[]string{"remote", "test"},
+		Remote_conns:      &[]string{"remote", "test"},
+		Replication_conns: &[]string{"*localhost"},
 	}
 
 	exp := &CacheCfg{
-		RemoteConns: []string{"remote", "test"},
+		RemoteConns:      []string{"remote", "test"},
+		ReplicationConns: []string{"*localhost"},
 	}
 
 	if err := cCfg.loadFromJSONCfg(jsnCfg); err != nil {
@@ -288,6 +290,11 @@ func TestCacheCfgloadFromJSONCfg(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(cCfg), utils.ToJSON(exp)) {
 		t.Errorf("Expected <%v>, Received <%v>", utils.ToJSON(exp), utils.ToJSON(cCfg))
 
+	}
+
+	jsnCfg = nil
+	if err := cCfg.loadFromJSONCfg(jsnCfg); err != nil {
+		t.Error(err)
 	}
 }
 func TestDiffCacheJsonCfgRemoteConn(t *testing.T) {
