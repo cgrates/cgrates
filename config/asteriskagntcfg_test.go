@@ -44,14 +44,17 @@ func TestAsteriskConnCfgloadFromJSONCfg(t *testing.T) {
 func TestDiffAstConnJsonCfgMaxReconn(t *testing.T) {
 	v1 := &AsteriskConnCfg{
 		MaxReconnectInterval: time.Duration(4),
+		AriWebSocket:         true,
 	}
 
 	v2 := &AsteriskConnCfg{
 		MaxReconnectInterval: time.Duration(5),
+		AriWebSocket:         false,
 	}
 
 	expected := &AstConnJsonCfg{
 		Max_reconnect_interval: utils.StringPointer("5ns"),
+		Ari_websocket:          utils.BoolPointer(false),
 	}
 
 	rcv := diffAstConnJsonCfg(v1, v2)

@@ -39,6 +39,26 @@ func TestResourceSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"*req.index1"},
 		Notexists_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:            utils.BoolPointer(true),
+		Opts: &ResourcesOptsJson{
+			UsageID: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "usg2",
+				},
+			},
+			UsageTTL: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  1 * time.Second,
+				},
+			},
+			Units: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  2.5,
+				},
+			},
+		},
 	}
 	expected := &ResourceSCfg{
 		Enabled:        true,
@@ -54,9 +74,33 @@ func TestResourceSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NotExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:           true,
 		Opts: &ResourcesOpts{
-			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
-			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
-			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
+			UsageID: []*DynamicStringOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  "usg2",
+				},
+				{
+					value: ResourcesUsageIDDftOpt,
+				},
+			},
+			UsageTTL: []*DynamicDurationOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  1 * time.Second,
+				},
+				{
+					value: ResourcesUsageTTLDftOpt,
+				},
+			},
+			Units: []*DynamicFloat64Opt{
+				{
+					Tenant: "cgrates.org",
+					value:  2.5,
+				},
+				{
+					value: ResourcesUnitsDftOpt,
+				},
+			},
 		},
 	}
 	cfg := NewDefaultCGRConfig()
