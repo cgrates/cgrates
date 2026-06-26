@@ -477,7 +477,7 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 		},
 	}
 
-	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
+	expBody := `{"*opts":{"*actionsProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	var reply string
 	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
 		ev, &reply); err != nil {
