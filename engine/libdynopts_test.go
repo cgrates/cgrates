@@ -2123,15 +2123,15 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 		t.Errorf("expected %v,received %v", config.SessionsTTLDftOpt, rcv)
 	}
 
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.SessionSCfg().Opts.AutoChargeInterval); err != nil {
 		t.Error(err)
 	} else if rcv != (8 * time.Second) {
 		t.Errorf("expected %v,received %v", 8*time.Second, rcv)
 	}
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), nil, fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), nil, fltrs, cgrCfg.SessionSCfg().Opts.AutoChargeInterval); err != nil {
 		t.Error(err)
-	} else if rcv != config.SessionsDebitIntervalDftOpt {
-		t.Errorf("expected %v,received %v", config.SessionsDebitIntervalDftOpt, rcv)
+	} else if rcv != config.SessionsAutoChargeIntervalDftOpt {
+		t.Errorf("expected %v,received %v", config.SessionsAutoChargeIntervalDftOpt, rcv)
 	}
 }
 

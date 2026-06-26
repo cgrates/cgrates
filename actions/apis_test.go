@@ -487,7 +487,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	}
 
 	// Check if the log action was executed
-	expected := `{"*opts":{"*actProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
+	expected := `{"*opts":{"*actionsProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}

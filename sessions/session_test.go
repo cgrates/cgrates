@@ -65,13 +65,13 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 // 				ExtraUsage:    1,
 // 				LastUsage:     2,
 // 				TotalUsage:    3,
-// 				NextAutoDebit: &tTime,
+// 				NextAutoCharge: &tTime,
 // 			},
 // 			{ID: "1002",
 // 				ExtraUsage:    4,
 // 				LastUsage:     5,
 // 				TotalUsage:    6,
-// 				NextAutoDebit: &tTime2,
+// 				NextAutoCharge: &tTime2,
 // 			},
 // 		},
 // 	}
@@ -86,13 +86,13 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 // 				ExtraUsage:    1,
 // 				LastUsage:     2,
 // 				TotalUsage:    3,
-// 				NextAutoDebit: &tTime,
+// 				NextAutoCharge: &tTime,
 // 			},
 // 			{ID: "1002",
 // 				ExtraUsage:    4,
 // 				LastUsage:     5,
 // 				TotalUsage:    6,
-// 				NextAutoDebit: &tTime2,
+// 				NextAutoCharge: &tTime2,
 // 			},
 // 		},
 // 	}
@@ -107,8 +107,8 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 // 		t.Errorf("Expecting: %s, received: %s", 3*time.Nanosecond, session.SRuns[1].TotalUsage)
 // 	}
 // 	tTimeNow := time.Now()
-// 	*rcv.SRuns[1].NextAutoDebit = tTimeNow
-// 	if *session.SRuns[1].NextAutoDebit == tTimeNow {
+// 	*rcv.SRuns[1].NextAutoCharge = tTimeNow
+// 	if *session.SRuns[1].NextAutoCharge == tTimeNow {
 // 		t.Errorf("Expecting: %s, received: %s", time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC), tTimeNow)
 
 // 	}
@@ -153,15 +153,15 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 // 		SRuns: []*SRun{{
 
 // 			TotalUsage:    2 * time.Second,
-// 			NextAutoDebit: &tTime,
+// 			NextAutoCharge: &tTime,
 // 		}},
 // 	}
 // 	exp := []*ExternalSession{{
 // 		//CGRID:    "RandomoriginID",
 // 		ID:            "1001",
 // 		NodeID:        "ALL",
-// 		DebitInterval: time.Second,
-// 		NextAutoDebit: tTime,
+// 		AutoChargeInterval: time.Second,
+// 		NextAutoCharge: tTime,
 // 		// aSs[i].LoopIndex:     sr.CD.LoopIndex,
 // 		// aSs[i].DurationIndex: sr.CD.DurationIndex,
 // 		// aSs[i].MaxRate:       sr.CD.MaxRate,
@@ -215,7 +215,7 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 			},
 			Tenant:        "cgrates.org",
 			EventStart:    engine.NewMapEvent(startEv),
-			DebitInterval: time.Second,
+			AutoChargeInterval: time.Second,
 			SRuns: []*SRun{{
 				Event:      engine.NewMapEvent(ev),
 				TotalUsage: 2 * time.Second,
@@ -241,7 +241,7 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 				utils.EventName: "TEST_EVENT2",
 			},
 			NodeID:        "ALL",
-			DebitInterval: time.Second,
+			AutoChargeInterval: time.Second,
 			LoopIndex:     10,
 			DurationIndex: 3 * time.Second,
 			MaxRate:       11,
@@ -296,11 +296,11 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 			},
 			Tenant:        "cgrates.org",
 			EventStart:    engine.NewMapEvent(startEv),
-			DebitInterval: time.Second,
+			AutoChargeInterval: time.Second,
 			SRuns: []*SRun{{
 				Event:         engine.NewMapEvent(ev),
 				TotalUsage:    2 * time.Second,
-				NextAutoDebit: &tTime,
+				NextAutoCharge: &tTime,
 			}},
 		}
 		exp := &ExternalSession{
@@ -323,13 +323,13 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 				utils.EventName: "TEST_EVENT2",
 			},
 			NodeID:        "ALL",
-			DebitInterval: time.Second,
+			AutoChargeInterval: time.Second,
 			LoopIndex:     10,
 			DurationIndex: 3 * time.Second,
 			MaxRate:       11,
 			MaxRateUnit:   30 * time.Second,
 			MaxCostSoFar:  20,
-			NextAutoDebit: tTime,
+			NextAutoCharge: tTime,
 		}
 		//check for some fields if populated correct
 		rply := s.AsExternalSession(s.SRuns[0], "", "ALL")
@@ -357,16 +357,16 @@ func TestSessiontotalUsage(t *testing.T) {
 
 		SRuns: []*SRun{
 			{
-				ID:            "1001",
-				LastUsage:     2,
-				TotalUsage:    5,
-				NextAutoDebit: &tTime,
+				ID:             "1001",
+				LastUsage:      2,
+				TotalUsage:     5,
+				NextAutoCharge: &tTime,
 			},
 			{
-				ID:            "1002",
-				LastUsage:     5,
-				TotalUsage:    6,
-				NextAutoDebit: &tTime2,
+				ID:             "1002",
+				LastUsage:      5,
+				TotalUsage:     6,
+				NextAutoCharge: &tTime2,
 			},
 		},
 	}
@@ -581,10 +581,10 @@ func TestSRunClone(t *testing.T) {
 			Event:   map[string]any{"id": "1"},
 			APIOpts: map[string]any{"runID": "run1"},
 		},
-		ExtraUsage:    5 * time.Second,
-		LastUsage:     10 * time.Second,
-		TotalUsage:    50 * time.Second,
-		NextAutoDebit: &origTime,
+		ExtraUsage:     5 * time.Second,
+		LastUsage:      10 * time.Second,
+		TotalUsage:     50 * time.Second,
+		NextAutoCharge: &origTime,
 	}
 
 	clonedSRun := origSRun.Clone()
@@ -620,8 +620,8 @@ func TestSRunClone(t *testing.T) {
 		t.Error("TotalUsage does not match")
 	}
 
-	if clonedSRun.NextAutoDebit == nil || *clonedSRun.NextAutoDebit != *origSRun.NextAutoDebit {
-		t.Error("NextAutoDebit does not match")
+	if clonedSRun.NextAutoCharge == nil || *clonedSRun.NextAutoCharge != *origSRun.NextAutoCharge {
+		t.Error("NextAutoCharge does not match")
 	}
 }
 
@@ -648,10 +648,10 @@ func TestCloneSession(t *testing.T) {
 	originEvent := &utils.CGREvent{Event: map[string]any{"origin": "event"}}
 
 	session := &Session{
-		ID:             "session1",
-		OriginCGREvent: originEvent,
-		ClientConnID:   "conn1",
-		DebitInterval:  utils.DurationPointer(time.Duration(5)),
+		ID:                 "session1",
+		OriginCGREvent:     originEvent,
+		ClientConnID:       "conn1",
+		AutoChargeInterval: time.Duration(5),
 		SRuns: []*SRun{
 			{ID: "run1", CGREvent: &utils.CGREvent{Event: map[string]any{"tor": "voice"}}},
 		},
@@ -663,8 +663,8 @@ func TestCloneSession(t *testing.T) {
 		t.Errorf("Expected ClientConnID to be 'conn1', got %s", clonedSession.ClientConnID)
 	}
 
-	if clonedSession.DebitInterval == nil || *clonedSession.DebitInterval != 5 {
-		t.Errorf("Expected DebitInterval to be 5, got %v", clonedSession.DebitInterval)
+	if clonedSession.AutoChargeInterval != time.Duration(5) {
+		t.Errorf("Expected AutoChargeInterval to be 5, got %v", clonedSession.AutoChargeInterval)
 	}
 
 	if clonedSession.OriginCGREvent.Event["origin"] != "event" {
@@ -759,14 +759,14 @@ func TestSessionAsExternalSession(t *testing.T) {
 		ID: "sess1",
 		SRuns: []*SRun{
 			{
-				ID:            "run1",
-				CGREvent:      &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
-				NextAutoDebit: &tTime1,
+				ID:             "run1",
+				CGREvent:       &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
+				NextAutoCharge: &tTime1,
 			},
 			{
-				ID:            "run2",
-				CGREvent:      &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
-				NextAutoDebit: &tTime2,
+				ID:             "run2",
+				CGREvent:       &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
+				NextAutoCharge: &tTime2,
 			},
 			{
 				ID:       "run3",
@@ -826,11 +826,11 @@ func TestSessionAsExternalSession(t *testing.T) {
 				t.Errorf("Expected NodeID %s, got %s", tt.nodeID, aS.NodeID)
 			}
 			if tt.expectedDebit != nil {
-				if aS.NextAutoDebit != *tt.expectedDebit {
-					t.Errorf("Expected NextAutoDebit %v, got %v", *tt.expectedDebit, aS.NextAutoDebit)
+				if aS.NextAutoCharge != *tt.expectedDebit {
+					t.Errorf("Expected NextAutoCharge %v, got %v", *tt.expectedDebit, aS.NextAutoCharge)
 				}
-			} else if aS.NextAutoDebit != (time.Time{}) {
-				t.Errorf("Expected NextAutoDebit to be zero, got %v", aS.NextAutoDebit)
+			} else if aS.NextAutoCharge != (time.Time{}) {
+				t.Errorf("Expected NextAutoCharge to be zero, got %v", aS.NextAutoCharge)
 			}
 		})
 	}
