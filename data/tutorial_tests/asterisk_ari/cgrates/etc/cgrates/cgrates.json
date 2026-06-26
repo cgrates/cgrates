@@ -57,6 +57,13 @@
 	"debitInterval": "5s",
 	"channelSyncInterval":"7s",
 	"conns":{
+	"*accounts": [
+		 {
+			"tenant": "",
+			"filterIDs": [],
+			"connIDs": ["*internal"]
+		 }
+	],
 	"*rals": [
 		 {
 			"tenant": "",
@@ -130,44 +137,36 @@
 	},
 	"requestProcessors": [
 		{
-			"id": "Authorize",
+			"id": "StasisContinue",
 			"filters": ["*string:~*req.type:StasisStart"],
-			"flags": ["*authorize","*accounts","*attributes"],
-			"requestFields":[
-				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
-			],
-			"replyFields":[
-				{"tag": "CGR_Reqtype", "path": "*rep.cgr_reqtype", "type": "*constant", "value": "*prepaid"}
-			]
+			"flags": ["*none"]
 		},
 		{
 			"id": "Initiate",
 			"filters": [
 				"*string:~*req.type:ChannelStateChange",
-				"*string:~*req.channel.state:Up",
-				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
+				"*string:~*req.channel.state:Up"
 			],
 			"flags": ["*initiate","*accounts"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.timestamp"}
 			]
 		},
 		{
-			"id": "Terminate",
-			"filters": [
-				"*string:~*req.type:ChannelDestroyed",
-				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
-			],
-			"flags": ["*terminate","*accounts"],
-			"requestFields":[
-				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
-			]
+			"id": "IgnoreOther",
+			"filters": ["*string:~*req.type:ChannelStateChange"],
+			"flags": ["*none"]
 		},
 		{
-			"id": "IgnoreOutbound",
-			"filters": ["*empty:~*req.channel.channelvars.cgr_reqtype:"],
-			"flags": ["*none"]
+			"id": "Terminate",
+			"filters": ["*string:~*req.type:ChannelDestroyed"],
+			"flags": ["*terminate","*accounts","*cdrs"],
+			"requestFields":[
+				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"}
+			]
 		}
 	]
 },
@@ -203,8 +202,42 @@
 		"*stats": [{"connIDs": ["*internal"]}],
 		"*resources": [{"connIDs": ["*internal"]}]
 	},
-	"rals_conns": ["*internal"],	
+	"rals_conns": ["*internal"],
 	"stringIndexedFields": ["*req.Account"],
+},
+
+"db": {
+	"dbConns": {
+		"*default": {
+			"dbType": "redis",
+			"dbHost": "127.0.0.1",
+			"dbPort": 6379,
+			"dbName": "10",
+			"dbUser": "cgrates"
+		},
+		"StorDB": {
+			"dbType": "mysql",
+			"dbHost": "127.0.0.1",
+			"dbPort": 3306,
+			"dbName": "cgrates",
+			"dbUser": "cgrates",
+			"dbPassword": "CGRateS.org"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
+},
+
+"accounts": {
+	"enabled": true,
+	"conns": {
+		"*rates": [{"connIDs": ["*internal"]}]
+	},
+},
+
+"rates": {
+	"enabled": true,
 },
 
 
@@ -217,7 +250,7 @@
 		"id": "*default",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"lockfilePath": ".cgr.lck",
+		"lockfilePath": "/tmp/cgr_asterisk_tutorial.lck",
 		"tpInPath": "/usr/share/cgrates/tariffplans/tutorial",
 		"tpOutPath": "",
 	},

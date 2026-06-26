@@ -8,6 +8,7 @@ go 1.26.2
 
 require (
 	github.com/Azure/go-amqp v1.1.0
+	github.com/VoiceBlender/voiceblender-go v0.9.0
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/blevesearch/bleve/v2 v2.4.2

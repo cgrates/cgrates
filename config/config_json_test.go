@@ -2572,7 +2572,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*req.channel.id")},
 			{
-				Tag:   utils.StringPointer("OriginIDOpt"),
+				Tag:   utils.StringPointer("originID"),
 				Path:  utils.StringPointer("*opts.*originID"),
 				Type:  utils.StringPointer(utils.MetaVariable),
 				Value: utils.StringPointer("~*req.channel.id")},
@@ -2584,18 +2584,13 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 			{
 				Tag:   utils.StringPointer("RequestType"),
 				Path:  utils.StringPointer("*cgreq.RequestType"),
-				Type:  utils.StringPointer(utils.MetaVariable),
-				Value: utils.StringPointer("~*req.cgr_reqtype")},
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("*prepaid")},
 			{
 				Tag:   utils.StringPointer("Tenant"),
 				Path:  utils.StringPointer("*cgreq.Tenant"),
 				Type:  utils.StringPointer(utils.MetaConstant),
 				Value: utils.StringPointer("cgrates.org")},
-			{
-				Tag:   utils.StringPointer("Category"),
-				Path:  utils.StringPointer("*cgreq.Category"),
-				Type:  utils.StringPointer(utils.MetaConstant),
-				Value: utils.StringPointer("call")},
 			{
 				Tag:   utils.StringPointer("Account"),
 				Path:  utils.StringPointer("*cgreq.Account"),

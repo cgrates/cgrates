@@ -173,8 +173,8 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	opts := utils.MapStorage{}
 	rply := utils.NewOrderedNavigableMap()
-	sessConns, _ := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns[utils.MetaSessionS],
-		sma.cgrCfg.GeneralCfg().DefaultTenant, ev, sma.fltrS)
+	sessConns, _ := engine.GetConnIDs(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().Conns, utils.MetaSessionS,
+		sma.cgrCfg.GeneralCfg().DefaultTenant, ev, nil, sma.fltrS)
 
 	var processed bool
 	var err error
@@ -187,7 +187,7 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 				reqProcessor.Tenant, sma.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					sma.cgrCfg.GeneralCfg().DefaultTimezone),
-				sma.fltrS, nil),
+				nil, sma.fltrS, nil),
 			utils.AsteriskAgent, sma.connMgr,
 			sessConns, nil, nil, sma.fltrS)
 		if lclProcessed {
