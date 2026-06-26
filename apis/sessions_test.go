@@ -270,7 +270,8 @@ func TestProcessEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.MetaOriginID: "OriginID",
+			utils.MetaOriginID:     "OriginID",
+			utils.MetaInterimUsage: "0",
 		},
 	}
 	if err := ssv1.ProcessEvent(context.Background(), args, &reply); err != nil {

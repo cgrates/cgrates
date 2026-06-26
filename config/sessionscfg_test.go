@@ -95,7 +95,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			Privatekey_path:     utils.StringPointer("randomPath"),
 		},
 		Opts: &SessionsOptsJson{
-			DebitInterval: []*DynamicInterfaceOpt{
+			AutoChargeInterval: []*DynamicInterfaceOpt{
 				{
 					Value: 2 * time.Second,
 				},
@@ -171,12 +171,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: 2 * time.Second,
 				},
 				{
-					value: SessionsDebitIntervalDftOpt,
+					value: SessionsAutoChargeIntervalDftOpt,
 				},
 			},
 			TTLLastUsage:       []*DynamicDurationPointerOpt{},
@@ -228,7 +228,7 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	cfgJSON.Opts.TTL = nil
 
 	/////
-	cfgJSON.Opts.DebitInterval = []*DynamicInterfaceOpt{
+	cfgJSON.Opts.AutoChargeInterval = []*DynamicInterfaceOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "1c",
@@ -237,7 +237,7 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
-	cfgJSON.Opts.DebitInterval = nil
+	cfgJSON.Opts.AutoChargeInterval = nil
 
 	/////
 	cfgJSON.Opts.TTLLastUsage = []*DynamicInterfaceOpt{
@@ -407,7 +407,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			MaxUsage:               []*DynamicBoolOpt{{}},
 			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
-			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
 			OriginID:               []*DynamicStringOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
@@ -563,7 +563,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{{}},
 			utils.MetaTTLCfg:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
 			utils.MetaChargeableCfg:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
-			utils.MetaDebitIntervalCfg:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			utils.MetaAutoChargeIntervalCfg:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			utils.MetaTTLLastUsageCfg:           []*DynamicDurationPointerOpt{},
 			utils.MetaTTLLastUsedCfg:            []*DynamicDurationPointerOpt{},
 			utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
@@ -702,12 +702,12 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				},
 			},
 			utils.MetaChargeableCfg: []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
-			utils.MetaDebitIntervalCfg: []*DynamicDurationOpt{
+			utils.MetaAutoChargeIntervalCfg: []*DynamicDurationOpt{
 				{
 					value: 8 * time.Second,
 				},
 				{
-					value: SessionsDebitIntervalDftOpt,
+					value: SessionsAutoChargeIntervalDftOpt,
 				},
 			},
 			utils.MetaTTLLastUsageCfg:    []*DynamicDurationPointerOpt{},
@@ -1626,7 +1626,7 @@ func TestSessionSCfgClone(t *testing.T) {
 			},
 		},
 		Opts: &SessionsOpts{
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: 2,
 				},
@@ -1733,7 +1733,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PrivateKeyPath:     "/private/key/path",
 		},
 		Opts: &SessionsOpts{
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: time.Second,
 				},
@@ -1792,7 +1792,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PrivateKeyPath:     "/private/key/path/2",
 		},
 		Opts: &SessionsOpts{
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: 2 * time.Second,
 				},
@@ -1847,7 +1847,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			Privatekey_path:     utils.StringPointer("/private/key/path/2"),
 		},
 		Opts: &SessionsOptsJson{
-			DebitInterval: []*DynamicInterfaceOpt{
+			AutoChargeInterval: []*DynamicInterfaceOpt{
 				{
 					Value: 2 * time.Second,
 				},
@@ -1926,7 +1926,7 @@ func TestSessionSCloneSection(t *testing.T) {
 			PrivateKeyPath:     "/private/key/path",
 		},
 		Opts: &SessionsOpts{
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: time.Second,
 				},
@@ -1978,7 +1978,7 @@ func TestSessionSCloneSection(t *testing.T) {
 			PrivateKeyPath:     "/private/key/path",
 		},
 		Opts: &SessionsOpts{
-			DebitInterval: []*DynamicDurationOpt{
+			AutoChargeInterval: []*DynamicDurationOpt{
 				{
 					value: time.Second,
 				},
@@ -2178,7 +2178,7 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  utils.DurationPointer(5 * time.Second),
 			},
 		},
-		DebitInterval: []*DynamicDurationOpt{
+		AutoChargeInterval: []*DynamicDurationOpt{
 			{
 				Tenant: "cgrates.org",
 				value:  3 * time.Second,
@@ -2361,7 +2361,7 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  utils.DurationPointer(6 * time.Second),
 			},
 		},
-		DebitInterval: []*DynamicDurationOpt{
+		AutoChargeInterval: []*DynamicDurationOpt{
 			{
 				Tenant: "cgrates.net",
 				value:  4 * time.Second,
@@ -2545,7 +2545,7 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  utils.DurationPointer(6 * time.Second),
 			},
 		},
-		DebitInterval: []*DynamicInterfaceOpt{
+		AutoChargeInterval: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  4 * time.Second,
