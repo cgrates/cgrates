@@ -941,6 +941,10 @@ const (
 	MetaChargeID            = "*chargeID"
 	MetaAsync               = "*async"
 	MetaUsage               = "*usage"
+	MetaChargedUsage        = "*chargedUsage"
+	MetaReservedUsage       = "*reservedUsage"
+	MetaTotalUsage          = "*totalUsage"
+	MetaInterimUsage        = "*interimUsage"
 	MetaDestination         = "*destination"
 	MetaStartTime           = "*startTime"
 	Weights                 = "Weights"
@@ -2491,6 +2495,7 @@ const (
 	MetaResourcesUsageID          = "*resourcesUsageID"
 	MetaIPsAuthorizeCfg           = "*ipsAuthorize"
 	MetaAccountsAuthorizeCfg      = "*accountsAuthorize"
+	MetaAccountsDebitCfg          = "*accountsDebit"
 	MetaIPsAllocateCfg            = "*ipsAllocate"
 	MetaIPsReleaseCfg             = "*ipsRelease"
 	MetaRoutesDerivedReplyCfg     = "*routesDerivedReply"
@@ -2500,7 +2505,7 @@ const (
 	MetaForceUsageCfg             = "*forceUsage"
 	MetaTTLCfg                    = "*ttl"
 	MetaChargeableCfg             = "*chargeable"
-	MetaDebitIntervalCfg          = "*debitInterval"
+	MetaAutoChargeIntervalCfg     = "*autoChargeInterval"
 	MetaTTLLastUsageCfg           = "*ttlLastUsage"
 	MetaTTLLastUsedCfg            = "*ttlLastUsed"
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
@@ -2724,17 +2729,17 @@ const (
 	OptsSesMessage                = "*sesMessage"
 
 	// Accounts
-	OptsAccountsUsage      = "*acntUsage"
-	OptsAccountsForceUsage = "*accountSForceUsage"
-	OptsAccountsProfileIDs = "*acntProfileIDs"
+	OptsAccountsUsage      = "*accountsUsage"
+	OptsAccountsForceUsage = "*accountsForceUsage"
+	OptsAccountsProfileIDs = "*accountsProfileIDs"
 
 	// Actions
-	OptsActionsProfileIDs = "*actProfileIDs"
+	OptsActionsProfileIDs = "*actionsProfileIDs"
 
 	// Attributes
-	OptsAttributesProfileIDs  = "*attrProfileIDs"
-	OptsAttributesProfileRuns = "*attrProfileRuns"
-	OptsAttributesProcessRuns = "*attrProcessRuns"
+	OptsAttributesProfileIDs  = "*attributesProfileIDs"
+	OptsAttributesProfileRuns = "*attributesProfileRuns"
+	OptsAttributesProcessRuns = "*attributesProcessRuns"
 
 	// CDRs
 	OptsCDRsExport = "*cdrsExport"
@@ -2751,29 +2756,29 @@ const (
 	OptsEEsVerbose = "*eesVerbose"
 
 	// Rates
-	OptsRatesProfileIDs    = "*rtsProfileIDs"
-	OptsRatesStartTime     = "*rtsStartTime"
-	OptsRatesUsage         = "*rtsUsage"
-	OptsRatesIntervalStart = "*rtsIntervalStart"
+	OptsRatesProfileIDs    = "*ratesProfileIDs"
+	OptsRatesStartTime     = "*ratesStartTime"
+	OptsRatesUsage         = "*ratesUsage"
+	OptsRatesIntervalStart = "*ratesIntervalStart"
 
 	// Resources
-	OptsResourcesUnits    = "*resUnits"
-	OptsResourcesUsageID  = "*resUsageID"
-	OptsResourcesUsageTTL = "*resUsageTTL"
+	OptsResourcesUnits    = "*resourcesUnits"
+	OptsResourcesUsageID  = "*resourcesUsageID"
+	OptsResourcesUsageTTL = "*resourcesUsageTTL"
 
 	// IPs
-	OptsIPsAllocationID = "*ipAllocationID"
-	OptsIPsTTL          = "*ipTTL"
+	OptsIPsAllocationID = "*ipsAllocationID"
+	OptsIPsTTL          = "*ipsTTL"
 	MetaAllocationID    = "*allocationID"
 
 	// Routes
-	OptsRoutesProfilesCount = "*rouProfilesCount"
-	OptsRoutesLimit         = "*rouLimit"
-	OptsRoutesOffset        = "*rouOffset"
-	OptsRoutesMaxItems      = "*rouMaxItems"
-	OptsRoutesIgnoreErrors  = "*rouIgnoreErrors"
-	OptsRoutesMaxCost       = "*rouMaxCost"
-	OptsRoutesUsage         = "*rouUsage"
+	OptsRoutesProfilesCount = "*routesProfilesCount"
+	OptsRoutesLimit         = "*routesLimit"
+	OptsRoutesOffset        = "*routesOffset"
+	OptsRoutesMaxItems      = "*routesMaxItems"
+	OptsRoutesIgnoreErrors  = "*routesIgnoreErrors"
+	OptsRoutesMaxCost       = "*routesMaxCost"
+	OptsRoutesUsage         = "*routesUsage"
 
 	// Stats
 	OptsStatsProfileIDs  = "*statsProfileIDs"

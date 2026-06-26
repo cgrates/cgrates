@@ -59,7 +59,7 @@ const (
 	SessionsTTLDftOpt                    = 0
 	SessionsChargeableDftOpt             = true
 	SessionsTTLMaxDelayDftOpt            = 0
-	SessionsDebitIntervalDftOpt          = 0
+	SessionsAutoChargeIntervalDftOpt     = 0
 )
 
 type SessionsOpts struct {
@@ -94,12 +94,13 @@ type SessionsOpts struct {
 	StatsDerivedReply      []*DynamicBoolOpt
 	ThresholdsDerivedReply []*DynamicBoolOpt
 	MaxUsage               []*DynamicBoolOpt
+	InterimUsage           []*DynamicDecimalOpt
+	TotalUsage             []*DynamicDecimalOpt
 	ForceUsage             []*DynamicBoolOpt
 	TTL                    []*DynamicDurationOpt
 	Chargeable             []*DynamicBoolOpt
 	TTLLastUsage           []*DynamicDurationPointerOpt
 	TTLLastUsed            []*DynamicDurationPointerOpt
-	DebitInterval          []*DynamicDurationOpt
 	TTLMaxDelay            []*DynamicDurationOpt
 	TTLUsage               []*DynamicDurationPointerOpt
 	CGRid                  []*DynamicStringOpt
@@ -110,7 +111,9 @@ type SessionsOpts struct {
 	AccountsInitialize     []*DynamicBoolOpt
 	AccountsUpdate         []*DynamicBoolOpt
 	AccountsTerminate      []*DynamicBoolOpt
+	AccountsDebit          []*DynamicBoolOpt
 	Session                []*DynamicBoolOpt
+	AutoChargeInterval     []*DynamicDurationOpt
 	EEs                    []*DynamicBoolOpt
 	EEsIDs                 []*DynamicStringOpt
 }
@@ -377,12 +380,12 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.TTLLastUsed = append(lastUsed, sesOpts.TTLLastUsed...)
 	}
-	if jsnCfg.DebitInterval != nil {
-		debitInterval, err := IfaceToDurationDynamicOpts(jsnCfg.DebitInterval)
+	if jsnCfg.AutoChargeInterval != nil {
+		aCInterval, err := IfaceToDurationDynamicOpts(jsnCfg.AutoChargeInterval)
 		if err != nil {
 			return err
 		}
-		sesOpts.DebitInterval = append(debitInterval, sesOpts.DebitInterval...)
+		sesOpts.AutoChargeInterval = append(aCInterval, sesOpts.AutoChargeInterval...)
 	}
 	if jsnCfg.TTLMaxDelay != nil {
 		maxDelay, err := IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay)
@@ -542,7 +545,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaForceUsageCfg:             scfg.Opts.ForceUsage,
 		utils.MetaTTLCfg:                    scfg.Opts.TTL,
 		utils.MetaChargeableCfg:             scfg.Opts.Chargeable,
-		utils.MetaDebitIntervalCfg:          scfg.Opts.DebitInterval,
+		utils.MetaAutoChargeIntervalCfg:     scfg.Opts.AutoChargeInterval,
 		utils.MetaTTLLastUsageCfg:           scfg.Opts.TTLLastUsage,
 		utils.MetaTTLLastUsedCfg:            scfg.Opts.TTLLastUsed,
 		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
@@ -613,7 +616,7 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		ForceUsage:             CloneDynamicBoolOpt(o.ForceUsage),
 		TTL:                    CloneDynamicDurationOpt(o.TTL),
 		Chargeable:             CloneDynamicBoolOpt(o.Chargeable),
-		DebitInterval:          CloneDynamicDurationOpt(o.DebitInterval),
+		AutoChargeInterval:     CloneDynamicDurationOpt(o.AutoChargeInterval),
 		TTLLastUsage:           CloneDynamicDurationPointerOpt(o.TTLLastUsage),
 		TTLLastUsed:            CloneDynamicDurationPointerOpt(o.TTLLastUsed),
 		TTLMaxDelay:            CloneDynamicDurationOpt(o.TTLMaxDelay),
@@ -774,7 +777,7 @@ type SessionsOptsJson struct {
 	ForceUsage             []*DynamicInterfaceOpt `json:"*forceUsage"`
 	TTL                    []*DynamicInterfaceOpt `json:"*ttl"`
 	Chargeable             []*DynamicInterfaceOpt `json:"*chargeable"`
-	DebitInterval          []*DynamicInterfaceOpt `json:"*debitInterval"`
+	AutoChargeInterval     []*DynamicInterfaceOpt `json:"*autoChargeInterval"`
 	TTLLastUsage           []*DynamicInterfaceOpt `json:"*ttlLastUsage"`
 	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
 	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`
@@ -906,8 +909,8 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicDurationPointerOptEqual(v1.TTLLastUsed, v2.TTLLastUsed) {
 		d.TTLLastUsed = DurationPointerToIfaceDynamicOpts(v2.TTLLastUsed)
 	}
-	if !DynamicDurationOptEqual(v1.DebitInterval, v2.DebitInterval) {
-		d.DebitInterval = DurationToIfaceDynamicOpts(v2.DebitInterval)
+	if !DynamicDurationOptEqual(v1.AutoChargeInterval, v2.AutoChargeInterval) {
+		d.AutoChargeInterval = DurationToIfaceDynamicOpts(v2.AutoChargeInterval)
 	}
 	if !DynamicDurationOptEqual(v1.TTLMaxDelay, v2.TTLMaxDelay) {
 		d.TTLMaxDelay = DurationToIfaceDynamicOpts(v2.TTLMaxDelay)

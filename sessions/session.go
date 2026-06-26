@@ -40,14 +40,14 @@ func (s *SessionID) OptsOriginID() string {
 
 // ExternalSession is used when displaying active sessions via RPC
 type ExternalSession struct {
-	ID            string
-	RunID         string
-	CGREvent      *utils.CGREvent
-	NodeID        string
-	TotalUsage    time.Duration // the call duration so far (till TimeEnd)
-	TotalCost     float64
-	DebitInterval time.Duration
-	NextAutoDebit time.Time
+	ID                 string
+	RunID              string
+	CGREvent           *utils.CGREvent
+	NodeID             string
+	TotalUsage         time.Duration // the call duration so far (till TimeEnd)
+	TotalCost          float64
+	AutoChargeInterval time.Duration
+	NextAutoCharge     time.Time
 }
 
 // NewSession is the constructor for one Session
@@ -68,11 +68,13 @@ func NewSession(origCGREv *utils.CGREvent, clientConnID string, runEvents []*uti
 
 // Session is the main structure to describe a call
 type Session struct {
-	ID             string          // Unique identifier per Session, defaults to APIOpts[*cgrID]
-	OriginCGREvent *utils.CGREvent // initial CGREvent received
-	ClientConnID   string          // connection ID towards the client so we can recover from passive
-	DebitInterval  *time.Duration  // execute debits for *prepaid runs
-	SRuns          []*SRun         // forked based on ChargerS
+	ID                 string          // Unique identifier per Session, defaults to APIOpts[*cgrID]
+	OriginCGREvent     *utils.CGREvent // initial CGREvent received
+	ClientConnID       string          // connection ID towards the client so we can recover from passive
+	AutoChargeInterval time.Duration   // Enable auto-charging
+
+	SRuns []*SRun          // forked based on ChargerS
+	sRuns map[string]*SRun // new way of indexing SRuns, should replace SRuns
 
 	lk          sync.RWMutex
 	debitStop   chan struct{}
@@ -83,9 +85,9 @@ type Session struct {
 func (s *Session) Clone() (cln *Session) {
 	s.lk.RLock()
 	cln = &Session{
-		OriginCGREvent: s.OriginCGREvent.Clone(),
-		ClientConnID:   s.ClientConnID,
-		DebitInterval:  s.DebitInterval,
+		OriginCGREvent:     s.OriginCGREvent.Clone(),
+		ClientConnID:       s.ClientConnID,
+		AutoChargeInterval: s.AutoChargeInterval,
 	}
 	if s.SRuns != nil {
 		cln.SRuns = make([]*SRun, len(s.SRuns))
@@ -109,8 +111,8 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 			NodeID:   utils.EmptyString,
 		}
 
-		if sr.NextAutoDebit != nil {
-			aSs[i].NextAutoDebit = *sr.NextAutoDebit
+		if sr.NextAutoCharge != nil {
+			aSs[i].NextAutoCharge = *sr.NextAutoCharge
 		}
 	}
 	s.lk.RUnlock()
@@ -125,8 +127,8 @@ func (s *Session) AsExternalSession(sRunIdx int, nodeID string) (aS *ExternalSes
 		CGREvent: s.SRuns[sRunIdx].CGREvent,
 		NodeID:   nodeID,
 	}
-	if s.SRuns[sRunIdx].NextAutoDebit != nil {
-		aS.NextAutoDebit = *s.SRuns[sRunIdx].NextAutoDebit
+	if s.SRuns[sRunIdx].NextAutoCharge != nil {
+		aS.NextAutoCharge = *s.SRuns[sRunIdx].NextAutoCharge
 	}
 	return
 }
@@ -150,6 +152,16 @@ func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
 		cgrEvs[i] = sr.CGREvent
+	}
+	return
+}
+
+// asCGREventsMap returns a map of all SRuns
+// asCGREventsMap is not thread safe
+func (s *Session) asCGREventsMap() (cgrEvs map[string]*utils.CGREvent) {
+	cgrEvs = make(map[string]*utils.CGREvent, len(s.sRuns)) // so we can gather all cdr info while under lock
+	for runID, sr := range s.sRuns {
+		cgrEvs[runID] = sr.CGREvent
 	}
 	return
 }
@@ -185,23 +197,25 @@ type SRun struct {
 	ID       string          // Identifier of the SRun, inherited from CGREvent.APIOpts[*runID]
 	CGREvent *utils.CGREvent // Event received from ChargerS
 
-	ExtraUsage    time.Duration // keeps the extra usage debited on top of what has been asked
-	LastUsage     time.Duration // last requested Duration
-	TotalUsage    time.Duration // sum of lastUsage
-	NextAutoDebit *time.Time
+	ExtraUsage         time.Duration // keeps the extra usage debited on top of what has been asked
+	LastUsage          time.Duration // last requested Duration
+	TotalUsage         time.Duration // sum of lastUsage
+	AutoChargeInterval time.Duration // Activate auto-charging
+	NextAutoCharge     *time.Time
 }
 
 // Clone returns the cloned version of SRun
 func (sr *SRun) Clone() (clsr *SRun) {
 	clsr = &SRun{
-		ID:         sr.ID,
-		CGREvent:   sr.CGREvent.Clone(),
-		ExtraUsage: sr.ExtraUsage,
-		LastUsage:  sr.LastUsage,
-		TotalUsage: sr.TotalUsage,
+		ID:                 sr.ID,
+		CGREvent:           sr.CGREvent.Clone(),
+		ExtraUsage:         sr.ExtraUsage,
+		LastUsage:          sr.LastUsage,
+		TotalUsage:         sr.TotalUsage,
+		AutoChargeInterval: sr.AutoChargeInterval,
 	}
-	if sr.NextAutoDebit != nil {
-		clsr.NextAutoDebit = utils.TimePointer(*sr.NextAutoDebit)
+	if sr.NextAutoCharge != nil {
+		clsr.NextAutoCharge = utils.TimePointer(*sr.NextAutoCharge)
 	}
 	return
 }
@@ -216,6 +230,9 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 			continue
 		}
 		for _, sr := range s.SRuns {
+			sr.CGREvent.Event[k] = v
+		}
+		for _, sr := range s.sRuns { // Update the *new* approach
 			sr.CGREvent.Event[k] = v
 		}
 	}

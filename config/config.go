@@ -183,7 +183,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 				TTLLastUsage:           []*DynamicDurationPointerOpt{},
 				TTLLastUsed:            []*DynamicDurationPointerOpt{},
-				DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
 				TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 				TTLUsage:               []*DynamicDurationPointerOpt{},
 				OriginID:               []*DynamicStringOpt{},

@@ -934,16 +934,38 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	return
 }
 
+// newSessionOutEvent is the new approach to creating session
+// FixMe: rename as soon as we will remove the old newSession
+func (sS *SessionS) newSessionOutEvent(ctx *context.Context, sID string, cgrEv *utils.CGREvent,
+	clntConnID string) (s *Session, err error) {
+	s = &Session{
+		ID:             utils.IfaceAsString(cgrEv.APIOpts[utils.MetaOriginID]),
+		OriginCGREvent: cgrEv,
+		ClientConnID:   clntConnID,
+		sRuns:          map[string]*SRun{utils.MetaPrimary: NewSRun(cgrEv)}, // enforced to one SRun, will be modified from outside if chargers is also activated
+	}
+	return
+}
+
 // setSession is called on each processEvent with *session flag to either create or update a session
+// cch contain the preprocessed opts
 func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
-	cgrID, clientConnID string) (s *Session, err error) {
-	if cgrID == utils.EmptyString {
+	cch map[string]any, clientConnID string) (s *Session, err error) {
+	if cgrIDVal, has := cch[utils.MetaCGRid]; !has ||
+		cgrIDVal.(string) == utils.EmptyString {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaCGRid)
 	}
-	if s = sS.getActivateSession(cgrID); s == nil {
-		if s, err = sS.newSession(ctx, cgrEv, clientConnID); err != nil {
+	_, hasInterimUsage := cch[utils.MetaInterimUsage]
+	_, hasTotalUsage := cch[utils.MetaTotalUsage]
+	if !hasInterimUsage && !hasTotalUsage { // make sure that we know what to charge
+		return nil, utils.NewErrMandatoryIeMissing(utils.MetaInterimUsage + "|" + utils.MetaTotalUsage)
+	}
+	if s = sS.getActivateSession(cch[utils.MetaCGRid].(string)); s == nil {
+		if s, err = sS.newSessionOutEvent(ctx, cch[utils.MetaCGRid].(string), cgrEv, clientConnID); err != nil {
 			return
 		}
+	} else {
+		s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
 	}
 	return
 }
@@ -1024,7 +1046,8 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 }
 
 // accountSDebitEvent will debit the abstracts for the provided event
-func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eEc *utils.EventCharges, err error) {
+// if session is provided, it will try to debit first out of reserved balance
+func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent, s *Session) (eEc *utils.EventCharges, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaAccounts],
 		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
@@ -1767,7 +1790,7 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 }
 
 // eesProcessEvent will send the CGREvent to EEs
-func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, cch map[string]any) (eesIDs []string, err error) {
+func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eesIDs []string, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns[utils.MetaEEs],
 		cgrEv.Tenant, cgrEv.AsDataProvider(), sS.fltrS); err != nil {
