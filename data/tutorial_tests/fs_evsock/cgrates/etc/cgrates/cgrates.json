@@ -55,6 +55,13 @@
 	"debitInterval": "5s",
 	"channelSyncInterval":"7s",
 	"conns":{
+	"*accounts": [
+		 {
+			"tenant": "",
+			"filterIDs": [],
+			"connIDs": ["*internal"]
+		 }
+	],
 	"*rals": [
 		 {
 			"tenant": "",
@@ -114,7 +121,6 @@
 			},
 },
 
-
 "freeswitchAgent": {
 	"enabled": true,
 	"subscribePark": true,
@@ -126,22 +132,19 @@
 	},	
 	"requestProcessors": [
 		{
-			"id": "Authorize",
+			"id": "Park",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_PARK"],
-			"flags": ["*authorize","*accounts","*resources","*routes","*attributes"],
-			"requestFields":[
-				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
-			],
-			"replyFields":[
-				{"tag": "ResourceAllocation", "path": "*rep.cgr_resource_allocation", "type": "*variable", "value": "~*cgrep.ResourceAllocation.*primary"}
-			]
+			"flags": ["*none","*log"]
 		},
 		{
 			"id": "Initiate",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_ANSWER"],
-			"flags": ["*initiate","*accounts"],
+			"flags": ["*initiate","*accounts","*log"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.variable_sip_from_user"},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.variable_sip_from_user"},
 				{"tag": "FsConnID", "path": "*cgreq.FsConnID", "type": "*variable", "value": "~*vars.FsConnID"}
 			],
 			"replyFields":[
@@ -151,17 +154,12 @@
 		{
 			"id": "Terminate",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_HANGUP_COMPLETE"],
-			"flags": ["*terminate","*accounts"],
+			"flags": ["*terminate","*accounts","*cdrs","*log"],
 			"requestFields":[
-				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
-			]
-		},
-		{
-			"id": "CDR",
-			"filters": ["*string:~*req.Event-Name:CHANNEL_HANGUP_COMPLETE"],
-			"flags": ["*cdrs"],
-			"requestFields":[
-				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
+				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.variable_sip_from_user"},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.variable_sip_from_user"}
 			]
 		}
 	]

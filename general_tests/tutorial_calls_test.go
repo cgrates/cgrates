@@ -21,69 +21,58 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package general_tests
 
-/*
-var tutorialCallsCfg *config.CGRConfig
-var tutorialCallsRpc *rpc.Client
-var tutorialCallsPjSuaListener *os.File
-var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorial_tests/fs_evsock", "FreeSwitch tutorial folder")
-var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorial_tests/kamevapi", "Kamailio tutorial folder")
-var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorial_tests/osips", "OpenSips tutorial folder")
-var ariConf = flag.String("ariConf", "/usr/share/cgrates/tutorial_tests/asterisk_ari", "Asterisk tutorial folder")
-var optConf string
+import (
+	"flag"
+	"fmt"
+	"net"
+	"net/url"
+	"os"
+	"os/exec"
+	"path"
+	"testing"
+	"time"
+
+	voiceblender "github.com/VoiceBlender/voiceblender-go"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	tutorialCallsCfg *config.CGRConfig
+	tutorialCallsRpc *birpc.Client
+
+	fsConfig           = flag.String("fsConfig", "/usr/share/cgrates/tutorial_tests/fs_evsock", "FreeSwitch tutorial folder")
+	ariConf            = flag.String("ariConf", "/usr/share/cgrates/tutorial_tests/asterisk_ari", "Asterisk tutorial folder")
+	voiceblenderAPIURL = flag.String("vbAPIURL", "http://127.0.0.1:8080/v1", "VoiceBlender REST API base URL")
+	vbClient           *voiceblender.Client
+	vbCmd              *exec.Cmd
+	optConf            string
+)
 
 var sTestsCalls = []func(t *testing.T){
 	testCallInitCfg,
 	testCallResetDataDb,
-
 	testCallStartFS,
-	testCallStartEngine,
 	testCallRestartFS,
+	testCallStartEngine,
 	testCallRpcConn,
 	testCallLoadTariffPlanFromFolder,
-	testCallAccountsBefore,
-	testCallStatMetricsBefore,
-	testCallCheckResourceBeforeAllocation,
-	testCallCheckThreshold1001Before,
-	testCallCheckThreshold1002Before,
-	testCallStartPjsuaListener,
+	testCallInitVoiceBlender,
 	testCallCall1001To1002,
-	testCallGetActiveSessions,
-	testCallCall1002To1001,
-	testCallCall1001To1003,
-	testCallCall1003To1001,
-	testCallCall1003To1001SecondTime,
-	testCallCheckResourceAllocation,
-	testCallAccount1001,
-	testCall1001Cdrs,
-	testCall1002Cdrs,
-	testCall1003Cdrs,
-	testCallStatMetrics,
-	testCallCheckResourceRelease,
-	testCallCheckThreshold1001After,
-	testCallCheckThreshold1002After,
-	testCallSyncSessions,
-	testCallStopPjsuaListener,
+	testCallGetCDRs,
+	testCallCheckBalance,
+	testCallStopVoiceBlender,
 	testCallStopCgrEngine,
-	testCallStopFS,
+	testCallFS,
 }
 
-//Test start here
 func TestFreeswitchCalls(t *testing.T) {
 	optConf = utils.Freeswitch
-	for _, stest := range sTestsCalls {
-		t.Run("", stest)
-	}
-}
-
-func TestKamailioCalls(t *testing.T) {
-	optConf = utils.Kamailio
-	for _, stest := range sTestsCalls {
-		t.Run("", stest)
-	}
-}
-
-func TestOpensipsCalls(t *testing.T) {
-	optConf = utils.Opensips
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
@@ -97,26 +86,17 @@ func TestAsteriskCalls(t *testing.T) {
 }
 
 func testCallInitCfg(t *testing.T) {
-	// Init config first
 	var err error
 	switch optConf {
 	case utils.Freeswitch:
-		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
-		if err != nil {
-			t.Error(err)
-		}
-	case utils.Kamailio:
-		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
-		if err != nil {
-			t.Error(err)
-		}
-	case utils.Opensips:
-		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(context.Background(),
+			path.Join(*ariConf, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	case utils.Asterisk:
-		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*ariConf, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(context.Background(),
+			path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
@@ -128,31 +108,17 @@ func testCallInitCfg(t *testing.T) {
 	config.SetCgrConfig(tutorialCallsCfg)
 }
 
-// Remove data in both rating and accounting db
 func testCallResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tutorialCallsCfg); err != nil {
+	if err := engine.InitDB(tutorialCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-
-
-// start FS server
 func testCallStartFS(t *testing.T) {
 	switch optConf {
 	case utils.Freeswitch:
 		engine.KillProcName(utils.Freeswitch, 5000)
 		if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Kamailio:
-		engine.KillProcName(utils.Kamailio, 5000)
-		if err := engine.CallScript(path.Join(*kamConfig, "kamailio", "etc", "init.d", "kamailio"), "start", 3000); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Opensips:
-		engine.KillProcName(utils.Kamailio, 5000)
-		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "start", 3000); err != nil {
 			t.Fatal(err)
 		}
 	case utils.Asterisk:
@@ -161,24 +127,32 @@ func testCallStartFS(t *testing.T) {
 			t.Fatal(err)
 		}
 	default:
-		t.Error("Invalid option")
+		t.Fatalf("Invalid option")
 	}
 }
 
-// Start CGR Engine
+func testCallRestartFS(t *testing.T) {
+	switch optConf {
+	case utils.Freeswitch:
+		engine.KillProcName(utils.Freeswitch, 5000)
+		if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "restart", 3000); err != nil {
+			t.Fatal(err)
+		}
+	case utils.Asterisk:
+		engine.KillProcName(utils.Asterisk, 5000)
+		if err := engine.CallScript(path.Join(*ariConf, "asterisk", "etc", "init.d", "asterisk"), "restart", 3000); err != nil {
+			t.Fatal(err)
+		}
+	default:
+		t.Fatalf("Invalid option")
+	}
+}
+
 func testCallStartEngine(t *testing.T) {
 	engine.KillProcName("cgr-engine", *utils.WaitRater)
 	switch optConf {
 	case utils.Freeswitch:
 		if err := engine.CallScript(path.Join(*fsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Kamailio:
-		if err := engine.CallScript(path.Join(*kamConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Opensips:
-		if err := engine.CallScript(path.Join(*oSipsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 			t.Fatal(err)
 		}
 	case utils.Asterisk:
@@ -190,625 +164,141 @@ func testCallStartEngine(t *testing.T) {
 	}
 }
 
-// Restart FS so we make sure reconnects are working
-func testCallRestartFS(t *testing.T) {
-	switch optConf {
-	case utils.Freeswitch:
-		engine.KillProcName(utils.Freeswitch, 5000)
-		if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "restart", 3000); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Kamailio:
-		engine.KillProcName(utils.Kamailio, 5000)
-		if err := engine.CallScript(path.Join(*kamConfig, "kamailio", "etc", "init.d", "kamailio"), "restart", 3000); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Opensips:
-		engine.KillProcName(utils.Kamailio, 5000)
-		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "restart", 3000); err != nil {
-			t.Fatal(err)
-		}
-	case utils.Asterisk:
-		engine.KillProcName(utils.Asterisk, 5000)
-		if err := engine.CallScript(path.Join(*ariConf, "asterisk", "etc", "init.d", "asterisk"), "restart", 3000); err != nil {
-			t.Fatal(err)
-		}
-	default:
-		t.Error("Invalid option")
-	}
-}
-
-// Connect rpc client to rater
 func testCallRpcConn(t *testing.T) {
 	var err error
-	tutorialCallsRpc, err = jsonrpc.Dial(utils.TCP, tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	for i := 0; i < 20; i++ {
+		if tutorialCallsRpc, err = jsonrpc.Dial(utils.TCP, tutorialCallsCfg.ListenCfg().RPCJSONListen); err == nil {
+			return
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+	t.Fatal(err)
+}
+
+func testCallLoadTariffPlanFromFolder(t *testing.T) {
+	var reply string
+	args := &loaders.ArgsProcessFolder{
+		Path: path.Join(*utils.DataDir, "tariffplans", "tutorial"),
+		APIOpts: map[string]any{
+			utils.MetaCache:       utils.MetaReload,
+			utils.MetaStopOnError: true,
+		},
+	}
+	if err := tutorialCallsRpc.Call(context.Background(), utils.LoaderSv1Run, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned: %s", reply)
+	}
+	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
+}
+
+func testCallInitVoiceBlender(t *testing.T) {
+	engine.KillProcName("voiceblender", 1000)
+
+	vbPath, err := exec.LookPath("voiceblender")
 	if err != nil {
 		t.Fatal(err)
 	}
-}
+	vbCmd = exec.Command(vbPath)
+	vbCmd.Stdout = os.Stdout
+	vbCmd.Stderr = os.Stderr
+	if err := vbCmd.Start(); err != nil {
+		t.Fatalf("starting voiceblender: %v", err)
+	}
 
-// Load the tariff plan, creating accounts and their balances
-func testCallLoadTariffPlanFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
-	if err := tutorialCallsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
-}
-
-// Make sure account was debited properly
-func testCallAccountsBefore(t *testing.T) {
-	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
-		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
-	}
-	var reply2 *engine.Account
-	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs2, &reply2); err != nil {
-		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply2.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply2.BalanceMap[utils.MetaMonetary].GetTotalValue())
-	}
-	var reply3 *engine.Account
-	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs3, &reply3); err != nil {
-		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply3.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply3.BalanceMap[utils.MetaMonetary].GetTotalValue())
-	}
-}
-
-func testCallStatMetricsBefore(t *testing.T) {
-	var metrics map[string]string
-	expectedMetrics := map[string]string{
-		utils.MetaTCC: utils.NotAvailable,
-		utils.MetaTCD: utils.NotAvailable,
-	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
-	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
-	}
-}
-
-func testCallCheckResourceBeforeAllocation(t *testing.T) {
-	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceEvent",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-		},
-	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	u, err := url.Parse(*voiceblenderAPIURL)
+	if err != nil {
 		t.Fatal(err)
-	} else if len(*rs) != 1 {
-		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
 	}
-	for _, r := range *rs {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
-			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
+	addr := u.Host
+	if u.Port() == "" {
+		addr = net.JoinHostPort(u.Hostname(), "80")
+	}
+	var ready bool
+	for range 10 {
+		conn, derr := net.DialTimeout(utils.TCP, addr, 200*time.Millisecond)
+		if derr == nil {
+			conn.Close()
+			ready = true
+			break
 		}
+		time.Sleep(250 * time.Millisecond)
 	}
+	if !ready {
+		t.Fatalf("voiceblender REST API %s not reachable", addr)
+	}
+
+	vbClient = voiceblender.New(voiceblender.WithBaseURL(*voiceblenderAPIURL))
 }
 
-func testCallCheckThreshold1001Before(t *testing.T) {
-	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 0}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eTd, td) {
-		t.Errorf("expecting: %+v, received: %+v", eTd, td)
-	}
-}
-
-func testCallCheckThreshold1002Before(t *testing.T) {
-	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 0}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eTd, td) {
-		t.Errorf("expecting: %+v, received: %+v", eTd, td)
-	}
-}
-
-// Start Pjsua as listener and register it to receive calls
-func testCallStartPjsuaListener(t *testing.T) {
-	var err error
-	acnts := []*engine.PjsuaAccount{
-		{Id: "sip:1001@127.0.0.1",
-			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
-		{Id: "sip:1002@127.0.0.1",
-			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
-		{Id: "sip:1003@127.0.0.1",
-			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
-	}
-	if tutorialCallsPjSuaListener, err = engine.StartPjsuaListener(
-		acnts, 5070, time.Duration(*utils.WaitRater)*time.Millisecond); err != nil {
+func vbOriginate(t *testing.T, from, dst string, dur time.Duration) {
+	t.Helper()
+	if _, err := vbClient.CreateLeg(context.Background(), voiceblender.CreateLegRequest{
+		Type:        "sip",
+		To:          fmt.Sprintf("sip:%s@127.0.0.1:5080", dst),
+		From:        from,
+		MaxDuration: int(dur.Seconds()),
+	}); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(3 * time.Second)
 }
 
-// Call from 1001 (prepaid) to 1002
 func testCallCall1001To1002(t *testing.T) {
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", 67*time.Second, 5071); err != nil {
-		t.Fatal(err)
-	}
-	// give time to session to start so we can check it
+	vbOriginate(t, "1001", "1002", 15*time.Second)
 	time.Sleep(time.Second)
 }
 
-// GetActiveSessions
-func testCallGetActiveSessions(t *testing.T) {
-	var reply *[]*sessions.ExternalSession
-	expected := &[]*sessions.ExternalSession{
-		{
-			RequestType: "*prepaid",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Subject:     "1001",
-			Destination: "1002",
-		},
+func testCallGetCDRs(t *testing.T) {
+	args := &utils.CDRFilters{
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &reply); err != nil {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
-	} else {
-		if len(*reply) == 2 {
-			sort.Slice(*reply, func(i, j int) bool {
-				return strings.Compare((*reply)[i].RequestType, (*reply)[j].RequestType) > 0
-			})
+	var cdrs []*utils.CDR
+	var err error
+	for i := 0; i < 30; i++ {
+		err = tutorialCallsRpc.Call(context.Background(), utils.AdminSv1GetCDRs, args, &cdrs)
+		if err == nil && len(cdrs) != 0 {
+			break
 		}
-		// compare some fields (eg. CGRId is generated)
-		if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
-		} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
-		} else if !reflect.DeepEqual((*expected)[0].Destination, (*reply)[0].Destination) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].Destination, (*reply)[0].Destination)
+		time.Sleep(time.Second)
+	}
+	if err != nil || len(cdrs) == 0 {
+		t.Fatalf("expected CDRs for account 1001, received none (err=%v)", err)
+	}
+	for _, cdr := range cdrs {
+		if utils.IfaceAsString(cdr.Event[utils.AccountField]) != "1001" {
+			t.Errorf("unexpected CDR account: %s", utils.ToJSON(cdr))
 		}
 	}
 }
 
-// Call from 1002 (postpaid) to 1001
-func testCallCall1002To1001(t *testing.T) {
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 65*time.Second, 5072); err != nil {
+func testCallCheckBalance(t *testing.T) {
+	const initialUnits = 10.0
+	var acc utils.Account
+	if err := tutorialCallsRpc.Call(context.Background(), utils.AccountSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acc); err != nil {
 		t.Fatal(err)
 	}
-}
-
-// Call from 1001 (prepaid) to 1003 limit to 12 seconds
-func testCallCall1001To1003(t *testing.T) {
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", 60*time.Second, 5073); err != nil {
-		t.Fatal(err)
+	units, ok := acc.Balances["MonetaryBalance"].Units.Float64()
+	if !ok {
+		t.Fatal("expected MonetaryBalance to exists")
+	}
+	if units < initialUnits {
+		t.Errorf("expected account 1001 balance below initial %v (debited), got %v: %s",
+			initialUnits, units, utils.ToJSON(acc))
+		return
 	}
 }
 
-// Call from 1003 (prepaid) to 1001 for 20 seconds
-func testCallCall1003To1001(t *testing.T) {
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 20*time.Second, 5074); err != nil {
-		t.Fatal(err)
+func testCallStopVoiceBlender(t *testing.T) {
+	if vbCmd == nil || vbCmd.Process == nil {
+		return
 	}
-	// after this call from 1001 to 1003 and call from 1003 to 1001 should be done
-}
-
-// Call from 1003 (prepaid) to 1001 for 15 seconds
-func testCallCall1003To1001SecondTime(t *testing.T) {
-	time.Sleep(22 * time.Second)
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 15*time.Second, 5075); err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(time.Second)
-}
-
-// Check if the resource was Allocated
-func testCallCheckResourceAllocation(t *testing.T) {
-	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID1",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceAllocation",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-		},
-	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Fatal(err)
-	} else if len(*rs) != 1 {
-		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
-	}
-	for _, r := range *rs {
-		if r.ID == "ResGroup1" && len(r.Usages) != 3 {
-			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
-		}
-	}
-	// Allow calls to finish before start querying the results
-	time.Sleep(50 * time.Second)
-}
-
-// Make sure account was debited properly
-func testCallAccount1001(t *testing.T) {
-	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
-		t.Error(err.Error())
-	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() == 10.0 { // Make sure we debitted
-		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
-	} else if reply.Disabled == true {
-		t.Error("Account disabled")
-	}
-}
-
-// Make sure account was debited properly
-func testCall1001Cdrs(t *testing.T) {
-	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	} else {
-		for _, cdr := range reply {
-			if cdr.RequestType != utils.MetaPrepaid {
-				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
-			}
-			if cdr.Destination == "1002" {
-				// in case of Asterisk take the integer part from usage
-				if optConf == utils.Asterisk {
-					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
-				}
-				if cdr.Usage != "1m7s" && cdr.Usage != "1m8s" { // Usage as seconds
-					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
-				}
-				if cdr.CostSource != utils.MetaSessionS {
-					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
-				}
-			} else if cdr.Destination == "1003" {
-				// in case of Asterisk take the integer part from usage
-				if optConf == utils.Asterisk {
-					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
-				}
-				if cdr.Usage != "12s" && cdr.Usage != "13s" { // Usage as seconds
-					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
-				}
-				if cdr.CostSource != utils.MetaSessionS {
-					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
-				}
-			}
-		}
-	}
-}
-
-// Make sure account was debited properly
-func testCall1002Cdrs(t *testing.T) {
-	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
-		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	} else {
-		if reply[0].RequestType != utils.MetaPostpaid {
-			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
-		}
-		// in case of Asterisk take the integer part from usage
-		if optConf == utils.Asterisk {
-			reply[0].Usage = strings.Split(reply[0].Usage, ".")[0] + "s"
-		}
-		if reply[0].Usage != "1m5s" && reply[0].Usage != "1m6s" { // Usage as seconds
-			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
-		}
-		if reply[0].CostSource != utils.MetaCDRs {
-			t.Errorf("Unexpected CostSource for CDR: %+v", reply[0].CostSource)
-		}
-	}
-}
-
-// Make sure account was debited properly
-func testCall1003Cdrs(t *testing.T) {
-	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
-		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	} else {
-		for _, cdr := range reply {
-			if cdr.RequestType != utils.MetaPrepaid {
-				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
-			}
-			// in case of Asterisk take the integer part from usage
-			if optConf == utils.Asterisk {
-				cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
-			}
-			if cdr.Usage != "15s" && cdr.Usage != "16s" &&
-				cdr.Usage != "20s" && cdr.Usage != "21s" { // Usage as seconds
-				t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
-			}
-			if cdr.CostSource != utils.MetaSessionS {
-				t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
-			}
-
-		}
-	}
-}
-
-func testCallStatMetrics(t *testing.T) {
-	var metrics map[string]string
-	firstStatMetrics1 := map[string]string{
-		utils.MetaTCC: "1.35346",
-		utils.MetaTCD: "2m27s",
-	}
-	firstStatMetrics2 := map[string]string{
-		utils.MetaTCC: "1.35009",
-		utils.MetaTCD: "2m25s",
-	}
-	firstStatMetrics3 := map[string]string{
-		utils.MetaTCC: "1.34009",
-		utils.MetaTCD: "2m24s",
-	}
-	firstStatMetrics4 := map[string]string{
-		utils.MetaTCC: "1.35346",
-		utils.MetaTCD: "2m24s",
-	}
-	secondStatMetrics1 := map[string]string{
-		utils.MetaTCC: "0.6",
-		utils.MetaTCD: "35s",
-	}
-	secondStatMetrics2 := map[string]string{
-		utils.MetaTCC: "0.6",
-		utils.MetaTCD: "37s",
-	}
-
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
-		t.Fatal(err)
-	}
-	if optConf == utils.Asterisk {
-		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
-	}
-	if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics2, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics3, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics4, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
-	}
-	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
+	if err := vbCmd.Process.Kill(); err != nil {
 		t.Error(err)
 	}
-	if optConf == utils.Asterisk {
-		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
-	}
-	if !reflect.DeepEqual(secondStatMetrics1, metrics) &&
-		!reflect.DeepEqual(secondStatMetrics2, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics1, metrics)
-	}
-}
-
-func testCallCheckResourceRelease(t *testing.T) {
-	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID2",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceRelease",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-		},
-	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Fatal(err)
-	} else if len(*rs) != 1 {
-		t.Fatalf("Resources: %+v", rs)
-	}
-	for _, r := range *rs {
-		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
-			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
-		}
-	}
-}
-
-func testCallCheckThreshold1001After(t *testing.T) {
-	var td engine.Threshold
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testCallCheckThreshold1002After(t *testing.T) {
-	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 4}
-	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
-	} else if !reflect.DeepEqual(eTd.ID, td.ID) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.ID, td.ID)
-	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.Hits, td.Hits)
-	}
-}
-
-func testCallSyncSessions(t *testing.T) {
-	var reply *[]*sessions.ExternalSession
-	// activeSessions shouldn't be active
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
-	}
-	// 1001 call 1002 stop the call after 12 seconds
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", 120*time.Second, 5076); err != nil {
-		t.Fatal(err)
-	}
-	// 1001 call 1003 stop the call after 11 seconds
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", 120*time.Second, 5077); err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(time.Second)
-	// get active sessions
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &reply); err != nil {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
-	} else if len(*reply) != 4 { // expect to have 4 sessions ( two for 1001 to 1003 *raw and *default and two from 1001 to 1002 *raw and *default)
-		t.Errorf("expecting 4 active sessions, received: %+v", utils.ToJSON(reply))
-	}
-	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
-	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID3",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AllocateResource",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-		},
-	}
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Fatal(err)
-	} else if len(*rs) != 1 {
-		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
-	}
-	for _, r := range *rs {
-		if r.ID == "ResGroup1" && len(r.Usages) != 2 {
-			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
-		}
-	}
-
-	time.Sleep(3 * time.Second)
-	//stop the FS
-	switch optConf {
-	case utils.Freeswitch:
-		engine.ForceKillProcName(utils.Freeswitch,
-			int(tutorialCallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
-	case utils.Kamailio:
-		engine.ForceKillProcName(utils.Kamailio,
-			int(tutorialCallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
-	case utils.Opensips:
-		engine.ForceKillProcName(utils.Opensips,
-			int(tutorialCallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
-	case utils.Asterisk:
-		engine.ForceKillProcName(utils.Asterisk,
-			int(tutorialCallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
-	default:
-		t.Errorf("unsupported format")
-	}
-
-	time.Sleep(2 * time.Second)
-
-	// activeSessions shouldn't be active
-	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Got error on SessionSv1.GetActiveSessions: %v and reply: %s", err, utils.ToJSON(reply))
-	}
-
-	var sourceForCDR string
-	numberOfCDR := 3
-	switch optConf {
-	case utils.Freeswitch:
-		sourceForCDR = "FS_CHANNEL_ANSWER"
-	case utils.Kamailio:
-		sourceForCDR = utils.KamailioAgent
-	case utils.Asterisk:
-		sourceForCDR = utils.AsteriskAgent
-	case utils.Opensips:
-		sourceForCDR = utils.Opensips
-	}
-	// verify cdr
-	var rplCdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{
-		Sources:  []string{sourceForCDR},
-		MaxUsage: "20s",
-		RunIDs:   []string{utils.MetaDefault},
-		Accounts: []string{"1001"},
-	}
-	if err := tutorialCallsRpc.Call(utils.APIerSv2GetCDRs, &req, &rplCdrs); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
-		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs), utils.ToJSON(rplCdrs))
-	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[0].Usage); err != nil {
-		t.Error(err)
-	} else if time1 > 15*time.Second {
-		t.Error("Unexpected time duration : ", time1)
-	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[1].Usage); err != nil {
-		t.Error(err)
-	} else if time1 > 15*time.Second {
-		t.Error("Unexpected time duration : ", time1)
-	} else if numberOfCDR == 3 {
-		if time1, err := utils.ParseDurationWithSecs(rplCdrs[2].Usage); err != nil {
-			t.Error(err)
-		} else if time1 > 15*time.Second {
-			t.Error("Unexpected time duration : ", time1)
-		}
-	}
-
-	//check if resource was released
-	var rsAfter *engine.Resources
-	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
-		t.Fatal(err)
-	} else if len(*rsAfter) != 1 {
-		t.Fatalf("Resources: %+v", rsAfter)
-	}
-	for _, r := range *rsAfter {
-		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
-			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
-		}
-	}
-}
-
-func testCallStopPjsuaListener(t *testing.T) {
-	tutorialCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
-	time.Sleep(time.Second)                         // Allow pjsua to finish it's tasks, eg un-REGISTER
+	vbCmd.Wait()
 }
 
 func testCallStopCgrEngine(t *testing.T) {
@@ -817,18 +307,13 @@ func testCallStopCgrEngine(t *testing.T) {
 	}
 }
 
-func testCallStopFS(t *testing.T) {
+func testCallFS(t *testing.T) {
 	switch optConf {
 	case utils.Freeswitch:
 		engine.ForceKillProcName(utils.Freeswitch, 1000)
-	case utils.Kamailio:
-		engine.ForceKillProcName(utils.Kamailio, 1000)
-	case utils.Opensips:
-		engine.ForceKillProcName(utils.Opensips, 1000)
 	case utils.Asterisk:
 		engine.ForceKillProcName(utils.Asterisk, 1000)
 	default:
-		t.Errorf("unsupported format")
+		t.Errorf("invalid option")
 	}
 }
-*/
