@@ -886,7 +886,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	if interimUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage); errUsage != nil {
 		return errUsage
-	} else if interimUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
+	} else if interimUsage != nil && interimUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
 		cch[utils.MetaInterimUsage] = interimUsage
 	}
 
@@ -894,7 +894,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	if totalUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.TotalUsage, utils.MetaTotalUsage); errUsage != nil {
 		return errUsage
-	} else if totalUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
+	} else if totalUsage != nil && totalUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
 		cch[utils.MetaTotalUsage] = totalUsage
 	}
 
