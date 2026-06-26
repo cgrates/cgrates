@@ -2246,3 +2246,56 @@ func TestEescfgdiffEventExporterOptsJsonCfg(t *testing.T) {
 		t.Errorf("\nexpected: %s\nreceived: %s\n", utils.ToJSON(expD), utils.ToJSON(rcv))
 	}
 }
+
+func TestExporterCfg(t *testing.T) {
+	eesCfg := &EEsCfg{
+		Exporters: []*EventExporterCfg{
+			{
+				ID:   "eesID",
+				Type: utils.MetaFileCSV,
+			},
+			{
+				ID:   "eesID1",
+				Type: utils.MetaFileFWV,
+			},
+			{
+				ID:   "eesID2",
+				Type: utils.MetaFileCSV,
+			},
+		},
+	}
+
+	tests := []struct {
+		id     string
+		want   *EventExporterCfg
+		errMsg string
+	}{
+		{
+			id:     "eesID",
+			want:   eesCfg.Exporters[0],
+			errMsg: "",
+		},
+		{
+			id:     "eesID1",
+			want:   eesCfg.Exporters[1],
+			errMsg: "",
+		},
+		{
+			id:     "nonexistent",
+			want:   nil,
+			errMsg: "Exporter with ID 'nonexistent' not found",
+		},
+		{
+			id:     "",
+			want:   nil,
+			errMsg: "Exporter ID cannot be empty",
+		},
+	}
+
+	for _, tc := range tests {
+		got := eesCfg.ExporterCfg(tc.id)
+		if got != tc.want {
+			t.Errorf("ExporterCfg(%q): expected %v, got %v; %s", tc.id, tc.want, got, tc.errMsg)
+		}
+	}
+}
