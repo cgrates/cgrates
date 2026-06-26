@@ -2049,7 +2049,7 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 						"value": "~*req.TTL",
 					},
 				],
-				"*debitInterval": [
+				"*autoChargeInterval": [
 					{
 				        "filterIDs": ["*string:~*req.Account:1001"],
 						"value": "~*req.Usage",

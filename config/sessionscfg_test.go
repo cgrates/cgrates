@@ -168,6 +168,10 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{{}},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
 			MaxUsage:               []*DynamicBoolOpt{{}},
+			InterimUsage:           []*DynamicDecimalOpt{},
+			TotalUsage:             []*DynamicDecimalOpt{},
+			AccountsDebit:          []*DynamicBoolOpt{{}},
+			Session:                []*DynamicBoolOpt{{}},
 			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
@@ -405,10 +409,14 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{{}},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
 			MaxUsage:               []*DynamicBoolOpt{{}},
+			InterimUsage:           []*DynamicDecimalOpt{},
+			TotalUsage:             []*DynamicDecimalOpt{},
 			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
+			AccountsDebit:          []*DynamicBoolOpt{{}},
+			Session:                []*DynamicBoolOpt{{}},
 			OriginID:               []*DynamicStringOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
@@ -618,7 +626,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 						"value": "1s"
 					}
 				],
-				"*debitInterval": [
+				"*autoChargeInterval": [
 					{
 						"value": "8s"
 					}
