@@ -156,9 +156,7 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",		// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
+		"redisConnectTimeout": "0",		// the read/write timeout for each connection.
 		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
 		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
 		"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
@@ -1083,9 +1081,7 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,
 		"redisClusterSync": "5s",
 		"redisClusterOndownDelay": "0",
-		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
+		"redisConnectTimeout": "0",		// the read/write timeout for each connection.
 		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
 		"redisPoolPipelineLimit": 0,		// maximum number of commands that can be pipelined before flushing (0 means no limit)
 		"redisTLS": false,			// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection

@@ -29,9 +29,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestNewRedisStorage(t *testing.T) {
+	_, err := NewRedisStorage("127.0.0.1:6379", 10, "cgrates", "", "json", 10, 20,
+		"", false, 5*time.Second, 0, 0, 0, 0, false, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func BenchmarkRedisScan(b *testing.B) {
 	rs, err := NewRedisStorage("127.0.0.1:6379", 10, "cgrates", "", "json", 10, 20,
-		"", false, 5*time.Second, 0, 0, 0, 0, 0, 0, false, "", "", "")
+		"", false, 5*time.Second, 0, 0, 0, 0, false, "", "", "")
 	if err != nil {
 		b.Fatalf("Failed to create Redis storage: %v", err)
 	}

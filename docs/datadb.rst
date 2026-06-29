@@ -234,8 +234,8 @@ redisClusterSync
 redisClusterOndownDelay
     Delay before executing commands when Redis Cluster is in CLUSTERDOWN state
 
-redisConnectTimeout, redisReadTimeout, redisWriteTimeout
-    Timeout settings for various Redis operations
+redisConnectTimeout
+    The read/write timeout for each connection.
 
 redisTLS, redisClientCertificate, redisClientKey, redisCACertificate
     TLS configuration for secure Redis connections

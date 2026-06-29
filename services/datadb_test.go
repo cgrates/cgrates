@@ -63,8 +63,6 @@ func TestDataDBCoverage(t *testing.T) {
 			RedisClusterOndownDelay: 0,
 			RedisPoolPipelineWindow: 150 * time.Microsecond,
 			RedisConnectTimeout:     0,
-			RedisReadTimeout:        0,
-			RedisWriteTimeout:       0,
 			MongoQueryTimeout:       10 * time.Second,
 			RedisTLS:                false,
 		},

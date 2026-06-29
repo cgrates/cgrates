@@ -2432,8 +2432,6 @@ const (
 	RedisPoolPipelineWindowCfg   = "redisPoolPipelineWindow"
 	RedisPoolPipelineLimitCfg    = "redisPoolPipelineLimit"
 	RedisConnectTimeoutCfg       = "redisConnectTimeout"
-	RedisReadTimeoutCfg          = "redisReadTimeout"
-	RedisWriteTimeoutCfg         = "redisWriteTimeout"
 	RedisTLS                     = "redisTLS"
 	RedisClientCertificate       = "redisClientCertificate"
 	RedisClientKey               = "redisClientKey"

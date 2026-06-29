@@ -292,15 +292,6 @@ func TestRemoveVersions(t *testing.T) {
 	}
 }
 
-func TestSelectDatabase(t *testing.T) {
-	dbM := &DataDBMock{}
-	dbName := "db"
-	err := dbM.SelectDatabase(dbName)
-	if err != utils.ErrNotImplemented {
-		t.Errorf("Expected error to be ErrNotImplemented, got %v", err)
-	}
-}
-
 func TestGetStorageType(t *testing.T) {
 	dbM := &DataDBMock{}
 	result := dbM.GetStorageType()

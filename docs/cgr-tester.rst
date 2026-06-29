@@ -64,17 +64,13 @@ Command line stress testing tool configurable via command line arguments.
   -redisConnectAttempts int
     	The maximum amount of dial attempts (default 20)
   -redisConnectTimeout duration
-    	The amount of wait time until timeout for a connection attempt
+    	The read/write timeout for each connection.
   -redisBatchSize int
     	COUNT size used in redis SCAN queries (default 1000)
   -redisMaxConns int
     	The connection pool size (default 10)
-  -redisReadTimeout duration
-    	The amount of wait time until timeout for reading operations
   -redisSentinel string
     	The name of redis sentinel
-  -redisWriteTimeout duration
-    	The amount of wait time until timeout for writing operations
   -req_separator string
     	separator for requests in file (default "\n\n")
   -request_type string

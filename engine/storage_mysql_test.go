@@ -128,19 +128,6 @@ func TestMongoGetContext(t *testing.T) {
 		t.Errorf("GetContext() = %v; want %v", gotCtx, testCtx)
 	}
 }
-func TestMongoSelectDatabase(t *testing.T) {
-	initialDB := "mongo"
-	ms := &MongoStorage{
-		db: initialDB,
-	}
-	newDB := "db"
-	if err := ms.SelectDatabase(newDB); err != nil {
-		t.Errorf("SelectDatabase() returned an error: %v", err)
-	}
-	if got := ms.db; got != newDB {
-		t.Errorf("SelectDatabase() updated db to %v, want %v", got, newDB)
-	}
-}
 
 func TestMongoGetStorageType(t *testing.T) {
 	ms := &MongoStorage{}
@@ -169,15 +156,6 @@ func TestGetKeysForPrefix(t *testing.T) {
 	}
 	if keys != nil {
 		t.Errorf("Expected keys to be nil, got: %v", keys)
-	}
-}
-
-func TestMysqlSelectDatabase(t *testing.T) {
-	sqlStorage := SQLStorage{}
-	testDBName := "mySql"
-	err := sqlStorage.SelectDatabase(testDBName)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
 	}
 }
 

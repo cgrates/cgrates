@@ -38,7 +38,6 @@ type Storage interface {
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
-	SelectDatabase(dbName string) (err error)
 	GetStorageType() string
 	IsDBEmpty() (resp bool, err error)
 }

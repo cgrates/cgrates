@@ -84,10 +84,6 @@ func (dbM *DataDBMock) RemoveVersions(vrs Versions) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SelectDatabase(dbName string) (err error) {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetStorageType() string {
 	return utils.EmptyString
 }
