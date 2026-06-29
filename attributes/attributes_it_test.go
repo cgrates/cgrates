@@ -1713,7 +1713,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_WITH_BLOCKER_TRUE",
-			FilterIDs: []string{"*string:~*req.Blockers:*exists", "*eq:~*opts.*attrProcessRuns:2"},
+			FilterIDs: []string{"*string:~*req.Blockers:*exists", "*eq:~*opts.*attributesProcessRuns:2"},
 			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,

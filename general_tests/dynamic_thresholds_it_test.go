@@ -921,7 +921,7 @@ func TestDynThdIT(t *testing.T) {
 			ThresholdProfile: &utils.ThresholdProfile{
 				Tenant:           utils.CGRateSorg,
 				ID:               "THD_ACNT_1002",
-				FilterIDs:        []string{"*string:~*opts.*acntProfileIDs:1002"},
+				FilterIDs:        []string{"*string:~*opts.*accountsProfileIDs:1002"},
 				MaxHits:          1,
 				ActionProfileIDs: []string{"DYNAMIC_THRESHOLD_ACTION"},
 				Async:            true,
@@ -948,7 +948,7 @@ func TestDynThdIT(t *testing.T) {
 		expThPrf := utils.ThresholdProfile{
 			Tenant:           utils.CGRateSorg,
 			ID:               "THD_ACNT_1002",
-			FilterIDs:        []string{"*string:~*opts.*acntProfileIDs:1002"},
+			FilterIDs:        []string{"*string:~*opts.*accountsProfileIDs:1002"},
 			MaxHits:          1,
 			ActionProfileIDs: []string{"DYNAMIC_THRESHOLD_ACTION"},
 			Async:            true,
@@ -1016,7 +1016,7 @@ func TestDynThdIT(t *testing.T) {
 			{
 				Tenant:           utils.CGRateSorg,
 				ID:               "THD_ACNT_1002",
-				FilterIDs:        []string{"*string:~*opts.*acntProfileIDs:1002"},
+				FilterIDs:        []string{"*string:~*opts.*accountsProfileIDs:1002"},
 				MaxHits:          1,
 				MinHits:          0,
 				MinSleep:         0,
@@ -2552,7 +2552,7 @@ func TestDynThdIT(t *testing.T) {
 						TTL:  10 * time.Second,
 						Type: utils.MetaAddBalance,
 						Opts: map[string]any{
-							"{\"*acntProfileIDs\"": "\"1002\",\"*actProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
 						},
 						Weights: utils.DynamicWeights{
 							{
@@ -2643,7 +2643,7 @@ func TestDynThdIT(t *testing.T) {
 						TTL:  10 * time.Second,
 						Type: utils.MetaAddBalance,
 						Opts: map[string]any{
-							"{\"*acntProfileIDs\"": "\"1002\",\"*actProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
 						},
 						Weights: utils.DynamicWeights{
 							{

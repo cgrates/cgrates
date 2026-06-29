@@ -1376,7 +1376,7 @@ func testAccRefundCharges(t *testing.T) {
 					Weight: 0,
 				},
 			},
-			FilterIDs: []string{"*exists:~*opts.*acntUsage:", "*string:~*req.Destination:1004"},
+			FilterIDs: []string{"*exists:~*opts.*accountsUsage:", "*string:~*req.Destination:1004"},
 			Balances: map[string]*utils.Balance{
 				"AB": {
 					ID: "AB",
