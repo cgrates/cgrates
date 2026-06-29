@@ -206,7 +206,7 @@ func TestRadiusChargingRecurringFee(t *testing.T) {
 }
 
 // TestRadiusChargingActionProvisioning runs the same US plan as
-// TestRadiusChargingProvisioning, but the data balances come from a *setBalance
+// TestRadiusChargingProvisioning, but the allowance comes from a *setBalance
 // action instead of being declared in SetAccount.
 func TestRadiusChargingActionProvisioning(t *testing.T) {
 	switch *utils.DBType {
@@ -293,11 +293,7 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 							dk("alw_weight", "*balance.data_allowance.Weights", "`;20`"),
 							dk("alw_cost", "*balance.data_allowance.CostIncrements", "`;1;0;0`"),
 							dk("alw_units", "*balance.data_allowance.Units", gb),
-							dk("ovg_type", "*balance.data_overage.Type", utils.MetaAbstract),
-							dk("ovg_weight", "*balance.data_overage.Weights", "`;10`"),
-							dk("ovg_rate", "*balance.data_overage.RateProfileIDs", "RP_US_OVERAGE"),
-							dk("ovg_units", "*balance.data_overage.Units", 0),
-							dk("ovg_unlimited", "*balance.data_overage.Opts.*balanceUnlimited", true),
+							dk("mon_rate", "*balance.monetary.RateProfileIDs", "RP_US_OVERAGE"),
 						},
 					},
 				},
@@ -476,19 +472,12 @@ func setDataAccount(t *testing.T, c *birpc.Client, acctID string, regionFilter [
 							},
 						},
 					},
-					"data_overage": {
-						ID:             "data_overage",
-						Type:           utils.MetaAbstract,
-						Weights:        utils.DynamicWeights{{Weight: 10}},
-						Units:          utils.NewDecimal(0, 0),
-						Opts:           map[string]any{utils.MetaBalanceUnlimited: true},
-						RateProfileIDs: []string{overageRPID},
-					},
 					"monetary": {
-						ID:      "monetary",
-						Type:    utils.MetaConcrete,
-						Weights: utils.DynamicWeights{{Weight: 5}},
-						Units:   monetary,
+						ID:             "monetary",
+						Type:           utils.MetaConcrete,
+						Weights:        utils.DynamicWeights{{Weight: 5}},
+						Units:          monetary,
+						RateProfileIDs: []string{overageRPID},
 					},
 				},
 			},
