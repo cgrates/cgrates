@@ -23,6 +23,7 @@ package general_tests
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -95,7 +96,17 @@ ACT_TOPUP,*topup_reset,,,balance_sms,*sms,,,,,*unlimited,,1000000,,,,`,
 cgrates.org,DEFAULT,,,*default,*none,0`,
 		},
 	}
+	switch *utils.DBType {
+	case utils.MetaInternal, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		ng.ConfigPath = filepath.Join(*utils.DataDir, "conf", "samples", "diam_sy_mysql")
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
 	client, cfg := ng.Run(t)
+
+	time.Sleep(200 * time.Millisecond)
 
 	diamClient, err := agents.NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,

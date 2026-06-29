@@ -101,11 +101,6 @@ func (iDB *InternalDB) Flush(string) error {
 	return nil
 }
 
-// SelectDatabase only to implement Storage interface
-func (iDB *InternalDB) SelectDatabase(string) (err error) {
-	return nil
-}
-
 // GetKeysForPrefix returns the keys from cache that have the given prefix. If search is
 // populated it will also match the string given in search parameter
 func (iDB *InternalDB) GetKeysForPrefix(prefix, search string) (ids []string, err error) {

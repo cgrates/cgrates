@@ -76,11 +76,7 @@ var (
 	dbRedisPoolPipelineLimit = cgrTesterFlags.Int(utils.RedisPoolPipelineLimitCfg, cgrConfig.DataDbCfg().Opts.RedisPoolPipelineLimit,
 		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisConnectTimeout = cgrTesterFlags.Duration(utils.RedisConnectTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisConnectTimeout,
-		"The amount of wait time until timeout for a connection attempt")
-	dbRedisReadTimeout = cgrTesterFlags.Duration(utils.RedisReadTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisReadTimeout,
-		"The amount of wait time until timeout for reading operations")
-	dbRedisWriteTimeout = cgrTesterFlags.Duration(utils.RedisWriteTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisWriteTimeout,
-		"The amount of wait time until timeout for writing operations")
+		"The read/write timeout for each connection.")
 	dbQueryTimeout = cgrTesterFlags.Duration("mongoQueryTimeout", cgrConfig.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
 	dbMongoConnScheme = cgrTesterFlags.String(utils.MongoConnSchemeCfg, cgrConfig.DataDbCfg().Opts.MongoConnScheme,
@@ -300,12 +296,6 @@ func main() {
 	}
 	if *dbRedisConnectTimeout != cgrConfig.DataDbCfg().Opts.RedisConnectTimeout {
 		tstCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
-	}
-	if *dbRedisReadTimeout != cgrConfig.DataDbCfg().Opts.RedisReadTimeout {
-		tstCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
-	}
-	if *dbRedisWriteTimeout != cgrConfig.DataDbCfg().Opts.RedisWriteTimeout {
-		tstCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
 	if *dbRedisPoolPipelineWindow != cgrConfig.DataDbCfg().Opts.RedisPoolPipelineWindow {
 		tstCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow

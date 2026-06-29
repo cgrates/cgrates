@@ -67,9 +67,10 @@ import (
 var (
 	clsrConfig *config.CGRConfig
 	clsrRPC    *birpc.Client
+	tmpcfg     = config.CgrConfig()
 
-	clsrNodeCfgPath   = path.Join(*utils.DataDir, "redisCluster", "node%v.conf")
-	clsrEngineCfgPath = path.Join(*utils.DataDir, "conf", "samples", "redisCluster")
+	clsrNodeCfgPath   = path.Join(*utils.DataDir, "redis_cluster", "node%v.conf")
+	clsrEngineCfgPath = path.Join(*utils.DataDir, "conf", "samples", "redis_cluster")
 	clsrNodes         = make(map[string]*exec.Cmd)
 	clsrOutput        = make(map[string]*bytes.Buffer) // in order to debug if something is not working
 	clsrNoNodes       = 6                              // this is the minimum number of nodes for a cluster with 1 replica for each master
@@ -87,6 +88,7 @@ var (
 		testClsrSetGetAttribute2,
 		testClsrReStartMaster,
 		testClsrGetAttribute,
+		testClsrResetNodes,
 		testClsrStopNodes,
 		testClsrKillEngine,
 		testClsrDeleteFolder,
@@ -126,7 +128,26 @@ func TestRedisCluster(t *testing.T) {
 	}
 	for _, stest := range clsrTests {
 		t.Run("TestRedisCluster", stest)
+		if t.Failed() {
+			for i := 1; i <= clsrNoNodes; i++ {
+				cmd := exec.Command("redis-cli", "-p", fmt.Sprintf("700%v", i), "CLUSTER", "RESET", "HARD")
+				var stdOut bytes.Buffer
+				cmd.Stdout = &stdOut
+				if err := cmd.Run(); err != nil {
+					t.Errorf("Could not reset the cluster because %s", err)
+					t.Logf("The output was:\n %s", stdOut.String()) // print the output to debug the error
+				}
+				time.Sleep(200 * time.Millisecond)
+			}
+			for path, node := range clsrNodes {
+				if err := node.Process.Kill(); err != nil {
+					t.Fatalf("Could not stop node with path <%s> because %s", path, err)
+				}
+			}
+			break
+		}
 	}
+	config.SetCgrConfig(tmpcfg)
 }
 
 func testClsrPrepare(t *testing.T) {
@@ -148,6 +169,8 @@ func testClsrStartNodes(t *testing.T) {
 }
 
 func testClsrCreateCluster(t *testing.T) {
+	time.Sleep(200 * time.Millisecond)
+
 	cmd := exec.Command(clsrRedisCliCmd, clsrRedisCliArgs...)
 	cmd.Stdin = bytes.NewBuffer([]byte("yes\n"))
 	var stdOut bytes.Buffer
@@ -156,7 +179,7 @@ func testClsrCreateCluster(t *testing.T) {
 		t.Errorf("Could not create the cluster because %s", err)
 		t.Logf("The output was:\n %s", stdOut.String()) // print the output to debug the error
 	}
-	time.Sleep(200 * time.Millisecond)
+	// time.Sleep(500 * time.Millisecond)
 }
 
 func testClsrInitConfig(t *testing.T) {
@@ -165,6 +188,7 @@ func testClsrInitConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	config.SetCgrConfig(clsrConfig)
 	clsrConfig.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
@@ -292,6 +316,19 @@ func testClsrGetAttribute(t *testing.T) {
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	}
+}
+
+func testClsrResetNodes(t *testing.T) {
+	for i := 1; i <= clsrNoNodes; i++ {
+		cmd := exec.Command("redis-cli", "-p", fmt.Sprintf("700%v", i), "CLUSTER", "RESET", "HARD")
+		var stdOut bytes.Buffer
+		cmd.Stdout = &stdOut
+		if err := cmd.Run(); err != nil {
+			t.Errorf("Could not reset the cluster because %s", err)
+			t.Logf("The output was:\n %s", stdOut.String()) // print the output to debug the error
+		}
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 

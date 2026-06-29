@@ -21,11 +21,13 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"strconv"
 	"strings"
@@ -34,18 +36,16 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/mediocregopher/radix/v3"
+	"github.com/redis/rueidis"
 )
 
 type RedisStorage struct {
-	client radix.Client
+	client rueidis.Client
 	ms     Marshaler
 }
 
 // Redis commands
 const (
-	redis_AUTH     = "AUTH"
-	redis_SELECT   = "SELECT"
 	redis_FLUSHDB  = "FLUSHDB"
 	redis_DEL      = "DEL"
 	redis_HGETALL  = "HGETALL"
@@ -64,141 +64,382 @@ const (
 	redis_LPOP     = "LPOP"
 	redis_HMGET    = "HMGET"
 	redis_HDEL     = "HDEL"
-	redis_HGET     = "HGET"
 	redis_RENAME   = "RENAME"
-	redis_HMSET    = "HMSET"
-	redis_HSET     = "HSET"
-	redis_SCAN     = "SCAN"
+	redis_HSET     = "HMSET"
 
 	redisLoadError = "Redis is loading the dataset in memory"
 	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
 )
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
-	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
-	clusterOnDownDelay, connTimeout, readTimeout, writeTimeout,
-	pipelineWindow time.Duration, pipelineLimit int,
+	maxConns, retryAttempts int, sentinelName string, isCluster bool, clusterSync,
+	clusterOnDownDelay, connTimeout, pipelineWindow time.Duration, pipelineLimit int,
 	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string) (_ *RedisStorage, err error) {
 	var ms Marshaler
 	if ms, err = NewMarshaler(mrshlerStr); err != nil {
 		return
 	}
-
-	dialOpts := make([]radix.DialOpt, 1, 6)
-	dialOpts[0] = radix.DialSelectDB(db)
+	opt := rueidis.ClientOption{
+		InitAddress:      []string{address},
+		ConnWriteTimeout: connTimeout,
+		BlockingPoolSize: maxConns,
+		ClusterOption: rueidis.ClusterOption{
+			ShardsRefreshInterval: clusterSync,
+		},
+		DisableRetry: false,
+	}
 	if pass != utils.EmptyString {
-		if user == utils.EmptyString {
-			dialOpts = append(dialOpts, radix.DialAuthPass(pass))
-		} else {
-			dialOpts = append(dialOpts, radix.DialAuthUser(user, pass))
+		if user != utils.EmptyString {
+			opt.Username = user
 		}
+		opt.Password = pass
+	}
+	if pipelineLimit > 0 {
+		opt.PipelineMultiplex = pipelineLimit
+	}
+	if pipelineWindow > 0 {
+		opt.MaxFlushDelay = pipelineWindow
 	}
 
-	if tlsConn {
-		var cert tls.Certificate
-		if tlsClientCert != "" && tlsClientKey != "" {
-			if cert, err = tls.LoadX509KeyPair(tlsClientCert, tlsClientKey); err != nil {
-				return
+	opt.RetryDelay = func(attempts int, cmd rueidis.Completed, err error) time.Duration {
+		if attempts == retryAttempts {
+			return -1 // stop retrying
+		}
+		if clusterOnDownDelay > 0 {
+			// if CLUSTERDOWN state, delay and retry
+			if err != nil && strings.HasPrefix(err.Error(), "CLUSTERDOWN") {
+				return clusterOnDownDelay
 			}
 		}
-		var rootCAs *x509.CertPool
-		if rootCAs, err = x509.SystemCertPool(); err != nil {
-			return
-		}
-		if rootCAs == nil {
-			rootCAs = x509.NewCertPool()
+		// taken from rueidis defaultRetryDelayFn
+		// delay the next retry exponentially without considering the error. From 1 microsecond, Max delay is 1 second
+		base := 1 << min(retryAttempts, attempts)
+		// randomise delay so not all clients restart at the same time to not overload the server
+		return min(1*time.Second, time.Duration(base+rand.IntN(base))*time.Microsecond)
+	}
+	// Add TLS configuration
+	if tlsConn {
+		tlsConfig := &tls.Config{}
+		if tlsClientCert != "" && tlsClientKey != "" {
+			cert, err := tls.LoadX509KeyPair(tlsClientCert, tlsClientKey)
+			if err != nil {
+				return nil, fmt.Errorf("failed to load client certificates: %w", err)
+			}
+			tlsConfig.Certificates = []tls.Certificate{cert}
 		}
 		if tlsCACert != "" {
-			var ca []byte
-			if ca, err = os.ReadFile(tlsCACert); err != nil {
-				return
+			caCert, err := os.ReadFile(tlsCACert)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read CA certificate: %w", err)
 			}
-			if !rootCAs.AppendCertsFromPEM(ca) {
-				return
+			caCertPool := x509.NewCertPool()
+			if !caCertPool.AppendCertsFromPEM(caCert) {
+				return nil, fmt.Errorf("failed to parse CA certificate")
+			}
+			tlsConfig.RootCAs = caCertPool
+		} else {
+			systemCerts, err := x509.SystemCertPool()
+			if err == nil && systemCerts != nil {
+				tlsConfig.RootCAs = systemCerts
+			} else {
+				tlsConfig.RootCAs = x509.NewCertPool()
 			}
 		}
-		dialOpts = append(dialOpts, radix.DialUseTLS(&tls.Config{
-			Certificates: []tls.Certificate{cert},
-			RootCAs:      rootCAs,
-		}))
+
+		opt.TLSConfig = tlsConfig
+	}
+	if !isCluster { // DB is not selectable if its a cluster
+		opt.SelectDB = db
+	}
+	if sentinelName != utils.EmptyString {
+		opt.Sentinel = rueidis.SentinelOption{
+			MasterSet: sentinelName,
+		}
+	}
+	client, err := rueidis.NewClient(opt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Redis client: %w", err)
 	}
 
-	dialOpts = append(dialOpts,
-		radix.DialReadTimeout(readTimeout),
-		radix.DialWriteTimeout(writeTimeout),
-		radix.DialConnectTimeout(connTimeout))
-
-	var client radix.Client
-	if client, err = newRedisClient(address, sentinelName,
-		isCluster, clusterSync, clusterOnDownDelay,
-		pipelineWindow, pipelineLimit,
-		maxConns, attempts, dialOpts); err != nil {
-		return
-	}
 	return &RedisStorage{
 		ms:     ms,
 		client: client,
 	}, nil
 }
 
-func redisDial(network, addr string, attempts int, opts ...radix.DialOpt) (conn radix.Conn, err error) {
-	fib := utils.FibDuration(time.Millisecond, 0)
-	for i := 0; i < attempts; i++ {
-		if conn, err = radix.Dial(network, addr, opts...); err == nil ||
-			!strings.Contains(err.Error(), redisLoadError) {
-			break
-		}
-		time.Sleep(fib())
-	}
-	return
-}
-
-func newRedisClient(address, sentinelName string, isCluster bool,
-	clusterSync, clusterOnDownDelay, pipelineWindow time.Duration,
-	pipelineLimit, maxConns, attempts int, dialOpts []radix.DialOpt,
-) (radix.Client, error) {
-
-	dialFunc := func(network, addr string) (radix.Conn, error) {
-		return redisDial(network, addr, attempts, dialOpts...)
-	}
-	dialFuncAuthOnly := func(network, addr string) (radix.Conn, error) {
-		return redisDial(network, addr, attempts, dialOpts[1:]...)
-	}
-
-	// Configure common pool options.
-	poolOpts := make([]radix.PoolOpt, 0, 2)
-	poolOpts = append(poolOpts, radix.PoolPipelineWindow(pipelineWindow, pipelineLimit))
-
-	switch {
-	case isCluster:
-		return radix.NewCluster(utils.InfieldSplit(address),
-			radix.ClusterSyncEvery(clusterSync),
-			radix.ClusterOnDownDelayActionsBy(clusterOnDownDelay),
-			radix.ClusterPoolFunc(func(network, addr string) (radix.Client, error) {
-				// in cluster enviorment do not select the DB as we expect to have only one DB
-				return radix.NewPool(network, addr, maxConns, append(poolOpts, radix.PoolConnFunc(dialFuncAuthOnly))...)
-			}))
-	case sentinelName != utils.EmptyString:
-		return radix.NewSentinel(sentinelName, utils.InfieldSplit(address),
-			radix.SentinelConnFunc(dialFuncAuthOnly),
-			radix.SentinelPoolFunc(func(network, addr string) (radix.Client, error) {
-				return radix.NewPool(network, addr, maxConns, append(poolOpts, radix.PoolConnFunc(dialFunc))...)
-			}))
-	default:
-		return radix.NewPool(utils.TCP, address, maxConns, append(poolOpts, radix.PoolConnFunc(dialFunc))...)
-	}
-}
-
-// Cmd function get a connection from the pool.
-// Handles automatic failover in case of network disconnects
+// Cmd executes a Redis command with the given receiver for the result.
 func (rs *RedisStorage) Cmd(rcv any, cmd string, args ...string) error {
-	return rs.client.Do(radix.Cmd(rcv, cmd, args...))
+	ctx := context.Background()
+	var cmdObj rueidis.Completed
+
+	switch cmd {
+	case redis_GET:
+		cmdObj = rs.client.B().Get().Key(args[0]).Build()
+	case redis_SET:
+		cmdObj = rs.client.B().Set().Key(args[0]).Value(args[1]).Build()
+	case redis_DEL:
+		if config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay > 0 {
+			for range config.CgrConfig().DataDbCfg().Opts.RedisConnectAttempts {
+				if err := rs.client.Do(ctx, rs.client.B().Del().Key(args...).Build()).Error(); err != nil {
+					if strings.HasPrefix(err.Error(), "CLUSTERDOWN") {
+						time.Sleep(config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay)
+						continue
+					}
+					return err
+				}
+				return nil
+			}
+		}
+		return rs.client.Do(ctx, rs.client.B().Del().Key(args...).Build()).Error()
+	case redis_EXISTS:
+		cmdObj = rs.client.B().Exists().Key(args...).Build()
+	case redis_KEYS:
+		cmdObj = rs.client.B().Keys().Pattern(args[0]).Build()
+	case redis_FLUSHDB:
+		cmdObj = rs.client.B().Flushdb().Build()
+	case redis_HGETALL:
+		cmdObj = rs.client.B().Hgetall().Key(args[0]).Build()
+	case redis_HDEL:
+		cmdObj = rs.client.B().Hdel().Key(args[0]).Field(args[1:]...).Build()
+	case redis_HMGET:
+		cmdObj = rs.client.B().Hmget().Key(args[0]).Field(args[1:]...).Build()
+	case redis_SADD:
+		cmdObj = rs.client.B().Sadd().Key(args[0]).Member(args[1:]...).Build()
+	case redis_SMEMBERS:
+		cmdObj = rs.client.B().Smembers().Key(args[0]).Build()
+	case redis_SREM:
+		cmdObj = rs.client.B().Srem().Key(args[0]).Member(args[1:]...).Build()
+	case redis_LRANGE:
+		start, _ := strconv.ParseInt(args[1], 10, 64)
+		stop, _ := strconv.ParseInt(args[2], 10, 64)
+		cmdObj = rs.client.B().Lrange().Key(args[0]).Start(start).Stop(stop).Build()
+	case redis_LPUSH:
+		cmdObj = rs.client.B().Lpush().Key(args[0]).Element(args[1:]...).Build()
+	case redis_RPUSH:
+		cmdObj = rs.client.B().Rpush().Key(args[0]).Element(args[1:]...).Build()
+	case redis_LPOP:
+		cmdObj = rs.client.B().Lpop().Key(args[0]).Build()
+	case redis_RPOP:
+		cmdObj = rs.client.B().Rpop().Key(args[0]).Build()
+	case redis_LLEN:
+		cmdObj = rs.client.B().Llen().Key(args[0]).Build()
+	case redis_RENAME:
+		cmdObj = rs.client.B().Rename().Key(args[0]).Newkey(args[1]).Build()
+	default:
+		// Fallback to arbitrary command
+		arbitrary := rs.client.B().Arbitrary(cmd)
+		for _, arg := range args {
+			arbitrary = arbitrary.Args(arg)
+		}
+		cmdObj = arbitrary.Build()
+	}
+
+	result := rs.client.Do(ctx, cmdObj)
+	if result.Error() != nil {
+		if rueidis.IsRedisNil(result.Error()) {
+			return nil
+		}
+		if config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay > 0 {
+			for range config.CgrConfig().DataDbCfg().Opts.RedisConnectAttempts {
+				if err := result.Error(); err != nil {
+					if strings.HasPrefix(err.Error(), "CLUSTERDOWN") {
+						time.Sleep(config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay)
+						continue
+					}
+					return err
+				}
+				return nil
+			}
+		}
+		return result.Error()
+	}
+
+	return rs.parseResult(result, rcv)
 }
 
-// FlatCmd function get a connection from the pool.
-// Handles automatic failover in case of network disconnects
+// FlatCmd executes a Redis command with flat key-value arguments, optimized for hash operations
 func (rs *RedisStorage) FlatCmd(rcv any, cmd, key string, args ...any) error {
-	return rs.client.Do(radix.FlatCmd(rcv, cmd, key, args...))
+	ctx := context.Background()
+	var cmdObj rueidis.Completed
+
+	switch cmd {
+	case redis_HSET:
+		b := rs.client.B().Hset().Key(key).FieldValue()
+		for _, arg := range args {
+			switch v := arg.(type) {
+			case map[string]string:
+				for k, val := range v {
+					b.FieldValue(k, val)
+				}
+			case Versions:
+				for k, val := range v {
+					b.FieldValue(k, strconv.FormatInt(val, 10))
+				}
+			case map[string]int64:
+				for k, val := range v {
+					b.FieldValue(k, strconv.FormatInt(val, 10))
+				}
+			}
+		}
+		cmdObj = b.Build()
+
+	case redis_HMGET:
+		strFields := make([]string, 0, len(args))
+		for _, arg := range args {
+			strFields = append(strFields, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Hmget().Key(key).Field(strFields...).Build()
+
+	case redis_HDEL:
+		strFields := make([]string, 0, len(args))
+		for _, arg := range args {
+			strFields = append(strFields, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Hdel().Key(key).Field(strFields...).Build()
+
+	case redis_SADD:
+		strMembers := make([]string, 0, len(args))
+		for _, arg := range args {
+			strMembers = append(strMembers, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Sadd().Key(key).Member(strMembers...).Build()
+
+	case redis_SREM:
+		strMembers := make([]string, 0, len(args))
+		for _, arg := range args {
+			strMembers = append(strMembers, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Srem().Key(key).Member(strMembers...).Build()
+
+	case redis_LPUSH:
+		strElements := make([]string, 0, len(args))
+		for _, arg := range args {
+			strElements = append(strElements, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Lpush().Key(key).Element(strElements...).Build()
+
+	case redis_RPUSH:
+		strElements := make([]string, 0, len(args))
+		for _, arg := range args {
+			strElements = append(strElements, fmt.Sprint(arg))
+		}
+		cmdObj = rs.client.B().Rpush().Key(key).Element(strElements...).Build()
+
+	default:
+		// Fallback to arbitrary command
+		arbitrary := rs.client.B().Arbitrary(cmd).Args(key)
+		for _, arg := range args {
+			arbitrary = arbitrary.Args(fmt.Sprint(arg))
+		}
+		cmdObj = arbitrary.Build()
+	}
+
+	result := rs.client.Do(ctx, cmdObj)
+	if result.Error() != nil {
+		if rueidis.IsRedisNil(result.Error()) {
+			return nil
+		}
+		if config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay > 0 {
+			for range config.CgrConfig().DataDbCfg().Opts.RedisConnectAttempts {
+				if err := result.Error(); err != nil {
+					if strings.HasPrefix(err.Error(), "CLUSTERDOWN") {
+						time.Sleep(config.CgrConfig().DataDbCfg().Opts.RedisClusterOndownDelay)
+						continue
+					}
+
+					return err
+				}
+				return nil
+			}
+		}
+		return result.Error()
+	}
+
+	return rs.parseResult(result, rcv)
+}
+
+// parseResult unmarshals a Redis result into the receiver based on its type
+func (rs *RedisStorage) parseResult(result rueidis.RedisResult, rcv any) error {
+	switch v := rcv.(type) {
+	case nil:
+		return nil
+	case *[]byte:
+		val, err := result.AsBytes()
+		if err != nil {
+			return err
+		}
+		*v = val
+	case *string:
+		val, err := result.AsBytes()
+		if err != nil {
+			return err
+		}
+		*v = string(val)
+	case *[]string:
+		vals, err := result.AsStrSlice()
+		if err != nil {
+			arr, err2 := result.ToArray()
+			if err2 != nil {
+				return err
+			}
+			for _, item := range arr {
+				s, _ := item.AsBytes()
+				*v = append(*v, string(s))
+			}
+			return nil
+		}
+		*v = vals
+	case *map[string]string:
+		vals, err := result.AsStrMap()
+		if err != nil {
+			return err
+		}
+		for k, val := range vals {
+			(*v)[k] = val
+		}
+	case *int:
+		val, err := result.AsInt64()
+		if err != nil {
+			return err
+		}
+		*v = int(val)
+	case *int64:
+		val, err := result.AsInt64()
+		if err != nil {
+			return err
+		}
+		*v = val
+	case *bool:
+		val, err := result.AsBool()
+		if err != nil {
+			return err
+		}
+		*v = val
+	case *[][]byte:
+		arr, err := result.ToArray()
+		if err != nil {
+			return err
+		}
+		for _, item := range arr {
+			val, err := item.AsBytes()
+			if err != nil {
+				continue
+			}
+			*v = append(*v, val)
+		}
+	default:
+		// Try to unmarshal as bytes using the marshaler
+		val, err := result.AsBytes()
+		if err != nil {
+			return err
+		}
+		if len(val) == 0 {
+			return nil
+		}
+		return rs.ms.Unmarshal(val, rcv)
+	}
+
+	return nil
 }
 
 func (rs *RedisStorage) Close() {
@@ -213,10 +454,6 @@ func (rs *RedisStorage) Flush(ignore string) error {
 
 func (rs *RedisStorage) Marshaler() Marshaler {
 	return rs.ms
-}
-
-func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
-	return rs.Cmd(nil, redis_SELECT, dbName)
 }
 
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
@@ -307,37 +544,65 @@ func (rs *RedisStorage) scanKeysForPrefixContaining(prefix, search string) ([]st
 	if search == utils.EmptyString {
 		return nil, nil
 	}
+
+	ctx := context.Background()
 	var keys []string
-	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
-		Command: redis_SCAN,
-		Pattern: prefix + utils.Meta + search + utils.Meta, // Match all keys with the given prefix and containing search value
-		Count:   config.CgrConfig().DataDbCfg().Opts.RedisBatchSize,
-	})
-	var key string
-	for scanner.Next(&key) {
-		keys = append(keys, key)
+	pattern := prefix + utils.Meta + search + utils.Meta
+	cursor := uint64(0)
+	batchSize := int64(config.CgrConfig().DataDbCfg().Opts.RedisBatchSize)
+
+	// Iterate through all keys using SCAN
+	for {
+		cmd := rs.client.B().Scan().Cursor(cursor).Match(pattern).Count(batchSize).Build()
+		result := rs.client.Do(ctx, cmd)
+		if result.Error() != nil && result.Error() != rueidis.Nil {
+			return nil, result.Error()
+		}
+
+		scanEntry, err := result.AsScanEntry()
+		if err != nil {
+			return nil, err
+		}
+
+		keys = append(keys, scanEntry.Elements...)
+
+		cursor = scanEntry.Cursor
+		if cursor == 0 {
+			break
+		}
 	}
-	if err := scanner.Close(); err != nil {
-		return nil, err
-	}
+
 	return keys, nil
 }
 
-// scanKeysWithPrefix performs a non-blocking scan for keys matching the given prefix.
+// scanKeysForPrefix performs a non-blocking scan for keys matching the given prefix.
 func (rs *RedisStorage) scanKeysForPrefix(prefix string) ([]string, error) {
+	ctx := context.Background()
 	var keys []string
-	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
-		Command: redis_SCAN,
-		Pattern: prefix + "*", // Match all keys with the given prefix
-		Count:   config.CgrConfig().DataDbCfg().Opts.RedisBatchSize,
-	})
-	var key string
-	for scanner.Next(&key) {
-		keys = append(keys, key)
+	cursor := uint64(0)
+	batchSize := int64(config.CgrConfig().DataDbCfg().Opts.RedisBatchSize)
+
+	// Iterate through all keys using SCAN
+	for {
+		cmd := rs.client.B().Scan().Cursor(cursor).Match(prefix + "*").Count(batchSize).Build()
+		result := rs.client.Do(ctx, cmd)
+		if result.Error() != nil && result.Error() != rueidis.Nil {
+			return nil, result.Error()
+		}
+
+		scanEntry, err := result.AsScanEntry()
+		if err != nil {
+			return nil, err
+		}
+
+		keys = append(keys, scanEntry.Elements...)
+
+		cursor = scanEntry.Cursor
+		if cursor == 0 {
+			break
+		}
 	}
-	if err := scanner.Close(); err != nil {
-		return nil, err
-	}
+
 	return keys, nil
 }
 
@@ -940,18 +1205,33 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 	if itm != "" {
-		var fldVal int64
-		mn := radix.MaybeNil{Rcv: &fldVal}
-		if err = rs.Cmd(&mn, redis_HGET, utils.TBLVersions, itm); err != nil {
-			return nil, err
-		} else if mn.Nil {
-			err = utils.ErrNotFound
-			return
+		ctx := context.Background()
+		cmd := rs.client.B().Hget().Key(utils.TBLVersions).Field(itm).Build()
+		result := rs.client.Do(ctx, cmd)
+		if result.Error() != nil {
+			// Check if it's a nil response (key doesn't exist)
+			if rueidis.IsRedisNil(result.Error()) {
+				err = utils.ErrNotFound
+				return
+			}
+			return nil, result.Error()
 		}
-		return Versions{itm: fldVal}, nil
+		val, err := result.AsInt64()
+		if err != nil {
+			return nil, utils.ErrNotFound
+		}
+		return Versions{itm: val}, nil
 	}
-	var mp map[string]string
-	if err = rs.Cmd(&mp, redis_HGETALL, utils.TBLVersions); err != nil {
+
+	ctx := context.Background()
+	cmd := rs.client.B().Hgetall().Key(utils.TBLVersions).Build()
+	result := rs.client.Do(ctx, cmd)
+	if result.Error() != nil && result.Error() != rueidis.Nil {
+		return nil, result.Error()
+	}
+
+	mp, err := result.AsStrMap()
+	if err != nil {
 		return nil, err
 	}
 	if len(mp) == 0 {
@@ -969,7 +1249,7 @@ func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 			return
 		}
 	}
-	return rs.FlatCmd(nil, redis_HMSET, utils.TBLVersions, vrs)
+	return rs.FlatCmd(nil, redis_HSET, utils.TBLVersions, vrs)
 }
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
@@ -1343,15 +1623,25 @@ func (rs *RedisStorage) GetStorageType() string {
 
 func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	if itemIDPrefix != "" {
-		var fldVal int64
-		mn := radix.MaybeNil{Rcv: &fldVal}
-		if err = rs.Cmd(&mn, redis_HGET, utils.LoadIDs, itemIDPrefix); err != nil {
-			return
-		} else if mn.Nil {
-			err = utils.ErrNotFound
+		ctx := context.Background()
+		cmd := rs.client.B().Hget().Key(utils.LoadIDs).Field(itemIDPrefix).Build()
+		result := rs.client.Do(ctx, cmd)
+		if result.Error() != nil {
+			if rueidis.IsRedisNil(result.Error()) {
+				err = utils.ErrNotFound
+			} else {
+				err = result.Error()
+			}
 			return
 		}
-		return map[string]int64{itemIDPrefix: fldVal}, nil
+		val, err := result.AsInt64()
+		if err != nil {
+			if rueidis.IsRedisNil(err) {
+				return nil, utils.ErrNotFound
+			}
+			return nil, err
+		}
+		return map[string]int64{itemIDPrefix: val}, nil
 	}
 	mpLoadIDs := make(map[string]string)
 	if err = rs.Cmd(&mpLoadIDs, redis_HGETALL, utils.LoadIDs); err != nil {
@@ -1370,7 +1660,7 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 }
 
 func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]int64) error {
-	return rs.FlatCmd(nil, redis_HMSET, utils.LoadIDs, loadIDs)
+	return rs.FlatCmd(nil, redis_HSET, utils.LoadIDs, loadIDs)
 }
 
 func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
@@ -1447,7 +1737,7 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 		}
 		mp[key] = string(encodedMp)
 		if len(mp) == RedisLimit {
-			if err = rs.FlatCmd(nil, redis_HMSET, dbKey, mp); err != nil {
+			if err = rs.FlatCmd(nil, redis_HSET, dbKey, mp); err != nil {
 				return
 			}
 			mp = make(map[string]string)
@@ -1459,7 +1749,7 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 		}
 	}
 	if len(mp) != 0 {
-		return rs.FlatCmd(nil, redis_HMSET, dbKey, mp)
+		return rs.FlatCmd(nil, redis_HSET, dbKey, mp)
 	}
 	return
 }
@@ -1492,14 +1782,14 @@ func (rs *RedisStorage) SetBackupSessionsDrv(nodeID string,
 		}
 		mp[sess.CGRID] = string(sessByte)
 		if len(mp) == RedisLimit {
-			if err = rs.FlatCmd(nil, redis_HMSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt,
+			if err = rs.FlatCmd(nil, redis_HSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt,
 				nodeID), mp); err != nil {
 				return
 			}
 			mp = make(map[string]string)
 		}
 	}
-	return rs.FlatCmd(nil, redis_HMSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), mp)
+	return rs.FlatCmd(nil, redis_HSET, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), mp)
 }
 
 // Will restore sessions that were active from dataDB backup

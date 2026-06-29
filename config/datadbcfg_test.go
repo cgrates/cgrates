@@ -138,18 +138,6 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
-			RedisReadTimeout: utils.StringPointer("test4"),
-		},
-	}); err == nil {
-		t.Error(err)
-	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
-		Opts: &DBOptsJson{
-			RedisWriteTimeout: utils.StringPointer("test5"),
-		},
-	}); err == nil {
-		t.Error(err)
-	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
-		Opts: &DBOptsJson{
 			MongoQueryTimeout: utils.StringPointer("test4"),
 		},
 	}); err == nil {

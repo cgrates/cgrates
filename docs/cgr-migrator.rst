@@ -78,19 +78,15 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
   -redisConnectAttempts int
     	The maximum amount of dial attempts (default 20)
   -redisConnectTimeout duration
-    	The amount of wait time until timeout for a connection attempt
+    	The read/write timeout for each connection.
   -redisBatchSize int
     	COUNT size used in redis SCAN queries (default 1000)
   -redisMaxConns int
     	The connection pool size (default 10)
-  -redisReadTimeout duration
-    	The amount of wait time until timeout for reading operations
   -redisSentinel string
     	the name of redis sentinel
   -redisTLS
     	Enable TLS when connecting to Redis
-  -redisWriteTimeout duration
-    	The amount of wait time until timeout for writing operations
   -stordb_host string
     	the StorDB host (default "127.0.0.1")
   -stordb_name string

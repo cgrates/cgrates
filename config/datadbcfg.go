@@ -43,8 +43,6 @@ type DataDBOpts struct {
 	RedisClusterSync          time.Duration
 	RedisClusterOndownDelay   time.Duration
 	RedisConnectTimeout       time.Duration
-	RedisReadTimeout          time.Duration
-	RedisWriteTimeout         time.Duration
 	RedisPoolPipelineWindow   time.Duration
 	RedisPoolPipelineLimit    int
 	RedisTLS                  bool
@@ -131,16 +129,6 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.RedisConnectTimeout != nil {
 		if dbOpts.RedisConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisConnectTimeout); err != nil {
-			return
-		}
-	}
-	if jsnCfg.RedisReadTimeout != nil {
-		if dbOpts.RedisReadTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisReadTimeout); err != nil {
-			return
-		}
-	}
-	if jsnCfg.RedisWriteTimeout != nil {
-		if dbOpts.RedisWriteTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisWriteTimeout); err != nil {
 			return
 		}
 	}
@@ -278,8 +266,6 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisClusterSync:          dbOpts.RedisClusterSync,
 		RedisClusterOndownDelay:   dbOpts.RedisClusterOndownDelay,
 		RedisConnectTimeout:       dbOpts.RedisConnectTimeout,
-		RedisReadTimeout:          dbOpts.RedisReadTimeout,
-		RedisWriteTimeout:         dbOpts.RedisWriteTimeout,
 		RedisPoolPipelineWindow:   dbOpts.RedisPoolPipelineWindow,
 		RedisPoolPipelineLimit:    dbOpts.RedisPoolPipelineLimit,
 		RedisTLS:                  dbOpts.RedisTLS,
@@ -339,8 +325,6 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.RedisClusterSyncCfg:          dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg:   dbcfg.Opts.RedisClusterOndownDelay.String(),
 		utils.RedisConnectTimeoutCfg:       dbcfg.Opts.RedisConnectTimeout.String(),
-		utils.RedisReadTimeoutCfg:          dbcfg.Opts.RedisReadTimeout.String(),
-		utils.RedisWriteTimeoutCfg:         dbcfg.Opts.RedisWriteTimeout.String(),
 		utils.RedisPoolPipelineWindowCfg:   dbcfg.Opts.RedisPoolPipelineWindow.String(),
 		utils.RedisPoolPipelineLimitCfg:    dbcfg.Opts.RedisPoolPipelineLimit,
 		utils.RedisTLS:                     dbcfg.Opts.RedisTLS,

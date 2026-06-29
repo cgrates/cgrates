@@ -396,12 +396,6 @@ func (ms *MongoStorage) DB() *mongo.Database {
 	return ms.client.Database(ms.db)
 }
 
-// SelectDatabase selects the specified database.
-func (ms *MongoStorage) SelectDatabase(dbName string) error {
-	ms.db = dbName
-	return nil
-}
-
 func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) error {
 	var colName string
 	switch prefix {
