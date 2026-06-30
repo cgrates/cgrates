@@ -25,7 +25,7 @@ require (
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
-	github.com/creack/pty v1.1.23
+	github.com/creack/pty v1.1.24
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/elastic-transport-go/v8 v8.6.0
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731
@@ -39,6 +39,7 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/procfs v0.15.1
 	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/reeflective/readline v1.2.2
 	github.com/twmb/franz-go v1.20.7
 	github.com/twmb/franz-go/pkg/kadm v1.17.2
 	github.com/ugorji/go/codec v1.2.12
@@ -120,6 +121,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.26 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.13.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
@@ -132,12 +134,12 @@ require (
 	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
-	golang.org/x/mod v0.35.0 // indirect
+	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
-	golang.org/x/tools v0.44.0 // indirect
+	golang.org/x/tools v0.45.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
