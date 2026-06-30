@@ -243,7 +243,7 @@ type FreeswitchAgentJsonCfg struct {
 	MaxWaitConnection      *string                    `json:"maxWaitConnection"`
 	ActiveSessionDelimiter *string                    `json:"activeSessionDelimiter"`
 	EventSocketConns       *[]*FsConnJsonCfg          `json:"eventSocketConns"`
-	Request_processors     *[]*ReqProcessorJsnCfg
+	Request_processors     *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 // Represents one connection instance towards FreeSWITCH

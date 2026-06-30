@@ -200,7 +200,7 @@ type AsteriskAgentJsonCfg struct {
 	Enabled            *bool
 	Conns              map[string][]*DynamicConns `json:"conns,omitempty"`
 	Asterisk_conns     *[]*AstConnJsonCfg         `json:"asteriskConns"`
-	Request_processors *[]*ReqProcessorJsnCfg
+	Request_processors *[]*ReqProcessorJsnCfg     `json:"requestProcessors"`
 }
 
 func diffAstConnJsonCfg(v1, v2 *AsteriskConnCfg) (d *AstConnJsonCfg) {

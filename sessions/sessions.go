@@ -566,8 +566,14 @@ func (sS *SessionS) replicateSessions(ctx *context.Context, sID string, psv bool
 	for _, s := range ss {
 		sCln := s.Clone()
 		var conns []string // ToDo: cache per session
+		tnt := utils.MetaAny
+		dP := utils.MapStorage{}
+		if s.OriginCGREvent != nil {
+			tnt = s.OriginCGREvent.Tenant
+			dP = s.OriginCGREvent.AsDataProvider()
+		}
 		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaReplication,
-			s.OriginCGREvent.Tenant, s.OriginCGREvent.AsDataProvider(), nil, sS.fltrS); err != nil {
+			tnt, dP, nil, sS.fltrS); err != nil {
 			return
 		}
 		if len(conns) == 0 {

@@ -85,9 +85,11 @@ type Session struct {
 func (s *Session) Clone() (cln *Session) {
 	s.lk.RLock()
 	cln = &Session{
-		OriginCGREvent:     s.OriginCGREvent.Clone(),
 		ClientConnID:       s.ClientConnID,
 		AutoChargeInterval: s.AutoChargeInterval,
+	}
+	if s.OriginCGREvent != nil {
+		cln.OriginCGREvent = s.OriginCGREvent.Clone()
 	}
 	if s.SRuns != nil {
 		cln.SRuns = make([]*SRun, len(s.SRuns))
