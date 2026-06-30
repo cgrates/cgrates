@@ -922,183 +922,6 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 	}
 }
 
-func TestLibRoutesLCSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
-			utils.Cost:   0.1,
-			utils.Weight: 10.0,
-		}}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortLeastCost()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
-func TestLibRoutesHCSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
-			utils.Cost:   0.1,
-			utils.Weight: 10.0,
-		}}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortHighestCost()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
-func TestLibRoutesResAscSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{
-			RouteID: strconv.Itoa(i),
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
-				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
-			},
-			SortingData: map[string]any{
-				utils.ResourceUsageStr: 5.0,
-				utils.Weight:           10.0,
-			},
-		}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortResourceAscendent()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
-func TestLibRoutesResDescSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{
-			RouteID: strconv.Itoa(i),
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
-				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
-			},
-			SortingData: map[string]any{
-				utils.ResourceUsageStr: 5.0,
-				utils.Weight:           10.0,
-			},
-		}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortResourceDescendent()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-
-}
-
-func TestLibRoutesLoadDistSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{
-			RouteID: strconv.Itoa(i),
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Ratio:  utils.NewDecimalFromFloat64(4.0),
-				utils.Load:   utils.NewDecimalFromFloat64(3.0),
-				utils.Weight: utils.NewDecimalFromFloat64(10.0),
-			},
-			SortingData: map[string]any{
-				utils.Ratio:  4.0,
-				utils.Load:   3.0,
-				utils.Weight: 10.0,
-			},
-		}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortLoadDistribution()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
-func TestLibRoutesQOSSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
-			utils.Weight:  10.0,
-			utils.MetaACD: -1.0,
-		}}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortQOS([]string{utils.MetaACD})
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
-func TestLibRoutesSameWeight(t *testing.T) {
-	sSpls := &SortedRoutes{}
-	sortedSlice := &SortedRoutes{}
-	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]any{
-			utils.Weight: 10.0,
-		}}
-		sSpls.Routes = append(sSpls.Routes, route)
-		sortedSlice.Routes = append(sortedSlice.Routes, route)
-	}
-	for i := 0; i < 3; i++ {
-		sSpls.SortWeight()
-		// we expect to receive this in a random order
-		// the comparison logic is the following if the slice is the same as sorted slice we return error
-		if reflect.DeepEqual(sortedSlice, sSpls) {
-			t.Errorf("Expecting: %+v, \n received: %+v",
-				sortedSlice, sSpls)
-		}
-	}
-}
-
 func BenchmarkRouteSortCost(b *testing.B) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -1227,61 +1050,6 @@ func TestSortHighestCost(t *testing.T) {
 	ex := sSpls
 	if !reflect.DeepEqual(ex, sSpls) {
 		t.Errorf("Expected %+v, received %+v", ex, sSpls)
-	}
-}
-
-func TestSortResourceAscendentDescendent(t *testing.T) {
-	sSpls := &SortedRoutes{
-		Routes: []*SortedRoute{
-			{
-				RouteID: "route2",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
-					utils.Weight:           utils.NewDecimalFromFloat64(10.0),
-				},
-				SortingData: map[string]any{
-					utils.ResourceUsageStr: 10.0,
-					utils.Weight:           10.0,
-				},
-			},
-			{
-				RouteID: "route1",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
-					utils.Weight:           utils.NewDecimalFromFloat64(11.0),
-				},
-				SortingData: map[string]any{
-					utils.ResourceUsageStr: 10.0,
-					utils.Weight:           11.0,
-				},
-			},
-		},
-	}
-
-	//SortingResourceAscendent/Descendent while ResourceUsages are equal
-	expSRts := sSpls
-	sSpls.SortResourceAscendent()
-	if !reflect.DeepEqual(expSRts, sSpls) {
-		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
-	}
-
-	sSpls.SortResourceDescendent()
-	if !reflect.DeepEqual(expSRts, sSpls) {
-		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
-	}
-
-	//SortingResourceAscendent/Descendent while ResourceUsages are not equal
-	sSpls.Routes[0].SortingData[utils.ResourceUsageStr] = 11.0
-	sSpls.Routes[0].sortingDataDecimal[utils.ResourceUsageStr] = utils.NewDecimalFromFloat64(11.0)
-	expSRts = sSpls
-	sSpls.SortResourceAscendent()
-	if !reflect.DeepEqual(expSRts, sSpls) {
-		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
-	}
-
-	sSpls.SortResourceDescendent()
-	if !reflect.DeepEqual(expSRts, sSpls) {
-		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
 	}
 }
 
@@ -1633,4 +1401,167 @@ func TestRouteLazyPassTrue(t *testing.T) {
 		t.Error("Returned false, expecting true")
 	}
 
+}
+
+func TestLibRoutesSortSameWeight(t *testing.T) {
+	tests := []struct {
+		name string
+		data map[string]*utils.Decimal
+		sort func(sr *SortedRoutes)
+	}{
+		{
+			name: "SortWeight",
+			data: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortWeight() },
+		},
+		{
+			name: "SortLeastCost",
+			data: map[string]*utils.Decimal{
+				utils.Cost:   utils.NewDecimalFromFloat64(0.1),
+				utils.Weight: utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortLeastCost() },
+		},
+		{
+			name: "SortHighestCost",
+			data: map[string]*utils.Decimal{
+				utils.Cost:   utils.NewDecimalFromFloat64(0.1),
+				utils.Weight: utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortHighestCost() },
+		},
+		{
+			name: "SortResourceAscendent",
+			data: map[string]*utils.Decimal{
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
+				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortResourceAscendent() },
+		},
+		{
+			name: "SortResourceDescendent",
+			data: map[string]*utils.Decimal{
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
+				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortResourceDescendent() },
+		},
+		{
+			name: "SortLoadDistribution",
+			data: map[string]*utils.Decimal{
+				utils.Ratio:  utils.NewDecimalFromFloat64(4.0),
+				utils.Load:   utils.NewDecimalFromFloat64(3.0),
+				utils.Weight: utils.NewDecimalFromFloat64(10.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortLoadDistribution() },
+		},
+		{
+			name: "SortQOS",
+			data: map[string]*utils.Decimal{
+				utils.Weight:  utils.NewDecimalFromFloat64(10.0),
+				utils.MetaACD: utils.NewDecimalFromFloat64(-1.0),
+			},
+			sort: func(sr *SortedRoutes) { sr.SortQOS([]string{utils.MetaACD}) },
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sSpls := &SortedRoutes{}
+			for i := 0; i <= 10; i++ {
+				sSpls.Routes = append(sSpls.Routes, &SortedRoute{
+					RouteID:            strconv.Itoa(i),
+					sortingDataDecimal: tt.data,
+				})
+			}
+			order := sSpls.RoutesWithParams()
+			shuffled := false
+			for i := 0; i < 100; i++ {
+				tt.sort(sSpls)
+				if !reflect.DeepEqual(sSpls.RoutesWithParams(), order) {
+					shuffled = true
+					break
+				}
+			}
+			if !shuffled {
+				t.Errorf("Routes kept their order after sorting")
+			}
+		})
+	}
+}
+
+func TestSortResourceAscendentDescendent(t *testing.T) {
+	sSpls := &SortedRoutes{
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
+					utils.Weight:           utils.NewDecimalFromFloat64(10.0),
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsageStr: 10.0,
+					utils.Weight:           10.0,
+				},
+			},
+			{
+				RouteID: "route2",
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
+					utils.Weight:           utils.NewDecimalFromFloat64(11.0),
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsageStr: 10.0,
+					utils.Weight:           11.0,
+				},
+			},
+		},
+	}
+
+	exp := []string{"route2", "route1"}
+	sSpls.SortResourceAscendent()
+	if rcv := sSpls.RoutesWithParams(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v, received %v", exp, rcv)
+	}
+
+	sSpls.SortResourceDescendent()
+	if rcv := sSpls.RoutesWithParams(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v, received %v", exp, rcv)
+	}
+
+	sSpls = &SortedRoutes{Routes: []*SortedRoute{
+		{
+			RouteID: "route1",
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(11),
+				utils.Weight:           utils.NewDecimalFromFloat64(10),
+			},
+			SortingData: map[string]any{
+				utils.ResourceUsageStr: 10.0,
+				utils.Weight:           10.0,
+			},
+		},
+		{
+			RouteID: "route2",
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10),
+				utils.Weight:           utils.NewDecimalFromFloat64(10),
+			},
+			SortingData: map[string]any{
+				utils.ResourceUsageStr: 10.0,
+				utils.Weight:           10.0,
+			},
+		},
+	}}
+	exp = []string{"route2", "route1"}
+	sSpls.SortResourceAscendent()
+	if rcv := sSpls.RoutesWithParams(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v, received %v", exp, rcv)
+	}
+	exp = []string{"route1", "route2"}
+	sSpls.SortResourceDescendent()
+	if rcv := sSpls.RoutesWithParams(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v, received %v", exp, rcv)
+	}
 }
