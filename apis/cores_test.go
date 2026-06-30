@@ -33,7 +33,7 @@ import (
 func TestCoreSStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	var reply map[string]any
 	if err := cS.Status(context.Background(), &cores.V1StatusParams{}, &reply); err != nil {
@@ -44,7 +44,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 1 * time.Millisecond,
@@ -61,7 +61,7 @@ func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
 	shutdown := utils.NewSyncedChan()
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, shutdown)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, shutdown, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
 	var reply string
@@ -80,7 +80,7 @@ func TestCoreSShutdown(t *testing.T) {
 func TestStartCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	args := &utils.DirectoryArgs{
 		DirPath: "dir_path",
@@ -98,7 +98,7 @@ func TestStartCPUProfiling(t *testing.T) {
 func TestStopCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -114,7 +114,7 @@ func TestStopCPUProfiling(t *testing.T) {
 func TestStopMemoryProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), new(sync.WaitGroup), nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), new(sync.WaitGroup), nil, nil)
 	cS := NewCoreSv1(coreService)
 	var reply string
 	errExp := "stop memory profiling: not started yet"

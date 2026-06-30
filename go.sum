@@ -75,8 +75,8 @@ github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb h1:pjaGbI9TD/e24XRQ
 github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb/go.mod h1:3ekcTdjvTk8jqEA/2BufAxQS6E6nHnWke1WQ2XHtjFg=
 github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f h1:dCp5BflGB8I8wlhWn4R5g0o4ok2pZRmcYHyzIks9Pbc=
 github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
-github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFrewWaar/JkXYiDgO7gRw/R1zWITxEw=
-github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
+github.com/cgrates/birpc v1.3.1-0.20260701165602-b3899805c429 h1:OONKkJlqGww9gQVeWD6Yrp4lei++spOElnBkOErVGXE=
+github.com/cgrates/birpc v1.3.1-0.20260701165602-b3899805c429/go.mod h1:dYbYf5F+SfXQ52wvh7hnQfCp4G0KS2UjZzgTWJ97x28=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2oK6wyE1pNRVQc62Wz+TfPWDhU=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5NcAOjdRyX0v76ZFkolu3X70fbs=

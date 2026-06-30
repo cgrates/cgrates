@@ -24,17 +24,25 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/pprof"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+// serviceRanger exposes the RPC services registered on the server
+type serviceRanger interface {
+	RangeServices(func(name string, svc *birpc.Service) bool)
+}
+
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU *os.File, stopChan chan struct{},
-	shdWg *sync.WaitGroup, shutdown *utils.SyncedChan) *CoreS {
+	shdWg *sync.WaitGroup, shutdown *utils.SyncedChan, cl serviceRanger) *CoreS {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
@@ -46,6 +54,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU *os.File, 
 		CapsStats: st,
 		fileCPU:   fileCPU,
 		caps:      caps,
+		cl:        cl,
 	}
 }
 
@@ -54,6 +63,7 @@ type CoreS struct {
 	CapsStats *engine.CapsStats
 	shdWg     *sync.WaitGroup
 	shutdown  *utils.SyncedChan
+	cl        serviceRanger
 
 	memProfMux   sync.Mutex
 	finalMemProf string        // full path of the final memory profile created on stop/shutdown
@@ -371,4 +381,28 @@ func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ utils.TenantWithAPI
 // V1Panic is used print the Message sent as a panic
 func (cS *CoreS) V1Panic(_ *context.Context, args *utils.PanicMessageArgs, _ *string) error {
 	panic(args.Message)
+}
+
+// V1DescribeMethods reflects every registered method's argument and reply
+// types into field descriptors.
+func (cS *CoreS) V1DescribeMethods(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *[]utils.MethodDescriptor) error {
+	var mds []utils.MethodDescriptor
+	cS.cl.RangeServices(func(name string, svc *birpc.Service) bool {
+		if name == "_goRPC_" { // birpc's internal service, not a cgrates API
+			return true
+		}
+		for method, mt := range svc.Methods {
+			mds = append(mds, utils.MethodDescriptor{
+				Method: name + "." + method,
+				Args:   utils.DescribeType(mt.ArgType),
+				Result: utils.DescribeType(mt.ReplyType),
+			})
+		}
+		return true
+	})
+	slices.SortFunc(mds, func(a, b utils.MethodDescriptor) int {
+		return strings.Compare(a.Method, b.Method)
+	})
+	*reply = mds
+	return nil
 }

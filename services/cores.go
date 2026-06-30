@@ -67,7 +67,7 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stopChan = make(chan struct{})
-	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown)
+	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown, cl)
 	srv, err := engine.NewService(s.cS)
 	if err != nil {
 		return err
