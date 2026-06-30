@@ -975,6 +975,12 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	} else {
 		s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
 	}
+	// ToDo: Fix here the sTerminator
+	return
+}
+
+// terminateSessionNew is the new way to terminate a session
+func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err error) {
 	return
 }
 
@@ -1051,6 +1057,23 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 		return
 	}
 	return &acntCost, nil
+}
+
+// ratesCost will query the RateS cost for Event
+func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (*utils.RateProfileCost, error) {
+	rateConns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaRates, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
+	if err != nil {
+		return nil, err
+	}
+	if len(rateConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.RateS)
+	}
+	var rtsCost utils.RateProfileCost
+	if err := sS.connMgr.Call(ctx, rateConns,
+		utils.RateSv1CostForEvent, cgrEv, &rtsCost); err != nil {
+		return nil, err
+	}
+	return &rtsCost, nil
 }
 
 // accountSDebitEvent will debit the abstracts for the provided event

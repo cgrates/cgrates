@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -866,7 +865,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	} else {
 		cch[utils.MetaAttributes] = attrS
 	}
-	if cch[utils.MetaAttributes].(bool) {
+	if utils.OptAsBool(cch, utils.MetaAttributes) {
 		if rplyAttr, errProc := attributes.AttributeScProcessEvent(ctx, sS.fltrS,
 			sS.cfg.SessionSCfg().Conns, sS.connMgr, utils.MetaSessionS, apiArgs); errProc != nil {
 			if errProc.Error() != utils.ErrNotFound.Error() {
@@ -910,7 +909,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaSession] = sesBool
 	}
 	var s *Session
-	if cch[utils.MetaSession].(bool) {
+	if utils.OptAsBool(cch, utils.MetaSession) {
 		if s, err = sS.setSession(ctx, apiArgs, cch,
 			sS.biJClntID(ctx.Client)); err != nil {
 			return
@@ -936,8 +935,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaChargers] = chrgS
 	}
 	// Apply ChargerS, but only if *primary *runID
-	if cch[utils.MetaChargers].(bool) &&
-		cch[utils.MetaRunID].(string) == utils.MetaPrimary && len(cgrEvs) < 2 { // initial event, not inherited from Session
+	if utils.OptAsBool(cch, utils.MetaChargers) &&
+		utils.IfaceAsString(cch[utils.MetaRunID]) == utils.MetaPrimary &&
+		len(cgrEvs) < 2 { // initial event, not inherited from Session
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
 			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
@@ -988,7 +988,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if rous, errRous := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Routes,
 			utils.MetaRoutes); errRous != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errRous
 			}
 			withErrors = true
@@ -998,7 +998,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if rous {
 			var rous routes.SortedRoutesList
 			if rous, err = sS.getRoutes(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1016,7 +1016,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if sts, errSts := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
 			utils.MetaStats); errSts != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errSts
 			}
 			withErrors = true
@@ -1026,7 +1026,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if sts {
 			var statIDs []string
 			if statIDs, err = sS.processStats(ctx, cgrEv, true); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1044,7 +1044,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if thds, errThds := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
 			utils.MetaThresholds); errThds != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errThds
 			}
 			withErrors = true
@@ -1054,7 +1054,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if thds {
 			var thdIDs []string
 			if thdIDs, err = sS.processThreshold(ctx, cgrEv, true); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1072,7 +1072,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if ipS, errIPs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPs,
 			utils.MetaIPs); errIPs != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errIPs
 			}
 			withErrors = true
@@ -1088,7 +1088,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if rtS, errRTs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Rates,
 			utils.MetaRates); errRTs != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errRTs
 			}
 			withErrors = true
@@ -1097,10 +1097,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					utils.SessionS, errRTs.Error(), cgrEv, utils.RateS))
 		} else if rtS {
 			var rtsCost *utils.RateProfileCost
-			if rtsCost, err = rates.RateScCostForEvent(ctx, sS.fltrS,
-				sS.cfg.SessionSCfg().Conns, sS.connMgr,
-				utils.MetaSessionS, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+			if rtsCost, err = sS.ratesCost(ctx, cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1120,7 +1118,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if acntS, errAcnts := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Accounts,
 			utils.MetaAccounts); errAcnts != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errAcnts
 			}
 			withErrors = true
@@ -1135,7 +1133,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if rscS, errRscS := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.Resources,
 			utils.MetaResources); errRscS != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errRscS
 			}
 			withErrors = true
@@ -1150,7 +1148,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if auth, errAuth := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
 			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Authorize,
 			utils.MetaAuthorize); errAuth != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errAuth
 			}
 			withErrors = true
@@ -1165,7 +1163,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if ipsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
 			utils.MetaIPsAuthorizeCfg); errBool != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errBool
 			}
 			withErrors = true
@@ -1175,11 +1173,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else {
 			cchEv[utils.MetaIPsAuthorizeCfg] = ipsAuthBool
 		}
-		if cchEv[utils.MetaIPsAuthorizeCfg].(bool) ||
-			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaIPs].(bool)) {
+		if utils.OptAsBool(cchEv, utils.MetaIPsAuthorizeCfg) ||
+			(utils.OptAsBool(cchEv, utils.MetaAuthorize) && utils.OptAsBool(cchEv, utils.MetaIPs)) {
 			var authIP *utils.AllocatedIP
 			if authIP, err = sS.ipsAuthorize(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1197,7 +1195,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if resAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAuthorize,
 			utils.MetaResourcesAuthorizeCfg); errBool != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errBool
 			}
 			withErrors = true
@@ -1205,14 +1203,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
 					utils.SessionS, errBool.Error(), cgrEv, utils.MetaResourcesAuthorizeCfg))
 		} else {
-
 			cchEv[utils.MetaResourcesAuthorizeCfg] = resAuthBool
 		}
-		if cchEv[utils.MetaResourcesAuthorizeCfg].(bool) ||
-			(cchEv[utils.MetaAuthorize].(bool) && cchEv[utils.MetaResources].(bool)) {
+		if utils.OptAsBool(cchEv, utils.MetaResourcesAuthorizeCfg) ||
+			(utils.OptAsBool(cchEv, utils.MetaAuthorize) && utils.OptAsBool(cchEv, utils.MetaResources)) {
 			var resID string
 			if resID, err = sS.resourcesAuthorize(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1230,7 +1227,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if acntsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsAuthorize,
 			utils.MetaAccountsAuthorizeCfg); errBool != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errBool
 			}
 			withErrors = true
@@ -1240,14 +1237,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else {
 			cchEv[utils.MetaAccountsAuthorizeCfg] = acntsAuthBool
 		}
-		if !cchEv[utils.MetaAccountsAuthorizeCfg].(bool) &&
-			cchEv[utils.MetaAccounts].(bool) && cchEv[utils.MetaAuthorize].(bool) {
-			cchEv[utils.MetaAccountsAuthorizeCfg] = true // mark it so we can use it later
-		}
-		if cchEv[utils.MetaAccountsAuthorizeCfg].(bool) {
+		if utils.OptAsBool(cchEv, utils.MetaAccountsAuthorizeCfg) ||
+			(utils.OptAsBool(cchEv, utils.MetaAuthorize) && utils.OptAsBool(cchEv, utils.MetaAccounts)) {
 			var acntCost *utils.EventCharges
 			if acntCost, err = sS.accountsMaxAbstracts(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1265,7 +1259,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if acntsDebitBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsDebit,
 			utils.MetaAccountsDebitCfg); errBool != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errBool
 			}
 			withErrors = true
@@ -1275,16 +1269,22 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else {
 			cchEv[utils.MetaAccountsDebitCfg] = acntsDebitBool
 		}
-		if cchEv[utils.MetaAccountsDebitCfg].(bool) {
+		if utils.OptAsBool(cchEv, utils.MetaAccountsDebitCfg) ||
+			(utils.OptAsBool(cchEv, utils.MetaAccounts) && !utils.OptAsBool(cchEv, utils.MetaAuthorize)) {
 			var acntCost *utils.EventCharges
 			if acntCost, err = sS.accountSDebitEvent(ctx, cgrEv, s); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s for Debit",
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
+			}
+			if s != nil {
+				s.lk.Lock()
+				s.sRuns[runID].Charges = append(s.sRuns[runID].Charges, acntCost)
+				s.lk.Unlock()
 			}
 			maxDur, _ := acntCost.Abstracts.Duration()
 			if apiRply.AccountSUsage == nil {
@@ -1296,7 +1296,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if ees, errEEs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.EEs,
 			utils.MetaEEs); errEEs != nil {
-			if cch[utils.OptsSesBlockerError].(bool) {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 				return errEEs
 			}
 			withErrors = true
@@ -1306,7 +1306,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if ees {
 			var eesIDs []string
 			if eesIDs, err = sS.eesProcessEvent(ctx, cgrEv); err != nil {
-				if cch[utils.OptsSesBlockerError].(bool) {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
 				withErrors = true
@@ -1320,8 +1320,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			apiRply.EventExporters[runID] = eesIDs
 		}
 	}
+
+	if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil {
+		if errTerminate := sS.terminateSessionNew(ctx, s); errTerminate != nil {
+			return errTerminate
+		}
+	}
+
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
+
 	return
 }

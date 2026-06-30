@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // SessionID is given by an agent as the answer to GetActiveSessionIDs API
@@ -72,6 +73,7 @@ type Session struct {
 	OriginCGREvent     *utils.CGREvent // initial CGREvent received
 	ClientConnID       string          // connection ID towards the client so we can recover from passive
 	AutoChargeInterval time.Duration   // Enable auto-charging
+	NextAutoCharge     *time.Time
 
 	SRuns []*SRun          // forked based on ChargerS
 	sRuns map[string]*SRun // new way of indexing SRuns, should replace SRuns
@@ -112,10 +114,6 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 			CGREvent: sr.CGREvent,
 			NodeID:   utils.EmptyString,
 		}
-
-		if sr.NextAutoCharge != nil {
-			aSs[i].NextAutoCharge = *sr.NextAutoCharge
-		}
 	}
 	s.lk.RUnlock()
 	return
@@ -129,9 +127,6 @@ func (s *Session) AsExternalSession(sRunIdx int, nodeID string) (aS *ExternalSes
 		CGREvent: s.SRuns[sRunIdx].CGREvent,
 		NodeID:   nodeID,
 	}
-	if s.SRuns[sRunIdx].NextAutoCharge != nil {
-		aS.NextAutoCharge = *s.SRuns[sRunIdx].NextAutoCharge
-	}
 	return
 }
 
@@ -142,7 +137,8 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 		return
 	}
 	for _, sr := range s.SRuns {
-		tDur = sr.TotalUsage
+		tDurInt, _ := sr.TotalUsage.Int64()
+		tDur = time.Duration(tDurInt)
 		break // only first
 	}
 	return
@@ -196,28 +192,21 @@ func NewSRun(cgrEv *utils.CGREvent) *SRun {
 
 // SRun is one billing run for the Session
 type SRun struct {
-	ID       string          // Identifier of the SRun, inherited from CGREvent.APIOpts[*runID]
-	CGREvent *utils.CGREvent // Event received from ChargerS
+	ID       string                // Identifier of the SRun, inherited from CGREvent.APIOpts[*runID]
+	CGREvent *utils.CGREvent       // Event received from ChargerS
+	Charges  []*utils.EventCharges // list of charges this session run has performed
 
-	ExtraUsage         time.Duration // keeps the extra usage debited on top of what has been asked
-	LastUsage          time.Duration // last requested Duration
-	TotalUsage         time.Duration // sum of lastUsage
-	AutoChargeInterval time.Duration // Activate auto-charging
-	NextAutoCharge     *time.Time
+	AdjustmentUsage *decimal.Big // holds the extra usage debited on top  due to increment rounding
+	InterimUsage    *decimal.Big // last requested Usage
+	TotalUsage      *decimal.Big // sum of InterimUsage
+
 }
 
 // Clone returns the cloned version of SRun
 func (sr *SRun) Clone() (clsr *SRun) {
 	clsr = &SRun{
-		ID:                 sr.ID,
-		CGREvent:           sr.CGREvent.Clone(),
-		ExtraUsage:         sr.ExtraUsage,
-		LastUsage:          sr.LastUsage,
-		TotalUsage:         sr.TotalUsage,
-		AutoChargeInterval: sr.AutoChargeInterval,
-	}
-	if sr.NextAutoCharge != nil {
-		clsr.NextAutoCharge = utils.TimePointer(*sr.NextAutoCharge)
+		ID:       sr.ID,
+		CGREvent: sr.CGREvent.Clone(),
 	}
 	return
 }
