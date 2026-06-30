@@ -1,0 +1,3 @@
+#Tenant,ID,FilterIDs,Weights,Blockers,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlockers,RouteParameters
+cgrates.org,ROUTE_LCR,*string:~*req.Account:1001,;0,,*lc,,vendor1,,,RT_VENDOR1,,,;0,,RT_VENDOR1
+cgrates.org,ROUTE_LCR,,,,,,vendor2,,,RT_VENDOR2,,,;0,,RT_VENDOR2

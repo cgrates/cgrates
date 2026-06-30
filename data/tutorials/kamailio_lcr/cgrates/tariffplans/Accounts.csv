@@ -1,0 +1,2 @@
+#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,*string:~*req.Account:1001,;0,,,Concrete1,,;0,,*concrete,10,,,,,RT_CUSTOMER,*none
