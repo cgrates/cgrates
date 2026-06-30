@@ -142,29 +142,21 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 	if len(b.Timings) == 0 {
 		return true
 	}
-	if len(b.TimingIDs) == 0 {
-		for _, tim := range b.Timings {
-			if tim.IsActiveAt(t) {
-				return true
-			}
-		}
-		return false
-	}
-	hasPositive := false
-	positiveActive := false
+	exists, active := false, false
 	for _, tim := range b.Timings {
-		active := tim.IsActiveAt(t)
-		if b.TimingIDs[tim.ID] {
-			hasPositive = true
-			if active {
-				positiveActive = true
+		negated := len(b.TimingIDs) > 0 && !b.TimingIDs[tim.ID]
+		activeTiming := tim.IsActiveAt(t)
+		if !negated {
+			exists = true
+			if activeTiming {
+				active = true
 			}
-		} else if active {
+		} else if activeTiming {
 			return false
 		}
 	}
-	if hasPositive {
-		return positiveActive
+	if exists {
+		return active
 	}
 	return true
 }
