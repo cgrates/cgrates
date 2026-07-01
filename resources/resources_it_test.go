@@ -694,7 +694,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 		},
 	}
 
-	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"],"*eventType":"ResourceUpdate","*resUnits":1,"*resUsageID":"RU_1","*thdProfileIDs":["THD_1"]},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":1}}`
+	expBody := `{"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventType":"ResourceUpdate","*resourcesUnits":1,"*resourcesUsageID":"RU_1","*thdProfileIDs":["THD_1"]},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":1}}`
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
 		t.Error(err)
