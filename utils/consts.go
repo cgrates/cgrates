@@ -618,7 +618,6 @@ const (
 	Error                    = "Error"
 	MetaCgreq                = "*cgreq"
 	MetaCgrep                = "*cgrep"
-	CgrAcd                   = "cgr_acd"
 	ActivationIntervalString = "ActivationInterval"
 	MaxHits                  = "MaxHits"
 	MinHits                  = "MinHits"
@@ -681,7 +680,6 @@ const (
 	MetaOpts               = "*opts"
 	MetaCfg                = "*cfg"
 	MetaDynReq             = "~*req"
-	CGROriginHost          = "cgr_originhost"
 	MetaInitiate           = "*initiate"
 	MetaUpdate             = "*update"
 	MetaDelete             = "*delete"
@@ -1885,19 +1883,9 @@ const (
 
 // cgr_ variables
 const (
-	CGRAccount         = "cgrAccount"
-	CGRRoute           = "cgr_route"
-	CGRDestination     = "cgrDestination"
-	CGRSubject         = "cgrSubject"
-	CGRCategory        = "cgrCategory"
-	CGRReqType         = "cgr_reqtype"
-	CGRTenant          = "cgrTenant"
-	CGRPdd             = "cgrPdd"
+	CGRRoute           = "cgrRoute"
 	CGRDisconnectCause = "cgrDisconnectCause"
-	CGRComputeLCR      = "cgrComputeLCR"
-	CGRRoutes          = "cgr_routes"
-	CGRFlags           = "cgr_flags"
-	CGROpts            = "cgrOpts"
+	CGRFlags           = "cgrFlags"
 )
 
 // CSV file name

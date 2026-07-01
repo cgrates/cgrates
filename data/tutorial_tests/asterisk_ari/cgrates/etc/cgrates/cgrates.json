@@ -26,21 +26,22 @@
 },
 
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-},
-
-
 "cdrs": {
 	"enabled": true,
 	"conns": {
 		"*stats": [{"connIDs": ["*localhost"]}],
-		"*chargers": [{"connIDs": ["*internal"]}]
+		"*chargers": [{"connIDs": ["*internal"]}],
+		"*rates": [{"connIDs": ["*internal"]}]
 	},
-	"rals_conns": ["*localhost"],
-	"sessions_cost_retries": 5,
+	"opts": {
+		"*rates": [
+			{
+				"tenant": "*any",
+				"filterIDs": ["*notstring:~*req.RequestType:*none"],
+				"value": true,
+			},
+		],
+	},
 },
 
 
@@ -147,7 +148,7 @@
 				"*string:~*req.type:ChannelStateChange",
 				"*string:~*req.channel.state:Up"
 			],
-			"flags": ["*initiate","*accounts"],
+			"flags": ["*initiate","*chargers","*accounts"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},

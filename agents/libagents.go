@@ -147,14 +147,11 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		agReq.setCGRReply(rply, err)
 
 	case utils.MetaCDRs: // allow CDR processing
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 	}
 
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		cdrEv := cgrEv.Clone()
-		cdrEv.APIOpts = map[string]any{utils.MetaCDRs: true}
 		var rplyCDRs string
 		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {

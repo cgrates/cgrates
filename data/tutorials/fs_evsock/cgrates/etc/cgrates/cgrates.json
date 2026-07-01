@@ -128,7 +128,7 @@
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"conns": {
-		"*sessions":[{"connIDs":["*bijson_localhost"]}]
+		"*sessions":[{"connIDs":["*bijsonLocalhost"]}]
 	},
 	"requestProcessors": [
 		{
@@ -138,9 +138,6 @@
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"}
 			],
-			"replyFields":[
-				{"tag": "ResourceAllocation", "path": "*rep.cgr_resource_allocation", "type": "*variable", "value": "~*cgrep.ResourceAllocation.*primary"}
-			]
 		},
 		{
 			"id": "Initiate",
@@ -150,9 +147,6 @@
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
 				{"tag": "FsConnID", "path": "*cgreq.FsConnID", "type": "*variable", "value": "~*vars.FsConnID"}
 			],
-			"replyields":[
-				{"tag": "OriginHost", "path": "*rep.cgr_originhost", "type": "*variable", "value": "~*vars.OriginHost"}
-			]
 		},
 		{
 			"id": "TerminateAndCDR",

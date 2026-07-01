@@ -37,7 +37,6 @@ import (
 const (
 	CGRAuthAPP            = "cgratesAuth"
 	CGRMaxSessionTime     = "CGRMaxSessionTime"
-	CGRRoute              = "CGRRoute"
 	ARIStasisStart        = "StasisStart"
 	ARIChannelStateChange = "ChannelStateChange"
 	ARIChannelDestroyed   = "ChannelDestroyed"

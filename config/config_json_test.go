@@ -2354,7 +2354,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Tag:   utils.StringPointer("ACD"),
 				Path:  utils.StringPointer("*cgreq.ACD"),
 				Type:  utils.StringPointer(utils.MetaComposed),
-				Value: utils.StringPointer("~*req.variable_cdr_acd;s")},
+				Value: utils.StringPointer("~*req.variable_cgrAcd;s")},
 			{
 				Tag:   utils.StringPointer("OriginID"),
 				Path:  utils.StringPointer("*cgreq.OriginID"),
@@ -2369,7 +2369,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Tag:   utils.StringPointer("OriginHost"),
 				Path:  utils.StringPointer("*cgreq.OriginHost"),
 				Type:  utils.StringPointer(utils.MetaVariable),
-				Value: utils.StringPointer("~*req.variable_cgr_originhost")},
+				Value: utils.StringPointer("~*vars.Originhost")},
 			{
 				Tag:   utils.StringPointer("Account"),
 				Path:  utils.StringPointer("*cgreq.Account"),
@@ -2437,7 +2437,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Tag:   utils.StringPointer("Route"),
 				Path:  utils.StringPointer("*cgreq.Route"),
 				Type:  utils.StringPointer(utils.MetaVariable),
-				Value: utils.StringPointer("~*req.variable_cgr_route")},
+				Value: utils.StringPointer("~*req.variable_cgrRoute")},
 			{
 				Tag:   utils.StringPointer("Cost"),
 				Path:  utils.StringPointer("*cgreq.Cost"),

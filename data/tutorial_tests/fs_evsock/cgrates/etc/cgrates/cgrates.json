@@ -24,28 +24,29 @@
 },
 
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-},
-
-
 "cdrs": {
 	"enabled": true,
 	"conns": {
-		"*chargers": [{"connIDs": ["*internal"]}],
+		"*chargers": [{"connIDs": ["*localhost"]}],
+		"*rates": [{"connIDs": ["*localhost"]}],
 		"*stats": [{"connIDs": ["*localhost"]}]
 	},
-	"rals_conns": ["*localhost"],
-	"sessions_cost_retries": 5,
+	"opts": {
+		"*rates": [
+			{
+				"tenant": "*any",
+				"filterIDs": ["*notstring:~*req.RequestType:*none"],
+				"value": true,
+			},
+		],
+	},
 },
 
 
 "chargers": {
 	"enabled": true,
 	"conns": {
-			"*attributes": [{"connIDs": ["*internal"]}]
+			"*attributes": [{"connIDs": ["*localhost"]}]
 	},
 },
 
@@ -59,7 +60,7 @@
 		 {
 			"tenant": "",
 			"filterIDs": [],
-			"connIDs": ["*internal"]
+			"connIDs": ["*localhost"]
 		 }
 	],
 	"*rals": [
@@ -115,7 +116,7 @@
 		 {
 			"tenant": "",
 			"filterIDs": [],
-			"connIDs": ["*internal"]
+			"connIDs": ["*localhost"]
 		 }
 	]
 			},
@@ -128,7 +129,7 @@
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"conns": {
-		"*sessions":[{"connIDs":["*birpc_internal"]}]
+		"*sessions":[{"connIDs":["*bijsonLocalhost"]}]
 	},	
 	"requestProcessors": [
 		{
@@ -139,7 +140,7 @@
 		{
 			"id": "Initiate",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_ANSWER"],
-			"flags": ["*initiate","*accounts","*log"],
+			"flags": ["*initiate","*chargers","*accounts","*log"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
@@ -148,7 +149,7 @@
 				{"tag": "FsConnID", "path": "*cgreq.FsConnID", "type": "*variable", "value": "~*vars.FsConnID"}
 			],
 			"replyFields":[
-				{"tag": "OriginHost", "path": "*rep.cgr_originhost", "type": "*variable", "value": "~*vars.OriginHost"}
+				{"tag": "OriginHost", "path": "*rep.cgrOriginhost", "type": "*variable", "value": "~*vars.OriginHost"}
 			]
 		},
 		{
@@ -209,27 +210,15 @@
 	"stringIndexedFields": ["*req.Account","*req.RunID","*req.Destination"],
 },
 
-
 "thresholds": {
 	"enabled": true,
-	"stringIndexedFields": ["*req.Account"],
-},
-
-
-"routes": {
-	"enabled": true,
-	"conns": {
-		"*resources": [{"connIDs": ["*internal"]}],
-		"*stats": [{"connIDs": ["*internal"]}]
-	},
-	"rals_conns": ["*internal"],	
 	"stringIndexedFields": ["*req.Account"],
 },
 
 "accounts": {
 	"enabled": true,
 	"conns": {
-		"*rates": [{"connIDs": ["*internal"]}]
+		"*rates": [{"connIDs": ["*localhost"]}]
 	},
 },
 
