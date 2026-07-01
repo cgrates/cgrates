@@ -286,8 +286,6 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	}
 	if dPrfls, err = dS.dispatcherProfilesForEvent(tnt, ev, evNm, subsys); err != nil {
 		return utils.NewErrDispatcherS(err)
-	} else if len(dPrfls) == 0 { // no profiles matched
-		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
 	} else if isInternalDispatcherProfile(dPrfls[0]) { // dispatcherS was disabled
 		return callDH(newInternalHost(tnt), utils.EmptyString, nil,
 			serviceMethod, args, reply)
