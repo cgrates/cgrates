@@ -1845,3 +1845,33 @@ func TestDispatcherServiceDispatcherProfilesForEventBoolOptsErr(t *testing.T) {
 	}
 
 }
+
+func TestDispatcherServiceDispatchNoProfilesFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().IndexedSelects = false
+	rpcCl := map[string]chan birpc.ClientConnector{}
+	connMng := engine.NewConnManager(cfg, rpcCl)
+	dataDB, derr := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if derr != nil {
+		t.Error(derr)
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	ev := &utils.CGREvent{}
+	tnt := ""
+	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
+	dPrfls, _ := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
+
+	expectedErr := "DISPATCHER_ERROR:NOT_FOUND"
+	err := dss.Dispatch(ev, subsys, "", "", "")
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedErr, err)
+	}
+
+	if len(dPrfls) != 0 {
+		t.Errorf("Expected 0 profiles, got %d", len(dPrfls))
+	}
+}
