@@ -1569,3 +1569,369 @@ func TestAccountObjectID(t *testing.T) {
 	}
 
 }
+
+func TestMapStringInterfaceToAccount(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]any
+		want *Account
+	}{
+		{
+			name: "Complete Account",
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ACC1",
+				Opts:      map[string]any{},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Balances: map[string]*Balance{
+					"MonetaryBalance": {
+						ID: "MonetaryBalance",
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+						},
+						Type:  "*monetary",
+						Opts:  map[string]any{},
+						Units: NewDecimal(14, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+								Factor:    NewDecimal(100, 0),
+							},
+							{
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Factor:    NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+								Increment:    NewDecimal(13, 1),
+								FixedFee:     NewDecimal(23, 1),
+								RecurrentFee: NewDecimal(33, 1),
+							},
+						},
+						AttributeIDs: []string{"attr1", "attr2"},
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ThresholdIDs: []string{MetaNone},
+			},
+			want: &Account{
+				Tenant:    "cgrates.org",
+				ID:        "ACC1",
+				Opts:      map[string]any{},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Balances: map[string]*Balance{
+					"MonetaryBalance": {
+						ID: "MonetaryBalance",
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+						},
+						Type:  "*monetary",
+						Opts:  map[string]any{},
+						Units: NewDecimal(14, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+								Factor:    NewDecimal(100, 0),
+							},
+							{
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Factor:    NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+								Increment:    NewDecimal(13, 1),
+								FixedFee:     NewDecimal(23, 1),
+								RecurrentFee: NewDecimal(33, 1),
+							},
+						},
+						AttributeIDs: []string{"attr1", "attr2"},
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ThresholdIDs: []string{MetaNone},
+			},
+		},
+		{
+			name: "Nil Balances",
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ACC1",
+				Opts:      map[string]any{},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Balances: nil,
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ThresholdIDs: []string{MetaNone},
+			},
+			want: &Account{
+				Tenant:    "cgrates.org",
+				ID:        "ACC1",
+				Opts:      map[string]any{},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ThresholdIDs: []string{MetaNone},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToAccount(tt.m)
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, recieved %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestAccountAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		acc  *Account
+		want map[string]any
+	}{
+		{
+			name: "Complete Account",
+			acc: &Account{
+				Tenant:    "cgrates.org",
+				ID:        "ProfileID1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 2.4,
+					},
+				},
+				Opts: map[string]any{
+					"Destination": 10,
+				},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Balances: map[string]*Balance{
+					"VoiceBalance": {
+						ID:        "VoiceBalance",
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Weights: DynamicWeights{
+							{
+								Weight: 1.1,
+							},
+						},
+						Type: "*abstract",
+						Opts: map[string]any{
+							"Destination": 10,
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1001"},
+								Increment:    &Decimal{decimal.New(1, 1)},
+								FixedFee:     &Decimal{decimal.New(75, 1)},
+								RecurrentFee: &Decimal{decimal.New(20, 1)},
+							},
+						},
+						AttributeIDs: []string{"attr1", "attr2"},
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1001"},
+								Factor:    &Decimal{decimal.New(20, 2)},
+							},
+						},
+						Units: &Decimal{decimal.New(125, 3)},
+					},
+				},
+				ThresholdIDs: []string{"*none"},
+			},
+			want: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ProfileID1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 2.4,
+					},
+				},
+				Opts: map[string]any{
+					"Destination": 10,
+				},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: false,
+					},
+				},
+				Balances: map[string]*Balance{
+					"VoiceBalance": {
+						ID:        "VoiceBalance",
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Weights: DynamicWeights{
+							{
+								Weight: 1.1,
+							},
+						},
+						Type: "*abstract",
+						Opts: map[string]any{
+							"Destination": 10,
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1001"},
+								Increment:    &Decimal{decimal.New(1, 1)},
+								FixedFee:     &Decimal{decimal.New(75, 1)},
+								RecurrentFee: &Decimal{decimal.New(20, 1)},
+							},
+						},
+						AttributeIDs: []string{"attr1", "attr2"},
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1001"},
+								Factor:    &Decimal{decimal.New(20, 2)},
+							},
+						},
+						Units: &Decimal{decimal.New(125, 3)},
+					},
+				},
+				ThresholdIDs: []string{"*none"},
+			},
+		},
+		{
+			name: "nil case",
+			acc:  nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.acc.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, recieved %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToBalance(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]any
+		want *Balance
+	}{
+		{
+			m: map[string]any{
+				ID:        "ID1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 1.1,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]any{
+					"Destination": 10,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.Account:1001"},
+						Increment:    &Decimal{decimal.New(1, 1)},
+						FixedFee:     &Decimal{decimal.New(75, 1)},
+						RecurrentFee: &Decimal{decimal.New(20, 1)},
+					},
+				},
+				AttributeIDs:   []string{"attr1", "attr2"},
+				RateProfileIDs: []string{"RATE1", "RATE2"},
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Factor:    &Decimal{decimal.New(20, 2)},
+					},
+				},
+				Units: &Decimal{decimal.New(125, 3)},
+			},
+			want: &Balance{
+				ID:        "ID1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 1.1,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]any{
+					"Destination": 10,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.Account:1001"},
+						Increment:    &Decimal{decimal.New(1, 1)},
+						FixedFee:     &Decimal{decimal.New(75, 1)},
+						RecurrentFee: &Decimal{decimal.New(20, 1)},
+					},
+				},
+				AttributeIDs:   []string{"attr1", "attr2"},
+				RateProfileIDs: []string{"RATE1", "RATE2"},
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1001"},
+						Factor:    &Decimal{decimal.New(20, 2)},
+					},
+				},
+				Units: &Decimal{decimal.New(125, 3)},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToBalance(tt.m)
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, recieved %+v", tt.want, got)
+			}
+		})
+	}
+}
