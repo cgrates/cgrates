@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestSessionIDMetaOriginID(t *testing.T) {
@@ -348,25 +349,17 @@ func TestSessiontotalUsage(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//normal check
-	tTime := time.Now()
-	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
-		ID: "1001",
-
+		ID:           "1001",
 		ClientConnID: "ClientConnID",
-
 		SRuns: []*SRun{
 			{
-				ID:             "1001",
-				LastUsage:      2,
-				TotalUsage:     5,
-				NextAutoCharge: &tTime,
+				ID:         "1001",
+				TotalUsage: decimal.New(5, 0),
 			},
 			{
-				ID:             "1002",
-				LastUsage:      5,
-				TotalUsage:     6,
-				NextAutoCharge: &tTime2,
+				ID:         "1002",
+				TotalUsage: decimal.New(6, 0),
 			},
 		},
 	}
@@ -571,8 +564,6 @@ func TestGetSessionIDsMatchingIndexes(t *testing.T) {
 }
 
 func TestSRunClone(t *testing.T) {
-	origTime := time.Now()
-
 	origSRun := &SRun{
 		ID: "run1",
 		CGREvent: &utils.CGREvent{
@@ -581,10 +572,7 @@ func TestSRunClone(t *testing.T) {
 			Event:   map[string]any{"id": "1"},
 			APIOpts: map[string]any{"runID": "run1"},
 		},
-		ExtraUsage:     5 * time.Second,
-		LastUsage:      10 * time.Second,
-		TotalUsage:     50 * time.Second,
-		NextAutoCharge: &origTime,
+		TotalUsage: decimal.New(50, 0),
 	}
 
 	clonedSRun := origSRun.Clone()
@@ -607,21 +595,8 @@ func TestSRunClone(t *testing.T) {
 			t.Error("CGREvent.ID does not match")
 		}
 	}
-
-	if clonedSRun.ExtraUsage != origSRun.ExtraUsage {
-		t.Error("ExtraUsage does not match")
-	}
-
-	if clonedSRun.LastUsage != origSRun.LastUsage {
-		t.Error("LastUsage does not match")
-	}
-
-	if clonedSRun.TotalUsage != origSRun.TotalUsage {
-		t.Error("TotalUsage does not match")
-	}
-
-	if clonedSRun.NextAutoCharge == nil || *clonedSRun.NextAutoCharge != *origSRun.NextAutoCharge {
-		t.Error("NextAutoCharge does not match")
+	if clonedSRun.CGREvent == origSRun.CGREvent {
+		t.Error("CGREvent was not cloned")
 	}
 }
 
@@ -752,21 +727,16 @@ func TestNewSession(t *testing.T) {
 }
 
 func TestSessionAsExternalSession(t *testing.T) {
-	tTime1 := time.Now()
-	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
-
 	session := &Session{
 		ID: "sess1",
 		SRuns: []*SRun{
 			{
-				ID:             "run1",
-				CGREvent:       &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
-				NextAutoCharge: &tTime1,
+				ID:       "run1",
+				CGREvent: &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
 			},
 			{
-				ID:             "run2",
-				CGREvent:       &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
-				NextAutoCharge: &tTime2,
+				ID:       "run2",
+				CGREvent: &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
 			},
 			{
 				ID:       "run3",
@@ -781,31 +751,27 @@ func TestSessionAsExternalSession(t *testing.T) {
 		nodeID         string
 		expectedRunID  string
 		expectedTenant string
-		expectedDebit  *time.Time
 	}{
 		{
-			name:           "First run with debit",
+			name:           "First run",
 			sRunIdx:        0,
 			nodeID:         "nodeA",
 			expectedRunID:  "run1",
 			expectedTenant: "cgrates1.org",
-			expectedDebit:  &tTime1,
 		},
 		{
-			name:           "Second run with debit",
+			name:           "Second run",
 			sRunIdx:        1,
 			nodeID:         "nodeB",
 			expectedRunID:  "run2",
 			expectedTenant: "cgrates2.org",
-			expectedDebit:  &tTime2,
 		},
 		{
-			name:           "Third run without debit",
+			name:           "Third run",
 			sRunIdx:        2,
 			nodeID:         "nodeC",
 			expectedRunID:  "run3",
 			expectedTenant: "cgrates3.org",
-			expectedDebit:  nil,
 		},
 	}
 
@@ -825,17 +791,9 @@ func TestSessionAsExternalSession(t *testing.T) {
 			if aS.NodeID != tt.nodeID {
 				t.Errorf("Expected NodeID %s, got %s", tt.nodeID, aS.NodeID)
 			}
-			if tt.expectedDebit != nil {
-				if aS.NextAutoCharge != *tt.expectedDebit {
-					t.Errorf("Expected NextAutoCharge %v, got %v", *tt.expectedDebit, aS.NextAutoCharge)
-				}
-			} else if aS.NextAutoCharge != (time.Time{}) {
-				t.Errorf("Expected NextAutoCharge to be zero, got %v", aS.NextAutoCharge)
-			}
 		})
 	}
 }
-
 func TestSessionUpdateSRuns(t *testing.T) {
 	sr1 := &SRun{
 		ID: "run1",
