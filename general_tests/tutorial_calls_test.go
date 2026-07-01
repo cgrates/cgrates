@@ -90,13 +90,13 @@ func testCallInitCfg(t *testing.T) {
 	switch optConf {
 	case utils.Freeswitch:
 		tutorialCallsCfg, err = config.NewCGRConfigFromPath(context.Background(),
-			path.Join(*ariConf, "cgrates", "etc", "cgrates"))
+			path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	case utils.Asterisk:
 		tutorialCallsCfg, err = config.NewCGRConfigFromPath(context.Background(),
-			path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
+			path.Join(*ariConf, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
@@ -244,6 +244,7 @@ func vbOriginate(t *testing.T, from, dst string, dur time.Duration) {
 }
 
 func testCallCall1001To1002(t *testing.T) {
+	time.Sleep(2 * time.Second)
 	vbOriginate(t, "1001", "1002", 15*time.Second)
 	time.Sleep(time.Second)
 }
@@ -257,19 +258,35 @@ func testCallGetCDRs(t *testing.T) {
 	var err error
 	for i := 0; i < 30; i++ {
 		err = tutorialCallsRpc.Call(context.Background(), utils.AdminSv1GetCDRs, args, &cdrs)
-		if err == nil && len(cdrs) != 0 {
+		if err == nil && len(cdrs) == 2 {
 			break
 		}
 		time.Sleep(time.Second)
 	}
-	if err != nil || len(cdrs) == 0 {
-		t.Fatalf("expected CDRs for account 1001, received none (err=%v)", err)
+	if err != nil || len(cdrs) != 2 {
+		t.Fatalf("expected 2 CDRs for account 1001, received %d (err=%v)", len(cdrs), err)
 	}
+	var dfltCdr *utils.CDR
 	for _, cdr := range cdrs {
 		if utils.IfaceAsString(cdr.Event[utils.AccountField]) != "1001" {
 			t.Errorf("unexpected CDR account: %s", utils.ToJSON(cdr))
 		}
+		if utils.MetaDefault == cdr.Opts[utils.MetaRunID] {
+			dfltCdr = cdr
+			break
+		}
 	}
+	if dfltCdr == nil {
+		t.Fatalf("missing *default run CDR: %s", utils.ToJSON(cdrs))
+	}
+	cost, err := utils.IfaceAsFloat64(dfltCdr.Opts[utils.MetaCost])
+	if err != nil {
+		t.Fatalf("retrieving *default run cost: %v, CDR: %s", err, utils.ToJSON(dfltCdr))
+	}
+	if cost != 0.005 {
+		t.Errorf("expected *default run cost 0.005, got %v: %s", cost, utils.ToJSON(dfltCdr))
+	}
+
 }
 
 func testCallCheckBalance(t *testing.T) {
@@ -284,10 +301,9 @@ func testCallCheckBalance(t *testing.T) {
 	if !ok {
 		t.Fatal("expected MonetaryBalance to exists")
 	}
-	if units < initialUnits {
+	if units >= initialUnits {
 		t.Errorf("expected account 1001 balance below initial %v (debited), got %v: %s",
 			initialUnits, units, utils.ToJSON(acc))
-		return
 	}
 }
 

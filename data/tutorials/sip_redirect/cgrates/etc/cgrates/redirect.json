@@ -52,17 +52,17 @@
 						"value": "~*cgrep.RouteProfiles[*raw][0].Routes[0].RouteParameters"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;q=0.7; expires=3600;cgr_cost=`"},
+							"value":"`;q=0.7; expires=3600;cgrCost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[0].SortingData.Cost"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;cgr_maxusage=`"},
+							"value":"`;cgrMaxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[0].SortingData.MaxUsage"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"`;cgr_route=`"},
+						"value":"`;cgrRoute=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[0].RouteID"},
 
@@ -88,17 +88,17 @@
 						"value": "~*cgrep.RouteProfiles[*raw][0].Routes[1].RouteParameters"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;q=0.7; expires=3600;cgr_cost=`"},
+							"value":"`;q=0.7; expires=3600;cgrCost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[1].SortingData.Cost"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;cgr_maxusage=`"},
+							"value":"`;cgrMaxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[1].SortingData.MaxUsage"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"`;cgr_route=`"},
+						"value":"`;cgrRoute=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[1].RouteID"},
 
@@ -120,17 +120,17 @@
 						"value": "~*cgrep.RouteProfiles[*raw][0].Routes[2].RouteParameters"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;q=0.7; expires=3600;cgr_cost=`"},
+							"value":"`;q=0.7; expires=3600;cgrCost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[2].SortingData.Cost"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"`;cgr_maxusage=`"},
+							"value":"`;cgrMaxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[2].SortingData.MaxUsage"},
 
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"`;cgr_route=`"},
+						"value":"`;cgrRoute=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[2].RouteID"},
 

@@ -110,7 +110,7 @@ func (kev KamEvent) MissingParameter() bool {
 		// TRIndex and TRLabel must exist in order to know where to send back the response
 		mndPrm := []string{kev[KamTRIndex], kev[KamTRLabel]}
 		_, has := kev[utils.CGRFlags]
-		// in case that the user populate cgr_flags we treat it like a ProcessEvent
+		// in case that the user populate cgrFlags we treat it like a ProcessEvent
 		// and expect to have the required fields
 		if has {
 			mndPrm = append(mndPrm, kev[utils.OriginID],
@@ -311,7 +311,7 @@ type kamDlgInfo struct {
 	Caller    *kamCallerDlg
 	Variables []struct {
 		CgrOriginID   string `json:"cgrOriginID,omitempty"`
-		CgrOriginHost string `json:"cgr_originhost,omitempty"`
+		CgrOriginHost string `json:"cgrOriginhost,omitempty"`
 	} `json:"variables"`
 }
 

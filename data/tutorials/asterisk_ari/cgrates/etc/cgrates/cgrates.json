@@ -164,7 +164,7 @@
 
 	],
 	"conns": {
-		"*sessions":[{"connIDs":["*bijson_localhost"]}]
+		"*sessions":[{"connIDs":["*bijsonLocalhost"]}]
 	},
 	"requestProcessors": [
 		{
@@ -173,17 +173,21 @@
 			"flags": ["*authorize","*accounts","*attributes"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
-			],
-			"replyFields":[
-				{"tag": "CGR_Reqtype", "path": "*rep.cgr_reqtype", "type": "*constant", "value": "*prepaid"}
 			]
+		},
+		{
+			"id": "SkipRinging",
+			"filters": [
+				"*string:~*req.type:ChannelStateChange",
+				"*string:~*req.channel.state:Ringing",
+			],
+			"flags": ["*none"],
 		},
 		{
 			"id": "Initiate",
 			"filters": [
 				"*string:~*req.type:ChannelStateChange",
 				"*string:~*req.channel.state:Up",
-				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
 			],
 			"flags": ["*initiate","*accounts"],
 			"requestFields":[
@@ -195,17 +199,11 @@
 			"id": "Terminate",
 			"filters": [
 				"*string:~*req.type:ChannelDestroyed",
-				"*string:~*req.channel.channelvars.cgr_reqtype:*prepaid"
 			],
 			"flags": ["*terminate","*accounts"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
 			]
-		},
-		{
-			"id": "IgnoreOutbound",
-			"filters": ["*empty:~*req.channel.channelvars.cgr_reqtype:"],
-			"flags": ["*none"]
 		}
 	]
 },
