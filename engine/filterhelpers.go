@@ -130,7 +130,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 		}
 		return
 	},
-		config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
+		0, lockID)
 	if err != nil {
 		return nil, err
 	}
