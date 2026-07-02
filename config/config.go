@@ -999,7 +999,7 @@ func loadConfigFromHTTP(ctx *context.Context, urlPaths string, loadFuncs Section
 	for _, urlPath := range strings.Split(urlPaths, utils.InfieldSep) {
 
 		var myClient = &http.Client{
-			Timeout: CgrConfig().GeneralCfg().ReplyTimeout,
+			Timeout: cfg.GeneralCfg().ReplyTimeout,
 		}
 		var req *http.Request
 		if req, err = http.NewRequestWithContext(ctx, utils.EmptyString, urlPath, nil); err != nil {

@@ -6173,7 +6173,7 @@ func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
 	cancel()
 	url := "inexistentURL"
 	expected := `path:"inexistentURL" is not reachable`
-	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
+	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, cfgCgr); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
 	}
 
