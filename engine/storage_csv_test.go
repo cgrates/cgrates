@@ -148,7 +148,7 @@ func TestNewURLCSVStorage(t *testing.T) {
 	sep := ','
 	dataPath := "http://cgrates.org/data1,http://cgrates.org/data2"
 
-	csvStorage := NewURLCSVStorage(sep, dataPath)
+	csvStorage := NewURLCSVStorage(sep, dataPath, 0)
 
 	if csvStorage == nil {
 		t.Fatalf("Expected CSVStorage to be initialized, got nil")

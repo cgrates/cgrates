@@ -30,8 +30,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -134,8 +134,8 @@ func NewStringCSVStorage(sep rune,
 }
 
 // NewGoogleCSVStorage creates a csv storege from google sheets
-func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
-	sht, err := newSheet()
+func NewGoogleCSVStorage(sep rune, spreadsheetID string, gapiCredentials, gapiToken json.RawMessage) (*CSVStorage, error) {
+	sht, err := newSheet(gapiCredentials, gapiToken)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 }
 
 // NewURLCSVStorage returns a CSVStorage that can parse URLs
-func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
+func NewURLCSVStorage(sep rune, dataPath string, replyTimeout time.Duration) *CSVStorage {
 	var resourcesPaths []string
 	var ipsPaths []string
 	var statsPaths []string
@@ -252,7 +252,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 		accountsPaths,
 	)
 	c.generator = func() csvReaderCloser {
-		return &csvURL{}
+		return &csvURL{replyTimeout: replyTimeout}
 	}
 	return c
 }
@@ -548,18 +548,18 @@ func (c *csvString) Close() { // no need for close
 // Google
 
 // Retrieve a token, saves the token, then returns the generated client.
-func getClient(cfg *oauth2.Config, configPath string) (*http.Client, error) {
+func getClient(cfg *oauth2.Config, gapiToken json.RawMessage) (*http.Client, error) {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
 	tok := &oauth2.Token{}
-	raw, err := getCfgJSONData(config.CgrConfig().LoaderCgrCfg().GapiToken)
+	raw, err := getCfgJSONData(gapiToken)
 	if err != nil {
 		tok, err = getTokenFromWeb(cfg)
 		if err != nil {
 			return nil, err
 		}
-		path2TokFileb := config.CgrConfig().LoaderCgrCfg().GapiToken
+		path2TokFileb := gapiToken
 		path2TokFile := string(path2TokFileb[1 : len(path2TokFileb)-1])
 		if err := os.MkdirAll(filepath.Dir(path2TokFile), os.FileMode(0777)); err != nil { // create the directory if not exists
 			return nil, err
@@ -617,10 +617,9 @@ func getCfgJSONData(raw json.RawMessage) (data []byte, err error) {
 	return os.ReadFile(dataPath)
 }
 
-func newSheet() (sht *sheets.Service, err error) { //*google_api
+func newSheet(gapiCredentials, gapiToken json.RawMessage) (sht *sheets.Service, err error) { //*google_api
 	var cred []byte
-	var cfgPathDir string
-	if cred, err = getCfgJSONData(config.CgrConfig().LoaderCgrCfg().GapiCredentials); err != nil {
+	if cred, err = getCfgJSONData(gapiCredentials); err != nil {
 		err = fmt.Errorf("Unable to read client secret file: %v", err)
 		return
 	}
@@ -630,7 +629,7 @@ func newSheet() (sht *sheets.Service, err error) { //*google_api
 		err = fmt.Errorf("Unable to parse client secret file to config: %v", err)
 		return
 	}
-	client, err := getClient(config, cfgPathDir)
+	client, err := getClient(config, gapiToken)
 	if err != nil {
 		return nil, err
 	}
@@ -710,8 +709,9 @@ func (c *csvGoogle) Close() { // no need for close
 }
 
 type csvURL struct {
-	csvReader *csv.Reader
-	page      io.ReadCloser
+	csvReader    *csv.Reader
+	page         io.ReadCloser
+	replyTimeout time.Duration
 }
 
 func (c *csvURL) Open(fn string, sep rune, nrFields int) (err error) {
@@ -719,7 +719,7 @@ func (c *csvURL) Open(fn string, sep rune, nrFields int) (err error) {
 		return
 	}
 	var myClient = &http.Client{
-		Timeout: config.CgrConfig().GeneralCfg().ReplyTimeout,
+		Timeout: c.replyTimeout,
 	}
 	var req *http.Response
 	req, err = myClient.Get(fn)

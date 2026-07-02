@@ -291,12 +291,13 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 
 func getLoader(cfg *config.CGRConfig) (engine.LoadReader, error) {
 	if gprefix := utils.MetaGoogleAPI + utils.ConcatenatedKeySep; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
-		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
+		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix),
+			cfg.LoaderCgrCfg().GapiCredentials, cfg.LoaderCgrCfg().GapiToken)
 	}
 	if !utils.IsURL(*dataPath) {
 		return engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	}
-	return engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath), nil
+	return engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath, cfg.GeneralCfg().ReplyTimeout), nil
 }
 
 func main() {
