@@ -350,20 +350,16 @@ func TestSessiontotalUsage(t *testing.T) {
 	}
 	//normal check
 	session = &Session{
-		ID: "1001",
-
+		ID:           "1001",
 		ClientConnID: "ClientConnID",
-
 		SRuns: []*SRun{
 			{
-				ID:           "1001",
-				InterimUsage: decimal.New(2, 0),
-				TotalUsage:   decimal.New(5, 0),
+				ID:         "1001",
+				TotalUsage: decimal.New(5, 0),
 			},
 			{
-				ID:           "1002",
-				InterimUsage: decimal.New(5, 0),
-				TotalUsage:   decimal.New(6, 0),
+				ID:         "1002",
+				TotalUsage: decimal.New(6, 0),
 			},
 		},
 	}
@@ -576,6 +572,7 @@ func TestSRunClone(t *testing.T) {
 			Event:   map[string]any{"id": "1"},
 			APIOpts: map[string]any{"runID": "run1"},
 		},
+		TotalUsage: decimal.New(50, 0),
 	}
 
 	clonedSRun := origSRun.Clone()
@@ -597,6 +594,9 @@ func TestSRunClone(t *testing.T) {
 		if clonedSRun.CGREvent.ID != origSRun.CGREvent.ID {
 			t.Error("CGREvent.ID does not match")
 		}
+	}
+	if clonedSRun.CGREvent == origSRun.CGREvent {
+		t.Error("CGREvent was not cloned")
 	}
 }
 
@@ -753,21 +753,21 @@ func TestSessionAsExternalSession(t *testing.T) {
 		expectedTenant string
 	}{
 		{
-			name:           "First run with debit",
+			name:           "First run",
 			sRunIdx:        0,
 			nodeID:         "nodeA",
 			expectedRunID:  "run1",
 			expectedTenant: "cgrates1.org",
 		},
 		{
-			name:           "Second run with debit",
+			name:           "Second run",
 			sRunIdx:        1,
 			nodeID:         "nodeB",
 			expectedRunID:  "run2",
 			expectedTenant: "cgrates2.org",
 		},
 		{
-			name:           "Third run without debit",
+			name:           "Third run",
 			sRunIdx:        2,
 			nodeID:         "nodeC",
 			expectedRunID:  "run3",
@@ -794,7 +794,6 @@ func TestSessionAsExternalSession(t *testing.T) {
 		})
 	}
 }
-
 func TestSessionUpdateSRuns(t *testing.T) {
 	sr1 := &SRun{
 		ID: "run1",
