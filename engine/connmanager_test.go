@@ -546,7 +546,6 @@ func TestCMGetInternalChan(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cM.SetCache(cacheS)
-	cM.dispIntCh = cM.rpcInternal
 
 	exp := make(chan context.ClientConnector, 1)
 	rcv := cM.GetInternalChan()
@@ -564,7 +563,6 @@ func TestCMGetDispInternalChan(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cM.SetCache(cacheS)
-	cM.dispIntCh = cM.rpcInternal
 
 	exp := make(chan context.ClientConnector, 1)
 	rcv := cM.GetDispInternalChan()
