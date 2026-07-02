@@ -26,7 +26,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
@@ -284,7 +283,7 @@ func NewSTIRIdentity(ctx *context.Context, cache *engine.CacheS, header *utils.P
 
 // AuthStirShaken autentificates the given identity using STIR/SHAKEN
 func AuthStirShaken(ctx *context.Context, cache *engine.CacheS, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
-	attest utils.StringSet, hdrMaxDur time.Duration) error {
+	attest utils.StringSet, hdrMaxDur, replyTimeout time.Duration) error {
 	pi, err := NewProcessedIdentity(identity)
 	if err != nil {
 		return err
@@ -292,7 +291,7 @@ func AuthStirShaken(ctx *context.Context, cache *engine.CacheS, identity, origin
 	if !pi.VerifyHeader() {
 		return errors.New("wrong header")
 	}
-	if err = pi.VerifySignature(ctx, cache, config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
+	if err = pi.VerifySignature(ctx, cache, replyTimeout); err != nil {
 		return err
 	}
 	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest)
