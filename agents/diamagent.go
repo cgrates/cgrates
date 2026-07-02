@@ -306,7 +306,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.cache, da.fltrS, nil),
+				da.cgrCfg, da.cache, da.fltrS, nil),
 			utils.DiameterAgent, da.connMgr,
 			sessConns,
 			statConns,
@@ -387,7 +387,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cache, da.fltrS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cgrCfg, da.cache, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
@@ -434,7 +434,7 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
-		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cache, da.fltrS, nil)
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.cgrCfg, da.cache, da.fltrS, nil)
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().RARTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot send RAR with OriginID: <%s>, err: %s",

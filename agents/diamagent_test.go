@@ -448,7 +448,7 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
@@ -504,7 +504,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -533,7 +533,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -564,7 +564,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {
@@ -592,7 +592,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cacheS, filters, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {

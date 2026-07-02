@@ -104,7 +104,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["cgr_reqtype"] = utils.MetaPostpaid
 	expMp[utils.Source] = utils.KamailioAgent
 	expMp[utils.RequestType] = utils.MetaRated
-	rcv := kamEv.AsMapStringInterface()
+	rcv := kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType)
 	if !reflect.DeepEqual(expMp, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expMp, rcv)
 	}
@@ -124,9 +124,9 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
-		Event: kamEv.AsMapStringInterface(),
+		Event: kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
 	}
-	if rcv := kamEv.AsCGREvent(timezone); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+	if rcv := kamEv.AsCGREvent(timezone, config.CgrConfig().GeneralCfg().DefaultTenant, config.CgrConfig().GeneralCfg().DefaultReqType); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
@@ -147,7 +147,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(),
+		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	authRply := &sessions.V1AuthorizeReply{
@@ -170,7 +170,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(),
+		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	authRply = &sessions.V1AuthorizeReply{
@@ -220,7 +220,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(),
+		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
@@ -244,7 +244,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(),
+		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{

@@ -156,7 +156,7 @@ func (fsa *FSsessions) handleFSEvent(fsev map[string]string, connIdx int) {
 				reqProcessor.Tenant, fsa.cgrcfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					fsa.cgrcfg.GeneralCfg().DefaultTimezone),
-				fsa.cache, fsa.fltrS, nil),
+				fsa.cgrcfg, fsa.cache, fsa.fltrS, nil),
 			utils.FreeSWITCHAgent, fsa.connMgr,
 			sessConns, nil, nil, fsa.fltrS)
 		if lclProcessed {

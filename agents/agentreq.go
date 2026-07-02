@@ -37,6 +37,7 @@ func NewAgentRequest(req utils.DataProvider,
 	opts utils.MapStorage,
 	tntTpl utils.RSRParsers,
 	dfltTenant, timezone string,
+	cfg *config.CGRConfig,
 	cache *engine.CacheS,
 	filterS *engine.FilterS,
 	extraDP map[string]utils.DataProvider) (ar *AgentRequest) {
@@ -65,16 +66,17 @@ func NewAgentRequest(req utils.DataProvider,
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
+		cgrCfg:     cfg,
 		cache:      cache,
 		filterS:    filterS,
 		Opts:       opts,
-		Cfg:        config.CgrConfig().GetDataProvider(),
+		Cfg:        cfg.GetDataProvider(),
 		ExtraDP:    extraDP, // used for extra dataproviders like *hdr and *trl
 	}
 	if tnt, err := tntTpl.ParseDataProvider(ar); err == nil && tnt != utils.EmptyString {
 		ar.Tenant = tnt
 	}
-	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID)
+	ar.Vars.Set([]string{utils.NodeID}, cfg.GeneralCfg().NodeID)
 	return
 }
 
@@ -88,6 +90,7 @@ type AgentRequest struct {
 	Reply      *utils.OrderedNavigableMap
 	Tenant     string
 	Timezone   string
+	cgrCfg     *config.CGRConfig
 	cache      *engine.CacheS
 	filterS    *engine.FilterS
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
@@ -382,7 +385,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaGroup:
 		tmpType = utils.MetaVariable
 	}
-	out, err = attributes.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
+	out, err = attributes.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, ar.cgrCfg.GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, ar.cgrCfg.GeneralCfg().DefaultTimezone), cfgFld.Layout)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {

@@ -91,7 +91,7 @@ func testDiamEmptyCEItConnectDiameterClient(t *testing.T) {
 		"INTEGRATION_TESTS",
 		daCfgND.DiameterAgentCfg().OriginRealm, daCfgND.DiameterAgentCfg().VendorID,
 		daCfgND.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		daCfgND.DiameterAgentCfg().DictionariesPath, lstnr.Network)
+		daCfgND.DiameterAgentCfg().DictionariesPath, daCfgND.DiameterAgentCfg().DictionariesAppendDefaults, lstnr.Network)
 	if err.Error() != "missing application" {
 		t.Fatal(err)
 	}

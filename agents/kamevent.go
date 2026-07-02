@@ -23,7 +23,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -133,7 +132,7 @@ func (kev KamEvent) MissingParameter() bool {
 }
 
 // AsMapStringInterface converts KamEvent into event used by other subsystems
-func (kev KamEvent) AsMapStringInterface() (mp map[string]any) {
+func (kev KamEvent) AsMapStringInterface(dfltReqType string) (mp map[string]any) {
 	mp = make(map[string]any)
 	for k, v := range kev {
 		if k == utils.Usage {
@@ -148,18 +147,18 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]any) {
 		mp[utils.Source] = utils.KamailioAgent
 	}
 	if _, has := mp[utils.RequestType]; !has {
-		mp[utils.RequestType] = config.CgrConfig().GeneralCfg().DefaultReqType
+		mp[utils.RequestType] = dfltReqType
 	}
 	return
 }
 
 // AsCGREvent converts KamEvent into CGREvent
-func (kev KamEvent) AsCGREvent(timezone string) *utils.CGREvent {
+func (kev KamEvent) AsCGREvent(timezone, dfltTenant, dfltReqType string) *utils.CGREvent {
 	return &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			dfltTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kev.AsMapStringInterface(),
+		Event:   kev.AsMapStringInterface(dfltReqType),
 		APIOpts: kev.GetOptions(),
 	}
 }

@@ -91,7 +91,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		v.ComputePath()
 	}
 	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cacheS, nil, nil)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", config.CgrConfig(), cacheS, nil, nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, utils.NewLeafNode(time.Hour))
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, utils.NewLeafNode("AccessAccept"))
 	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.AccountField}, utils.NewLeafNode("1001"))

@@ -202,7 +202,7 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 				da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.cache, da.fltrS, nil),
+				da.cgrCfg, da.cache, da.fltrS, nil),
 			utils.DNSAgent, da.connMgr,
 			sessionsConns, statsConns, thresholdsConns,
 			da.fltrS); err != nil {
