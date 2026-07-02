@@ -127,7 +127,7 @@ func (a *app) help(fields []string) {
 	switch {
 	case len(fields) == 1:
 		for _, m := range a.client.Methods() {
-			fmt.Println(m)
+			fmt.Println(rpcconsole.Alias(m))
 		}
 	case fields[1] == "keys":
 		printKeys()
@@ -248,14 +248,15 @@ func (a *app) completions(line []rune, cursor int) readline.Completions {
 	return completeFields(md, typedKeys(done[1:]))
 }
 
-// completeMethods offers every method grouped under its service. No argument
-// summary: a shared one makes reeflective collapse the menu into aliased columns.
+// completeMethods offers every method grouped under its service, with the alias
+// as the value and the RPC name as its description.
 func (a *app) completeMethods() readline.Completions {
 	methods := a.client.Methods()
 	comps := make([]readline.Completion, 0, len(methods))
 	for _, m := range methods {
-		svc, _, _ := strings.Cut(m, ".")
-		comps = append(comps, readline.Completion{Value: m, Tag: svc})
+		alias := rpcconsole.Alias(m)
+		svc, _, _ := strings.Cut(alias, ".")
+		comps = append(comps, readline.Completion{Value: alias, Description: m, Tag: svc})
 	}
 	return readline.CompleteRaw(comps)
 }

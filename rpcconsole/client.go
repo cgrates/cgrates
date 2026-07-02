@@ -30,6 +30,7 @@ type Client struct {
 	cl      *rpcclient.RPCClient
 	methods []string                           // sorted "Service.Method" names
 	descs   map[string]*utils.MethodDescriptor // descriptor by method name
+	aliases map[string]string                  // alias -> RPC name
 }
 
 // NewClient fetches the methods the engine serves and returns a ready Client.
@@ -43,10 +44,12 @@ func NewClient(cl *rpcclient.RPCClient) (*Client, error) {
 		cl:      cl,
 		methods: make([]string, len(mds)),
 		descs:   make(map[string]*utils.MethodDescriptor, len(mds)),
+		aliases: make(map[string]string, len(mds)),
 	}
 	for i := range mds {
 		c.methods[i] = mds[i].Method
 		c.descs[mds[i].Method] = &mds[i]
+		c.aliases[Alias(mds[i].Method)] = mds[i].Method
 	}
 	return c, nil
 }
@@ -56,15 +59,25 @@ func (c *Client) Methods() []string {
 	return c.methods
 }
 
-// Describe returns method's descriptor, or nil if the engine does not serve it.
-func (c *Client) Describe(method string) *utils.MethodDescriptor {
-	return c.descs[method]
+// Resolve maps an alias to its RPC name. A raw RPC name passes through unchanged.
+func (c *Client) Resolve(method string) string {
+	if rpc, ok := c.aliases[method]; ok {
+		return rpc
+	}
+	return method
 }
 
-// Call invokes method with params and returns the decoded reply.
+// Describe returns the method's descriptor, or nil if the engine doesn't serve
+// it. Takes an alias or the RPC name.
+func (c *Client) Describe(method string) *utils.MethodDescriptor {
+	return c.descs[c.Resolve(method)]
+}
+
+// Call runs method with params and returns the decoded reply. Takes an alias or
+// the RPC name.
 func (c *Client) Call(method string, params any) (any, error) {
 	var reply any
-	if err := c.cl.Call(context.Background(), method, params, &reply); err != nil {
+	if err := c.cl.Call(context.Background(), c.Resolve(method), params, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
