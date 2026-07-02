@@ -70,7 +70,7 @@ type TestContent struct {
 			Attempts:       3,
 			FailedPostsDir: "/tmp",
 			Opts:           &config.EventExporterOpts{},
-		}, config.CgrConfig(), nil, nil)
+		}, config.NewDefaultCGRConfig(), nil, nil)
 		if err != nil {
 			t.Error(err)
 		}
@@ -107,7 +107,7 @@ type TestContent struct {
 			Attempts:       3,
 			FailedPostsDir: "/tmp",
 			Opts:           &config.EventExporterOpts{},
-		}, config.CgrConfig(), nil, nil)
+		}, config.NewDefaultCGRConfig(), nil, nil)
 		if err != nil {
 			t.Error(err)
 		}

@@ -510,10 +510,8 @@ func TestCMReload(t *testing.T) {
 func TestCMDeadLock(t *testing.T) {
 	// to not break the next tests reset the values
 	tCh := Cache
-	tCfg := config.CgrConfig()
 	defer func() {
 		Cache = tCh
-		config.SetCgrConfig(tCfg)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -521,7 +519,6 @@ func TestCMDeadLock(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueueProfiles].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 
 	Cache = NewCacheS(cfg, nil, nil)
 

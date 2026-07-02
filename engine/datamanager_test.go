@@ -119,15 +119,11 @@ func TestDataManagerSetFilterDMNil(t *testing.T) {
 }
 
 func TestDataManagerSetFilterErrConnID(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Remote = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -152,11 +148,8 @@ func TestDataManagerSetFilterErrConnID(t *testing.T) {
 }
 
 func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -187,11 +180,8 @@ func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
 }
 
 func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -224,15 +214,11 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 }
 
 func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -277,11 +263,8 @@ func TestDataManagerRemoveFilterNildm(t *testing.T) {
 
 func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -307,11 +290,8 @@ func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
 
 func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -337,11 +317,8 @@ func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
 
 func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -368,11 +345,8 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 
 func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -405,11 +379,8 @@ func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 
 func TestDataManagerRemoveFilterErrNilOldFltr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -432,16 +403,12 @@ func TestDataManagerRemoveFilterErrNilOldFltr(t *testing.T) {
 
 func TestDataManagerRemoveFilterReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{}
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -480,11 +447,8 @@ func TestDataManagerRemoveAccountNilDM(t *testing.T) {
 
 func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -510,11 +474,8 @@ func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
 
 func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -543,11 +504,8 @@ func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
 
 func TestDataManagerRemoveAccountErrNiloldRpp(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -570,11 +528,8 @@ func TestDataManagerRemoveAccountErrNiloldRpp(t *testing.T) {
 
 func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -608,11 +563,8 @@ func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
 
 func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -648,16 +600,12 @@ func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 
 func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{}
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -683,15 +631,11 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 
 func TestDMRemoveAccountReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAccounts].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -972,15 +916,11 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 
 func TestDMSetAccountReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAccounts].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -1193,15 +1133,11 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 
 func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -1261,15 +1197,11 @@ func TestDMSetThresholdErr(t *testing.T) {
 
 func TestDMSetThresholdReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholds].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1290,15 +1222,11 @@ func TestDMSetThresholdReplicateTrue(t *testing.T) {
 
 func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholds].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1359,11 +1287,9 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // unfinished, getting **Threshold GetThresholdDrv outputing *, we need plain
 // func TestDMGetThresholdSetThErr(t *testing.T) {
 // 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
 // 	tmpCM := connMgr
 // 	defer func() {
 // 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
 // 		connMgr = tmpCM
 // 	}()
 // 	Cache.Clear(nil)
@@ -1372,7 +1298,6 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	cfg.DbCfg().Items[utils.MetaThresholds].Remote = true
 // 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 // 		utils.RemoteConnsCfg)}
-// 	config.SetCgrConfig(cfg)
 // 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 // 	th := &Threshold{
@@ -1409,15 +1334,10 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // }
 
 func TestDMGetThresholdSetThCacheSetErr(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.MetaThresholds].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -1510,15 +1430,11 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 
 func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueues].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1576,16 +1492,12 @@ func TestDMRemoveStatQueueErrDrv(t *testing.T) {
 
 func TestDMRemoveStatQueueReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueues].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cc := make(chan birpc.ClientConnector, 1)
@@ -1674,17 +1586,12 @@ func TestDMGetStatQueueProfileErrNilCacheRead(t *testing.T) {
 
 func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueueProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -1741,15 +1648,9 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 
 func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueueProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -1806,15 +1707,9 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 
 func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueueProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -1868,16 +1763,11 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 }
 
 func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.MetaThresholds].Replicate = true
 
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -1949,11 +1839,9 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // unfinished
 // func TestGetThresholdProfileSetThErr(t *testing.T) {
 // 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
 // 	tmpCM := connMgr
 // 	defer func() {
 // 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
 // 		connMgr = tmpCM
 // 	}()
 // 	Cache.Clear(nil)
@@ -1962,7 +1850,6 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // 	cfg.DbCfg().Items[utils.MetaThresholdProfiles].Remote = true
 // 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 // 		utils.RemoteConnsCfg)}
-// 	config.SetCgrConfig(cfg)
 // 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 // 	th := &Threshold{
@@ -1999,15 +1886,10 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // }
 
 func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.MetaThresholdProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -2038,15 +1920,10 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 }
 
 func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.MetaThresholdProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -3100,16 +2977,12 @@ func TestDMGetAccountNil(t *testing.T) {
 }
 
 func TestDMGetAccountReplicate(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAccounts].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := &ccMock{
@@ -3292,15 +3165,11 @@ func TestDMSetLoadIDsDrvErr(t *testing.T) {
 
 func TestDMSetLoadIDsReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaLoadIDs].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -3368,15 +3237,11 @@ func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
 
 func TestDMCheckFiltersErrCall(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Remote = true
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -3398,16 +3263,11 @@ func TestDMCheckFiltersErrCall(t *testing.T) {
 }
 
 func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.APIBanCfg().Keys = []string{"testKey"}
 	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	var counter int
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3440,7 +3300,6 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	defer testServer.Close()
 	baningo.RootURL = testServer.URL + "/"
 
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -3469,16 +3328,11 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 }
 
 func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.APIBanCfg().Keys = []string{"testKey"}
 	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	var counter int
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3511,7 +3365,6 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	defer testServer.Close()
 	baningo.RootURL = testServer.URL + "/"
 
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -3540,16 +3393,11 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 }
 
 func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.APIBanCfg().Keys = []string{"testKey"}
 	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	var counter int
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -3583,7 +3431,6 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	defer testServer.Close()
 	baningo.RootURL = testServer.URL + "/"
 
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -3646,15 +3493,11 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 
 func TestDMRemoveIndexesReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.CacheAttributeFilterIndexes].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -3699,16 +3542,12 @@ func TestDMSetIndexesErrNilDm(t *testing.T) {
 
 func TestDMSetIndexesReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.CacheAttributeFilterIndexes].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -3743,16 +3582,12 @@ func TestDMSetIndexesReplicate(t *testing.T) {
 
 func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.CacheAttributeFilterIndexes].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -3794,15 +3629,9 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 
 func TestDMGetIndexesErrCacheSet(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheAttributeFilterIndexes].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -3832,15 +3661,9 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 
 func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheAttributeFilterIndexes].Replicate = true
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -4003,16 +3826,12 @@ func TestDMGetFilterNilDMErr(t *testing.T) {
 }
 
 func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholdProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -4234,16 +4053,12 @@ func TestDMSetThresholdProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -4306,17 +4121,12 @@ func TestDMGetStatQueueCacheGetErr(t *testing.T) {
 
 func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueues].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -4365,17 +4175,12 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 
 func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueues].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	stq := &utils.StatQueue{
 		Tenant: "cgrates.org",
@@ -4422,15 +4227,9 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 
 func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -4713,16 +4512,12 @@ func TestDMGetResourceNilDmErr(t *testing.T) {
 
 func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaResources].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -4756,15 +4551,9 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 
 func TestDMGetResourceCacheWriteErr1(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -4794,15 +4583,9 @@ func TestDMGetResourceCacheWriteErr1(t *testing.T) {
 
 func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -4908,16 +4691,12 @@ func TestDMRemoveResourceRemoveResourceDrvErr(t *testing.T) {
 
 func TestDMRemoveResourceReplicateErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaResources].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -4978,16 +4757,12 @@ func TestDMGetResourceProfileNilDmErr(t *testing.T) {
 
 func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaResourceProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5021,15 +4796,9 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 
 func TestDMGetResourceProfileCacheWriteErr1(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheResourceProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -5059,15 +4828,9 @@ func TestDMGetResourceProfileCacheWriteErr1(t *testing.T) {
 
 func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheResourceProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -5114,16 +4877,12 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 }
 
 func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaFilters].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5154,15 +4913,9 @@ func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
 
 func TestDMGetFilterCacheWriteErr1(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheFilters].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -5192,15 +4945,9 @@ func TestDMGetFilterCacheWriteErr1(t *testing.T) {
 
 func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheFilters].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -5245,16 +4992,12 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 }
 
 func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaThresholds].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5376,16 +5119,12 @@ func TestDMSetResourceProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetResourceProfileErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaResourceProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5555,11 +5294,8 @@ func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
 }
 func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -5579,7 +5315,6 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaResourceProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5631,7 +5366,7 @@ func TestDMHasDataOK(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	fltrTh1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
 		Rules: []*FilterRule{
 			{
@@ -5686,11 +5421,8 @@ func TestDMGetRouteProfileNilDmErr(t *testing.T) {
 
 func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rp := &utils.RouteProfile{
 
@@ -5720,7 +5452,6 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaRouteProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5774,15 +5505,9 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 		}},
 	}
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -5817,15 +5542,9 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 
 func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -6067,11 +5786,8 @@ func TestDMSetRouteProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetRouteProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6100,7 +5816,6 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaRouteProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -6342,11 +6057,8 @@ func TestDMRemoveRouteProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
@@ -6375,7 +6087,6 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaRouteProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -6573,11 +6284,8 @@ func TestDMRemoveAttributeProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -6595,7 +6303,6 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAttributeProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -6796,11 +6503,8 @@ func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -6818,7 +6522,6 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaChargerProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7115,11 +6818,8 @@ func TestDMRemoveRateProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveRateProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -7143,7 +6843,6 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaRateProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7268,11 +6967,8 @@ func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveActionProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	ap := &utils.ActionProfile{
 
@@ -7292,7 +6988,6 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaActionProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7458,11 +7153,8 @@ func TestDMSetAttributeProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetAttributeProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7480,7 +7172,6 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAttributeProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7522,11 +7213,8 @@ func TestDMGetAttributeProfileNilDmErr(t *testing.T) {
 
 func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -7544,7 +7232,6 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaAttributeProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7749,11 +7436,8 @@ func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetChargerProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -7771,7 +7455,6 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaChargerProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -7950,11 +7633,8 @@ func TestDMSetActionProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetActionProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	ap := &utils.ActionProfile{
 
@@ -7974,7 +7654,6 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaActionProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -8195,11 +7874,8 @@ func TestDMSetRateProfileRatesSetRateProfileDrvErr(t *testing.T) {
 
 func TestDMSetRateProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	rpp := &utils.RateProfile{
 		ID:        "test_ID1",
@@ -8211,7 +7887,6 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaRateProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -8309,12 +7984,8 @@ func TestDMGetActionProfileNilDmErr(t *testing.T) {
 
 func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	ap := &utils.ActionProfile{
 
@@ -8334,7 +8005,6 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaActionProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -8380,16 +8050,9 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 		Actions:  []*utils.APAction{{}},
 	}
 
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheActionProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -8424,15 +8087,9 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 
 func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheActionProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -8515,16 +8172,9 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 		Weights: make(utils.DynamicWeights, 1),
 	}
 
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheAttributeProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -8559,15 +8209,9 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 
 func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheAttributeProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -8689,12 +8333,8 @@ func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
 
 func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -8720,7 +8360,6 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9034,12 +8673,8 @@ func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	sqp := &utils.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -9065,7 +8700,6 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9106,16 +8740,9 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 		SQMetrics: make(map[string]utils.StatMetric),
 	}
 
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9150,11 +8777,6 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 
 func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
@@ -9171,7 +8793,6 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaChargerProfiles].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9216,16 +8837,9 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 		},
 	}
 
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheChargerProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9260,15 +8874,9 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 
 func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheChargerProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -9325,15 +8933,9 @@ func TestDMGetItemLoadIDsNilDM(t *testing.T) {
 
 func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DbCfg().Items[utils.MetaLoadIDs].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9373,16 +8975,9 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 		"ID_1": 21,
 	}
 
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -9418,15 +9013,9 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 
 func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 
@@ -9672,11 +9261,8 @@ func TestDMGetTrend(t *testing.T) {
 		t.Errorf("expected ErrNoDatabaseConn, got %v", err)
 	}
 
-	cfgtmp := config.CgrConfig()
+	cfgtmp := config.NewDefaultCGRConfig()
 	cacheS := NewCacheS(cfgtmp, nil, nil, nil)
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -9728,7 +9314,6 @@ func TestDMGetTrend(t *testing.T) {
 
 	cfg.DbCfg().Items[utils.MetaTrends].Remote = true
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-	config.SetCgrConfig(cfg)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{

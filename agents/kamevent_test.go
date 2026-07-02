@@ -82,6 +82,7 @@ func TestKamEvMissingParameter(t *testing.T) {
 }
 
 func TestKamEvAsMapStringInterface(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -104,14 +105,15 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["cgr_reqtype"] = utils.MetaPostpaid
 	expMp[utils.Source] = utils.KamailioAgent
 	expMp[utils.RequestType] = utils.MetaRated
-	rcv := kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType)
+	rcv := kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType)
 	if !reflect.DeepEqual(expMp, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expMp, rcv)
 	}
 }
 
 func TestKamEvAsCGREvent(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
+	cfg := config.NewDefaultCGRConfig()
+	timezone := cfg.GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -122,11 +124,11 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		utils.CGRDisconnectCause: "200"}
 	expected := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			cfg.GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
-		Event: kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
+		Event: kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 	}
-	if rcv := kamEv.AsCGREvent(timezone, config.CgrConfig().GeneralCfg().DefaultTenant, config.CgrConfig().GeneralCfg().DefaultReqType); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+	if rcv := kamEv.AsCGREvent(timezone, cfg.GeneralCfg().DefaultTenant, cfg.GeneralCfg().DefaultReqType); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
@@ -134,6 +136,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 }
 
 func TestKamEvAsKamAuthReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -145,9 +148,9 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		utils.MetaAccounts:       "true"}
 	authArgs := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			cfg.GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
+		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	authRply := &sessions.V1AuthorizeReply{
@@ -168,9 +171,9 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		utils.MetaAttributes: "true"}
 	authArgs = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			cfg.GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
+		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	authRply = &sessions.V1AuthorizeReply{
@@ -206,6 +209,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 }
 
 func TestKamEvAsKamProcessEventReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -218,9 +222,9 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvArgs := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			cfg.GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
+		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
@@ -242,9 +246,9 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvArgs = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().GeneralCfg().DefaultTenant),
+			cfg.GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Event:   kamEv.AsMapStringInterface(config.CgrConfig().GeneralCfg().DefaultReqType),
+		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{

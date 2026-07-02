@@ -201,8 +201,6 @@ func TestRemoveIndexFiltersItem(t *testing.T) {
 		Async: true,
 	}
 	dm.SetThresholdProfile(context.Background(), thd, false)
-	// dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	// dm := NewDataManager(dbCM, config.CgrConfig().CacheCfg(), connMng)
 	if err := removeIndexFiltersItem(context.Background(), dm, utils.CacheThresholdFilterIndexes, "cgrates.org", "", []string{"account"}); err != nil {
 		t.Error(err)
 	}
@@ -231,8 +229,6 @@ func TestRemoveFilterIndexesForFilter(t *testing.T) {
 	dm.SetThresholdProfile(context.Background(), thd, false)
 	exp := make(utils.StringSet)
 	exp.Add(utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1001"))
-	// dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	// dm := NewDataManager(dbCM, config.CgrConfig().CacheCfg(), connMng)
 	if err := removeFilterIndexesForFilter(context.Background(), dm, utils.CacheThresholdFilterIndexes, "cgrates.org", []string{""}, exp); err != nil {
 		t.Error(err)
 	}

@@ -63,7 +63,6 @@ func testLoadIdsStart(testName string, t *testing.T) {
 	if loadCfgIn, err = config.NewCGRConfigFromPath(context.Background(), inPath); err != nil {
 		t.Fatal(err)
 	}
-	config.SetCgrConfig(loadCfgIn)
 	if loadCfgOut, err = config.NewCGRConfigFromPath(context.Background(), outPath); err != nil {
 		t.Fatal(err)
 	}

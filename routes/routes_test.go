@@ -141,9 +141,9 @@ var (
 	}
 )
 
-func prepareRoutesData(t *testing.T, dm *engine.DataManager) {
+func prepareRoutesData(t *testing.T, dm *engine.DataManager, cfg *config.CGRConfig) {
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -166,7 +166,7 @@ func prepareRoutesData(t *testing.T, dm *engine.DataManager) {
 		t.Fatal(err)
 	}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
 		Rules: []*engine.FilterRule{
 			{
@@ -189,7 +189,7 @@ func prepareRoutesData(t *testing.T, dm *engine.DataManager) {
 		t.Fatal(err)
 	}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
 		Rules: []*engine.FilterRule{
 			{
@@ -229,7 +229,7 @@ func TestRoutesCache(t *testing.T) {
 	dmSPP.SetCache(cacheS)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 }
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
@@ -248,7 +248,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	for i, spp := range testRoutesPrfs {
 		sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[i])
@@ -276,7 +276,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile1",
@@ -387,7 +387,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -442,7 +442,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -486,7 +486,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -517,6 +517,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesMaxCost:      10,
@@ -528,7 +529,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 		maxCost:      10.0,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, cfg.RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -538,7 +539,8 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", true, nil)}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", true, nil)}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{},
 	}
@@ -546,7 +548,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, cfg.RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -556,6 +558,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
 			utils.OptsRoutesIgnoreErrors: true,
@@ -565,7 +568,7 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, cfg.RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -590,7 +593,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	cfg.RouteSCfg().IndexedSelects = false
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	prepareRoutesData(t, dmSPP)
+	prepareRoutesData(t, dmSPP, cfg)
 
 	for i, spp := range testRoutesPrfs {
 		sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[i])
@@ -1008,7 +1011,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 		},
 	}
 
-	prepareRoutesData(t, dm)
+	prepareRoutesData(t, dm, cfg)
 
 	if err := cacheS.Set(context.Background(), utils.CacheRouteProfiles, "cgrates.org:RouteProfile1", nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1034,15 +1037,9 @@ func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, re
 
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 
-	cfgtmp := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
-	config.SetCgrConfig(cfg)
 
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -1087,7 +1084,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1154,7 +1151,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1246,7 +1243,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 			},
 		}}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1338,7 +1335,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 			},
 		}}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1572,7 +1569,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1658,7 +1655,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1744,7 +1741,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -1833,7 +1830,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -2136,7 +2133,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 	}
 
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -2193,7 +2190,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rpS := NewRouteService(dm, fltrs, cfg, nil)
 
-	prepareRoutesData(t, dm)
+	prepareRoutesData(t, dm, cfg)
 
 	exp := []*utils.RouteProfile{
 		{

@@ -31,11 +31,6 @@ import (
 )
 
 func TestCDRsV1ProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -106,11 +101,6 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventMockErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -184,11 +174,6 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventMockCache(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -231,10 +216,10 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	defaultConf := config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses]
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	defaultConf := cfg.CacheCfg().Partitions[utils.CacheRPCResponses]
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	defer func() {
-		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
+		cfg.CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
 	var rply string
 	err := newCDRSrv.V1ProcessEvent(context.Background(), cgrEv, &rply)
@@ -265,11 +250,6 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal,
@@ -313,10 +293,10 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	defaultConf := config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses]
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	defaultConf := cfg.CacheCfg().Partitions[utils.CacheRPCResponses]
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	defer func() {
-		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
+		cfg.CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
 	var rply []*utils.EventsWithOpts
 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
@@ -348,11 +328,6 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -396,10 +371,10 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 			"*context":           utils.MetaCDRs,
 		},
 	}
-	defaultConf := config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses]
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	defaultConf := cfg.CacheCfg().Partitions[utils.CacheRPCResponses]
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	defer func() {
-		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
+		cfg.CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
 	expectedErr := `retrieving *attributes option failed: cannot convert field: 1s to bool`
 	var rply []*utils.EventsWithOpts
@@ -411,11 +386,6 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
@@ -456,11 +426,6 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 }
 
 func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
@@ -504,14 +469,8 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 
 func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	config.SetCgrConfig(cfg)
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -559,11 +518,6 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 }
 
 func TestCDRsV1ProcessStoredEvents(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -628,11 +582,6 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 }
 
 func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 

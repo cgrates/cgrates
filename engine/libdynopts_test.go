@@ -1323,7 +1323,7 @@ func TestDynamicDecimalBigOptsDynVal(t *testing.T) {
 			utils.MetaUsage: "27s",
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1423,7 +1423,7 @@ func TestDynamicIntOptsDynVal(t *testing.T) {
 			utils.MetaDestination: 6548454,
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1523,7 +1523,7 @@ func TestDynamicFloat64OptsDynVal(t *testing.T) {
 			"*acc": 3434,
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1623,7 +1623,7 @@ func TestDynamicBoolOptsDynVal(t *testing.T) {
 			"Field2": true,
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1723,7 +1723,7 @@ func TestDynamicDurationOptsDynVal(t *testing.T) {
 			"Usage": "10s",
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1823,7 +1823,7 @@ func TestDynamicDurationPointerOptsDynVal(t *testing.T) {
 			"Usage": "10s",
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1902,7 +1902,7 @@ func TestDynamicStringOptsDynVal(t *testing.T) {
 			"*context": "chargers",
 		},
 	}
-	fs := NewFilterS(config.CgrConfig(), nil, nil)
+	fs := NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

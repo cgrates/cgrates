@@ -1779,9 +1779,10 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 */
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	sS := new(SessionS)
-	sS.cfg = config.CgrConfig()
+	sS.cfg = cfg
 	sS.cache = cacheS
 	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
@@ -1822,9 +1823,10 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 }
 
 func TestBiRPCv1STIRIdentity(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	sS := new(SessionS)
-	sS.cfg = config.CgrConfig()
+	sS.cfg = cfg
 	sS.cache = cacheS
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},

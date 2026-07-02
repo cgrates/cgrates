@@ -453,7 +453,6 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm.SetCache(cacheS)
 	cfg.AccountSCfg().MaxIterations = 100
-	config.SetCgrConfig(cfg)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
 		blnCfg: &utils.Balance{

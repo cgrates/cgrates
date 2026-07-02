@@ -175,13 +175,14 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 `
 
 	testTPID := "LoaderCSVTests"
-	idb, err := NewInternalDB(nil, nil, nil, config.CgrConfig().DbCfg().Items)
+	cfg := config.NewDefaultCGRConfig()
+	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, config.CgrConfig().DbCfg())
-	cacheS := NewCacheS(config.CgrConfig(), nil, nil, nil)
-	csvr, err := NewTpReader(dbCM, config.CgrConfig(), NewStringCSVStorage(utils.CSVSep,
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	cacheS := NewCacheS(cfg, nil, nil, nil)
+	csvr, err := NewTpReader(dbCM, cfg, NewStringCSVStorage(utils.CSVSep,
 		ResourcesCSVContent, IPCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, cacheS, nil)

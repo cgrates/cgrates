@@ -31,8 +31,9 @@ import (
 )
 
 func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -45,7 +46,7 @@ func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -60,8 +61,9 @@ func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -74,7 +76,7 @@ func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -89,8 +91,9 @@ func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
@@ -102,7 +105,7 @@ func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthly", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthly", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -117,8 +120,9 @@ func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep),
@@ -130,7 +134,7 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -145,8 +149,9 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
@@ -158,7 +163,7 @@ func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*yearly", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*yearly", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -173,8 +178,9 @@ func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
@@ -186,7 +192,7 @@ func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout(utils.MetaUnlimited, utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout(utils.MetaUnlimited, utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -201,8 +207,9 @@ func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("", utils.InfieldSep),
@@ -214,7 +221,7 @@ func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -229,8 +236,9 @@ func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
@@ -242,7 +250,7 @@ func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*month_endTest", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*month_endTest", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -257,8 +265,9 @@ func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeError(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
@@ -283,8 +292,9 @@ func TestExportReqParseFieldDateTimeError2(t *testing.T) {
 			utils.Usage:        "20m",
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(mS, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(mS, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    prsr,
@@ -304,8 +314,9 @@ func TestExportReqFieldAsInterface(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
 	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
@@ -342,17 +353,18 @@ func TestExportReqNewEventExporter(t *testing.T) {
 	expData := map[string]*utils.OrderedNavigableMap{
 		utils.MetaReq: onm,
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	expected := &ExportRequest{
 		inData:           inData,
 		filterS:          nil,
 		tnt:              "cgrates.org",
 		cache:            cacheS,
 		ExpData:          expData,
-		roundingDecimals: config.CgrConfig().GeneralCfg().RoundingDecimals,
-		timezone:         config.CgrConfig().GeneralCfg().DefaultTimezone,
+		roundingDecimals: cfg.GeneralCfg().RoundingDecimals,
+		timezone:         cfg.GeneralCfg().DefaultTimezone,
 	}
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	if !reflect.DeepEqual(expected, eventReq) {
 		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
 	}
@@ -371,8 +383,9 @@ func TestExportRequestString(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	exp := utils.ToIJSON(eeR)
 
@@ -389,8 +402,9 @@ func TestExportReqFieldAsInterfaceBadPrefix(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fldPath := []string{"inexistant"}
 	expErr := "unsupported field prefix: <inexistant>"
@@ -407,8 +421,9 @@ func TestExportReqFieldAsInterfaceMetaUCHErr(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fldPath := []string{utils.MetaUCH}
 	if _, err := eventReq.FieldAsInterface(fldPath); err != utils.ErrNotFound {
@@ -434,8 +449,9 @@ func TestExportReqFieldAsInterfaceNMSliceType(t *testing.T) {
 		},
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Slice"}
 	expVal := "cgrates.org"
 	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
@@ -453,8 +469,9 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 			"Usage":   "10m",
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
 	if rcv, err := eventReq.FieldAsString(fldPath); err != nil {
@@ -465,8 +482,9 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 }
 
 func TestExportRequestParseFieldMetaFiller(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaFiller,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -484,8 +502,9 @@ func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 }
 
 func TestExportRequestParseFieldMetaGroup(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaGroup,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -503,7 +522,8 @@ func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 }
 
 func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
-	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -517,7 +537,7 @@ func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -549,8 +569,9 @@ func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -585,8 +606,9 @@ func TestExportRequestSetAsSliceExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -612,8 +634,9 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -642,7 +665,8 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 }
 
 func TestExportRequestAppendMetaUCH(t *testing.T) {
-	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -656,7 +680,7 @@ func TestExportRequestAppendMetaUCH(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -688,8 +712,9 @@ func TestExportRequestAppendMetaOpts(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -724,8 +749,9 @@ func TestExportRequestAppendExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -751,8 +777,9 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -785,7 +812,8 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 }
 
 func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
-	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -799,7 +827,7 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -821,7 +849,8 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 }
 
 func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
-	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -835,7 +864,7 @@ func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
@@ -872,8 +901,9 @@ func TestExportRequestComposeMetaOptsOK(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -907,8 +937,9 @@ func TestExportRequestComposeMetaOptsFoundOK(t *testing.T) {
 		},
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaOpts, "Tenant"},
@@ -945,8 +976,9 @@ func TestExportRequestComposeDefaultOK(t *testing.T) {
 		utils.MetaExp: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaExp, "Tenant"},
@@ -984,8 +1016,9 @@ func TestExportRequestComposeExpDataErr(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"Inexistant field"},
@@ -1029,7 +1062,7 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 		},
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, fltr, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, fltr, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	expErr := "NOT_FOUND:inexistant"
 	if err := eeR.SetFields(context.Background(), tplFlds); err == nil || err.Error() != expErr {
@@ -1068,7 +1101,7 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 		},
 	}
 
-	eeR := NewExportRequest(inData, "cgrates.org", cacheS, fltr, expData, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	eeR := NewExportRequest(inData, "cgrates.org", cacheS, fltr, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	pastEeR := eeR
 	if err := eeR.SetFields(context.Background(), tplFlds); err != nil {
 		t.Error(err)

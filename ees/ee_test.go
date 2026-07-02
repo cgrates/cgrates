@@ -313,8 +313,9 @@ func TestExportRequestTenant(t *testing.T) {
 		},
 	}
 	tpFields[0].ComputePath()
-	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	if err := NewExportRequest(inData, "cgrates.org", cacheS, nil, map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}, config.CgrConfig().GeneralCfg().RoundingDecimals, config.CgrConfig().GeneralCfg().DefaultTimezone).SetFields(nil, tpFields); err != nil {
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	if err := NewExportRequest(inData, "cgrates.org", cacheS, nil, map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone).SetFields(nil, tpFields); err != nil {
 		t.Error(err)
 	}
 	rcv, err := bP.PrepareOrderMap(expNM)

@@ -77,8 +77,8 @@ import (
 // 			},
 // 		},
 // 	}
-// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
-// 	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
+// 	cfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
+// 	cfg.CacheCfg().ReplicationConns = []string{"*localhost"}
 // 	ds.registerDispHosts()
 // 	host1.ID = "Host2"
 // 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
@@ -91,8 +91,8 @@ import (
 // 		t.Errorf("Expected to not find Host2 in cache")
 // 	}
 
-// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = false
-// 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
+// 	cfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = false
+// 	cfg.CacheCfg().ReplicationConns = []string{}
 
 // 	host1.ID = "Host1"
 // 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
@@ -167,7 +167,7 @@ func TestRegisterRPCHosts(t *testing.T) {
 			},
 		},
 	}
-	cache := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cache := engine.NewCacheS(cfg, nil, nil, nil)
 	regist := &RegistrarCService{
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg),

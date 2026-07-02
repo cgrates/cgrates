@@ -580,7 +580,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &utils.APAction{
@@ -688,7 +688,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &utils.APAction{
@@ -742,7 +742,7 @@ func TestExportAction(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
@@ -796,7 +796,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
@@ -853,7 +853,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
@@ -899,7 +899,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
@@ -945,7 +945,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
@@ -991,7 +991,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)

@@ -172,8 +172,9 @@ var (
 )
 
 func prepareStatsData(t *testing.T, dm *engine.DataManager) {
+	cfg := config.NewDefaultCGRConfig()
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -201,7 +202,7 @@ func prepareStatsData(t *testing.T, dm *engine.DataManager) {
 		t.Fatal(err)
 	}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
 		Rules: []*engine.FilterRule{
 			{
@@ -229,7 +230,7 @@ func prepareStatsData(t *testing.T, dm *engine.DataManager) {
 		t.Fatal(err)
 	}
 	if err := dm.SetFilter(context.Background(), &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
 		Rules: []*engine.FilterRule{
 			{
@@ -1027,14 +1028,10 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
@@ -3478,7 +3475,7 @@ func TestStatRemOnQueueLength(t *testing.T) {
 
 func TestStatAddStatEvent(t *testing.T) {
 	m := &matchedStatQueue{
-		cfg: config.CgrConfig(),
+		cfg: config.NewDefaultCGRConfig(),
 		statQueue: &utils.StatQueue{
 			SQMetrics: map[string]utils.StatMetric{
 				utils.MetaASR: &utils.StatASR{
@@ -3563,7 +3560,7 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 func TestStatRemoveExpiredTTL(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		m := &matchedStatQueue{
-			cfg: config.CgrConfig(),
+			cfg: config.NewDefaultCGRConfig(),
 			statQueue: &utils.StatQueue{
 				SQMetrics: map[string]utils.StatMetric{
 					utils.MetaASR: &utils.StatASR{
@@ -3605,7 +3602,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 func TestStatRemoveExpiredQueue(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		m := &matchedStatQueue{
-			cfg: config.CgrConfig(),
+			cfg: config.NewDefaultCGRConfig(),
 			statQueue: &utils.StatQueue{
 				SQMetrics: map[string]utils.StatMetric{
 					utils.MetaASR: &utils.StatASR{
@@ -3742,7 +3739,7 @@ func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 		},
 	}
 
-	m.cfg = config.CgrConfig()
+	m.cfg = config.NewDefaultCGRConfig()
 	m.filters = filters
 	experr := utils.ErrWrongPath
 	err := m.processEvent(context.Background(), tnt, evID, evNm)

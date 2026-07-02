@@ -57,12 +57,12 @@ func (s *testMockSessionConn) Handlers() (b map[string]any) {
 
 func TestProcessRequest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, config.CgrConfig().DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	dm.SetCache(cacheS)
-	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
+	filters := engine.NewFilterS(cfg, nil, dm) // no need for filterS but still try to configure the dm :D
 
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply := utils.NewOrderedNavigableMap()
@@ -116,9 +116,9 @@ func TestProcessRequest(t *testing.T) {
 		v.ComputePath()
 	}
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
-		utils.OriginHost:  utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().OriginHost),
-		utils.OriginRealm: utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().OriginRealm),
-		utils.ProductName: utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().ProductName),
+		utils.OriginHost:  utils.NewLeafNode(cfg.DiameterAgentCfg().OriginHost),
+		utils.OriginRealm: utils.NewLeafNode(cfg.DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewLeafNode(cfg.DiameterAgentCfg().ProductName),
 		utils.MetaApp:     utils.NewLeafNode("appName"),
 		utils.MetaAppID:   utils.NewLeafNode("appID"),
 		utils.MetaCmd:     utils.NewLeafNode("cmdR"),
@@ -447,17 +447,17 @@ func TestProcessRequest(t *testing.T) {
 	}}
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
-		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
+		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
+		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
-	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
 	da := &DiameterAgent{
-		cgrCfg:  config.CgrConfig(),
+		cgrCfg:  cfg,
 		fltrS:   filters,
 		connMgr: connMgr,
 	}
@@ -503,8 +503,8 @@ func TestProcessRequest(t *testing.T) {
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
-		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
+		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
+		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -532,8 +532,8 @@ func TestProcessRequest(t *testing.T) {
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
-		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
+		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
+		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
@@ -563,8 +563,8 @@ func TestProcessRequest(t *testing.T) {
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
-		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
+		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
+		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {
@@ -591,8 +591,8 @@ func TestProcessRequest(t *testing.T) {
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
-		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
+		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
+		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
 	if err != nil {

@@ -188,11 +188,9 @@ package engine
 // /*
 // 	func TestLoggerExportAlert(t *testing.T) {
 // 		testCache := Cache
-// 		tmpC := config.CgrConfig()
 // 		tmpCM := connMgr
 // 		defer func() {
 // 			Cache = testCache
-// 			config.SetCgrConfig(tmpC)
 // 			connMgr = tmpCM
 // 		}()
 

@@ -81,6 +81,7 @@ func TestNewCSVStringReader(t *testing.T) {
 }
 
 func TestNewCSVReaderErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	path := "TestNewCSVReaderErrors" + strconv.Itoa(rand.Int()) + utils.CSVSuffix
 	expErrMsg := fmt.Sprintf("open %s: no such file or directory", path)
 	if _, err := NewCSVReader(fileProvider{}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
@@ -88,18 +89,19 @@ func TestNewCSVReaderErrors(t *testing.T) {
 	}
 
 	expErrMsg = fmt.Sprintf("parse %q: invalid URI for request", "./"+path)
-	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{cfg: cfg}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	prePath := "http:/localhost:" + strconv.Itoa(rand.Int())
 	expErrMsg = fmt.Sprintf(`path:"%s/%s" is not reachable`, prePath, path)
-	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{cfg: cfg}, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %q, received: %q", expErrMsg, err.Error())
 	}
 }
 
 func TestNewCSVURLReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	data := `cgrates.org,ATTR_VARIABLE,,20,,*req.Category,*variable,~*req.ToR,`
 	mux := http.NewServeMux()
 	mux.Handle("/ok/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { rw.Write([]byte(data)) }))
@@ -107,11 +109,11 @@ func TestNewCSVURLReader(t *testing.T) {
 	defer s.Close()
 	runtime.Gosched()
 
-	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
+	if _, err := NewCSVReader(urlProvider{cfg: cfg}, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
 		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
 	}
 
-	csvR, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
+	csvR, err := NewCSVReader(urlProvider{cfg: cfg}, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
 	if err != nil {
 		t.Fatal(err)
 	}

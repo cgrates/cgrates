@@ -419,7 +419,8 @@ func TestResourceAllocateResource(t *testing.T) {
 
 // TestRSCacheSetGet assurace the presence of private params in cached resource
 func TestRSCacheSetGet(t *testing.T) {
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	r := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL",
@@ -456,7 +457,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
 	fltrRes1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -483,7 +484,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 	dmRES.SetFilter(context.Background(), fltrRes1, true)
 	fltrRes2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
 		Rules: []*engine.FilterRule{
 			{
@@ -510,7 +511,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 	dmRES.SetFilter(context.Background(), fltrRes2, true)
 	fltrRes3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
 		Rules: []*engine.FilterRule{
 			{
@@ -523,7 +524,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	dmRES.SetFilter(context.Background(), fltrRes3, true)
 	resprf := []*utils.ResourceProfile{
 		{
-			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:            cfg.GeneralCfg().DefaultTenant,
 			ID:                "ResourceProfile1",
 			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
@@ -536,7 +537,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			ThresholdIDs: []string{""},
 		},
 		{
-			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:            cfg.GeneralCfg().DefaultTenant,
 			ID:                "ResourceProfile2", // identifier of this resource
 			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
@@ -549,7 +550,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			ThresholdIDs: []string{""},
 		},
 		{
-			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:            cfg.GeneralCfg().DefaultTenant,
 			ID:                "ResourceProfile3",
 			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
@@ -564,19 +565,19 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	}
 	resourceTest := []*utils.Resource{
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile1",
 			Usages: map[string]*utils.ResourceUsage{},
 			TTLIdx: []string{},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile2",
 			Usages: map[string]*utils.ResourceUsage{},
 			TTLIdx: []string{},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile3",
 			Usages: map[string]*utils.ResourceUsage{},
 			TTLIdx: []string{},
@@ -602,7 +603,8 @@ func TestResourceAddResourceProfile(t *testing.T) {
 func newTestMatchingSetup(t *testing.T) (*ResourceS, []*utils.ResourceProfile, matchedResources, []*utils.CGREvent) {
 	t.Helper()
 	rS, dm, _ := newTestResourceS(t)
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	cfg := config.NewDefaultCGRConfig()
+	tenant := cfg.GeneralCfg().DefaultTenant
 
 	dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: tenant,
@@ -1343,14 +1345,10 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 		utils.Logger = tmpLogger
 	}()
 
-	dft := config.CgrConfig()
-	defer config.SetCgrConfig(dft)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1824,14 +1822,10 @@ func TestResourcesStartLoop(t *testing.T) {
 }
 
 func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
@@ -1862,14 +1856,10 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 }
 
 func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)

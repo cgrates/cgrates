@@ -111,7 +111,7 @@ func TestThresholdsCache(t *testing.T) {
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
 
 	fltrTh1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -128,7 +128,7 @@ func TestThresholdsCache(t *testing.T) {
 	}
 	dmTH.SetFilter(context.Background(), fltrTh1, true)
 	fltrTh2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
 		Rules: []*engine.FilterRule{
 			{
@@ -145,7 +145,7 @@ func TestThresholdsCache(t *testing.T) {
 	}
 	dmTH.SetFilter(context.Background(), fltrTh2, true)
 	fltrTh3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
 		Rules: []*engine.FilterRule{
 			{
@@ -291,7 +291,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	thServ = NewThresholdService(cfg, dmTH, cacheS, engine.NewFilterS(cfg, nil, dmTH), nil)
 
 	fltrTh1 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
 		Rules: []*engine.FilterRule{
 			{
@@ -308,7 +308,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	}
 	dmTH.SetFilter(context.Background(), fltrTh1, true)
 	fltrTh2 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
 		Rules: []*engine.FilterRule{
 			{
@@ -324,7 +324,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		},
 	}
 	fltrTh3 := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
 		Rules: []*engine.FilterRule{
 			{
@@ -686,10 +686,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	tmpLogger := utils.Logger
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
-	tmp := config.CgrConfig()
-
 	defer func() {
-		config.SetCgrConfig(tmp)
 		utils.Logger = tmpLogger
 	}()
 
@@ -697,7 +694,6 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -924,11 +920,9 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 
 func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmpC := config.CgrConfig()
 
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -943,7 +937,6 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	cfg.DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"test"}
 	cfg.DbCfg().Items[utils.CacheThresholds].Remote = true
-	config.SetCgrConfig(cfg)
 	tS := NewThresholdService(cfg, dm, cacheS,
 		engine.NewFilterS(cfg, nil, dm), nil)
 
@@ -1056,9 +1049,6 @@ func TestThresholdsStartLoop(t *testing.T) {
 }
 
 func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -1102,9 +1092,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
-	tmpC := config.CgrConfig()
 	defer func() {
-		config.SetCgrConfig(tmpC)
 		utils.Logger = tmpLogger
 	}()
 
@@ -1112,7 +1100,6 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
@@ -1138,11 +1125,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 }
 
 func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)

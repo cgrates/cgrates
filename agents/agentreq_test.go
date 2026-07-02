@@ -1268,10 +1268,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathOpts(t *testing.T) {
 }
 
 func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
-	tmp := config.CgrConfig()
-
 	cfg := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1286,14 +1283,12 @@ func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
 
 	path := []string{utils.MetaCfg}
 
-	expVal := config.CgrConfig().GetDataProvider()
+	expVal := cfg.GetDataProvider()
 	if rply, err := aqReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expVal, rply) {
 		t.Errorf("Expected %+v \n, received %+v", expVal, rply)
 	}
-
-	config.SetCgrConfig(tmp)
 }
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
@@ -2634,9 +2629,10 @@ func TestFieldAsInterface(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
@@ -2649,7 +2645,7 @@ func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2664,9 +2660,10 @@ func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2678,7 +2675,7 @@ func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2693,9 +2690,10 @@ func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2707,7 +2705,7 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthly", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthly", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2722,9 +2720,10 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2736,7 +2735,7 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*monthlyEstimated", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2751,9 +2750,10 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2765,7 +2765,7 @@ func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*yearly", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*yearly", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2780,9 +2780,10 @@ func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2794,7 +2795,7 @@ func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout(utils.MetaUnlimited, utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout(utils.MetaUnlimited, utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2809,9 +2810,10 @@ func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2823,7 +2825,7 @@ func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2838,9 +2840,10 @@ func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2852,7 +2855,7 @@ func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
 
-	expected, err := utils.ParseTimeDetectLayout("*month_endTest", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	expected, err := utils.ParseTimeDetectLayout("*month_endTest", utils.FirstNonEmpty(fctTemp.Timezone, cfg.GeneralCfg().DefaultTimezone))
 	if err != nil {
 		t.Errorf("Expected %v but received %v", nil, err)
 	}
@@ -2867,9 +2870,10 @@ func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2884,12 +2888,13 @@ func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	prsr, err := utils.NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, prsr, "", "", config.CgrConfig(), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, prsr, "", "", cfg, cacheS, nil, nil)
 	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
 		Value:    prsr,
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
@@ -2904,6 +2909,7 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 }
 
 func TestGigawordsCalculateTotalOctets(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	var gigawordMultiplier int64 = 4294967296
 	configTemplate := `
 {
@@ -3072,7 +3078,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 			err:       utils.ErrNotFound,
 		},
 	}
-	cacheS := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fullConf := fmt.Sprintf(configTemplate, tc.fieldConfig)
@@ -3080,7 +3086,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Config parsing failed: %v", err)
 			}
-			agReq := NewAgentRequest(tc.inputDP, nil, nil, nil, nil, nil, "cgrates.org", "", config.CgrConfig(), cacheS, nil, nil)
+			agReq := NewAgentRequest(tc.inputDP, nil, nil, nil, nil, nil, "cgrates.org", "", cfg, cacheS, nil, nil)
 			fieldDef := cgrconf.DiameterAgentCfg().RequestProcessors[0].RequestFields[0]
 			out, err := agReq.ParseField(fieldDef)
 			if tc.expectErr {
