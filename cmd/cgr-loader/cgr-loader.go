@@ -38,7 +38,7 @@ var (
 	dataDB engine.DataDB
 
 	cgrLoaderFlags = flag.NewFlagSet(utils.CgrLoader, flag.ContinueOnError)
-	dfltCfg        = config.CgrConfig()
+	dfltCfg        = config.NewDefaultCGRConfig()
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 	printConfig = cgrLoaderFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
@@ -118,7 +118,7 @@ var (
 )
 
 func loadConfig() (ldrCfg *config.CGRConfig) {
-	ldrCfg = config.CgrConfig()
+	ldrCfg = config.NewDefaultCGRConfig()
 	if *cfgPath != utils.EmptyString {
 		var err error
 		if ldrCfg, err = config.NewCGRConfigFromPath(context.Background(), *cfgPath); err != nil {
