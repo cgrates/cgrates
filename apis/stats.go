@@ -190,7 +190,6 @@ func NewStatSv1(sS *stats.StatS) *StatSv1 {
 
 // StatSv1 represents the RPC object to register for stats v1 APIs.
 type StatSv1 struct {
-	ping
 	sS *stats.StatS
 }
 

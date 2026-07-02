@@ -25,9 +25,9 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -82,14 +82,16 @@ func (anz *AnalyzerService) start(shutdown *utils.SyncedChan, registry *servmana
 		return
 	}
 	anz.mu.Lock()
+	defer anz.mu.Unlock()
 	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
 
-	srv, _ := engine.NewService(anz.anz)
-	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewAnalyzerSv1(anz.anz), utils.AnalyzerSv1)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error registering RPC service: %s", utils.AnalyzerS, err))
+		shutdown.CloseOnce()
+		return
 	}
-	anz.mu.Unlock()
+	cl.RpcRegister(srv)
 }
 
 // Reload handles the change of config

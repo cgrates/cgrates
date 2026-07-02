@@ -16,29 +16,31 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package apis
+package services
 
 import (
-	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func NewServiceManagerV1(sm *servmanager.ServiceManager) *ServiceManagerV1 {
-	return &ServiceManagerV1{sm: sm}
-}
-
-type ServiceManagerV1 struct {
-	sm *servmanager.ServiceManager
-}
-
-func (servManager *ServiceManagerV1) StartService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
-	return servManager.sm.V1StartService(ctx, args, reply)
-}
-
-func (servManager *ServiceManagerV1) StopService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
-	return servManager.sm.V1StopService(ctx, args, reply)
-}
-
-func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *servmanager.ArgsServiceID, reply *map[string]string) error {
-	return servManager.sm.V1ServiceStatus(ctx, args, reply)
+func RegisterServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
+	registry *servmanager.Registry, shutdown *utils.SyncedChan) {
+	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		}, cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	srv, err := newRPCService(apis.NewServiceManagerV1(srvMngr), utils.ServiceManagerV1)
+	if err != nil {
+		return
+	}
+	cl.RpcRegister(srv)
+	cms.AddInternalConn(utils.ServiceManager, srv)
 }

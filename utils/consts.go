@@ -1542,6 +1542,9 @@ const (
 	ConfigSv1GetConfigAsJSON   = "ConfigSv1.GetConfigAsJSON"
 	ConfigSv1SetConfigFromJSON = "ConfigSv1.SetConfigFromJSON"
 	ConfigSv1StoreCfgInDB      = "ConfigSv1.StoreCfgInDB"
+	ConfigSv1DumpConfigDB      = "ConfigSv1.DumpConfigDB"
+	ConfigSv1RewriteConfigDB   = "ConfigSv1.RewriteConfigDB"
+	ConfigSv1BackupConfigDB    = "ConfigSv1.BackupConfigDB"
 	ConfigSv1Ping              = "ConfigSv1.Ping"
 )
 
@@ -1579,6 +1582,7 @@ const (
 	CoreSv1StopCPUProfiling     = "CoreSv1.StopCPUProfiling"
 	CoreSv1StartMemoryProfiling = "CoreSv1.StartMemoryProfiling"
 	CoreSv1StopMemoryProfiling  = "CoreSv1.StopMemoryProfiling"
+	CoreSv1DescribeMethods      = "CoreSv1.DescribeMethods"
 )
 
 // RouteS APIs
@@ -1812,6 +1816,7 @@ const (
 const (
 	CacheSv1                  = "CacheSv1"
 	CacheSv1GetStats          = "CacheSv1.GetStats"
+	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"
 	CacheSv1GetItem           = "CacheSv1.GetItem"
@@ -2974,15 +2979,10 @@ const (
 	DataDBUserCgr   = "dataDBUser"
 	DataDBPasswdCgr = "dataDBPasswd"
 	//Cgr console
-	CgrConsole     = "cgr-console"
-	HomeCgr        = "HOME"
-	HistoryCgr     = "/.cgr_history"
 	RpcEncodingCgr = "rpcEncoding"
 	CertPathCgr    = "crtPath"
 	KeyPathCgr     = "keyPath"
 	CAPathCgr      = "caPath"
-	HelpCgr        = "help"
-	SepCgr         = " "
 	//Cgr engine
 	CgrEngine            = "cgr-engine"
 	PrintCfgCgr          = "printConfig"

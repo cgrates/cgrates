@@ -21,9 +21,9 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -70,11 +70,11 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()
 	chrS.chrS = chargers.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
-	srv, _ := engine.NewService(chrS.chrS)
-	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewChargerSv1(chrS.chrS), utils.ChargerSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ChargerS, srv)
 	return nil
 }

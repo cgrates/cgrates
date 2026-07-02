@@ -22,9 +22,9 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,7 +68,7 @@ func (cs *CDRService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 
 	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), cacheS.CacheS(), fs, cms.ConnManager())
 	runtime.Gosched()
-	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewCdrSv1(cs.cdrS), utils.CDRsV1)
 	if err != nil {
 		return err
 	}

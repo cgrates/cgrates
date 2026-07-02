@@ -29,7 +29,6 @@ func NewAnalyzerSv1(aS *analyzers.AnalyzerS) *AnalyzerSv1 {
 
 type AnalyzerSv1 struct {
 	aS *analyzers.AnalyzerS
-	ping
 }
 
 func (aSv1 *AnalyzerSv1) StringQuery(ctx *context.Context, search *analyzers.QueryArgs, reply *[]map[string]any) error {

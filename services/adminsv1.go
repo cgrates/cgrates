@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -67,16 +66,16 @@ func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanage
 
 	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs)
 
-	srv, _ := engine.NewService(s.api)
-	// srv, _ := birpc.NewService(s.api, "", false)
-
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(s.api, utils.AdminSv1)
+	if err != nil {
+		return err
 	}
-	rpl, _ := engine.NewService(apis.NewReplicatorSv1(dm, s.api))
-	for _, svc := range rpl {
-		cl.RpcRegister(svc)
+	cl.RpcRegister(srv)
+	rpl, err := newRPCService(apis.NewReplicatorSv1(dm, s.api), utils.ReplicatorSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(rpl)
 	cms.AddInternalConn(utils.AdminS, srv)
 	return
 }

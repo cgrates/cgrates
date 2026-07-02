@@ -191,6 +191,11 @@ type AccountSv1 struct {
 	accs *accounts.AccountS
 }
 
+// GetAccount returns the account matching tenant and ID.
+func (aS *AccountSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+	return aS.accs.V1GetAccount(ctx, arg, reply)
+}
+
 // AccountsForEvent returns the matching Accounts for Event
 func (aS *AccountSv1) AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) error {
 	return aS.accs.V1AccountsForEvent(ctx, args, aps)

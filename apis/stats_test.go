@@ -596,16 +596,6 @@ func TestStatsNewStatsv1(t *testing.T) {
 	}
 }
 
-func TestStatsSv1Ping(t *testing.T) {
-	statSv1 := new(StatSv1)
-	var reply string
-	if err := statSv1.Ping(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Unexpected reply error")
-	}
-}
-
 func TestStatsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone

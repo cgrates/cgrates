@@ -20,8 +20,8 @@ package services
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
@@ -67,15 +67,13 @@ func (s *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	ss := stats.NewStatService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := engine.NewService(ss)
+	srv, err := newRPCService(apis.NewStatSv1(ss), utils.StatSv1)
 	if err != nil {
 		return err
 	}
 	ss.StartLoop(context.TODO())
 	s.sts = ss
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.StatS, srv)
 	return nil
 }

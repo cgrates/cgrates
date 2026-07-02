@@ -197,6 +197,11 @@ func (rpS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	return rpS.rpS.V1GetRoutes(ctx, args, reply)
 }
 
+// V1GetRouteProfilesForEvent returns route profiles matching an event.
+func (rpS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.RouteProfile) error {
+	return rpS.rpS.V1GetRouteProfilesForEvent(ctx, args, reply)
+}
+
 // V1GetRoutesList returns the list of valid routes.
 func (rpS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	return rpS.rpS.V1GetRoutesList(ctx, args, reply)

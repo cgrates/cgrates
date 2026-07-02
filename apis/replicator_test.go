@@ -41,7 +41,6 @@ func TestNewReplicatorSv1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	rcv := NewReplicatorSv1(dm, v1)
@@ -65,7 +64,6 @@ func TestReplicatorGetAccount(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -121,7 +119,6 @@ func TestReplicatorGetAccountError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -174,7 +171,6 @@ func TestReplicatorGetStatQueue(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -213,7 +209,6 @@ func TestReplicatorGetStatQueueErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -249,7 +244,6 @@ func TestReplicatorGetFilter(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -305,7 +299,6 @@ func TestReplicatorGetFilterError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -358,7 +351,6 @@ func TestReplicatorGetThreshold(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -394,7 +386,6 @@ func TestReplicatorGetThresholdError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -427,7 +418,6 @@ func TestReplicatorGetThresholdProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -472,7 +462,6 @@ func TestReplicatorGetThresholdProfileError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -514,7 +503,6 @@ func TestReplicatorGetResource(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -549,7 +537,6 @@ func TestReplicatorGetResourceError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -581,7 +568,6 @@ func TestReplicatorGetResourceProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -623,7 +609,6 @@ func TestReplicatorGetResourceProfileError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -662,7 +647,6 @@ func TestReplicatorGetRouteProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -713,7 +697,6 @@ func TestReplicatorGetRouteProfileError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -761,7 +744,6 @@ func TestReplicatorGetAttributeProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -813,7 +795,6 @@ func TestReplicatorGetAttributeProfileError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -862,7 +843,6 @@ func TestReplicatorGetChargerProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -903,7 +883,6 @@ func TestReplicatorGetChargerProfileError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -941,7 +920,6 @@ func TestReplicatorGetItemLoadIDs(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -974,7 +952,6 @@ func TestReplicatorGetItemLoadIDsError(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 
@@ -1007,7 +984,6 @@ func TestReplicatorSetThresholdProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1071,7 +1047,6 @@ func TestReplicatorSetThresholdProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1115,7 +1090,6 @@ func TestReplicatorSetAccount(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1203,7 +1177,6 @@ func TestReplicatorSetThreshold(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1249,7 +1222,6 @@ func TestReplicatorSetThresholdErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1284,7 +1256,6 @@ func TestReplicatorSetStatQueueProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1348,7 +1319,6 @@ func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1405,7 +1375,6 @@ func TestReplicatorSetStatQueue(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1449,7 +1418,6 @@ func TestReplicatorSetFilter(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1510,7 +1478,6 @@ func TestReplicatorSetFilterErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1565,7 +1532,6 @@ func TestReplicatorSetResourceProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1613,7 +1579,6 @@ func TestReplicatorSetResourceProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1655,7 +1620,6 @@ func TestReplicatorSetResource(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1696,7 +1660,6 @@ func TestReplicatorSetResourceErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1730,7 +1693,6 @@ func TestReplicatorSetRouteProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1787,7 +1749,6 @@ func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1838,7 +1799,6 @@ func TestReplicatorSetAttributeProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1896,7 +1856,6 @@ func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1948,7 +1907,6 @@ func TestReplicatorChargerProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -1995,7 +1953,6 @@ func TestReplicatorChargerProfileErr1(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2036,7 +1993,6 @@ func TestReplicatorRemoveThreshold(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2078,7 +2034,6 @@ func TestReplicatorRemoveThresholdErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2117,7 +2072,6 @@ func TestReplicatorRemoveAccount(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2180,7 +2134,6 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2225,7 +2178,6 @@ func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2267,7 +2219,6 @@ func TestReplicatorRemoveFilter(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2329,7 +2280,6 @@ func TestReplicatorRemoveFilterErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2388,7 +2338,6 @@ func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2439,7 +2388,6 @@ func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2487,7 +2435,6 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2552,7 +2499,6 @@ func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2614,7 +2560,6 @@ func TestReplicatorRemoveResource(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2656,7 +2601,6 @@ func TestReplicatorRemoveResourceErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2696,7 +2640,6 @@ func TestReplicatorRemoveResourceProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2745,7 +2688,6 @@ func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2792,7 +2734,6 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2850,7 +2791,6 @@ func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2906,7 +2846,6 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -2965,7 +2904,6 @@ func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3022,7 +2960,6 @@ func TestReplicatorRemoveChargerProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3070,7 +3007,6 @@ func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3116,7 +3052,6 @@ func TestReplicatorGetRateProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3188,7 +3123,6 @@ func TestReplicatorGetRateProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3257,7 +3191,6 @@ func TestReplicatorGetActionProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3307,7 +3240,6 @@ func TestReplicatorGetActionProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3354,7 +3286,6 @@ func TestReplicatorSetRateProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3430,7 +3361,6 @@ func TestReplicatorSetRateProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3501,7 +3431,6 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3555,7 +3484,6 @@ func TestReplicatorSetActionProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3603,7 +3531,6 @@ func TestReplicatorRemoveRateProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3680,7 +3607,6 @@ func TestReplicatorRemoveRateProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3755,7 +3681,6 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3810,7 +3735,6 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: engine.NewConnManager(cfg),
-		ping:    struct{}{},
 	}
 	v1.connMgr.SetCache(cacheS)
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
@@ -3854,7 +3778,6 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 
 func TestReplicatorMethodConstants(t *testing.T) {
 	consts := map[string]string{
-		"Ping":                   utils.ReplicatorSv1Ping,
 		"GetAccount":             utils.ReplicatorSv1GetAccount,
 		"GetStatQueue":           utils.ReplicatorSv1GetStatQueue,
 		"GetFilter":              utils.ReplicatorSv1GetFilter,
@@ -3930,8 +3853,8 @@ func TestReplicatorMethodConstants(t *testing.T) {
 		}
 	}
 
-	for i := range rType.NumMethod() {
-		name := rType.Method(i).Name
+	for method := range rType.Methods() {
+		name := method.Name
 		if _, ok := consts[name]; !ok {
 			t.Errorf("method %s exists on *ReplicatorSv1 but has no constant in test map", name)
 		}

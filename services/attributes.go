@@ -21,9 +21,9 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -69,11 +69,11 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()
 	attrService := attributes.NewAttributeService(dm, fs, cms.ConnManager(), attrS.cfg)
-	srv, _ := engine.NewService(attrService)
-	// srv, _ := birpc.NewService(attrS.rpc, "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewAttributeSv1(attrService), utils.AttributeSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.AttributeS, srv)
 	return
 }

@@ -94,6 +94,10 @@ func (c *CommonListenerS) RpcUnregisterName(name string) {
 	c.rpcServer.UnregisterName(name)
 }
 
+func (c *CommonListenerS) RangeServices(f func(name string, svc *birpc.Service) bool) {
+	c.rpcServer.Range(f)
+}
+
 func (c *CommonListenerS) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	c.httpMux.HandleFunc(pattern, handler)
 	c.httpsMux.HandleFunc(pattern, handler)

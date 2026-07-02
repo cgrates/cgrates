@@ -22,9 +22,9 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/efs"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -64,7 +64,10 @@ func (s *ExportFailoverService) Start(shutdown *utils.SyncedChan, registry *serv
 
 	s.efS = efs.NewEfs(s.cfg, cms.ConnManager())
 	s.stopChan = make(chan struct{})
-	s.srv, _ = engine.NewServiceWithPing(s.efS, utils.EfSv1, utils.V1Prfx)
+	s.srv, err = newRPCService(apis.NewEfSv1(s.efS), utils.EfSv1)
+	if err != nil {
+		return err
+	}
 	cl.RpcRegister(s.srv)
 	cms.AddInternalConn(utils.EFs, s.srv)
 	efs.InitFailedPostCache(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)

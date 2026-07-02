@@ -16,22 +16,36 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package apis
+package services
 
 import (
+	"reflect"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/tpes"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func NewTPeSv1(tpes *tpes.TPeS) *TPeSv1 {
-	return &TPeSv1{tpes: tpes}
+func newRPCService(rcvr any, name string) (*birpc.Service, error) {
+	srv, err := birpc.NewService(rcvr, name, true)
+	if err != nil {
+		return nil, err
+	}
+	srv.Methods[utils.Ping] = pingM
+	return srv, nil
 }
 
-type TPeSv1 struct {
-	tpes *tpes.TPeS
+func ping(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }
 
-// ExportTariffPlan is the API executed to export tariff plan items
-func (tpE *TPeSv1) ExportTariffPlan(ctx *context.Context, args *tpes.ArgsExportTP, reply *[]byte) error {
-	return tpE.tpes.V1ExportTariffPlan(ctx, args, reply)
+var pingM = &birpc.MethodType{
+	Method: reflect.Method{
+		Name: utils.Ping,
+		Type: reflect.TypeOf(ping),
+		Func: reflect.ValueOf(ping),
+	},
+	ArgType:   reflect.TypeFor[*utils.CGREvent](),
+	ReplyType: reflect.TypeFor[*string](),
 }

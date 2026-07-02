@@ -33,9 +33,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -278,7 +276,7 @@ func runCGREngine(fs []string) (err error) {
 	}()
 
 	srvManager.StartServices(shutdown)
-	initServiceManagerV1(cfg, srvManager, registry, shutdown)
+	services.RegisterServiceManagerV1(cfg, srvManager, registry, shutdown)
 
 	// Serve rpc connections
 	startRPC(cfg, registry, shutdown)
@@ -382,24 +380,6 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 			}()
 		}
 	}
-}
-
-// initServiceManagerV1 registers the ServiceManager methods.
-func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
-	registry *servmanager.Registry, shutdown *utils.SyncedChan) {
-	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
-		[]string{
-			utils.CommonListenerS,
-			utils.ConnManager,
-		}, cfg.GeneralCfg().ConnectTimeout)
-	if err != nil {
-		return
-	}
-	cl := srvDeps[utils.CommonListenerS].(*services.CommonListenerService).CLS()
-	cms := srvDeps[utils.ConnManager].(*services.ConnManagerService)
-	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
-	cl.RpcRegister(srv)
-	cms.AddInternalConn(utils.ServiceManager, srv)
 }
 
 // startRPC initializes and starts the RPC server.

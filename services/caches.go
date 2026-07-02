@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
@@ -74,11 +75,11 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 
 	cS.cacheCh <- cache
 
-	srv, _ := engine.NewService(cache)
-	// srv, _ := birpc.NewService(apis.NewCacheSv1(cache), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewCacheSv1(cache), utils.CacheSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.CacheS, srv)
 	if len(cS.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(cache))

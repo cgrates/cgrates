@@ -41,7 +41,7 @@ func TestNewCoreService(t *testing.T) {
 		caps:      caps,
 		shutdown:  shutdown,
 	}
-	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, nil, shutdown)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, nil, shutdown, nil)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}

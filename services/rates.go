@@ -21,8 +21,8 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -72,11 +72,10 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.R
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
 	rs.mu.Unlock()
 
-	srv, err := engine.NewServiceWithPing(rs.rateS, utils.RateSv1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewRateSv1(rs.rateS), utils.RateSv1)
 	if err != nil {
 		return err
 	}
-	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
 	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RateS, srv)
 	return

@@ -44,7 +44,6 @@ type AdminSv1 struct {
 	dm      *engine.DataManager
 	connMgr *engine.ConnManager
 	fltrS   *engine.FilterS
-	ping
 }
 
 // ReplayFailedReplicationsArgs contains args for replaying failed replications.

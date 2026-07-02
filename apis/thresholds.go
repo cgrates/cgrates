@@ -190,7 +190,6 @@ func NewThresholdSv1(tS *thresholds.ThresholdS) *ThresholdSv1 {
 
 // ThresholdSv1 represents the RPC object to register for thresholds v1 APIs.
 type ThresholdSv1 struct {
-	ping
 	tS *thresholds.ThresholdS
 }
 

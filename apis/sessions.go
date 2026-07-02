@@ -32,7 +32,6 @@ func NewSessionSv1(sS *sessions.SessionS) *SessionSv1 {
 
 // SessionSv1 exports RPC from SessionSv1
 type SessionSv1 struct {
-	ping
 	sS *sessions.SessionS
 }
 

@@ -20,18 +20,20 @@ package apis
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/tpes"
+	"github.com/cgrates/cgrates/ers"
 )
 
-func NewTPeSv1(tpes *tpes.TPeS) *TPeSv1 {
-	return &TPeSv1{tpes: tpes}
+// NewErSv1 initializes the ErSv1 object.
+func NewErSv1(erS *ers.ERService) *ErSv1 {
+	return &ErSv1{erS: erS}
 }
 
-type TPeSv1 struct {
-	tpes *tpes.TPeS
+// ErSv1 represents the RPC object to register for event reader v1 APIs.
+type ErSv1 struct {
+	erS *ers.ERService
 }
 
-// ExportTariffPlan is the API executed to export tariff plan items
-func (tpE *TPeSv1) ExportTariffPlan(ctx *context.Context, args *tpes.ArgsExportTP, reply *[]byte) error {
-	return tpE.tpes.V1ExportTariffPlan(ctx, args, reply)
+// RunReader processes files for the configured reader.
+func (s *ErSv1) RunReader(ctx *context.Context, args ers.V1RunReaderParams, reply *string) error {
+	return s.erS.V1RunReader(ctx, args, reply)
 }
