@@ -121,7 +121,6 @@ func main() {
 				return
 			}
 		}
-		config.SetCgrConfig(mgrCfg)
 	}
 
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
@@ -224,7 +223,6 @@ func main() {
 
 	m := migrator.NewMigrator(dmFrom, dmTo, *dryRun, sameDataDB)
 	defer m.Close()
-	config.SetCgrConfig(mgrCfg)
 	if exec != nil && *exec != utils.EmptyString { // Run migrator
 		mig := strings.Split(*exec, utils.FieldsSep)
 		err, migrstats := m.Migrate(mig)

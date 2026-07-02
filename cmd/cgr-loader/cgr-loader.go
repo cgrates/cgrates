@@ -139,7 +139,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 				return
 			}
 		}
-		config.SetCgrConfig(ldrCfg)
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Type {
