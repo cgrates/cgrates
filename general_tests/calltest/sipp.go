@@ -108,6 +108,20 @@ func (u SippUAS) Start(t testing.TB) {
 	})
 }
 
+// SippRegister sends one REGISTER per aor, advertising contactPort as the
+// contact so calls route to a UAS there. The scenario binds contactPort (-p),
+// so run it before the UAS claims that port.
+func SippRegister(t testing.TB, addr, scenario string, contactPort int, aors ...string) {
+	t.Helper()
+	path := needBinary(t, "sipp")
+	for _, aor := range aors {
+		args := []string{"-sf", scenario, "-s", aor, "-p", strconv.Itoa(contactPort), "-m", "1", addr}
+		if out, err := exec.Command(path, args...).CombinedOutput(); err != nil {
+			t.Fatalf("sipp register %s: %v\n%s", aor, err, out)
+		}
+	}
+}
+
 func scenarioArgs(scenario, preset string) []string {
 	if scenario != "" {
 		return []string{"-sf", scenario}

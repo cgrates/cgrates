@@ -32,6 +32,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// TestKamailioLCR routes two calls through kamailio, letting cgrates authorize
+// and pick the vendor route, and checks each CDR carries the matching rate
+// profile and cost.
 func TestKamailioLCR(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
