@@ -66,7 +66,7 @@ func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, params utils.Tenant
 }
 
 // DescribeMethods returns descriptors for registered RPC methods.
-func (cS *CoreSv1) DescribeMethods(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]utils.MethodDescriptor) error {
+func (cS *CoreSv1) DescribeMethods(ctx *context.Context, args *utils.DescribeMethodsArgs, reply *[]utils.MethodDescriptor) error {
 	return cS.cS.V1DescribeMethods(ctx, args, reply)
 }
 

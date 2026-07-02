@@ -40,6 +40,12 @@ type FieldDescriptor struct {
 	Fields []FieldDescriptor
 }
 
+// DescribeMethodsArgs filters a CoreSv1.DescribeMethods reply.
+type DescribeMethodsArgs struct {
+	TenantWithAPIOpts
+	SkipServices []string // services to leave out; empty returns all
+}
+
 var (
 	durationType = reflect.TypeFor[time.Duration]()
 	timeType     = reflect.TypeFor[time.Time]()

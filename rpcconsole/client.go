@@ -37,7 +37,9 @@ type Client struct {
 func NewClient(cl *rpcclient.RPCClient) (*Client, error) {
 	var mds []utils.MethodDescriptor
 	if err := cl.Call(context.Background(), utils.CoreSv1DescribeMethods,
-		&utils.TenantWithAPIOpts{}, &mds); err != nil {
+		&utils.DescribeMethodsArgs{
+			SkipServices: []string{"_goRPC_", utils.ReplicatorSv1},
+		}, &mds); err != nil {
 		return nil, err
 	}
 	c := &Client{

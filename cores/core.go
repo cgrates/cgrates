@@ -383,12 +383,17 @@ func (cS *CoreS) V1Panic(_ *context.Context, args *utils.PanicMessageArgs, _ *st
 	panic(args.Message)
 }
 
-// V1DescribeMethods reflects every registered method's argument and reply
-// types into field descriptors.
-func (cS *CoreS) V1DescribeMethods(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *[]utils.MethodDescriptor) error {
+// V1DescribeMethods returns every registered method's argument and reply types
+// as field descriptors. Services in args.SkipServices are dropped; empty args
+// returns the full set, _goRPC_ included.
+func (cS *CoreS) V1DescribeMethods(_ *context.Context, args *utils.DescribeMethodsArgs, reply *[]utils.MethodDescriptor) error {
+	var skip []string
+	if args != nil {
+		skip = args.SkipServices
+	}
 	var mds []utils.MethodDescriptor
 	cS.cl.RangeServices(func(name string, svc *birpc.Service) bool {
-		if name == "_goRPC_" { // birpc's internal service, not a cgrates API
+		if slices.Contains(skip, name) {
 			return true
 		}
 		for method, mt := range svc.Methods {
