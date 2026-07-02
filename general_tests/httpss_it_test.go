@@ -52,10 +52,11 @@ var (
 		// 		testHAitResetDB,
 		testHttpSsStartEngine,
 		testHttpSsRPC,
-		testHttpSsLoadTPFromFolder,
+		//testHttpSsLoadTPFromFolder,
+		testHttpSsProvisionData,
 		testHttpSsAuth,
-		// testHttpSsSession,
-		//testHttpSsStopEngine,
+		testHttpSsSessionStart,
+		testHttpSsStopEngine,
 		//testHttpSsTerminate,
 	}
 )
@@ -78,7 +79,6 @@ func TestHttpSessionsIt(t *testing.T) {
 	for _, stest := range httpSsTests {
 		t.Run(httpSsCfgDIR, stest)
 	}
-
 }
 
 // // Init config first
@@ -127,14 +127,42 @@ func testHttpSsLoadTPFromFolder(t *testing.T) {
 	//time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+// testHttpSsProvisionAccount will take care about data provisioning for the tests
+func testHttpSsProvisionData(t *testing.T) {
+	var reply string
+	if err := httpSsRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:    "cgrates.org",
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*utils.Balance{
+					"DATA1": {
+						ID:      "DATA1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0)},
+						},
+						Units: utils.NewDecimalFromFloat64(1000 * 1000), // 1GB (1 unit = 1kb)
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("SetAccount: %v", err)
+	}
+}
+
 func testHttpSsAuth(t *testing.T) {
-	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=Authorization&imsi=2343000000000123&destination=491239440004&sessionID=uuidTestHttpSs",
+	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=Authorization&imsi=2343000000000123&sessionID=uuidTestHttpSs",
 		httpSsCfg.HTTPAgentCfg()[0].URL)
 	rply, err := httpSsClnt.Get(reqUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
-	eRply := "MaxDuration=60"
+	eRply := "MaxUsage=1000000"
 	if rply, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if strings.HasPrefix(string(rply), "Error") {
@@ -145,14 +173,14 @@ func testHttpSsAuth(t *testing.T) {
 	rply.Body.Close()
 }
 
-func testHttpSsSession(t *testing.T) {
-	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=Session&imsi=2343000000000123&destination=491239440004&sessionID=uuidTestHttpSs",
+func testHttpSsSessionStart(t *testing.T) {
+	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=SessionStart&imsi=2343000000000123&sessionID=uuidTestHttpSs",
 		httpSsCfg.HTTPAgentCfg()[0].URL)
 	rply, err := httpSsClnt.Get(reqUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
-	eRply := "MaxDuration=60"
+	eRply := "MaxUsage=50000"
 	if rply, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if strings.HasPrefix(string(rply), "Error") {
@@ -161,7 +189,6 @@ func testHttpSsSession(t *testing.T) {
 		t.Errorf("expecting: %q, received: %q", eRply, rply)
 	}
 	rply.Body.Close()
-	// 	time.Sleep(time.Millisecond)
 }
 
 func testHttpSsTerminate(t *testing.T) {

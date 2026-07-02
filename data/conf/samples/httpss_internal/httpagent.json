@@ -15,49 +15,83 @@
 				"id": "Authorization",
 				"filters": ["*string:~*req.requestType:Authorization"],
 				"tenant": "cgrates.org",
-				"flags": ["*authorize", "*accounts"],
+				"flags": ["*event"],
 				"requestFields":[
+					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptUsage", "path": "*opts.*usage", "type": "*constant",
+						"value": "1000000"}, // auth 1GB
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
-					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+					{"tag": "Account", "path": "*cgreq.IMSI", "type": "*variable",
 						"value": "~*req.imsi", "mandatory": true},
-					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
-						"value": "~*req.destination", "mandatory": true},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now"}
 				],
 				"replyFields":[
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
-					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true}
+					{"tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
+						"value": "~*cgrep.MaxUsage.*primary{*durationNanoseconds}", "mandatory": true}
 				]
 			},
 			{
-				"id": "Session",
-				"filters": ["*string:~*req.requestType:Session"],
+				"id": "SessionStart",
+				"filters": ["*string:~*req.requestType:SessionStart"],
 				"tenant": "cgrates.org",
-				"flags": ["*session", "*accounts"],
+				"flags": ["*event"],
 				"requestFields":[
-					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					{"tag": "OptSession", "path": "*opts.*session", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
+						"value": "50000"}, // auth 50MB
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
-					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+					{"tag": "Account", "path": "*cgreq.IMSI", "type": "*variable",
 						"value": "~*req.imsi", "mandatory": true},
-					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
-						"value": "~*req.destination", "mandatory": true},
 					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
 						"value": "*now"}
 				],
 				"replyFields":[
 					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
 					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
-					{"tag": "MaxDuration", "path": "*rep.MaxDuration", "type": "*variable",
-						"value": "~*cgrep.MaxUsage{*durationSeconds}", "mandatory": true}
+					{"tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
+						"value": "~*cgrep.MaxUsage.*primary{*durationNanoseconds}", "mandatory": true}
 				]
 			},
 			{
-				"id": "Terminate",
-				"filters": ["*string:~*req.requestType:Terminate"],
+				"id": "SessionUpdate",
+				"filters": ["*string:~*req.requestType:SessionUpdate"],
+				"tenant": "cgrates.org",
+				"flags": ["*event", "*session", "*accounts"],
+				"requestFields":[
+					{"tag": "OptSession", "path": "*opts.*session", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
+						"value": "1000000"}, // auth 1GB
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
+						"value": "~*req.sessionID", "mandatory": true},
+					{"tag": "Account", "path": "*cgreq.IMSI", "type": "*variable",
+						"value": "~*req.imsi", "mandatory": true},
+					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*constant",
+						"value": "*now"}
+				],
+				"replyFields":[
+					{"tag": "Error", "filters": ["*notempty:~*cgrep.Error:"], "path": "*rep.Error",
+					"type": "*variable", "value": "~*cgrep.Error", "blocker": true},
+					{"tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
+						"value": "~*cgrep.MaxUsage.*primary{*durationNanoseconds}", "mandatory": true}
+				]
+			},
+			{
+				"id": "SessionStop",
+				"filters": ["*string:~*req.requestType:SessionStop"],
 				"tenant": "cgrates.org",
 				"flags": ["*terminate", "*accounts"],
 				"requestFields":[

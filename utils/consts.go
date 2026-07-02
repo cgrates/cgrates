@@ -908,6 +908,7 @@ const (
 	MetaChargedUsage        = "*chargedUsage"
 	MetaReservedUsage       = "*reservedUsage"
 	MetaTotalUsage          = "*totalUsage"
+	MetaPreviousUsage       = "*previousUsage"
 	MetaInterimUsage        = "*interimUsage"
 	MetaDestination         = "*destination"
 	MetaStartTime           = "*startTime"

@@ -196,10 +196,9 @@ type SRun struct {
 	CGREvent *utils.CGREvent       // Event received from ChargerS
 	Charges  []*utils.EventCharges // list of charges this session run has performed
 
-	AdjustmentUsage *decimal.Big // holds the extra usage debited on top  due to increment rounding
-	InterimUsage    *decimal.Big // last requested Usage
-	TotalUsage      *decimal.Big // sum of InterimUsage
-
+	RoundingUsage *decimal.Big // holds the extra usage debited on top  due to increment rounding
+	InterimUsage  *decimal.Big // last requested Usage
+	TotalUsage    *decimal.Big // sum of InterimUsage
 }
 
 // Clone returns the cloned version of SRun

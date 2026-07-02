@@ -947,7 +947,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 func (sS *SessionS) newSessionOutEvent(ctx *context.Context, sID string, cgrEv *utils.CGREvent,
 	clntConnID string) (s *Session, err error) {
 	s = &Session{
-		ID:             utils.IfaceAsString(cgrEv.APIOpts[utils.MetaOriginID]),
+		ID:             sID,
 		OriginCGREvent: cgrEv,
 		ClientConnID:   clntConnID,
 		sRuns:          map[string]*SRun{utils.MetaPrimary: NewSRun(cgrEv)}, // enforced to one SRun, will be modified from outside if chargers is also activated
@@ -974,6 +974,11 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		}
 	} else {
 		s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
+	}
+	if hasInterimUsage { // Fix Usage of all
+		for _, sRun := range s.sRuns {
+			sRun.CGREvent.APIOpts[utils.MetaUsage] = utils.IfaceAsString(cgrEv.APIOpts[utils.MetaInterimUsage])
+		}
 	}
 	// ToDo: Fix here the sTerminator
 	return

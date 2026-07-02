@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
-	"github.com/ericlagergren/decimal"
 )
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific subsystems
@@ -884,11 +883,19 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaRunID].(string): apiArgs,
 	}
 
+	// Set *previousUsage
+	if previousUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.PreviousUsage, utils.MetaPreviousUsage); errUsage != nil {
+		return errUsage
+	} else if previousUsage != nil {
+		cch[utils.MetaPreviousUsage] = previousUsage
+	}
+
 	// Set *interimUsage
 	if interimUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
-		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage); errUsage != nil {
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage, utils.MetaUsage); errUsage != nil {
 		return errUsage
-	} else if interimUsage != nil && interimUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
+	} else if interimUsage != nil {
 		cch[utils.MetaInterimUsage] = interimUsage
 	}
 
@@ -896,7 +903,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	if totalUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.TotalUsage, utils.MetaTotalUsage); errUsage != nil {
 		return errUsage
-	} else if totalUsage != nil && totalUsage.Cmp(decimal.New(0, 0)) == 1 { // >0
+	} else if totalUsage != nil {
 		cch[utils.MetaTotalUsage] = totalUsage
 	}
 
@@ -1248,12 +1255,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s for MaxAbstracts",
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
+			} else {
+				maxDur, _ := acntCost.Abstracts.Duration()
+				if apiRply.AccountSUsage == nil {
+					apiRply.AccountSUsage = make(map[string]time.Duration)
+				}
+				apiRply.AccountSUsage[runID] = maxDur
 			}
-			maxDur, _ := acntCost.Abstracts.Duration()
-			if apiRply.AccountSUsage == nil {
-				apiRply.AccountSUsage = make(map[string]time.Duration)
-			}
-			apiRply.AccountSUsage[runID] = maxDur
+
 		}
 		// AccountS Debit
 		if acntsDebitBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
