@@ -308,7 +308,7 @@ func TestLibRegistrarcRegister(t *testing.T) {
 		Response:         nil,
 	}
 	cache := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	result, err := register(req, cache)
+	result, err := register(config.CgrConfig(), req, cache)
 	expected := &json.RawMessage{}
 	if reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
@@ -377,7 +377,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	cache := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	if rplyID, err := register(req, cache); err != nil {
+	if rplyID, err := register(config.CgrConfig(), req, cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
@@ -423,7 +423,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
 	cache := engine.NewCacheS(cfg, nil, connMgr, nil)
 	connMgr.SetCache(cache)
-	_, err = register(req, cache)
+	_, err = register(config.CgrConfig(), req, cache)
 	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}
@@ -465,7 +465,7 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	cache := engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	if rplyID, err := register(req, cache); err != nil {
+	if rplyID, err := register(config.CgrConfig(), req, cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
@@ -524,7 +524,7 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
 	cache := engine.NewCacheS(cfg, nil, connMgr, nil)
 	connMgr.SetCache(cache)
-	_, err = register(req, cache)
+	_, err = register(config.CgrConfig(), req, cache)
 	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
 	}

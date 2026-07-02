@@ -81,7 +81,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	}
 	cms.AddInternalConn(utils.CacheS, srv)
 	if len(cS.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(cache))
+		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(cS.cfg, cache))
 	}
 	return nil
 }
