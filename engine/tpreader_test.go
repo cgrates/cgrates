@@ -635,11 +635,11 @@ func TestTpReaderLoadAll(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	cacheS := NewCacheS(cfg, nil, nil, nil)
-	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, cacheS, nil)
+	tpr, err := NewTpReader(dbCM, cfg, storeCSV, "", "", nil, nil, cacheS, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil, cacheS, nil)
+	tprCopy, err := NewTpReader(dbCM, cfg, storeCSV, "", "", nil, nil, cacheS, nil)
 	if err != nil {
 		t.Error(err)
 	}

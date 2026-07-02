@@ -181,7 +181,7 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, config.CgrConfig().DbCfg())
 	cacheS := NewCacheS(config.CgrConfig(), nil, nil, nil)
-	csvr, err := NewTpReader(dbCM, NewStringCSVStorage(utils.CSVSep,
+	csvr, err := NewTpReader(dbCM, config.CgrConfig(), NewStringCSVStorage(utils.CSVSep,
 		ResourcesCSVContent, IPCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, cacheS, nil)

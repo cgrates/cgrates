@@ -339,7 +339,7 @@ func main() {
 	cacheS := engine.NewCacheS(ldrCfg, nil, cM, nil)
 	cM.SetCache(cacheS)
 	var tpReader *engine.TpReader
-	if tpReader, err = engine.NewTpReader(dbcManager, loader,
+	if tpReader, err = engine.NewTpReader(dbcManager, ldrCfg, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
 		ldrCfg.LoaderCgrCfg().ActionSConns, cacheS, cM); err != nil {

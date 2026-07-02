@@ -135,7 +135,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
-	loader, err = NewTpReader(dbCM, csvStorage, "", "",
+	loader, err = NewTpReader(dbCM, lCfg, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderCache, loaderConnMgr)
 	if err != nil {
 		t.Error(err)
@@ -182,7 +182,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 		t.Fatal(err)
 	}
 	dbCM := NewDBConnManager(dataDbCsv.DB(), lCfg.DbCfg())
-	loader, err = NewTpReader(dbCM, csvStorage, "", "",
+	loader, err = NewTpReader(dbCM, lCfg, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, loaderCache, loaderConnMgr)
 	if err != nil {
 		t.Error(err)

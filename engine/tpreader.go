@@ -53,12 +53,12 @@ type TpReader struct {
 	//schedulerConns     []string
 }
 
-func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
+func NewTpReader(db *DBConnManager, cfg *config.CGRConfig, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string, cache *CacheS, connMgr *ConnManager) (*TpReader, error) {
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig(), connMgr), // ToDo: add CGRConfig as parameter to the NewTpReader
+		dm:         NewDataManager(db, cfg, connMgr),
 		cache:      cache,
 		lr:         lr,
 		connMgr:    connMgr,
