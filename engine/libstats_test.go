@@ -102,7 +102,7 @@ func TestStatQueueNewStoredStatQueue(t *testing.T) {
 	experr := "marshal mock error"
 	var ms utils.Marshaler = mockMarshal(experr)
 
-	rcv, err := NewStoredStatQueue(sq, ms)
+	rcv, err := NewStoredStatQueue(sq, ms, 0)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nreceived: %q, \nexpected: %q", experr, err)

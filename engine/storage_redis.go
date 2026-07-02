@@ -559,15 +559,13 @@ func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
-		if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
-			return
-		}
+		return utils.ErrMandatoryIeMissing
 	}
-	var result []byte
-	if result, err = rs.ms.Marshal(ssq); err != nil {
-		return
+	result, err := rs.ms.Marshal(ssq)
+	if err != nil {
+		return err
 	}
 	return rs.Cmd(nil, redisSET, utils.StatQueuePrefix+ssq.SqID(), string(result))
 }

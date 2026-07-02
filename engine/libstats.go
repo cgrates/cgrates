@@ -23,16 +23,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
-func NewStoredStatQueue(sq *utils.StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue, err error) {
+func NewStoredStatQueue(sq *utils.StatQueue, ms utils.Marshaler, limit int) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
 		Tenant:     sq.Tenant,
 		ID:         sq.ID,
-		Compressed: sq.Compress(uint64(config.CgrConfig().StatSCfg().StoreUncompressedLimit)),
+		Compressed: sq.Compress(uint64(limit)),
 		SQItems:    make([]utils.SQItem, len(sq.SQItems)),
 		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
 	}
@@ -44,7 +43,7 @@ func NewStoredStatQueue(sq *utils.StatQueue, ms utils.Marshaler) (sSQ *StoredSta
 		}
 		sSQ.SQMetrics[metricID] = marshaled
 	}
-	return
+	return sSQ, nil
 }
 
 // StoredStatQueue differs from StatQueue due to serialization of SQMetrics

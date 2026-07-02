@@ -266,7 +266,7 @@ func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) 
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
 	return utils.ErrNotImplemented
 }
 

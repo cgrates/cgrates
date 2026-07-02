@@ -912,7 +912,8 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 				var ssq *StoredStatQueue
 				if db.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
-					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+					ssq, err = NewStoredStatQueue(sq, dm.ms, dm.cfg.StatSCfg().StoreUncompressedLimit)
+					if err != nil {
 						return nil, err
 					}
 				}
@@ -960,7 +961,7 @@ func (dm *DataManager) setStatQueue(ctx *context.Context, sq *utils.StatQueue, r
 	var ssq *StoredStatQueue
 	if db.GetStorageType() != utils.MetaInternal {
 		// in case of internal we don't marshal
-		ssq, err = NewStoredStatQueue(sq, dm.ms)
+		ssq, err = NewStoredStatQueue(sq, dm.ms, dm.cfg.StatSCfg().StoreUncompressedLimit)
 		if err != nil {
 			return err
 		}
