@@ -35,8 +35,6 @@ import (
 )
 
 var (
-	cgrCfg *CGRConfig // will be shared
-
 	getDftFsConnCfg  = func() *FsConnCfg { return new(FsConnCfg) }             // returns default FreeSWITCH Connection configuration, built out of json default configuration
 	getDftKamConnCfg = func() *KamConnCfg { return new(KamConnCfg) }           // returns default Kamailio Connection configuration
 	getDftAstConnCfg = func() *AsteriskConnCfg { return new(AsteriskConnCfg) } // returns default Asterisk Connection configuration
@@ -54,9 +52,9 @@ var (
 )
 
 func init() {
-	cgrCfg = NewDefaultCGRConfig()
+	dfltCfg := NewDefaultCGRConfig()
 	// populate default ERs reader
-	for _, rdr := range cgrCfg.ersCfg.Readers {
+	for _, rdr := range dfltCfg.ersCfg.Readers {
 		if rdr.ID == utils.MetaDefault {
 			getDftEvRdrCfg = rdr.Clone
 			break
@@ -64,35 +62,25 @@ func init() {
 	}
 
 	// populate default EEs exporter
-	for _, exp := range cgrCfg.eesCfg.Exporters {
+	for _, exp := range dfltCfg.eesCfg.Exporters {
 		if exp.ID == utils.MetaDefault {
 			getDftEvExpCfg = exp.Clone
 			break
 		}
 	}
 
-	for id, dbconnCfg := range cgrCfg.dbCfg.DBConns {
+	for id, dbconnCfg := range dfltCfg.dbCfg.DBConns {
 		if id == utils.MetaDefault {
 			getDftDBConnCfg = dbconnCfg.Clone
 			break
 		}
 	}
 
-	getDftFsConnCfg = cgrCfg.fsAgentCfg.EventSocketConns[0].Clone // We leave it crashing here on purpose if no Connection defaults defined
-	getDftKamConnCfg = cgrCfg.kamAgentCfg.EvapiConns[0].Clone
-	getDftAstConnCfg = cgrCfg.asteriskAgentCfg.AsteriskConns[0].Clone
-	getDftLoaderCfg = cgrCfg.loaderCfg[0].Clone
-	getDftRemHstCfg = cgrCfg.rpcConns[utils.MetaLocalHost].Conns[0].Clone
-}
-
-// CgrConfig is used to retrieve system configuration from other packages
-func CgrConfig() *CGRConfig {
-	return cgrCfg
-}
-
-// SetCgrConfig is used to set system configuration from other places
-func SetCgrConfig(cfg *CGRConfig) {
-	cgrCfg = cfg
+	getDftFsConnCfg = dfltCfg.fsAgentCfg.EventSocketConns[0].Clone // We leave it crashing here on purpose if no Connection defaults defined
+	getDftKamConnCfg = dfltCfg.kamAgentCfg.EvapiConns[0].Clone
+	getDftAstConnCfg = dfltCfg.asteriskAgentCfg.AsteriskConns[0].Clone
+	getDftLoaderCfg = dfltCfg.loaderCfg[0].Clone
+	getDftRemHstCfg = dfltCfg.rpcConns[utils.MetaLocalHost].Conns[0].Clone
 }
 
 // NewDefaultCGRConfig returns the default configuration
