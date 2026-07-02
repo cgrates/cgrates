@@ -269,7 +269,7 @@ func NewReplicationTaskFromFile(ctx *context.Context, path string) (*Replication
 			return err
 		}
 		return os.Remove(path) // file is not needed anymore
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+path); err != nil {
+	}, 0, utils.FileLockPrefix+path); err != nil {
 		return nil, err
 	}
 	dec := gob.NewDecoder(bytes.NewBuffer(taskBytes))
@@ -291,7 +291,7 @@ func (r *ReplicationTask) WriteToFile(ctx *context.Context, path string) error {
 		defer f.Close()
 		enc := gob.NewEncoder(f)
 		return enc.Encode(r)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+path)
+	}, 0, utils.FileLockPrefix+path)
 }
 
 // Execute performs the replication task.
