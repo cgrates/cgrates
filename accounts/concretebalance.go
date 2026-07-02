@@ -20,6 +20,7 @@ package accounts
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -45,14 +46,15 @@ func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) 
 }
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(ctx *context.Context, acntID string, blnCfg *utils.Balance,
+func newConcreteBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &concreteBalance{acntID, blnCfg, fltrS, connMgr, ctx, attrSConns, rateSConns}
+	return &concreteBalance{cfg, acntID, blnCfg, fltrS, connMgr, ctx, attrSConns, rateSConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
 type concreteBalance struct {
+	cfg        *config.CGRConfig
 	acntID     string
 	blnCfg     *utils.Balance
 	fltrS      *engine.FilterS
@@ -92,7 +94,7 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
-		costIcrm, dbted); err != nil {
+		costIcrm, dbted, cB.cfg.AccountSCfg().MaxIterations); err != nil {
 		return
 	} else if ecCncrt.Abstracts.Compare(utils.NewDecimal(0, 0)) == 0 { // no debit performed
 		return

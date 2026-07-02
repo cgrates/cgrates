@@ -20,21 +20,23 @@ package accounts
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(ctx *context.Context, acntID string, blnCfg *utils.Balance,
+func newAbstractBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
 	cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &abstractBalance{acntID, blnCfg, cncrtBlncs, fltrS, connMgr, ctx, attrSConns, rateSConns}
+	return &abstractBalance{cfg, acntID, blnCfg, cncrtBlncs, fltrS, connMgr, ctx, attrSConns, rateSConns}
 }
 
 // abstractBalance is the operator for *abstract balance type
 type abstractBalance struct {
+	cfg        *config.CGRConfig
 	acntID     string
 	blnCfg     *utils.Balance
 	cncrtBlncs []*concreteBalance // paying balances
@@ -112,7 +114,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
 			aB.rateSConns, aB.blnCfg.RateProfileIDs,
-			costIcrm, dbted); err != nil {
+			costIcrm, dbted, aB.cfg.AccountSCfg().MaxIterations); err != nil {
 			return
 		} else if ecCost.Abstracts.Compare(utils.NewDecimal(0, 0)) == 0 {
 			// no debit performed

@@ -224,7 +224,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 	if err != nil {
 		return nil, err
 	}
-	if blncOpers, err = newBalanceOperators(ctx, acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
+	if blncOpers, err = newBalanceOperators(ctx, aS.cfg, acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
 		attrConns, rateConns); err != nil {
 		return
 	}

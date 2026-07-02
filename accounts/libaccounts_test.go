@@ -58,9 +58,10 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 			},
 		},
 	}
-	filters := engine.NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(cfg, nil, nil)
 
-	concrete, err := newBalanceOperator(context.Background(), acntPrf.ID, acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
+	concrete, err := newBalanceOperator(context.Background(), cfg, acntPrf.ID, acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -68,6 +69,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 	cncrtBlncs = append(cncrtBlncs, concrete.(*concreteBalance))
 
 	expected := &abstractBalance{
+		cfg:        cfg,
 		acntID:     acntPrf.ID,
 		blnCfg:     acntPrf.Balances["BL0"],
 		fltrS:      filters,
@@ -75,7 +77,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 		cncrtBlncs: cncrtBlncs,
 	}
 	blnCfgs := []*utils.Balance{acntPrf.Balances["BL0"], acntPrf.Balances["BL1"]}
-	if blcOp, err := newBalanceOperators(context.Background(), acntPrf.ID, blnCfgs, filters, nil,
+	if blcOp, err := newBalanceOperators(context.Background(), cfg, acntPrf.ID, blnCfgs, filters, nil,
 		nil, nil); err != nil {
 		t.Error(err)
 	} else {
@@ -475,7 +477,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0)); err != nil {
+		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
@@ -493,7 +495,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0)); err == nil || err != utils.ErrMaxIncrementsExceeded {
+		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err != utils.ErrMaxIncrementsExceeded {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
@@ -800,7 +802,7 @@ func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(2, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0)); err == nil || err.Error() != expectedErr {
+		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
@@ -897,9 +899,10 @@ func TestNewBalanceOperator(t *testing.T) {
 	ctx := new(context.Context)
 	acntID := "1001"
 	filters := new(engine.FilterS)
+	cfg := config.NewDefaultCGRConfig()
 
 	blncCfg := &utils.Balance{ID: "B1", Type: "unknown"}
-	bOp, err := newBalanceOperator(ctx, acntID, blncCfg, nil, filters, nil, nil, nil)
+	bOp, err := newBalanceOperator(ctx, cfg, acntID, blncCfg, nil, filters, nil, nil, nil)
 	if err == nil {
 		t.Errorf("expected error for unsupported type, got nil")
 	}
@@ -908,7 +911,7 @@ func TestNewBalanceOperator(t *testing.T) {
 	}
 
 	blncCfg = &utils.Balance{ID: "B2", Type: utils.MetaConcrete}
-	bOp, err = newBalanceOperator(ctx, acntID, blncCfg, nil, filters, nil, nil, nil)
+	bOp, err = newBalanceOperator(ctx, cfg, acntID, blncCfg, nil, filters, nil, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -921,7 +924,7 @@ func TestNewBalanceOperator(t *testing.T) {
 
 	cncrt := &concreteBalance{}
 	blncCfg = &utils.Balance{ID: "B3", Type: utils.MetaAbstract}
-	bOp, err = newBalanceOperator(ctx, acntID, blncCfg, []*concreteBalance{cncrt}, filters, nil, nil, nil)
+	bOp, err = newBalanceOperator(ctx, cfg, acntID, blncCfg, []*concreteBalance{cncrt}, filters, nil, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
