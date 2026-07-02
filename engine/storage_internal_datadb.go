@@ -61,7 +61,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 		transCacheOpts = nil // create TransCache without offline collector if neither
 		// DumpInterval or RewriteInterval are provided
 	}
-	tc, err := ltcache.NewTransCacheWithOfflineCollector(transCacheOpts, tcCfg, utils.Logger)
+	tc, err := ltcache.NewTransCacheWithOfflineCollector(transCacheOpts, tcCfg, utils.Logger, false)
 	if err != nil {
 		return nil, err
 	}

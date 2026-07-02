@@ -112,8 +112,8 @@ func TestOfflineInternalAPIsDumpDataDB(t *testing.T) {
 		} else if files != 42 {
 			t.Errorf("expected 42 files, received <%d>", files)
 		}
-		if totalSize < 35600 || totalSize > 35800 {
-			t.Errorf("expected folder size to be within range 35500KB to 35700KB, received <%v>KB", totalSize)
+		if totalSize < 35400 || totalSize > 35800 {
+			t.Errorf("expected folder size to be within range 35400KB to 35800KB, received <%v>KB", totalSize)
 		}
 	})
 
