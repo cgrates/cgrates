@@ -33,24 +33,29 @@ import (
 // NewExportRequest returns a new EventRequest
 func NewExportRequest(inData map[string]utils.DataStorage,
 	tnt string,
-	cache *engine.CacheS, filterS *engine.FilterS, oNM map[string]*utils.OrderedNavigableMap) *ExportRequest {
+	cache *engine.CacheS, filterS *engine.FilterS, oNM map[string]*utils.OrderedNavigableMap,
+	roundingDecimals int, timezone string) *ExportRequest {
 	return &ExportRequest{
-		inData:  inData,
-		cache:   cache,
-		filterS: filterS,
-		tnt:     tnt,
-		ExpData: oNM,
+		inData:           inData,
+		cache:            cache,
+		filterS:          filterS,
+		tnt:              tnt,
+		ExpData:          oNM,
+		roundingDecimals: roundingDecimals,
+		timezone:         timezone,
 	}
 }
 
 // ExportRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
 type ExportRequest struct {
-	inData  map[string]utils.DataStorage          // request
-	ExpData map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
-	tnt     string
-	cache   *engine.CacheS
-	filterS *engine.FilterS
+	inData           map[string]utils.DataStorage          // request
+	ExpData          map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
+	tnt              string
+	roundingDecimals int
+	timezone         string
+	cache            *engine.CacheS
+	filterS          *engine.FilterS
 }
 
 // String implements utils.DataProvider
@@ -182,7 +187,7 @@ func (eeR *ExportRequest) ParseField(
 	case utils.MetaGroup:
 		tmpType = utils.MetaVariable
 	}
-	out, err = attributes.ParseAttribute(eeR, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
+	out, err = attributes.ParseAttribute(eeR, tmpType, cfgFld.Path, cfgFld.Value, eeR.roundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, eeR.timezone), cfgFld.Layout)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {

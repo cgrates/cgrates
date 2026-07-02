@@ -500,7 +500,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
-				})
+				}, erS.cfg.GeneralCfg().RoundingDecimals, erS.cfg.GeneralCfg().DefaultTimezone)
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
@@ -568,7 +568,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
-				})
+				}, erS.cfg.GeneralCfg().RoundingDecimals, erS.cfg.GeneralCfg().DefaultTimezone)
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(

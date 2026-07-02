@@ -122,7 +122,8 @@ func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FC
 		utils.MetaEM:  em,
 		utils.MetaCfg: cfg.GetDataProvider(),
 	}, cfg.GeneralCfg().DefaultTenant, cache, fltS,
-		map[string]*utils.OrderedNavigableMap{prfx: r}).SetFields(ctx, fields)
+		map[string]*utils.OrderedNavigableMap{prfx: r},
+		cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone).SetFields(ctx, fields)
 	return r, err
 }
 

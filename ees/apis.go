@@ -201,7 +201,8 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			cache, filterS,
-			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(ctx, exp.Cfg().ContentFields())
+			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM},
+			cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone).SetFields(ctx, exp.Cfg().ContentFields())
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
 			return err
 		}
