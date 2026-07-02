@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 )
@@ -119,7 +118,7 @@ func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
+		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
@@ -150,7 +149,7 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
+		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
@@ -286,7 +285,7 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
+		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 	for _, id := range profilesIDs {
 		var filterIDs *[]string
@@ -321,7 +320,7 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 		}
 		tntGrp := utils.ConcatenatedKey(tnt, ID)
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
+			dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			utils.NonTransactional, true, false, idxItmType); err != nil {
@@ -358,7 +357,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 		}
 		tntGrp := utils.ConcatenatedKey(tnt, ID)
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
+			dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			utils.NonTransactional, true, false, idxItmType); err != nil {
@@ -484,7 +483,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 
 	tntID := newFlt.TenantID()
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntID)
+		dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntID)
 	defer guardian.Guardian.UnguardIDs(refID)
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
@@ -692,7 +691,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 						return utils.ErrNotFound
 					}
 					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
+						dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 					var updIdx map[string]utils.StringSet
 					if updIdx, err = newFilterIndex(ctx, dm, idxItmType,
 						newFlt.Tenant, rpID, itemID, utils.NonTransactional, rate.FilterIDs, newFlt); err != nil {
@@ -741,7 +740,7 @@ func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmT
 		return nil // no indexes to remove
 	}
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
+		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,

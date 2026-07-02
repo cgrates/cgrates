@@ -2499,7 +2499,18 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 
 func TestAddIndexFiltersItemGetIndexesErr(t *testing.T) {
 
-	if err := addIndexFiltersItem(context.Background(), nil, "idxItmType", "cgrates.org", "itemID", []string{"FltrId_1"}); err != utils.ErrNoDatabaseConn {
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
+	setTestCache(dm, cfg)
+
+	if err := addIndexFiltersItem(context.Background(), dm, "idxItmType", "cgrates.org", "itemID", []string{"FltrId_1"}); err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
 	}
 
@@ -2709,19 +2720,37 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 }
 
 func TestUpdatedIndexesAddIndexFiltersItemErr(t *testing.T) {
-	var dm *DataManager
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
+	setTestCache(dm, cfg)
 
-	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", nil, []string{"fltr1"}, false); err != utils.ErrNoDatabaseConn {
-		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", nil, []string{"fltr1"}, false); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
 	}
 
 }
 
 func TestUpdatedIndexesRemoveIndexFiltersItemErr(t *testing.T) {
-	var dm *DataManager
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM)
+	setTestCache(dm, cfg)
 
-	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", &[]string{"fltr1"}, []string{}, false); err != utils.ErrNoDatabaseConn {
-		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", &[]string{"fltr1"}, []string{}, false); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
 	}
 
 }
