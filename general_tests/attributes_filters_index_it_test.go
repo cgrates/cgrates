@@ -26,6 +26,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -72,6 +73,9 @@ func TestAttributeFilterIndexing(t *testing.T) {
 		DBCfg:      dbCfg,
 	}
 	client, _ := ng.Run(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	engine.WaitForService(t, ctx, client, utils.APIerSv1)
 
 	// Set filter with value 48
 	filter := &engine.FilterWithAPIOpts{

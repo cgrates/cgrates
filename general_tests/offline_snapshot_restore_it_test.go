@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"os"
 	"path"
@@ -83,9 +82,9 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) { // run with sudo
 				ConfigPath:       pth,
 				GracefulShutdown: true,
 				PreserveDataDB:   true,
-				LogBuffer:        &bytes.Buffer{},
+				// LogBuffer:        &bytes.Buffer{},
 			}
-			t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+			// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 			client, cfg := ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 

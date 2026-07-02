@@ -1068,6 +1068,7 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 					},
 				},
 			}},
+		false,
 	)
 	tscache.Set(utils.CacheTBLTPDestinations, "itemId", &utils.TPDestination{
 		TPid: "tpID",
@@ -1228,6 +1229,7 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 					},
 				},
 			}},
+		false,
 	)
 	tscache.Set(utils.CacheTBLTPAccountActions, "*prfitemId", &utils.TPAccountActions{
 		TPid:    "tp_acc1",
@@ -1449,6 +1451,7 @@ func TestTpReaderLoadTimingsErr(t *testing.T) {
 					},
 				},
 			}},
+		false,
 	)
 	duplicateId := "id"
 	tscache.Set(utils.CacheTBLTPTimings, "*prfitemId", &utils.ApierTPTiming{
@@ -1487,6 +1490,7 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 				},
 			},
 		},
+		false,
 	)
 	duplicateId := "id"
 	tscache.Set(utils.CacheTBLTPDestinationRates, "*prfdest_rate1", &utils.TPDestinationRate{
@@ -1587,6 +1591,7 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 				},
 			},
 		},
+		false,
 	)
 	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if dErr != nil {
@@ -1647,6 +1652,7 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
+		false,
 	)
 	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if dErr != nil {
@@ -1735,6 +1741,7 @@ func TestTpReaderSetDestination(t *testing.T) {
 				StaticTTL: false,
 			},
 		},
+		false,
 	)
 	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if dErr != nil {

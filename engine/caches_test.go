@@ -20,7 +20,6 @@ package engine
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"testing"
 	"time"
 
@@ -103,7 +102,7 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 		args.CacheID: {
 			MaxItems: 2,
 		},
-	})
+	}, false)
 	cacheS := &CacheS{
 		dm:     dm,
 		cfg:    cfg,
@@ -137,7 +136,7 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 					},
 				},
 			},
-		})
+		}, false)
 	tscache.Set("cacheID", "itemID", "", []string{}, true, "tId")
 
 	cfg := config.NewDefaultCGRConfig()
@@ -185,7 +184,7 @@ func TestCacheSV1HasItem(t *testing.T) {
 					},
 				},
 			},
-		})
+		}, false)
 	tscache.Set("cacheID", "itemID", "", []string{}, true, "tId")
 
 	cfg := config.NewDefaultCGRConfig()
@@ -245,7 +244,7 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 					},
 				},
 			},
-		})
+		}, false)
 	chS := &CacheS{
 		cfg:    cfg,
 		dm:     dm,
@@ -275,7 +274,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			},
-		})
+		}, false)
 	tscache.Set("cacheID", "itemID", "value", []string{}, true, "tId")
 
 	cfg := config.NewDefaultCGRConfig()
@@ -312,7 +311,7 @@ func TestCacheSV1GetItemExpiryTime(t *testing.T) {
 				MaxItems: -1,
 				TTL:      30 * time.Minute,
 			},
-		})
+		}, false)
 	chS := &CacheS{
 		tCache: tscache,
 	}
@@ -352,7 +351,7 @@ func TestCacheSV1RemoveItem(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			},
-		})
+		}, false)
 	tscache.Set("cacheID", "itemID", "value", []string{}, true, "tId")
 
 	cfg := config.NewDefaultCGRConfig()
@@ -410,7 +409,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 		utils.CacheResources:    {"res1", "res2", "res3"},
 		utils.CacheFilters:      {"fltr1", "filtr2", "filtr3"},
 	}
-	tscache := ltcache.NewTransCache(cfgCache)
+	tscache := ltcache.NewTransCache(cfgCache, false)
 
 	for keyId := range cfgCache {
 		if itemids, has := args2[keyId]; has {
@@ -479,7 +478,7 @@ func TestCacheSV1Clear(t *testing.T) {
 			},
 		},
 	}
-	tscache := ltcache.NewTransCache(cfgCache)
+	tscache := ltcache.NewTransCache(cfgCache, false)
 	chS := &CacheS{
 		cfg:    cfg,
 		dm:     dm,
@@ -517,6 +516,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			}},
+		false,
 	)
 	chS := &CacheS{
 		cfg:    cfg,
@@ -580,6 +580,7 @@ func TestCacheSV1GetCacheStats(t *testing.T) {
 				},
 			},
 		},
+		false,
 	)
 
 	for i, id := range args.CacheIDs {
@@ -693,6 +694,7 @@ func TestCacheSV1HasGroup(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			}},
+		false,
 	)
 	tscache.Set("cacheId", "itemId", "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -734,6 +736,7 @@ func TestCacheSV1HasGroupItemIDs(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			}},
+		false,
 	)
 	tscache.Set("cacheId", "itemId", "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -775,6 +778,7 @@ func TestV1RemoveGroup(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			}},
+		false,
 	)
 	tscache.Set("cacheId", "itemId", "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -819,6 +823,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 					func(itmID string, value any) {},
 				},
 			}},
+		false,
 	)
 	tscache.Set(args.CacheID, args.ItemID, "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -894,6 +899,7 @@ func TestCacheRemoveWithoutReplicate(t *testing.T) {
 					},
 				},
 			}},
+		false,
 	)
 	tscache.Set("cacheID", "itemId", "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -925,6 +931,7 @@ func TestCacheRemoveGroup(t *testing.T) {
 					},
 				},
 			}},
+		false,
 	)
 	tscache.Set("cacheID", "itemId", "value", []string{"groupId"}, true, "tId")
 	chS := &CacheS{
@@ -951,7 +958,7 @@ func TestUpdateReplicationFilters(t *testing.T) {
 		utils.CacheReplicationHosts: {
 			MaxItems: 3,
 		},
-	})
+	}, false)
 	objType, objID, connID := "obj", "id", "conn"
 	UpdateReplicationFilters("obj", "id", "conn")
 	if val, has := Cache.Get(utils.CacheReplicationHosts, objType+objID+utils.ConcatenatedKeySep+connID); !has {
@@ -1090,31 +1097,32 @@ func TestV1LoadCache(t *testing.T) {
 
 }
 
-func TestCacheSBeginTransaction(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-	Cache.Clear(nil)
+// Transactions arent used currently
+// func TestCacheSBeginTransaction(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	Cache.Clear(nil)
 
-	cfg := config.NewDefaultCGRConfig()
-	db, err := NewInternalDB(nil, nil, false, nil, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	db, err := NewInternalDB(nil, nil, false, nil, cfg.DataDbCfg().Items)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
-	cacheS := NewCacheS(cfg, dm, nil)
+// 	cacheS := NewCacheS(cfg, dm, nil)
 
-	expFormat := `........-....-....-....-............`
-	rcv := cacheS.BeginTransaction()
-	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
-		t.Error(err)
-	} else if !matched {
-		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
-	}
+// 	expFormat := `........-....-....-....-............`
+// 	rcv := cacheS.BeginTransaction()
+// 	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
+// 		t.Error(err)
+// 	} else if !matched {
+// 		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
+// 	}
 
-}
+// }
 
 func TestCachesV1ReLoadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

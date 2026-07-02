@@ -247,6 +247,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	time.Sleep(300 * time.Millisecond) // give time to replicate
 	if err := engineOneRpc.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)
