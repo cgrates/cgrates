@@ -1,0 +1,16 @@
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+ExecStart=/opt/prometheus/prometheus \
+  --config.file=/opt/prometheus/prometheus.yml \
+  --storage.tsdb.path=/opt/prometheus/data \
+  --web.listen-address=:9090
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
