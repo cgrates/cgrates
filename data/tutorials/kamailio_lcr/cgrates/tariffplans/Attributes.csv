@@ -1,0 +1,4 @@
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_KAMAILIO_LCR,*exists:~*req.OriginID:,;20,;false,,,*opts.*originID,*variable,~*req.OriginID
+cgrates.org,ATTR_KAMAILIO_LCR,,,,*exists:~*req.Usage:,,*opts.*usage,*variable,~*req.Usage
+cgrates.org,ATTR_KAMAILIO_LCR,,,,*exists:~*req.RateProfileID:,,*opts.*ratesProfileIDs,*variable,~*req.RateProfileID

@@ -1,0 +1,7 @@
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RT_VENDOR1,,;0,,,,RT_RO,*prefix:~*req.Destination:+40,"* * * * *",;0,false,0s,0,0.02,1s,1s
+cgrates.org,RT_VENDOR1,,,,,,RT_DE,*prefix:~*req.Destination:+49,"* * * * *",;0,false,0s,0,0.05,1s,1s
+cgrates.org,RT_VENDOR2,,;0,,,,RT_RO,*prefix:~*req.Destination:+40,"* * * * *",;0,false,0s,0,0.04,1s,1s
+cgrates.org,RT_VENDOR2,,,,,,RT_DE,*prefix:~*req.Destination:+49,"* * * * *",;0,false,0s,0,0.01,1s,1s
+cgrates.org,RT_CUSTOMER,,;0,,,,RT_RO,*prefix:~*req.Destination:+40,"* * * * *",;0,false,0s,0,0.05,1s,1s
+cgrates.org,RT_CUSTOMER,,,,,,RT_DE,*prefix:~*req.Destination:+49,"* * * * *",;0,false,0s,0,0.04,1s,1s

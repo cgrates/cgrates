@@ -1,0 +1,65 @@
+{
+  "general": {
+    "nodeID": "KamailioLCR"
+  },
+  "sessions": {
+    "enabled": true,
+    "conns": {
+      "*accounts":    [ { "connIDs": [ "*localhost" ] } ],
+      "*attributes":  [ { "connIDs": [ "*localhost" ] } ],
+      "*cdrs":        [ { "connIDs": [ "*localhost" ] } ],
+      "*routes":      [ { "connIDs": [ "*localhost" ] } ]
+    }
+  },
+  "cdrs": {
+    "enabled": true,
+    "conns": {
+      "*accounts":   [ { "connIDs": [ "*localhost" ] } ],
+      "*attributes": [ { "connIDs": [ "*localhost" ] } ],
+      "*rates":      [ { "connIDs": [ "*localhost" ] } ]
+    },
+    "opts": {
+      "*attributes": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
+      "*rates": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
+      "*store": [ { "tenant": "*any", "filterIDs": [], "value": true } ]
+    }
+  },
+  "attributes": {
+    "enabled": true,
+    "existsIndexedFields": [ "*req.OriginID" ]
+  },
+  "accounts": {
+    "enabled": true,
+    "conns": {
+      "*rates": [ { "connIDs": [ "*localhost" ] } ]
+    }
+  },
+  "rates": {
+    "enabled": true,
+    "ratePrefixIndexedFields": [ "*req.Destination" ]
+  },
+  "routes": {
+    "enabled": true,
+    "stringIndexedFields": [ "*req.Account" ],
+    "conns": {
+      "*rates": [ { "connIDs": [ "*localhost" ] } ]
+    }
+  },
+  "kamailioAgent": {
+    "enabled": true,
+    "evapiConns": [
+      {
+        "address": "127.0.0.1:8448",
+        "reconnects": -1,
+        "maxReconnectInterval": "5s"
+      }
+    ],
+    "conns": {
+      "*sessions": [ { "connIDs": [ "*bijsonLocalhost" ] } ]
+    },
+    "createCDR": false
+  },
+  "admins": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "general": {
+    "nodeID": "osipsdemo"
+  },
+  "sessions": {
+    "enabled": true,
+    "conns": {
+      "*cdrs": [ { "connIDs": [ "*localhost" ] } ]
+    }
+  },
+  "cdrs": {
+    "enabled": true,
+    "conns": {
+      "*rates": [ { "connIDs": [ "*localhost" ] } ],
+      "*stats": [ { "connIDs": [ "*localhost" ] } ]
+    },
+    "opts": {
+      "*rates": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
+      "*stats": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
+      "*store": [ { "tenant": "*any", "filterIDs": [], "value": true } ]
+    }
+  },
+  "rates": {
+    "enabled": true,
+    "ratePrefixIndexedFields": [ "*req.Destination" ]
+  },
+  "stats": {
+    "enabled": true,
+    "stringIndexedFields": []
+  },
+  "prometheusAgent": {
+    "enabled": true,
+    "conns": {
+      "*stats":  [ { "connIDs": [ "*localhost" ] } ],
+      "*caches": [ { "connIDs": [ "*localhost" ] } ],
+      "*cores":  [ { "connIDs": [ "*localhost" ] } ],
+      "*admins": [ { "connIDs": [ "*localhost" ] } ]
+    }
+  },
+  "admins": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}}, "unit": "short", "decimals": 0}},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "id": 60,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_5S\",metric=\"*sum#1\"} > 0",  "legendFormat": "5s window",  "refId": "A"},
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_30S\",metric=\"*sum#1\"} > 0", "legendFormat": "30s window", "refId": "B"}
+      ],
+      "title": "Calls per window (5s vs 30s)",
+      "type": "timeseries"
+    },
+
+    {
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}}, "unit": "s", "decimals": 1}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 50,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_5S\",metric=\"*tcd\"} / 1e9 > 0",  "legendFormat": "5s window",  "refId": "A"},
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_30S\",metric=\"*tcd\"} / 1e9 > 0", "legendFormat": "30s window", "refId": "B"}
+      ],
+      "title": "Total Call Duration (5s vs 30s)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}}, "unit": "currencyUSD", "decimals": 4}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 51,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_5S\",metric=\"*tcc\"} > 0",  "legendFormat": "5s window",  "refId": "A"},
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_30S\",metric=\"*tcc\"} > 0", "legendFormat": "30s window", "refId": "B"}
+      ],
+      "title": "Total Call Cost (5s vs 30s)",
+      "type": "timeseries"
+    },
+
+    {
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}}, "unit": "s", "decimals": 1}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 52,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_5S\",metric=\"*acd\"} / 1e9 > 0",  "legendFormat": "5s window",  "refId": "A"},
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_30S\",metric=\"*acd\"} / 1e9 > 0", "legendFormat": "30s window", "refId": "B"}
+      ],
+      "title": "Average Call Duration (5s vs 30s)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}}, "unit": "currencyUSD", "decimals": 4}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 53,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_5S\",metric=\"*acc\"} > 0",  "legendFormat": "5s window",  "refId": "A"},
+        {"expr": "cgrates_stats_metrics{queue=\"SQ_30S\",metric=\"*acc\"} > 0", "legendFormat": "30s window", "refId": "B"}
+      ],
+      "title": "Average Call Cost (5s vs 30s)",
+      "type": "timeseries"
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 24},
+      "id": 350,
+      "title": "Cache",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false}, "unit": "short", "decimals": 0}},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 25},
+          "id": 351,
+          "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [{"expr": "cgrates_cache_items_total{cache=\"*stat_filter_indexes\"}", "legendFormat": "Filter indexes", "refId": "A"}],
+          "title": "Stats filter index entries",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false}, "unit": "short", "decimals": 0}},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 25},
+          "id": 352,
+          "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [
+            {"expr": "cgrates_cache_items_total{cache=\"*statqueues\"}",         "legendFormat": "Stat queues",     "refId": "A"},
+            {"expr": "cgrates_cache_items_total{cache=\"*statqueue_profiles\"}", "legendFormat": "Stat profiles",   "refId": "B"},
+            {"expr": "cgrates_cache_items_total{cache=\"*rpc_connections\"}",    "legendFormat": "RPC connections", "refId": "C"}
+          ],
+          "title": "Stat queue cache items",
+          "type": "timeseries"
+        }
+      ]
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33},
+      "id": 400,
+      "title": "CGRateS Runtime",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false}, "unit": "short"}},
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 34},
+          "id": 401,
+          "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [{"expr": "go_goroutines{job=\"cgrates\"}", "legendFormat": "goroutines", "refId": "A"}],
+          "title": "Goroutines",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false}, "unit": "bytes"}},
+          "gridPos": {"h": 8, "w": 8, "x": 8, "y": 34},
+          "id": 402,
+          "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [
+            {"expr": "go_memstats_heap_alloc_bytes{job=\"cgrates\"}", "legendFormat": "heap alloc", "refId": "A"},
+            {"expr": "go_memstats_heap_sys_bytes{job=\"cgrates\"}",   "legendFormat": "heap sys",   "refId": "B"}
+          ],
+          "title": "Heap Memory",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false}, "unit": "bytes"}},
+          "gridPos": {"h": 8, "w": 8, "x": 16, "y": 34},
+          "id": 403,
+          "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [{"expr": "process_resident_memory_bytes{job=\"cgrates\"}", "legendFormat": "RSS", "refId": "A"}],
+          "title": "Process Memory (RSS)",
+          "type": "timeseries"
+        }
+      ]
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 42},
+      "id": 500,
+      "title": "Cumulative",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "purple", "value": null}]}, "unit": "short", "decimals": 0}},
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 43},
+          "id": 501,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "pluginVersion": "13.0.1",
+          "targets": [{"expr": "cgrates_stats_metrics{queue=\"SQ_TOTAL\",metric=\"*sum#1\"}", "refId": "A"}],
+          "title": "Total calls processed",
+          "type": "stat"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}, "unit": "s", "decimals": 1}},
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 43},
+          "id": 502,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "pluginVersion": "13.0.1",
+          "targets": [{"expr": "cgrates_stats_metrics{queue=\"SQ_TOTAL\",metric=\"*tcd\"} / 1e9", "refId": "A"}],
+          "title": "Total Call Duration",
+          "type": "stat"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "currencyUSD", "decimals": 2}},
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 43},
+          "id": 503,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "pluginVersion": "13.0.1",
+          "targets": [{"expr": "cgrates_stats_metrics{queue=\"SQ_TOTAL\",metric=\"*tcc\"}", "refId": "A"}],
+          "title": "Total Call Cost",
+          "type": "stat"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}, "unit": "s", "decimals": 1}},
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 43},
+          "id": 504,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "pluginVersion": "13.0.1",
+          "targets": [{"expr": "cgrates_stats_metrics{queue=\"SQ_TOTAL\",metric=\"*acd\"} / 1e9", "refId": "A"}],
+          "title": "Average Call Duration",
+          "type": "stat"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["cgrates", "demo", "cdr"],
+  "templating": {"list": []},
+  "time": {"from": "now-5m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "CGRateS CDR Analytics",
+  "uid": "cgrates-cdr-analytics",
+  "version": 4
+}

@@ -1,0 +1,7 @@
+#Tenant,Id,FilterIDs,Weights,Blockers,QueueLength,TTL,MinItems,Stored,ThresholdIDs,MetricIDs,MetricFilterIDs,MetricBlockers
+cgrates.org,SQ_5S,,,,0,5s,0,true,*none,,,
+cgrates.org,SQ_5S,,,,,,,,,*acd;*tcd;*acc;*tcc;*sum#1,,
+cgrates.org,SQ_30S,,,,0,30s,0,true,*none,,,
+cgrates.org,SQ_30S,,,,,,,,,*acd;*tcd;*acc;*tcc;*sum#1,,
+cgrates.org,SQ_TOTAL,,,,-1,-1,0,true,*none,,,
+cgrates.org,SQ_TOTAL,,,,,,,,,*acd;*tcd;*acc;*tcc;*sum#1,,
