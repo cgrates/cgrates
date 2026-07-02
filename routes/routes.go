@@ -170,17 +170,6 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *engine.Filte
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-	// ToDoNext: rates.V1CostForEvent
-	// cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
-	// 	config.CgrConfig().GeneralCfg().DefaultTimezone)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// cc, err := cd.GetCost()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// opts.maxCost = cc.Cost
 	default:
 		if opts.maxCost, err = utils.IfaceAsFloat64(maxCost); err != nil {
 			return nil, err
