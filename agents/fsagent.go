@@ -235,20 +235,18 @@ func (fsa *FSsessions) authorizePark(uuid string, connIdx int, destNr string, cg
 }
 
 func minAccountUsage(cgrRply *utils.DataNode) (min time.Duration, found bool) {
-	node, has := cgrRply.Map[utils.CapMaxUsage]
-	if !has || node == nil {
+	maxUsageRpl, has := cgrRply.Map[utils.CapMaxUsage]
+	if !has || maxUsageRpl == nil || maxUsageRpl.Value == nil {
 		return
 	}
-	for _, dataNode := range node.Map {
-		if dataNode == nil || dataNode.Value == nil {
-			continue
-		}
-		d, ok := dataNode.Value.Data.(time.Duration)
-		if !ok {
-			continue
-		}
-		if !found || d < min {
-			min, found = d, true
+	switch d := maxUsageRpl.Value.Data.(type) {
+	case time.Duration:
+		min, found = d, true
+	case *utils.Decimal:
+		min, found = d.Duration()
+	default:
+		if dur, err := utils.IfaceAsDuration(maxUsageRpl.Value.Data); err == nil {
+			min, found = dur, true
 		}
 	}
 	return
@@ -290,7 +288,7 @@ func (fsa *FSsessions) setMaxCallDuration(uuid string, connIdx int,
 // Sends the transfer command to unpark the call to freeswitch
 func (fsa *FSsessions) unparkCall(uuid string, connIdx int, callDestNb, notify string) (err error) {
 	_, err = fsa.conns[connIdx].SendApiCmd(
-		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+		fmt.Sprintf("uuid_setvar %s cgrNotify %s\n\n", uuid, notify))
 	if err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not send unpark api notification to freeswitch, error: <%s>, connIdx: %v",
@@ -344,7 +342,7 @@ func (fsa *FSsessions) Connect() error {
 // Disconnects a session by sending hangup command to freeswitch
 func (fsa *FSsessions) disconnectSession(connIdx int, uuid, redirectNr, notify string) error {
 	if _, err := fsa.conns[connIdx].SendApiCmd(
-		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify)); err != nil {
+		fmt.Sprintf("uuid_setvar %s cgrNotify %s\n\n", uuid, notify)); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> error: %s when attempting to disconnect channelID: %s over connIdx: %v",
 				utils.FreeSWITCHAgent, err.Error(), uuid, connIdx))
@@ -389,7 +387,7 @@ func (fsa *FSsessions) Shutdown() (err error) {
 			continue
 		}
 		utils.Logger.Info(fmt.Sprintf("<%s> Shutting down all sessions on connection index: %v", utils.FreeSWITCHAgent, connIdx))
-		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
+		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgrReqtype *prepaid"); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error on calls shutdown: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))
 		}
 		if err = fSock.Disconnect(); err != nil {
