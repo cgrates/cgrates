@@ -659,7 +659,7 @@ func (fltr *FilterRule) passCronExp(ctx *context.Context, dDP utils.DataProvider
 		}
 		return false, err
 	}
-	tmTime, err := utils.IfaceAsTime(tm, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	tmTime, err := utils.IfaceAsTime(tm, utils.TimezoneOf(dDP))
 	if err != nil {
 		return false, err
 	}
@@ -793,7 +793,7 @@ func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider)
 	if !ok {
 		return false, fmt.Errorf("apiban filter requires a dynamic data provider")
 	}
-	return GetAPIBan(ctx, dynDP.cacheS(), strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+	return GetAPIBan(ctx, dynDP.cacheS(), strVal, dynDP.cfg.APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
 func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
@@ -811,7 +811,7 @@ func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvi
 	if !ok {
 		return false, fmt.Errorf("sentrypeer filter requires a dynamic data provider")
 	}
-	return GetSentryPeer(ctx, dynDP.cacheS(), strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])
+	return GetSentryPeer(ctx, dynDP.cacheS(), strVal, dynDP.cfg.SentryPeerCfg(), fltr.Values[0])
 }
 
 func parseTime(rsr *utils.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {
@@ -819,7 +819,7 @@ func parseTime(rsr *utils.RSRParser, dDp utils.DataProvider) (_ time.Time, err e
 	if str, err = rsr.ParseDataProvider(dDp); err != nil {
 		return
 	}
-	return utils.ParseTimeDetectLayout(str, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	return utils.ParseTimeDetectLayout(str, utils.TimezoneOf(dDp))
 }
 
 func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, error) {
