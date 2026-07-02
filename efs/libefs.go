@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 	"github.com/cgrates/ltcache"
@@ -88,7 +87,7 @@ func NewFailoverPosterFromFile(filePath, provider string, efs *EfS) (FailoverPos
 			return readErr
 		}
 		return os.Remove(filePath)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
+	}, efs.cfg.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +105,7 @@ func NewFailoverPosterFromFile(filePath, provider string, efs *EfS) (FailoverPos
 			return nil, err
 		}
 		return &FailedExportersEEs{
+			cfg:            efs.cfg,
 			module:         expEv.Module,
 			failedPostsDir: expEv.FailedPostsDir,
 			Path:           expEv.Path,
