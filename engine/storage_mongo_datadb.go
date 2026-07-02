@@ -31,7 +31,6 @@ import (
 	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 
@@ -688,7 +687,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			)
 			return err
 		})
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 

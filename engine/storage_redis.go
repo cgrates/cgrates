@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 	"github.com/mediocregopher/radix/v3"
@@ -362,7 +361,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 			}
 		}
 		return rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 

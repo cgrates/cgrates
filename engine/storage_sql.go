@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 	"gorm.io/gorm"
@@ -1503,7 +1502,7 @@ func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 
 			return tx.Table(utils.LoadInstKey).Save(&newMdl).Error
 		})
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 
