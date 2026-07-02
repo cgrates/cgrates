@@ -141,7 +141,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 	var filtersObjList []*engine.Filter // List of filter objects from rdr.Config().Filters, received from DB
 	for _, fltrID := range rdr.Config().Filters {
-		if resultFilter, err := rdr.dm.GetFilter(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant, fltrID, true, false, utils.NonTransactional); err != nil {
+		if resultFilter, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant, fltrID, true, false, utils.NonTransactional); err != nil {
 			rdr.rdrErr <- err
 			return
 		} else {
