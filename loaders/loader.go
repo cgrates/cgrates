@@ -362,7 +362,7 @@ func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[str
 	// 	csvType = utils.MetaGoogleAPI
 	// 	inPath = strings.TrimPrefix(inPath, gprefix)
 	case utils.IsURL(inPath):
-		csvType = urlProvider{}
+		csvType = urlProvider{cfg: l.cfg}
 	}
 	for _, cfg := range l.ldrCfg.Data {
 		if err = l.processFile(ctx, cfg, inPath, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {

@@ -33,6 +33,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -87,13 +88,13 @@ func TestNewCSVReaderErrors(t *testing.T) {
 	}
 
 	expErrMsg = fmt.Sprintf("parse %q: invalid URI for request", "./"+path)
-	if _, err := NewCSVReader(urlProvider{}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	prePath := "http:/localhost:" + strconv.Itoa(rand.Int())
 	expErrMsg = fmt.Sprintf(`path:"%s/%s" is not reachable`, prePath, path)
-	if _, err := NewCSVReader(urlProvider{}, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %q, received: %q", expErrMsg, err.Error())
 	}
 }
@@ -106,11 +107,11 @@ func TestNewCSVURLReader(t *testing.T) {
 	defer s.Close()
 	runtime.Gosched()
 
-	if _, err := NewCSVReader(urlProvider{}, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
+	if _, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
 		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
 	}
 
-	csvR, err := NewCSVReader(urlProvider{}, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
+	csvR, err := NewCSVReader(urlProvider{cfg: config.CgrConfig()}, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
 	if err != nil {
 		t.Fatal(err)
 	}

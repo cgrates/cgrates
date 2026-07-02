@@ -868,7 +868,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
 	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore,
-		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{cfg: cfg}); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -885,7 +885,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
 	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore,
-		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != utils.ErrNotFound {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{cfg: cfg}); err != utils.ErrNotFound {
 		t.Errorf("Expected: %v, received: %v", utils.ErrNotFound, err)
 	}
 
