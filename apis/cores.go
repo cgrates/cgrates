@@ -30,7 +30,6 @@ func NewCoreSv1(cS *cores.CoreS) *CoreSv1 {
 // CoreSv1 exports RPC from RLs
 type CoreSv1 struct {
 	cS *cores.CoreS
-	ping
 }
 
 func (cS *CoreSv1) Status(ctx *context.Context, params *cores.V1StatusParams, reply *map[string]any) error {
@@ -64,6 +63,11 @@ func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, params cores.Memor
 // StopMemoryProfiling stops memory profiling.
 func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, params utils.TenantWithAPIOpts, reply *string) error {
 	return cS.cS.V1StopMemoryProfiling(ctx, params, reply)
+}
+
+// DescribeMethods returns descriptors for registered RPC methods.
+func (cS *CoreSv1) DescribeMethods(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]utils.MethodDescriptor) error {
+	return cS.cS.V1DescribeMethods(ctx, args, reply)
 }
 
 // Panic is used print the Message sent as a panic.

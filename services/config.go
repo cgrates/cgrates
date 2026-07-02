@@ -19,8 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -51,11 +51,12 @@ func (s *ConfigService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	svcs, _ := engine.NewServiceWithName(s.cfg, utils.ConfigS, true)
-	for _, svc := range svcs {
-		cl.RpcRegister(svc)
+	svc, err := newRPCService(apis.NewConfigSv1(s.cfg), utils.ConfigSv1)
+	if err != nil {
+		return err
 	}
-	cms.AddInternalConn(utils.ConfigS, svcs)
+	cl.RpcRegister(svc)
+	cms.AddInternalConn(utils.ConfigS, svc)
 	return nil
 }
 

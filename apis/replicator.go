@@ -29,7 +29,6 @@ import (
 
 // ReplicatorSv1 exports DB methods as RPC endpoints for replication.
 type ReplicatorSv1 struct {
-	ping
 	dm    *engine.DataManager
 	admin *AdminSv1
 }

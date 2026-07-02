@@ -33,7 +33,6 @@ func NewConfigSv1(cfg *config.CGRConfig) *ConfigSv1 {
 
 // ConfigSv1 exports RPC for config
 type ConfigSv1 struct {
-	ping
 	cfg *config.CGRConfig
 }
 

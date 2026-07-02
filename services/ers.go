@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -76,7 +76,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	erS.ers = ers.NewERService(dbs.DataManager(), erS.cfg, cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
-	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewErSv1(erS.ers), utils.ErSv1)
 	if err != nil {
 		return err
 	}

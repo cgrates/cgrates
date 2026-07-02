@@ -65,9 +65,12 @@ func (ts *TPeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 
 	ts.tpes = tpes.NewTPeS(ts.cfg, dbs, cm)
 	ts.stopChan = make(chan struct{})
-	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
+	ts.srv, err = newRPCService(apis.NewTPeSv1(ts.tpes), utils.TPeSv1)
+	if err != nil {
+		return err
+	}
 	cl.RpcRegister(ts.srv)
-	return
+	return nil
 }
 
 // Reload handles the change of config

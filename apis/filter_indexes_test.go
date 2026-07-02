@@ -45,7 +45,6 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 	var reply string
 
@@ -251,7 +250,6 @@ func TestRemoveFilterIndexes(t *testing.T) {
 // 	cfg:     cfg,
 // 	dm:      dm,
 // 	connMgr: connMgr,
-// 	ping:    struct{}{},
 // }
 
 // 	adms.dm.SetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, "cgrates", nil, true, utils.GenUUID())
@@ -289,7 +287,6 @@ func TestComputeFilterIndexes(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply string
@@ -430,7 +427,6 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply string
@@ -568,7 +564,6 @@ func TestGetFilterIndexes(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply []string
@@ -732,7 +727,6 @@ func TestGetReverseFilterHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply map[string]*engine.ReverseFilterIHReply
@@ -763,7 +757,6 @@ func TestGetThresholdsIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -794,7 +787,6 @@ func TestGetResourcesIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -825,7 +817,6 @@ func TestGetStatsIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -856,7 +847,6 @@ func TestGetRoutesIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -887,7 +877,6 @@ func TestGetAttributesIndexHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -918,7 +907,6 @@ func TestGetChargersIndexHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -949,7 +937,6 @@ func TestGetRateProfilesIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -980,7 +967,6 @@ func TestGetActionsIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -1011,7 +997,6 @@ func TestGetAccountsIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply
@@ -1042,7 +1027,6 @@ func TestGetRateRatesIndexesHealth(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		connMgr: connMgr,
-		ping:    struct{}{},
 	}
 
 	var reply engine.FilterIHReply

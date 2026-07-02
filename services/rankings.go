@@ -23,8 +23,8 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rankings"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -74,13 +74,11 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}
-	srv, err := engine.NewService(ran.ran)
+	srv, err := newRPCService(apis.NewRankingSv1(ran.ran), utils.RankingSv1)
 	if err != nil {
 		return err
 	}
-	for _, s := range srv {
-		cl.RpcRegister(s)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RankingS, srv)
 	return nil
 }

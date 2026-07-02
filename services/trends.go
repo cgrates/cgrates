@@ -22,8 +22,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/trends"
 	"github.com/cgrates/cgrates/utils"
@@ -73,13 +73,11 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
-	srv, err := engine.NewService(trs.trs)
+	srv, err := newRPCService(apis.NewTrendSv1(trs.trs), utils.TrendSv1)
 	if err != nil {
 		return err
 	}
-	for _, s := range srv {
-		cl.RpcRegister(s)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.TrendS, srv)
 	return nil
 }

@@ -22,9 +22,9 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/accounts"
+	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -69,7 +69,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
-	srv, err := engine.NewServiceWithPing(acts.acts, utils.AccountSv1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewAccountSv1(acts.acts), utils.AccountSv1)
 	if err != nil {
 		return err
 	}

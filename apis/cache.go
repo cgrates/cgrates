@@ -25,10 +25,10 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type CacheSv1 struct {
-	ping
 	cacheS *engine.CacheS
 }
 
@@ -82,6 +82,12 @@ func (chSv1 *CacheSv1) RemoveItems(ctx *context.Context, args *utils.AttrReloadC
 func (chSv1 *CacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1Clear(ctx, args, reply)
+}
+
+// GetCacheStats returns CacheStats filtered by cacheIDs
+func (chSv1 *CacheSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
+	rply *map[string]*ltcache.CacheStats) error {
+	return chSv1.cacheS.V1GetCacheStats(ctx, args, rply)
 }
 
 // GetStats returns CacheStats filtered by cacheIDs

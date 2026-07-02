@@ -22,9 +22,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,13 +68,11 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	defer s.mu.Unlock()
 	s.stopChan = make(chan struct{})
 	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown, cl)
-	srv, err := engine.NewService(s.cS)
+	srv, err := newRPCService(apis.NewCoreSv1(s.cS), utils.CoreSv1)
 	if err != nil {
 		return err
 	}
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.CoreS, srv)
 	return nil
 }

@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -77,22 +77,20 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	// Pass internal connection via BiRPCClient
 
 	// Register RPC handler
-	srv, _ := engine.NewServiceWithName(smg.sm, utils.SessionS, true) // methods with multiple options
-	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewSessionSv1(smg.sm), utils.SessionSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBiJSON != utils.EmptyString {
 		smg.bircpEnabled = true
-		for n, s := range srv {
-			cl.BiRPCRegisterName(n, s)
-		}
+		cl.BiRPCRegisterName(srv.Name, srv)
 		// run this in it's own goroutine
 		go smg.start(shutdown, cl)
 	}
 	cms.AddInternalConn(utils.SessionS, srv)
-	return
+	return nil
 }
 
 func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners.CommonListenerS) (err error) {

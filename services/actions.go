@@ -22,9 +22,9 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/actions"
+	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -69,11 +69,10 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, cacheS.CacheS(), fs, dbs, cms.ConnManager())
-	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewActionSv1(acts.acts), utils.ActionSv1)
 	if err != nil {
 		return
 	}
-	// srv, _ := birpc.NewService(apis.NewActionSv1(acts.acts), "", false)
 	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ActionS, srv)
 	return

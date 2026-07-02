@@ -21,8 +21,8 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -70,11 +70,11 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()
 	routeS.routeS = routes.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
-	srv, _ := engine.NewService(routeS.routeS)
-	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
-	for _, s := range srv {
-		cl.RpcRegister(s)
+	srv, err := newRPCService(apis.NewRouteSv1(routeS.routeS), utils.RouteSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RouteS, srv)
 	return
 }

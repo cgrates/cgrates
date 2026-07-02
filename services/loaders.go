@@ -23,8 +23,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -90,11 +90,11 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if err := s.ldrs.ListenAndServe(s.stopChan); err != nil {
 		return err
 	}
-	srv, _ := engine.NewService(s.ldrs)
-	// srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
+	srv, err := newRPCService(apis.NewLoaderSv1(s.ldrs), utils.LoaderSv1)
+	if err != nil {
+		return err
 	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.LoaderS, srv)
 	return nil
 }

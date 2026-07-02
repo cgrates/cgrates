@@ -20,8 +20,8 @@ package services
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -67,16 +67,13 @@ func (s *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanage
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	rs := resources.NewResourceService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := engine.NewService(rs)
+	srv, err := newRPCService(apis.NewResourceSv1(rs), utils.ResourceSv1)
 	if err != nil {
 		return err
 	}
 	rs.StartLoop(context.TODO())
 	s.resources = rs
-	// srv, _ := birpc.NewService(apis.NewResourceSv1(s.resources), "", false)
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ResourceS, srv)
 	return nil
 }

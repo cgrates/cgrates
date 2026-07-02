@@ -30,7 +30,6 @@ func NewLoaderSv1(ldrS *loaders.LoaderS) *LoaderSv1 {
 // LoaderSv1 Exports RPC from LoaderService
 type LoaderSv1 struct {
 	ldrS *loaders.LoaderS
-	ping
 }
 
 func (ldrSv1 *LoaderSv1) Run(ctx *context.Context, args *loaders.ArgsProcessFolder,

@@ -598,16 +598,6 @@ func TestThresholdsNewThresholdSv1(t *testing.T) {
 	}
 }
 
-func TestThresholdsSv1Ping(t *testing.T) {
-	thSv1 := new(ThresholdSv1)
-	var reply string
-	if err := thSv1.Ping(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Unexpected reply error")
-	}
-}
-
 func TestThresholdsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone

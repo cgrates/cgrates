@@ -39,8 +39,7 @@ func TestAuthorizeEvent(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply sessions.V1AuthorizeReply
 	args := &utils.CGREvent{
@@ -65,8 +64,7 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply sessions.V1AuthorizeReplyWithDigest
 	args := &utils.CGREvent{
@@ -88,7 +86,6 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 // 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 // dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 	ssv1 := &SessionSv1{
-// 		ping: struct{}{},
 // 		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 // 	}
 // 	var reply sessions.V1InitSessionReply
@@ -114,8 +111,7 @@ func TestInitiateSessionWithDigest(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply sessions.V1InitReplyWithDigest
 	args := &utils.CGREvent{
@@ -140,8 +136,7 @@ func TestUpdateSession(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply sessions.V1UpdateSessionReply
 	args := &utils.CGREvent{
@@ -166,8 +161,7 @@ func TestSyncSessions(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply string
 	args := &utils.TenantWithAPIOpts{
@@ -191,8 +185,7 @@ func TestTerminateSessions(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 	var reply string
 	args := &utils.CGREvent{
@@ -220,8 +213,7 @@ func TestProcessCDR(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -255,8 +247,7 @@ func TestProcessMessage(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply sessions.V1ProcessMessageReply
@@ -285,8 +276,7 @@ func TestProcessEvent(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply sessions.V1ProcessEventReply
@@ -319,8 +309,7 @@ func TestGetActiveSessions(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply []*sessions.ExternalSession
@@ -348,8 +337,7 @@ func TestGetActiveSessionsCount(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply int
@@ -380,8 +368,7 @@ func TestForceDisconnect(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -409,8 +396,7 @@ func TestGetPassiveSessions(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply []*sessions.ExternalSession
@@ -438,8 +424,7 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply int
@@ -465,7 +450,6 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 // dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
 // 	ssv1 := &SessionSv1{
-// 		ping: struct{}{},
 // 		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 // 	}
 
@@ -491,8 +475,7 @@ func TestActivateSessions(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -517,8 +500,7 @@ func TestDeactivateSessions(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -543,8 +525,7 @@ func TestDisconnectPeer(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -573,8 +554,7 @@ func TestSTIRAuthenticate(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -603,8 +583,7 @@ func TestSTIRIdentity(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string
@@ -635,8 +614,7 @@ func TestRegisterInternalBiJSONConn(t *testing.T) {
 		{ConnIDs: []string{"*internal"}},
 	}
 	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
 	}
 
 	var reply string

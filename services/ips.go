@@ -22,8 +22,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ips"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -73,7 +73,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Regi
 	defer s.mu.Unlock()
 	s.ips = ips.NewIPService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	s.ips.StartLoop(context.TODO())
-	srv, err := engine.NewServiceWithPing(s.ips, utils.IPsV1, utils.V1Prfx)
+	srv, err := newRPCService(apis.NewIPSv1(s.ips), utils.IPsV1)
 	if err != nil {
 		return err
 	}

@@ -21,9 +21,9 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -70,8 +70,10 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 		return err
 	}
 
-	srv, _ := engine.NewServiceWithPing(es.eeS, utils.EeSv1, utils.V1Prfx)
-	// srv, _ := birpc.NewService(es.rpc, "", false)
+	srv, err := newRPCService(apis.NewEeSv1(es.eeS), utils.EeSv1)
+	if err != nil {
+		return err
+	}
 	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.EEs, srv)
 	return nil

@@ -20,8 +20,8 @@ package services
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/thresholds"
 	"github.com/cgrates/cgrates/utils"
@@ -67,15 +67,13 @@ func (s *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	ts := thresholds.NewThresholdService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := engine.NewService(ts)
+	srv, err := newRPCService(apis.NewThresholdSv1(ts), utils.ThresholdSv1)
 	if err != nil {
 		return err
 	}
 	ts.StartLoop(context.TODO())
 	s.thrs = ts
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ThresholdS, srv)
 	return nil
 }
