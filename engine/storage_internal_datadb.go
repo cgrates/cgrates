@@ -38,7 +38,6 @@ type InternalDB struct {
 	prefixIndexedFields []string
 	indexedFieldsMutex  sync.RWMutex   // used for reload
 	cnter               *utils.Counter // used for OrderID for cdr
-	ms                  utils.Marshaler
 	db                  *ltcache.TransCache
 }
 
@@ -63,12 +62,10 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 	if err != nil {
 		return nil, err
 	}
-	ms, _ := utils.NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
-		ms:                  ms,
 		db:                  tc,
 	}, nil
 }
@@ -376,16 +373,13 @@ func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (s
 	}
 	return x.(*utils.StatQueue), nil
 }
-func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, _ *StoredStatQueue, sq *utils.StatQueue) error {
 	if sq == nil {
-		sq, err = ssq.AsStatQueue(iDB.ms)
-		if err != nil {
-			return
-		}
+		return utils.ErrMandatoryIeMissing
 	}
 	iDB.db.Set(utils.CacheStatQueues, utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
 		true, utils.NonTransactional)
-	return
+	return nil
 }
 func (iDB *InternalDB) RemStatQueueDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id),

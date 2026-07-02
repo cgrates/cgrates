@@ -29,14 +29,10 @@ import (
 )
 
 func TestUpdateReplicationFilters(t *testing.T) {
-	cfgTmp := config.CgrConfig()
-	defer config.SetCgrConfig(cfgTmp)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
-	config.SetCgrConfig(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	dm := &DataManager{}
 	dm.SetCache(cacheS)
@@ -66,14 +62,10 @@ func TestUpdateReplicationFilters(t *testing.T) {
 }
 
 func TestReplicateNnReplicatorSv1(t *testing.T) {
-	cfgTmp := config.CgrConfig()
-	defer config.SetCgrConfig(cfgTmp)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
-	config.SetCgrConfig(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	connMgr := NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
@@ -91,14 +83,10 @@ func TestReplicateNnReplicatorSv1(t *testing.T) {
 }
 
 func TestReplicateMultipleIDs(t *testing.T) {
-	cfgTmp := config.CgrConfig()
-	defer config.SetCgrConfig(cfgTmp)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
-	config.SetCgrConfig(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	connMgr := NewConnManager(cfg)
 	connMgr.SetCache(cacheS)

@@ -201,7 +201,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsPostFailCfg.EFsCfg().FailedPostsDir, fileName)
 
-		ev, err := efs.NewFailoverPosterFromFile(filePath, utils.EEs, &efs.EfS{})
+		ev, err := efs.NewFailoverPosterFromFile(filePath, utils.EEs, efs.NewEfs(cdrsPostFailCfg, nil))
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue

@@ -46,11 +46,11 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
 	reqVars *utils.DataNode,
 	tpl []*config.FCTemplate, tnt, tmz string,
-	cache *engine.CacheS, filterS *engine.FilterS) (sipingo.Message, error) {
+	cfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS) (sipingo.Message, error) {
 	aReq := NewAgentRequest(
 		m, reqVars,
 		nil, nil, nil, nil,
-		tnt, tmz, cache, filterS, nil)
+		tnt, tmz, cfg, cache, filterS, nil)
 	if err := aReq.SetFields(tpl); err != nil {
 		return nil, err
 	}

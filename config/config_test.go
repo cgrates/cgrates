@@ -34,6 +34,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var cgrCfg = NewDefaultCGRConfig()
+
 func TestNewDefaultConfigError(t *testing.T) {
 	if _, err := newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
@@ -57,15 +59,6 @@ func TestNewCgrConfigFromBytesDecodeError(t *testing.T) {
 	expected := "invalid character 'i' looking for beginning of value around line 1 and position 1\n line: \"invalidSection\""
 	if _, err := newCGRConfig(cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v,\n received %+q", expected, err)
-	}
-}
-
-func TestCgrCfgConfigSharing(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	SetCgrConfig(cfg)
-	cfgReturn := CgrConfig()
-	if !reflect.DeepEqual(cfgReturn, cfg) {
-		t.Errorf("Retrieved %v, Expected %v", cfgReturn, cfg)
 	}
 }
 
@@ -6173,7 +6166,7 @@ func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
 	cancel()
 	url := "inexistentURL"
 	expected := `path:"inexistentURL" is not reachable`
-	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
+	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, cfgCgr); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
 	}
 

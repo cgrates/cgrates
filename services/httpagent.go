@@ -70,7 +70,7 @@ func (ha *HTTPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(cm, agntCfg.Conns, cacheS.CacheS(),
+			agents.NewHTTPAgent(ha.cfg, cm, agntCfg.Conns, cacheS.CacheS(),
 				fs, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload, agntCfg.ReplyPayload,
 				agntCfg.RequestProcessors, caps))
 	}

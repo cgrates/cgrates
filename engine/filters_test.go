@@ -1222,7 +1222,7 @@ func TestAPIBan(t *testing.T) {
 		dm:    dmFilterPass,
 		cache: cacheS,
 	}
-	config.CgrConfig().APIBanCfg().Keys = []string{"testKey"}
+	cfg.APIBanCfg().Keys = []string{"testKey"}
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
 		t.Fatal(err)
 	} else if pass {

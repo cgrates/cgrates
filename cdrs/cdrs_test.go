@@ -367,11 +367,6 @@ func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, re
 }
 
 func TestCDRsAttrSProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 
@@ -442,11 +437,6 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 
@@ -519,11 +509,6 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 }
 
 func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 
@@ -616,11 +601,6 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 }
 
 func TestCDRsChrgrSProcessEvent(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}}
 
@@ -681,11 +661,6 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 }
 
 func TestCDRsRateProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaRates] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}}}
 
@@ -755,11 +730,6 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsAccountProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 
@@ -831,11 +801,6 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsThdSProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
@@ -899,11 +864,6 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 
@@ -966,11 +926,6 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 }
 
 func TestCDRsStatSProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 
@@ -1034,11 +989,6 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsEESProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -1106,11 +1056,6 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsProcessEventMock(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -1175,11 +1120,6 @@ func TestCDRsProcessEventMock(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
@@ -1258,11 +1198,6 @@ func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1315,11 +1250,6 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1373,11 +1303,6 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1431,11 +1356,6 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1490,11 +1410,6 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockRateSErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1548,11 +1463,6 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1607,11 +1517,6 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1665,11 +1570,6 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1724,11 +1624,6 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockExportErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1782,11 +1677,6 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1841,11 +1731,6 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockThdsErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1898,11 +1783,6 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -1957,11 +1837,6 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockStatsErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -2015,11 +1890,6 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -2074,11 +1944,6 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 }
 
 func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}}
 
@@ -2127,11 +1992,6 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 }
 
 func TestCDRServerAccountSRefundCharges(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ConnsCfg)}}}
 
@@ -2202,11 +2062,6 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	}
 }
 func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ConnsCfg)}}}
 
@@ -2296,11 +2151,6 @@ func TestPopulateCost(t *testing.T) {
 	}
 }
 func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
@@ -2359,11 +2209,6 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2397,11 +2242,6 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 }
 
 func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer func() {
-		config.SetCgrConfig(tmpC)
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)

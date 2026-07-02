@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/go-diameter/diam"
 	"github.com/cgrates/go-diameter/diam/avp"
@@ -37,7 +36,7 @@ import (
 var dictOnce sync.Once
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
-	firmwareRev int, dictsDir string, network string) (dc *DiameterClient, err error) {
+	firmwareRev int, dictsDir string, dictsAppendDefaults bool, network string) (dc *DiameterClient, err error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
@@ -47,7 +46,7 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		Dict:             dict.Default,
 	}
 	if len(dictsDir) != 0 {
-		if !config.CgrConfig().DiameterAgentCfg().DictionariesAppendDefaults {
+		if !dictsAppendDefaults {
 			if cfg.Dict, err = dict.NewParser(); err != nil {
 				return nil, err
 			}

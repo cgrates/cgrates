@@ -348,11 +348,8 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 }
 
 func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
-	tmpC := config.CgrConfig()
-
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -403,11 +400,8 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 }
 
 func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
-	tmpC := config.CgrConfig()
-
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -471,11 +465,8 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 }
 
 func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
-	tmpC := config.CgrConfig()
-
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -533,11 +524,8 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 }
 
 func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -557,11 +545,8 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 }
 
 func TestThresholdsV1ResetThresholdOK(t *testing.T) {
-	tmpC := config.CgrConfig()
-
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -604,10 +589,8 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 }
 
 func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
-	tmpC := config.CgrConfig()
 	defer func() {
 		guardian.Guardian = guardian.New()
-		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -639,9 +622,6 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 }
 
 func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -680,9 +660,6 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 }
 
 func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -713,15 +690,11 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 }
 
 func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	defer config.SetCgrConfig(tmpC)
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)

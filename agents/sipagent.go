@@ -331,7 +331,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		sa.cfg.TemplatesCfg()[utils.MetaErr],
 		sa.cfg.GeneralCfg().DefaultTenant,
 		sa.cfg.GeneralCfg().DefaultTimezone,
-		sa.cache, sa.fltrS)
+		sa.cfg, sa.cache, sa.fltrS)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s building errSIP for message: %s",
@@ -343,8 +343,8 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 		agReq := NewAgentRequest(dp, reqVars, cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			sa.cache, sa.fltrS, nil)
+				sa.cfg.GeneralCfg().DefaultTimezone),
+			sa.cfg, sa.cache, sa.fltrS, nil)
 		var lclProcessed bool
 		if lclProcessed, err = sa.processRequest(reqProcessor, agReq); err != nil {
 			utils.Logger.Warning(

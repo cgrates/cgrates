@@ -34,9 +34,9 @@ import (
 )
 
 func TestDynamicDPnewDynamicDP(t *testing.T) {
-
+	cfg := config.NewDefaultCGRConfig()
 	expDDP := &DynamicDP{
-		cfg:    config.CgrConfig(),
+		cfg:    cfg,
 		tenant: "cgrates.org",
 		initialDP: utils.StringSet{
 			"test": struct{}{},
@@ -45,7 +45,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 		ctx:   context.Background(),
 	}
 
-	if rcv := NewDynamicDP(context.Background(), config.CgrConfig(), "cgrates.org",
+	if rcv := NewDynamicDP(context.Background(), cfg, "cgrates.org",
 		utils.StringSet{"test": struct{}{}}, nil); !reflect.DeepEqual(rcv, expDDP) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(expDDP), utils.ToJSON(rcv))
@@ -435,7 +435,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaLibPhoneNumber(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 	ms := utils.MapStorage{}
-	dDp := NewDynamicDP(context.Background(), config.CgrConfig(), "cgrates.org", ms, nil)
+	dDp := NewDynamicDP(context.Background(), config.NewDefaultCGRConfig(), "cgrates.org", ms, nil)
 
 	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)

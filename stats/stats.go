@@ -36,6 +36,8 @@ import (
 
 // matchedStatQueue is the unit matched by filters
 type matchedStatQueue struct {
+	cfg       *config.CGRConfig
+	filters   *engine.FilterS
 	statQueue *utils.StatQueue
 	profile   *utils.StatQueueProfile
 	ttl       *time.Duration // timeToLeave, picked on each init
@@ -268,6 +270,8 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 			return nil, nil, err
 		}
 		sqs = append(sqs, &matchedStatQueue{
+			cfg:       s.cfg,
+			filters:   s.filters,
 			statQueue: sq,
 			profile:   sqPrfl,
 			ttl:       ttl,
@@ -409,7 +413,7 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 	statQueueIDs = getStatQueueIDs(matchSQs)
 	var withErrors bool
 	for idx, m := range matchSQs {
-		if err = m.processEvent(ctx, tnt, args.ID, s.filters, evNm); err != nil {
+		if err = m.processEvent(ctx, tnt, args.ID, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> Queue: %s, ignoring event: %s, error: %v",
 					utils.StatS, m.statQueue.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err))
@@ -445,11 +449,11 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 }
 
 // processEvent processes a utils.CGREvent, returns true if processed
-func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, evNm utils.MapStorage) error {
 
 	//processing metrics without storing in the queue
 	if oneEv := m.isOneEvent(); oneEv {
-		return m.addStatOneEvent(ctx, tnt, filterS, evNm)
+		return m.addStatOneEvent(ctx, tnt, evNm)
 	}
 	if _, err := remExpired(m.statQueue); err != nil {
 		return err
@@ -457,7 +461,7 @@ func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, 
 	if err := m.remOnQueueLength(); err != nil {
 		return err
 	}
-	return m.addStatEvent(ctx, tnt, evID, filterS, evNm)
+	return m.addStatEvent(ctx, tnt, evID, evNm)
 }
 
 // remEventWithID removes an event from metrics
@@ -513,7 +517,7 @@ func (m *matchedStatQueue) remOnQueueLength() error {
 }
 
 // addStatEvent computes metrics for an event
-func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *engine.FilterS, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, evNm utils.MapStorage) error {
 	var expTime *time.Time
 	if m.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*m.ttl))
@@ -522,9 +526,9 @@ func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, 
 	// recreate the request without *opts
 	metricEvNm := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]}
 
-	dDP := engine.NewDynamicDP(ctx, config.CgrConfig(), tnt, metricEvNm, filterS)
+	dDP := engine.NewDynamicDP(ctx, m.cfg, tnt, metricEvNm, m.filters)
 	for idx, metricCfg := range m.profile.Metrics {
-		pass, err := filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
+		pass, err := m.filters.Pass(ctx, tnt, metricCfg.FilterIDs,
 			evNm)
 		if err != nil {
 			return err
@@ -538,7 +542,7 @@ func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, 
 			return err
 		}
 		// every metric has a blocker, verify them
-		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm)
+		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, m.filters, tnt, evNm)
 		if err != nil {
 			return err
 		}
@@ -553,12 +557,12 @@ func (m *matchedStatQueue) isOneEvent() bool {
 	return m.ttl != nil && *m.ttl == -1
 }
 
-func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *engine.FilterS, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, evNm utils.MapStorage) error {
 	metricEvNm := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]}
-	dDP := engine.NewDynamicDP(ctx, config.CgrConfig(), tnt, metricEvNm, filterS)
+	dDP := engine.NewDynamicDP(ctx, m.cfg, tnt, metricEvNm, m.filters)
 
 	for idx, metricCfg := range m.profile.Metrics {
-		pass, err := filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
+		pass, err := m.filters.Pass(ctx, tnt, metricCfg.FilterIDs,
 			evNm)
 		if err != nil {
 			return err
@@ -571,7 +575,7 @@ func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, fil
 			return err
 		}
 
-		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm)
+		blocker, err := engine.BlockerFromDynamics(ctx, metricCfg.Blockers, m.filters, tnt, evNm)
 		if err != nil {
 			return err
 		}

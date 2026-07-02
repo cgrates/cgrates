@@ -49,7 +49,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	stringFilter = append(stringFilter, x)
 	attribStringF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
 	dmMatch.SetFilter(context.Background(), attribStringF, true)
@@ -59,7 +59,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	prefixFilter = append(prefixFilter, x)
 	attribPrefF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
 	dmMatch.SetFilter(context.Background(), attribPrefF, true)
@@ -69,7 +69,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	defaultFilter = append(defaultFilter, x)
 	attribDefaultF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter}
 	dmMatch.SetFilter(context.Background(), attribDefaultF, true)
@@ -80,12 +80,12 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	}
 	suffixFilter = append(suffixFilter, x)
 	attribSufF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "sufFilter",
 		Rules:  suffixFilter}
 	dmMatch.SetFilter(context.Background(), attribSufF, true)
 
-	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
+	tnt := cfg.GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
@@ -158,7 +158,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	}
 	stringFilter = append(stringFilter, x)
 	attribStringF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
 	dmMatch.SetFilter(context.TODO(), attribStringF, true)
@@ -169,7 +169,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	}
 	prefixFilter = append(prefixFilter, x)
 	attribPrefF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
 	dmMatch.SetFilter(context.TODO(), attribPrefF, true)
@@ -180,13 +180,13 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	}
 	defaultFilter = append(defaultFilter, x)
 	attribDefaultF := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter,
 	}
 	dmMatch.SetFilter(context.TODO(), attribDefaultF, true)
 
-	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
+	tnt := cfg.GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
@@ -195,7 +195,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		tnt, ctx, prefixFilterID, []string{"prefFilter"}); err != nil {
 		t.Error(err)
 	}
-	tntCtx := utils.ConcatenatedKey(config.CgrConfig().GeneralCfg().DefaultTenant, ctx)
+	tntCtx := utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, ctx)
 
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),

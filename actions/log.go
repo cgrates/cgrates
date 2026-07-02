@@ -93,7 +93,8 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt st
 		utils.MetaOpts: optsMS,
 		utils.MetaCfg:  aL.config.GetDataProvider(),
 	}, aL.config.GeneralCfg().DefaultTenant,
-		aL.cache, aL.fltrS, oNm)
+		aL.cache, aL.fltrS, oNm,
+		aL.config.GeneralCfg().RoundingDecimals, aL.config.GeneralCfg().DefaultTimezone)
 
 	if err = cdrLogReq.SetFields(ctx, template); err != nil {
 		return

@@ -187,7 +187,7 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 				reqProcessor.Tenant, sma.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					sma.cgrCfg.GeneralCfg().DefaultTimezone),
-				nil, sma.fltrS, nil),
+				sma.cgrCfg, nil, sma.fltrS, nil),
 			utils.AsteriskAgent, sma.connMgr,
 			sessConns, nil, nil, sma.fltrS)
 		if lclProcessed {

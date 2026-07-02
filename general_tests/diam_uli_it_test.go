@@ -145,7 +145,7 @@ func TestDiamULI(t *testing.T) {
 	diamClient, err := agents.NewDiameterClient(lstnr.Address, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-		cfg.DiameterAgentCfg().DictionariesPath, lstnr.Network)
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().DictionariesAppendDefaults, lstnr.Network)
 	if err != nil {
 		t.Fatal(err)
 	}

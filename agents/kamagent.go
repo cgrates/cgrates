@@ -44,15 +44,16 @@ var (
 	kamProcessCDRRegex     = regexp.MustCompile(CGR_PROCESS_CDR)
 )
 
-func NewKamailioAgent(kaCfg *config.KamAgentCfg,
+func NewKamailioAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, timezone string, caps *engine.Caps, fltrS *engine.FilterS) (ka *KamailioAgent) {
 	ka = &KamailioAgent{
-		cfg:              kaCfg,
+		cfg:              cfg,
+		kamCfg:           cfg.KamAgentCfg(),
 		connMgr:          connMgr,
 		timezone:         timezone,
 		caps:             caps,
 		fltrS:            fltrS,
-		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
+		conns:            make([]*kamevapi.KamEvapi, len(cfg.KamAgentCfg().EvapiConns)),
 		activeSessionIDs: make(chan []*sessions.SessionID),
 	}
 	srv, _ := birpc.NewService(ka, "", false)
@@ -61,7 +62,8 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 }
 
 type KamailioAgent struct {
-	cfg              *config.KamAgentCfg
+	cfg              *config.CGRConfig
+	kamCfg           *config.KamAgentCfg
 	connMgr          *engine.ConnManager
 	timezone         string
 	caps             *engine.Caps
@@ -81,7 +83,7 @@ func (self *KamailioAgent) Connect() (err error) {
 		kamProcessCDRRegex:     {self.onCgrProcessCDR},
 	}
 	errChan := make(chan error)
-	for connIdx, connCfg := range self.cfg.EvapiConns {
+	for connIdx, connCfg := range self.kamCfg.EvapiConns {
 		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, connCfg.MaxReconnectInterval,
 			utils.FibDuration, eventHandlers, utils.Logger); err != nil {
 			return
@@ -126,7 +128,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
@@ -145,7 +147,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 		}
 		return
 	}
-	authArgs := kev.AsCGREvent(ka.timezone)
+	authArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
 	if authArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
@@ -155,7 +157,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	var authReply sessions.V1AuthorizeReply
 	// take the error after calling SessionSv1.AuthorizeEvent
 	// and send it as parameter to AsKamAuthReply
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, ka.fltrS)
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, ka.fltrS)
 	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
@@ -181,7 +183,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
@@ -196,13 +198,13 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 				utils.ErrMandatoryIeMissing.Error()))
 		return
 	}
-	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
 	}
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
 	var initReply sessions.V1InitSessionReply
 	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1InitiateSession,
 		cgrEv, &initReply); err != nil {
@@ -231,7 +233,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
@@ -245,13 +247,13 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}
 	}
 	var reply string
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
 	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1TerminateSession,
 		cgrEv, &reply); err != nil {
 		utils.Logger.Err(
@@ -259,7 +261,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		// no return here since we want CDR anyhow
 	}
-	if ka.cfg.CreateCdr || strings.Contains(kev[utils.CGRFlags], utils.MetaCDRs) {
+	if ka.kamCfg.CreateCdr || strings.Contains(kev[utils.CGRFlags], utils.MetaCDRs) {
 		if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
@@ -310,7 +312,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
@@ -337,7 +339,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 		}
 	}
 
-	procEvArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	procEvArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
 	if procEvArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process message session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
@@ -345,7 +347,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	}
 	procEvArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns, utils.MetaSessionS, procEvArgs.Tenant, procEvArgs.AsDataProvider(), nil, ka.fltrS)
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procEvArgs.Tenant, procEvArgs.AsDataProvider(), nil, ka.fltrS)
 	var processReply sessions.V1ProcessMessageReply
 	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessMessage, procEvArgs, &processReply)
 	// take the error after calling SessionSv1.ProcessMessage
@@ -374,7 +376,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
@@ -392,7 +394,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 		return
 	}
 
-	procCDRArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	procCDRArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
 	if procCDRArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process cdr session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
@@ -400,7 +402,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	}
 	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.cfg.Conns, utils.MetaSessionS, procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), nil, ka.fltrS)
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), nil, ka.fltrS)
 	var processReply string
 	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
 	// take the error after calling SessionSv1.ProcessCDR
@@ -467,7 +469,7 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, _ string, s
 	if sentDLG == 0 {
 		return
 	}
-	tm := time.NewTimer(config.CgrConfig().GeneralCfg().ReplyTimeout)
+	tm := time.NewTimer(ka.cfg.GeneralCfg().ReplyTimeout)
 	for i := 0; i < sentDLG; i++ {
 		select {
 		case sIDs := <-ka.activeSessionIDs:
@@ -486,7 +488,7 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, _ string, s
 // Reload recreates the connection buffers
 // only used on reload
 func (ka *KamailioAgent) Reload() {
-	ka.conns = make([]*kamevapi.KamEvapi, len(ka.cfg.EvapiConns))
+	ka.conns = make([]*kamevapi.KamEvapi, len(ka.kamCfg.EvapiConns))
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface

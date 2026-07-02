@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 	"github.com/mediocregopher/radix/v3"
@@ -362,7 +361,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 			}
 		}
 		return rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 
@@ -559,15 +558,13 @@ func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
-		if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
-			return
-		}
+		return utils.ErrMandatoryIeMissing
 	}
-	var result []byte
-	if result, err = rs.ms.Marshal(ssq); err != nil {
-		return
+	result, err := rs.ms.Marshal(ssq)
+	if err != nil {
+		return err
 	}
 	return rs.Cmd(nil, redisSET, utils.StatQueuePrefix+ssq.SqID(), string(result))
 }

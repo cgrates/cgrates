@@ -35,7 +35,7 @@ func NewConnManager(cfg *config.CGRConfig) *ConnManager {
 	return &ConnManager{
 		cfg:         cfg,
 		rpcInternal: make(map[string]chan context.ClientConnector),
-		dynIntCh:    make(RPCClientSet),
+		dynIntCh:    newRPCClientSet(cfg),
 		connCache:   ltcache.NewCache(-1, 0, true, false, nil),
 	}
 }
@@ -54,8 +54,7 @@ type ConnManager struct {
 	cache       *CacheS
 	rpcInternal map[string]chan birpc.ClientConnector
 	disp        map[string]chan birpc.ClientConnector
-	dispIntCh   RPCClientSet
-	dynIntCh    RPCClientSet
+	dynIntCh    *RPCClientSet
 	connCache   *ltcache.Cache
 }
 
@@ -223,9 +222,6 @@ func (cM *ConnManager) Reload() {
 }
 
 func (cM *ConnManager) GetInternalChan() chan birpc.ClientConnector {
-	if cM.dispIntCh != nil {
-		return cM.dispIntCh.GetInternalChanel()
-	}
 	return cM.dynIntCh.GetInternalChanel()
 }
 
@@ -235,7 +231,7 @@ func (cM *ConnManager) GetDispInternalChan() chan birpc.ClientConnector {
 func (cM *ConnManager) AddInternalConn(connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
 	cM.rpcInternal[connName] = iConnCh
-	cM.dynIntCh[apiPrefix] = iConnCh
+	cM.dynIntCh.conns[apiPrefix] = iConnCh
 }
 
 func (cM *ConnManager) getInternalConnChan(key string) (c chan birpc.ClientConnector, has bool) {

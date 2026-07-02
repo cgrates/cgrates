@@ -38,7 +38,7 @@ var (
 	dataDB engine.DataDB
 
 	cgrLoaderFlags = flag.NewFlagSet(utils.CgrLoader, flag.ContinueOnError)
-	dfltCfg        = config.CgrConfig()
+	dfltCfg        = config.NewDefaultCGRConfig()
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 	printConfig = cgrLoaderFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
@@ -118,7 +118,7 @@ var (
 )
 
 func loadConfig() (ldrCfg *config.CGRConfig) {
-	ldrCfg = config.CgrConfig()
+	ldrCfg = config.NewDefaultCGRConfig()
 	if *cfgPath != utils.EmptyString {
 		var err error
 		if ldrCfg, err = config.NewCGRConfigFromPath(context.Background(), *cfgPath); err != nil {
@@ -139,7 +139,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 				return
 			}
 		}
-		config.SetCgrConfig(ldrCfg)
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Type {
@@ -291,12 +290,13 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 
 func getLoader(cfg *config.CGRConfig) (engine.LoadReader, error) {
 	if gprefix := utils.MetaGoogleAPI + utils.ConcatenatedKeySep; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
-		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
+		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix),
+			cfg.LoaderCgrCfg().GapiCredentials, cfg.LoaderCgrCfg().GapiToken)
 	}
 	if !utils.IsURL(*dataPath) {
 		return engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	}
-	return engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath), nil
+	return engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath, cfg.GeneralCfg().ReplyTimeout), nil
 }
 
 func main() {
@@ -339,7 +339,7 @@ func main() {
 	cacheS := engine.NewCacheS(ldrCfg, nil, cM, nil)
 	cM.SetCache(cacheS)
 	var tpReader *engine.TpReader
-	if tpReader, err = engine.NewTpReader(dbcManager, loader,
+	if tpReader, err = engine.NewTpReader(dbcManager, ldrCfg, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
 		ldrCfg.LoaderCgrCfg().ActionSConns, cacheS, cM); err != nil {

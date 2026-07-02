@@ -288,20 +288,11 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 // }
 
 func TestRPCClientSetCallErrCtxTimeOut(t *testing.T) {
-	cfgtmp := config.CgrConfig()
-
-	defer func() {
-		config.SetCgrConfig(cfgtmp)
-
-	}()
-
 	connChan := make(chan birpc.ClientConnector, 1)
-	s := &RPCClientSet{
-		"test": connChan,
-	}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().ConnectTimeout = 1 * time.Millisecond
-	config.SetCgrConfig(cfg)
+	s := newRPCClientSet(cfg)
+	s.conns["test"] = connChan
 
 	var args any
 	var reply any
@@ -315,9 +306,8 @@ func TestRPCClientSetCallErrCtxTimeOut(t *testing.T) {
 func TestRPCClientSetCallErrBadMethod(t *testing.T) {
 
 	connChan := make(chan birpc.ClientConnector, 1)
-	s := &RPCClientSet{
-		"test": connChan,
-	}
+	s := newRPCClientSet(config.NewDefaultCGRConfig())
+	s.conns["test"] = connChan
 
 	var args any
 	var reply any
@@ -331,9 +321,8 @@ func TestRPCClientSetCallErrBadMethod(t *testing.T) {
 func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
 
 	connChan := make(chan birpc.ClientConnector, 1)
-	s := &RPCClientSet{
-		"test": connChan,
-	}
+	s := newRPCClientSet(config.NewDefaultCGRConfig())
+	s.conns["test"] = connChan
 
 	var args any
 	var reply any

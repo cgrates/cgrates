@@ -131,7 +131,7 @@ func (rdr *AMQPER) processMessage(msg []byte) error {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
+		rdr.cgrCfg, rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant,
 		rdr.Config().Filters, agReq)
 	if err != nil || !pass {

@@ -52,7 +52,7 @@ func (s *CommonListenerService) Start(shutdown *utils.SyncedChan, registry *serv
 	defer s.mu.Unlock()
 	s.cls = commonlisteners.NewCommonListenerS(cs.(*CapService).Caps())
 	if s.cfg.ConfigSCfg().Enabled {
-		s.cls.RegisterHTTPFunc(s.cfg.ConfigSCfg().URL, config.HandlerConfigS)
+		s.cls.RegisterHTTPFunc(s.cfg.ConfigSCfg().URL, config.HandlerConfigS(s.cfg))
 	}
 	return nil
 }

@@ -29,11 +29,12 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(connMgr *engine.ConnManager,
+func NewHTTPAgent(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	conns map[string][]*config.DynamicConns,
 	cache *engine.CacheS, filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor, caps *engine.Caps) *HTTPAgent {
 	return &HTTPAgent{
+		cfg:           cfg,
 		connMgr:       connMgr,
 		cache:         cache,
 		filterS:       filterS,
@@ -48,6 +49,7 @@ func NewHTTPAgent(connMgr *engine.ConnManager,
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
+	cfg           *config.CGRConfig
 	connMgr       *engine.ConnManager
 	cache         *engine.CacheS
 	filterS       *engine.FilterS
@@ -83,8 +85,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ha.cache, ha.filterS, nil)
+				ha.cfg.GeneralCfg().DefaultTimezone),
+			ha.cfg, ha.cache, ha.filterS, nil)
 		sessConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaSessionS, agReq.Tenant, agReq, nil, ha.filterS)
 		statConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaStats, agReq.Tenant, agReq, nil, ha.filterS)
 		thConns, _ := engine.GetConnIDs(context.TODO(), ha.conns, utils.MetaThresholds, agReq.Tenant, agReq, nil, ha.filterS)

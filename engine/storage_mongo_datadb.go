@@ -31,7 +31,6 @@ import (
 	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 
@@ -688,7 +687,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			)
 			return err
 		})
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 
@@ -1008,14 +1007,12 @@ func (ms *MongoStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StoredStatQueue
-func (ms *MongoStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (ms *MongoStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
-		if ssq, err = NewStoredStatQueue(sq, ms.ms); err != nil {
-			return err
-		}
+		return utils.ErrMandatoryIeMissing
 	}
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
-		_, err = ms.getCol(ColSqs).UpdateOne(sctx, bson.M{"tenant": ssq.Tenant, "id": ssq.ID},
+		_, err := ms.getCol(ColSqs).UpdateOne(sctx, bson.M{"tenant": ssq.Tenant, "id": ssq.ID},
 			bson.M{"$set": ssq},
 			options.Update().SetUpsert(true),
 		)

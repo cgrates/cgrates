@@ -1136,7 +1136,7 @@ func testAttributeProcessEvent(t *testing.T) {
 func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
 			FilterIDs: []string{"*string:~*req.Category:call", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1165,7 +1165,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: attrCfg.GeneralCfg().DefaultTenant,
 		ID:     "HeaderEventForAttribute",
 		Event: map[string]any{
 			"Category": "call",
@@ -1183,7 +1183,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 			},
 		},
 		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: attrCfg.GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
 			Event: map[string]any{
 				"Category": "call_suffix",
@@ -1207,7 +1207,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1225,7 +1225,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	}
 	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1243,7 +1243,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	}
 	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1280,7 +1280,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: attrCfg.GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
 			"InitialField": "InitialValue",
@@ -1311,7 +1311,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 		},
 		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: attrCfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				"InitialField": "InitialValue",
@@ -1336,7 +1336,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1354,7 +1354,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	}
 	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1372,7 +1372,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	}
 	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.Field2:Value2", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
 			Attributes: []*utils.ExternalAttribute{
@@ -1409,7 +1409,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: attrCfg.GeneralCfg().DefaultTenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]any{
 			"InitialField": "InitialValue",
@@ -1440,7 +1440,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 		},
 		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: attrCfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				"InitialField": "InitialValue",
@@ -1711,7 +1711,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 	// the blocker on the profile is false
 	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    attrCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_WITH_BLOCKER_TRUE",
 			FilterIDs: []string{"*string:~*req.Blockers:*exists", "*eq:~*opts.*attributesProcessRuns:2"},
 			Blockers: utils.DynamicBlockers{
@@ -1753,7 +1753,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 	// here the the blocker on the profile is true
 	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: attrCfg.GeneralCfg().DefaultTenant,
 			ID:     "ATTR_WITH_BLOCKER",
 			FilterIDs: []string{"*string:~*req.Blockers:*exists",
 				"*notexists:~*opts.*usage:"},

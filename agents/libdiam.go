@@ -461,7 +461,7 @@ func diamErr(c diam.Conn, m *diam.Message, resCode uint32, reqVars *utils.DataNo
 	tnt := cfg.GeneralCfg().DefaultTenant
 	tmz := cfg.GeneralCfg().DefaultTimezone
 	aReq := NewAgentRequest(newDADataProvider(nil, m), reqVars,
-		nil, nil, nil, nil, tnt, tmz, cache, filterS, nil)
+		nil, nil, nil, nil, tnt, tmz, cfg, cache, filterS, nil)
 	if err := aReq.SetFields(cfg.TemplatesCfg()[utils.MetaErr]); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> message: %s - failed to parse *err template: %v",

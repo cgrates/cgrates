@@ -1332,6 +1332,7 @@ func TestSortedRoutesListAsNavigableMap(t *testing.T) {
 }
 
 func TestRouteLazyPassErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 
 	filters := []*engine.FilterRule{
 		{
@@ -1354,13 +1355,14 @@ func TestRouteLazyPassErr(t *testing.T) {
 
 	expErr := "NOT_IMPLEMENTED:nr1"
 	if _, err := routeLazyPass(context.Background(), filters, ev,
-		data, config.CgrConfig(), nil); err == nil || err.Error() != expErr {
+		data, cfg, nil); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 
 }
 
 func TestRouteLazyPassTrue(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	filter, err := engine.NewFilterFromInline(
 		"cgrates.org",
 		"*string:~*opts.<~*opts.*originID;~*req.RunID;-Cost>:~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
@@ -1395,7 +1397,7 @@ func TestRouteLazyPassTrue(t *testing.T) {
 	}
 
 	if ok, err := routeLazyPass(context.Background(), rules, ev,
-		data, config.CgrConfig(), nil); err != nil {
+		data, cfg, nil); err != nil {
 		t.Error(err)
 	} else if !ok {
 		t.Error("Returned false, expecting true")

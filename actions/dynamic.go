@@ -94,7 +94,7 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -277,7 +277,7 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -492,7 +492,7 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -672,7 +672,7 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -839,7 +839,7 @@ func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, 
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -995,7 +995,7 @@ func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -1126,7 +1126,7 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -1256,7 +1256,7 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -1301,7 +1301,7 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 			params[1] = routeFieldParts[1]
 			if routeProfileFound, err = aL.dm.GetRouteProfile(context.Background(),
 				utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-					config.CgrConfig().GeneralCfg().DefaultTenant),
+					aL.config.GeneralCfg().DefaultTenant),
 				params[1], true, true, utils.NonTransactional); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				return err
@@ -1573,7 +1573,7 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -1797,7 +1797,7 @@ func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trg
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
@@ -2003,7 +2003,7 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 	}
 	data[utils.MetaNow] = time.Now()
 	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
-		config.CgrConfig().GeneralCfg().DefaultTenant)
+		aL.config.GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)

@@ -1103,7 +1103,7 @@ func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/NotExists/cgrates.json", nil)
 	w := httptest.NewRecorder()
-	HandlerConfigS(w, req)
+	HandlerConfigS(cgrCfg)(w, req)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)
@@ -1135,7 +1135,7 @@ func testHttpHandlerConfigSInvalidPath(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/\x00/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutredis/cgrates.json", nil)
 	w := httptest.NewRecorder()
-	HandlerConfigS(w, req)
+	HandlerConfigS(cgrCfg)(w, req)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)
@@ -1153,7 +1153,7 @@ func testHttpHandlerConfigSForFile(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutredis/cgrates.json", nil)
 	w := httptest.NewRecorder()
-	HandlerConfigS(w, req)
+	HandlerConfigS(cgrCfg)(w, req)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)
@@ -1172,7 +1172,7 @@ func testHttpHandlerConfigSForNotExistFolder(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/NotExists/", nil)
 	w := httptest.NewRecorder()
-	HandlerConfigS(w, req)
+	HandlerConfigS(cgrCfg)(w, req)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)
@@ -1190,7 +1190,7 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/diamagent_internal/", nil)
 	w := httptest.NewRecorder()
-	HandlerConfigS(w, req)
+	HandlerConfigS(cgrCfg)(w, req)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)

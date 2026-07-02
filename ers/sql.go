@@ -141,7 +141,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 	var filtersObjList []*engine.Filter // List of filter objects from rdr.Config().Filters, received from DB
 	for _, fltrID := range rdr.Config().Filters {
-		if resultFilter, err := rdr.dm.GetFilter(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant, fltrID, true, false, utils.NonTransactional); err != nil {
+		if resultFilter, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant, fltrID, true, false, utils.NonTransactional); err != nil {
 			rdr.rdrErr <- err
 			return
 		} else {
@@ -318,7 +318,7 @@ func (rdr *SQLEventReader) processMessage(ev map[string]any) (err error) {
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.cache, rdr.fltrS, nil) // create an AgentRequest
+		rdr.cgrCfg, rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 	var pass bool
 	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.lazyFilters,
 		agReq); err != nil || !pass {

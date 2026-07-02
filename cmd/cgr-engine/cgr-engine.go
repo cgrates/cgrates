@@ -352,7 +352,6 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 	if len(utils.ConcurrentReqsStrategy) != 0 {
 		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
 	}
-	config.SetCgrConfig(cfg) // Share the config object
 	return
 }
 

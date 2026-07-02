@@ -127,7 +127,7 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 	var filtersObjList []*engine.Filter
 	for _, fltrID := range rdr.Config().Filters {
-		f, err := rdr.dm.GetFilter(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant,
+		f, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			fltrID, true, false, utils.NonTransactional)
 		if err != nil {
 			rdr.rdrErr <- err

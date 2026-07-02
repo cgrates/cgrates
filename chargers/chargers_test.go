@@ -953,7 +953,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 		cfg:   cfg,
 	}
 	cgrEv := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]any{
 			"Charger":        "ChargerProfile1",

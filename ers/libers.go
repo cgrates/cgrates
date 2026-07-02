@@ -32,7 +32,7 @@ import (
 )
 
 // mergePartialEvents will unite the events using the reader configuration
-func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, cache *engine.CacheS, fltrS *engine.FilterS, dftTnt, dftTmz string) (cgrEv *utils.CGREvent, err error) {
+func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, cgrCfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dftTnt, dftTmz string) (cgrEv *utils.CGREvent, err error) {
 	cgrEv = cgrEvs[0]     // by default there is at least one event
 	if len(cgrEvs) != 1 { // need to merge the incoming events
 		// prepare the field after which the events are ordered
@@ -88,7 +88,7 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, ca
 			utils.MapStorage(cgrEv.Event), nil,
 			nil, nil, cgrEv.APIOpts, cfg.Tenant, dftTnt,
 			utils.FirstNonEmpty(cfg.Timezone, dftTmz),
-			cache, fltrS, nil) // create an AgentRequest
+			cgrCfg, cache, fltrS, nil) // create an AgentRequest
 		if err = agReq.SetFields(cfg.PartialCommitFields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> processing partial event: <%s>, ignoring due to error: <%s>",

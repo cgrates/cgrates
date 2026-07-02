@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 	"gorm.io/gorm"
@@ -889,11 +888,9 @@ func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 	return ssq.AsStatQueue(sqls.ms)
 }
 
-func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error) {
+func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
-		if ssq, err = NewStoredStatQueue(sq, sqls.ms); err != nil {
-			return
-		}
+		return utils.ErrMandatoryIeMissing
 	}
 	tx := sqls.db.Begin()
 	mdl := &StatQueueMdl{
@@ -901,18 +898,18 @@ func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQue
 		ID:        ssq.ID,
 		StatQueue: ssq.AsMapStringInterface(),
 	}
-	if err = tx.Model(&StatQueueMdl{}).Where(
+	if err := tx.Model(&StatQueueMdl{}).Where(
 		StatQueueMdl{Tenant: mdl.Tenant, ID: mdl.ID}).Delete(
 		StatQueueMdl{}).Error; err != nil {
 		tx.Rollback()
-		return
+		return err
 	}
-	if err = tx.Save(mdl).Error; err != nil {
+	if err := tx.Save(mdl).Error; err != nil {
 		tx.Rollback()
-		return
+		return err
 	}
 	tx.Commit()
-	return
+	return nil
 }
 
 func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
@@ -1505,7 +1502,7 @@ func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 
 			return tx.Table(utils.LoadInstKey).Save(&newMdl).Error
 		})
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
+	}, 0, utils.LoadInstKey)
 	return err
 }
 

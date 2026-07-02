@@ -111,27 +111,37 @@ func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, cer
 }
 
 // RPCClientSet is a RPC ClientConnector for the internal subsystems
-type RPCClientSet map[string]chan birpc.ClientConnector
+type RPCClientSet struct {
+	cfg   *config.CGRConfig
+	conns map[string]chan birpc.ClientConnector
+}
+
+func newRPCClientSet(cfg *config.CGRConfig) *RPCClientSet {
+	return &RPCClientSet{
+		cfg:   cfg,
+		conns: make(map[string]chan birpc.ClientConnector),
+	}
+}
 
 // GetInternalChanel is used when RPCClientSet is passed as internal connection for RPCPool
-func (s RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
+func (s *RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
 	connChan := make(chan birpc.ClientConnector, 1)
 	connChan <- s
 	return connChan
 }
 
 // Call the implementation of the birpc.ClientConnector interface
-func (s RPCClientSet) Call(ctx *context.Context, method string, args any, reply any) error {
+func (s *RPCClientSet) Call(ctx *context.Context, method string, args any, reply any) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	connCh, has := s[methodSplit[0]]
+	connCh, has := s.conns[methodSplit[0]]
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	var conn birpc.ClientConnector
-	ctx2, cancel := context.WithTimeout(ctx, config.CgrConfig().GeneralCfg().ConnectTimeout)
+	ctx2, cancel := context.WithTimeout(ctx, s.cfg.GeneralCfg().ConnectTimeout)
 	select {
 	case conn = <-connCh:
 		connCh <- conn

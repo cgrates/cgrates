@@ -184,7 +184,7 @@ func (rdr *XMLFileER) processFile(fName string) error {
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.cache, rdr.fltrS, nil) // create an AgentRequest
+			rdr.cgrCfg, rdr.cache, rdr.fltrS, nil) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(

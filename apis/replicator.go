@@ -722,11 +722,7 @@ func (r *ReplicatorSv1) SetActionProfile(ctx *context.Context, args *utils.Actio
 // Unlike the standard Set pattern, StatQueueWithAPIOpts uses a named field
 // (not embedded), so tenant/ID access goes through args.StatQueue.
 func (r *ReplicatorSv1) SetStatQueue(ctx *context.Context, args *utils.StatQueueWithAPIOpts, reply *string) error {
-	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueues)
-	if err != nil {
-		return err
-	}
-	if err := db.SetStatQueueDrv(ctx, nil, args.StatQueue); err != nil {
+	if err := r.dm.SetStatQueueWithoutReplicate(ctx, args.StatQueue); err != nil {
 		return err
 	}
 	if r.admin.cfg.GeneralCfg().CachingDelay != 0 {

@@ -35,7 +35,7 @@ import (
 
 // newAccountBalances constructs accountBalances
 // expects the balances to be ordered and it will keep them that way
-func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.Balance,
+func newBalanceOperators(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
 
@@ -45,7 +45,7 @@ func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.B
 		if blnCfg.Type != utils.MetaConcrete {
 			continue
 		}
-		blncOpers[i] = newConcreteBalanceOperator(ctx, acntID, blnCfg,
+		blncOpers[i] = newConcreteBalanceOperator(ctx, cfg, acntID, blnCfg,
 			fltrS, connMgr, attrSConns, rateSConns)
 		cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
 	}
@@ -54,7 +54,7 @@ func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.B
 		if blnCfg.Type != utils.MetaAbstract {
 			continue
 		}
-		blncOpers[i] = newAbstractBalanceOperator(ctx, acntID, blnCfg, cncrtBlncs,
+		blncOpers[i] = newAbstractBalanceOperator(ctx, cfg, acntID, blnCfg, cncrtBlncs,
 			fltrS, connMgr, attrSConns, rateSConns)
 	}
 	return
@@ -62,16 +62,16 @@ func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.B
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(ctx *context.Context, acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(ctx, acntID, blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newConcreteBalanceOperator(ctx, cfg, acntID, blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceOperator(ctx, acntID, blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newAbstractBalanceOperator(ctx, cfg, acntID, blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	}
 }
 
@@ -212,7 +212,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
-	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big) (ec *utils.EventCharges, err error) {
+	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big, maxItr int) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	// process AttributeS if needed
@@ -230,7 +230,6 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher abstracts are not possible
 	var aPaid, aDenied *decimal.Big
-	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
 	ec = utils.NewEventCharges() //
 	for i := 0; i <= maxItr; i++ {
 		if i != 0 {

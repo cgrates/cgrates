@@ -60,28 +60,30 @@ func (cScfg *ConfigSCfg) loadFromJSONCfg(jsnCfg *ConfigSCfgJson) (err error) {
 	return
 }
 
-// HandlerConfigS handler for httpServer to register the configs
-func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	w.Header().Set("Content-Type", "application/json")
-	// take out the /configs prefix and use the rest of url as path
-	pth := strings.TrimPrefix(r.URL.Path, "/configs")
-	pth = path.Join(CgrConfig().ConfigSCfg().RootDir, pth)
-	fi, err := os.Stat(pth)
-	if err != nil {
-		if os.IsNotExist(err) {
-			w.WriteHeader(404)
-		} else {
-			w.WriteHeader(500)
+// HandlerConfigS returns the httpServer handler to register the configs.
+func HandlerConfigS(cfg *CGRConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		w.Header().Set("Content-Type", "application/json")
+		// take out the /configs prefix and use the rest of url as path
+		pth := strings.TrimPrefix(r.URL.Path, "/configs")
+		pth = path.Join(cfg.ConfigSCfg().RootDir, pth)
+		fi, err := os.Stat(pth)
+		if err != nil {
+			if os.IsNotExist(err) {
+				w.WriteHeader(404)
+			} else {
+				w.WriteHeader(500)
+			}
+			w.Write([]byte(err.Error()))
+			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	switch mode := fi.Mode(); {
-	case mode.IsDir():
-		handleConfigSFolder(&context.Context{Context: r.Context()}, pth, w)
-	case mode.IsRegular():
-		handleConfigSFile(pth, w)
+		switch mode := fi.Mode(); {
+		case mode.IsDir():
+			handleConfigSFolder(&context.Context{Context: r.Context()}, pth, w)
+		case mode.IsRegular():
+			handleConfigSFile(pth, w)
+		}
 	}
 }
 

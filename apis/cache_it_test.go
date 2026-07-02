@@ -428,7 +428,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    chcCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*utils.ExternalAttribute{
@@ -446,7 +446,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 	}
 	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    chcCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*utils.ExternalAttribute{
@@ -464,7 +464,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 	}
 	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant:    chcCfg.GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*utils.ExternalAttribute{

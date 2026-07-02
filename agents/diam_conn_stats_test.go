@@ -148,7 +148,7 @@ func TestDiamConnStats(t *testing.T) {
 		client, err := NewDiameterClient(lstnr.Address,
 			originHost, originRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-			cfg.DiameterAgentCfg().DictionariesPath,
+			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().DictionariesAppendDefaults,
 			lstnr.Network)
 		if err != nil {
 			t.Fatal(err)

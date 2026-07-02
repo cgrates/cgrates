@@ -91,7 +91,6 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	// }
 	// defer dataDB.Close()
 	// dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	// dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), connMng)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())

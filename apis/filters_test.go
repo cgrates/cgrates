@@ -1201,8 +1201,6 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"rep"}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
 	cfg.RPCConns()["connID"] = &config.RPCConn{}
-	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
-	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"connID"}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
@@ -1237,8 +1235,6 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
 	}
-	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{}
-	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
 }
 
 func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
@@ -1248,8 +1244,6 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"rep"}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
 	cfg.RPCConns()["connID"] = &config.RPCConn{}
-	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
-	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"connID"}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
@@ -1287,8 +1281,6 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]", err)
 	}
-	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{}
-	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
 }
 
 func TestFiltersGetFilterIDs(t *testing.T) {

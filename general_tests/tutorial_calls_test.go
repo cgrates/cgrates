@@ -105,7 +105,6 @@ func testCallInitCfg(t *testing.T) {
 	}
 
 	tutorialCallsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tutorialCallsCfg)
 }
 
 func testCallResetDataDb(t *testing.T) {

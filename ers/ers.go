@@ -430,7 +430,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 
 	var cgrEv *utils.CGREvent
-	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.cache, erS.fltrS, // merge the events
+	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
 		erS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -463,7 +463,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 	switch action {
 	case utils.MetaNone: // do nothing with the events
 	case utils.MetaPostCDR: // merge the events and post the to erS
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS,
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS,
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -481,7 +481,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -500,7 +500,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
-				})
+				}, erS.cfg.GeneralCfg().RoundingDecimals, erS.cfg.GeneralCfg().DefaultTimezone)
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
@@ -549,7 +549,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
-		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cache, erS.fltrS, // merge the partial events
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
@@ -568,7 +568,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 				erS.cache, erS.fltrS, map[string]*utils.OrderedNavigableMap{
 					utils.MetaExp: utils.NewOrderedNavigableMap(),
-				})
+				}, erS.cfg.GeneralCfg().RoundingDecimals, erS.cfg.GeneralCfg().DefaultTimezone)
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(

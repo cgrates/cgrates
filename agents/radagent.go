@@ -180,8 +180,8 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		agReq := NewAgentRequest(radDP, varsDataNode, cgrReplyNM, replyNM, opts,
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.cache, ra.fltrS, nil)
+				ra.cfg.GeneralCfg().DefaultTimezone),
+			ra.cfg, ra.cache, ra.fltrS, nil)
 		var lclProcessed bool
 		if lclProcessed, processReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
 			processed = lclProcessed
@@ -245,9 +245,9 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(
 				reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone,
+				ra.cfg.GeneralCfg().DefaultTimezone,
 			),
-			ra.cache, ra.fltrS, nil,
+			ra.cfg, ra.cache, ra.fltrS, nil,
 		)
 		lclProcessed, err := ra.processRequest(reqPacket,
 			reqProcessor, agReq, replyPacket)
@@ -671,7 +671,7 @@ func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTempla
 		requestEv, requestVars, nil, nil, nil, nil,
 		ra.cfg.GeneralCfg().DefaultTenant,
 		ra.cfg.GeneralCfg().DefaultTimezone,
-		ra.cache, ra.fltrS, map[string]utils.DataProvider{
+		ra.cfg, ra.cache, ra.fltrS, map[string]utils.DataProvider{
 			utils.MetaOReq: newRADataProvider(packet),
 		})
 	err := agReq.SetFields(ra.cfg.TemplatesCfg()[requestTemplate])

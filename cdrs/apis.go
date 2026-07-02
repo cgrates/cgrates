@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -38,10 +37,10 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
@@ -73,10 +72,10 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, args *utils.C
 		args.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
@@ -109,10 +108,10 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *utils.C
 	}
 
 	// RPC caching
-	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
+	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessStoredEvents, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey)
+			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey)
 		defer guardian.Guardian.UnguardIDs(refID)
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {

@@ -96,7 +96,7 @@ func TestDiamMultipleListeners(t *testing.T) {
 			cli, err := agents.NewDiameterClient(lstnr.Address, "INTEGRATION_TEST_CLIENT",
 				cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 				cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-				cfg.DiameterAgentCfg().DictionariesPath, lstnr.Network)
+				cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().DictionariesAppendDefaults, lstnr.Network)
 			if err != nil {
 				t.Fatalf("client for %s: %v", lstnr.Address, err)
 			}
@@ -200,7 +200,7 @@ func TestDiamMultipleListenersSessionID(t *testing.T) {
 	cliA, err := agents.NewDiameterClient(listeners[0].Address, "INTEGRATION_TEST_CLIENT",
 		daCfg.OriginRealm, daCfg.VendorID,
 		daCfg.ProductName, utils.DiameterFirmwareRevision,
-		daCfg.DictionariesPath, listeners[0].Network)
+		daCfg.DictionariesPath, daCfg.DictionariesAppendDefaults, listeners[0].Network)
 	if err != nil {
 		t.Fatalf("client A: %v", err)
 	}
@@ -209,7 +209,7 @@ func TestDiamMultipleListenersSessionID(t *testing.T) {
 	cliB, err := agents.NewDiameterClient(listeners[1].Address, "INTEGRATION_TEST_CLIENT",
 		daCfg.OriginRealm, daCfg.VendorID,
 		daCfg.ProductName, utils.DiameterFirmwareRevision,
-		daCfg.DictionariesPath, listeners[1].Network)
+		daCfg.DictionariesPath, daCfg.DictionariesAppendDefaults, listeners[1].Network)
 	if err != nil {
 		t.Fatalf("client B: %v", err)
 	}

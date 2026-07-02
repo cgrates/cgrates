@@ -91,8 +91,8 @@ func NewASR(minItems uint64, _ string, filterIDs []string) StatMetric {
 	return &StatASR{Metric: NewMetric(minItems, filterIDs)}
 }
 
-// timezoneOf returns the provider's timezone if it exposes one, else "".
-func timezoneOf(dp DataProvider) string {
+// TimezoneOf returns the provider's timezone if it exposes one, else "".
+func TimezoneOf(dp DataProvider) string {
 	if p, ok := dp.(interface{ Timezone() string }); ok {
 		return p.Timezone()
 	}
@@ -129,7 +129,7 @@ func (asr *StatASR) AddOneEvent(ev DataProvider) (err error) {
 		if err != ErrNotFound {
 			return
 		}
-	} else if at, err := IfaceAsTime(val, timezoneOf(ev)); err != nil {
+	} else if at, err := IfaceAsTime(val, TimezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1
@@ -146,7 +146,7 @@ func (asr *StatASR) AddEvent(evID string, ev DataProvider) (err error) {
 		if err != ErrNotFound {
 			return err
 		}
-	} else if at, err := IfaceAsTime(val, timezoneOf(ev)); err != nil {
+	} else if at, err := IfaceAsTime(val, TimezoneOf(ev)); err != nil {
 		return err
 	} else if !at.IsZero() {
 		answered = 1

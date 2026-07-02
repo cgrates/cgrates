@@ -79,17 +79,17 @@ func (fileProvider) Open(dPath, fn string) (io.ReadCloser, error) {
 
 func (fileProvider) Type() string { return utils.MetaFileCSV }
 
-type urlProvider struct{}
+type urlProvider struct{ cfg *config.CGRConfig }
 
-func (urlProvider) Open(dPath, fn string) (_ io.ReadCloser, err error) {
+func (u urlProvider) Open(dPath, fn string) (_ io.ReadCloser, err error) {
 	path := strings.TrimSuffix(dPath, utils.Slash) + utils.Slash + fn
 	if _, err = url.ParseRequestURI(path); err != nil {
 		return
 	}
 	var req *http.Response
 	if req, err = (&http.Client{
-		Transport: config.CgrConfig().HTTPCfg().ClientOpts,
-		Timeout:   config.CgrConfig().GeneralCfg().ReplyTimeout,
+		Transport: u.cfg.HTTPCfg().ClientOpts,
+		Timeout:   u.cfg.GeneralCfg().ReplyTimeout,
 	}).Get(path); err != nil {
 		err = utils.ErrPathNotReachable(path)
 		return

@@ -62,7 +62,7 @@ type DataDB interface {
 	SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error)
 	GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error)
-	SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) (err error)
+	SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error
 	RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error)
 	GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *utils.ThresholdProfile, err error)
 	SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error)

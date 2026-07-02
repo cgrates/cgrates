@@ -1917,7 +1917,7 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
 		}
 	}
 	if err = AuthStirShaken(ctx, sS.cache, args.Identity, args.OriginatorTn, args.OriginatorURI,
-		args.DestinationTn, args.DestinationURI, attest, stirMaxDur); err != nil {
+		args.DestinationTn, args.DestinationURI, attest, stirMaxDur, sS.cfg.GeneralCfg().ReplyTimeout); err != nil {
 		return utils.NewSTIRError(err.Error())
 	}
 	*reply = utils.OK

@@ -117,7 +117,7 @@ type UnregisterArgs struct {
 }
 
 // Registrar returns the httpServer handler to register the dispatcher hosts.
-func Registrar(cache *engine.CacheS) http.HandlerFunc {
+func Registrar(cfg *config.CGRConfig, cache *engine.CacheS) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 		w.Header().Set("Content-Type", "application/json")
@@ -125,7 +125,7 @@ func Registrar(cache *engine.CacheS) http.HandlerFunc {
 		var errMessage any
 		var err error
 		var id *json.RawMessage
-		if id, err = register(r, cache); err != nil {
+		if id, err = register(cfg, r, cache); err != nil {
 			result, errMessage = nil, err.Error()
 		}
 		if err := utils.WriteServerResponse(w, id, result, errMessage); err != nil {
@@ -135,7 +135,7 @@ func Registrar(cache *engine.CacheS) http.HandlerFunc {
 	}
 }
 
-func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error) {
+func register(cfg *config.CGRConfig, req *http.Request, cache *engine.CacheS) (*json.RawMessage, error) {
 	id := json.RawMessage("0")
 	sReq, err := utils.DecodeServerRequest(req.Body)
 	if err != nil {
@@ -159,8 +159,8 @@ func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error)
 				utils.RegistrarC, err))
 			return sReq.Id, err
 		}
-		rpcConns := config.CgrConfig().RPCConns()
-		config.CgrConfig().LockSections(config.RPCConnsJSON)
+		rpcConns := cfg.RPCConns()
+		cfg.LockSections(config.RPCConnsJSON)
 		for connID := range config.RemoveRPCCons(rpcConns, utils.NewStringSet(args.IDs)) {
 			if err = cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
@@ -169,7 +169,7 @@ func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error)
 				hasErrors = true
 			}
 		}
-		config.CgrConfig().UnlockSections(config.RPCConnsJSON)
+		cfg.UnlockSections(config.RPCConnsJSON)
 	case utils.RegistrarSv1RegisterRPCHosts:
 		dH, err := unmarshallRegisterArgs(req, *sReq.Params)
 		if err != nil {
@@ -179,8 +179,8 @@ func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error)
 		for _, dH := range dH {
 			cfgHosts[dH.ID] = dH.RemoteHost
 		}
-		rpcConns := config.CgrConfig().RPCConns()
-		config.CgrConfig().LockSections(config.RPCConnsJSON)
+		rpcConns := cfg.RPCConns()
+		cfg.LockSections(config.RPCConnsJSON)
 		for connID := range config.UpdateRPCCons(rpcConns, cfgHosts) {
 			if err = cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
@@ -189,7 +189,7 @@ func register(req *http.Request, cache *engine.CacheS) (*json.RawMessage, error)
 				hasErrors = true
 			}
 		}
-		config.CgrConfig().UnlockSections(config.RPCConnsJSON)
+		cfg.UnlockSections(config.RPCConnsJSON)
 	}
 	if hasErrors {
 		return sReq.Id, utils.ErrPartiallyExecuted

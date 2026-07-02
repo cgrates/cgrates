@@ -912,7 +912,8 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 				var ssq *StoredStatQueue
 				if db.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
-					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+					ssq, err = NewStoredStatQueue(sq, dm.ms, dm.cfg.StatSCfg().StoreUncompressedLimit)
+					if err != nil {
 						return nil, err
 					}
 				}
@@ -940,7 +941,16 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 }
 
 // SetStatQueue converts to StoredStatQueue and stores the result in db
-func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *utils.StatQueue) (err error) {
+func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *utils.StatQueue) error {
+	return dm.setStatQueue(ctx, sq, true)
+}
+
+// SetStatQueueWithoutReplicate stores a StatQueue without replication.
+func (dm *DataManager) SetStatQueueWithoutReplicate(ctx *context.Context, sq *utils.StatQueue) error {
+	return dm.setStatQueue(ctx, sq, false)
+}
+
+func (dm *DataManager) setStatQueue(ctx *context.Context, sq *utils.StatQueue, replicate bool) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -951,24 +961,30 @@ func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *utils.StatQueue) (
 	var ssq *StoredStatQueue
 	if db.GetStorageType() != utils.MetaInternal {
 		// in case of internal we don't marshal
-		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
-			return
+		ssq, err = NewStoredStatQueue(sq, dm.ms, dm.cfg.StatSCfg().StoreUncompressedLimit)
+		if err != nil {
+			return err
 		}
 	}
-	if err = db.SetStatQueueDrv(ctx, ssq, sq); err != nil {
-		return
+	if err := db.SetStatQueueDrv(ctx, ssq, sq); err != nil {
+		return err
+	}
+	if !replicate {
+		return nil
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		if err := rpl.replicate(ctx,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
 			&utils.StatQueueWithAPIOpts{
 				StatQueue: sq,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm)
+					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
+			return err
+		}
 	}
-	return
+	return nil
 }
 
 // RemoveStatQueue removes the StoredStatQueue
