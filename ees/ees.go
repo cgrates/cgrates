@@ -90,7 +90,7 @@ func (eeS *EeS) SetupExporterCache() error {
 		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, false,
 			[]func(itmID string, value any){
 				onCacheEvicted,
-			})
+			}, nil)
 
 		// Precache exporters if required.
 		if chCfg.Precache {

@@ -337,7 +337,7 @@ func TestLoaderProcess(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 	expLd := &loader{
@@ -433,7 +433,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
 	{
@@ -740,7 +740,7 @@ func TestLoaderProcessData(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
@@ -793,7 +793,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
@@ -845,7 +845,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
@@ -914,7 +914,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -1012,7 +1012,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -1140,7 +1140,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
@@ -1362,7 +1362,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},

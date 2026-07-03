@@ -112,7 +112,7 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 	badConf := []*config.RemoteHost{
 		{

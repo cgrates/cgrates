@@ -175,7 +175,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS
 		dm:      dm,
 		connMgr: connMgr,
 		pcItems: make(map[string]chan struct{}),
-		tCache:  ltcache.NewTransCache(tCache),
+		tCache:  ltcache.NewTransCache(tCache, false),
 	}
 	for cacheID := range cfg.CacheCfg().Partitions {
 		c.pcItems[cacheID] = make(chan struct{})

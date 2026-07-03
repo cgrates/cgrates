@@ -73,7 +73,7 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 	cacheS := NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cM.SetCache(cacheS)
@@ -114,7 +114,7 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			"testString": cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 	cacheS := NewCacheS(cfg, nil, nil, nil)
 	cM.SetCache(cacheS)
@@ -159,7 +159,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
@@ -193,7 +193,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
@@ -228,7 +228,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	cM.connCache.Set(connID, nil, nil)
@@ -262,7 +262,7 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
@@ -294,7 +294,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
@@ -409,7 +409,7 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 	subsHostIDs := utils.StringSet{
 		connID: struct{}{},
@@ -457,7 +457,7 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
 	cM.connCache.Set(poolID+utils.ConcatenatedKeySep+connID, ccM, nil)
@@ -479,7 +479,7 @@ func TestCMReload(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 	cM.connCache.Set("itmID1", "value of first item", nil)
 
@@ -617,7 +617,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 
 // 	cM := &ConnManager{
 // 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+// 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
 // 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -664,7 +664,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 
 // 	cM := &ConnManager{
 // 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+// 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
 // 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)

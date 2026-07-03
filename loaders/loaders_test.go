@@ -54,7 +54,7 @@ func TestNewLoaderService(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil)
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ld := NewLoaderS(cfg, dm, fS, cM)
 	exp := &LoaderS{

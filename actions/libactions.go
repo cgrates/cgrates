@@ -71,7 +71,7 @@ func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID, schedul
 		ignFilters: ignFilters,
 		data:       data,
 		acts:       acts,
-		cch:        ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}),
+		cch:        ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}, false),
 	}
 }
 

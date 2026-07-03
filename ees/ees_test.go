@@ -300,7 +300,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, false, []func(itmID string, value any){
 				onCacheEvicted,
-			}),
+			}, nil),
 	}
 	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, cacheS, filterS, connMngr, nil)
 	if err != nil {
@@ -381,7 +381,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, false, []func(itmID string, value any){
 				onCacheEvicted,
-			}),
+			}, nil),
 	}
 	eeS.exporterCache[utils.MetaHTTPPost].Set("SQLExporterFull", mEe, []string{"grp1"})
 	cgrEv := &utils.CGREventWithEeIDs{
