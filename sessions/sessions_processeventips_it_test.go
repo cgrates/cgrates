@@ -267,6 +267,7 @@ cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*a
 					utils.MetaIPsAuthorizeCfg: true,
 					utils.OptsIPsAllocationID: "testallocid212",
 					utils.MetaOriginID:        "OriginID",
+					utils.OptsSesBlockerError: true,
 				},
 				Event: map[string]any{
 					utils.AccountField: "9999",
