@@ -25,7 +25,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -1198,88 +1197,89 @@ func TestCacheSPrecacheErr(t *testing.T) {
 
 }
 
-func TestCacheSBeginTransaction(t *testing.T) {
+// Transactions are currently not necessary and disabled
+// func TestCacheSBeginTransaction(t *testing.T) {
 
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+// 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := newTestCacheS(cfg, dm, nil)
+// 	cacheS := newTestCacheS(cfg, dm, nil)
 
-	expFormat := `........-....-....-....-............`
-	rcv := cacheS.BeginTransaction()
-	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
-		t.Error(err)
-	} else if !matched {
-		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
-	}
+// 	expFormat := `........-....-....-....-............`
+// 	rcv := cacheS.BeginTransaction()
+// 	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
+// 		t.Error(err)
+// 	} else if !matched {
+// 		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
+// 	}
 
-}
+// }
 
-func TestCacheSRollbackTransaction(t *testing.T) {
+// func TestCacheSRollbackTransaction(t *testing.T) {
 
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+// 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := newTestCacheS(cfg, dm, nil)
+// 	cacheS := newTestCacheS(cfg, dm, nil)
 
-	expFormat := `........-....-....-....-............`
-	tranId := cacheS.BeginTransaction()
-	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
-		t.Error(err)
-	} else if !matched {
-		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
-	}
+// 	expFormat := `........-....-....-....-............`
+// 	tranId := cacheS.BeginTransaction()
+// 	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
+// 		t.Error(err)
+// 	} else if !matched {
+// 		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
+// 	}
 
-	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
-		t.Error(err)
-	}
+// 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
+// 		t.Error(err)
+// 	}
 
-	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
-		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
-	} else if rcv != "valinterface" {
-		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
-	}
+// 	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
+// 		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
+// 	} else if rcv != "valinterface" {
+// 		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
+// 	}
 
-	// destroys a transaction from transactions buffer
-	cacheS.RollbackTransaction(tranId)
+// 	// destroys a transaction from transactions buffer
+// 	cacheS.RollbackTransaction(tranId)
 
-}
+// }
 
-func TestCacheSCommitTransaction(t *testing.T) {
+// func TestCacheSCommitTransaction(t *testing.T) {
 
-	cfg := config.NewDefaultCGRConfig()
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+// 	dm := NewDataManager(dbCM, cfg, nil)
 
-	cacheS := newTestCacheS(cfg, dm, nil)
+// 	cacheS := newTestCacheS(cfg, dm, nil)
 
-	expFormat := `........-....-....-....-............`
-	tranId := cacheS.BeginTransaction()
-	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
-		t.Error(err)
-	} else if !matched {
-		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
-	}
+// 	expFormat := `........-....-....-....-............`
+// 	tranId := cacheS.BeginTransaction()
+// 	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
+// 		t.Error(err)
+// 	} else if !matched {
+// 		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
+// 	}
 
-	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
-		t.Error(err)
-	}
+// 	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
+// 		t.Error(err)
+// 	}
 
-	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
-		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
-	} else if rcv != "valinterface" {
-		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
-	}
+// 	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
+// 		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
+// 	} else if rcv != "valinterface" {
+// 		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
+// 	}
 
-	// executes the actions in a transaction buffer
-	cacheS.CommitTransaction(tranId)
+// 	// executes the actions in a transaction buffer
+// 	cacheS.CommitTransaction(tranId)
 
-}
+// }
 
 func TestCallCacheNoCaching(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()

@@ -21,7 +21,7 @@ require (
 	github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191
-	github.com/cgrates/ltcache v0.0.0-20260512080837-0d98106c5460
+	github.com/cgrates/ltcache v0.0.0-20260702142901-a892bb64c827
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
@@ -47,9 +47,9 @@ require (
 	github.com/twmb/franz-go/pkg/kadm v1.17.2
 	github.com/ugorji/go/codec v1.2.12
 	go.mongodb.org/mongo-driver v1.16.1
-	golang.org/x/crypto v0.51.0
-	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
-	golang.org/x/net v0.54.0
+	golang.org/x/crypto v0.53.0
+	golang.org/x/exp v0.0.0-20260611194520-c48552f49976
+	golang.org/x/net v0.56.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
@@ -151,12 +151,12 @@ require (
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
-	golang.org/x/mod v0.36.0 // indirect
+	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
-	golang.org/x/tools v0.45.0 // indirect
+	golang.org/x/tools v0.46.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )

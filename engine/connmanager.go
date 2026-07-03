@@ -36,7 +36,7 @@ func NewConnManager(cfg *config.CGRConfig) *ConnManager {
 		cfg:         cfg,
 		rpcInternal: make(map[string]chan context.ClientConnector),
 		dynIntCh:    newRPCClientSet(cfg),
-		connCache:   ltcache.NewCache(-1, 0, true, false, nil),
+		connCache:   ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 }
 
