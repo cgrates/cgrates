@@ -170,6 +170,15 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(tm, expTime) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
+
+	uc, err := NewDataConverter(MetaUnits)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := new(UnitsConverter)
+	if !reflect.DeepEqual(uc, expected) {
+		t.Errorf("Expected %+v received: %+v", expected, uc)
+	}
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -1968,6 +1977,63 @@ func TestNewDateTimeConverterNew(t *testing.T) {
 			}
 			if !strings.Contains(err.Error(), tc.expectedErr) {
 				t.Errorf("expected error containing %q, got %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUnitsConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		expOut int64
+		expErr string
+	}{
+		{
+			name:   "Minute",
+			in:     5 * time.Minute,
+			expOut: 300000000000,
+		},
+		{
+			name:   "Second",
+			in:     5 * time.Second,
+			expOut: 5000000000,
+		},
+		{
+			name:   "Nanosecond",
+			in:     5 * time.Nanosecond,
+			expOut: 5,
+		},
+		{
+			name:   "Millisecond",
+			in:     5 * time.Millisecond,
+			expOut: 5000000,
+		},
+		{
+			name:   "Time as a string",
+			in:     "5s",
+			expOut: 5000000000,
+		},
+		{
+			name:   "Error case",
+			in:     "1ss",
+			expErr: `time: unknown unit "ss" in duration "1ss"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			uc := &UnitsConverter{}
+			rcv, err := uc.Convert(tt.in)
+
+			if err != nil {
+				if err.Error() != tt.expErr {
+					t.Errorf("Expected error %v, received error %v", tt.expErr, err)
+				}
+				return
+			}
+
+			if !reflect.DeepEqual(tt.expOut, rcv) {
+				t.Errorf("Expected %+v received: %+v", tt.expOut, rcv)
 			}
 		})
 	}

@@ -150,6 +150,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(GigawordsConverter), nil
 	case strings.HasPrefix(params, Meta3GPPULI):
 		return NewULIConverter(params)
+	case params == MetaUnits:
+		return new(UnitsConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -914,4 +916,16 @@ func (dt *DateTimeConverter) Convert(in any) (any, error) {
 			inStr, dt.inlayout, err)
 	}
 	return tm, nil
+}
+
+// UnitsConverter converts duration into integer
+type UnitsConverter struct{}
+
+func (c *UnitsConverter) Convert(in any) (out any, err error) {
+	var inDur time.Duration
+	if inDur, err = IfaceAsDuration(in); err != nil {
+		return nil, err
+	}
+	out = int64(inDur)
+	return
 }

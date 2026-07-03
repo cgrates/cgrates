@@ -763,6 +763,7 @@ const (
 	MetaExport              = "*export"
 	MetaGigawords           = "*gigawords"
 	Meta3GPPULI             = "*3gppULI"
+	MetaUnits               = "*units"
 	LoadIDs                 = "loadIDs"
 	DNSAgent                = "DNSAgent"
 	TLSNoCaps               = "tls"
