@@ -264,6 +264,13 @@ func TestActionProfileSet(t *testing.T) {
 	}
 }
 
+func TestAPActionSetEmptyDiktatID(t *testing.T) {
+	action := &APAction{Opts: make(map[string]any)}
+	if err := action.Set([]string{Diktats, ID}, "", true); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestActionProfileFieldAsInterface(t *testing.T) {
 	ap := ActionProfile{
 		Tenant:    "cgrates.org",
@@ -696,6 +703,57 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 	if !reflect.DeepEqual(apAct, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			ToJSON(expected), ToJSON(apAct))
+	}
+}
+
+func TestActionProfileAPActionMergeReplacesEmptyDiktatPlaceholder(t *testing.T) {
+	action := &APAction{
+		Opts: make(map[string]any),
+		Diktats: []*APDiktat{
+			{Opts: map[string]any{}},
+		},
+	}
+	expected := &APAction{
+		Opts: make(map[string]any),
+		Diktats: []*APDiktat{
+			{ID: "d1", Opts: map[string]any{}},
+		},
+	}
+
+	action.Merge(&APAction{
+		Diktats: []*APDiktat{
+			{ID: "d1", Opts: map[string]any{}},
+		},
+	})
+	if !reflect.DeepEqual(action, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(expected), ToJSON(action))
+	}
+}
+
+func TestActionProfileAPActionMergeKeepsEmptyOptsDiktats(t *testing.T) {
+	action := &APAction{
+		Opts: make(map[string]any),
+		Diktats: []*APDiktat{
+			{ID: "d1", Opts: map[string]any{}},
+		},
+	}
+	expected := &APAction{
+		Opts: make(map[string]any),
+		Diktats: []*APDiktat{
+			{ID: "d1", Opts: map[string]any{}},
+			{ID: "d2", Opts: map[string]any{}},
+		},
+	}
+
+	action.Merge(&APAction{
+		Diktats: []*APDiktat{
+			{ID: "d2", Opts: map[string]any{}},
+		},
+	})
+	if !reflect.DeepEqual(action, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(expected), ToJSON(action))
 	}
 }
 

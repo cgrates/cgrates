@@ -517,10 +517,8 @@ func (a *APAction) Set(path []string, val any, newBranch bool) (err error) {
 				}
 				return ErrWrongPath
 			case ID:
-				if dID := IfaceAsString(val); dID == EmptyString {
-					return ErrWrongPath
-				} else {
-					a.Diktats[len(a.Diktats)-1].ID = dID
+				if id := IfaceAsString(val); id != "" {
+					a.Diktats[len(a.Diktats)-1].ID = id
 				}
 			case FilterIDs:
 				var valA []string
@@ -562,7 +560,7 @@ func (a *APAction) Merge(v2 *APAction) {
 	if v2.Weights != nil {
 		a.Weights = append(a.Weights, v2.Weights...)
 	}
-	if len(a.Diktats) == 1 && len(a.Diktats[0].Opts) == 0 {
+	if len(a.Diktats) == 1 && isEmptyDiktat(a.Diktats[0]) {
 		a.Diktats = a.Diktats[:0]
 	}
 	for _, diktatV2 := range v2.Diktats {
@@ -574,6 +572,12 @@ func (a *APAction) Merge(v2 *APAction) {
 		}
 		a.Diktats = append(a.Diktats, diktatV2)
 	}
+}
+
+func isEmptyDiktat(diktat *APDiktat) bool {
+	return diktat == nil ||
+		(diktat.ID == "" && len(diktat.FilterIDs) == 0 && len(diktat.Opts) == 0 &&
+			len(diktat.Weights) == 0 && len(diktat.Blockers) == 0)
 }
 
 // String implements the DataProvider interface, returning the APAction in JSON format.
