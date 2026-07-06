@@ -26,7 +26,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestSessionIDMetaOriginID(t *testing.T) {
@@ -340,47 +339,13 @@ func TestSessionIDMetaOriginID(t *testing.T) {
 
 }
 */
-func TestSessiontotalUsage(t *testing.T) {
-	//empty check
-	session := new(Session)
-	rcv := session.totalUsage()
-	eOut := time.Duration(0)
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
-	}
-	//normal check
-	session = &Session{
-		ID: "1001",
-
-		ClientConnID: "ClientConnID",
-
-		SRuns: []*SRun{
-			{
-				ID:           "1001",
-				InterimUsage: decimal.New(2, 0),
-				TotalUsage:   decimal.New(5, 0),
-			},
-			{
-				ID:           "1002",
-				InterimUsage: decimal.New(5, 0),
-				TotalUsage:   decimal.New(6, 0),
-			},
-		},
-	}
-	eOut = 5
-	rcv = session.totalUsage()
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
-	}
-}
 
 func TestSessionstopSTerminator(t *testing.T) {
 	//empty check
 	session := new(Session)
-	rcv := session.totalUsage()
-	eOut := time.Duration(0)
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	session.stopSTerminator()
+	if session.sTerminator != nil {
+		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.sTerminator))
 	}
 	//normal check
 	session = &Session{
