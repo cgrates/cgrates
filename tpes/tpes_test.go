@@ -37,20 +37,7 @@ func TestNewTPeS(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(cacheS)
-	tpExporterTypes.Add("not_valid")
-	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// // utils.Logger.SetLogLevel(7)
-	// buff := new(bytes.Buffer)
-	// log.SetOutput(buff)
 	_ = NewTPeS(cfg, dm, connMng)
-	tpExporterTypes.Remove("not_valid")
-	// expected := "<not_valid>"
-	// if rcv := buff.String(); !strings.Contains(rcv, expected) {
-	// 	t.Errorf("Expected %v, received %v", expected, rcv)
-	// }
 }
 
 func TestGetTariffPlansKeys(t *testing.T) {
@@ -355,9 +342,33 @@ func TestGetTariffPlansKeys(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 
+	//Rankings
+	ranking := &utils.RankingProfile{
+		Tenant: "cgrates.org",
+		ID:     "RANK_2",
+	}
+	dm.SetRankingProfile(context.Background(), ranking)
+	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRankings)
+	exp = []string{"RANK_2"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v\n but received %v", exp, rcv)
+	}
+
+	//Trends
+	trend := &utils.TrendProfile{
+		Tenant: "cgrates.org",
+		ID:     "TREND_2",
+	}
+	dm.SetTrendProfile(context.Background(), trend)
+	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaTrends)
+	exp = []string{"TREND_2"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v\n but received %v", exp, rcv)
+	}
+
 	//Unsupported
 	_, err := getTariffPlansKeys(context.Background(), dm, "cgrates.org", "not_valid")
-	errExpect := "Unsuported exporter type"
+	errExpect := "UNSUPPORTED_TPEXPORTER_TYPE:not_valid"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err.Error())
 	}

@@ -21,7 +21,6 @@ package tpes
 import (
 	"archive/zip"
 	"bytes"
-	"fmt"
 	"io"
 	"time"
 
@@ -32,21 +31,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewTPeS(cfg *config.CGRConfig, dm *engine.DataManager, cm *engine.ConnManager) (tpE *TPeS) {
-	tpE = &TPeS{
+func NewTPeS(cfg *config.CGRConfig, dm *engine.DataManager, cm *engine.ConnManager) *TPeS {
+	return &TPeS{
 		cfg:     cfg,
 		connMgr: cm,
 		dm:      dm,
-		exps:    make(map[string]tpExporter),
 	}
-
-	var err error
-	for expType := range tpExporterTypes {
-		if tpE.exps[expType], err = newTPExporter(expType, dm); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> cannot create exporter of type <%s>", utils.TPeS, expType))
-		}
-	}
-	return
 }
 
 // TPeS is managing the TariffPlanExporter
@@ -54,71 +44,32 @@ type TPeS struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
 	dm      *engine.DataManager
-	fltr    *engine.FilterS
-	exps    map[string]tpExporter
 }
 
 type ArgsExportTP struct {
 	Tenant      string
 	APIOpts     map[string]any
-	ExportItems map[string][]string // map[expType][]string{"itemID1", "itemID2"}
+	ExportItems map[string][]string // map[exportType][]string{"itemID1", "itemID2"}
 }
 
-func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expType string) (profileIDs []string, err error) {
-	var itemID string
-	var prfx string
-	switch expType {
-	case utils.MetaAttributes:
-		prfx = utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaAttributeProfiles
-	case utils.MetaActions:
-		prfx = utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaActionProfiles
-	case utils.MetaAccounts:
-		prfx = utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaAccounts
-	case utils.MetaChargers:
-		prfx = utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaChargerProfiles
-	case utils.MetaFilters:
-		prfx = utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaFilters
-	case utils.MetaRates:
-		prfx = utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaRateProfiles
-	case utils.MetaResources:
-		prfx = utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaResourceProfiles
-	case utils.MetaRoutes:
-		prfx = utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaRouteProfiles
-	case utils.MetaStats:
-		prfx = utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaStatQueueProfiles
-	case utils.MetaThresholds:
-		prfx = utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaThresholdProfiles
-	case utils.MetaRankings:
-		prfx = utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaRankingProfiles
-	case utils.MetaTrends:
-		prfx = utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
-		itemID = utils.MetaTrendProfiles
-	default:
-		return nil, fmt.Errorf("Unsuported exporter type")
+func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tenant, exportType string) (profileIDs []string, err error) {
+	exporter, ok := exporters[exportType]
+	if !ok {
+		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, exportType)
 	}
-	// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "alp_cgrates.org:ATTR_1" -- just ATTR_1
-	db, _, err := dm.DBConns().GetConn(itemID)
+	prefix := exporter.keyPrefix + tenant + utils.ConcatenatedKeySep
+	// dbKeys are full keys (for example "alp_cgrates.org:ATTR_1"); return only profile IDs.
+	db, _, err := dm.DBConns().GetConn(exporter.dbItemID)
 	if err != nil {
 		return nil, err
 	}
 	var dbKeys []string
-	if dbKeys, err = db.GetKeysForPrefix(ctx, prfx, utils.EmptyString); err != nil {
+	if dbKeys, err = db.GetKeysForPrefix(ctx, prefix, utils.EmptyString); err != nil {
 		return nil, err
 	}
 	profileIDs = make([]string, 0, len(dbKeys))
 	for _, key := range dbKeys {
-		profileIDs = append(profileIDs, key[len(prfx):])
+		profileIDs = append(profileIDs, key[len(prefix):])
 	}
 	return
 }
@@ -128,47 +79,40 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
 	}
-	/*
-	  IMPORTANT!!
-	*/
-	// in case the export items are empty, export all tariffplans for every subsystem from database in zip format and containing CSV files
+	// Empty ExportItems means export all known tariff-plan items.
 	if len(args.ExportItems) == 0 {
 		args.ExportItems = make(map[string][]string)
-		for subsystem := range tpExporterTypes {
+		for exportType := range exporters {
 			var itemIDs []string
-			if itemIDs, err = getTariffPlansKeys(ctx, tpE.dm, args.Tenant, subsystem); err != nil {
+			if itemIDs, err = getTariffPlansKeys(ctx, tpE.dm, args.Tenant, exportType); err != nil {
 				return
 			} else if len(itemIDs) != 0 {
-				// the map e.g. : *filters: {"ATTR_1", "ATTR_1"}
-				args.ExportItems[subsystem] = itemIDs
+				args.ExportItems[exportType] = itemIDs
 			}
 		}
 	} else {
-		// else export just the wanted IDs
-		for eType := range args.ExportItems {
-			if _, has := tpE.exps[eType]; !has {
-				return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, eType)
+		for exportType := range args.ExportItems {
+			if _, has := exporters[exportType]; !has {
+				return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, exportType)
 			}
 		}
 	}
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
-	for expType, expItms := range args.ExportItems {
-		// if there are not items to be exported, continue with the next subsystem
-		if len(expItms) == 0 {
+	for exportType, itemIDs := range args.ExportItems {
+		if len(itemIDs) == 0 {
 			continue
 		}
-		var wrtr io.Writer
-		// here we will create all the header for each subsystem type for the csv
-		if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
-			Method:   zip.Deflate, // to be compressed
-			Name:     exportFileName[expType],
+		exporter := exporters[exportType]
+		var writer io.Writer
+		if writer, err = zBuff.CreateHeader(&zip.FileHeader{
+			Method:   zip.Deflate,
+			Name:     exporter.fileName,
 			Modified: time.Now(),
 		}); err != nil {
 			return
 		}
-		// our buffer will contain the bytes with all profiles in CSV format
-		if err = tpE.exps[expType].exportItems(ctx, wrtr, args.Tenant, expItms); err != nil {
+		if err = exporter.exportItems(ctx, tpE.dm, exportType, writer, args.Tenant, itemIDs); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
