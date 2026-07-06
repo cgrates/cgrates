@@ -1369,6 +1369,119 @@ func TestIfaceAsBig(t *testing.T) {
 
 }
 
+func TestIfaceAsDecimal(t *testing.T) {
+	tests := []struct {
+		name   string
+		itm    any
+		want   *Decimal
+		expErr string
+	}{
+		{
+			name: "time.Duration",
+			itm:  time.Duration(1),
+			want: &Decimal{Big: decimal.New(1, 0)},
+		},
+		{
+			name: "int",
+			itm:  2,
+			want: &Decimal{Big: decimal.New(2, 0)},
+		},
+		{
+			name: "int8",
+			itm:  int8(3),
+			want: &Decimal{Big: decimal.New(3, 0)},
+		},
+		{
+			name: "int16",
+			itm:  int16(4),
+			want: &Decimal{Big: decimal.New(4, 0)},
+		},
+		{
+			name: "int32",
+			itm:  int32(5),
+			want: &Decimal{Big: decimal.New(5, 0)},
+		},
+		{
+			name: "int64",
+			itm:  int64(6),
+			want: &Decimal{Big: decimal.New(6, 0)},
+		},
+		{
+			name: "uint",
+			itm:  uint(2),
+			want: &Decimal{Big: decimal.New(2, 0)},
+		},
+		{
+			name: "uint8",
+			itm:  uint8(3),
+			want: &Decimal{Big: decimal.New(3, 0)},
+		},
+		{
+			name: "uint16",
+			itm:  uint16(4),
+			want: &Decimal{Big: decimal.New(4, 0)},
+		},
+		{
+			name: "uint32",
+			itm:  uint32(5),
+			want: &Decimal{Big: decimal.New(5, 0)},
+		},
+		{
+			name: "uint64",
+			itm:  uint64(6),
+			want: &Decimal{Big: decimal.New(6, 0)},
+		},
+		{
+			name: "float64",
+			itm:  float64(12.2),
+			want: &Decimal{Big: decimal.WithContext(DecimalContext).SetFloat64(12.2)},
+		},
+		{
+			name: "float32",
+			itm:  float32(12),
+			want: &Decimal{Big: decimal.WithContext(DecimalContext).SetFloat64(12)},
+		},
+		{
+			name:   "error case",
+			itm:    "errms",
+			expErr: `time: invalid duration "errms"`,
+		},
+		{
+			name: "string",
+			itm:  "123",
+			want: &Decimal{Big: decimal.New(123, 0)},
+		},
+		{
+			name: "*decimal.Big",
+			itm:  decimal.WithContext(DecimalContext).SetUint64(21),
+			want: &Decimal{Big: decimal.New(21, 0)},
+		},
+		{
+			name: "*Decimal",
+			itm:  NewDecimal(10, 0),
+			want: &Decimal{Big: decimal.New(10, 0)},
+		},
+		{
+			name:   "error case",
+			itm:    []string{"test"},
+			expErr: "cannot convert field: []string to decimal.Big",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := IfaceAsDecimal(tt.itm)
+
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v but received %v", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(rcv, tt.want) {
+				t.Errorf("Expected %v but received %v", tt.want, rcv)
+			}
+		})
+	}
+}
+
 func TestReflectFieldMethodInterfaceStruct(t *testing.T) {
 	//Make obj a struct
 	type Obj struct {

@@ -133,6 +133,14 @@ func IfaceAsBig(itm any) (b *decimal.Big, err error) {
 	return
 }
 
+func IfaceAsDecimal(itm any) (d *Decimal, err error) {
+	b, err := IfaceAsBig(itm)
+	if err != nil {
+		return nil, err
+	}
+	return &Decimal{Big: b}, nil
+}
+
 func IfaceAsDuration(itm any) (d time.Duration, err error) {
 	switch it := itm.(type) {
 	case time.Duration:
