@@ -360,7 +360,7 @@ func TestSuppliersCache(t *testing.T) {
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(spp), utils.ToJSON(tempSpp))
 		}
 	}
 }

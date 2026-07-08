@@ -51,6 +51,7 @@ func (a *Action) Clone() (cln *Action) {
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
 		Balance:          a.Balance.Clone(),
+		balanceValue:     a.balanceValue,
 	}
 }
 
@@ -868,15 +869,20 @@ func (apl Actions) Sort() {
 }
 
 // Clone returns a clone from object
-func (apl Actions) Clone() (any, error) {
-	if apl == nil {
-		return nil, nil
+func (a Actions) Clone() Actions {
+	if a == nil {
+		return nil
 	}
-	cln := make(Actions, len(apl))
-	for i, action := range apl {
+	cln := make(Actions, len(a))
+	for i, action := range a {
 		cln[i] = action.Clone()
 	}
-	return cln, nil
+	return cln
+}
+
+// CacheClone returns a clone of Actions used by ltcache CacheCloner
+func (a Actions) CacheClone() any {
+	return a.Clone()
 }
 
 // newCdrLogProvider constructs a DataProvider

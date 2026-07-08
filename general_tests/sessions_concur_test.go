@@ -66,6 +66,7 @@ var sTestsSCncrIT = []func(t *testing.T){
 
 func testSCncrInitConfig(t *testing.T) {
 	sCncrCfgPath = path.Join(*utils.DataDir, "conf", "samples", sCncrCfgDIR)
+	var err error
 	if sCncrCfg, err = config.NewCGRConfigFromPath(sCncrCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -151,6 +152,7 @@ func testSCncrRunSessions(t *testing.T) {
 				},
 			}
 			var addBlcRply string
+			var err error
 			if err = sCncrRPC.Call(utils.APIerSv1AddBalance, argsAddBalance, &addBlcRply); err != nil {
 				t.Error(err)
 			} else if addBlcRply != utils.OK {
@@ -169,6 +171,7 @@ func testSCncrRunSessions(t *testing.T) {
 		acntAttrs := &utils.AttrGetAccount{
 			Tenant:  "cgrates.org",
 			Account: acntID}
+		var err error
 		if err = sCncrRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 			return
 		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
@@ -202,6 +205,7 @@ func testRunSession(t *testing.T) {
 			utils.Weight: 10,
 		},
 	}
+	var err error
 	if err = sCncrRPC.Call(utils.APIerSv1AddBalance, argsAddBalance, &addBlcRply); err != nil {
 		t.Error(err)
 	} else if addBlcRply != utils.OK {
