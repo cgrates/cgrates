@@ -2537,9 +2537,8 @@ func TestClonedActions(t *testing.T) {
 			Weight: float64(20),
 		},
 	}
-	if clone, err := actions.Clone(); err != nil {
-		t.Error("error cloning actions: ", err)
-	} else if !reflect.DeepEqual(actions, clone) {
+	clone := actions.Clone()
+	if !reflect.DeepEqual(actions, clone) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToIJSON(actions), utils.ToIJSON(clone))
 	}
 
@@ -2578,9 +2577,9 @@ func TestCacheGetClonedActions(t *testing.T) {
 		},
 	}
 	Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, "")
-	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
-	if err != nil {
-		t.Error(err)
+	clned, ok := Cache.Get(utils.CacheActions, "MYTEST")
+	if !ok {
+		t.Error("expected to get cache")
 	}
 	aCloned := clned.(Actions)
 	if !reflect.DeepEqual(actions, aCloned) {

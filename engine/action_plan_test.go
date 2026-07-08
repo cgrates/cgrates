@@ -106,13 +106,12 @@ func TestActionPlanClone(t *testing.T) {
 			},
 		},
 	}
-	clned, err := at1.Clone()
+	clned := at1.Clone()
 	if err != nil {
 		t.Error(err)
 	}
-	at1Cloned := clned.(*ActionPlan)
-	if !reflect.DeepEqual(at1, at1Cloned) {
-		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, at1Cloned)
+	if !reflect.DeepEqual(at1, clned) {
+		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, clned)
 	}
 }
 
@@ -254,9 +253,9 @@ func TestCacheGetCloned(t *testing.T) {
 		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
 	}
 	Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, "")
-	clned, err := Cache.GetCloned(utils.CacheActionPlans, "MYTESTAPL")
-	if err != nil {
-		t.Error(err)
+	clned, ok := Cache.Get(utils.CacheActionPlans, "MYTESTAPL")
+	if !ok {
+		t.Error("expected to get cache")
 	}
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {

@@ -49,11 +49,13 @@ func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) m
 				MaxItems:  itemsCacheCfg[utils.CacheActions].Limit,
 				TTL:       itemsCacheCfg[utils.CacheActions].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheActions].StaticTTL,
+				Clone:     true,
 			},
 			utils.CacheActionPlans: {
 				MaxItems:  itemsCacheCfg[utils.CacheActionPlans].Limit,
 				TTL:       itemsCacheCfg[utils.CacheActionPlans].TTL,
 				StaticTTL: itemsCacheCfg[utils.CacheActionPlans].StaticTTL,
+				Clone:     true,
 			},
 			utils.CacheAccountActionPlans: {
 				MaxItems:  itemsCacheCfg[utils.CacheAccountActionPlans].Limit,
@@ -329,7 +331,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 	isDataDB bool, itemsCacheCfg map[string]*config.ItemOpt) (iDB *InternalDB) {
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	iDB = &InternalDB{
-		db:                  ltcache.NewTransCache(newInternalDBCfg(itemsCacheCfg, isDataDB)),
+		db:                  ltcache.NewTransCache(newInternalDBCfg(itemsCacheCfg, isDataDB), false),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),

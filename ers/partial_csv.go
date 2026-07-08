@@ -67,7 +67,7 @@ func NewPartialCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		pCSVFileER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	pCSVFileER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, function)
+	pCSVFileER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, false, []func(itmID string, value any){function}, nil)
 	return pCSVFileER, nil
 }
 

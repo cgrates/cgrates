@@ -60,7 +60,7 @@ func NewFlatstoreER(cfg *config.CGRConfig, cfgIdx int,
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		flatER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	flatER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, flatER.dumpToFile)
+	flatER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, false, []func(itmID string, value any){flatER.dumpToFile}, nil)
 	return flatER, err
 }
 

@@ -81,13 +81,15 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 }
 
 // Clone clones *ActionPlan
-func (apl *ActionPlan) Clone() (any, error) {
+func (apl *ActionPlan) Clone() *ActionPlan {
 	if apl == nil {
-		return nil, nil
+		return nil
 	}
 	cln := &ActionPlan{
-		Id:         apl.Id,
-		AccountIDs: apl.AccountIDs.Clone(),
+		Id: apl.Id,
+	}
+	if apl.AccountIDs != nil {
+		cln.AccountIDs = apl.AccountIDs.Clone()
 	}
 	if apl.ActionTimings != nil {
 		cln.ActionTimings = make([]*ActionTiming, len(apl.ActionTimings))
@@ -95,7 +97,12 @@ func (apl *ActionPlan) Clone() (any, error) {
 			cln.ActionTimings[i] = act.Clone()
 		}
 	}
-	return cln, nil
+	return cln
+}
+
+// CacheClone returns a clone of ActionPlan used by ltcache CacheCloner
+func (apl *ActionPlan) CacheClone() any {
+	return apl.Clone()
 }
 
 // Clone clones ActionTiming

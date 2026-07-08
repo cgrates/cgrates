@@ -15,7 +15,7 @@ require (
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/go-diameter v0.0.0-20260107110131-c7c2da637acf
 	github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191
-	github.com/cgrates/ltcache v0.0.0-20240411152156-e673692056db
+	github.com/cgrates/ltcache v0.0.0-20260702142901-a892bb64c827
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/creack/pty v1.1.23
@@ -34,7 +34,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.50
 	github.com/ugorji/go/codec v1.2.12
 	go.mongodb.org/mongo-driver v1.16.1
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.56.0
 	golang.org/x/oauth2 v0.22.0
 	google.golang.org/api v0.192.0
 )
@@ -74,12 +74,13 @@ require (
 	go.opentelemetry.io/otel v1.28.0 // indirect
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
-	golang.org/x/tools v0.24.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
+	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/sync v0.21.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/tools v0.46.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240730163845-b1a4ccb954bf // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	google.golang.org/grpc v1.65.0 // indirect

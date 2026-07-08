@@ -58,7 +58,7 @@ func InitCache(cfg config.CacheCfg) {
 		cfg = config.CgrConfig().CacheCfg()
 	}
 	cfg.AddTmpCaches()
-	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig())
+	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig(), false)
 }
 
 // NewCacheS initializes the Cache service and executes the precaching

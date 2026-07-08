@@ -428,7 +428,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err == nil ||
 		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:aa:bb:cc") {
-		t.Error("Expecting error ", err)
+		t.Error("Expecting error UNSUPPORTED_FORMAT:aa:bb:cc, received: ", err)
 	}
 }
 

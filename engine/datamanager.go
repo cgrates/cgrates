@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 var (
@@ -1375,14 +1374,15 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 
 func (dm *DataManager) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
 	if !skipCache {
-		if x, err := Cache.GetCloned(utils.CacheActions, key); err != nil {
-			if err != ltcache.ErrNotFound {
-				return nil, err
+		if x, ok := Cache.Get(utils.CacheActions, key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-		} else if x == nil {
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(Actions), nil
+			act := x.(Actions)
+			if act == nil {
+				return nil, utils.ErrNotFound
+			}
+			return act, nil // Action is cloned on ltcache side
 		}
 	}
 	as, err = dm.DataDB().GetActionsDrv(key)
@@ -1452,14 +1452,15 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 
 func (dm *DataManager) GetActionPlan(key string, cacheRead, cacheWrite bool, transactionID string) (ats *ActionPlan, err error) {
 	if cacheRead {
-		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
-			if err != ltcache.ErrNotFound { // Only consider cache if item was found
-				return nil, err
+		if x, ok := Cache.Get(utils.CacheActionPlans, key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-		} else if x == nil { // item was placed nil in cache
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(*ActionPlan), nil
+			ap := x.(*ActionPlan)
+			if ap == nil { // item was placed nil in cache
+				return nil, utils.ErrNotFound
+			}
+			return ap, nil // ActionPlan is cloned on ltcache side
 		}
 	}
 	ats, err = dm.dataDB.GetActionPlanDrv(key)

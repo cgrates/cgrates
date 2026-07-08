@@ -444,10 +444,7 @@ func TestActionpublishAccount(t *testing.T) {
 func TestActionCloneNil(t *testing.T) {
 	var apl Actions
 
-	rcv, err := apl.Clone()
-	if err != nil {
-		t.Error(err)
-	}
+	rcv := apl.Clone()
 
 	if rcv != nil {
 		t.Error(err)
