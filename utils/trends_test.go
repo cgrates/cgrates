@@ -89,6 +89,48 @@ func TestTrendProfileClone(t *testing.T) {
 	if len(cloned.ThresholdIDs) > 0 && &cloned.ThresholdIDs[0] == &original.ThresholdIDs[0] {
 		t.Errorf("ThresholdIDs slice was not deep copied")
 	}
+
+	original = nil
+	cloned = original.Clone()
+	if !reflect.DeepEqual(cloned, original) {
+		t.Errorf("Expected %v, recieved %v", original, cloned)
+	}
+}
+
+func TestTrendProfileCacheClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tp   *TrendProfile
+	}{
+		{
+			name: "Complete TrendProfile",
+			tp: &TrendProfile{
+				Tenant:          "cgrates.org",
+				ID:              "ID",
+				Schedule:        "Schedule",
+				StatID:          "StatID",
+				Metrics:         []string{"metric1", "metric2"},
+				TTL:             10 * time.Minute,
+				QueueLength:     100,
+				MinItems:        10,
+				CorrelationType: "average",
+				Tolerance:       0.05,
+				Stored:          true,
+				ThresholdIDs:    []string{"thresh1", "thresh2"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tp.CacheClone()
+			if !reflect.DeepEqual(got, tt.tp) {
+				t.Errorf("Expected %v, recieved %v", tt.tp, got)
+			}
+			if tt.tp != nil && got == tt.tp {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
 }
 
 func TestTrendProfileTenantIDAndTrendProfileWithAPIOpts(t *testing.T) {
@@ -417,6 +459,7 @@ func TestTrendProfileFieldAsString(t *testing.T) {
 	}{
 		{ID, []string{ID}, nil, "Trend1"},
 		{Tenant, []string{Tenant}, nil, "cgrates.org"},
+		{Tenant, []string{Tenant, ID}, ErrNotFound, "cgrates.org"},
 		{Schedule, []string{Schedule}, nil, "@every 1m"},
 		{StatID, []string{StatID}, nil, "Stat1"},
 		{Metrics, []string{Metrics + "[0]"}, nil, "*acc"},
@@ -752,6 +795,13 @@ func TestTrendProfileSet(t *testing.T) {
 			expected: nil,
 			hasError: true,
 		},
+		{
+			name:     "ErrWrongPath",
+			path:     []string{Tenant, ID},
+			val:      "newTenant",
+			expected: "newTenant",
+			hasError: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -913,5 +963,665 @@ func TestTrendProfileMergeV2(t *testing.T) {
 
 	if tp1.Tolerance != 1.5 {
 		t.Errorf("Expected Tolerance to be 1.5, but got: %f", tp1.Tolerance)
+	}
+}
+
+func TestMapStringInterfaceToTrend(t *testing.T) {
+	tests := []struct {
+		name   string
+		m      map[string]any
+		want   *Trend
+		expErr string
+	}{
+		{
+			m: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []any{
+					"2026-01-02T15:04:05Z",
+				},
+				Metrics: map[string]any{
+					"2026-01-02T15:04:05Z": map[string]any{
+						"*acc": map[string]any{ID: "*acc", Value: float64(45), TrendGrowth: -1.0, TrendLabel: NotAvailable},
+						"*acd": map[string]any{ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+					},
+				},
+				CompressedMetrics: "",
+			},
+			want: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []time.Time{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+				},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC): {
+						"*acc": {ID: "*acc", Value: float64(45), TrendGrowth: -1.0, TrendLabel: NotAvailable},
+						"*acd": {ID: "*acd", Value: 0, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+					},
+				},
+				CompressedMetrics: []byte{},
+			},
+		},
+		{
+			name: "parsing error",
+			m: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []any{
+					"2026-01-02T15:04:05Z",
+					"2s",
+				},
+			},
+			want:   nil,
+			expErr: `parsing time "2s" as "2006-01-02T15:04:05Z07:00": cannot parse "2s" as "2006"`,
+		},
+		{
+			name: "error case: CompressedMetrics",
+			m: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []any{
+					time.Date(2026, time.January, 1, 1, 56, 0, 0, time.UTC),
+				},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					time.Now(): {
+						"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+						"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+					},
+					time.Now().Add(time.Second): {
+						"*acc": {ID: "*acc", Value: 42, TrendGrowth: -3.0, TrendLabel: MetaNegative},
+						"*acd": {ID: "*acd", Value: 52, TrendGrowth: 2.0, TrendLabel: MetaPositive},
+					},
+				},
+				CompressedMetrics: "0",
+			},
+			want:   nil,
+			expErr: "illegal base64 data at input byte 0",
+		},
+		{
+			name: "error case: Metrics",
+			m: map[string]any{
+				Tenant:   "cgrates.org",
+				ID:       "ID",
+				RunTimes: []any{},
+				Metrics: map[string]any{
+					"2026-01-02T15:04:05Z70:00": map[string]any{
+						"*acc": map[string]any{ID: "*acc", Value: float64(45), TrendGrowth: -1.0, TrendLabel: NotAvailable},
+						"*acd": map[string]any{ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+					},
+				},
+				CompressedMetrics: "",
+			},
+			want:   nil,
+			expErr: `parsing time "2026-01-02T15:04:05Z70:00": extra text: "70:00"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToTrend(tt.m)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, recieved %+v", ToJSON(tt.want), ToJSON(got))
+			}
+		})
+	}
+}
+
+func TestTrendAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		tr   *Trend
+		want map[string]any
+	}{
+		{
+			tr: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []time.Time{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+				},
+				Metrics:           map[time.Time]map[string]*MetricWithTrend{},
+				CompressedMetrics: []byte{},
+			},
+			want: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []any{
+					"2026-01-02T15:04:05Z",
+				},
+				Metrics:           map[string]any{},
+				CompressedMetrics: "",
+			},
+		},
+		{
+			name: "nil case",
+			tr:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tr.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(tt.want), ToJSON(got)) {
+				t.Errorf("Expected %+v, recieved %+v", ToJSON(tt.want), ToJSON(got))
+			}
+		})
+	}
+}
+
+func TestTrendAsTrendSummary(t *testing.T) {
+	tr := &Trend{
+		Tenant: "cgrates.org",
+		ID:     "Trend1",
+		RunTimes: []time.Time{
+			time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+		},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC): {
+				"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+				"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+			},
+		},
+	}
+	trS := &TrendSummary{
+		Tenant: "cgrates.org",
+		ID:     "Trend1",
+		Time:   time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+		Metrics: map[string]*MetricWithTrend{
+			"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+			"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: NotAvailable},
+		},
+	}
+	rcv := tr.AsTrendSummary()
+	if !reflect.DeepEqual(ToJSON(trS), ToJSON(rcv)) {
+		t.Errorf("Expected %+v, recieved %+v", ToJSON(trS), ToJSON(rcv))
+	}
+}
+
+func TestTrendClone(t *testing.T) {
+	tests := []struct {
+		name  string
+		trend *Trend
+	}{
+		{
+			name: "Complete Trend",
+			trend: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []time.Time{
+					time.Now(),
+					time.Now().Add(-1 * time.Hour),
+				},
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					time.Now(): {
+						"metric1": {ID: "metric1", Value: 1.5},
+						"metric2": {ID: "metric2", Value: 2.0},
+					},
+					time.Now().Add(-1 * time.Hour): {
+						"metric1": {ID: "metric1", Value: 1.0},
+					},
+				},
+				CompressedMetrics: []byte{0x00, 0x01},
+				mLast: map[string]time.Time{
+					"metric1": time.Now(),
+					"metric2": time.Now().Add(-1 * time.Hour),
+				},
+				mCounts: map[string]int{
+					"metric1": 2,
+					"metric2": 1,
+				},
+				mTotals: map[string]float64{
+					"metric1": 2.5,
+					"metric2": 2.0,
+				},
+				tPrfl: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "trendProfileID",
+					Schedule:        "0 * * * *",
+					StatID:          "statID1",
+					QueueLength:     10,
+					TTL:             5 * time.Minute,
+					MinItems:        1,
+					CorrelationType: "average",
+					Tolerance:       0.1,
+					Stored:          true,
+					ThresholdIDs:    []string{"threshold1", "threshold2"},
+				},
+			},
+		},
+		{
+			name:  "Nil case",
+			trend: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.trend.Clone()
+			if !reflect.DeepEqual(got, tt.trend) {
+				t.Errorf("Expected %+v, recieved %+v", tt.trend, got)
+			}
+			if tt.trend != nil && got == tt.trend {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.trend.CacheClone()
+			if !reflect.DeepEqual(got, tt.trend) {
+				t.Errorf("Expected %+v, recieved %+v", tt.trend, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToTrendProfile(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       map[string]any
+		tp      *TrendProfile
+		wantErr string
+	}{
+		{
+			m: map[string]any{
+				ID:              "Trend1",
+				StatID:          "Stats1",
+				Tenant:          "cgrates.org",
+				Schedule:        "0 0 * * *",
+				MinItems:        3,
+				CorrelationType: "*last",
+				QueueLength:     -1,
+				TTL:             0,
+				Tolerance:       0.5,
+				Stored:          true,
+				ThresholdIDs:    []string{"Th1"},
+				Metrics:         []string{"*acc"},
+			},
+			tp: &TrendProfile{
+				ID:              "Trend1",
+				StatID:          "Stats1",
+				Tenant:          "cgrates.org",
+				Schedule:        "0 0 * * *",
+				MinItems:        0,
+				CorrelationType: "*last",
+				QueueLength:     0,
+				TTL:             0,
+				Tolerance:       0.5,
+				Stored:          true,
+				ThresholdIDs:    []string{"Th1"},
+				Metrics:         []string{"*acc"},
+			},
+		},
+		{
+			name: "TTL as string",
+			m: map[string]any{
+				TTL: "0",
+			},
+			tp: &TrendProfile{
+				TTL: 0,
+			},
+		},
+		{
+			name: "MinItems, QueueLength, and TTL as float64",
+			m: map[string]any{
+				MinItems:    float64(3),
+				QueueLength: float64(-1),
+				TTL:         float64(0),
+			},
+			tp: &TrendProfile{
+				MinItems:    3,
+				QueueLength: -1,
+				TTL:         0,
+			},
+		},
+		{
+			name: "Error case",
+			m: map[string]any{
+				TTL: "err",
+			},
+			tp:      nil,
+			wantErr: `time: invalid duration "err"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToTrendProfile(tt.m)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.wantErr, err)
+			}
+			if !reflect.DeepEqual(got, tt.tp) {
+				t.Errorf("Expected %+v, recieved %+v", tt.tp, got)
+			}
+		})
+	}
+}
+
+func TestTrendProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		tp   *TrendProfile
+		want map[string]any
+	}{
+		{
+			name: "Complete TrendProfile",
+			tp: &TrendProfile{
+				ID:              "Trend1",
+				StatID:          "Stats1",
+				Tenant:          "cgrates.org",
+				Schedule:        "0 0 * * *",
+				MinItems:        3,
+				CorrelationType: "*last",
+				QueueLength:     -1,
+				TTL:             0,
+				Tolerance:       0.5,
+				Stored:          true,
+				ThresholdIDs:    []string{"Th1"},
+				Metrics:         []string{"*acc"},
+			},
+			want: map[string]any{
+				ID:              "Trend1",
+				StatID:          "Stats1",
+				Tenant:          "cgrates.org",
+				Schedule:        "0 0 * * *",
+				MinItems:        3,
+				CorrelationType: "*last",
+				QueueLength:     -1,
+				TTL:             0,
+				Tolerance:       0.5,
+				Stored:          true,
+				ThresholdIDs:    []string{"Th1"},
+				Metrics:         []string{"*acc"},
+			},
+		},
+		{
+			name: "Nil TrendProfile",
+			tp:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tp.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMetricWithTrendClone(t *testing.T) {
+	tests := []struct {
+		name string
+		m    *MetricWithTrend
+	}{
+		{
+			m: &MetricWithTrend{
+				ID:          MetaTCC,
+				Value:       13,
+				TrendGrowth: -1,
+				TrendLabel:  NotAvailable,
+			},
+		},
+		{
+			m: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.m.Clone()
+			if !reflect.DeepEqual(got, tt.m) {
+				t.Errorf("Expected %v, recieved %v", got, tt.m)
+			}
+			if tt.m != nil && got == tt.m {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
+
+func TestTrendConfig(t *testing.T) {
+	tr := &Trend{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		RunTimes: []time.Time{
+			time.Now(),
+			time.Now().Add(-1 * time.Hour),
+		},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			time.Now(): {
+				"metric1": {ID: "metric1", Value: 1.5},
+				"metric2": {ID: "metric2", Value: 2.0},
+			},
+			time.Now().Add(-1 * time.Hour): {
+				"metric1": {ID: "metric1", Value: 1.0},
+			},
+		},
+		CompressedMetrics: []byte{0x00, 0x01},
+		mLast: map[string]time.Time{
+			"metric1": time.Now(),
+			"metric2": time.Now().Add(-1 * time.Hour),
+		},
+		mCounts: map[string]int{
+			"metric1": 2,
+			"metric2": 1,
+		},
+		mTotals: map[string]float64{
+			"metric1": 2.5,
+			"metric2": 2.0,
+		},
+		tPrfl: &TrendProfile{
+			Tenant:          "cgrates.org",
+			ID:              "trendProfileID",
+			Schedule:        "0 * * * *",
+			StatID:          "statID1",
+			QueueLength:     10,
+			TTL:             5 * time.Minute,
+			MinItems:        1,
+			CorrelationType: "average",
+			Tolerance:       0.1,
+			Stored:          true,
+			ThresholdIDs:    []string{"threshold1", "threshold2"},
+		},
+	}
+	expected := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "trendProfileID",
+		Schedule:        "0 * * * *",
+		StatID:          "statID1",
+		QueueLength:     10,
+		TTL:             5 * time.Minute,
+		MinItems:        1,
+		CorrelationType: "average",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1", "threshold2"},
+	}
+	result := tr.Config()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestTrendSetConfig(t *testing.T) {
+	trend := &Trend{}
+	trend.SetConfig(&TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "trendProfileID",
+		Schedule:        "0 * * * *",
+		StatID:          "statID1",
+		QueueLength:     10,
+		TTL:             5 * time.Minute,
+		MinItems:        1,
+		CorrelationType: "average",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1", "threshold2"},
+	})
+
+	expected := &Trend{
+		tPrfl: &TrendProfile{
+			Tenant:          "cgrates.org",
+			ID:              "trendProfileID",
+			Schedule:        "0 * * * *",
+			StatID:          "statID1",
+			QueueLength:     10,
+			TTL:             5 * time.Minute,
+			MinItems:        1,
+			CorrelationType: "average",
+			Tolerance:       0.1,
+			Stored:          true,
+			ThresholdIDs:    []string{"threshold1", "threshold2"},
+		},
+	}
+	if !reflect.DeepEqual(trend, expected) {
+		t.Errorf("Expected %v, Recieved %v", expected, trend)
+	}
+}
+
+func TestTrendCompress(t *testing.T) {
+	tests := []struct {
+		name      string
+		tr        *Trend
+		limit     int
+		marshaler Marshaler
+		expected  *Trend
+		expErr    string
+	}{
+		{
+			name: "limit = 0",
+			tr: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				CompressedMetrics: nil,
+			},
+			expected: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				CompressedMetrics: []byte{'n', 'u', 'l', 'l'},
+			},
+			limit:     0,
+			marshaler: JSONMarshaler{},
+		},
+		{
+			name: "limit = 100",
+			tr: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				CompressedMetrics: nil,
+			},
+			expected:  nil,
+			limit:     100,
+			marshaler: JSONMarshaler{},
+		},
+		{
+			name: "error case",
+			tr: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []time.Time{
+					time.Now(),
+					time.Now().Add(-1 * time.Hour),
+				},
+			},
+			expected: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+			},
+			limit:     0,
+			marshaler: MockMarshaler{},
+			expErr:    `NOT_IMPLEMENTED`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if rcv, err := tt.tr.Compress(tt.marshaler, tt.limit); err != nil && err.Error() != tt.expErr {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rcv, tt.expected) {
+				t.Errorf("Expected %v, recieved %v", ToJSON(tt.expected), ToJSON(rcv))
+			}
+		})
+	}
+}
+
+func TestTrendUncompress(t *testing.T) {
+	tests := []struct {
+		name     string
+		tr       *Trend
+		expected *Trend
+		expErr   string
+	}{
+		{
+			name:     "nil Trend",
+			tr:       nil,
+			expected: nil,
+		},
+		{
+			name: "error case",
+			tr: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				RunTimes:          []time.Time{},
+				Metrics:           map[time.Time]map[string]*MetricWithTrend{},
+				CompressedMetrics: []byte("0"),
+			},
+			expected: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				RunTimes:          []time.Time{},
+				Metrics:           map[time.Time]map[string]*MetricWithTrend{},
+				CompressedMetrics: []byte("0"),
+			},
+			expErr: `json: cannot unmarshal number into Go value of type map[time.Time]map[string]*utils.MetricWithTrend`,
+		},
+		{
+			name: "metrics with values",
+			tr: &Trend{
+				Tenant:            "cgrates.org",
+				ID:                "ID",
+				RunTimes:          []time.Time{},
+				CompressedMetrics: []byte(`{}`),
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC): {
+						"*acc": {ID: "metric1", Value: 1.5},
+						"*acd": {ID: "metric2", Value: 2.0},
+					},
+					time.Date(2026, time.February, 2, 15, 4, 5, 0, time.UTC): {
+						"*acc": {ID: "metric1", Value: 1.5},
+						"*acd": {ID: "metric2", Value: 2.0},
+					},
+				},
+			},
+			expected: &Trend{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+				RunTimes: []time.Time{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+					time.Date(2026, time.February, 2, 15, 4, 5, 0, time.UTC),
+				},
+				CompressedMetrics: nil,
+				Metrics: map[time.Time]map[string]*MetricWithTrend{
+					time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC): {
+						"*acc": {ID: "metric1", Value: 1.5},
+						"*acd": {ID: "metric2", Value: 2.0},
+					},
+					time.Date(2026, time.February, 2, 15, 4, 5, 0, time.UTC): {
+						"*acc": {ID: "metric1", Value: 1.5},
+						"*acd": {ID: "metric2", Value: 2.0},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.tr.Uncompress(JSONMarshaler{}); err != nil && err.Error() != tt.expErr {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tt.tr, tt.expected) {
+				t.Errorf("Expected %v, Recieved %v", ToJSON(tt.expected), ToJSON(tt.tr))
+			}
+		})
 	}
 }
