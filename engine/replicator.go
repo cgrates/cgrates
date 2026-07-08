@@ -84,15 +84,14 @@ func (r *replicator) replicate(ctx *context.Context, objType, objID, method stri
 		return nil
 	}
 
+	// Form a unique key by joining method name with object identifiers.
+	// Including the method name (Set/Remove) allows different operations
+	// on the same object to have distinct keys, which also serve as
+	// predictable filenames if replication fails.
+	_, methodName, _ := strings.Cut(method, utils.NestingSep)
+	key := methodName + "_" + objType + objID
+
 	if r.interval > 0 {
-
-		// Form a unique key by joining method name with object identifiers.
-		// Including the method name (Set/Remove) allows different operations
-		// on the same object to have distinct keys, which also serve as
-		// predictable filenames if replication fails.
-		_, methodName, _ := strings.Cut(method, utils.NestingSep)
-		key := methodName + "_" + objType + objID
-
 		r.mu.Lock()
 		defer r.mu.Unlock()
 		r.pending[key] = &replicationData{
@@ -104,7 +103,39 @@ func (r *replicator) replicate(ctx *context.Context, objType, objID, method stri
 		return nil
 	}
 
-	return replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
+	return r.replicateAndRestore(ctx, key, objType, objID, method, args)
+}
+
+// replicateAndRestore is a wrapper over replicate function and checks failedDir
+// to create files for tracking unsuccessful writes
+func (r *replicator) replicateAndRestore(ctx *context.Context, key string, objType, objID, method string, args any) error {
+	var failedPath string
+	if r.failedDir != "" {
+		failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
+		// Clean up any existing file containing failed replications.
+		unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
+		if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to remove file for %q: %v", key, err))
+		}
+		unlock()
+	}
+	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
+	if err != nil && failedPath != "" {
+		task := &ReplicationTask{
+			ConnIDs:  r.conns,
+			Filtered: r.filtered,
+			ObjType:  objType,
+			ObjID:    objID,
+			Method:   method,
+			Args:     args,
+		}
+		if wErr := task.WriteToFile(ctx, failedPath, r.locker); wErr != nil {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to dump replication task: %v", wErr))
+		}
+	}
+	return err
 }
 
 // replicate performs the actual replication by calling Set/Remove APIs on ReplicatorSv1
@@ -157,40 +188,10 @@ func (r *replicator) flush() {
 	r.mu.Unlock()
 
 	for key, data := range pending {
-		var failedPath string
-
-		if r.failedDir != "" {
-			failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
-
-			// Clean up any existing file containing failed replications.
-			unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
-			if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
-				utils.Logger.Warning(fmt.Sprintf(
-					"<DataManager> failed to remove file for %q: %v", key, err))
-			}
-			unlock()
-		}
-
-		if err := replicate(context.TODO(), r.cm, r.conns, r.filtered, data.objType, data.objID,
-			data.method, data.args); err != nil {
+		if err := r.replicateAndRestore(context.TODO(), key, data.objType, data.objID, data.method, data.args); err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<DataManager> failed to replicate %q for object %q: %v",
 				data.method, data.objType+data.objID, err))
-
-			if failedPath != "" {
-				task := &ReplicationTask{
-					ConnIDs:  r.conns,
-					Filtered: r.filtered,
-					ObjType:  data.objType,
-					ObjID:    data.objID,
-					Method:   data.method,
-					Args:     data.args,
-				}
-				if err := task.WriteToFile(context.TODO(), failedPath, r.locker); err != nil {
-					utils.Logger.Err(fmt.Sprintf(
-						"<DataManager> failed to dump replication task: %v", err))
-				}
-			}
 		}
 	}
 }
