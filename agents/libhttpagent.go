@@ -191,7 +191,7 @@ func newHAReplyEncoder(encType string,
 		return nil, fmt.Errorf("unsupported encoder type <%s>", encType)
 	case utils.MetaXml:
 		return newHAXMLEncoder(w)
-	case utils.MetaTextPlain:
+	case utils.MetaText:
 		return newHATextPlainEncoder(w)
 	}
 }

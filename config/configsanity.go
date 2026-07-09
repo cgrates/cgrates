@@ -575,7 +575,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !slices.Contains([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
 			return fmt.Errorf("<%s> unsupported request payload %s", utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
-		if !slices.Contains([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
+		if !slices.Contains([]string{utils.MetaText, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
 			return fmt.Errorf("<%s> unsupported reply payload %s", utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
 		for _, req := range httpAgentCfg.RequestProcessors {

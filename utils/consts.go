@@ -867,7 +867,7 @@ const (
 	MetaApier               = "*apier"
 	MetaAnalyzer            = "*analyzer"
 	CGREventString          = "CGREvent"
-	MetaTextPlain           = "*text_plain"
+	MetaText                = "*text"
 	MetaIgnoreErrors        = "*ignore_errors"
 	MetaRelease             = "*release"
 	MetaAllocate            = "*allocate"

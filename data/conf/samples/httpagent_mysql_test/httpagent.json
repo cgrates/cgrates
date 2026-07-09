@@ -126,7 +126,7 @@
 		"url": "/textplain",
 		"sessions_conns": ["*localhost"],
 		"request_payload":	"*url",
-		"reply_payload":	"*text_plain",
+		"reply_payload":	"*text",
 		"request_processors": [
 			{
 				"id": "TextPlainDryRun",

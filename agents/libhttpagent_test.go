@@ -232,7 +232,7 @@ func TestLibhttpagentNewHAReplyEncoder(t *testing.T) {
 		},
 		{
 			name:     "text_plain_encoder",
-			encType:  utils.MetaTextPlain,
+			encType:  utils.MetaText,
 			wantType: "*agents.haTextPlainEncoder",
 			wantErr:  false,
 		},
