@@ -113,6 +113,25 @@ func TestActionPlanClone(t *testing.T) {
 	if !reflect.DeepEqual(at1, clned) {
 		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, clned)
 	}
+
+	at1 = nil
+	clned = at1.Clone()
+	if err != nil {
+		t.Error(err)
+	}
+	if clned != nil {
+		t.Errorf("expected nil, received <%#v>", clned)
+	}
+
+	at1 = &ActionPlan{}
+	clned = at1.Clone()
+	if err != nil {
+		t.Error(err)
+	}
+	exp := &ActionPlan{}
+	if !reflect.DeepEqual(clned, exp) {
+		t.Errorf("expected <%#v>, received <%#v>", exp, clned)
+	}
 }
 
 func TestActionTimingClone(t *testing.T) {

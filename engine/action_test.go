@@ -207,13 +207,37 @@ var a *Action = &Action{
 	balanceValue:     fl2,
 }
 
-func TestActionClone(t *testing.T) {
+func TestActionCloneNil(t *testing.T) {
 	var a *Action
 
 	rcv := a.Clone()
 
 	if rcv != nil {
 		t.Error(rcv)
+	}
+}
+
+func TestActionClone(t *testing.T) {
+	original := &Action{
+		Id:               "t1",
+		ActionType:       "t2",
+		ExtraParameters:  "t3",
+		Filter:           "t4",
+		ExpirationString: "t5",
+		Weight:           6,
+		Balance:          &BalanceFilter{},
+		balanceValue:     7,
+	}
+
+	got := original.Clone()
+	if got == nil {
+		t.Fatal("expected non-nil clone")
+	}
+	if got == original {
+		t.Fatal("expected a different Action instance")
+	}
+	if !reflect.DeepEqual(original, got) {
+		t.Fatalf("expected <%#v>\nreceived <%#v>", original, got)
 	}
 }
 
@@ -441,7 +465,7 @@ func TestActionpublishAccount(t *testing.T) {
 	}
 }
 
-func TestActionCloneNil(t *testing.T) {
+func TestActionsCloneNil(t *testing.T) {
 	var apl Actions
 
 	rcv := apl.Clone()
