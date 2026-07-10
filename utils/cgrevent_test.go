@@ -196,6 +196,27 @@ func TestCGREventClone(t *testing.T) {
 	}
 }
 
+func TestCGREventCacheClone(t *testing.T) {
+	ev := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]any{
+			"AnswerTime":       time.Now(),
+			"supplierprofile1": "supplier",
+			"UsageInterval":    "54.2",
+			"PddInterval":      "1s",
+			"Weight":           20.0,
+		},
+		APIOpts: map[string]any{
+			"testKey": 12,
+		},
+	}
+	cl := ev.CacheClone()
+	if !reflect.DeepEqual(ev, cl) {
+		t.Errorf("Expecting: %+v, received: %+v", ev, cl)
+	}
+}
+
 func TestCGREventOptAsInt64(t *testing.T) {
 	ev := &CGREvent{
 		APIOpts: map[string]any{
@@ -407,5 +428,25 @@ func TestHasField(t *testing.T) {
 	if rcv := ev.HasField("supplierprofile1"); !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n received %v", exp, rcv)
 
+	}
+}
+
+func TestCGREventOptAsString(t *testing.T) {
+	se := &CGREvent{
+		APIOpts: map[string]any{
+			MetaUsage: "7m26s",
+		},
+	}
+	answ, err := se.OptAsString(MetaUsage)
+	if err != nil {
+		t.Error(err)
+	}
+	if answ != "7m26s" {
+		t.Errorf("Expecting: %+v, received: %+v", "7m26s", answ)
+	}
+
+	answ, err = se.OptAsString("error")
+	if err == nil || err != ErrNotFound {
+		t.Errorf("Expecting: %+v, received: %+v", ErrNotFound, err)
 	}
 }

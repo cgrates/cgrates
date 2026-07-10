@@ -212,3 +212,183 @@ func TestChargerProfileFieldAsInterfaceBlockers(t *testing.T) {
 	}
 
 }
+
+func TestChargerProfileClone(t *testing.T) {
+	tests := []struct {
+		name string
+		cp   *ChargerProfile
+	}{
+		{
+			name: "Complete ChargerProfile",
+			cp: &ChargerProfile{
+				Tenant:    "cgrates.org",
+				ID:        "profileID",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Weights: DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				RunID:        MetaDefault,
+				AttributeIDs: []string{"attr2"},
+				Blockers:     DynamicBlockers{},
+			},
+		},
+		{
+			name: "Nil fields",
+			cp: &ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "profileID",
+				FilterIDs:    nil,
+				Weights:      nil,
+				RunID:        "",
+				AttributeIDs: nil,
+				Blockers:     nil,
+			},
+		},
+		{
+			name: "Nil ChargerProfile",
+			cp:   nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.cp.Clone()
+			if !reflect.DeepEqual(got, tt.cp) {
+				t.Errorf("Expected %v, recieved %v", tt.cp, got)
+			}
+
+			if tt.cp != nil && tt.cp == got {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.cp.CacheClone()
+			if !reflect.DeepEqual(got, tt.cp) {
+				t.Errorf("Expected %v, recieved %v", tt.cp, got)
+			}
+		})
+	}
+}
+
+func TestChargerProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		cp   *ChargerProfile
+		want map[string]any
+	}{
+		{
+			name: "ChargerProfile with values",
+			cp: &ChargerProfile{
+				Tenant:    "cgrates.org",
+				ID:        "id1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				RunID:        MetaDefault,
+				AttributeIDs: []string{"attr1"},
+				Blockers:     DynamicBlockers{},
+			},
+			want: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "id1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				RunID:        MetaDefault,
+				AttributeIDs: []string{"attr1"},
+				Blockers:     DynamicBlockers{},
+			},
+		},
+		{
+			name: "Nil ChargerProfile",
+			cp:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.cp.AsMapStringInterface()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToChargerProfile(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]any
+		want *ChargerProfile
+	}{
+		{
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "id1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				RunID:        MetaDefault,
+				AttributeIDs: []string{"attr1"},
+				Blockers:     DynamicBlockers{},
+			},
+			want: &ChargerProfile{
+				Tenant:    "cgrates.org",
+				ID:        "id1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				RunID:        MetaDefault,
+				AttributeIDs: []string{"attr1"},
+				Blockers:     DynamicBlockers{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToChargerProfile(tt.m)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestChargerProfileTenantID(t *testing.T) {
+	cp := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "id1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		RunID:        MetaDefault,
+		AttributeIDs: []string{"attr1"},
+		Blockers:     DynamicBlockers{},
+	}
+	want := "cgrates.org:id1"
+
+	got := cp.TenantID()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Expected %v, recieved %v", want, got)
+	}
+}
