@@ -2240,3 +2240,167 @@ func TestSessionSv1ProcessEventAttributesAndEEs(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventStatsAndThresholds(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+            "logger": {"level": 7},
+            "sessions": {
+                "enabled": true,
+                "conns": {
+                    "*stats":      [{"ConnIDs": ["*localhost"]}],
+                    "*thresholds": [{"ConnIDs": ["*localhost"]}],
+                    "*ees":        [{"ConnIDs": ["*localhost"]}]
+                }
+            },
+            "stats": {"enabled": true},
+            "thresholds": {
+                "enabled": true,
+                "conns": {
+                    "*actions": [{"ConnIDs": ["*localhost"]}]
+                }
+            },
+            "actions": {"enabled": true},
+            "ees": {
+                "enabled": true,
+                "exporters": [
+                    {"id": "LogExporter", "type": "*log", "attempts": 1}
+                ]
+            },
+            "chargers": {"enabled": true},
+            "admins":   {"enabled": true}
+        }`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	var reply string
+
+	t.Run("setChargerProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+			&utils.ChargerProfileWithAPIOpts{
+				ChargerProfile: &utils.ChargerProfile{
+					Tenant:       "cgrates.org",
+					ID:           "CGR_DEFAULT",
+					RunID:        utils.MetaDefault,
+					AttributeIDs: []string{utils.MetaNone},
+					Weights:      utils.DynamicWeights{{Weight: 0}},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetChargerProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetChargerProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setStatQueueProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+			&utils.StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &utils.StatQueueProfile{
+					Tenant:      "cgrates.org",
+					ID:          "SQ_1001",
+					FilterIDs:   []string{"*string:~*req.Account:1001"},
+					Weights:     utils.DynamicWeights{{Weight: 10}},
+					QueueLength: 10,
+					TTL:         time.Hour,
+					Metrics: []*utils.MetricWithFilters{
+						{MetricID: utils.MetaTCD},
+					},
+					Stored: true,
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetStatQueueProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetStatQueueProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("setThresholdProfile", func(t *testing.T) {
+		if err := client.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+			&utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   utils.DynamicWeights{{Weight: 10}},
+					MaxHits:   -1,
+					Async:     true,
+				},
+			}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetThresholdProfile failed: %v", err)
+		} else if reply != utils.OK {
+			t.Fatalf("AdminSv1SetThresholdProfile reply = %s, want OK", reply)
+		}
+	})
+
+	t.Run("statsAndThresholdsFlags", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "statsAndThresholdsEvent",
+				APIOpts: map[string]any{
+					utils.MetaStats:      true,
+					utils.MetaThresholds: true,
+					utils.MetaEEs:        true,
+					utils.MetaOriginID:   "OriginID_statsAndThresholds",
+					utils.MetaUsage:      10 * time.Minute,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.Usage:        10 * time.Minute,
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent with *stats+*thresholds failed: %v", err)
+		}
+		if len(rply.StatQueueIDs) == 0 {
+			t.Error("StatQueueIDs should be populated with *stats flag")
+		}
+		sqIDs, ok := rply.StatQueueIDs[utils.MetaPrimary]
+		if !ok || !slices.Contains(sqIDs, "SQ_1001") {
+			t.Errorf("StatQueueIDs = %v, want to contain SQ_1001 under *primary", rply.StatQueueIDs)
+		}
+		if len(rply.ThresholdIDs) == 0 {
+			t.Error("ThresholdIDs should be populated with *thresholds flag")
+		}
+		thIDs, ok := rply.ThresholdIDs[utils.MetaPrimary]
+		if !ok || !slices.Contains(thIDs, "THD_1001") {
+			t.Errorf("ThresholdIDs = %v, want to contain THD_1001 under *primary", rply.ThresholdIDs)
+		}
+		if len(rply.EventExporters) == 0 {
+			t.Fatal("EventExporters should not be empty with *ees flag")
+		}
+	})
+
+	t.Run("noMatchStatsAndThresholds", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchEvent",
+				APIOpts: map[string]any{
+					utils.MetaStats:      true,
+					utils.MetaThresholds: true,
+					utils.MetaOriginID:   "OriginID_noMatch",
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+					utils.Destination:  "1002",
+					utils.Usage:        10 * time.Minute,
+				},
+			}, &rply)
+		if err != nil {
+			t.Logf("ProcessEvent noMatch returned: %v (expected when no profiles match)", err)
+		}
+		if len(rply.StatQueueIDs) != 0 {
+			t.Errorf("StatQueueIDs should be empty when no profile matches, got: %v", rply.StatQueueIDs)
+		}
+		if len(rply.ThresholdIDs) != 0 {
+			t.Errorf("ThresholdIDs should be empty when no profile matches, got: %v", rply.ThresholdIDs)
+		}
+	})
+}
