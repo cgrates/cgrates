@@ -56,7 +56,7 @@ var (
 		testAnalyzerSChargerSv1ProcessEvent,
 		testAnalyzerSV1Search,
 		testAnalyzerSV1Search2,
-		testAnalyzerSV1SearchWithContentFilters,
+		testAnalyzerSV1SearchWithFilters,
 		testAnalyzerSV1SearchWithLimit,
 		testAnalyzerSV1SearchWithOffset,
 		testAnalyzerSV1SearchWithLimitAndOffsetZero,
@@ -227,7 +227,10 @@ func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
 	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*internal",
+		"*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent",
+	}}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -236,18 +239,20 @@ func testAnalyzerSV1Search(t *testing.T) {
 
 func testAnalyzerSV1Search2(t *testing.T) {
 	var result []map[string]any
-	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*json",
+		"*string:~*hdr.RequestMethod:ChargerSv1.ProcessEvent",
+	}}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
 
-func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
+func testAnalyzerSV1SearchWithFilters(t *testing.T) {
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters:  `+RequestEncoding:\*json`,
-		ContentFilters: []string{"*string:~*req.Event.Account:1010"},
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json", "*string:~*req.Event.Account:1010"},
 	}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -258,7 +263,7 @@ func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
 func testAnalyzerSV1SearchWithLimit(t *testing.T) {
 	var resultAll []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
 	}, &resultAll); err != nil {
 		t.Fatal(err)
 	}
@@ -269,8 +274,8 @@ func testAnalyzerSV1SearchWithLimit(t *testing.T) {
 
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
-		Limit:         1,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
+		Limit:   1,
 	}, &result); err != nil {
 		t.Fatal(err)
 	} else if len(result) != 1 {
@@ -281,7 +286,7 @@ func testAnalyzerSV1SearchWithLimit(t *testing.T) {
 func testAnalyzerSV1SearchWithOffset(t *testing.T) {
 	var resultAll []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
 	}, &resultAll); err != nil {
 		t.Fatal(err)
 	}
@@ -292,9 +297,9 @@ func testAnalyzerSV1SearchWithOffset(t *testing.T) {
 
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
-		Limit:         totalCount,
-		Offset:        1,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
+		Limit:   totalCount,
+		Offset:  1,
 	}, &result); err != nil {
 		t.Fatal(err)
 	} else if len(result) != totalCount-1 {
@@ -305,7 +310,7 @@ func testAnalyzerSV1SearchWithOffset(t *testing.T) {
 func testAnalyzerSV1SearchWithLimitAndOffsetZero(t *testing.T) {
 	var resultAll []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
 	}, &resultAll); err != nil {
 		t.Fatal(err)
 	}
@@ -313,9 +318,9 @@ func testAnalyzerSV1SearchWithLimitAndOffsetZero(t *testing.T) {
 
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
-		Limit:         0,
-		Offset:        0,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
+		Limit:   0,
+		Offset:  0,
 	}, &result); err != nil {
 		t.Fatal(err)
 	} else if len(result) != totalCount {
@@ -326,7 +331,7 @@ func testAnalyzerSV1SearchWithLimitAndOffsetZero(t *testing.T) {
 func testAnalyzerSV1SearchOffsetWithoutLimit(t *testing.T) {
 	var resultAll []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
 	}, &resultAll); err != nil {
 		t.Fatal(err)
 	}
@@ -337,8 +342,8 @@ func testAnalyzerSV1SearchOffsetWithoutLimit(t *testing.T) {
 
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json`,
-		Offset:        1,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json"},
+		Offset:  1,
 	}, &result); err != nil {
 		t.Fatal(err)
 	} else if len(result) != totalCount-1 {
@@ -356,7 +361,10 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
-	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
+	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*birpc_json",
+		"*string:~*hdr.RequestMethod:SessionSv1.DisconnectPeer",
+	}}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -469,8 +477,7 @@ func testAnalyzerSv1MultipleQuery(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{
-		HeaderFilters:  `+RequestMethod:"AdminSv1.SetFilter"`,
-		ContentFilters: []string{"*prefix:~*req.ID:TestA"},
+		Filters: []string{"*string:~*hdr.RequestMethod:AdminSv1.SetFilter", "*prefix:~*req.ID:TestA"},
 	}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 3 {

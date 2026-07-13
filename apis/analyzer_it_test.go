@@ -149,7 +149,7 @@ func testAnalyzerSSearchCall1(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*internal", "*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent"},
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
 		t.Error(err)
@@ -161,7 +161,7 @@ func testAnalyzerSSearchCall1(t *testing.T) {
 func testAnalyzerSSearchCall2(t *testing.T) {
 	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:ChargerSv1\.ProcessEvent`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*internal", "*string:~*hdr.RequestMethod:ChargerSv1.ProcessEvent"},
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
 		t.Error(err)
@@ -217,7 +217,7 @@ func testAnalyzerSGetFilterIDs(t *testing.T) {
 func testAnalyzerSSearchCall3(t *testing.T) {
 	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
-		HeaderFilters: `+RequestEncoding:\*json +RequestMethod:AdminSv1\.GetFilter`,
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json", "*string:~*hdr.RequestMethod:AdminSv1.GetFilter"},
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
 		t.Error(err)

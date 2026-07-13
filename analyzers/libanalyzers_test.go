@@ -75,7 +75,7 @@ func TestNewInfoRPC(t *testing.T) {
 	t1 := time.Now()
 	expIdx := &InfoRPC{
 		RequestDuration:    time.Second,
-		RequestStartTime:   t1,
+		RequestStartTime:   t1.UTC().Format(time.RFC3339Nano),
 		RequestEncoding:    utils.MetaJSON,
 		RequestSource:      "127.0.0.1:5565",
 		RequestDestination: "127.0.0.1:2012",
@@ -99,60 +99,38 @@ func TestNewInfoRPC(t *testing.T) {
 }
 
 func TestUnmarshalJSON(t *testing.T) {
-	expErr := new(json.SyntaxError)
-	if _, err := unmarshalJSON(json.RawMessage(`a`)); err == nil || err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s,received %+v", expErr, err)
+	tests := []struct {
+		name string
+		raw  string
+		want any
+	}{
+		{name: "empty"},
+		{
+			name: "trailing whitespace",
+			raw:  "{\"number\":94}\n\t ",
+			want: map[string]any{"number": json.Number("94")},
+		},
 	}
-	var exp any = true
-	if val, err := unmarshalJSON(json.RawMessage(`true`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	exp = false
-	if val, err := unmarshalJSON(json.RawMessage(`false`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	exp = "string"
-	if val, err := unmarshalJSON(json.RawMessage(`"string"`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	exp = 94.
-	if val, err := unmarshalJSON(json.RawMessage(`94`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := unmarshalJSON(json.RawMessage(tt.raw))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("got %#v, want %#v", got, tt.want)
+			}
+		})
 	}
 
-	exp = []any{"1", "2", "3"}
-	if val, err := unmarshalJSON(json.RawMessage(`["1","2","3"]`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	exp = map[string]any{"1": "A", "2": "B", "3": "C"}
-	if val, err := unmarshalJSON(json.RawMessage(`{"1":"A","2":"B","3":"C"}`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	for _, raw := range []string{`true false`, `{} trailing`} {
+		if _, err := unmarshalJSON(json.RawMessage(raw)); err == nil {
+			t.Errorf("accepted %q", raw)
+		}
 	}
 
-	exp = nil
-	if val, err := unmarshalJSON(json.RawMessage(`null`)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := unmarshalJSON(json.RawMessage(``)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, exp) {
-		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	var syntaxErr *json.SyntaxError
+	if _, err := unmarshalJSON(json.RawMessage(`a`)); !errors.As(err, &syntaxErr) {
+		t.Fatalf("got %v, want JSON syntax error", err)
 	}
 }

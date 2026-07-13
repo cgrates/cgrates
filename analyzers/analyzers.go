@@ -62,7 +62,7 @@ func (aS *AnalyzerS) SetFilterS(fS *engine.FilterS) {
 
 func (aS *AnalyzerS) initDB() (err error) {
 	if aS.cfg.AnalyzerSCfg().IndexType == utils.MetaInternal {
-		aS.db, err = bleve.NewMemOnly(bleve.NewIndexMapping())
+		aS.db, err = bleve.NewMemOnly(newAnalyzerIndexMapping())
 		return
 	}
 	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, utils.AnzDBDir)
@@ -71,7 +71,7 @@ func (aS *AnalyzerS) initDB() (err error) {
 	} else if os.IsNotExist(err) {
 		indxType, storeType := getIndex(aS.cfg.AnalyzerSCfg().IndexType)
 		aS.db, err = bleve.NewUsing(dbPath,
-			bleve.NewIndexMapping(), indxType, storeType, nil)
+			newAnalyzerIndexMapping(), indxType, storeType, nil)
 	}
 	return
 }
@@ -133,28 +133,33 @@ func (aS *AnalyzerS) logTrafic(id uint64, method string,
 		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 
-// QueryArgs the structure that we use to filter the API calls
+// QueryArgs contains filters and pagination options for Analyzer queries.
 type QueryArgs struct {
-	// a string based on the query language(https://blevesearch.com/docs/Query-String-Query/) that we send to bleve
-	HeaderFilters string
-	// Limit is the maximum number of results to return (maps to Bleve's Size parameter)
+	// Filters contains inline filters and named filter IDs.
+	Filters []string
+	// Limit is the maximum number of results to return.
 	Limit int
-	// Offset is the starting position for results, used for pagination (maps to Bleve's From parameter)
+	// Offset is the starting position for results, used for pagination.
 	Offset int
-	// a list of filters that we use to filter the call similar to how we filter the events
-	ContentFilters []string
 }
 
-// V1StringQuery returns a list of API that match the query
+// V1StringQuery returns RPC calls matching the filters.
 func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]any) error {
-	var q query.Query
-	if args.HeaderFilters == utils.EmptyString {
-		q = bleve.NewMatchAllQuery()
-	} else {
-		q = bleve.NewQueryStringQuery(args.HeaderFilters)
+	if len(args.Filters) == 0 {
+		return aS.queryAll(ctx, args, reply)
 	}
-	s := bleve.NewSearchRequest(q)
-	s.Fields = []string{utils.Meta} // return all fields
+	q, err := queryFromFilters(args.Filters)
+	if err != nil {
+		return err
+	}
+	return aS.queryFiltered(ctx, q, args, reply)
+}
+
+func (aS *AnalyzerS) queryAll(ctx *context.Context,
+	args *QueryArgs, reply *[]map[string]any) error {
+	s := bleve.NewSearchRequest(bleve.NewMatchAllQuery())
+	s.Fields = []string{utils.Meta}
+	s.SortBy([]string{"-" + utils.RequestStartTime, "_id"})
 	if args.Limit > 0 {
 		s.Size = args.Limit
 	}
@@ -166,34 +171,79 @@ func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply 
 		return err
 	}
 	rply := make([]map[string]any, 0, searchResults.Hits.Len())
-	lenContentFltrs := len(args.ContentFilters)
 	for _, obj := range searchResults.Hits {
-		// make sure that the result is corectly marshaled
-		rep := json.RawMessage(utils.IfaceAsString(obj.Fields[utils.Reply]))
-		req := json.RawMessage(utils.IfaceAsString(obj.Fields[utils.RequestParams]))
-		obj.Fields[utils.Reply] = rep
-		obj.Fields[utils.RequestParams] = req
-		// try to pretty print the duration
-		if dur, err := utils.IfaceAsDuration(obj.Fields[utils.RequestDuration]); err == nil {
-			obj.Fields[utils.RequestDuration] = dur.String()
-		}
-		if val, has := obj.Fields[utils.ReplyError]; !has || len(utils.IfaceAsString(val)) == 0 {
-			obj.Fields[utils.ReplyError] = nil
-		}
-		if lenContentFltrs != 0 {
-			dp, err := getDPFromSearchresult(req, rep, obj.Fields)
-			if err != nil {
-				return err
-			}
-			if pass, err := aS.fltrS.Pass(ctx, aS.cfg.GeneralCfg().DefaultTenant,
-				args.ContentFilters, dp); err != nil {
-				return err
-			} else if !pass {
-				continue
-			}
-		}
+		prepareQueryFields(obj.Fields)
 		rply = append(rply, obj.Fields)
 	}
 	*reply = rply
 	return nil
+}
+
+func (aS *AnalyzerS) queryFiltered(ctx *context.Context, q query.Query,
+	args *QueryArgs, reply *[]map[string]any) error {
+	limit := args.Limit
+	if limit <= 0 {
+		limit = defaultQueryLimit
+	}
+	offset := args.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	rply := make([]map[string]any, 0, limit)
+	skipped := 0
+	var searchAfter []string
+	for len(rply) < limit {
+		s := bleve.NewSearchRequest(q)
+		s.Fields = []string{utils.Meta}
+		s.SortBy([]string{"-" + utils.RequestStartTime, "_id"})
+		s.Size = queryBatchSize
+		s.SearchAfter = searchAfter
+		searchResults, err := aS.db.SearchInContext(ctx, s)
+		if err != nil {
+			return err
+		}
+		if searchResults.Hits.Len() == 0 {
+			break
+		}
+		for _, obj := range searchResults.Hits {
+			req, rep := prepareQueryFields(obj.Fields)
+			dp, err := getDPFromSearchresult(req, rep, obj.Fields)
+			if err != nil {
+				return err
+			}
+			pass, err := aS.fltrS.Pass(ctx, aS.cfg.GeneralCfg().DefaultTenant, args.Filters, dp)
+			if err != nil {
+				return err
+			}
+			if !pass {
+				continue
+			}
+			if skipped < offset {
+				skipped++
+				continue
+			}
+			rply = append(rply, obj.Fields)
+			if len(rply) == limit {
+				break
+			}
+		}
+		// Resume after the last hit, since filtering can reject the whole batch.
+		searchAfter = searchResults.Hits[searchResults.Hits.Len()-1].Sort
+	}
+	*reply = rply
+	return nil
+}
+
+func prepareQueryFields(fields map[string]any) (req, rep json.RawMessage) {
+	req = json.RawMessage(utils.IfaceAsString(fields[utils.RequestParams]))
+	rep = json.RawMessage(utils.IfaceAsString(fields[utils.Reply]))
+	fields[utils.RequestParams] = req
+	fields[utils.Reply] = rep
+	if dur, err := utils.IfaceAsDuration(fields[utils.RequestDuration]); err == nil {
+		fields[utils.RequestDuration] = dur.String()
+	}
+	if val, has := fields[utils.ReplyError]; !has || len(utils.IfaceAsString(val)) == 0 {
+		fields[utils.ReplyError] = nil
+	}
+	return req, rep
 }

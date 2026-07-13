@@ -19,10 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	stdctx "context"
 	"encoding/json"
+	"errors"
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,6 +37,26 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
+
+type baseIndex = bleve.Index
+
+type indexWithInsert struct {
+	baseIndex
+	id  string
+	doc any
+}
+
+func (idx *indexWithInsert) SearchInContext(ctx stdctx.Context, req *bleve.SearchRequest) (*bleve.SearchResult, error) {
+	result, err := idx.baseIndex.SearchInContext(ctx, req)
+	if err == nil && idx.doc != nil {
+		doc := idx.doc
+		idx.doc = nil
+		if err = idx.baseIndex.Index(idx.id, doc); err != nil {
+			return nil, err
+		}
+	}
+	return result, err
+}
 
 func TestNewAnalyzerService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -197,8 +220,18 @@ func TestAnalyzersV1Search(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil)
 	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	methodRule, err := engine.NewFilterRule(utils.MetaString, "~*hdr.RequestMethod", []string{utils.CoreSv1Ping})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "ANALYZER_METHOD",
+		Rules:  []*engine.FilterRule{methodRule},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
 	anz, err := NewAnalyzerS(cfg)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,13 +295,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply := []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
-		t.Fatal(err)
-	} else if len(reply) != 4 {
-		t.Errorf("Expected 4 hits received: %v", len(reply))
-	}
-	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: "RequestMethod:" + `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"ANALYZER_METHOD"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
@@ -283,61 +310,51 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Event":null,"APIOpts":{"EventSource":"*attributes"}}`),
 		"Reply":              json.RawMessage(`"Pong"`),
 		"RequestSource":      "127.0.0.1:5566",
-		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339Nano),
 		"ReplyError":         nil,
 	}}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: utils.RequestDuration + ":>=" + strconv.FormatInt(int64(time.Hour), 10)}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*gte:~*hdr.RequestDuration:" + strconv.FormatInt(int64(time.Hour), 10)}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: utils.RequestStartTime + ":<=\"" + t1.Add(-23*time.Hour).UTC().Format(time.RFC3339) + "\""}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*lte:~*hdr.RequestStartTime:" + t1.Add(-23*time.Hour).UTC().Format(time.RFC3339)}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: "RequestEncoding:*gob"}, &reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(expRply, reply) {
-		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
-	}
-
-	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*rep:Pong"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*string:~*hdr.RequestEncoding:*gob"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*string:~*rep:Pong",
+	}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*gt:~*hdr.RequestDuration:1m"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*string:~*req.APIOpts.EventSource:*attributes",
+	}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*gt:~*hdr.RequestDuration:1m",
+	}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
@@ -351,13 +368,11 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Event":null,"APIOpts":{"EventSource":"*ees"}}`),
 		"Reply":              json.RawMessage(`"Pong"`),
 		"RequestSource":      "127.0.0.1:5566",
-		"RequestStartTime":   t1.Add(-11 * time.Hour).UTC().Format(time.RFC3339),
+		"RequestStartTime":   t1.Add(-11 * time.Hour).UTC().Format(time.RFC3339Nano),
 		"ReplyError":         nil,
 	}}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*ees"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*string:~*req.APIOpts.EventSource:*ees"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
@@ -365,43 +380,56 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	expRply = []map[string]any{}
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*cdrs"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*string:~*req.APIOpts.EventSource:*cdrs",
+	}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*notstring:~*req.APIOpts.EventSource:*attributes"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*notstring:~*req.APIOpts.EventSource:*attributes",
+	}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*sessions"},
-	}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*string:~*req.APIOpts.EventSource:*sessions"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
-	expErr := utils.ErrPrefixNotErrNotImplemented("*type")
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
-	}, &reply); err == nil || err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s,received:%v", expErr, err)
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestEncoding:*gob",
+		"*type:~*opts.EventSource:*cdrs",
+	}}, &reply); err == nil || !strings.Contains(err.Error(), "Unsupported filter Type") {
+		t.Errorf("expected unsupported filter error, received: %v", err)
+	}
+
+	payloadNumber := uint64(9007199254740995)
+	payloadMethod := "Payload.Test"
+	if err = anz.db.Index("large-payload", NewInfoRPC(0, payloadMethod,
+		map[string]any{"Number": payloadNumber}, nil, nil, utils.MetaJSON, "", "", t1, t1)); err != nil {
+		t.Fatal(err)
+	}
+	reply = nil
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestMethod:" + payloadMethod,
+		"*string:~*req.Number:" + strconv.FormatUint(payloadNumber, 10),
+	}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Fatalf("expected one exact numeric payload match, got %d", len(reply))
 	}
 
 	sTime := time.Now()
 	if err = anz.db.Index(utils.ConcatenatedKey(utils.AttributeSv1Ping, strconv.FormatInt(sTime.Unix(), 10)),
 		&InfoRPC{
 			RequestDuration:  time.Second,
-			RequestStartTime: sTime,
+			RequestStartTime: sTime.UTC().Format(time.RFC3339Nano),
 			RequestEncoding:  utils.MetaJSON,
 			RequestID:        0,
 			RequestMethod:    utils.AttributeSv1Ping,
@@ -411,17 +439,17 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expErr = new(json.SyntaxError)
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestMethod:" + utils.AttributeSv1Ping,
-		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
-	}, &reply); err == nil || err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s,received:%v", expErr, err)
+	var syntaxErr *json.SyntaxError
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestMethod:" + utils.AttributeSv1Ping,
+		"*string:~*opts.EventSource:*cdrs",
+	}}, &reply); !errors.As(err, &syntaxErr) {
+		t.Errorf("Expected JSON syntax error,received:%v", err)
 	}
 	if err = anz.db.Index(utils.ConcatenatedKey(utils.AttributeSv1Ping, strconv.FormatInt(sTime.Unix(), 10)),
 		&InfoRPC{
 			RequestDuration:  time.Second,
-			RequestStartTime: sTime,
+			RequestStartTime: sTime.UTC().Format(time.RFC3339Nano),
 			RequestEncoding:  utils.MetaJSON,
 			RequestID:        0,
 			RequestMethod:    utils.AttributeSv1Ping,
@@ -430,79 +458,171 @@ func TestAnalyzersV1Search(t *testing.T) {
 		}); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
-		HeaderFilters:  "RequestMethod:" + utils.AttributeSv1Ping,
-		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
-	}, &reply); err == nil || err.Error() != expErr.Error() {
-		t.Errorf("Expected error: %s,received:%v", expErr, err)
+	syntaxErr = nil
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{
+		"*string:~*hdr.RequestMethod:" + utils.AttributeSv1Ping,
+		"*string:~*opts.EventSource:*cdrs",
+	}}, &reply); !errors.As(err, &syntaxErr) {
+		t.Errorf("Expected JSON syntax error,received:%v", err)
 	}
 
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(),
-		&QueryArgs{
-			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
-			Limit:         2,
-		}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
+		Filters: []string{"*string:~*hdr.RequestMethod:" + utils.CoreSv1Ping},
+		Limit:   2,
+	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 2 {
 		t.Errorf("Expected 2 hits with Limit=2, received: %v", len(reply))
 	}
 
 	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(),
-		&QueryArgs{
-			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
-			Limit:         4,
-			Offset:        2,
-		}, &reply); err != nil {
-		t.Fatal(err)
-	} else if len(reply) != 2 {
-		t.Errorf("Expected 2 hits with Limit=4 Offset=2, received: %v", len(reply))
-	}
-
-	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(),
-		&QueryArgs{
-			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
-			Limit:         1,
-			Offset:        1,
-		}, &reply); err != nil {
-		t.Fatal(err)
-	} else if len(reply) != 1 {
-		t.Errorf("Expected 1 hit with Limit=1 Offset=1, received: %v", len(reply))
-	}
-
-	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(),
-		&QueryArgs{
-			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
-			Offset:        2,
-		}, &reply); err != nil {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
+		Filters: []string{"*string:~*hdr.RequestMethod:" + utils.CoreSv1Ping},
+		Offset:  2,
+	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 2 {
 		t.Errorf("Expected 2 hits with Offset=2 no Limit, received: %v", len(reply))
 	}
 
-	reply = []map[string]any{}
-	if err = anz.V1StringQuery(context.Background(),
-		&QueryArgs{
-			HeaderFilters: `"` + utils.CoreSv1Ping + `"`,
-			Limit:         0,
-			Offset:        0,
-		}, &reply); err != nil {
-		t.Fatal(err)
-	} else if len(reply) != 4 {
-		t.Errorf("Expected 4 hits with Limit=0 Offset=0, received: %v", len(reply))
-	}
-
 	if err = anz.db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: "RequestEncoding:*gob"}, &reply); err != bleve.ErrorIndexClosed {
+	if err = anz.V1StringQuery(context.Background(), &QueryArgs{Filters: []string{"*string:~*hdr.RequestEncoding:*gob"}}, &reply); err != bleve.ErrorIndexClosed {
 		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
 	}
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestAnalyzerSFilteredPagination(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	anz, err := NewAnalyzerS(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	anz.SetFilterS(engine.NewFilterS(cfg, nil, dm))
+	t.Cleanup(func() {
+		if err := anz.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	})
+
+	start := time.Now()
+	for i := 0; i < queryBatchSize+2; i++ {
+		if err := anz.db.Index("batch-"+strconv.Itoa(10000+i), NewInfoRPC(uint64(i), "Batch.Test",
+			map[string]any{"Match": i >= queryBatchSize}, nil, nil,
+			utils.MetaJSON, "", "", start, start)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var reply []map[string]any
+	if err := anz.V1StringQuery(context.Background(), &QueryArgs{
+		Filters: []string{"*string:~*req.Match:true"},
+		Limit:   1,
+		Offset:  1,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Fatalf("expected one match across batches, got %d", len(reply))
+	} else if got := utils.IfaceAsString(reply[0]["RequestID"]); got != strconv.Itoa(queryBatchSize+1) {
+		t.Fatalf("got request ID %s, want %d", got, queryBatchSize+1)
+	}
+
+	anz.db = &indexWithInsert{
+		baseIndex: anz.db,
+		id:        "batch-00000",
+		doc:       NewInfoRPC(999999, "Batch.Test", nil, nil, nil, utils.MetaJSON, "", "", start, start),
+	}
+	reply = nil
+	if err := anz.V1StringQuery(context.Background(), &QueryArgs{
+		Filters: []string{"*string:~*hdr.RequestMethod:Batch.Test"},
+		Limit:   queryBatchSize + 1,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != queryBatchSize+1 {
+		t.Fatalf("expected %d results, got %d", queryBatchSize+1, len(reply))
+	}
+	for i, fields := range reply {
+		if got := utils.IfaceAsString(fields["RequestID"]); got != strconv.Itoa(i) {
+			t.Fatalf("result %d has request ID %s", i, got)
+		}
+	}
+}
+
+func TestAnalyzerSQueryOrder(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	anz, err := NewAnalyzerS(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	anz.SetFilterS(engine.NewFilterS(cfg, nil, dm))
+	t.Cleanup(func() {
+		if err := anz.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	})
+
+	base := time.Date(2025, time.January, 15, 10, 30, 0, 123_456_789, time.UTC)
+	for _, doc := range []struct {
+		key   string
+		id    uint64
+		start time.Time
+	}{
+		{key: "old", id: 1, start: base},
+		{key: "same-a", id: 2, start: base.Add(time.Hour)},
+		{key: "same-b", id: 3, start: base.Add(time.Hour)},
+		{key: "newest", id: 4, start: base.Add(2 * time.Hour)},
+	} {
+		if err := anz.db.Index(doc.key, NewInfoRPC(doc.id, "Order.Test", nil, nil, nil,
+			utils.MetaJSON, "", "", doc.start, doc.start)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for _, tt := range []struct {
+		name string
+		args QueryArgs
+		want []string
+	}{
+		{name: "unfiltered", args: QueryArgs{Limit: 4}, want: []string{"4", "2", "3", "1"}},
+		{
+			name: "filtered page",
+			args: QueryArgs{Filters: []string{"*prefix:~*hdr.RequestMethod:Order."}, Limit: 2, Offset: 1},
+			want: []string{"2", "3"},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			var reply []map[string]any
+			if err := anz.V1StringQuery(context.Background(), &tt.args, &reply); err != nil {
+				t.Fatal(err)
+			}
+			got := make([]string, len(reply))
+			for i, fields := range reply {
+				got[i] = utils.IfaceAsString(fields["RequestID"])
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("got %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

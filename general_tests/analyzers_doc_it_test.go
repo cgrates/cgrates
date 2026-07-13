@@ -103,57 +103,39 @@ func TestAnzDocIT(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	// HeaderFilters only queries.
-	anzStringQuery(t, client, 5, `+RequestMethod:"AdminSv1.SetAttributeProfile"`)
-	anzStringQuery(t, client, 1, `+RequestMethod:"AdminSv1.GetAttributeProfiles"`)
-	anzStringQuery(t, client, 3, `+RequestMethod:"AttributeSv1.ProcessEvent"`)
-	anzStringQuery(t, client, 2, `+RequestMethod:"CoreSv1.Status"`)
-	anzStringQuery(t, client, 5, `+RequestMethod:"CacheSv1.ReloadCache"`)
-	anzStringQuery(t, client, 11, `-RequestMethod:"CacheSv1.ReloadCache"`)
-	anzStringQuery(t, client, 6, `+RequestMethod:"/AdminSv1.*/"`) // regex
+	anzStringQuery(t, client, 5, "*string:~*hdr.RequestMethod:AdminSv1.SetAttributeProfile")
+	anzStringQuery(t, client, 1, "*string:~*hdr.RequestMethod:AdminSv1.GetAttributeProfiles")
+	anzStringQuery(t, client, 3, "*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent")
+	anzStringQuery(t, client, 2, "*string:~*hdr.RequestMethod:CoreSv1.Status")
+	anzStringQuery(t, client, 5, "*string:~*hdr.RequestMethod:CacheSv1.ReloadCache")
+	anzStringQuery(t, client, 11, "*notstring:~*hdr.RequestMethod:CacheSv1.ReloadCache")
+	anzStringQuery(t, client, 6, "*regex:~*hdr.RequestMethod:AdminSv1.*")
 
-	// Query results that happen before a given time.
-	headerFltr := `+RequestStartTime:<"%s"`
-	headerFltr = fmt.Sprintf(headerFltr, timeVar)
-	anzStringQuery(t, client, 1, headerFltr)
+	dateFilter := fmt.Sprintf("*lt:~*hdr.RequestStartTime:%s", timeVar)
+	anzStringQuery(t, client, 1, dateFilter)
 
-	// ContentFilters only queries.
-	anzStringQuery(t, client, 2, `+RequestID:<=2 -RequestMethod:"CacheSv1.ReloadCache"`)
-	anzStringQuery(t, client, 5, "", "*string:~*hdr.RequestMethod:AdminSv1.SetAttributeProfile")
-	anzStringQuery(t, client, 1, "", "*string:~*hdr.RequestMethod:AdminSv1.GetAttributeProfiles")
-	anzStringQuery(t, client, 3, "", "*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent")
-	anzStringQuery(t, client, 2, "", "*string:~*hdr.RequestMethod:CoreSv1.Status")
-	anzStringQuery(t, client, 5, "", "*string:~*hdr.RequestMethod:CacheSv1.ReloadCache")
-	anzStringQuery(t, client, 6, "", "*prefix:~*hdr.RequestMethod:AdminSv1.")
+	anzStringQuery(t, client, 2,
+		"*lte:~*hdr.RequestID:2",
+		"*notstring:~*hdr.RequestMethod:CacheSv1.ReloadCache")
+	anzStringQuery(t, client, 6, "*prefix:~*hdr.RequestMethod:AdminSv1.")
 
-	// Query results that happen before a given time
-	contentFltr := "*lt:~*hdr.RequestStartTime:%s"
-	contentFltr = fmt.Sprintf(contentFltr, timeVar)
-	anzStringQuery(t, client, 1, "", contentFltr)
-
-	anzStringQuery(t, client, 7, "", "*lte:~*hdr.RequestID:2")
-	anzStringQuery(t, client, -1, "", "*gt:~*hdr.RequestDuration:500µs")
-	anzStringQuery(t, client, 1, `+RequestMethod:"AttributeSv1.ProcessEvent"`, "*notstring:~*rep.CGREvent.Event.Cost:0")
-	anzStringQuery(t, client, 1, `+RequestMethod:"CoreSv1.Status"`, "*gt:~*rep.goroutines:47")
+	anzStringQuery(t, client, 7, "*lte:~*hdr.RequestID:2")
+	anzStringQuery(t, client, -1, "*gt:~*hdr.RequestDuration:500µs")
+	anzStringQuery(t, client, 1,
+		"*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent",
+		"*notstring:~*rep.CGREvent.Event.Cost:0")
+	anzStringQuery(t, client, 2,
+		"*string:~*hdr.RequestMethod:CoreSv1.Status",
+		"*gt:~*rep.goroutines:0")
 }
 
-// anzStringQuery sends an AnalyzerSv1.StringQuery request. First filter represents
-// the HeaderFilters parameter, while the rest are the ContentFilters. Checks if the
-// result contains the expected amount of matches (wantRC).
 func anzStringQuery(t *testing.T, client *birpc.Client, wantRC int, filters ...string) {
 	t.Helper()
-	var headerFilters string
-	var contentFilters []string
-	if len(filters) > 0 {
-		headerFilters = filters[0]
-		contentFilters = filters[1:]
-	}
 	var result []map[string]any
 	if err := client.Call(context.Background(), utils.AnalyzerSv1StringQuery,
 		&analyzers.QueryArgs{
-			HeaderFilters:  headerFilters,
-			ContentFilters: contentFilters,
-			Limit:          1000,
+			Filters: filters,
+			Limit:   1000,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != wantRC && wantRC != -1 {

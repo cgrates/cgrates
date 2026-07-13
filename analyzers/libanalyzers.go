@@ -19,8 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	"bytes"
 	"encoding/json"
-	"strconv"
+	"errors"
+	"io"
 	"time"
 
 	"github.com/blevesearch/bleve/v2/index/scorch"
@@ -46,7 +48,7 @@ func NewInfoRPC(id uint64, method string,
 	}
 	return &InfoRPC{
 		RequestDuration:  eTime.Sub(sTime),
-		RequestStartTime: sTime,
+		RequestStartTime: sTime.UTC().Format(time.RFC3339Nano),
 		// EndTime:          eTime,
 
 		RequestEncoding:    enc,
@@ -64,7 +66,7 @@ func NewInfoRPC(id uint64, method string,
 // InfoRPC the structure to be indexed
 type InfoRPC struct {
 	RequestDuration  time.Duration
-	RequestStartTime time.Time
+	RequestStartTime string
 	// EndTime          time.Time
 
 	RequestEncoding    string
@@ -101,33 +103,24 @@ func getIndex(indx string) (indxType, storeType string) {
 	return
 }
 
-// unmarshalJSON will transform the message in a map[string]any of []any
-// depending of the first character
 func unmarshalJSON(jsn json.RawMessage) (any, error) {
-	switch {
-	case string(jsn) == "null" ||
-		len(jsn) == 0: // nil or empty response
-		// by default consider nil as an empty map for filtering purposes
+	if len(jsn) == 0 {
 		return nil, nil
-	case string(jsn) == "true": // booleans
-		return true, nil
-	case string(jsn) == "false":
-		return false, nil
-	case jsn[0] == '"': // string
-		return string(jsn[1 : len(jsn)-1]), nil
-	case jsn[0] >= '0' && jsn[0] <= '9': // float64
-		return strconv.ParseFloat(string(jsn), 64)
-	case jsn[0] == '[': // slice
-		var val []any
-		err := json.Unmarshal(jsn, &val)
-		return val, err
-	case jsn[0] == '{': // map
-		var val map[string]any
-		err := json.Unmarshal(jsn, &val)
-		return val, err
-	default:
-		return nil, new(json.SyntaxError)
 	}
+	decoder := json.NewDecoder(bytes.NewReader(jsn))
+	decoder.UseNumber()
+	var val any
+	if err := decoder.Decode(&val); err != nil {
+		return nil, err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		if err == nil {
+			return nil, errors.New("multiple JSON values")
+		}
+		return nil, err
+	}
+	return val, nil
 }
 
 // getDPFromSearchresult will unmarshal the request and reply and populate a DataProvider
