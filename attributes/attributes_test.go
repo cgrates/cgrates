@@ -600,7 +600,7 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = attrS.attributeProfileForEvent(context.TODO(), attrEvs.Tenant,
 		attrIDs, utils.MapStorage{
 			utils.MetaReq:  attrEvs.Event,
@@ -681,7 +681,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, engine.NewDynamicDP(context.TODO(), cfg, "cgrates.org", eNM, nil), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -811,7 +811,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, engine.NewDynamicDP(context.TODO(), cfg, "cgrates.org", eNM, nil), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
@@ -943,7 +943,7 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	var rply utils.APIAttributeProfile
-	expErr := "SERVER_ERROR: NOT_IMPLEMENTED:*stirng"
+	expErr := "SERVER_ERROR: Unsupported filter Type: *stirng"
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, &rply)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)

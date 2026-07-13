@@ -1294,16 +1294,13 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
 	sS.dm.SetCache(cacheS)
 	expIndx := map[string][]string{}
-	expUindx := []*engine.FilterRule{
-		{
-			Type:    utils.MetaString,
-			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
-			Values:  []string{utils.MetaVoice},
-		},
+	rule, err := engine.NewFilterRule(utils.MetaString,
+		utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.ToR,
+		[]string{utils.MetaVoice})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if err := expUindx[0].CompileValues(); err != nil {
-		t.Error(err)
-	}
+	expUindx := []*engine.FilterRule{rule}
 	fltrs := []string{"*string:~*req.ToR:*voice"}
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))

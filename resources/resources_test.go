@@ -1947,7 +1947,7 @@ func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, _, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocksBlocker", utils.DurationPointer(10*time.Second))
 	if err == nil || err.Error() != expErr {

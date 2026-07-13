@@ -457,7 +457,7 @@ func TestV1CostForEventError(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedErr := "SERVER_ERROR: NOT_IMPLEMENTED:*notAType"
+	expectedErr := "SERVER_ERROR: Unsupported filter Type: *notAType"
 	rPrf.FilterIDs = []string{"*notAType:~*req.Account:1001"}
 	if err := rateS.V1CostForEvent(context.Background(), &utils.CGREvent{
 		Tenant: "cgrates.org",

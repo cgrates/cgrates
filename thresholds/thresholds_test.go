@@ -1387,7 +1387,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	if _, _, err := tS.matchingThresholdsForEvent(context.Background(), args.Tenant, args); err.Error() != expErr || err == nil {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}

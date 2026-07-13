@@ -791,7 +791,7 @@ func TestChargersmatchingChargerProfilesForEventWeightFromDynamicsErr(t *testing
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -844,7 +844,7 @@ func TestChargersmatchingChargerProfilesForEventBlockerFromDynamicsErr(t *testin
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)

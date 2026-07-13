@@ -1269,7 +1269,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0])
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -1361,7 +1361,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0])
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -2413,7 +2413,7 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 
 	pag := utils.Paginator{}
 	extraOpts := &optsGetRoutes{}
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -2482,7 +2482,7 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 
 	pag := utils.Paginator{}
 	extraOpts := &optsGetRoutes{}
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err = routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)

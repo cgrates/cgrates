@@ -194,28 +194,24 @@ func splitDynFltrValues(val, sep string) (vals []string) {
 }
 
 // NewFilterFromInline parses an inline rule into a compiled Filter
-func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
+func NewFilterFromInline(tenant, inlnRule string) (*Filter, error) {
 	ruleSplt := utils.SplitPath(inlnRule, utils.InInFieldSep[0], 3)
 	if len(ruleSplt) != 3 {
 		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
 	}
 	var vals []string
-	if ruleSplt[2] != utils.EmptyString {
+	if ruleSplt[2] != "" {
 		vals = splitDynFltrValues(ruleSplt[2], utils.PipeSep)
 	}
-	f = &Filter{
-		Tenant: tenant,
-		ID:     inlnRule,
-		Rules: []*FilterRule{{
-			Type:    ruleSplt[0],
-			Element: ruleSplt[1],
-			Values:  vals,
-		}},
-	}
-	if err = f.Compile(); err != nil {
+	rule, err := NewFilterRule(ruleSplt[0], ruleSplt[1], vals)
+	if err != nil {
 		return nil, err
 	}
-	return
+	return &Filter{
+		Tenant: tenant,
+		ID:     inlnRule,
+		Rules:  []*FilterRule{rule},
+	}, nil
 }
 
 type ArgsFiltersMatch struct {
@@ -341,28 +337,25 @@ var (
 		utils.MetaRegex, utils.MetaNotRegex})
 )
 
+func isHTTPFilterType(rfType string) bool {
+	return strings.HasPrefix(rfType, utils.MetaHTTP+utils.HashtagSep)
+}
+
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
-	var negative bool
-	rType := rfType
-	if strings.HasPrefix(rfType, utils.MetaNot) {
-		rType = utils.Meta + strings.TrimPrefix(rfType, utils.MetaNot)
-		negative = true
-	}
-	if !supportedFiltersType.Has(rType) {
+	if !supportedFiltersType.Has(rfType) && !isHTTPFilterType(rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && needsFieldName.Has(rType) {
+	if fieldName == "" && needsFieldName.Has(rfType) {
 		return nil, fmt.Errorf("Element is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && needsValues.Has(rType) {
+	if len(vals) == 0 && needsValues.Has(rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
-		Type:     rfType,
-		Element:  fieldName,
-		Values:   vals,
-		negative: utils.BoolPointer(negative),
+		Type:    rfType,
+		Element: fieldName,
+		Values:  vals,
 	}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
@@ -380,7 +373,7 @@ type FilterRule struct {
 	rsrElement  *utils.RSRParser // Cache here the
 	rsrFilters  utils.RSRFilters // Cache here the RSRFilter Values
 	regexValues []*regexp.Regexp
-	negative    *bool
+	negative    bool
 }
 
 // Clone method for FilterRule
@@ -389,8 +382,9 @@ func (fltr *FilterRule) Clone() *FilterRule {
 		return nil
 	}
 	clone := &FilterRule{
-		Type:    fltr.Type,
-		Element: fltr.Element,
+		Type:     fltr.Type,
+		Element:  fltr.Element,
+		negative: fltr.negative,
 	}
 	if fltr.Values != nil {
 		clone.Values = make([]string, len(fltr.Values))
@@ -399,10 +393,6 @@ func (fltr *FilterRule) Clone() *FilterRule {
 	if fltr.rsrValues != nil {
 		clone.rsrValues = make(utils.RSRParsers, len(fltr.rsrValues))
 		copy(clone.rsrValues, fltr.rsrValues)
-	}
-	if fltr.negative != nil {
-		clone.negative = new(bool)
-		*clone.negative = *fltr.negative
 	}
 	if fltr.rsrFilters != nil {
 		fltr.rsrFilters = make(utils.RSRFilters, len(fltr.rsrFilters))
@@ -438,6 +428,9 @@ func (fltr *FilterRule) IsValid() bool {
 
 // CompileValues compiles RSR fields
 func (fltr *FilterRule) CompileValues() (err error) {
+	if negative := strings.HasPrefix(fltr.Type, utils.MetaNot); fltr.negative != negative {
+		fltr.negative = negative
+	}
 	switch fltr.Type {
 	case utils.MetaRegex, utils.MetaNotRegex:
 		fltr.regexValues = make([]*regexp.Regexp, len(fltr.Values))
@@ -475,10 +468,6 @@ func (fltr *FilterRule) CompileValues() (err error) {
 
 // Pass is the method which should be used from outside.
 func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (result bool, err error) {
-	if fltr.negative == nil {
-		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
-	}
-
 	switch fltr.Type {
 	case utils.MetaString, utils.MetaNotString:
 		result, err = fltr.passString(dDP)
@@ -513,7 +502,7 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 	case utils.MetaNever:
 		result, err = fltr.passNever(dDP)
 	default:
-		if strings.HasPrefix(fltr.Type, utils.MetaHTTP) && strings.Index(fltr.Type, "#") == len(utils.MetaHTTP) {
+		if isHTTPFilterType(fltr.Type) {
 			result, err = fltr.passHttp(dDP)
 			break
 		}
@@ -522,7 +511,7 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 	if err != nil {
 		return false, err
 	}
-	return result != *fltr.negative, nil
+	return result != fltr.negative, nil
 }
 
 func (fltr *FilterRule) passString(dDP utils.DataProvider) (bool, error) {

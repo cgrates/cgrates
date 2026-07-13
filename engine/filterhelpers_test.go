@@ -73,7 +73,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, err := WeightFromDynamics(ctx, dWs, fltrs, tnt, ev)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
@@ -102,7 +102,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 	tnt := utils.CGRateSorg
 	ev := utils.MapStorage{}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	if _, err := BlockerFromDynamics(ctx, dBs, fltrs, tnt, ev); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
 	}

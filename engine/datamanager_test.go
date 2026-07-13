@@ -199,7 +199,7 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 	}
 	fltr := &Filter{
 		Tenant: "cgrates.org",
-		ID:     "*stirng:~*req.Account:1001",
+		ID:     "*string:~*req.Account:1001",
 		Rules: []*FilterRule{{
 			Type:    utils.MetaString,
 			Element: "~*req.Account",
@@ -234,7 +234,7 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 	dm.dbConns.replicators[utils.MetaDefault] = newReplicator(cfg.DbCfg().DBConns[utils.MetaDefault], cM)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
-		ID:     "*stirng:~*req.Account:1001",
+		ID:     "*string:~*req.Account:1001",
 		Rules: []*FilterRule{{
 			Type:    utils.MetaString,
 			Element: "~*req.Account",
@@ -334,8 +334,8 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 		},
 	}
 
-	fltrId := "*stirng:~*req.Account:1001:4fields"
-	expErr := "cannot remove filter <cgrates.org:*stirng:~*req.Account:1001:4fields> because will broken the reference to following items: null"
+	fltrId := "*string:~*req.Account:1001:4fields"
+	expErr := "cannot remove filter <cgrates.org:*string:~*req.Account:1001:4fields> because will broken the reference to following items: null"
 	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, fltrId, true)
 	if err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
@@ -748,7 +748,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 				Weight: 0,
 			},
 		},
-		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",
@@ -813,7 +813,7 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 				Weight: 0,
 			},
 		},
-		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",
@@ -878,7 +878,7 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 				Weight: 0,
 			},
 		},
-		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",

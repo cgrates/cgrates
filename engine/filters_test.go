@@ -315,7 +315,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf := &FilterRule{Type: utils.MetaString, Element: "~MetaString", Values: []string{"String"}, negative: utils.BoolPointer(false)}
+	erf := &FilterRule{Type: utils.MetaString, Element: "~MetaString", Values: []string{"String"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -326,7 +326,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaEmpty, Element: "~MetaEmpty", Values: []string{}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaEmpty, Element: "~MetaEmpty", Values: []string{}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -337,7 +337,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaExists, Element: "~MetaExists", Values: []string{}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaExists, Element: "~MetaExists", Values: []string{}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -348,7 +348,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaPrefix, Element: "~MetaPrefix", Values: []string{"stringPrefix"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaPrefix, Element: "~MetaPrefix", Values: []string{"stringPrefix"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -359,7 +359,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaSuffix, Element: "~MetaSuffix", Values: []string{"stringSuffix"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaSuffix, Element: "~MetaSuffix", Values: []string{"stringSuffix"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -370,7 +370,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaLessThan, Element: "~MetaLessThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaLessThan, Element: "~MetaLessThan", Values: []string{"20"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -381,7 +381,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaLessOrEqual, Element: "~MetaLessOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaLessOrEqual, Element: "~MetaLessOrEqual", Values: []string{"20"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -392,7 +392,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaGreaterThan, Element: "~MetaGreaterThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaGreaterThan, Element: "~MetaGreaterThan", Values: []string{"20"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -403,7 +403,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~MetaGreaterOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~MetaGreaterOrEqual", Values: []string{"20"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -415,7 +415,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: utils.MetaRegex, Element: "~MetaRegex", Values: []string{"Regex"}, negative: utils.BoolPointer(false)}
+	erf = &FilterRule{Type: utils.MetaRegex, Element: "~MetaRegex", Values: []string{"Regex"}}
 	if err = erf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
@@ -1010,6 +1010,10 @@ func TestNewFilterFromInline(t *testing.T) {
 	}
 
 	if _, err := NewFilterFromInline("cgrates.org", "*string:~*req.Account:~*opts.*originID{*|1001"); err == nil {
+		t.Error("Expected error received nil")
+	}
+
+	if _, err := NewFilterFromInline("cgrates.org", "*notgt:~*req.Usage:1"); err == nil {
 		t.Error("Expected error received nil")
 	}
 }
@@ -2950,8 +2954,8 @@ func TestNewFilterRule(t *testing.T) {
 	if rf.Element != "~*req.Account" {
 		t.Errorf("Expected Element '~*req.Account', got %s", rf.Element)
 	}
-	if rf.negative == nil || *rf.negative {
-		t.Errorf("Expected negative=false, got %v", rf.negative)
+	if rf.negative {
+		t.Error("expected positive filter rule")
 	}
 	if len(rf.Values) != 2 {
 		t.Errorf("Expected 2 values, got %d", len(rf.Values))

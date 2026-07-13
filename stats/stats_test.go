@@ -3117,7 +3117,7 @@ func TestStatQueuesMatchingStatQueuesForEventWeightErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	_, _, err := statService.matchingStatQueuesForEvent(context.TODO(), testStatsArgs[0].Tenant, testStatsArgs[0])
 
 	if err == nil || err.Error() != expErr {
@@ -3319,7 +3319,7 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 		},
 	}
 
-	expErr := "NOT_IMPLEMENTED:*stirng"
+	expErr := "Unsupported filter Type: *stirng"
 	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
@@ -3924,7 +3924,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 
 	m.cfg = cfg
 	m.filters = fltrS
-	expErr := `NOT_IMPLEMENTED:*stirng`
+	expErr := `Unsupported filter Type: *stirng`
 	if err := m.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
