@@ -22,6 +22,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -397,6 +398,92 @@ func TestLoaderProcess(t *testing.T) {
 	}
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
+	}
+	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaRemove,
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); !errors.Is(err, utils.ErrNotFound) {
+		t.Errorf("second removal returned %v, want wrapped %v", err, utils.ErrNotFound)
+	} else if want := "*remove *attributes <cgrates.org:ID>: NOT_FOUND"; err.Error() != want {
+		t.Errorf("second removal returned %q, want %q", err, want)
+	}
+}
+
+func TestLoaderStoreRemove(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	loaderCfg := cfg.LoaderCfg()[0]
+	loaderCfg.Enabled = true
+	loaderCfg.LockFilePath = utils.MetaMemory
+	loaderCfg.TpInDir = t.TempDir()
+	loaderCfg.TpOutDir = ""
+	loaderCfg.Action = utils.MetaStore
+	loaderCfg.Opts.Cache = utils.MetaNone
+
+	data := make([]*config.LoaderDataType, 0, 2)
+	for _, dataType := range loaderCfg.Data {
+		if dataType.Type == utils.MetaFilters || dataType.Type == utils.MetaResources {
+			data = append(data, dataType)
+		}
+	}
+	if len(data) != 2 {
+		t.Fatalf("found %d filter/resource data types, want 2", len(data))
+	}
+	loaderCfg.Data = data
+
+	if err := os.WriteFile(path.Join(loaderCfg.TpInDir, utils.FiltersCsv),
+		[]byte("cgrates.org,FLTR_RES,*string,~*req.Account,1001\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path.Join(loaderCfg.TpInDir, utils.ResourcesCsv),
+		[]byte("cgrates.org,RES,FLTR_RES,;10,1m,1,,false,false,\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cache)
+	internalDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbConn := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: internalDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbConn, cfg, connMgr)
+	dm.SetCache(cache)
+	filters := engine.NewFilterS(cfg, connMgr, dm)
+	loader := NewLoaderS(cfg, dm, filters, connMgr)
+	args := &ArgsProcessFolder{APIOpts: map[string]any{
+		utils.MetaCache:       utils.MetaNone,
+		utils.MetaForceLock:   true,
+		utils.MetaStopOnError: true,
+		utils.MetaWithIndex:   true,
+	}}
+
+	var reply string
+	if err := loader.V1Run(context.Background(), args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetResourceProfile(context.Background(), utils.CGRateSorg, "RES",
+		false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetFilter(context.Background(), utils.CGRateSorg, "FLTR_RES",
+		false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	loaderCfg.Action = utils.MetaRemove
+	if err := loader.V1Run(context.Background(), args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetResourceProfile(context.Background(), utils.CGRateSorg, "RES",
+		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Errorf("resource profile removal returned %v, want %v", err, utils.ErrNotFound)
+	}
+	if _, err := dm.GetResource(context.Background(), utils.CGRateSorg, "RES",
+		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Errorf("resource removal returned %v, want %v", err, utils.ErrNotFound)
+	}
+	if _, err := dm.GetFilter(context.Background(), utils.CGRateSorg, "FLTR_RES",
+		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Errorf("filter removal returned %v, want %v", err, utils.ErrNotFound)
 	}
 }
 

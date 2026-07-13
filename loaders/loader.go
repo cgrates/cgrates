@@ -204,8 +204,11 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 	default:
 		return fmt.Errorf("unsupported loader action: <%q>", action)
 	}
-	if err != nil || len(l.cacheConns) == 0 {
-		return
+	if err != nil {
+		return fmt.Errorf("%s %s <%s>: %w", action, lType, obj.TenantID(), err)
+	}
+	if len(l.cacheConns) == 0 {
+		return nil
 	}
 	cacheArgs := make(map[string][]string)
 	var cacheIDs []string // verify if we need to clear indexe
