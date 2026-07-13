@@ -23,7 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/mediocregopher/radix.v2/redis"
+	"github.com/redis/rueidis"
 )
 
 type redisMigrator struct {
@@ -538,7 +538,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 	var values []byte
 	if values, err = v1rs.rds.Cmd("GET",
 		ALIASES_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return

@@ -21,11 +21,10 @@ require (
 	github.com/creack/pty v1.1.23
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lib/pq v1.10.9
-	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
 	github.com/miekg/dns v1.1.62
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nyaruka/phonenumbers v1.1.8
@@ -64,6 +63,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.25 // indirect
+	github.com/redis/rueidis v1.0.76
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
