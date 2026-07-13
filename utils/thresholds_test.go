@@ -299,6 +299,12 @@ func TestThresholdsProfileSet(t *testing.T) {
 			val:       "test",
 			expectErr: true,
 		},
+		{
+			name:      "Append AttributeIDs",
+			path:      []string{AttributeIDs},
+			val:       "attr1",
+			expectErr: false,
+		},
 	}
 
 	for _, tc := range tests {
@@ -326,6 +332,7 @@ func TestThresholdProfileClone(t *testing.T) {
 		ActionProfileIDs: []string{"ACT_LOG", "ACT_MAIL", "ACT_CDR"},
 		Async:            true,
 		EeIDs:            []string{"EE1", "EE2"},
+		AttributeIDs:     []string{"attr1", "attr2"},
 	}
 
 	cloned := orig.Clone()
@@ -372,11 +379,35 @@ func TestThresholdProfileClone(t *testing.T) {
 	if !reflect.DeepEqual(cloned.EeIDs, orig.EeIDs) {
 		t.Errorf("EeIDs mismatch: got %v, want %v", cloned.EeIDs, orig.EeIDs)
 	}
+	if !reflect.DeepEqual(cloned.AttributeIDs, orig.AttributeIDs) {
+		t.Errorf("AttributeIDs mismatch: got %v, want %v", cloned.AttributeIDs, orig.AttributeIDs)
+	}
 
 	var nilTP *ThresholdProfile
 	nilClone := nilTP.Clone()
 	if nilClone != nil {
 		t.Errorf("Expected nil from Clone on nil receiver, got: %+v", nilClone)
+	}
+}
+
+func TestThresholdProfileCacheClone(t *testing.T) {
+	orig := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "thresholdID",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		MaxHits:          100,
+		MinHits:          5,
+		MinSleep:         10 * time.Second,
+		Blocker:          true,
+		Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+		ActionProfileIDs: []string{"ACT_LOG", "ACT_CDR"},
+		Async:            true,
+		EeIDs:            []string{"EE1", "EE2", "EE3"},
+		AttributeIDs:     []string{"attr1", "attr2"},
+	}
+	cloned := orig.CacheClone()
+	if !reflect.DeepEqual(cloned, orig) {
+		t.Errorf("Expected %+v, recieved %+v", cloned, orig)
 	}
 }
 
@@ -415,6 +446,20 @@ func TestThresholdClone(t *testing.T) {
 	}
 }
 
+func TestThresholdCacheClone(t *testing.T) {
+	orig := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH2",
+		Hits:   42,
+		Snooze: time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC),
+	}
+
+	cloned := orig.CacheClone()
+	if !reflect.DeepEqual(cloned, orig) {
+		t.Errorf("Expected %v, recieved %v", orig, cloned)
+	}
+}
+
 func TestThresholdProfileFieldAsInterface(t *testing.T) {
 	tp := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -428,6 +473,7 @@ func TestThresholdProfileFieldAsInterface(t *testing.T) {
 		ActionProfileIDs: []string{"act1", "act2"},
 		Async:            true,
 		EeIDs:            []string{"ee1", "ee2"},
+		AttributeIDs:     []string{"attr1", "attr2"},
 	}
 
 	tests := []struct {
@@ -521,6 +567,12 @@ func TestThresholdProfileFieldAsInterface(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "AttributeIDs",
+			path:    []string{AttributeIDs},
+			want:    []string{"attr1", "attr2"},
+			wantErr: false,
+		},
+		{
 			name:    "Unknown field",
 			path:    []string{"UnknownField"},
 			want:    nil,
@@ -551,5 +603,276 @@ func TestThresholdProfileFieldAsInterface(t *testing.T) {
 				t.Errorf("Got value %v (%T), expected %v (%T)", got, got, tc.want, tc.want)
 			}
 		})
+	}
+}
+
+func TestThresholdProfileTenantID(t *testing.T) {
+	tp := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MaxHits:   1,
+		MinHits:   1,
+		MinSleep:  1 * time.Second,
+		Blocker:   true,
+		Weights: DynamicWeights{
+			&DynamicWeight{Weight: 20.0},
+		},
+		ActionProfileIDs: []string{"ACT_LOG_WARNING"},
+		Async:            true,
+		EeIDs:            []string{"eeID1", "eeID2"},
+	}
+	want := "cgrates.org:THD_ACNT_1001"
+
+	got := tp.TenantID()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Expected %v, recieved %v", want, got)
+	}
+}
+
+func TestThresholdProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		tp   *ThresholdProfile
+		want map[string]any
+	}{
+		{
+			tp: &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "TH1",
+				FilterIDs:        []string{"*string:~*req.Subject:1001"},
+				MaxHits:          100,
+				MinHits:          5,
+				MinSleep:         10 * time.Second,
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: []string{"ACT_CDR"},
+				Async:            true,
+				EeIDs:            []string{"EE1"},
+				AttributeIDs:     []string{"attr1"},
+			},
+			want: map[string]any{
+				Tenant:           "cgrates.org",
+				ID:               "TH1",
+				FilterIDs:        []string{"*string:~*req.Subject:1001"},
+				MaxHits:          100,
+				MinHits:          5,
+				MinSleep:         10 * time.Second,
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: []string{"ACT_CDR"},
+				Async:            true,
+				EeIDs:            []string{"EE1"},
+				AttributeIDs:     []string{"attr1"},
+			},
+		},
+		{
+			tp:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tp.AsMapStringInterface()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %v, recieved %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToThresholdProfile(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       map[string]any
+		tp      *ThresholdProfile
+		wantErr string
+	}{
+		{
+			m: map[string]any{
+				Tenant:           "cgrates.org",
+				ID:               "THRESHOLD_TEST",
+				FilterIDs:        []string{"*string:~*req.Account:1002"},
+				MaxHits:          float64(100),
+				MinHits:          float64(5),
+				MinSleep:         "10s",
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: []string{"ACT_LOG"},
+				Async:            true,
+				EeIDs:            []string{"EE1", "EE2"},
+				AttributeIDs:     []string{"attr1", "attr2"},
+			},
+			tp: &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THRESHOLD_TEST",
+				FilterIDs:        []string{"*string:~*req.Account:1002"},
+				MaxHits:          100,
+				MinHits:          5,
+				MinSleep:         10 * time.Second,
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: []string{"ACT_LOG"},
+				Async:            true,
+				EeIDs:            []string{"EE1", "EE2"},
+				AttributeIDs:     []string{"attr1", "attr2"},
+			},
+		},
+		{
+			name: "ThresholdProfile with nil fields",
+			m: map[string]any{
+				Tenant:           "cgrates.org",
+				ID:               "THRESHOLD_TEST",
+				FilterIDs:        nil,
+				MaxHits:          float64(100),
+				MinHits:          float64(5),
+				MinSleep:         "10s",
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: nil,
+				Async:            true,
+				EeIDs:            nil,
+				AttributeIDs:     nil,
+			},
+			tp: &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THRESHOLD_TEST",
+				FilterIDs:        nil,
+				MaxHits:          100,
+				MinHits:          5,
+				MinSleep:         10 * time.Second,
+				Blocker:          true,
+				Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
+				ActionProfileIDs: nil,
+				Async:            true,
+				EeIDs:            nil,
+				AttributeIDs:     nil,
+			},
+		},
+		{
+			name: "MinSleep as float64",
+			m: map[string]any{
+				MinSleep: float64(10 * time.Second),
+			},
+			tp: &ThresholdProfile{
+				MinSleep: 10 * time.Second,
+			},
+		},
+		{
+			name: "Error case",
+			m: map[string]any{
+				MinSleep: "10ss",
+			},
+			tp:      nil,
+			wantErr: `time: unknown unit "ss" in duration "10ss"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToThresholdProfile(tt.m)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %v, recieved %v", tt.wantErr, err)
+			}
+
+			if !reflect.DeepEqual(got, tt.tp) {
+				t.Errorf("Expected %v, recieved %v", got, tt.tp)
+			}
+		})
+	}
+}
+
+func TestThresholdTenantID(t *testing.T) {
+	tp := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH001",
+		Hits:   42,
+		Snooze: time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC),
+	}
+	want := "cgrates.org:TH001"
+
+	got := tp.TenantID()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Expected %v, recieved %v", want, got)
+	}
+}
+
+func TestThresholdAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		th   *Threshold
+		want map[string]any
+	}{
+		{
+			th: &Threshold{
+				Tenant: "cgrates.org",
+				ID:     "TH001",
+				Hits:   42,
+				Snooze: time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC),
+			},
+			want: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "TH001",
+				Hits:   42,
+				Snooze: time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC),
+			},
+		},
+		{
+			th:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.th.AsMapStringInterface()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %v, recieved %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToThreshold(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]any
+		want *Threshold
+	}{
+		{
+			m: map[string]any{
+				Tenant: "cgrates.org",
+				ID:     "TH001",
+				Hits:   float64(42),
+				Snooze: "2026-01-01T12:00:01Z",
+			},
+			want: &Threshold{
+				Tenant: "cgrates.org",
+				ID:     "TH001",
+				Hits:   42,
+				Snooze: time.Date(2026, 1, 1, 12, 0, 1, 0, time.UTC),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToThreshold(tt.m)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %v, recieved %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestThresholdLockKey(t *testing.T) {
+	tenant := "cgrates.org"
+	id := "01"
+	expected := "*thresholds:cgrates.org:01"
+
+	result := ThresholdLockKey(tenant, id)
+	if result != expected {
+		t.Errorf("ThresholdLockKey(%q, %q) = %v; want %v", tenant, id, result, expected)
 	}
 }
