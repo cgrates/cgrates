@@ -6,40 +6,116 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
+	"context"
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/mediocregopher/radix.v2/pool"
-	"github.com/mediocregopher/radix.v2/redis"
-	"github.com/mediocregopher/radix.v2/sentinel"
+	"github.com/redis/rueidis"
 )
 
 type RedisStorage struct {
-	dbPool        *pool.Pool
-	maxConns      int
-	ms            Marshaler
-	sentinelName  string
-	sentinelInsts []*sentinelInst
-	db            int    //database number used when recconect sentinel
-	pass          string //password used when recconect sentinel
-	sentinelMux   sync.RWMutex
+	client       rueidis.Client
+	clientOption rueidis.ClientOption
+	clientMux    sync.RWMutex
+	maxConns     int
+	ms           Marshaler
 }
 
-type sentinelInst struct {
-	addr string
-	conn *sentinel.Client
+type RedisResp struct {
+	result rueidis.RedisResult
+	Err    error
+}
+
+func newRedisResp(result rueidis.RedisResult) *RedisResp {
+	err := result.Error()
+	// Radix exposed nil replies through conversion methods, not through Resp.Err.
+	if rueidis.IsRedisNil(err) {
+		err = nil
+	}
+	return &RedisResp{result: result, Err: err}
+}
+
+func newRedisError(err error) *RedisResp {
+	return &RedisResp{Err: err}
+}
+
+func (r *RedisResp) Bytes() ([]byte, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	return r.result.AsBytes()
+}
+
+func (r *RedisResp) Str() (string, error) {
+	if r.Err != nil {
+		return "", r.Err
+	}
+	return r.result.ToString()
+}
+
+func (r *RedisResp) Int() (int, error) {
+	i, err := r.Int64()
+	return int(i), err
+}
+
+func (r *RedisResp) Int64() (int64, error) {
+	if r.Err != nil {
+		return 0, r.Err
+	}
+	return r.result.AsInt64()
+}
+
+func (r *RedisResp) List() ([]string, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	// AsStrSlice intentionally maps nil array members to empty strings, which
+	// matches the former List behavior (important for HMGET misses).
+	return r.result.AsStrSlice()
+}
+
+func (r *RedisResp) ListBytes() ([][]byte, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	values, err := r.result.ToArray()
+	if err != nil {
+		return nil, err
+	}
+	list := make([][]byte, len(values))
+	for i := range values {
+		if values[i].IsNil() {
+			continue
+		}
+		if list[i], err = values[i].AsBytes(); err != nil {
+			return nil, err
+		}
+	}
+	return list, nil
+}
+
+func (r *RedisResp) Map() (map[string]string, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	return r.result.AsStrMap()
+}
+
+func (r *RedisResp) IsNil() bool {
+	return r.Err == nil && rueidis.IsRedisNil(r.result.Error())
 }
 
 // Redis commands
 const (
-	redis_AUTH     = "AUTH"
 	redis_SELECT   = "SELECT"
 	redis_FLUSHDB  = "FLUSHDB"
 	redis_DEL      = "DEL"
@@ -66,158 +142,142 @@ const (
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 	maxConns int, sentinelName string) (*RedisStorage, error) {
-
-	df := func(network, addr string) (*redis.Client, error) {
-		client, err := redis.Dial(network, addr)
-		if err != nil {
-			return nil, err
-		}
-		if len(pass) != 0 {
-			if err = client.Cmd(redis_AUTH, pass).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		if db != 0 {
-			if err = client.Cmd(redis_SELECT, db).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		return client, nil
-	}
-
 	ms, err := NewMarshaler(mrshlerStr)
 	if err != nil {
 		return nil, err
 	}
 
+	poolSize := maxConns
+	if poolSize < 1 {
+		poolSize = 1
+	}
+	option := rueidis.ClientOption{
+		InitAddress:           []string{address},
+		Password:              pass,
+		SelectDB:              db,
+		DisableAutoPipelining: true,
+		BlockingPoolSize:      poolSize,
+		ForceSingleClient:     sentinelName == "", // there are no clusters, so if its not sentinel, create a single redis instance
+	}
 	if sentinelName != "" {
-		var err error
-		addrs := utils.InfieldSplit(address)
-		sentinelInsts := make([]*sentinelInst, len(addrs))
-		for i, addr := range addrs {
-			sentinelInsts[i] = &sentinelInst{addr: addr}
-			if sentinelInsts[i].conn, err = sentinel.NewClientCustom(utils.TCP,
-				addr, maxConns, df, sentinelName); err != nil {
-				sentinelInsts[i].conn = nil
-				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> could not connenct to sentinel at address: %s because error: %s ",
-					sentinelInsts[i].addr, err.Error()))
-				// return nil, err
-			}
-		}
-		if err != nil {
-			return nil, err
-		}
-		return &RedisStorage{
-			maxConns:      maxConns,
-			ms:            ms,
-			sentinelName:  sentinelName,
-			sentinelInsts: sentinelInsts,
-			db:            db,
-			pass:          pass}, nil
-	} else {
-		p, err := pool.NewCustom(utils.TCP, address, maxConns, df)
-		if err != nil {
-			return nil, err
-		}
-		return &RedisStorage{
-			dbPool:   p,
-			maxConns: maxConns,
-			ms:       ms,
-		}, nil
-	}
-}
-
-func reconnectSentinel(addr, sentinelName string, db int, pass string, maxConns int) (*sentinel.Client, error) {
-	df := func(network, addr string) (*redis.Client, error) {
-		client, err := redis.Dial(network, addr)
-		if err != nil {
-			return nil, err
-		}
-		if len(pass) != 0 {
-			if err = client.Cmd(redis_AUTH, pass).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		if db != 0 {
-			if err = client.Cmd(redis_SELECT, db).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		return client, nil
-	}
-	return sentinel.NewClientCustom(utils.TCP, addr, maxConns, df, sentinelName)
-}
-
-// This CMD function get a connection from the pool.
-// Handles automatic failover in case of network disconnects
-func (rs *RedisStorage) Cmd(cmd string, args ...any) *redis.Resp {
-	if rs.sentinelName != "" {
-		var err error
-		for i := range rs.sentinelInsts {
-			rs.sentinelMux.Lock()
-
-			if rs.sentinelInsts[i].conn == nil {
-				rs.sentinelInsts[i].conn, err = reconnectSentinel(rs.sentinelInsts[i].addr,
-					rs.sentinelName, rs.db, rs.pass, rs.maxConns)
-				if err != nil {
-					if i == len(rs.sentinelInsts)-1 {
-						rs.sentinelMux.Unlock()
-						return redis.NewResp(fmt.Errorf("No sentinels active"))
-					}
-					rs.sentinelMux.Unlock()
-					continue
-				}
-			}
-			sConn := rs.sentinelInsts[i].conn
-			rs.sentinelMux.Unlock()
-
-			conn, err := sConn.GetMaster(rs.sentinelName)
-			if err != nil {
-				if i == len(rs.sentinelInsts)-1 {
-					return redis.NewResp(fmt.Errorf("No sentinels active"))
-				}
-				rs.sentinelMux.Lock()
-				rs.sentinelInsts[i].conn = nil
-				rs.sentinelMux.Unlock()
-				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> sentinel at address: %s became nil error: %s ",
-					rs.sentinelInsts[i].addr, err.Error()))
-				continue
-			}
-			result := conn.Cmd(cmd, args...)
-			sConn.PutMaster(rs.sentinelName, conn)
-			return result
-		}
+		option.InitAddress = utils.InfieldSplit(address)
+		option.Sentinel = rueidis.SentinelOption{MasterSet: sentinelName}
 	}
 
-	c1, err := rs.dbPool.Get()
+	client, err := rueidis.NewClient(option)
 	if err != nil {
-		return redis.NewResp(err)
+		return nil, err
 	}
-	result := c1.Cmd(cmd, args...)
-	if result.IsType(redis.IOErr) { // Failover mecanism
-		utils.Logger.Warning(fmt.Sprintf("<RedisStorage> error <%s>, attempting failover.", result.Err.Error()))
-		for i := 0; i < rs.maxConns; i++ { // Two attempts, one on connection of original pool, one on new pool
-			c2, err := rs.dbPool.Get()
-			if err == nil {
-				if result2 := c2.Cmd(cmd, args...); !result2.IsType(redis.IOErr) {
-					rs.dbPool.Put(c2)
-					return result2
-				}
-			}
+	return &RedisStorage{
+		client:       client,
+		clientOption: option,
+		maxConns:     maxConns,
+		ms:           ms,
+	}, nil
+}
+
+func appendRedisArg(dst []string, arg any) []string {
+	switch value := arg.(type) {
+	case nil:
+		return append(dst, "0")
+	case []byte:
+		return append(dst, rueidis.BinaryString(value))
+	case string:
+		return append(dst, value)
+	case bool:
+		if value {
+			return append(dst, "1")
 		}
-	} else {
-		rs.dbPool.Put(c1)
+		return append(dst, "0")
+	case int:
+		return append(dst, strconv.Itoa(value))
+	case int8:
+		return append(dst, strconv.FormatInt(int64(value), 10))
+	case int16:
+		return append(dst, strconv.FormatInt(int64(value), 10))
+	case int32:
+		return append(dst, strconv.FormatInt(int64(value), 10))
+	case int64:
+		return append(dst, strconv.FormatInt(value, 10))
+	case uint:
+		return append(dst, strconv.FormatUint(uint64(value), 10))
+	case uint8:
+		return append(dst, strconv.FormatUint(uint64(value), 10))
+	case uint16:
+		return append(dst, strconv.FormatUint(uint64(value), 10))
+	case uint32:
+		return append(dst, strconv.FormatUint(uint64(value), 10))
+	case uint64:
+		return append(dst, strconv.FormatUint(value, 10))
+	case float32:
+		return append(dst, strconv.FormatFloat(float64(value), 'f', -1, 32))
+	case float64:
+		return append(dst, strconv.FormatFloat(value, 'f', -1, 64))
+	case error:
+		return append(dst, value.Error())
 	}
-	return result
+
+	refValue := reflect.ValueOf(arg)
+	if refValue.IsValid() {
+		switch refValue.Kind() {
+		case reflect.Array, reflect.Slice:
+			for i := 0; i < refValue.Len(); i++ {
+				dst = appendRedisArg(dst, refValue.Index(i).Interface())
+			}
+			return dst
+		case reflect.Map:
+			for _, key := range refValue.MapKeys() {
+				dst = appendRedisArg(dst, key.Interface())
+				dst = appendRedisArg(dst, refValue.MapIndex(key).Interface())
+			}
+			return dst
+		}
+	}
+	return append(dst, fmt.Sprint(arg))
+}
+
+func redisCommandArgs(args ...any) []string {
+	flat := make([]string, 0, len(args))
+	for _, arg := range args {
+		flat = appendRedisArg(flat, arg)
+	}
+	return flat
+}
+
+// Cmd runs the redis commands. Rueidis manages reconnection and Sentinel master discovery;
+// non-Redis transport failures are retried up to the old pool-size retry bound.
+func (rs *RedisStorage) Cmd(cmd string, args ...any) *RedisResp {
+	rs.clientMux.RLock()
+	defer rs.clientMux.RUnlock()
+	if rs.client == nil {
+		return newRedisError(errors.New("redis client is closed"))
+	}
+
+	flatArgs := redisCommandArgs(args...)
+	attempts := rs.maxConns + 1
+	if attempts < 1 {
+		attempts = 1
+	}
+	var result rueidis.RedisResult
+	for attempt := 0; attempt < attempts; attempt++ {
+		command := rs.client.B().Arbitrary(strings.ToUpper(cmd)).Args(flatArgs...).Build()
+		result = rs.client.Do(context.Background(), command)
+		if result.NonRedisError() == nil {
+			return newRedisResp(result)
+		}
+		if attempt == 0 {
+			utils.Logger.Warning(fmt.Sprintf("<RedisStorage> error <%s>, attempting failover.", result.NonRedisError()))
+		}
+	}
+	return newRedisResp(result)
 }
 
 func (rs *RedisStorage) Close() {
-	if rs.dbPool != nil {
-		rs.dbPool.Empty()
+	rs.clientMux.Lock()
+	defer rs.clientMux.Unlock()
+	if rs.client != nil {
+		rs.client.Close()
+		rs.client = nil
 	}
 }
 
@@ -229,8 +289,28 @@ func (rs *RedisStorage) Marshaler() Marshaler {
 	return rs.ms
 }
 
+// SelectDatabase will select a new database, keeping the same options
 func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
-	return rs.Cmd(redis_SELECT, dbName).Err
+	db, err := strconv.Atoi(dbName)
+	if err != nil {
+		return err
+	}
+
+	rs.clientMux.Lock()
+	defer rs.clientMux.Unlock()
+	option := rs.clientOption
+	option.SelectDB = db
+	client, err := rueidis.NewClient(option)
+	if err != nil {
+		return err
+	}
+	oldClient := rs.client
+	rs.client = client
+	rs.clientOption = option
+	if oldClient != nil {
+		oldClient.Close()
+	}
+	return nil
 }
 
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
@@ -290,7 +370,7 @@ func (rs *RedisStorage) RebbuildActionPlanKeys() error {
 }
 
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	var r *redis.Resp
+	var r *RedisResp
 	if prefix == utils.ACTION_PLAN_PREFIX { // so we can avoid the full scan on scheduler reloads
 		r = rs.Cmd(redis_SMEMBERS, utils.ActionPlanIndexes)
 	} else {
@@ -329,7 +409,7 @@ func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 	key = utils.RATING_PLAN_PREFIX + key
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -378,7 +458,7 @@ func (rs *RedisStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err
 	key = utils.RATING_PROFILE_PREFIX + key
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -427,7 +507,7 @@ func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 	}
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, utils.DESTINATION_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			Cache.Set(utils.CacheDestinations, key, nil, nil,
 				cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
@@ -586,7 +666,7 @@ func (rs *RedisStorage) GetActionsDrv(key string) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -612,7 +692,7 @@ func (rs *RedisStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err erro
 	key = utils.SHARED_GROUP_PREFIX + key
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -640,7 +720,7 @@ func (rs *RedisStorage) GetAccountDrv(key string) (*Account, error) {
 	rpl := rs.Cmd(redis_GET, utils.ACCOUNT_PREFIX+key)
 	if rpl.Err != nil {
 		return nil, rpl.Err
-	} else if rpl.IsType(redis.Nil) {
+	} else if rpl.IsNil() {
 		return nil, utils.ErrNotFound
 	}
 	values, err := rpl.Bytes()
@@ -675,7 +755,7 @@ func (rs *RedisStorage) SetAccountDrv(acc *Account) (err error) {
 
 func (rs *RedisStorage) RemoveAccountDrv(key string) (err error) {
 	err = rs.Cmd(redis_DEL, utils.ACCOUNT_PREFIX+key).Err
-	if err == redis.ErrRespNil {
+	if rueidis.IsRedisNil(err) {
 		err = utils.ErrNotFound
 	}
 	return
@@ -760,7 +840,7 @@ func (rs *RedisStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, e
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -795,7 +875,7 @@ func (rs *RedisStorage) RemoveActionTriggersDrv(key string) (err error) {
 func (rs *RedisStorage) GetActionPlanDrv(key string) (ats *ActionPlan, err error) {
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, utils.ACTION_PLAN_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -859,7 +939,7 @@ func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string
 	var values []byte
 	if values, err = rs.Cmd(redis_GET,
 		utils.AccountActionPlansPrefix+acntID).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -901,7 +981,7 @@ func (rs *RedisStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceP
 	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -932,7 +1012,7 @@ func (rs *RedisStorage) GetResourceDrv(tenant, id string) (r *Resource, err erro
 	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -963,7 +1043,7 @@ func (rs *RedisStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1073,7 +1153,7 @@ func (rs *RedisStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	fldValBytes, err := rs.Cmd(redis_HGET,
 		utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix, fieldValKey).Bytes()
 	if err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -1087,7 +1167,7 @@ func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 	if itm != "" {
 		fldVal, err := rs.Cmd(redis_HGET, utils.TBLVersions, itm).Str()
 		if err != nil {
-			if err == redis.ErrRespNil {
+			if rueidis.IsRedisNil(err) {
 				err = utils.ErrNotFound
 			}
 			return nil, err
@@ -1139,7 +1219,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil {
+		if rueidis.IsRedisNil(err) {
 			err = utils.ErrNotFound
 		}
 		return
@@ -1171,7 +1251,7 @@ func (rs *RedisStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err e
 	key := utils.StatQueuePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil {
+		if rueidis.IsRedisNil(err) {
 			err = utils.ErrNotFound
 		}
 		return
@@ -1208,7 +1288,7 @@ func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil {
+		if rueidis.IsRedisNil(err) {
 			err = utils.ErrNotFound
 		}
 		return
@@ -1240,7 +1320,7 @@ func (rs *RedisStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err er
 	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1271,7 +1351,7 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1302,7 +1382,7 @@ func (rs *RedisStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierPro
 	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1333,7 +1413,7 @@ func (rs *RedisStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeP
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1364,7 +1444,7 @@ func (rs *RedisStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfi
 	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1395,7 +1475,7 @@ func (rs *RedisStorage) GetDispatcherProfileDrv(tenant, id string) (r *Dispatche
 	key := utils.DispatcherProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1426,7 +1506,7 @@ func (rs *RedisStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHo
 	key := utils.DispatcherHostPrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd(redis_GET, key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
+		if rueidis.IsRedisNil(err) { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1461,7 +1541,7 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 	if itemIDPrefix != "" {
 		fldVal, err := rs.Cmd(redis_HGET, utils.LoadIDs, itemIDPrefix).Int64()
 		if err != nil {
-			if err == redis.ErrRespNil {
+			if rueidis.IsRedisNil(err) {
 				err = utils.ErrNotFound
 			}
 			return nil, err
