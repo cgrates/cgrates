@@ -22,716 +22,230 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package main
 
 import (
-	"bytes"
-	"os/exec"
+	"net"
 	"path"
-	"reflect"
-	"sort"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	cgrLdrCfgPath string
-	cgrLdrCfgDir  string
-	cgrLdrCfg     *config.CGRConfig
-	cgrLdrBIRPC   *birpc.Client
-	cgrLdrTests   = []func(t *testing.T){
-		testCgrLdrInitCfg,
-		testCgrLdrInitDataDB,
-		testCgrLdrStartEngine,
-		testCgrLdrRPCConn,
-		testCgrLdrGetSubsystemsNotLoadedLoad,
-		testCgrLdrLoadData,
-		testCgrLdrGetAccountAfterLoad,
-		testCgrLdrGetActionProfileAfterLoad,
-		testCgrLdrGetAttributeProfileAfterLoad,
-		testCgrLdrGetFilterAfterLoad,
-		testCgrLdrGetRateProfileAfterLoad,
-		testCgrLdrGetResourceProfileAfterLoad,
-		testCgrLdrGetResourceAfterLoad,
-		testCgrLdrGetRouteProfileAfterLoad,
-		testCgrLdrGetStatsProfileAfterLoad,
-		testCgrLdrGetStatQueueAfterLoad,
-		testCgrLdrGetThresholdProfileAfterLoad,
-		testCgrLdrGetThresholdAfterLoad,
-
-		//remove all data with cgr-loader and remove flag
-		testCgrLdrRemoveData,
-		testCgrLdrGetSubsystemsNotLoadedLoad,
-		testCgrLdrKillEngine,
+func TestCGRLoaderStoreRemove(t *testing.T) {
+	var dbCfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal, utils.MetaPostgres:
+		t.SkipNow()
+	case utils.MetaRedis:
+		dbCfg = engine.RedisDBCfg
+	case utils.MetaMySQL:
+		dbCfg = engine.MySQLDBCfg
+	case utils.MetaMongo:
+		dbCfg = engine.MongoDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
 	}
-)
 
-func TestCGRLoaderRemove(t *testing.T) {
+	testEngine := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "tutinternal"),
+		DBCfg:      dbCfg,
+		Encoding:   utils.MetaJSON,
+	}
+	client, cfg := testEngine.Run(t)
+	tpPath := path.Join(*utils.DataDir, "tariffplans", "testit")
+
+	engine.LoadCSVsWithCGRLoader(t, cfg.ConfigPath, tpPath, nil, nil)
+	_ = client.Close()
+	testEngine.Stop(t)
+	client = testEngine.Start(t)
+
+	args := func(id string) *utils.TenantIDWithAPIOpts {
+		return &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: utils.CGRateSorg, ID: id},
+		}
+	}
+
+	var attribute *utils.APIAttributeProfile
+	if err := client.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
+		args("ATTR_ACNT_1001"), &attribute); err != nil {
+		t.Fatal(err)
+	}
+	if attribute == nil || attribute.Tenant != utils.CGRateSorg || attribute.ID != "ATTR_ACNT_1001" ||
+		!slices.Contains(attribute.FilterIDs, "FLTR_ACCOUNT_1001") ||
+		len(attribute.Attributes) != 1 || attribute.Attributes[0] == nil ||
+		attribute.Attributes[0].Path != "*req.OfficeGroup" ||
+		attribute.Attributes[0].Value != "Marketing" {
+		t.Errorf("unexpected attribute profile: %s", utils.ToJSON(attribute))
+	}
+
+	var resourceProfile *utils.ResourceProfile
+	if err := client.Call(context.Background(), utils.AdminSv1GetResourceProfile,
+		args("RES_ACNT_1001"), &resourceProfile); err != nil {
+		t.Fatal(err)
+	}
+	if resourceProfile == nil || resourceProfile.Limit != 1 || resourceProfile.UsageTTL != time.Hour ||
+		!slices.Contains(resourceProfile.FilterIDs, "FLTR_ACCOUNT_1001") {
+		t.Errorf("unexpected resource profile: %s", utils.ToJSON(resourceProfile))
+	}
+
+	var resource *utils.Resource
+	if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+		args("RES_ACNT_1001"), &resource); err != nil {
+		t.Fatal(err)
+	}
+	if resource == nil || resource.Tenant != utils.CGRateSorg || resource.ID != "RES_ACNT_1001" || len(resource.Usages) != 0 {
+		t.Errorf("unexpected resource: %s", utils.ToJSON(resource))
+	}
+
+	var rateProfile *utils.RateProfile
+	if err := client.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		args("RT_SPECIAL_1002"), &rateProfile); err != nil {
+		t.Fatal(err)
+	}
+	if rateProfile == nil {
+		t.Fatal("rate profile is nil")
+	}
+	rate, has := rateProfile.Rates["RT_ALWAYS"]
+	if !has || rate == nil || len(rate.IntervalRates) != 1 || rate.IntervalRates[0] == nil ||
+		rate.IntervalRates[0].RecurrentFee == nil ||
+		rate.IntervalRates[0].RecurrentFee.Cmp(utils.NewDecimal(1, 2).Big) != 0 {
+		t.Errorf("unexpected rate profile: %s", utils.ToJSON(rateProfile))
+	}
+
+	var account *utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		args("ACC_PRF_1"), &account); err != nil {
+		t.Fatal(err)
+	}
+	if account == nil {
+		t.Fatal("account is nil")
+	}
+	balance, has := account.Balances["MonetaryBalance"]
+	if !has || balance == nil || balance.Units == nil ||
+		balance.Units.Cmp(utils.NewDecimal(14, 0).Big) != 0 || len(balance.UnitFactors) != 2 {
+		t.Errorf("unexpected account: %s", utils.ToJSON(account))
+	}
+
+	var filter *engine.Filter
+	if err := client.Call(context.Background(), utils.AdminSv1GetFilter,
+		args("FLTR_1"), &filter); err != nil {
+		t.Fatal(err)
+	}
+	if filter == nil {
+		t.Fatal("filter is nil")
+	}
+	var hasPrefixRule bool
+	for _, rule := range filter.Rules {
+		if rule != nil && rule.Type == utils.MetaPrefix && rule.Element == "~*req.Destination" &&
+			slices.Contains(rule.Values, "10") && slices.Contains(rule.Values, "20") {
+			hasPrefixRule = true
+			break
+		}
+	}
+	if len(filter.Rules) != 3 || !hasPrefixRule {
+		t.Errorf("unexpected filter: %s", utils.ToJSON(filter))
+	}
+
+	engine.LoadCSVsWithCGRLoader(t, cfg.ConfigPath, tpPath, nil, nil, "-remove")
+
+	for _, check := range []struct {
+		name   string
+		method string
+		args   any
+		reply  any
+	}{
+		{name: "attribute profile", method: utils.AdminSv1GetAttributeProfile, args: args("ATTR_ACNT_1001"), reply: new(*utils.APIAttributeProfile)},
+		{name: "resource profile", method: utils.AdminSv1GetResourceProfile, args: args("RES_ACNT_1001"), reply: new(*utils.ResourceProfile)},
+		{name: "resource", method: utils.ResourceSv1GetResource, args: args("RES_ACNT_1001"), reply: new(*utils.Resource)},
+		{name: "rate profile", method: utils.AdminSv1GetRateProfile, args: args("RT_SPECIAL_1002"), reply: new(*utils.RateProfile)},
+		{name: "account", method: utils.AdminSv1GetAccount, args: args("ACC_PRF_1"), reply: new(*utils.Account)},
+		{name: "filter", method: utils.AdminSv1GetFilter, args: args("FLTR_1"), reply: new(*engine.Filter)},
+	} {
+		t.Run("removed "+check.name, func(t *testing.T) {
+			checkCGRLoaderNotFound(t, client, check.method, check.args, check.reply)
+		})
+	}
+}
+
+func TestCGRLoaderTenant(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
-	case utils.MetaMongo:
-		cgrLdrCfgDir = "tutmongo"
-	case utils.MetaRedis:
-		cgrLdrCfgDir = "tutredis"
-	case utils.MetaMySQL:
-		cgrLdrCfgDir = "tutmysql"
-	case utils.MetaPostgres:
+	case utils.MetaRedis, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatal("unsupported dbtype value")
 	}
-	for _, test := range cgrLdrTests {
-		t.Run("cgr-loader remove tests", test)
-	}
+	checkCGRLoaderTenant(t, path.Join(*utils.DataDir, "conf", "samples", "tutinternal"))
 }
 
-func testCgrLdrInitCfg(t *testing.T) {
-	var err error
-	cgrLdrCfgPath = path.Join(*utils.DataDir, "conf", "samples", cgrLdrCfgDir)
-	cgrLdrCfg, err = config.NewCGRConfigFromPath(context.Background(), cgrLdrCfgPath)
+type testCache struct {
+	tenant chan string
+}
+
+func (recorder *testCache) ReloadCache(_ *context.Context,
+	args *utils.AttrReloadCacheWithAPIOpts, reply *string) error {
+	select {
+	case recorder.tenant <- args.Tenant:
+	default:
+	}
+	*reply = utils.OK
+	return nil
+}
+
+func (*testCache) Clear(_ *context.Context, _ *utils.AttrCacheIDsWithAPIOpts,
+	reply *string) error {
+	*reply = utils.OK
+	return nil
+}
+
+func checkCGRLoaderTenant(t *testing.T, cfgPath string) {
+	t.Helper()
+	recorder := &testCache{tenant: make(chan string, 1)}
+	server := birpc.NewServer()
+	if err := server.RegisterName(utils.CacheSv1, recorder); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		t.Error(err)
-	}
-}
-
-func testCgrLdrInitDataDB(t *testing.T) {
-	if err := engine.InitDB(cgrLdrCfg); err != nil {
 		t.Fatal(err)
 	}
-}
-
-func testCgrLdrStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cgrLdrCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCgrLdrRPCConn(t *testing.T) {
-	cgrLdrBIRPC = engine.NewRPCClient(t, cgrLdrCfg.ListenCfg(), *utils.Encoding)
-}
-
-func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
-	//account
-	var replyAcc *utils.Account
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}},
-		&replyAcc); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound, err)
-	}
-
-	//actionsPrf
-	var replyAct *utils.ActionProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}},
-		&replyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound, err)
-	}
-
-	//attributesPrf
-	var replyAttr *utils.APIAttributeProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
-		&replyAttr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	//filtersPrf
-	var replyFltr *engine.Filter
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}},
-		&replyFltr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	//ratesPrf
-	var replyRates *utils.RateProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}},
-		&replyRates); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
-	}
-
-	// resourcesPrf
-	var replyResPrf *utils.ResourceProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
-		&replyResPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-	var replyRes *utils.Resource
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.ResourceSv1GetResource,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
-		&replyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	// routesPrf
-	var replyRts *utils.RouteProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
-		&replyRts); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	// statsPrf
-	var replySts *utils.StatQueueProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replySts); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	// statQueue
-	var replyStQue *utils.StatQueue
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replyStQue); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	// thresholdPrf
-	var replyThdPrf *utils.ThresholdProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
-		&replyThdPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	// threshold
-	var rplyThd *utils.Threshold
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
-		&rplyThd); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-	//chargers
-	var replyChrgr *utils.ChargerProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
-		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+v, received %v", utils.ErrNotFound.Error(), err)
-	}
-
-}
-
-func testCgrLdrLoadData(t *testing.T) {
-	// *cacheSAddress = "127.0.0.1:2012"
-	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "testit"))
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	cmd.Stderr = outerr
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
-	}
-}
-
-func testCgrLdrGetAccountAfterLoad(t *testing.T) {
-	expAcc := &utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "ACC_PRF_1",
-		Weights: []*utils.DynamicWeight{
-			{
-				Weight: 20,
-			},
-		},
-		FilterIDs: []string{},
-		Balances: map[string]*utils.Balance{
-			"MonetaryBalance": {
-				ID: "MonetaryBalance",
-				Weights: []*utils.DynamicWeight{
-					{
-						Weight: 10,
-					},
-				},
-				Type:  utils.MetaMonetary,
-				Units: utils.NewDecimal(14, 0),
-				UnitFactors: []*utils.UnitFactor{
-					{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor:    utils.NewDecimal(100, 0),
-					},
-					{
-						FilterIDs: []string{"fltr3"},
-						Factor:    utils.NewDecimal(200, 0),
-					},
-				},
-				CostIncrements: []*utils.CostIncrement{
-					{
-						FilterIDs:    []string{"fltr1", "fltr2"},
-						Increment:    utils.NewDecimal(13, 1),
-						FixedFee:     utils.NewDecimal(23, 1),
-						RecurrentFee: utils.NewDecimal(33, 1),
-					},
-				},
-				AttributeIDs: []string{"attr1", "attr2"},
-			},
-		},
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-	var replyAcc *utils.Account
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}},
-		&replyAcc); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(replyAcc, expAcc) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAcc), utils.ToJSON(replyAcc))
-	}
-}
-
-func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
-	expActPrf := &utils.ActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ONE_TIME_ACT",
-		FilterIDs: []string{},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Schedule: utils.MetaASAP,
-		Targets: map[string]utils.StringSet{
-			utils.MetaAccounts: {
-				"1001": {},
-				"1002": {},
-			},
-		},
-		Actions: []*utils.APAction{
-			{
-				ID:   "TOPUP",
-				Type: utils.MetaAddBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "ADDBALUNITS",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestBalance.Units",
-							"*balanceValue": "10",
-						},
-					},
-				},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_DATA",
-				Type: utils.MetaSetBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "SETBALTYPE",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestDataBalance.Type",
-							"*balanceValue": utils.MetaData,
-						},
-					},
-				},
-			},
-			{
-				ID:   "TOPUP_TEST_DATA",
-				Type: utils.MetaAddBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "ADDBALUNITS",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestDataBalance.Units",
-							"*balanceValue": "1024",
-						},
-					},
-				},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_VOICE",
-				Type: utils.MetaSetBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "SETBALTYPE",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestVoiceBalance.Type",
-							"*balanceValue": utils.MetaVoice,
-						},
-					},
-				},
-			},
-			{
-				ID:   "TOPUP_TEST_VOICE",
-				Type: utils.MetaAddBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "ADDBALUNITS",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestVoiceBalance.Units",
-							"*balanceValue": "15m15s",
-						},
-					},
-				},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_FILTERS",
-				Type: utils.MetaSetBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "SETBALFILTER",
-						Opts: map[string]any{
-							"*balancePath":  "*balance.TestVoiceBalance.Filters",
-							"*balanceValue": "*string:~*req.CustomField:500",
-						},
-					},
-				},
-			},
-			{
-				ID:   "TOPUP_REM_VOICE",
-				Type: utils.MetaRemBalance,
-				Diktats: []*utils.APDiktat{
-					{
-						ID: "REMBAL",
-						Opts: map[string]any{
-							"*balancePath": "TestVoiceBalance2",
-						},
-					},
-				},
-			},
-		},
-	}
-	var replyAct *utils.ActionProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}},
-		&replyAct); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(replyAct, expActPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expActPrf), utils.ToJSON(replyAct))
-	}
-}
-
-func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
-	extAttrPrf := &utils.APIAttributeProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "ATTR_ACNT_1001",
-		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Attributes: []*utils.ExternalAttribute{
-			{
-				FilterIDs: []string{},
-				Path:      "*req.OfficeGroup",
-				Type:      utils.MetaConstant,
-				Value:     "Marketing",
-			},
-		},
-		Blockers: utils.DynamicBlockers{
-			{
-				Blocker: false,
-			},
-		},
-	}
-	var replyAttr *utils.APIAttributeProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
-		&replyAttr); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(extAttrPrf.FilterIDs)
-		sort.Strings(replyAttr.FilterIDs)
-		if !reflect.DeepEqual(extAttrPrf, replyAttr) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(extAttrPrf), utils.ToJSON(replyAttr))
+	defer func() { _ = listener.Close() }()
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			go server.ServeCodec(jsonrpc.NewServerCodec(conn))
 		}
-	}
-}
+	}()
 
-func testCgrLdrGetFilterAfterLoad(t *testing.T) {
-	expFilter := &engine.Filter{
-		Tenant: utils.CGRateSorg,
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Account",
-				Values:  []string{"1003", "1002"},
-			},
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Destination",
-				Values:  []string{"10", "20"},
-			},
-			{
-				Type:    utils.MetaRSR,
-				Element: "~*req.Destination",
-				Values:  []string{"1002"},
-			},
-		},
-	}
-	var replyFltr *engine.Filter
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}},
-		&replyFltr); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expFilter, replyFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expFilter), utils.ToJSON(replyFltr))
-	}
-}
-
-func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
-	expRatePrf := &utils.RateProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "RT_SPECIAL_1002",
-		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Weights: []*utils.DynamicWeight{
-			{
-				Weight: 10,
-			},
-		},
-		MinCost:         utils.NewDecimal(0, 0),
-		MaxCost:         utils.NewDecimal(0, 0),
-		MaxCostStrategy: utils.MetaMaxCostFree,
-		Rates: map[string]*utils.Rate{
-			"RT_ALWAYS": {
-				ID:              "RT_ALWAYS",
-				ActivationTimes: "* * * * *",
-				Weights: []*utils.DynamicWeight{
-					{
-						Weight: 0,
-					},
-				},
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(1, 2),
-						FixedFee:      utils.NewDecimal(0, 0),
-						Unit:          utils.NewDecimal(int64(time.Minute), 0),
-						Increment:     utils.NewDecimal(int64(time.Second), 0),
-					},
-				},
-			},
-		},
-	}
-	var replyRates *utils.RateProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}},
-		&replyRates); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(replyRates, expRatePrf) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRatePrf), utils.ToJSON(replyRates))
-	}
-}
-
-func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
-	expREsPrf := &utils.ResourceProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "RES_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		UsageTTL:     time.Hour,
-		Limit:        1,
-		ThresholdIDs: []string{},
-	}
-	var replyRes *utils.ResourceProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
-		&replyRes); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expREsPrf, replyRes) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expREsPrf), utils.ToJSON(replyRes))
-	}
-}
-
-func testCgrLdrGetResourceAfterLoad(t *testing.T) {
-	expREsPrf := &utils.Resource{
-		Tenant: "cgrates.org",
-		ID:     "RES_ACNT_1001",
-		Usages: map[string]*utils.ResourceUsage{},
-	}
-	var replyRes *utils.Resource
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.ResourceSv1GetResource,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
-		&replyRes); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expREsPrf, replyRes) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expREsPrf), utils.ToJSON(replyRes))
-	}
-}
-
-func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
-	expRoutePrf := &utils.RouteProfile{
-		ID:        "ROUTE_ACNT_1001",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Sorting:           utils.MetaWeight,
-		SortingParameters: []string{},
-		Routes: []*utils.Route{
-			{
-				ID: "route1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
-					},
-				},
-			},
-			{
-				ID: "route2",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-			},
-		},
-	}
-	var replyRts *utils.RouteProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
-		&replyRts); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(expRoutePrf.Routes, func(i, j int) bool {
-			return expRoutePrf.Routes[i].ID < expRoutePrf.Routes[j].ID
-		})
-		sort.Slice(replyRts.Routes, func(i, j int) bool {
-			return replyRts.Routes[i].ID < replyRts.Routes[j].ID
-		})
-		if !reflect.DeepEqual(expRoutePrf, replyRts) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRoutePrf), utils.ToJSON(replyRts))
+	engine.LoadCSVsWithCGRLoader(t, cfgPath, "", nil, map[string]string{
+		utils.AttributesCsv: "cgrates.org,ATTR_TENANT_TEST,,,,,,,,\n",
+	}, "-caches_address="+listener.Addr().String(), "-tenant=tenant.com")
+	select {
+	case tenant := <-recorder.tenant:
+		if tenant != "tenant.com" {
+			t.Errorf("cache tenant is %q, want %q", tenant, "tenant.com")
 		}
+	default:
+		t.Error("cgr-loader did not reload the cache")
 	}
 }
 
-func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
-	expStatsprf := &utils.StatQueueProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "Stat_1",
-		FilterIDs: []string{"FLTR_STAT_1"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 30,
-			},
-		},
-		QueueLength: 100,
-		TTL:         10 * time.Second,
-		MinItems:    0,
-		Metrics: []*utils.MetricWithFilters{
-			{
-				MetricID: "*tcd",
-			},
-			{
-				MetricID: "*asr",
-			},
-			{
-				MetricID: "*acd",
-			},
-		},
-		Blockers:     utils.DynamicBlockers{{Blocker: true}},
-		ThresholdIDs: []string{utils.MetaNone},
+func checkCGRLoaderNotFound(t *testing.T, client *birpc.Client, method string, args, reply any) {
+	t.Helper()
+	err := client.Call(context.Background(), method, args, reply)
+	if err == nil {
+		t.Errorf("%s returned no error, want %v", method, utils.ErrNotFound)
+		return
 	}
-	var replySts *utils.StatQueueProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replySts); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(expStatsprf.Metrics, func(i, j int) bool {
-			return expStatsprf.Metrics[i].MetricID < expStatsprf.Metrics[j].MetricID
-		})
-		sort.Slice(replySts.Metrics, func(i, j int) bool {
-			return replySts.Metrics[i].MetricID < replySts.Metrics[j].MetricID
-		})
-		if !reflect.DeepEqual(expStatsprf, replySts) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStatsprf), utils.ToJSON(replySts))
-		}
-	}
-}
-
-func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
-	expStatQueue := map[string]string{
-		"*acd": "N/A",
-		"*tcd": "N/A",
-		"*asr": "N/A",
-	}
-	replyStQue := make(map[string]string)
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replyStQue); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expStatQueue, replyStQue) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStatQueue), utils.ToJSON(replyStQue))
-	}
-}
-
-func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
-	expThPrf := &utils.ThresholdProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "THD_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		MaxHits:          -1,
-		MinHits:          0,
-		ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
-		EeIDs:            []string{},
-		AttributeIDs:     []string{},
-	}
-	var replyThdPrf *utils.ThresholdProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
-		&replyThdPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expThPrf, replyThdPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expThPrf), utils.ToJSON(replyThdPrf))
-	}
-}
-
-func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
-	expThPrf := &utils.Threshold{
-		Tenant: "cgrates.org",
-		ID:     "THD_ACNT_1001",
-		Hits:   0,
-	}
-	var replyThdPrf *utils.Threshold
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
-		&replyThdPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expThPrf, replyThdPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expThPrf), utils.ToJSON(replyThdPrf))
-	}
-}
-
-func testCgrLdrRemoveData(t *testing.T) {
-	// *cacheSAddress = "127.0.0.1:2012"
-	cmd := exec.Command("cgr-loader", "-config_path="+cgrLdrCfgPath, "-path="+path.Join(*utils.DataDir, "tariffplans", "testit"), "-remove")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	cmd.Stderr = outerr
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
-	}
-}
-
-// Kill the engine when it is about to be finished
-func testCgrLdrKillEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
+	if err = utils.CastRPCErr(err); err != utils.ErrNotFound {
+		t.Errorf("%s returned %v, want %v", method, err, utils.ErrNotFound)
 	}
 }

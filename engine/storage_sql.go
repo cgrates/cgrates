@@ -1140,14 +1140,6 @@ func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 			Rate:          rate.AsMapStringInterface(),
 			RateProfileID: rpp.ID,
 		}
-		if optOverwrite {
-			if err = tx.Model(&RateMdl{}).Where(
-				RateMdl{Tenant: rMdl.Tenant, ID: rMdl.ID}).Delete(
-				RateMdl{}).Error; err != nil {
-				tx.Rollback()
-				return
-			}
-		}
 		var existingRT []*RateMdl
 		result := tx.Where(RateMdl{Tenant: rMdl.Tenant, ID: rMdl.ID, RateProfileID: rpMdl.ID}).Find(&existingRT)
 		if result.Error != nil {

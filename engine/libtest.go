@@ -829,12 +829,15 @@ func LoadCSVsWithCGRLoader(t testing.TB, cfgPath, tpPath string, logBuffer io.Wr
 		flags := []string{"-config_path", cfgPath, "-path", path}
 		flags = append(flags, extraFlags...)
 		loader := exec.Command("cgr-loader", flags...)
+		output := new(bytes.Buffer)
+		writer := io.Writer(output)
 		if logBuffer != nil {
-			loader.Stdout = logBuffer
-			loader.Stderr = logBuffer
+			writer = io.MultiWriter(logBuffer, output)
 		}
+		loader.Stdout = writer
+		loader.Stderr = writer
 		if err := loader.Run(); err != nil {
-			t.Fatal(err)
+			t.Fatalf("%q failed: %v\n%s", loader.Args, err, output.String())
 		}
 	}
 }
