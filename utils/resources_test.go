@@ -590,9 +590,10 @@ func TestMapStringInterfaceToResource(t *testing.T) {
 		ID:     "RES1",
 		Usages: map[string]any{
 			"u1": map[string]any{
-				Tenant: "cgrates.org",
-				ID:     "U1",
-				Units:  10.0,
+				Tenant:     "cgrates.org",
+				ID:         "U1",
+				Units:      10.0,
+				ExpiryTime: "2026-05-05T12:00:01Z",
 			},
 			"u2": &ResourceUsage{
 				Tenant: "cgrates.org",
@@ -641,5 +642,231 @@ func TestResourceLockKey(t *testing.T) {
 
 	if exp != got {
 		t.Errorf("ResourceLockKey mismatch\nexp=%v\ngot=%v", exp, got)
+	}
+}
+
+func TestResourceProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		rp   *ResourceProfile
+		want map[string]any
+	}{
+		{
+			name: "Complete ResourceProfile",
+			rp: &ResourceProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ID",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					}},
+				UsageTTL:          10,
+				Limit:             10,
+				AllocationMessage: "new",
+				Blocker:           true,
+				Stored:            true,
+				ThresholdIDs:      []string{"TH1"},
+			},
+			want: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ID",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				UsageTTL:          10,
+				Limit:             10,
+				AllocationMessage: "new",
+				Blocker:           true,
+				Stored:            true,
+				ThresholdIDs:      []string{"TH1"},
+			},
+		},
+		{
+			name: "Nil ResourceProfile",
+			rp:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.rp.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToResourceProfile(t *testing.T) {
+	tests := []struct {
+		name   string
+		m      map[string]any
+		rp     *ResourceProfile
+		expErr string
+	}{
+		{
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ID",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					}},
+				UsageTTL:          float64(10),
+				Limit:             float64(10),
+				AllocationMessage: "new",
+				Blocker:           true,
+				Stored:            true,
+				ThresholdIDs:      []string{"TH1"},
+			},
+			rp: &ResourceProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ID",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					}},
+				UsageTTL:          10,
+				Limit:             10,
+				AllocationMessage: "new",
+				Blocker:           true,
+				Stored:            true,
+				ThresholdIDs:      []string{"TH1"},
+			},
+		},
+		{
+			name: "UsageTTL as string",
+			m: map[string]any{
+				UsageTTL: "10s",
+			},
+			rp: &ResourceProfile{
+				UsageTTL: 10000000000,
+			},
+		},
+		{
+			name: "Error case",
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "ID",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					}},
+				UsageTTL:          "10ss",
+				Limit:             10,
+				AllocationMessage: "new",
+				Blocker:           true,
+				Stored:            true,
+				ThresholdIDs:      []string{"TH1"},
+			},
+			rp:     nil,
+			expErr: `time: unknown unit "ss" in duration "10ss"`,
+		},
+		{
+			name: "Nil case",
+			m:    nil,
+			rp:   &ResourceProfile{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToResourceProfile(tt.m)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.rp)) {
+				t.Errorf("Expected %#+v, recieved %#+v", tt.rp, got)
+			}
+		})
+	}
+}
+
+func TestInterfaceToMapStringResourceUsage(t *testing.T) {
+	tests := []struct {
+		name string
+		v    any
+		ru   map[string]*ResourceUsage
+	}{
+		{
+			name: "*ResourceUsage",
+			v: map[string]*ResourceUsage{
+				"u1": {
+					Tenant: "cgrates.org",
+					ID:     "U1",
+					Units:  10,
+				},
+				"u2": {
+					Tenant: "cgrates.org",
+					ID:     "U2",
+					Units:  20,
+				},
+			},
+			ru: map[string]*ResourceUsage{
+				"u1": {
+					Tenant: "cgrates.org",
+					ID:     "U1",
+					Units:  10,
+				},
+				"u2": {
+					Tenant: "cgrates.org",
+					ID:     "U2",
+					Units:  20,
+				},
+			},
+		},
+		{
+			name: "any",
+			v: map[string]any{
+				"u1": map[string]any{
+					Tenant: "cgrates.org",
+					ID:     "U1",
+					Units:  10.0,
+				},
+			},
+			ru: map[string]*ResourceUsage{
+				"u1": {
+					Tenant: "cgrates.org",
+					ID:     "U1",
+					Units:  10.0,
+				},
+			},
+		},
+		{
+			name: "ResourceUsage",
+			v: map[string]ResourceUsage{
+				"u1": {
+					Tenant: "cgrates.org",
+					ID:     "U1",
+					Units:  10,
+				},
+				"u2": {
+					Tenant: "cgrates.org",
+					ID:     "U2",
+					Units:  20,
+				},
+			},
+			ru: nil,
+		},
+		{
+			name: "Nil case",
+			v:    nil,
+			ru:   nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := InterfaceToMapStringResourceUsage(tt.v)
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.ru)) {
+				t.Errorf("Expected %+v, recieved %+v", ToJSON(tt.ru), ToJSON(got))
+			}
+		})
 	}
 }

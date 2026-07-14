@@ -215,3 +215,108 @@ func TestCheckInLineFilter(t *testing.T) {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
+
+func TestMapStringDPFieldAsInterface(t *testing.T) {
+	tests := []struct {
+		name    string
+		mp      MapStringDP
+		fldPath []string
+		want    any
+		expErr  error
+	}{
+		{
+			name: "Path not found",
+			mp: MapStringDP{
+				"Field1": "1001",
+				"Field2": "1003",
+			},
+			fldPath: []string{"1004"},
+			want:    nil,
+			expErr:  ErrNotFound,
+		},
+		{
+			name:    "Empty fldPath",
+			fldPath: []string{},
+			want:    nil,
+			expErr:  ErrNotFound,
+		},
+		{
+			mp: MapStringDP{
+				"Field1": "1001",
+				"Field2": "1003",
+			},
+			fldPath: []string{"Field1"},
+			want:    "1001",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.mp.FieldAsInterface(tt.fldPath)
+			if err != nil && err != tt.expErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, recieved %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringDPFieldAsString(t *testing.T) {
+	tests := []struct {
+		name    string
+		mp      MapStringDP
+		fldPath []string
+		want    any
+		expErr  error
+	}{
+		{
+			mp: MapStringDP{
+				"Field1": "3001",
+				"Field2": "3003",
+			},
+			fldPath: []string{"Field1"},
+			want:    "3001",
+		},
+		{
+			name:    "Empty fldPath",
+			fldPath: []string{},
+			want:    "",
+			expErr:  ErrNotFound,
+		},
+		{
+			name: "Path not found",
+			mp: MapStringDP{
+				"Field1": "2002",
+				"Field2": "2003",
+			},
+			fldPath: []string{"Field1.Field2[0]"},
+			want:    "",
+			expErr:  ErrNotFound,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.mp.FieldAsString(tt.fldPath)
+			if err != nil && err != tt.expErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, recieved %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringDPString(t *testing.T) {
+	mp := MapStringDP{
+		"Field1": "2002",
+	}
+	fldPath := ToJSON(mp)
+	got := mp.String()
+	if !reflect.DeepEqual(got, fldPath) {
+		t.Errorf("Expected %#+v, recieved %#+v", fldPath, got)
+	}
+}
