@@ -1211,6 +1211,7 @@ const (
 	CapResourceAllocation   = "ResourceAllocation"
 	AllocatedIPField        = "AllocatedIP"
 	CapMaxUsage             = "MaxUsage"
+	CapAccountSUsage        = "AccountSUsage"
 	CapRoutes               = "Routes"
 	CapRouteProfiles        = "RouteProfiles"
 	CapThresholds           = "Thresholds"

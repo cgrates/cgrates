@@ -348,7 +348,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 		for k, v := range v1Rply.AccountSUsage {
 			usage.Map[k] = utils.NewLeafNode(v)
 		}
-		cgrReply[utils.CapMaxUsage] = usage
+		cgrReply[utils.CapAccountSUsage] = usage
 	}
 	if v1Rply.IPsAllocation != nil {
 		ipAlloc := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}

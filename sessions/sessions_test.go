@@ -1169,9 +1169,9 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	//max usage check
+	//accountSUsage check
 	v1per.AccountSUsage = map[string]time.Duration{utils.MetaDefault: 5 * time.Minute}
-	expected[utils.CapMaxUsage] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaDefault: utils.NewLeafNode(5 * time.Minute)}}
+	expected[utils.CapAccountSUsage] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaDefault: utils.NewLeafNode(5 * time.Minute)}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
