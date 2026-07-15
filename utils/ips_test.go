@@ -808,6 +808,18 @@ func TestIPPoolFieldAsInterface(t *testing.T) {
 			want:    pool,
 			wantErr: false,
 		},
+		{
+			name:    "FilterIDs indexed access in range",
+			fldPath: []string{"FilterIDs[0]"},
+			want:    "flt1",
+			wantErr: false,
+		},
+		{
+			name:    "FilterIDs indexed access out of range",
+			fldPath: []string{"FilterIDs[10]"},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1463,6 +1475,401 @@ func TestIPProfileFieldsAsInterface(t *testing.T) {
 				if !reflect.DeepEqual(got, tt.exp) {
 					t.Errorf("FieldAsInterface() = %v, want %v", ToJSON(got), tt.exp)
 				}
+			}
+		})
+	}
+}
+
+func TestIPProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		p    *IPProfile
+		want map[string]any
+	}{
+		{
+			p: &IPProfile{
+				Tenant:    "cgrates.org",
+				ID:        "IP_1001",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					&DynamicWeight{
+						FilterIDs: []string{"*weight"},
+						Weight:    10.0,
+					},
+				},
+				TTL:    time.Duration(60) * time.Second,
+				Stored: true,
+				Pools: []*IPPool{
+					{
+						ID:        "POOL_1001",
+						FilterIDs: []string{"*string:~*req.Pool:1001"},
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+						Weights: DynamicWeights{
+							&DynamicWeight{
+								FilterIDs: []string{"poolWeight"},
+								Weight:    20.0,
+							},
+						},
+						Blockers: DynamicBlockers{
+							&DynamicBlocker{
+								FilterIDs: []string{"poolBlocker"},
+								Blocker:   false,
+							},
+						},
+					},
+				},
+			},
+			want: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "IP_1001",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: DynamicWeights{
+					&DynamicWeight{
+						FilterIDs: []string{"*weight"},
+						Weight:    10.0,
+					},
+				},
+				TTL:    time.Duration(60) * time.Second,
+				Stored: true,
+				Pools: []*IPPool{
+					{
+						ID:        "POOL_1001",
+						FilterIDs: []string{"*string:~*req.Pool:1001"},
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+						Weights: DynamicWeights{
+							&DynamicWeight{
+								FilterIDs: []string{"poolWeight"},
+								Weight:    20.0,
+							},
+						},
+						Blockers: DynamicBlockers{
+							&DynamicBlocker{
+								FilterIDs: []string{"poolBlocker"},
+								Blocker:   false,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "nil case",
+			p:    nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.p.AsMapStringInterface()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, received %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToIPProfile(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       map[string]any
+		want    *IPProfile
+		wantErr string
+	}{
+		{
+			m: map[string]any{
+				Tenant:    "cgrates.org",
+				ID:        "IP_1002",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Weights: DynamicWeights{
+					&DynamicWeight{
+						FilterIDs: []string{"*weight"},
+						Weight:    10.0,
+					},
+				},
+				TTL:    time.Duration(60) * time.Second,
+				Stored: true,
+				Pools: []any{
+					map[string]any{
+						ID:        "POOL_1002",
+						FilterIDs: []string{"*string:~*req.Pool:1002"},
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+						Weights: DynamicWeights{
+							&DynamicWeight{
+								FilterIDs: []string{"poolWeight"},
+								Weight:    20.0,
+							},
+						},
+						Blockers: DynamicBlockers{
+							&DynamicBlocker{
+								FilterIDs: []string{"poolBlocker"},
+								Blocker:   false,
+							},
+						},
+					},
+				},
+			},
+			want: &IPProfile{
+				Tenant:    "cgrates.org",
+				ID:        "IP_1002",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Weights: DynamicWeights{
+					&DynamicWeight{
+						FilterIDs: []string{"*weight"},
+						Weight:    10.0,
+					},
+				},
+				TTL:    0,
+				Stored: true,
+				Pools: []*IPPool{
+					{
+						ID:        "POOL_1002",
+						FilterIDs: []string{"*string:~*req.Pool:1002"},
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+						Weights: DynamicWeights{
+							&DynamicWeight{
+								FilterIDs: []string{"poolWeight"},
+								Weight:    20.0,
+							},
+						},
+						Blockers: DynamicBlockers{
+							&DynamicBlocker{
+								FilterIDs: []string{"poolBlocker"},
+								Blocker:   false,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Pools as []any",
+			m: map[string]any{
+				Pools: []any{
+					map[string]string{
+						ID:        "POOL_1001",
+						FilterIDs: "*string:~*req.Pool:1001",
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+					},
+				},
+			},
+			want: &IPProfile{
+				Pools: []*IPPool{},
+			},
+		},
+		{
+			name: "Pools as map[string]any",
+			m: map[string]any{
+				Pools: []*IPPool{
+					{
+						ID:        "POOL_1001",
+						FilterIDs: []string{"*string:~*req.Pool:1001"},
+						Type:      "ipv4",
+						Range:     "192.168.1.0/24",
+						Strategy:  "*ascending",
+						Message:   "IP allocated",
+					},
+				},
+			},
+			want: &IPProfile{
+				Pools: nil,
+			},
+		},
+		{
+			name: "TTL as string",
+			m: map[string]any{
+				TTL: "5m",
+			},
+			want: &IPProfile{
+				TTL: 5 * time.Minute,
+			},
+		},
+		{
+			name: "TTL as float",
+			m: map[string]any{
+				TTL: float64(5),
+			},
+			want: &IPProfile{
+				TTL: 5,
+			},
+		},
+		{
+			name: "Error case",
+			m: map[string]any{
+				TTL: "5mn",
+			},
+			want:    nil,
+			wantErr: `time: unknown unit "mn" in duration "5mn"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := MapStringInterfaceToIPProfile(tt.m)
+			if gotErr != nil && gotErr.Error() != tt.wantErr {
+				t.Errorf("Expected %+v, received %+v", tt.wantErr, gotErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, received %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestIPAllocationsAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		p    *IPAllocations
+		want map[string]any
+	}{
+		{
+			p: &IPAllocations{
+				Tenant:   "cgrates.org",
+				ID:       "alloc1",
+				TTLIndex: []string{"expired"},
+				Allocations: map[string]*PoolAllocation{
+					"allocA": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.100.119"),
+					},
+				},
+			},
+			want: map[string]any{
+				Tenant:   "cgrates.org",
+				ID:       "alloc1",
+				TTLIndex: []string{"expired"},
+				Allocations: map[string]*PoolAllocation{
+					"allocA": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.100.119"),
+					},
+				},
+			},
+		},
+		{
+			name: "nil case",
+			p:    nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.p.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, received %+v", ToJSON(tt.want), ToJSON(got))
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToIPAllocations(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]any
+		want *IPAllocations
+	}{
+		{
+			m: map[string]any{
+				Tenant:   "cgrates.org",
+				ID:       "alloc1",
+				TTLIndex: []string{"active"},
+				Allocations: map[string]any{
+					"allocA": map[string]any{
+						PoolID:  "pool1",
+						Address: "192.168.100.119",
+						Time:    "2026-01-02T15:04:05Z",
+					},
+					"allocB": map[string]any{
+						PoolID:  "pool1",
+						Address: "192.168.56.1",
+					},
+				},
+			},
+			want: &IPAllocations{
+				Tenant:   "cgrates.org",
+				ID:       "alloc1",
+				TTLIndex: []string{"active"},
+				Allocations: map[string]*PoolAllocation{
+					"allocA": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.100.119"),
+						Time:    time.Date(2026, time.January, 2, 15, 4, 5, 0, time.UTC),
+					},
+					"allocB": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.56.1"),
+					},
+				},
+			},
+		},
+		{
+			name: "Allocations as map[string]any",
+			m: map[string]any{
+				Tenant:   "cgrates.org",
+				ID:       "alloc1",
+				TTLIndex: []string{"active"},
+				Allocations: map[string]any{
+					"allocA": map[string]string{
+						PoolID: "pool1",
+					},
+				},
+			},
+			want: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "alloc1",
+				TTLIndex:    []string{"active"},
+				Allocations: map[string]*PoolAllocation{},
+			},
+		},
+		{
+			name: "Allocations as map[string]*any",
+			m: map[string]any{
+				Tenant:      "cgrates.org",
+				ID:          "alloc1",
+				TTLIndex:    []string{"active"},
+				Allocations: map[string]*any{},
+			},
+			want: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "alloc1",
+				TTLIndex:    []string{"active"},
+				Allocations: nil,
+			},
+		},
+		{
+			name: "nil Allocations",
+			m: map[string]any{
+				Tenant:      "cgrates.org",
+				ID:          "ip1",
+				TTLIndex:    []string{"active"},
+				Allocations: nil,
+			},
+			want: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "ip1",
+				TTLIndex:    []string{"active"},
+				Allocations: nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := MapStringInterfaceToIPAllocations(tt.m)
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, received %+v", ToJSON(tt.want), ToJSON(got))
 			}
 		})
 	}
