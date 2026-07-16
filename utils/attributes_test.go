@@ -590,3 +590,336 @@ func TestNewAttributeFromInlineNilPathErr(t *testing.T) {
 		t.Errorf("Expecting error <%v>, Reveived error <%v>", expErr, err)
 	}
 }
+
+func TestNewAPIAttributeProfile(t *testing.T) {
+	tests := []struct {
+		name string
+		attr *AttributeProfile
+		want *APIAttributeProfile
+	}{
+		{
+			attr: &AttributeProfile{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+			want: &APIAttributeProfile{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Attributes: []*ExternalAttribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: "",
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: "",
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewAPIAttributeProfile(tt.attr)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %+v, received %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestAttributeProfileAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		ap   *AttributeProfile
+		want map[string]any
+	}{
+		{
+			ap: &AttributeProfile{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+			want: map[string]any{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+		},
+		{
+			name: "Nil AttributeProfile",
+			ap:   nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.ap.AsMapStringInterface()
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, received %+v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToAttributeProfile(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       map[string]any
+		want    *AttributeProfile
+		wantErr string
+	}{
+		{
+			m: map[string]any{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*exists:~*opts.*usage:"},
+				Attributes: []any{
+					map[string]any{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					map[string]any{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+			want: &AttributeProfile{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*exists:~*opts.*usage:"},
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+		},
+		{
+			name: "Attributes as any",
+			m: map[string]any{
+				Attributes: []any{
+					map[string]string{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: "",
+					},
+				},
+			},
+			want: &AttributeProfile{
+				Attributes: []*Attribute{},
+			},
+		},
+		{
+			name: "Attributes as *Attribute",
+			m: map[string]any{
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+			},
+			want: &AttributeProfile{
+				Attributes: nil,
+			},
+		},
+		{
+			name: "Nil Attributes",
+			m: map[string]any{
+				Attributes: nil,
+			},
+			want: &AttributeProfile{
+				Attributes: nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToAttributeProfile(tt.m)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %+v, received %+v", tt.wantErr, err)
+			}
+
+			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, received %+v", tt.want, got)
+			}
+		})
+	}
+}
+func TestAttributeProfileClone(t *testing.T) {
+	tests := []struct {
+		name string
+		ap   *AttributeProfile
+	}{
+		{
+			name: "Complete AttributeProfile",
+			ap: &AttributeProfile{
+				Tenant:    CGRateSorg,
+				ID:        "attrTestID",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Attributes: []*Attribute{
+					{
+						Path:  AccountField,
+						Type:  MetaConstant,
+						Value: nil,
+					},
+					{
+						Path:  "*tenant",
+						Type:  MetaConstant,
+						Value: nil,
+					},
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: DynamicBlockers{},
+			},
+		},
+		{
+			name: "nil case",
+			ap:   nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.ap.Clone()
+			if !reflect.DeepEqual(rcv, tt.ap) {
+				t.Errorf("Expected %+v, received %+v", tt.ap, rcv)
+			}
+
+			if tt.ap != nil && rcv == tt.ap {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.ap.CacheClone()
+			if !reflect.DeepEqual(rcv, tt.ap) {
+				t.Errorf("Expected %+v, received %+v", tt.ap, rcv)
+			}
+		})
+	}
+}
+
+func TestAttributeClone(t *testing.T) {
+	tests := []struct {
+		name string
+		attr *Attribute
+	}{
+		{
+			name: "Complete Attribute",
+			attr: &Attribute{
+				FilterIDs: []string{"*string:~*req.PassField:Test"},
+				Path:      "*req.Password",
+				Type:      MetaPassword,
+				Value:     NewRSRParsersMustCompile("abcd123", RSRSep),
+				Blockers:  DynamicBlockers{},
+			},
+		},
+		{
+			name: "nil case",
+			attr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv := tt.attr.Clone()
+			if !reflect.DeepEqual(rcv, tt.attr) {
+				t.Errorf("Expected %+v, received %+v", tt.attr, rcv)
+			}
+
+			if tt.attr != nil && rcv == tt.attr {
+				t.Errorf("Clone returned the same instance, expected a new instance")
+			}
+		})
+	}
+}
