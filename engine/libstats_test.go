@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -252,5 +253,202 @@ func TestStatQueueAsStatQueueOK(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestStoredStatQueueAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		ssq  *StoredStatQueue
+		want map[string]any
+	}{
+		{
+			ssq: &StoredStatQueue{
+				Tenant: "cgrates.org",
+				ID:     "ssq02",
+				SQItems: []utils.SQItem{
+					{
+						EventID: "testID",
+					},
+				},
+				SQMetrics: map[string][]byte{
+					utils.MetaTCD: []byte(""),
+				},
+				Compressed: true,
+			},
+			want: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "ssq02",
+				utils.SQItems: []utils.SQItem{
+					{
+						EventID: "testID",
+					},
+				},
+				utils.SQMetrics: map[string][]byte{
+					utils.MetaTCD: []byte(""),
+				},
+				utils.Compressed: true,
+			},
+		},
+		{
+			name: "Nil case",
+			ssq:  nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.ssq.AsMapStringInterface()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Expected %v, recieved %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToStoredStatQueue(t *testing.T) {
+	date := time.Date(2026, 7, 17, 15, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name    string
+		m       map[string]any
+		ssq     *StoredStatQueue
+		wantErr string
+	}{
+		{
+			m: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "ssq01",
+				utils.SQItems: []utils.SQItem{
+					{
+						EventID: "testID",
+					},
+				},
+				utils.SQMetrics: map[string][]byte{
+					utils.MetaTCD: []byte(""),
+				},
+				utils.Compressed: true,
+			},
+			ssq: &StoredStatQueue{
+				Tenant:     "cgrates.org",
+				ID:         "ssq01",
+				SQItems:    nil,
+				SQMetrics:  nil,
+				Compressed: true,
+			},
+		},
+		{
+			name: "SQItems as any",
+			m: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "ssq02",
+				utils.SQItems: []any{
+					map[string]any{
+						utils.EventID: "testID",
+					},
+				},
+				utils.SQMetrics: map[string]any{
+					utils.MetaTCD: []byte(""),
+				},
+				utils.Compressed: true,
+			},
+			ssq: &StoredStatQueue{
+				Tenant: "cgrates.org",
+				ID:     "ssq02",
+				SQItems: []utils.SQItem{
+					{
+						EventID: "testID",
+					},
+				},
+				SQMetrics:  map[string][]byte{},
+				Compressed: true,
+			},
+		},
+		{
+			name: "ExpiryTime as time.Time",
+			m: map[string]any{
+				utils.SQItems: []any{
+					map[string]any{
+						utils.EventID:    "testID",
+						utils.ExpiryTime: &date,
+					},
+				},
+			},
+			ssq: &StoredStatQueue{
+				SQItems: []utils.SQItem{
+					{
+						EventID:    "testID",
+						ExpiryTime: &date,
+					},
+				},
+			},
+		},
+		{
+			name: "ExpiryTime as string",
+			m: map[string]any{
+				utils.SQItems: []any{
+					map[string]any{
+						utils.EventID:    "testID",
+						utils.ExpiryTime: "2026-07-17T15:00:00Z",
+					},
+				},
+			},
+			ssq: &StoredStatQueue{
+				SQItems: []utils.SQItem{
+					{
+						EventID:    "testID",
+						ExpiryTime: &date,
+					},
+				},
+			},
+		},
+		{
+			name: "MetaTCD as string",
+			m: map[string]any{
+				utils.SQMetrics: map[string]any{
+					utils.MetaTCD: "",
+				},
+			},
+			ssq: &StoredStatQueue{
+				SQMetrics: map[string][]byte{
+					utils.MetaTCD: []byte(""),
+				},
+			},
+		},
+		{
+			name: "Error case: ExpiryTime",
+			m: map[string]any{
+				utils.SQItems: []any{
+					map[string]any{
+						utils.EventID:    "testID",
+						utils.ExpiryTime: `"2026-07-17T15:00:00Z`,
+					},
+				},
+			},
+			ssq:     nil,
+			wantErr: `parsing time "\"2026-07-17T15:00:00Z" as "2006-01-02T15:04:05Z07:00": cannot parse "\"2026-07-17T15:00:00Z" as "2006"`,
+		},
+		{
+			name: "Error case: MetaTCD",
+			m: map[string]any{
+				utils.SQMetrics: map[string]any{
+					utils.MetaTCD: "1h0m0s",
+				},
+				utils.Compressed: true,
+			},
+			ssq:     nil,
+			wantErr: `failed to decode base64 string: illegal base64 data at input byte 4`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := MapStringInterfaceToStoredStatQueue(tt.m)
+			if gotErr != nil && gotErr.Error() != tt.wantErr {
+				t.Errorf("Expected %v, recieved %v", tt.wantErr, gotErr)
+			}
+
+			if !reflect.DeepEqual(utils.ToJSON(got), utils.ToJSON(tt.ssq)) {
+				t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(tt.ssq), utils.ToJSON(got))
+			}
+		})
 	}
 }
