@@ -3238,3 +3238,127 @@ func TestFilterToSQLQuery(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterAsMapStringInterface(t *testing.T) {
+	tests := []struct {
+		name string
+		fltr *Filter
+		want map[string]any
+	}{
+		{
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ATTR_3",
+				Rules: []*FilterRule{
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Attribute",
+						Values:  []string{"AttributeProfilePrefix"},
+					},
+				},
+			},
+			want: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "FLTR_ATTR_3",
+				utils.Rules: []*FilterRule{
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Attribute",
+						Values:  []string{"AttributeProfilePrefix"},
+					},
+				},
+			},
+		},
+		{
+			name: "Nil case",
+			fltr: nil,
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.fltr.AsMapStringInterface()
+			if !reflect.DeepEqual(utils.ToJSON(got), utils.ToJSON(tt.want)) {
+				t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(tt.want), utils.ToJSON(got))
+			}
+		})
+	}
+}
+
+func TestMapStringInterfaceToFilter(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       map[string]any
+		fltr    *Filter
+		wantErr string
+	}{
+		{
+			name: "Rules as *FilterRule",
+			m: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "FLTR_ATTR_1",
+				utils.Rules: []*FilterRule{
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Attribute",
+						Values:  []string{"AttributeProfilePrefix"},
+					},
+				},
+			},
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ATTR_1",
+				Rules:  nil,
+			},
+		},
+		{
+			name: "Rules as any",
+			m: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "FLTR_ATTR_2",
+				utils.Rules: []any{
+					map[string]any{
+						utils.Type:    utils.MetaPrefix,
+						utils.Element: "~*req.Attribute",
+						utils.Values:  []string{"AttributeProfilePrefix"},
+					},
+				},
+			},
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ATTR_2",
+				Rules: []*FilterRule{
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Attribute",
+						Values:  []string{"AttributeProfilePrefix"},
+					},
+				},
+			},
+		},
+		{
+			name: "Nil Rules",
+			m: map[string]any{
+				utils.Tenant: "cgrates.org",
+				utils.ID:     "FLTR_ATTR_3",
+				utils.Rules:  nil,
+			},
+			fltr: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ATTR_3",
+				Rules:  nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MapStringInterfaceToFilter(tt.m)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %+v, recieved %+v", tt.wantErr, err)
+			}
+			if !reflect.DeepEqual(utils.ToJSON(got), utils.ToJSON(tt.fltr)) {
+				t.Errorf("Expected %+v, recieved %+v", utils.ToJSON(tt.fltr), utils.ToJSON(got))
+			}
+		})
+	}
+}
