@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -2425,4 +2426,140 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1,`,
 		}
 	})
 
+}
+
+func TestActionPlanTimingIDPopulate(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+		"general": {
+			"log_level": 7
+		},
+		"listen": {
+			"rpc_json": ":2012",
+			"rpc_gob": ":2013",
+			"http": ":2080"
+		},
+		"apiers": {
+			"enabled": true
+		}
+	}`
+
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+	}
+	client, _ := ng.Run(t)
+
+	t.Run("SetActions", func(t *testing.T) {
+		attrs := &v1.V1AttrSetActions{
+			ActionsId: "ACT_TOPUP",
+			Actions: []*v1.V1TPAction{
+				{
+					Identifier:  utils.MetaTopUpReset,
+					BalanceType: utils.MetaMonetary,
+					Units:       10,
+					Weight:      10,
+				},
+			},
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetActions, attrs, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Fatalf("received: %s", reply)
+		}
+	})
+
+	t.Run("SetTiming", func(t *testing.T) {
+		tmg := &utils.TPTimingWithAPIOpts{
+			TPTiming: &utils.TPTiming{
+				ID:        "TIMINGID01",
+				Years:     utils.Years{2026, 2027},
+				Months:    utils.Months{1, 2, 3, 4, 5, 6},
+				MonthDays: utils.MonthDays{15, 16, 17, 18, 19, 20},
+				WeekDays:  utils.WeekDays{0, 2, 4, 6},
+				StartTime: "01:15:59",
+				EndTime:   "23:45:59",
+			},
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetTiming, tmg, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Fatalf("received: %s", reply)
+		}
+	})
+
+	t.Run("SetActionPlanWithTimingID", func(t *testing.T) {
+		atms := &engine.AttrSetActionPlan{
+			Id: "ApID1",
+			ActionPlan: []*engine.AttrActionPlan{
+				{
+					ActionsId: "ACT_TOPUP",
+					TimingID:  "TIMINGID01",
+					Time:      "02:59:59",
+					Weight:    10,
+				},
+			},
+			Overwrite: true,
+		}
+
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetActionPlan, atms, &reply); err != nil {
+			t.Fatal(err)
+		} else if reply != utils.OK {
+			t.Fatalf("received: %s", reply)
+		}
+	})
+
+	t.Run("GetActionPlanShouldUseReferencedTimingValues", func(t *testing.T) {
+		var reply []*engine.ActionPlan
+
+		if err := client.Call(context.Background(), utils.APIerSv1GetActionPlan,
+			&v1.AttrGetActionPlan{ID: "ApID1"}, &reply); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(reply) != 1 || len(reply[0].ActionTimings) != 1 {
+			t.Fatalf("unexpected ActionPlan reply: %s", utils.ToJSON(reply))
+		}
+
+		rit := reply[0].ActionTimings[0].Timing.Timing
+
+		expectedYears := utils.Years{2026, 2027}
+		if !reflect.DeepEqual(rit.Years, expectedYears) {
+			t.Errorf("expected Years %v, received %v", expectedYears, rit.Years)
+		}
+
+		expectedMonths := utils.Months{1, 2, 3, 4, 5, 6}
+		if !reflect.DeepEqual(rit.Months, expectedMonths) {
+			t.Errorf("expected Months %v, received %v", expectedMonths, rit.Months)
+		}
+
+		expectedMonthDays := utils.MonthDays{15, 16, 17, 18, 19, 20}
+		if !reflect.DeepEqual(rit.MonthDays, expectedMonthDays) {
+			t.Errorf("expected MonthDays %v, received %v", expectedMonthDays, rit.MonthDays)
+		}
+
+		expectedWeekDays := utils.WeekDays{0, 2, 4, 6}
+		if !reflect.DeepEqual(rit.WeekDays, expectedWeekDays) {
+			t.Errorf("expected WeekDays %v, received %v", expectedWeekDays, rit.WeekDays)
+		}
+
+		if rit.StartTime != "02:59:59" {
+			t.Errorf("expected StartTime 02:59:59, received: %s", rit.StartTime)
+		}
+
+		if rit.EndTime != "23:45:59" {
+			t.Errorf("expected EndTime 23:45:59, received: %s", rit.EndTime)
+		}
+	})
 }

@@ -446,10 +446,19 @@ func (attr *AttrActionPlan) GetRITiming(dm *DataManager) (timing *RITiming, err 
 		}
 	}
 	timing.ID = attr.TimingID
-	timing.Years.Parse(attr.Years, ";")
-	timing.Months.Parse(attr.Months, ";")
-	timing.MonthDays.Parse(attr.MonthDays, ";")
-	timing.WeekDays.Parse(attr.WeekDays, ";")
+	if attr.Years != utils.EmptyString {
+		timing.Years.Parse(attr.Years, ";")
+	}
+	if attr.Months != utils.EmptyString {
+		timing.Months.Parse(attr.Months, ";")
+	}
+	if attr.MonthDays != utils.EmptyString {
+		timing.MonthDays.Parse(attr.MonthDays, ";")
+	}
+	if attr.WeekDays != utils.EmptyString {
+		timing.WeekDays.Parse(attr.WeekDays, ";")
+	}
+
 	if !verifyFormat(attr.Time) {
 		err = fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), attr.Time)
 		return
