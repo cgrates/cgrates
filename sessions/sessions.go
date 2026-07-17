@@ -988,7 +988,7 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 			return
 		}
 	}
-	// ToDo: Fix here the sTerminator
+	sS.setSTerminator(ctx, s, cgrEv.APIOpts) // start termination timer
 	return
 }
 

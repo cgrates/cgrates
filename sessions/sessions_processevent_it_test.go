@@ -2404,3 +2404,147 @@ func TestSessionSv1ProcessEventStatsAndThresholds(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventSTerminator(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {"level": 7},
+"sessions": {
+	"enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	checkActiveSessions := func(t *testing.T, wantCount int) {
+		t.Helper()
+		var sessions []*ExternalSession
+		err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+			new(utils.SessionFilter), &sessions)
+		if wantCount == 0 {
+			if err != nil && err.Error() != utils.ErrNotFound.Error() {
+				t.Fatalf("GetActiveSessions unexpected error: %v", err)
+			}
+		} else if err != nil {
+			t.Fatalf("GetActiveSessions unexpected error: %v", err)
+		}
+		if len(sessions) != wantCount {
+			t.Fatalf("GetActiveSessions received %d sessions, want %d: %s",
+				len(sessions), wantCount, utils.ToIJSON(sessions))
+		}
+	}
+
+	t.Run("expiresAfterTTL", func(t *testing.T) {
+		originID := "TTLNoUpdate"
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SessInitTTL",
+				APIOpts: map[string]any{
+					utils.MetaSession:      true,
+					utils.MetaOriginID:     originID,
+					utils.OptsSesTTL:       "300ms",
+					utils.MetaInterimUsage: 10 * time.Second,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session) failed: %v", err)
+		}
+		checkActiveSessions(t, 1)
+		time.Sleep(500 * time.Millisecond)
+		checkActiveSessions(t, 0)
+	})
+
+	t.Run("sessionEventResetsTTL", func(t *testing.T) {
+		originID := "TTLReset"
+		sendSessionEvent := func(t *testing.T, evID string) {
+			t.Helper()
+			var rply V1ProcessEventReply
+			if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+				&utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     evID,
+					APIOpts: map[string]any{
+						utils.MetaSession:      true,
+						utils.MetaOriginID:     originID,
+						utils.OptsSesTTL:       "400ms",
+						utils.MetaInterimUsage: 10 * time.Second,
+					},
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Destination:  "1002",
+						utils.AnswerTime:   "2018-01-07T17:00:00Z",
+					},
+				}, &rply); err != nil {
+				t.Fatalf("ProcessEvent(*session) failed: %v", err)
+			}
+		}
+
+		sendSessionEvent(t, "createTTLReset")
+		checkActiveSessions(t, 1)
+
+		time.Sleep(250 * time.Millisecond)
+		sendSessionEvent(t, "updateTTLReset")
+		checkActiveSessions(t, 1)
+
+		time.Sleep(250 * time.Millisecond)
+		checkActiveSessions(t, 1)
+
+		time.Sleep(300 * time.Millisecond)
+		checkActiveSessions(t, 0)
+	})
+
+	t.Run("terminateStopsTTL", func(t *testing.T) {
+		originID := "TTLTerminate"
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "createTTLTerminate",
+				APIOpts: map[string]any{
+					utils.MetaSession:      true,
+					utils.MetaOriginID:     originID,
+					utils.OptsSesTTL:       "300ms",
+					utils.MetaInterimUsage: 10 * time.Second,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session) failed: %v", err)
+		}
+		checkActiveSessions(t, 1)
+
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "terminateTTLTerminate",
+				APIOpts: map[string]any{
+					utils.MetaSession:    true,
+					utils.MetaTerminate:  true,
+					utils.MetaOriginID:   originID,
+					utils.MetaTotalUsage: 5 * time.Second,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*terminate) failed: %v", err)
+		}
+		checkActiveSessions(t, 0)
+
+		time.Sleep(500 * time.Millisecond)
+		checkActiveSessions(t, 0)
+	})
+}
