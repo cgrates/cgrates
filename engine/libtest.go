@@ -277,7 +277,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheClosedSessions:              {},
 		utils.CacheLoadIDs:                     {},
 		utils.CacheRPCConnections:              {},
-		utils.CacheCDRIDs:                      {},
+		utils.CacheURIDs:                       {},
 		utils.CacheUCH:                         {},
 		utils.CacheEventCharges:                {},
 		utils.CacheReverseFilterIndexes:        {},

@@ -47,7 +47,7 @@
 					"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
 			],
 			"fields":[
-				{"tag": "*cdrID", "path": "*opts.*cdrID", "type": "*variable", "value": "~*req.opts.*cdrID", "mandatory": true},
+				{"tag": "*urID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.opts.*urID", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.event.ToR", "mandatory": true},
 				{"tag": "*originID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.opts.*originID", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.event.RequestType", "mandatory": true},

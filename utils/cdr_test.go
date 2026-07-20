@@ -127,7 +127,7 @@ func TestJSONBValue(t *testing.T) {
 	}
 }
 
-func TestGetUniqueCDRID(t *testing.T) {
+func TestGetUniqueURID(t *testing.T) {
 	{
 		cgrEv := &CGREvent{
 			APIOpts: map[string]interface{}{
@@ -135,11 +135,11 @@ func TestGetUniqueCDRID(t *testing.T) {
 			},
 		}
 
-		result := GetUniqueCDRID(cgrEv)
+		result := GetUniqueURID(cgrEv)
 
 		expected := "charge_id_123"
 		if result != expected {
-			t.Errorf("GetUniqueCDRID() returned %s, expected %s", result, expected)
+			t.Errorf("GetUniqueURID() returned %s, expected %s", result, expected)
 		}
 	}
 
@@ -150,11 +150,11 @@ func TestGetUniqueCDRID(t *testing.T) {
 			},
 		}
 
-		result := GetUniqueCDRID(cgrEv)
+		result := GetUniqueURID(cgrEv)
 
 		expected := "origin_id_456"
 		if result != expected {
-			t.Errorf("GetUniqueCDRID() returned %s, expected %s", result, expected)
+			t.Errorf("GetUniqueURID() returned %s, expected %s", result, expected)
 		}
 	}
 
@@ -163,10 +163,10 @@ func TestGetUniqueCDRID(t *testing.T) {
 			APIOpts: map[string]interface{}{},
 		}
 
-		result := GetUniqueCDRID(cgrEv)
+		result := GetUniqueURID(cgrEv)
 
 		if len(result) != 7 {
-			t.Errorf("GetUniqueCDRID() returned %s, expected a 7-character UUID prefix", result)
+			t.Errorf("GetUniqueURID() returned %s, expected a 7-character UUID prefix", result)
 		}
 	}
 }

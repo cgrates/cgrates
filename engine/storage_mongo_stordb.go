@@ -106,8 +106,8 @@ func (ms *MongoStorage) GetStorageType() string {
 }
 
 // SetCDR inserts or updates a CDR in MongoDB.
-// If a CDR with the same cdrID already exists and allowUpdate is true, it updates the existing CDR.
-// If allowUpdate is false and a CDR with the same cdrID exists, it returns an EXISTS error.
+// If a CDR with the same urID already exists and allowUpdate is true, it updates the existing CDR.
+// If allowUpdate is false and a CDR with the same urID exists, it returns an EXISTS error.
 func (ms *MongoStorage) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
 	// Assign a new order ID if it's not already set.
 	if val, has := cdr.Event[utils.OrderID]; has && val == 0 {
@@ -142,11 +142,11 @@ func (ms *MongoStorage) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowU
 				"updatedAt": currentTime,
 			}}
 
-			cdrID := utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID])
+			urID := utils.IfaceAsString(cdr.APIOpts[utils.MetaURID])
 			_, err = ms.getCol(ColCDRs).UpdateOne(
 				sctx,
 				bson.M{
-					"opts.*cdrID": cdrID,
+					"opts.*urID": urID,
 				},
 				update,
 				options.Update().SetUpsert(true),
@@ -394,7 +394,7 @@ func (ms *MongoStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 			// If the CDR passes the filters, remove it.
 			if pass {
 				_, err := ms.getCol(ColCDRs).DeleteOne(sctx, bson.M{
-					"opts.*cdrID": utils.IfaceAsString(cdr.Opts[utils.MetaCDRID]),
+					"opts.*urID": utils.IfaceAsString(cdr.Opts[utils.MetaURID]),
 				})
 				if err != nil {
 					return err

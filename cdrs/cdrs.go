@@ -353,9 +353,9 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 			cgrEv.APIOpts = make(map[string]any)
 		}
 
-		// Make sure *cdrID key exists in opts, as it's needed to identify CDRs during CRUD operations.
-		if _, ok := cgrEv.APIOpts[utils.MetaCDRID]; !ok {
-			cgrEv.APIOpts[utils.MetaCDRID] = utils.GetUniqueCDRID(cgrEv)
+		// Make sure *urID key exists in opts, as it's needed to identify CDRs during CRUD operations.
+		if _, ok := cgrEv.APIOpts[utils.MetaURID]; !ok {
+			cgrEv.APIOpts[utils.MetaURID] = utils.GetUniqueURID(cgrEv)
 		}
 
 		if err := cdrS.dm.SetCDR(ctx, cgrEv, false); err != nil {

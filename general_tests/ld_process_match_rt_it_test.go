@@ -223,7 +223,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	delete(testRPCrt1.Event.APIOpts, utils.MetaCDRID)
+	delete(testRPCrt1.Event.APIOpts, utils.MetaURID)
 	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPCrt1.Event)) {
 		t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPCrt1.Event))
 	}

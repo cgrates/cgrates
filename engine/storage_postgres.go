@@ -122,9 +122,9 @@ func (poS *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value)
 }
 
-// cdrIDQuery will query the CDR by its unique cdrID
-func (poS *PostgresStorage) cdrIDQuery(cdrID string) string {
-	return fmt.Sprintf(" opts ->> '*cdrID' = '%s'", cdrID)
+// urIDQuery will query the CDR by its unique urID
+func (poS *PostgresStorage) urIDQuery(urID string) string {
+	return fmt.Sprintf(" opts ->> '*urID' = '%s'", urID)
 }
 
 // existField will query for every element on json type if the field exists

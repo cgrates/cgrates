@@ -199,7 +199,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheEventCharges: {Limit: utils.IntPointer(0),
 				Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheCDRIDs: {Limit: utils.IntPointer(-1),
+			utils.CacheURIDs: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("10m"), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheLoadIDs: {Limit: utils.IntPointer(-1),

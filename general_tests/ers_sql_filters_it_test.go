@@ -44,13 +44,13 @@ var (
 	cdr1         = &utils.CDR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaCDRID:      utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaURID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			utils.OptsCDRsExport: false,
 			utils.MetaChargeID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			utils.MetaChargers:   true,
 			utils.MetaCost:       1.01,
 			utils.MetaOriginID:   "dsafdsaf",
-			utils.MetaRateSCost: &utils.RateProfileCost{
+			utils.MetaRatesCost: &utils.RateProfileCost{
 				Cost: utils.NewDecimalFromFloat64(2.3),
 				CostIntervals: []*utils.RateSIntervalCost{
 					{
@@ -107,17 +107,17 @@ var (
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	cdrID = utils.Sha1("oid2", timeStart.String())
-	cdr2  = &utils.CDR{ // sample with values not realisticy calculated
+	urID = utils.Sha1("oid2", timeStart.String())
+	cdr2 = &utils.CDR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaCDRID:      cdrID,
+			utils.MetaURID:       urID,
 			utils.OptsCDRsExport: false,
-			utils.MetaChargeID:   cdrID,
+			utils.MetaChargeID:   urID,
 			utils.MetaChargers:   true,
 			utils.MetaCost:       1.01,
 			utils.MetaOriginID:   "dsafdsaf",
-			utils.MetaRateSCost: &utils.RateProfileCost{
+			utils.MetaRatesCost: &utils.RateProfileCost{
 				Cost: utils.NewDecimalFromFloat64(2.3),
 				CostIntervals: []*utils.RateSIntervalCost{
 					{
@@ -177,7 +177,7 @@ var (
 	cdr3 = &utils.CDR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaCDRID:      utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaURID:       utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			utils.OptsCDRsExport: false,
 			utils.MetaChargeID:   utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			utils.MetaCost:       1.01,
@@ -503,7 +503,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cdrsProcessedSchema := "DROP TABLE IF EXISTS cdrsProcessed; CREATE TABLE cdrsProcessed ( `id` int(11) NOT NULL AUTO_INCREMENT, `tenant` VARCHAR(40) NOT NULL, `opts` JSON NOT NULL, `event` JSON NOT NULL, `created_at` TIMESTAMP NULL, `updated_at` TIMESTAMP NULL, `deleted_at` TIMESTAMP NULL,  PRIMARY KEY (`id`));ALTER TABLE cdrsProcessed ADD COLUMN cdrid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$.\"*cdrID\"') );CREATE UNIQUE INDEX opts_cdrid_idx ON cdrsProcessed (cdrid);"
+	cdrsProcessedSchema := "DROP TABLE IF EXISTS cdrsProcessed; CREATE TABLE cdrsProcessed ( `id` int(11) NOT NULL AUTO_INCREMENT, `tenant` VARCHAR(40) NOT NULL, `opts` JSON NOT NULL, `event` JSON NOT NULL, `created_at` TIMESTAMP NULL, `updated_at` TIMESTAMP NULL, `deleted_at` TIMESTAMP NULL,  PRIMARY KEY (`id`));ALTER TABLE cdrsProcessed ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$.\"*urID\"') );CREATE UNIQUE INDEX opts_urid_idx ON cdrsProcessed (urid);"
 	for qry := range strings.SplitSeq(cdrsProcessedSchema, ";") {
 		qry = strings.TrimSpace(qry)
 		if len(qry) == 0 {
@@ -637,7 +637,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 	  "eesSuccessIDs": ["SQLExporter"],
       "flags": ["*dryRun"],
       "fields": [
-        {"tag": "*cdrID", "path": "*opts.*cdrID", "type": "*variable", "value": "~*req.opts.*cdrID", "mandatory": true},
+        {"tag": "*urID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.opts.*urID", "mandatory": true},
         {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.event.ToR", "mandatory": true},
         {"tag": "*originID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.opts.*originID", "mandatory": true},
         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.event.RequestType", "mandatory": true},
@@ -648,7 +648,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
         {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.event.Destination", "mandatory": true},
         {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.event.SetupTime", "mandatory": true},
         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.event.AnswerTime", "mandatory": true},
-        {"tag": "RateSCost", "path": "*opts.*rateSCost", "type": "*variable", "value": "~*req.opts.*rateSCost", "mandatory": true},
+        {"tag": "RatesCost", "path": "*opts.*ratesCost", "type": "*variable", "value": "~*req.opts.*ratesCost", "mandatory": true},
         {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.event.Usage", "mandatory": true},
         {"tag": "ExtraInfo", "path": "*cgreq.ExtraInfo", "type": "*variable", "value": "~*req.event.ExtraInfo", "mandatory": true},
         {"tag": "ID", "path": "*cgreq.Id", "type": "*variable", "value": "~*req.id", "mandatory": true}
@@ -802,7 +802,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
       ],
       "flags": ["*dryRun"],
       "fields": [
-        {"tag": "*cdrID", "path": "*opts.*cdrID", "type": "*variable", "value": "~*req.opts.*cdrID", "mandatory": true},
+        {"tag": "*urID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.opts.*urID", "mandatory": true},
         {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.event.ToR", "mandatory": true},
         {"tag": "*originID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.opts.*originID", "mandatory": true},
         {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.event.RequestType", "mandatory": true},
@@ -813,7 +813,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
         {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.event.Destination", "mandatory": true},
         {"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.event.SetupTime", "mandatory": true},
         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.event.AnswerTime", "mandatory": true},
-        {"tag": "RateSCost", "path": "*opts.*rateSCost", "type": "*variable", "value": "~*req.opts.*rateSCost", "mandatory": true},
+        {"tag": "RatesCost", "path": "*opts.*ratesCost", "type": "*variable", "value": "~*req.opts.*ratesCost", "mandatory": true},
         {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.event.Usage", "mandatory": true}
       ]
     }

@@ -73,7 +73,7 @@ func (j JSONB) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
-func GetUniqueCDRID(cgrEv *CGREvent) string {
+func GetUniqueURID(cgrEv *CGREvent) string {
 	if chargeId, ok := cgrEv.APIOpts[MetaChargeID]; ok {
 		return IfaceAsString(chargeId)
 	}

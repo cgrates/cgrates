@@ -12,4 +12,4 @@ CREATE TABLE cdrs (
  updated_at TIMESTAMP WITH TIME ZONE NULL,
  deleted_at TIMESTAMP WITH TIME ZONE NULL
 );
-CREATE UNIQUE INDEX opts_cdrid_idx ON cdrs( (opts->>'*cdrID') );
+CREATE UNIQUE INDEX opts_urid_idx ON cdrs( (opts->>'*urID') );

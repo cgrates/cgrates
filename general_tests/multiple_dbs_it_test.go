@@ -305,7 +305,7 @@ func TestMultipleDBs(t *testing.T) {
 		exp := &utils.CDR{
 			Tenant: utils.CGRateSorg,
 			Opts: map[string]any{
-				utils.MetaCDRID:    cdrs[0].Opts[utils.MetaCDRID],
+				utils.MetaURID:     cdrs[0].Opts[utils.MetaURID],
 				utils.MetaRates:    true,
 				utils.MetaAccounts: false,
 				utils.MetaCost:     0.4,
@@ -648,7 +648,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 		exp := &utils.CDR{
 			Tenant: utils.CGRateSorg,
 			Opts: map[string]any{
-				utils.MetaCDRID:    cdrs[0].Opts[utils.MetaCDRID],
+				utils.MetaURID:     cdrs[0].Opts[utils.MetaURID],
 				utils.MetaRates:    true,
 				utils.MetaAccounts: false,
 				utils.MetaCost:     0.4,
