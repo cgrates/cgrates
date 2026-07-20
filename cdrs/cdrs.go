@@ -120,7 +120,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 }
 
 // rateSProcessEvent will send the event to rateS and attach the cost received back to event
-func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
+func (cdrS *CDRServer) ratesCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var rpCost utils.RateProfileCost
 	var conns []string
 	conns, err = engine.GetConnIDs(ctx, cdrS.cfg.CdrsCfg().Conns, utils.MetaRates, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS)
@@ -132,7 +132,7 @@ func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGRE
 		cgrEv, &rpCost); err != nil {
 		return
 	}
-	cgrEv.APIOpts[utils.MetaRateSCost] = rpCost
+	cgrEv.APIOpts[utils.MetaRatesCost] = rpCost
 	return
 }
 
@@ -277,7 +277,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		if !rateS {
 			continue
 		}
-		if err := cdrS.rateSCostForEvent(ctx, cgrEv); err != nil {
+		if err := cdrS.ratesCostForEvent(ctx, cgrEv); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%v> processing event %s with %s",
 					utils.CDRs, err, utils.ToJSON(cgrEv), utils.RateS))
@@ -453,7 +453,7 @@ func populateCost(cgrOpts map[string]any) *utils.Decimal {
 		return accCost.(*utils.EventCharges).Concretes
 	}
 	// after check in rates
-	if rtCost, has := cgrOpts[utils.MetaRateSCost]; has {
+	if rtCost, has := cgrOpts[utils.MetaRatesCost]; has {
 		return rtCost.(utils.RateProfileCost).Cost
 	}
 	return nil

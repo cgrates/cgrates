@@ -237,7 +237,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to float64")
 				}
 			case utils.Cost:
-				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				cd := getCostDetails(t, cdr, utils.MetaRatesCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}
@@ -273,7 +273,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 				}
 				got = cd[costKey].(float64)
 			case "cost":
-				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				cd := getCostDetails(t, cdr, utils.MetaRatesCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}
@@ -305,7 +305,7 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to string")
 				}
 			case utils.Cost:
-				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				cd := getCostDetails(t, cdr, utils.MetaRatesCost)
 				if cd == nil {
 					t.Fatalf("Nil costDetails")
 				}

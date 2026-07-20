@@ -1210,8 +1210,8 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ProcessEvent without *rates flag failed: %v", err)
 		}
-		if len(rply.RateSCost) != 0 {
-			t.Errorf("RateSCost should be empty without *rates flag, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) != 0 {
+			t.Errorf("RatesCost should be empty without *rates flag, got: %v", rply.RatesCost)
 		}
 	})
 
@@ -1236,12 +1236,12 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ProcessEvent with *rates flag failed: %v", err)
 		}
-		if len(rply.RateSCost) == 0 {
-			t.Fatal("RateSCost should be populated when *rates flag is set")
+		if len(rply.RatesCost) == 0 {
+			t.Fatal("RatesCost should be populated when *rates flag is set")
 		}
-		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		cost, ok := rply.RatesCost[utils.MetaPrimary]
 		if !ok {
-			t.Fatalf("expected *primary runID in RateSCost, got keys: %v", rply.RateSCost)
+			t.Fatalf("expected *primary runID in RatesCost, got keys: %v", rply.RatesCost)
 		}
 		if cost != 0.01 {
 			t.Errorf("expected cost 0.01 (1min × 0.01/min), got: %v", cost)
@@ -1379,11 +1379,11 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed without flags: %v", err)
 		}
-		if len(rply.RateSCost) > 0 {
-			t.Errorf("RateSCost should be empty without flags, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) > 0 {
+			t.Errorf("RatesCost should be empty without flags, got: %v", rply.RatesCost)
 		}
-		if len(rply.AccountSUsage) > 0 {
-			t.Errorf("AccountSUsage should be empty without flags, got: %v", rply.AccountSUsage)
+		if len(rply.AccountsUsage) > 0 {
+			t.Errorf("AccountsUsage should be empty without flags, got: %v", rply.AccountsUsage)
 		}
 	})
 
@@ -1408,17 +1408,17 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed with *accounts + *authorize: %v", err)
 		}
-		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		usage, ok := rply.AccountsUsage[utils.MetaPrimary]
 		if !ok {
-			t.Fatal("AccountSUsage missing *primary")
+			t.Fatal("AccountsUsage missing *primary")
 		}
 		wantUsage := 10 * time.Minute
 		if usage != wantUsage {
-			t.Errorf("AccountSUsage[*primary] = %v, want %v",
+			t.Errorf("AccountsUsage[*primary] = %v, want %v",
 				time.Duration(usage), time.Duration(wantUsage))
 		}
-		if len(rply.RateSCost) > 0 {
-			t.Errorf("RateSCost should be empty without *rates flag, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) > 0 {
+			t.Errorf("RatesCost should be empty without *rates flag, got: %v", rply.RatesCost)
 		}
 	})
 
@@ -1442,15 +1442,15 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed with *rates: %v", err)
 		}
-		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		cost, ok := rply.RatesCost[utils.MetaPrimary]
 		if !ok {
-			t.Fatalf("RateSCost missing *primary, got: %v", rply.RateSCost)
+			t.Fatalf("RatesCost missing *primary, got: %v", rply.RatesCost)
 		}
 		if cost != 10.0 {
-			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+			t.Errorf("RatesCost[*primary] = %g, want 10.0", cost)
 		}
-		if len(rply.AccountSUsage) > 0 {
-			t.Errorf("AccountSUsage should be empty without *accounts flag, got: %v", rply.AccountSUsage)
+		if len(rply.AccountsUsage) > 0 {
+			t.Errorf("AccountsUsage should be empty without *accounts flag, got: %v", rply.AccountsUsage)
 		}
 	})
 
@@ -1476,20 +1476,20 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed with *accounts + *authorize + *rates: %v", err)
 		}
-		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		usage, ok := rply.AccountsUsage[utils.MetaPrimary]
 		if !ok {
-			t.Fatal("AccountSUsage missing *primary")
+			t.Fatal("AccountsUsage missing *primary")
 		}
 		wantUsage := 10 * time.Minute
 		if usage != wantUsage {
-			t.Errorf("AccountSUsage[*primary] = %v, want %v", usage, wantUsage)
+			t.Errorf("AccountsUsage[*primary] = %v, want %v", usage, wantUsage)
 		}
-		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		cost, ok := rply.RatesCost[utils.MetaPrimary]
 		if !ok {
-			t.Fatal("RateSCost missing *primary")
+			t.Fatal("RatesCost missing *primary")
 		}
 		if cost != 10.0 {
-			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+			t.Errorf("RatesCost[*primary] = %g, want 10.0", cost)
 		}
 	})
 
@@ -1759,19 +1759,19 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if len(rply.RouteProfiles) == 0 {
 			t.Error("RouteProfiles should be populated")
 		}
-		cost, ok := rply.RateSCost[utils.MetaDefault]
+		cost, ok := rply.RatesCost[utils.MetaDefault]
 		if !ok {
-			t.Fatalf("RateSCost missing *default, got: %v", rply.RateSCost)
+			t.Fatalf("RatesCost missing *default, got: %v", rply.RatesCost)
 		}
 		if cost != 10.0 {
-			t.Errorf("RateSCost[*default] = %g, want 10.0", cost)
+			t.Errorf("RatesCost[*default] = %g, want 10.0", cost)
 		}
-		usage, ok := rply.AccountSUsage[utils.MetaDefault]
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
 		if !ok {
-			t.Fatalf("AccountSUsage missing *default, got: %v", rply.AccountSUsage)
+			t.Fatalf("AccountsUsage missing *default, got: %v", rply.AccountsUsage)
 		}
 		if usage != 10*time.Minute {
-			t.Errorf("AccountSUsage[*default] = %v, want %v", usage, 10*time.Minute)
+			t.Errorf("AccountsUsage[*default] = %v, want %v", usage, 10*time.Minute)
 		}
 		resID, ok := rply.ResourceAllocation[utils.MetaDefault]
 		if !ok {
@@ -2011,12 +2011,12 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent with *rates+*ees failed: %v", err)
 		}
-		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		cost, ok := rply.RatesCost[utils.MetaPrimary]
 		if !ok {
-			t.Fatalf("RateSCost missing *primary, got: %v", rply.RateSCost)
+			t.Fatalf("RatesCost missing *primary, got: %v", rply.RatesCost)
 		}
 		if cost != 10.0 {
-			t.Errorf("RateSCost[*primary] = %g, want 10.0", cost)
+			t.Errorf("RatesCost[*primary] = %g, want 10.0", cost)
 		}
 		if len(rply.EventExporters) == 0 {
 			t.Fatal("EventExporters should not be empty with *ees flag")
@@ -2050,19 +2050,19 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent with *accounts+*authorize+*rates+*ees failed: %v", err)
 		}
-		usage, ok := rply.AccountSUsage[utils.MetaPrimary]
+		usage, ok := rply.AccountsUsage[utils.MetaPrimary]
 		if !ok {
-			t.Fatalf("AccountSUsage missing *default, got: %v", rply.AccountSUsage)
+			t.Fatalf("AccountsUsage missing *default, got: %v", rply.AccountsUsage)
 		}
 		if usage != 10*time.Minute {
-			t.Errorf("AccountSUsage[*default] = %v, want %v", usage, 10*time.Minute)
+			t.Errorf("AccountsUsage[*default] = %v, want %v", usage, 10*time.Minute)
 		}
-		cost, ok := rply.RateSCost[utils.MetaPrimary]
+		cost, ok := rply.RatesCost[utils.MetaPrimary]
 		if !ok {
-			t.Fatalf("RateSCost missing *default, got: %v", rply.RateSCost)
+			t.Fatalf("RatesCost missing *default, got: %v", rply.RatesCost)
 		}
 		if cost != 10.0 {
-			t.Errorf("RateSCost[*default] = %g, want 10.0", cost)
+			t.Errorf("RatesCost[*default] = %g, want 10.0", cost)
 		}
 		if len(rply.EventExporters) == 0 {
 			t.Fatal("EventExporters should not be empty with *ees flag")

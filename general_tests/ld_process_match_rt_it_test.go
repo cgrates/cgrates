@@ -170,7 +170,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if testRPCrt1.Event == nil {
 		t.Fatal("The rpc was not called")
 	}
-	costIntervalRatesID := testRPCrt1.Event.APIOpts[utils.MetaRateSCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"]
+	costIntervalRatesID := testRPCrt1.Event.APIOpts[utils.MetaRatesCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"]
 	expected2 := &utils.CGREventWithEeIDs{
 		EeIDs: nil,
 		CGREvent: &utils.CGREvent{
@@ -187,7 +187,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 			},
 			APIOpts: map[string]any{
 				utils.MetaCost: 0.4,
-				utils.MetaRateSCost: map[string]any{
+				utils.MetaRatesCost: map[string]any{
 					"Altered":  nil,
 					utils.Cost: 0.4,
 					"CostIntervals": []map[string]any{

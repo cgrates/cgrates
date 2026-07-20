@@ -101,7 +101,7 @@ func TestOpenSIPSCDR(t *testing.T) {
 	costByDst := make(map[string]float64)
 	for _, cdr := range cdrs {
 		dst, _ := cdr.Event[utils.Destination].(string)
-		cost := cdrCostFloat(t, cdr, utils.MetaRateSCost, "Cost")
+		cost := cdrCostFloat(t, cdr, utils.MetaRatesCost, "Cost")
 		if cost <= 0 {
 			t.Errorf("cdr %s: non-positive rates cost %v: %s", dst, cost, utils.ToJSON(cdr))
 		}

@@ -84,8 +84,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed without rates flag: %v", err)
 		}
-		if len(rply.RateSCost) > 0 {
-			t.Errorf("RateSCost should be empty without *rates flag, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) > 0 {
+			t.Errorf("RatesCost should be empty without *rates flag, got: %v", rply.RatesCost)
 		}
 	})
 
@@ -110,16 +110,16 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed with *rates flag: %v", err)
 		}
-		if rply.RateSCost == nil {
-			t.Fatal("RateSCost should not be nil with *rates flag")
+		if rply.RatesCost == nil {
+			t.Fatal("RatesCost should not be nil with *rates flag")
 		}
-		cost, exists := rply.RateSCost[utils.MetaPrimary]
+		cost, exists := rply.RatesCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RatesCost entry for *primary runID, got: %v", rply.RatesCost)
 		}
 		const wantCost = 1.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
+			t.Errorf("RatesCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 
@@ -144,16 +144,16 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if rply.RateSCost == nil {
-			t.Fatal("RateSCost should not be nil")
+		if rply.RatesCost == nil {
+			t.Fatal("RatesCost should not be nil")
 		}
-		cost, exists := rply.RateSCost[utils.MetaPrimary]
+		cost, exists := rply.RatesCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RatesCost entry for *primary runID, got: %v", rply.RatesCost)
 		}
 		const wantCost = 2.0
 		if cost != wantCost {
-			t.Errorf("RateSCost[*primary] = %g, want %g", cost, wantCost)
+			t.Errorf("RatesCost[*primary] = %g, want %g", cost, wantCost)
 		}
 	})
 
@@ -178,8 +178,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 		if err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if len(rply.RateSCost) > 0 {
-			t.Errorf("RateSCost should be empty when *rates=false, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) > 0 {
+			t.Errorf("RatesCost should be empty when *rates=false, got: %v", rply.RatesCost)
 		}
 	})
 

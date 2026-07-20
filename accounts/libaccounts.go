@@ -109,8 +109,8 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	return &tmpReply, nil
 }
 
-// rateSCostForEvent will process the event with RateS in order to get the cost
-func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+// ratesCostForEvent will process the event with RateS in order to get the cost
+func ratesCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	rateSConns, rpIDs []string) (_ *utils.RateProfileCost, err error) {
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
@@ -245,7 +245,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			var rplyCost *utils.RateProfileCost
 			cgrEv.APIOpts[utils.OptsRatesIntervalStart] = dbtedAUnts
 			cgrEv.APIOpts[utils.OptsRatesUsage] = aUnits
-			if rplyCost, err = rateSCostForEvent(ctx, connMgr, cgrEv, rateSConns, rpIDs); err != nil {
+			if rplyCost, err = ratesCostForEvent(ctx, connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 				err = utils.NewErrRateS(err)
 				return
 			}

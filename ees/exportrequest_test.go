@@ -1097,7 +1097,7 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 			Type:    utils.MetaConstant,
 			Value:   utils.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
 			Path:    "*cgreq.ToR",
-			Filters: []string{"*gt:~*opts.*rateSCost.Cost:0.5"},
+			Filters: []string{"*gt:~*opts.*ratesCost.Cost:0.5"},
 		},
 	}
 
