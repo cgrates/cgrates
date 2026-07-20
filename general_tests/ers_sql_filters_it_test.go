@@ -225,7 +225,7 @@ func getDBCfg(t *testing.T) engine.DBCfg {
 	return engine.DBCfg{}
 }
 
-func openTestDB(t *testing.T, cdrs ...*utils.CDR) *gorm.DB {
+func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.CDR) *gorm.DB {
 	t.Helper()
 
 	cdb, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
@@ -233,7 +233,7 @@ func openTestDB(t *testing.T, cdrs ...*utils.CDR) *gorm.DB {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = cdb.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
+	if err = cdb.Exec(`CREATE DATABASE IF NOT EXISTS ` + dbName + `;`).Error; err != nil {
 		t.Fatal(err)
 	}
 	sqlCDB, err := cdb.DB()
@@ -242,15 +242,20 @@ func openTestDB(t *testing.T, cdrs ...*utils.CDR) *gorm.DB {
 	}
 	sqlCDB.SetConnMaxLifetime(5 * time.Second)
 
-	db, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, dbName)),
 		&gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fileContent, err := os.ReadFile("/usr/share/cgrates/storage/mysql/create_cdrs_tables.sql")
-	if err != nil {
-		t.Fatal(err)
+	var fileContent string
+	if tableName == utils.CDRsTBL {
+		fileContentByte, err := os.ReadFile("/usr/share/cgrates/storage/mysql/create_cdrs_tables.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+		fileContent = string(fileContentByte)
+	} else {
+		fileContent = fmt.Sprintf("DROP TABLE IF EXISTS %v;\nCREATE TABLE %v (\n `id` int(11) NOT NULL AUTO_INCREMENT,\n `tenant` VARCHAR(40) NOT NULL,\n `opts` JSON NOT NULL,\n `event` JSON NOT NULL,\n `created_at` TIMESTAMP NULL,\n `updated_at` TIMESTAMP NULL,\n `deleted_at` TIMESTAMP NULL,\n  PRIMARY KEY (`id`)\n);\nALTER TABLE %v ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$.\"*urID\"') );\nCREATE UNIQUE INDEX opts_urid_idx ON %v (urid);", tableName, tableName, tableName, tableName)
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -267,7 +272,7 @@ func openTestDB(t *testing.T, cdrs ...*utils.CDR) *gorm.DB {
 	}
 
 	tx := db.Begin()
-	tx = tx.Table(utils.CDRsTBL)
+	tx = tx.Table(tableName)
 	for _, cdr := range cdrs {
 		if err := tx.Save(&utils.CDRSQLTable{
 			Tenant:    cdr.Tenant,
@@ -285,14 +290,14 @@ func openTestDB(t *testing.T, cdrs ...*utils.CDR) *gorm.DB {
 	time.Sleep(10 * time.Millisecond)
 
 	var count int64
-	db.Table(utils.CDRsTBL).Count(&count)
+	db.Table(tableName).Count(&count)
 	if count != int64(len(cdrs)) {
 		t.Fatalf("expected %d rows in cdrs, got %d", len(cdrs), count)
 	}
 
 	t.Cleanup(func() {
 		_ = db.Migrator().DropTable("cdrs")
-		_ = db.Exec(`DROP DATABASE cgrates2;`).Error
+		_ = db.Exec(`DROP DATABASE IF EXISTS ` + dbName + `;`).Error
 		if d, err := db.DB(); err == nil {
 			_ = d.Close()
 		}
@@ -329,7 +334,7 @@ func waitFor(t *testing.T, check func() bool, msg string, timeout time.Duration)
 	}
 }
 
-func waitForERsLog(t *testing.T, buf *bytes.Buffer, substr string, timeout time.Duration) {
+func waitForLog(t *testing.T, buf *bytes.Buffer, substr string, timeout time.Duration) {
 	t.Helper()
 	waitFor(t,
 		func() bool { return strings.Contains(buf.String(), substr) },
@@ -384,7 +389,7 @@ func assertNoRateID2(t *testing.T, db *gorm.DB) {
 }
 
 func TestERSSQLFilters(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -397,7 +402,7 @@ func TestERSSQLFilters(t *testing.T) {
 	}
 	ng.Run(t)
 
-	waitForERsLog(t, buf, ersDryRunMySQL, 2*time.Second)
+	waitForLog(t, buf, ersDryRunMySQL, 2*time.Second)
 	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}
@@ -411,7 +416,7 @@ func TestERSSQLFilters(t *testing.T) {
 }
 
 func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -454,7 +459,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 }
 
 func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -496,7 +501,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 }
 
 func TestERSSQLFiltersMove(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	// Create cdrsProcessed table for the move target.
 	sqlDB, err := db.DB()
@@ -600,7 +605,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 }
 
 func TestERSSQLFiltersUpdate(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -691,7 +696,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 }
 
 func TestERSSQLFiltersRawUpdate(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -763,7 +768,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 }
 
 func TestERSSQLFiltersErr(t *testing.T) {
-	_ = openTestDB(t, cdr1, cdr2, cdr3)
+	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	jsonCfg := `{
 "general": {
@@ -833,13 +838,13 @@ func TestERSSQLFiltersErr(t *testing.T) {
 	ng.Run(t)
 
 	errLine := `[ERROR] <ERs> error: <value of filter <*notempty:~*vars.*readerID:''> is not empty <''>>`
-	waitForERsLog(t, buf, errLine, 2*time.Second)
+	waitForLog(t, buf, errLine, 2*time.Second)
 }
 
 // TestERSSQLFilterUnquote checks that JSON_UNQUOTE wraps only JSON_VALUE,
 // not the whole comparison (which produces invalid SQL on MySQL 8).
 func TestERSSQLFilterUnquote(t *testing.T) {
-	_ = openTestDB(t, cdr2)
+	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdr2)
 
 	jsonCfg := `{
 "general": {
@@ -893,7 +898,7 @@ func TestERSSQLFilterUnquote(t *testing.T) {
 	}
 	ng.Run(t)
 
-	waitForERsLog(t, buf, ersDryRunMySQL, 2*time.Second)
+	waitForLog(t, buf, ersDryRunMySQL, 2*time.Second)
 	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}
@@ -926,7 +931,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 			"EmptyField":       "not_empty",
 		},
 	}
-	_ = openTestDB(t, cdrWithEmpty, cdrWithoutEmpty)
+	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdrWithEmpty, cdrWithoutEmpty)
 
 	jsonCfg := `{
 "general": {
@@ -978,7 +983,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 	}
 	ng.Run(t)
 
-	waitForERsLog(t, buf, ersDryRunMySQL, 2*time.Second)
+	waitForLog(t, buf, ersDryRunMySQL, 2*time.Second)
 	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}

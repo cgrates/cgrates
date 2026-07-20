@@ -148,10 +148,10 @@ func TestMultipleDBs(t *testing.T) {
 			&utils.ArgsItemIDs{
 				Tenant: "cgrates.org",
 			}, &acnts); err != nil {
-			t.Errorf("AdminSv2GetAccounts failed unexpectedly: %v", err)
+			t.Errorf("AdminSv1GetAccounts failed unexpectedly: %v", err)
 		}
 		if len(acnts) != 2 {
-			t.Fatalf("AdminSv2GetAccounts len(acnts)=%v, want 2", len(acnts))
+			t.Fatalf("AdminSv1GetAccounts len(acnts)=%v, want 2", len(acnts))
 		}
 		sort.Slice(acnts, func(i, j int) bool {
 			return acnts[i].ID > acnts[j].ID
@@ -491,10 +491,10 @@ func TestMultipleDBsMongo(t *testing.T) {
 			&utils.ArgsItemIDs{
 				Tenant: "cgrates.org",
 			}, &acnts); err != nil {
-			t.Errorf("AdminSv2GetAccounts failed unexpectedly: %v", err)
+			t.Errorf("AdminSv1GetAccounts failed unexpectedly: %v", err)
 		}
 		if len(acnts) != 2 {
-			t.Fatalf("AdminSv2GetAccounts len(acnts)=%v, want 2", len(acnts))
+			t.Fatalf("AdminSv1GetAccounts len(acnts)=%v, want 2", len(acnts))
 		}
 		sort.Slice(acnts, func(i, j int) bool {
 			return acnts[i].ID > acnts[j].ID
