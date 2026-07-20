@@ -1126,13 +1126,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
 						utils.SessionS, err.Error(), cgrEv, utils.RateS))
 			} else {
-				if apiRply.RateSCost == nil {
-					apiRply.RateSCost = make(map[string]float64)
+				if apiRply.RatesCost == nil {
+					apiRply.RatesCost = make(map[string]float64)
 				}
 				costFlt, _ := rtsCost.Cost.Float64()
-				apiRply.RateSCost[runID] = costFlt
+				apiRply.RatesCost[runID] = costFlt
 				if s == nil || utils.OptAsBool(cch, utils.MetaTerminate) {
-					cgrEv.APIOpts[utils.MetaRateSCost] = rtsCost
+					cgrEv.APIOpts[utils.MetaRatesCost] = rtsCost
 				}
 			}
 		}
@@ -1303,10 +1303,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
 			} else {
 				maxDur, _ := acntCost.Abstracts.Duration()
-				if apiRply.AccountSUsage == nil {
-					apiRply.AccountSUsage = make(map[string]time.Duration)
+				if apiRply.AccountsUsage == nil {
+					apiRply.AccountsUsage = make(map[string]time.Duration)
 				}
-				apiRply.AccountSUsage[runID] = maxDur
+				apiRply.AccountsUsage[runID] = maxDur
 				if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
 					cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
 				}
@@ -1386,17 +1386,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
 			}
 			maxDur, _ := acntDbt.Duration()
-			if apiRply.AccountSUsage == nil {
-				apiRply.AccountSUsage = make(map[string]time.Duration)
+			if apiRply.AccountsUsage == nil {
+				apiRply.AccountsUsage = make(map[string]time.Duration)
 			}
-			apiRply.AccountSUsage[runID] = maxDur
+			apiRply.AccountsUsage[runID] = maxDur
 			if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
 				cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
 			}
 		}
 
 	}
-
 	if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil {
 		if errTerminate := sS.terminateSessionNew(ctx, s); errTerminate != nil {
 			return errTerminate
@@ -1407,9 +1406,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cchEv := make(map[string]any)
 
 		if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil { // terminate corrections
-			if _, has := apiRply.AccountSUsage[runID]; has { // correct usage to reflect total usage instead of interm one
+			if _, has := apiRply.AccountsUsage[runID]; has { // correct usage to reflect total usage instead of interm one
 				totalUsage, _ := s.sRuns[runID].TotalUsage.Duration()
-				apiRply.AccountSUsage[runID] = totalUsage
+				apiRply.AccountsUsage[runID] = totalUsage
 			}
 		}
 		// UsageRecords generation

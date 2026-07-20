@@ -57,7 +57,7 @@ func TestRatesCostFiltering(t *testing.T) {
 				"Usage":       60000000000,
 			},
 			APIOpts: map[string]any{
-				utils.MetaRateSCost: map[string]any{
+				utils.MetaRatesCost: map[string]any{
 					utils.Cost: 0.4,
 					"CostIntervals": []map[string]any{
 						{
@@ -89,22 +89,22 @@ func TestRatesCostFiltering(t *testing.T) {
 		},
 	}
 	cgrDP := cgrEv.AsDataProvider()
-	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*rateSCost.Cost:0"}, cgrDP); err != nil {
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*ratesCost.Cost:0"}, cgrDP); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expected to pass")
 	}
-	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*rateSCost.Cost:0.5"}, cgrDP); err != nil {
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*ratesCost.Cost:0.5"}, cgrDP); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expected to fail")
 	}
-	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*string:~*opts.*rateSCost.CostIntervals[0].Increments[0].RateID:Rate1"}, cgrDP); err != nil {
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*string:~*opts.*ratesCost.CostIntervals[0].Increments[0].RateID:Rate1"}, cgrDP); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expected to pass")
 	}
-	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*eq:~*opts.*rateSCost.Rates[Rate1].RecurrentFee:0.4"}, cgrDP); err != nil {
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*eq:~*opts.*ratesCost.Rates[Rate1].RecurrentFee:0.4"}, cgrDP); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expected to pass")
@@ -2988,31 +2988,31 @@ func TestFilterToSQLQuery(t *testing.T) {
 			name: "*eq with *-prefixed JSON path uses UNQUOTE only around JSON_VALUE",
 			fltr: FilterRule{
 				Type:    utils.MetaEqual,
-				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+				Element: "~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID",
 				Values:  []string{"RateID2"},
 			},
 			expected: []string{
-				`JSON_UNQUOTE(JSON_VALUE(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) = 'RateID2'`,
+				`JSON_UNQUOTE(JSON_VALUE(opts, '$."*ratesCost".CostIntervals[0].Increments[0].RateID')) = 'RateID2'`,
 			},
 		},
 		{
 			name: "*notexists with *-prefixed path",
 			fltr: FilterRule{
 				Type:    utils.MetaNotExists,
-				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+				Element: "~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID",
 			},
 			expected: []string{
-				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) IS NULL`,
+				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*ratesCost".CostIntervals[0].Increments[0].RateID')) IS NULL`,
 			},
 		},
 		{
 			name: "*empty with *-prefixed path uses JSON_EXTRACT for MariaDB compat",
 			fltr: FilterRule{
 				Type:    utils.MetaEmpty,
-				Element: "~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID",
+				Element: "~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID",
 			},
 			expected: []string{
-				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*rateSCost".CostIntervals[0].Increments[0].RateID')) = ''`,
+				`JSON_UNQUOTE(JSON_EXTRACT(opts, '$."*ratesCost".CostIntervals[0].Increments[0].RateID')) = ''`,
 			},
 		},
 		{

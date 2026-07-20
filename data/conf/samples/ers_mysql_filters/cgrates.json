@@ -42,7 +42,7 @@
 			"tenant": "cgrates.org",
 			"filters": [
 					"*gt:~*req.event.AnswerTime:-168h", // dont process cdrs with answer_time older than 7 days ago
-					"FLTR_SQL_RatingID", // "*eq:~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID:RateID",
+					"FLTR_SQL_RatingID", // "*eq:~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID:RateID",
 					"*string:~*vars.*readerID:mysql",
 					"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
 			],
@@ -58,7 +58,7 @@
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.event.Destination", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.event.SetupTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.event.AnswerTime", "mandatory": true},
-				{"tag": "RateSCost", "path": "*opts.*rateSCost", "type": "*variable", "value": "~*req.opts.*rateSCost", "mandatory": true},
+				{"tag": "RatesCost", "path": "*opts.*ratesCost", "type": "*variable", "value": "~*req.opts.*ratesCost", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.event.Usage", "mandatory": true},
 			]
 		}

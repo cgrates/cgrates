@@ -158,7 +158,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 	}
 }
 
-func TestCDRsRateSCostForEventErr(t *testing.T) {
+func TestCDRsRatesCostForEventErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 
@@ -187,7 +187,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
-	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
+	err := newCDRSrv.ratesCostForEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
@@ -702,7 +702,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.MetaSubsys: utils.MetaRates,
 		},
 	}
-	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
+	err := newCDRSrv.ratesCostForEvent(context.Background(), cgrEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
@@ -720,7 +720,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]any{
-			utils.MetaRateSCost: utils.RateProfileCost{},
+			utils.MetaRatesCost: utils.RateProfileCost{},
 			utils.MetaSubsys:    utils.MetaRates,
 		},
 	}
@@ -2127,7 +2127,7 @@ func TestPopulateCost(t *testing.T) {
 		},
 		APIOpts: map[string]any{
 
-			utils.MetaRateSCost: utils.RateProfileCost{
+			utils.MetaRatesCost: utils.RateProfileCost{
 
 				Cost: utils.NewDecimal(400, 0),
 			},

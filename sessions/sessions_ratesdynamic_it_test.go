@@ -97,17 +97,17 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
 
-		if rply.RateSCost == nil {
-			t.Fatal("RateSCost should not be nil when dynamic filter matches")
+		if rply.RatesCost == nil {
+			t.Fatal("RatesCost should not be nil when dynamic filter matches")
 		}
 
-		cost, exists := rply.RateSCost[utils.MetaPrimary]
+		cost, exists := rply.RatesCost[utils.MetaPrimary]
 		if !exists {
-			t.Fatalf("no RateSCost entry for *primary runID, got: %v", rply.RateSCost)
+			t.Fatalf("no RatesCost entry for *primary runID, got: %v", rply.RatesCost)
 		}
 
 		if cost != 1.0 {
-			t.Errorf("RateSCost[*primary] = %g, want 1.0", cost)
+			t.Errorf("RatesCost[*primary] = %g, want 1.0", cost)
 		}
 	})
 
@@ -131,8 +131,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
 
-		if len(rply.RateSCost) > 0 {
-			t.Errorf("RateSCost should be empty when filter does not match, got: %v", rply.RateSCost)
+		if len(rply.RatesCost) > 0 {
+			t.Errorf("RatesCost should be empty when filter does not match, got: %v", rply.RatesCost)
 		}
 	})
 }

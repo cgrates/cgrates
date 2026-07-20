@@ -95,7 +95,7 @@ func composeMongoURI(scheme, host, port, db, user, pass string) string {
 	return uri
 }
 
-// checkNestedFields checks if there are elements or values nested (e.g *opts.*rateSCost.Cost)
+// checkNestedFields checks if there are elements or values nested (e.g *opts.*ratesCost.Cost)
 func checkNestedFields(elem string, values []string) bool {
 	if len(strings.Split(elem, utils.NestingSep)) > 2 {
 		return true

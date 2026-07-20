@@ -815,7 +815,7 @@ const (
 	MetaRadCoATemplate      = "*radCoATemplate"
 	MetaRadDMRTemplate      = "*radDMRTemplate"
 	MetaCost                = "*cost"
-	MetaRateSCost           = "*rateSCost"
+	MetaRatesCost           = "*ratesCost"
 	MetaAccountsCost        = "*accountsCost"
 	MetaGroup               = "*group"
 	MetaFileName            = "*fileName"

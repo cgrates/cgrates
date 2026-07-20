@@ -120,7 +120,7 @@ func TestKamailioLCR(t *testing.T) {
 			t.Errorf("cdr %s rate profiles = %v, want %s", dst, rateProfileIDs, wantRateProfile)
 		}
 		accountCost := cdrCostFloat(t, cdr, utils.MetaAccountsCost, "Concretes")
-		rateCost := cdrCostFloat(t, cdr, utils.MetaRateSCost, "Cost")
+		rateCost := cdrCostFloat(t, cdr, utils.MetaRatesCost, "Cost")
 		if accountCost <= 0 || rateCost <= 0 {
 			t.Errorf("cdr %s missing cost: accountsCost=%v ratesCost=%v", dst, accountCost, rateCost)
 			continue

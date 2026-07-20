@@ -309,7 +309,7 @@ func TestMultipleDBs(t *testing.T) {
 				utils.MetaRates:    true,
 				utils.MetaAccounts: false,
 				utils.MetaCost:     0.4,
-				utils.MetaRateSCost: map[string]any{
+				utils.MetaRatesCost: map[string]any{
 					"Altered":  nil,
 					utils.Cost: 0.4,
 					"CostIntervals": []any{
@@ -318,7 +318,7 @@ func TestMultipleDBs(t *testing.T) {
 							"Increments": []any{
 								map[string]any{
 									"CompressFactor":    2,
-									"RateID":            cdrs[0].Opts[utils.MetaRateSCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"],
+									"RateID":            cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"],
 									"RateIntervalIndex": 0,
 									"Usage":             6e+10,
 								},
@@ -329,7 +329,7 @@ func TestMultipleDBs(t *testing.T) {
 					"MaxCost":         0,
 					"MaxCostStrategy": "",
 					"MinCost":         0,
-					"Rates":           cdrs[0].Opts[utils.MetaRateSCost].(map[string]any)["Rates"],
+					"Rates":           cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["Rates"],
 				},
 			},
 			Event: map[string]any{
@@ -652,7 +652,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 				utils.MetaRates:    true,
 				utils.MetaAccounts: false,
 				utils.MetaCost:     0.4,
-				utils.MetaRateSCost: map[string]any{
+				utils.MetaRatesCost: map[string]any{
 					"altered": nil,
 					"cost":    0.4,
 					"costintervals": []any{
@@ -661,7 +661,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 							"increments": []any{
 								map[string]any{
 									"compressfactor":    2,
-									"rateid":            cdrs[0].Opts[utils.MetaRateSCost].(map[string]any)["costintervals"].([]any)[0].(map[string]any)["increments"].([]any)[0].(map[string]any)["rateid"],
+									"rateid":            cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["costintervals"].([]any)[0].(map[string]any)["increments"].([]any)[0].(map[string]any)["rateid"],
 									"rateintervalindex": 0,
 									"usage":             6e+10,
 								},
@@ -672,7 +672,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 					"maxcost":         0,
 					"maxcoststrategy": "",
 					"mincost":         0,
-					"rates":           cdrs[0].Opts[utils.MetaRateSCost].(map[string]any)["rates"],
+					"rates":           cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["rates"],
 				},
 			},
 			Event: map[string]any{

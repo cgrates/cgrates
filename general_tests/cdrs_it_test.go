@@ -190,8 +190,8 @@ func testCDRsProcessCDR(t *testing.T) {
 			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
 				reply[0].Event["PayPalAccount"])
 		}
-		if reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
-			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost])
+		if reply[1].Opts[utils.MetaRatesCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
+			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRatesCost].(map[string]any)[utils.Cost])
 		}
 		if reply[1].Event["PayPalAccount"] != "paypal@cgrates.org" {
 			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
@@ -243,8 +243,8 @@ func testCDRsProcessCDR2(t *testing.T) {
 			t.Errorf("PayPalAccount should NOT be added by AttributeS, have: %s",
 				reply[0].Event["PayPalAccount"])
 		}
-		if reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
-			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost])
+		if reply[1].Opts[utils.MetaRatesCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
+			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRatesCost].(map[string]any)[utils.Cost])
 		}
 		//we disable the connection to AttributeS and PayPalAccount shouldn't be present
 		if _, has := reply[1].Event["PayPalAccount"]; has {

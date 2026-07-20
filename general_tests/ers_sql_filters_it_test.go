@@ -207,7 +207,7 @@ var (
 
 	sqlFilterTPFiles = map[string]string{
 		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Path[3],Values[4]
-cgrates.org,FLTR_SQL_RatingID,*eq,~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID,RateID2
+cgrates.org,FLTR_SQL_RatingID,*eq,~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID,RateID2
 cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql`,
 	}
 )

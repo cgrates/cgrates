@@ -134,7 +134,7 @@ func TestProcessAttributeS(t *testing.T) {
 	}
 }
 
-func TestRateSCostForEvent(t *testing.T) { // coverage purpose
+func TestRatesCostForEvent(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
 
 	sTestMock := &testMockCall{
@@ -158,12 +158,12 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
-	if _, err := rateSCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
+	if _, err := ratesCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
 
-func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
+func TestRatesCostForEvent2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
 
 	sTestMock := &testMockCall{
@@ -197,7 +197,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
-	if _, err := rateSCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err != nil {
+	if _, err := ratesCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err != nil {
 		t.Error(err)
 	}
 }
