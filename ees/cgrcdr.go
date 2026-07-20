@@ -169,7 +169,11 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 			return updTx.Error
 		}
 		if uerr := updTx.Table(cgr.tableName).Where(cgr.urIDQuery(urID)).Updates(
-			utils.CDRSQLTable{Opts: cgrEv.APIOpts, Event: cgrEv.Event, UpdatedAt: time.Now()}).Error; uerr != nil {
+			utils.CDRSQLTable{
+				Opts:      cgrEv.APIOpts,
+				Event:     cgrEv.Event,
+				UpdatedAt: time.Now(),
+			}).Error; uerr != nil {
 			updTx.Rollback()
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> updating CDR %s",
@@ -180,6 +184,11 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 		return nil
 	}
 	tx.Commit()
+	if cgr.Cfg().Flags.GetBool(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, exporter <%s>, message: %s",
+				utils.EEs, cgr.Cfg().ID, utils.ToIJSON(cgrEv)))
+	}
 	return nil
 }
 
