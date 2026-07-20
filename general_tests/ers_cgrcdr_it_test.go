@@ -52,8 +52,7 @@ func expectedCDREvent() map[string]any {
 
 }
 func TestERSCgrCDRFilters(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
-
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
 		ConfigJSON: `{
@@ -87,7 +86,7 @@ func TestERSCgrCDRFilters(t *testing.T) {
 	}
 	ng.Run(t)
 
-	waitForERsLog(t, buf, ersDryRunCgrCDR, 2*time.Second)
+	waitForLog(t, buf, ersDryRunCgrCDR, 2*time.Second)
 	if got := strings.Count(buf.String(), ersDryRunCgrCDR); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}
@@ -102,7 +101,7 @@ func TestERSCgrCDRFilters(t *testing.T) {
 }
 
 func TestERSCgrCDRFiltersDelete(t *testing.T) {
-	db := openTestDB(t, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{

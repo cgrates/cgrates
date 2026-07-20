@@ -323,10 +323,10 @@ func TestOfflineInternal(t *testing.T) {
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",
 					}, &acnts); err != nil {
-					t.Errorf("AdminSv2GetAccounts failed unexpectedly: %v", err)
+					t.Errorf("AdminSv1GetAccounts failed unexpectedly: %v", err)
 				}
 				if len(acnts) != 2 {
-					t.Fatalf("AdminSv2GetAccounts len(acnts)=%v, want 2", len(acnts))
+					t.Fatalf("AdminSv1GetAccounts len(acnts)=%v, want 2", len(acnts))
 				}
 				sort.Slice(acnts, func(i, j int) bool {
 					return acnts[i].ID > acnts[j].ID
@@ -624,10 +624,10 @@ func TestOfflineInternal(t *testing.T) {
 					&utils.ArgsItemIDs{
 						Tenant: "cgrates.org",
 					}, &rcv); err != nil {
-					t.Errorf("AdminSv2GetAccounts failed unexpectedly: %v", err)
+					t.Errorf("AdminSv1GetAccounts failed unexpectedly: %v", err)
 				}
 				if len(rcv) != 2 {
-					t.Fatalf("AdminSv2GetAccounts len(rcv)=%v, want 2", len(rcv))
+					t.Fatalf("AdminSv1GetAccounts len(rcv)=%v, want 2", len(rcv))
 				}
 				sort.Slice(rcv, func(i, j int) bool {
 					return rcv[i].ID > rcv[j].ID
