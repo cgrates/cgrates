@@ -38,7 +38,7 @@ type SQLImpl interface {
 	notExtraFieldsExistsQry(string) string
 	notExtraFieldsValueQry(string, string) string
 	valueQry(string, string, string, []string, bool) []string // will query for every type of filtering in case of needed
-	cdrIDQuery(string) string                                 // will get the unique *cdrID for every CDR
+	urIDQuery(string) string                                  // will get the unique *urID for every CDR
 	existField(string, string) string                         // will query for every element on json type if the field exists
 }
 
@@ -286,9 +286,9 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 			return tx.Error
 		}
 
-		cdrID := utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID])
+		urID := utils.IfaceAsString(cdr.APIOpts[utils.MetaURID])
 		updated := tx.Model(&utils.CDRSQLTable{}).Where(
-			sqls.cdrIDQuery(cdrID)).Updates(
+			sqls.urIDQuery(urID)).Updates(
 			utils.CDRSQLTable{Opts: cdr.APIOpts, Event: cdr.Event, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
@@ -434,7 +434,7 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	}
 	// keep the result for quering with other filter type that are not allowed in database
 	q = sqls.db.Table(utils.CDRsTBL)          // reset the query
-	remCdr := make([]string, 0, len(results)) // we will keep the *cdrID of every CDR taht matched the those filters
+	remCdr := make([]string, 0, len(results)) // we will keep the *urID of every CDR taht matched the those filters
 	for _, cdr := range results {
 		if len(excludedCdrQueryFilterTypes) != 0 {
 			newCdr := &utils.CDR{
@@ -453,8 +453,8 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 				}
 			}
 			if pass {
-				// if the filters passed, remove the CDR by it's *cdrID
-				remCdr = append(remCdr, sqls.cdrIDQuery(utils.IfaceAsString(newCdr.Opts[utils.MetaCDRID])))
+				// if the filters passed, remove the CDR by it's *urID
+				remCdr = append(remCdr, sqls.urIDQuery(utils.IfaceAsString(newCdr.Opts[utils.MetaURID])))
 			}
 		}
 	}

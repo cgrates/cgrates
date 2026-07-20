@@ -1117,11 +1117,11 @@ func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 }
 
 func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
-	cdrID := utils.IfaceAsString(cdr.APIOpts[utils.MetaCDRID])
+	urID := utils.IfaceAsString(cdr.APIOpts[utils.MetaURID])
 	if !allowUpdate {
 		// Check if CDR exists
 		var exists bool
-		if err := rs.Cmd(&exists, redisEXISTS, utils.CDRsPrefix+cdrID); err != nil {
+		if err := rs.Cmd(&exists, redisEXISTS, utils.CDRsPrefix+urID); err != nil {
 			return err
 		}
 		if exists {
@@ -1167,7 +1167,7 @@ func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 	}
 	if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
 		// Store the CDR in Redis
-		if err := rs.Cmd(nil, redisSET, utils.CDRsPrefix+cdrID, string(cdrMs)); err != nil {
+		if err := rs.Cmd(nil, redisSET, utils.CDRsPrefix+urID, string(cdrMs)); err != nil {
 			return err
 		}
 		return
@@ -1179,7 +1179,7 @@ func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 	for key := range idx {
 		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
 			rs.Cmd(nil, redisSADD, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant,
-				key), utils.CDRsPrefix+cdrID)
+				key), utils.CDRsPrefix+urID)
 			return
 		}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant, key)); err != nil {
 			return err

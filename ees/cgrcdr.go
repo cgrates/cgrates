@@ -133,8 +133,8 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]any)
 	}
-	if _, has := cgrEv.APIOpts[utils.MetaCDRID]; !has {
-		cgrEv.APIOpts[utils.MetaCDRID] = utils.GetUniqueCDRID(cgrEv)
+	if _, has := cgrEv.APIOpts[utils.MetaURID]; !has {
+		cgrEv.APIOpts[utils.MetaURID] = utils.GetUniqueURID(cgrEv)
 	}
 
 	cgr.reqs.get()
@@ -163,12 +163,12 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 			!strings.Contains(err.Error(), "duplicate key") {
 			return fmt.Errorf("storing CDR %s failed: %v", utils.ToJSON(cgrEv), err)
 		}
-		cdrID := utils.IfaceAsString(cgrEv.APIOpts[utils.MetaCDRID])
+		urID := utils.IfaceAsString(cgrEv.APIOpts[utils.MetaURID])
 		updTx := cgr.db.Begin()
 		if updTx.Error != nil {
 			return updTx.Error
 		}
-		if uerr := updTx.Table(cgr.tableName).Where(cgr.cdrIDQuery(cdrID)).Updates(
+		if uerr := updTx.Table(cgr.tableName).Where(cgr.urIDQuery(urID)).Updates(
 			utils.CDRSQLTable{Opts: cgrEv.APIOpts, Event: cgrEv.Event, UpdatedAt: time.Now()}).Error; uerr != nil {
 			updTx.Rollback()
 			utils.Logger.Warning(
@@ -183,11 +183,11 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 	return nil
 }
 
-func (cgr *CgrCDR) cdrIDQuery(cdrID string) string {
+func (cgr *CgrCDR) urIDQuery(urID string) string {
 	switch cgr.dbType {
 	case utils.Postgres:
-		return fmt.Sprintf(" opts ->> '*cdrID' = '%s'", cdrID)
+		return fmt.Sprintf(" opts ->> '*urID' = '%s'", urID)
 	default:
-		return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*cdrID\"') = '%s'", cdrID)
+		return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*urID\"') = '%s'", urID)
 	}
 }

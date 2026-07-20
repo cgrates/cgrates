@@ -33,7 +33,7 @@ var (
 
 	extraDBPartition = NewStringSet([]string{
 		CacheDiameterMessages, CacheRadiusPackets, CacheRPCResponses, CacheClosedSessions,
-		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
+		CacheURIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
 	// DBPartitions excluding Resources, Thresholds, Trends, Rankings, IPs, Stats
@@ -182,7 +182,7 @@ const (
 	GOBCaps                  = "GOB"
 	MsgPack                  = "msgpack"
 	CSVLoad                  = "CSVLOAD"
-	MetaCDRID                = "*cdrID"
+	MetaURID                 = "*urID"
 	MetaOriginID             = "*originID"
 	MetaCGRid                = "*cgrID"
 	CGRidCharSize            = 40
@@ -2000,7 +2000,7 @@ const (
 	MetaReady                        = "*ready"
 	CacheLoadIDs                     = "*loadIDs"
 	CacheRPCConnections              = "*rpcConnections"
-	CacheCDRIDs                      = "*cdrIDs"
+	CacheURIDs                       = "*urIDs"
 	CacheUCH                         = "*uch"
 	CacheSTIR                        = "*stir"
 	CacheEventCharges                = "*eventCharges"

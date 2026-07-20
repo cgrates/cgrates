@@ -249,9 +249,9 @@
 // 		"*reverseFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
 // 		"*diameterMessages": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},			// diameter messages caching
 // 		"*rpcResponses": {"limit": 0, "ttl": "2s", "staticTTL": false, "remote":false, "replicate": false},				// RPC responses caching
-// 		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
+// 		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for URs
 // 		"*eventCharges": {"limit": 0, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
-// 		"*cdrIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
+// 		"*urIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects URs against double-charging
 // 		"*loadIDs": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
 // 		"*rpcConnections": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// RPC connections caching
 // 		"*uch": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},					// User cache

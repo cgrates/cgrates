@@ -268,10 +268,10 @@ const CGRATES_CFG_JSON = `
 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
 		"*attributeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
 		"*capsEvents": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// caps cached samples
-		"*cdrIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
+		"*urIDs": {"limit": -1, "ttl": "10m", "staticTTL": false, "remote":false, "replicate": false},				// protects URs against double-charging
 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
 		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
-		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
+		"*closedSessions": {"limit": -1, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},			// closed sessions cached for URs
 		"*diameterMessages": {"limit": -1, "ttl": "3h", "staticTTL": false, "remote":false, "replicate": false},			// diameter messages caching
 		"*eventCharges": {"limit": 0, "ttl": "10s", "staticTTL": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
 		"*eventIPs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false},				// matching ip allocations to events

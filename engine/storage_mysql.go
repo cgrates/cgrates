@@ -113,9 +113,9 @@ func (msqlS *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }
 
-// cdrIDQuery will query the CDR by its unique cdrID
-func (msqlS *MySQLStorage) cdrIDQuery(cdrID string) string {
-	return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*cdrID\"') = '%s'", cdrID)
+// urIDQuery will query the CDR by its unique urID
+func (msqlS *MySQLStorage) urIDQuery(urID string) string {
+	return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*urID\"') = '%s'", urID)
 }
 
 // existField will query for every element on json type if the field exists

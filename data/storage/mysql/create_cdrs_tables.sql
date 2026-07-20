@@ -13,5 +13,5 @@ CREATE TABLE cdrs (
  `deleted_at` TIMESTAMP NULL,
   PRIMARY KEY (`id`)
 );
-ALTER TABLE cdrs ADD COLUMN cdrid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$."*cdrID"') );
-CREATE UNIQUE INDEX opts_cdrid_idx ON cdrs (cdrid);
+ALTER TABLE cdrs ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$."*urID"') );
+CREATE UNIQUE INDEX opts_urid_idx ON cdrs (urid);
