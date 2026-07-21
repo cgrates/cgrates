@@ -56,13 +56,12 @@ func TestERsProcessPartialEvent(t *testing.T) {
 		cgrEvent: event,
 		rdrCfg:   rdrCfg,
 	}
-	if err := erS.processPartialEvent(args.cgrEvent, args.rdrCfg); err != nil {
+	rcv, err := erS.processPartialEvent(args.cgrEvent, args.rdrCfg)
+	if err != nil {
 		t.Error(err)
-	} else {
-		rcv := <-erS.rdrEvents
-		if !reflect.DeepEqual(rcv, args) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", args, rcv)
-		}
+	}
+	if !reflect.DeepEqual(rcv, args.cgrEvent) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", args.cgrEvent, rcv)
 	}
 }
 

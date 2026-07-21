@@ -71,7 +71,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if capsStats := cs.CoreS().CapsStats; capsStats != nil {
 		capsStats.SetCache(cache)
 	}
-	go cache.Precache(shutdown)
+	cache.Precache(shutdown)
 
 	cS.cacheCh <- cache
 
