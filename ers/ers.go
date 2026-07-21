@@ -115,21 +115,35 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 			}
 			if err = erS.exportRawEvent(erEv, err != nil); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
-					"<%s> exporting event: <%s> from reader: <%s> got error: <%v>",
+					"<%s> exporting raw event: <%s> from reader: <%s> got error: <%v>",
 					utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
 			}
-
 		case pEv := <-erS.partialEvents:
-			err := erS.processPartialEvent(pEv.cgrEvent, pEv.rdrCfg)
+			completeCgrEv, err := erS.processPartialEvent(pEv.cgrEvent, pEv.rdrCfg)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> reading partial event: <%s> from reader: <%s> got error: <%v>",
 					utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
 			}
-			if err = erS.exportRawEvent(pEv, err != nil); err != nil {
+			if completeCgrEv == nil {
+				// export raw event even if it is partial, in case its asked for
+				if err = erS.exportRawEvent(pEv, err != nil); err != nil {
+					utils.Logger.Warning(fmt.Sprintf(
+						"<%s> exporting partial event: <%s> from reader: <%s> got error: <%v>",
+						utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
+				}
+				continue
+			}
+			// if event is complete, process it immediately instead of sending it back to erS.rdrEvents to not block both channels and avoid needless goroutine
+			if err = erS.processEvent(completeCgrEv, pEv.rdrCfg); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
-					"<%s> exporting partial event: <%s> from reader: <%s> got error: <%v>",
-					utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
+					"<%s> reading event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(completeCgrEv), pEv.rdrCfg.ID, err))
+			}
+			if err = erS.exportRawEvent(&erEvent{cgrEvent: completeCgrEv, rawEvent: pEv.rawEvent, rdrCfg: pEv.rdrCfg}, err != nil); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> exporting raw event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(completeCgrEv), pEv.rdrCfg.ID, err))
 			}
 		case <-cfgRldChan: // handle reload
 			cfgIDs := make(map[string]int)
@@ -404,7 +418,7 @@ type erEvents struct {
 }
 
 // processPartialEvent process the event as a partial event
-func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
+func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.EventReaderCfg) (cgrEv *utils.CGREvent, err error) {
 	// to identify the event the originID and originHost is used to create the originID
 	orgID, err := ev.FieldAsString(utils.OriginID)
 	if err == utils.ErrNotFound { // the field is missing ignore the event
@@ -429,15 +443,16 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 		cgrEvs.rdrCfg = rdrCfg
 	}
 
-	var cgrEv *utils.CGREvent
 	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
 		erS.cfg.GeneralCfg().DefaultTimezone); err != nil {
+		cgrEv = nil
 		return
 	}
 	if partial := cgrEv.APIOpts[utils.PartialOpt]; !slices.Contains([]string{utils.FalseStr, utils.EmptyString},
 		utils.IfaceAsString(partial)) { // if is still partial set it back in cache
 		erS.partialCache.Set(originID, cgrEvs, nil)
+		cgrEv = nil
 		return
 	}
 
@@ -446,7 +461,6 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 		erS.partialCache.Set(originID, nil, nil) // set it with nil in cache to ignore when we expire the item
 		erS.partialCache.Remove(originID)
 	}
-	go func() { erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdrCfg} }() // put the event on the complete events chanel( in a goroutine to not block the select from ListenAndServe)
 	return
 }
 
@@ -607,8 +621,8 @@ func (erS *ERService) onEvicted(id string, value any) {
 
 }
 
-// exportRawEvent exports the given event. If the processing of the event failed,
-// it uses eesFailedIDs; otherwise, it uses eesSuccessIDs.
+// exportRawEvent exports the given raw event. If the processing of the event failed,
+// it uses eesFailedIDs; otherwise, it uses eesSuccessIDs. Ignores the export if the corresponding list of exporter IDs is empty, and returns nothing if no exporter IDs are found.
 func (erS *ERService) exportRawEvent(event *erEvent, processingFailed bool) error {
 	var exporterIDs []string
 	if processingFailed {

@@ -409,17 +409,23 @@ func (l *loader) moveUnprocessedFiles(inPath string) (err error) {
 }
 
 func (l *loader) handleFolder(stopChan chan struct{}) {
+	// instantly process the folder once before starting the loop
+	if err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s-%s> cannot process <%s> folder initially, err: %s",
+			utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir, err))
+	}
 	for {
-		go l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false)
-		timer := time.NewTimer(l.ldrCfg.RunDelay)
 		select {
 		case <-stopChan:
 			utils.Logger.Info(
 				fmt.Sprintf("<%s-%s> stop monitoring path <%s>",
 					utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir))
-			timer.Stop()
 			return
-		case <-timer.C:
+		case <-time.After(l.ldrCfg.RunDelay):
+			if err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s-%s> cannot process <%s> folder, err: %s",
+					utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir, err))
+			}
 		}
 	}
 }
