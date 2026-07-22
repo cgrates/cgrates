@@ -15,7 +15,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
-	"github.com/cgrates/guardian"
 )
 
 // NewActionS instantiates the ActionS
@@ -243,7 +242,7 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
 func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) error {
-	return guardian.Guardian.Guard(ctx, func(ctx *context.Context) (err error) {
+	return aS.dm.Guard(ctx, func(ctx *context.Context) (err error) {
 		var ap *utils.ActionProfile
 		if ap, err = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
@@ -263,14 +262,14 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 					utils.ActionS, sActs.tenant, sActs.apID, err))
 		}
 		return
-	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+sActs.apID)
+	}, utils.ActionProfilePrefix+sActs.apID)
 }
 
 // cronExecuteActions runs a profile's units together under one lock.
 func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
 	ctx := context.Background()
 	first := units[0]
-	err := guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
+	err := aS.dm.Guard(ctx, func(ctx *context.Context) error {
 		if !first.ignFilters {
 			ap, err := aS.dm.GetActionProfile(ctx, first.tenant, first.apID, true, true, utils.NonTransactional)
 			if err != nil {
@@ -286,7 +285,7 @@ func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
 			err = errors.Join(err, sActs.Execute(ctx))
 		}
 		return err
-	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+first.apID)
+	}, utils.ActionProfilePrefix+first.apID)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> executing scheduled ActionProfile <%s:%s>, error: <%s>",

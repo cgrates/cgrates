@@ -1588,7 +1588,14 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 	args.BalanceIDs = []string{"AbstractBalance1"}
 
 	expected = utils.ErrNoDatabaseConn.Error()
-	accnts.dm = nil
+	dbMock := &engine.DataDBMock{
+		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+			return nil, utils.ErrNoDatabaseConn
+		},
+	}
+	accnts.dm = engine.NewDataManager(engine.NewDBConnManager(
+		map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg()), cfg, nil, locker)
+	accnts.dm.SetCache(cacheS)
 	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

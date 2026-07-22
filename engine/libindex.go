@@ -10,7 +10,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 var (
@@ -102,9 +101,8 @@ func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
-	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
-	defer guardian.Guardian.UnguardIDs(refID)
+	unlock := dm.Lock(idxItmType + tntGrp)
+	defer unlock()
 
 	var indexes map[string]utils.StringSet
 	if indexes, err = newFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, utils.NonTransactional, filterIDs, nil); err != nil {
@@ -133,9 +131,8 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
-	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
-	defer guardian.Guardian.UnguardIDs(refID)
+	unlock := dm.Lock(idxItmType + tntGrp)
+	defer unlock()
 
 	var indexes map[string]utils.StringSet
 	if indexes, err = newFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, utils.NonTransactional, filterIDs, nil); err != nil {
@@ -269,9 +266,8 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
-	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
-	defer guardian.Guardian.UnguardIDs(refID)
+	unlock := dm.Lock(idxItmType + tntGrp)
+	defer unlock()
 	for _, id := range profilesIDs {
 		var filterIDs *[]string
 		if filterIDs, err = getFilters(tnt, id, grp); err != nil {
@@ -304,13 +300,12 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 			continue
 		}
 		tntGrp := utils.ConcatenatedKey(tnt, ID)
-		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
+		unlock := dm.Lock(utils.CacheReverseFilterIndexes + tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			utils.NonTransactional, true, false, idxItmType); err != nil {
 			if err != utils.ErrNotFound {
-				guardian.Guardian.UnguardIDs(refID)
+				unlock()
 				return
 			}
 			err = nil
@@ -321,15 +316,15 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 		indexes[idxItmType].Add(itemID)
 		for indxKey := range indexes {
 			if err = dm.cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
-				guardian.Guardian.UnguardIDs(refID)
+				unlock()
 				return
 			}
 		}
 		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp, indexes, true, utils.NonTransactional); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
+			unlock()
 			return
 		}
-		guardian.Guardian.UnguardIDs(refID)
+		unlock()
 	}
 	return
 }
@@ -341,12 +336,11 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 			continue
 		}
 		tntGrp := utils.ConcatenatedKey(tnt, ID)
-		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
+		unlock := dm.Lock(utils.CacheReverseFilterIndexes + tntGrp)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			utils.NonTransactional, true, false, idxItmType); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
+			unlock()
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -357,15 +351,15 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 
 		for indxKey := range indexes {
 			if err = dm.cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
-				guardian.Guardian.UnguardIDs(refID)
+				unlock()
 				return
 			}
 		}
 		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp, indexes, true, utils.NonTransactional); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
+			unlock()
 			return
 		}
-		guardian.Guardian.UnguardIDs(refID)
+		unlock()
 	}
 	return
 }
@@ -467,9 +461,8 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 	}
 
 	tntID := newFlt.TenantID()
-	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		dm.cfg.GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntID)
-	defer guardian.Guardian.UnguardIDs(refID)
+	unlock := dm.Lock(utils.CacheReverseFilterIndexes + tntID)
+	defer unlock()
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
 	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
@@ -675,12 +668,11 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 					if !has {
 						return utils.ErrNotFound
 					}
-					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tntGrp)
+					unlock := dm.Lock(idxItmType + tntGrp)
 					var updIdx map[string]utils.StringSet
 					if updIdx, err = newFilterIndex(ctx, dm, idxItmType,
 						newFlt.Tenant, rpID, itemID, utils.NonTransactional, rate.FilterIDs, newFlt); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
+						unlock()
 						return
 					}
 					for _, idx := range updIdx {
@@ -688,10 +680,10 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 					}
 					if err = dm.SetIndexes(ctx, idxItmType, tntGrp,
 						updIdx, false, utils.NonTransactional); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
+						unlock()
 						return
 					}
-					guardian.Guardian.UnguardIDs(refID)
+					unlock()
 				}
 			}
 		case utils.CacheAttributeFilterIndexes:
@@ -724,9 +716,8 @@ func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmT
 	if len(removeIndexKeys) == 0 {
 		return nil // no indexes to remove
 	}
-	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		dm.cfg.GeneralCfg().LockingTimeout, idxItmType+tnt)
-	defer guardian.Guardian.UnguardIDs(refID)
+	unlock := dm.Lock(idxItmType + tnt)
+	defer unlock()
 
 	fltrIdx, err := dm.GetIndexes(ctx, idxItmType, tnt,
 		utils.NonTransactional, true, false, removeIndexKeys...)

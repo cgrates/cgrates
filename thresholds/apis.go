@@ -8,7 +8,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
@@ -93,10 +92,8 @@ func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDW
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
-	lockID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.ThresholdLockKey(tnt, tntID.ID))
-	defer guardian.Guardian.UnguardIDs(lockID)
+	unlock := s.dm.Lock(utils.ThresholdLockKey(tnt, tntID.ID))
+	defer unlock()
 	thd, err := s.dm.GetThreshold(ctx, tnt, tntID.ID, true, true, "")
 	if err != nil {
 		return err
@@ -115,10 +112,8 @@ func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantI
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
-	lockID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.ThresholdLockKey(tnt, tntID.ID))
-	defer guardian.Guardian.UnguardIDs(lockID)
+	unlock := s.dm.Lock(utils.ThresholdLockKey(tnt, tntID.ID))
+	defer unlock()
 	thd, err := s.dm.GetThreshold(ctx, tnt, tntID.ID, true, true, "")
 	if err != nil {
 		return err

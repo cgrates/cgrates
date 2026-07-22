@@ -90,6 +90,20 @@ func (dm *DataManager) SetCache(cache *CacheS) {
 	dm.cache = cache
 }
 
+// Lock locks keys until the returned function is called or the timeout expires.
+func (dm *DataManager) Lock(keys ...string) func() {
+	refID := dm.locker.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, keys...)
+	return func() {
+		dm.locker.UnguardIDs(refID)
+	}
+}
+
+// Guard runs handler with keys locked until it returns or the context is done.
+func (dm *DataManager) Guard(ctx *context.Context,
+	handler func(*context.Context) error, keys ...string) error {
+	return dm.locker.Guard(ctx, handler, dm.cfg.GeneralCfg().LockingTimeout, keys...)
+}
+
 // DBConnManager is the storage manager for all CGRateS DBs
 // transparently manages data retrieval, further serialization and caching
 type DBConnManager struct {
@@ -304,52 +318,52 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		switch prfx {
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ResourceLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.ResourceLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResourceProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ResourceLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.ResourceLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResource(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.IPProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetIPProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.IPAllocationsPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetIPAllocations(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueueProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.StatQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThresholdProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.RankingProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.RankingProfileLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.RankingProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetRankingProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.TrendProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetTrendProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
+			unlock := dm.Lock(utils.ThresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThreshold(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1103,7 +1117,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 		oldSts.TTL != sqp.TTL ||
 		oldSts.MinItems != sqp.MinItems ||
 		oldSts.Stored != sqp.Stored && oldSts.Stored { // reset the stats queue if the profile changed this fields
-		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
+		dm.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
 			var sq *utils.StatQueue
 			if sq, err = utils.NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
 				uint64(sqp.MinItems)); err != nil {
@@ -1111,9 +1125,9 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 			}
 			err = dm.SetStatQueue(ctx, sq)
 			return
-		}, dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqp.TenantID())
+		}, utils.StatQueuePrefix+sqp.TenantID())
 	} else {
-		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
+		dm.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
 			oSq, errRs := dm.GetStatQueue(ctx, sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
 				true, false, utils.NonTransactional)
 			if errRs == utils.ErrNotFound { // the stats queue does not exist
@@ -1148,7 +1162,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 				err = dm.SetStatQueue(ctx, oSq) // only set it in DB if Stored is true
 			}
 			return
-		}, dm.cfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqp.TenantID())
+		}, utils.StatQueuePrefix+sqp.TenantID())
 	}
 	return
 }

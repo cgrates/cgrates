@@ -18,7 +18,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 // matchedIPAllocs holds IP allocations together with the profile and indexes
@@ -28,7 +27,7 @@ type matchedIPAllocs struct {
 	profile    *utils.IPProfile
 	poolRanges map[string]netip.Prefix          // parsed CIDR ranges by pool ID
 	poolAllocs map[string]map[netip.Addr]string // allocated IP to allocation ID, by pool ID
-	lockID     string
+	unlock     func()
 }
 
 // newMatchedIPAllocs wraps allocs and builds the pool indexes from the profile.
@@ -306,14 +305,12 @@ func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
 			continue
 		}
 		allocs := allocIf.(*utils.IPAllocations)
-		lkID := guardian.Guardian.GuardIDs("",
-			s.cfg.GeneralCfg().LockingTimeout,
-			utils.IPAllocationsLockKey(allocs.Tenant, allocs.ID))
+		unlock := s.dm.Lock(utils.IPAllocationsLockKey(allocs.Tenant, allocs.ID))
 		if err := s.storeIPAllocations(ctx, allocs); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.IPs, err))
 			failedRIDs = append(failedRIDs, allocsID) // record failure so we can schedule it for next backup
 		}
-		guardian.Guardian.UnguardIDs(lkID)
+		unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -409,51 +406,49 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 		itemIDs = slices.Sorted(maps.Keys(matchedItemIDs))
 	}
 	var matchedPrfl *utils.IPProfile
-	var matchedLockID string
+	var matchedUnlock func()
 	var maxWeight float64
 	for _, id := range itemIDs {
-		lkID := guardian.Guardian.GuardIDs("",
-			s.cfg.GeneralCfg().LockingTimeout,
-			utils.IPAllocationsLockKey(tnt, id))
+		unlock := s.dm.Lock(utils.IPAllocationsLockKey(tnt, id))
 		var prfl *utils.IPProfile
 		if prfl, err = s.dm.GetIPProfile(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 			if err == utils.ErrNotFound {
 				continue
 			}
 			if matchedPrfl != nil {
-				guardian.Guardian.UnguardIDs(matchedLockID)
+				matchedUnlock()
 			}
 			return nil, nil, err
 		}
 		var pass bool
 		if pass, err = s.filters.Pass(ctx, tnt, prfl.FilterIDs, evNm); err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 			if matchedPrfl != nil {
-				guardian.Guardian.UnguardIDs(matchedLockID)
+				matchedUnlock()
 			}
 			return nil, nil, err
 		} else if !pass {
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 			continue
 		}
 		var weight float64
 		if weight, err = engine.WeightFromDynamics(ctx, prfl.Weights, s.filters, tnt, evNm); err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 			if matchedPrfl != nil {
-				guardian.Guardian.UnguardIDs(matchedLockID)
+				matchedUnlock()
 			}
 			return nil, nil, err
 		}
 		if matchedPrfl == nil || maxWeight < weight {
 			if matchedPrfl != nil {
-				guardian.Guardian.UnguardIDs(matchedLockID)
+				matchedUnlock()
 			}
 			matchedPrfl = prfl
-			matchedLockID = lkID
+			matchedUnlock = unlock
 			maxWeight = weight
 		} else {
-			guardian.Guardian.UnguardIDs(lkID)
+			unlock()
 		}
 	}
 	if matchedPrfl == nil {
@@ -461,19 +456,19 @@ func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 	}
 	allocs, err := s.dm.GetIPAllocations(ctx, matchedPrfl.Tenant, matchedPrfl.ID, true, true, "")
 	if err != nil {
-		guardian.Guardian.UnguardIDs(matchedLockID)
+		matchedUnlock()
 		return nil, nil, err
 	}
 	if matched, err = newMatchedIPAllocs(allocs, matchedPrfl); err != nil {
-		guardian.Guardian.UnguardIDs(matchedLockID)
+		matchedUnlock()
 		return nil, nil, err
 	}
-	matched.lockID = matchedLockID
+	matched.unlock = matchedUnlock
 	if err = s.cache.Set(ctx, utils.CacheEventIPs, evUUID, allocs.ID, nil, true, ""); err != nil {
-		guardian.Guardian.UnguardIDs(matchedLockID)
+		matchedUnlock()
 		return nil, nil, err
 	}
-	return matched, func() { guardian.Guardian.UnguardIDs(matched.lockID) }, nil
+	return matched, matched.unlock, nil
 }
 
 func findPoolByID(pools []*utils.IPPool, id string) *utils.IPPool {

@@ -316,10 +316,8 @@ func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithA
 	}
 
 	// make sure resource is locked at process level
-	lkID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.ResourceLockKey(tnt, arg.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	unlock := s.dm.Lock(utils.ResourceLockKey(tnt, arg.ID))
+	defer unlock()
 
 	res, err := s.dm.GetResource(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
@@ -339,10 +337,8 @@ func (s *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.Ten
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
-	lkID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.ResourceLockKey(tnt, arg.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	unlock := s.dm.Lock(utils.ResourceLockKey(tnt, arg.ID))
+	defer unlock()
 
 	res, err := s.dm.GetResource(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {

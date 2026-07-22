@@ -16,7 +16,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 const matchedItemsWarningThreshold int = 100
@@ -26,6 +25,9 @@ const matchedItemsWarningThreshold int = 100
 // helper on top of db.GetIndexes, adding utils.MetaAny to list of fields queried
 func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
+	if dm == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
 	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil || suffixFldIDs == nil || existsFldIDs == nil || notExistsFldIDs == nil) {
@@ -33,7 +35,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
+	dm.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if !indexedSelects {
 			var db DataDB
 			db, _, err = dm.dbConns.GetConn(cacheID)
@@ -114,8 +116,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 			}
 		}
 		return
-	},
-		0, lockID)
+	}, lockID)
 	if err != nil {
 		return nil, err
 	}

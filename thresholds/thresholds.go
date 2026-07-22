@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 type ThresholdConfig struct {
@@ -38,7 +37,7 @@ type matchedThreshold struct {
 	threshold *utils.Threshold
 	profile   *utils.ThresholdProfile
 	weight    float64
-	lockID    string // ID of the lock used when matching the threshold
+	unlock    func()
 }
 
 // NewThresholdService the constructor for ThresholdS service
@@ -138,13 +137,11 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 			continue
 		}
 		t := tIf.(*utils.Threshold)
-		lockID := guardian.Guardian.GuardIDs("",
-			s.cfg.GeneralCfg().LockingTimeout,
-			utils.ThresholdLockKey(t.Tenant, t.ID))
+		unlock := s.dm.Lock(utils.ThresholdLockKey(t.Tenant, t.ID))
 		if err := s.storeThreshold(ctx, t); err != nil {
 			failedThresholds = append(failedThresholds, tID) // record failure so we can schedule it for next backup
 		}
-		guardian.Guardian.UnguardIDs(lockID)
+		unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -181,7 +178,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 	args *utils.CGREvent) (ts []*matchedThreshold, unlock func(), err error) {
 	unlockAll := func() {
 		for _, mt := range ts {
-			guardian.Guardian.UnguardIDs(mt.lockID)
+			mt.unlock()
 		}
 	}
 
@@ -223,12 +220,10 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 
 	ts = make([]*matchedThreshold, 0, len(itemIDs))
 	for _, id := range itemIDs {
-		lockID := guardian.Guardian.GuardIDs("",
-			s.cfg.GeneralCfg().LockingTimeout,
-			utils.ThresholdLockKey(tnt, id))
+		unlock := s.dm.Lock(utils.ThresholdLockKey(tnt, id))
 		profile, err := s.dm.GetThresholdProfile(ctx, tnt, id, true, true, utils.NonTransactional)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lockID)
+			unlock()
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
@@ -240,17 +235,17 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 			var pass bool
 			if pass, err = s.filters.Pass(ctx, tnt, profile.FilterIDs,
 				evNm); err != nil {
-				guardian.Guardian.UnguardIDs(lockID)
+				unlock()
 				unlockAll()
 				return nil, nil, err
 			} else if !pass {
-				guardian.Guardian.UnguardIDs(lockID)
+				unlock()
 				continue
 			}
 		}
 		threshold, err := s.dm.GetThreshold(ctx, profile.Tenant, profile.ID, true, true, "")
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lockID)
+			unlock()
 			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
 				err = nil
 				continue
@@ -261,7 +256,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		weight, err := engine.WeightFromDynamics(ctx, profile.Weights,
 			s.filters, tnt, evNm)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lockID)
+			unlock()
 			unlockAll()
 			return nil, nil, err
 		}
@@ -269,7 +264,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 			threshold: threshold,
 			profile:   profile,
 			weight:    weight,
-			lockID:    lockID,
+			unlock:    unlock,
 		})
 	}
 	if len(ts) == 0 {
@@ -285,7 +280,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 	for i, mt := range ts {
 		if mt.profile.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
 			for _, dropped := range ts[i+1:] {
-				guardian.Guardian.UnguardIDs(dropped.lockID)
+				dropped.unlock()
 			}
 			ts = ts[:i+1]
 			break

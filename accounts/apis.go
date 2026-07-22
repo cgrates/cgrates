@@ -8,7 +8,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 // V1AccountsForEvent returns the matching Accounts for Event
@@ -183,10 +182,9 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if err = guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
+	if err = aS.dm.Guard(ctx, func(ctx *context.Context) error {
 		return actSetAccount(ctx, aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
-	}, aS.cfg.GeneralCfg().LockingTimeout,
-		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
+	}, utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
 
@@ -206,7 +204,7 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if err = guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
+	if err = aS.dm.Guard(ctx, func(ctx *context.Context) error {
 		qAcnt, err := aS.dm.GetAccount(ctx, tnt, args.AccountID)
 		if err != nil {
 			return err
@@ -215,8 +213,7 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 			delete(qAcnt.Balances, balID)
 		}
 		return aS.dm.SetAccount(ctx, qAcnt, false)
-	}, aS.cfg.GeneralCfg().LockingTimeout,
-		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
+	}, utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
 	*rply = utils.OK
