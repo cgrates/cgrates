@@ -60,6 +60,11 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 		}
 		accIDs = accIDsMap.AsSlice()
 	}
+	if lked {
+		accIDs = slices.Clone(accIDs)
+		slices.Sort(accIDs)
+		accIDs = slices.Compact(accIDs)
+	}
 	weights := make(map[string]float64) // stores sorting weights by acntID
 	for _, accID := range accIDs {
 		var refID string
@@ -266,7 +271,12 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 
 	acntsIdxed := make(map[string]*utils.Account) // so we can access Account easier
 	alteredAcnts := make(utils.StringSet)         // hold here the list of modified accounts
+	acntIDs := make([]string, 0, len(ecs.Accounts))
 	for acntID := range ecs.Accounts {
+		acntIDs = append(acntIDs, acntID)
+	}
+	slices.Sort(acntIDs)
+	for _, acntID := range acntIDs {
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			aS.cfg.GeneralCfg().LockingTimeout,
 			utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID))
