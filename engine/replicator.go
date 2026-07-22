@@ -29,11 +29,6 @@ type replicationData struct {
 
 // replicator manages replication tasks to synchronize data across instances.
 // It can perform immediate replication or batch tasks to replicate on intervals.
-//
-// For failed replications, files are created with predictable names based on
-// "methodName_objTypeObjID" as the key. Before each replication attempt, any existing
-// file for that key is removed. A new file is created only if the replication fails.
-// This ensures at most one failed replication file exists per unique item.
 type replicator struct {
 	mu sync.Mutex
 
@@ -74,6 +69,41 @@ func newReplicator(cm *ConnManager) *replicator {
 
 }
 
+// replicationKey gives Set and Remove the same key only when the latest
+// operation makes the earlier one unnecessary.
+func replicationKey(objType, objID, method string) string {
+	switch method {
+	case utils.ReplicatorSv1SetDestination, utils.ReplicatorSv1RemoveDestination,
+		utils.ReplicatorSv1SetThresholdProfile, utils.ReplicatorSv1RemoveThresholdProfile,
+		utils.ReplicatorSv1SetThreshold, utils.ReplicatorSv1RemoveThreshold,
+		utils.ReplicatorSv1SetStatQueueProfile, utils.ReplicatorSv1RemoveStatQueueProfile,
+		utils.ReplicatorSv1SetStatQueue, utils.ReplicatorSv1RemoveStatQueue,
+		utils.ReplicatorSv1SetFilter, utils.ReplicatorSv1RemoveFilter,
+		utils.ReplicatorSv1SetRankingProfile, utils.ReplicatorSv1RemoveRankingProfile,
+		utils.ReplicatorSv1SetTrendProfile, utils.ReplicatorSv1RemoveTrendProfile,
+		utils.ReplicatorSv1SetTrend, utils.ReplicatorSv1RemoveTrend,
+		utils.ReplicatorSv1SetTiming, utils.ReplicatorSv1RemoveTiming,
+		utils.ReplicatorSv1SetResourceProfile, utils.ReplicatorSv1RemoveResourceProfile,
+		utils.ReplicatorSv1SetResource, utils.ReplicatorSv1RemoveResource,
+		utils.ReplicatorSv1SetIPProfile, utils.ReplicatorSv1RemoveIPProfile,
+		utils.ReplicatorSv1SetIPAllocations, utils.ReplicatorSv1RemoveIPAllocations,
+		utils.ReplicatorSv1SetActionTriggers, utils.ReplicatorSv1RemoveActionTriggers,
+		utils.ReplicatorSv1SetSharedGroup, utils.ReplicatorSv1RemoveSharedGroup,
+		utils.ReplicatorSv1SetActions, utils.ReplicatorSv1RemoveActions,
+		utils.ReplicatorSv1SetActionPlan, utils.ReplicatorSv1RemoveActionPlan,
+		utils.ReplicatorSv1SetAccountActionPlans, utils.ReplicatorSv1RemAccountActionPlans,
+		utils.ReplicatorSv1SetRouteProfile, utils.ReplicatorSv1RemoveRouteProfile,
+		utils.ReplicatorSv1SetAttributeProfile, utils.ReplicatorSv1RemoveAttributeProfile,
+		utils.ReplicatorSv1SetChargerProfile, utils.ReplicatorSv1RemoveChargerProfile,
+		utils.ReplicatorSv1SetDispatcherProfile, utils.ReplicatorSv1RemoveDispatcherProfile,
+		utils.ReplicatorSv1SetDispatcherHost, utils.ReplicatorSv1RemoveDispatcherHost:
+		return objType + objID
+	default:
+		_, methodName, _ := strings.Cut(method, utils.NestingSep)
+		return methodName + "_" + objType + objID
+	}
+}
+
 // replicate handles the object replication based on configuration.
 // When interval > 0, the replication task is queued for the next batch.
 // Otherwise, it executes immediately.
@@ -82,13 +112,7 @@ func (r *replicator) replicate(objType, objID, method string, args any,
 	if !item.Replicate {
 		return nil
 	}
-	// Form a unique key by joining method name with object identifiers.
-	// Including the method name (Set/Remove) allows different operations
-	// on the same object to have distinct keys, which also serve as
-	// predictable filenames if replication fails.
-	_, methodName, _ := strings.Cut(method, utils.NestingSep)
-	key := methodName + "_" + objType + objID
-
+	key := replicationKey(objType, objID, method)
 	if r.interval > 0 {
 		r.mu.Lock()
 		defer r.mu.Unlock()
