@@ -36,6 +36,7 @@ func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanage
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
+			utils.GuardianS,
 		},
 		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -45,11 +46,12 @@ func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanage
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dm := srvDeps[utils.DB].(*DBService).DataManager()
+	gs := srvDeps[utils.GuardianS].(*GuardianService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs)
+	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs, gs.Locker())
 
 	srv, err := newRPCService(s.api, utils.AdminSv1)
 	if err != nil {

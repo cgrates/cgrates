@@ -225,7 +225,8 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 		},
 		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
 	}
-	dm.dbConns.replicators[utils.MetaDefault] = newReplicator(cfg.DbCfg().DBConns[utils.MetaDefault], cM)
+	dm.dbConns.replicators[utils.MetaDefault] = newReplicator(cfg.DbCfg().DBConns[utils.MetaDefault], cM,
+		locker)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "*string:~*req.Account:1001",
