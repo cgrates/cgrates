@@ -75,7 +75,7 @@ func NewDataManager(dbConns *DBConnManager, cfg *config.CGRConfig, connMgr *Conn
 	dbConns.dbCfg = cfg.DbCfg()
 	dbConns.replicators = make(map[string]*replicator)
 	for key, dbConnCfg := range cfg.DbCfg().DBConns {
-		dbConns.replicators[key] = newReplicator(dbConnCfg, connMgr)
+		dbConns.replicators[key] = newReplicator(dbConnCfg, connMgr, locker)
 	}
 	return &DataManager{
 		dbConns: dbConns,
@@ -3207,7 +3207,7 @@ func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 			dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
 			dbConnCfg.StringIndexedFields, dbConnCfg.PrefixIndexedFields,
 			dbConnCfg.Opts, cfg.DbCfg().Items)
-		r[dbKey] = newReplicator(dbConnCfg, dm.connMgr)
+		r[dbKey] = newReplicator(dbConnCfg, dm.connMgr, dm.locker)
 		if err != nil {
 			return
 		}

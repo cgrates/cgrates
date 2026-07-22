@@ -47,7 +47,7 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 		},
 		{
 			name: utils.AdminSv1,
-			rcvr: apis.NewAdminSv1(nil, nil, nil, nil),
+			rcvr: apis.NewAdminSv1(nil, nil, nil, nil, nil),
 			consts: map[string]string{
 				"BackupDB":                     utils.AdminSv1BackupDB,
 				"ComputeFilterIndexIDs":        utils.AdminSv1ComputeFilterIndexIDs,

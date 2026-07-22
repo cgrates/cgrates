@@ -25,7 +25,7 @@ func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var setRply string
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
@@ -60,7 +60,7 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var setRply string
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
@@ -110,7 +110,7 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var setRply string
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
@@ -167,7 +167,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var setRply string
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
@@ -204,7 +204,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -292,7 +292,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply)
@@ -313,7 +313,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply)
@@ -334,7 +334,7 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -428,7 +428,7 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	ext := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
 			ID:           "1001",
@@ -520,7 +520,7 @@ func TestChargerSRmvChargerProfileErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -544,7 +544,7 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -588,7 +588,7 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -640,7 +640,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -666,7 +666,7 @@ func TestChargersGetChargerProfilesOK(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	args1 := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
 			Tenant: "cgrates.org",
@@ -776,7 +776,7 @@ func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
 	args := &utils.ChargerProfileWithAPIOpts{
 		ChargerProfile: &utils.ChargerProfile{
 			Tenant: "cgrates.org",

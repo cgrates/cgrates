@@ -98,7 +98,7 @@ func TestCallCache(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, locker)
 	admS.cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{ConnIDs: []string{"*internal"}},
 	}
@@ -145,7 +145,7 @@ func TestCallCacheForRemoveIndexes(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, locker)
 	admS.cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{ConnIDs: []string{"*internal"}},
 	}
@@ -186,7 +186,7 @@ func TestCallCacheForComputeIndexes(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, locker)
 	admS.cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{ConnIDs: []string{"*internal"}},
 	}
@@ -227,7 +227,7 @@ func TestCallCacheMultiple(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, locker)
 	admS.cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{ConnIDs: []string{"*internal"}},
 	}

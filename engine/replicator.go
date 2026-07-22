@@ -37,8 +37,9 @@ type replicationData struct {
 type replicator struct {
 	mu sync.Mutex
 
-	cm    *ConnManager
-	conns []string // ids of connections to replicate to
+	locker *guardian.GuardianLocker
+	cm     *ConnManager
+	conns  []string // ids of connections to replicate to
 
 	// pending stores the latest version of the object, named by the key, that
 	// is to be replicated.
@@ -55,8 +56,9 @@ type replicator struct {
 // or batched replications based on configuration.
 // When interval > 0, replications are queued and processed in batches at that interval.
 // When interval = 0, each replication is performed immediately when requested.
-func newReplicator(cfg *config.DBConn, cm *ConnManager) *replicator {
+func newReplicator(cfg *config.DBConn, cm *ConnManager, locker *guardian.GuardianLocker) *replicator {
 	r := &replicator{
+		locker:    locker,
 		cm:        cm,
 		pending:   make(map[string]*replicationData),
 		interval:  cfg.RplInterval,
@@ -161,10 +163,13 @@ func (r *replicator) flush() {
 			failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
 
 			// Clean up any existing file containing failed replications.
-			if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
-				utils.Logger.Warning(fmt.Sprintf(
-					"<DataManager> failed to remove file for %q: %v", key, err))
-			}
+			_ = r.locker.Guard(context.TODO(), func(*context.Context) error {
+				if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
+					utils.Logger.Warning(fmt.Sprintf(
+						"<DataManager> failed to remove file for %q: %v", key, err))
+				}
+				return nil
+			}, 0, utils.FileLockPrefix+failedPath)
 		}
 
 		if err := replicate(context.TODO(), r.cm, r.conns, r.filtered, data.objType, data.objID,
@@ -182,7 +187,7 @@ func (r *replicator) flush() {
 					Method:   data.method,
 					Args:     data.args,
 				}
-				if err := task.WriteToFile(context.TODO(), failedPath); err != nil {
+				if err := task.WriteToFile(context.TODO(), failedPath, r.locker); err != nil {
 					utils.Logger.Err(fmt.Sprintf(
 						"<DataManager> failed to dump replication task: %v", err))
 				}
@@ -246,9 +251,9 @@ type ReplicationTask struct {
 
 // NewReplicationTaskFromFile loads a replication task from the specified file.
 // The file is removed after successful loading.
-func NewReplicationTaskFromFile(ctx *context.Context, path string) (*ReplicationTask, error) {
+func NewReplicationTaskFromFile(ctx *context.Context, path string, locker *guardian.GuardianLocker) (*ReplicationTask, error) {
 	var taskBytes []byte
-	if err := guardian.Guardian.Guard(ctx, func(*context.Context) error {
+	if err := locker.Guard(ctx, func(*context.Context) error {
 		var err error
 		if taskBytes, err = os.ReadFile(path); err != nil {
 			return err
@@ -267,8 +272,8 @@ func NewReplicationTaskFromFile(ctx *context.Context, path string) (*Replication
 
 // WriteToFile saves the replication task to the specified path.
 // This allows failed tasks to be recovered and retried later.
-func (r *ReplicationTask) WriteToFile(ctx *context.Context, path string) error {
-	return guardian.Guardian.Guard(ctx, func(*context.Context) error {
+func (r *ReplicationTask) WriteToFile(ctx *context.Context, path string, locker *guardian.GuardianLocker) error {
+	return locker.Guard(ctx, func(*context.Context) error {
 		f, err := os.Create(path)
 		if err != nil {
 			return err
