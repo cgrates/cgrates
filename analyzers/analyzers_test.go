@@ -190,7 +190,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 
 func TestAnalyzersV1Search(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {

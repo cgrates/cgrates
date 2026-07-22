@@ -137,7 +137,7 @@ func TestRegistrarcregisterRPCHostsErr(t *testing.T) {
 
 func TestRegisterRPCHosts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RegistrarCCfg().RPC.RegistrarSConns = []string{"errCon1"}
 	cfg.RegistrarCCfg().RPC.Hosts = map[string][]*config.RemoteHost{
 		"testHostKey": {},

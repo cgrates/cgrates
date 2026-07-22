@@ -17,7 +17,7 @@ import (
 func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cM := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
@@ -32,7 +32,7 @@ func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -77,7 +77,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cM := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
@@ -105,7 +105,7 @@ func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 func TestQOSRouteSorterRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -186,7 +186,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -253,7 +253,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -312,7 +312,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}

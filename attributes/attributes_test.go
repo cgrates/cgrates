@@ -532,7 +532,7 @@ func TestUniqueAlteredFields(t *testing.T) {
 
 func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -603,7 +603,7 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 
 func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -678,7 +678,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 
 func TestAttributeSProcessEventPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -745,7 +745,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 
 func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -810,7 +810,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 
 func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -889,7 +889,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 
 func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
 	conMng.SetCache(cacheS)
@@ -944,7 +944,7 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 
 func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -1098,7 +1098,7 @@ func TestAttributeFromHTTP(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -1197,7 +1197,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -1289,7 +1289,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 }
 func TestAttributePopulateAttrService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().StringIndexedFields = nil
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
 	cacheAtr = engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3025,7 +3025,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3093,7 +3093,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3162,7 +3162,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 
 func TestGetAttributeProfileFromInline(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	//refresh the DM
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {
 		t.Error(err)
@@ -3193,7 +3193,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 
 func TestProcessAttributeConstant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3264,7 +3264,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 
 func TestProcessAttributeVariable(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3338,7 +3338,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 
 func TestProcessAttributeComposed(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3418,7 +3418,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 
 func TestProcessAttributeUsageDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3493,7 +3493,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 
 func TestProcessAttributeSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3568,7 +3568,7 @@ func TestProcessAttributeSum(t *testing.T) {
 
 func TestProcessAttributeDiff(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3643,7 +3643,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 
 func TestProcessAttributeMultiply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3718,7 +3718,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 
 func TestProcessAttributeDivide(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3793,7 +3793,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 
 func TestProcessAttributeValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3868,7 +3868,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 
 func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3943,7 +3943,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 
 func TestProcessAttributePrefix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -4017,7 +4017,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 
 func TestProcessAttributeSuffix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -4092,7 +4092,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 func TestAttributeIndexSelectsFalse(t *testing.T) {
 	// change the IndexedSelects to false
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().StringIndexedFields = nil
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
 	cfg.AttributeSCfg().IndexedSelects = false
@@ -4157,7 +4157,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 
 func TestProcessAttributeWithSameWeight(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -4253,7 +4253,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 
 func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4366,7 +4366,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 
 func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4479,7 +4479,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 
 func TestAttributeMetaTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4548,7 +4548,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 
 func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().Enabled = true
 	cfg.AttributeSCfg().IndexedSelects = false
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -4665,7 +4665,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 
 func TestAttributeMultipleProfileRunns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4819,7 +4819,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 
 func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -4950,7 +4950,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 
 func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -5054,7 +5054,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 
 func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -5157,7 +5157,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 
 func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -5261,7 +5261,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 
 func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -5343,7 +5343,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 
 func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -5382,7 +5382,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	dataDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -5566,7 +5566,7 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 
 func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5677,7 +5677,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 
 func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -5807,7 +5807,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -5944,7 +5944,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -6048,7 +6048,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -6141,7 +6141,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.FilterSCfg().Conns[utils.MetaResources] = nil
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	conMng := engine.NewConnManager(cfg)
@@ -6244,7 +6244,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 }
 func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6356,7 +6356,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 
 func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6389,7 +6389,7 @@ func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 
 func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6468,7 +6468,7 @@ func TestAttributesParseAttributeMetaCCUsageError(t *testing.T) {
 
 func TestAttributesProcessEventSetError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6517,7 +6517,7 @@ func TestAttributesProcessEventSetError(t *testing.T) {
 }
 func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6570,7 +6570,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 
 func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.AttributeSCfg().IndexedSelects = false
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -6654,7 +6654,7 @@ func TestAttributesParseAttributeError(t *testing.T) {
 
 func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -6759,7 +6759,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 
 func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

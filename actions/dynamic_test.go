@@ -134,7 +134,7 @@ func TestActDynamicThresholdCfg(t *testing.T) {
 
 func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{"admins"}}}
 
@@ -453,7 +453,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -959,7 +959,7 @@ func TestActDynamicStatsExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1326,7 +1326,7 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1758,7 +1758,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2109,7 +2109,7 @@ func TestActDynamicTrendExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2397,7 +2397,7 @@ func TestActDynamicRankingExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2661,7 +2661,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2956,7 +2956,7 @@ func TestActDynamicRouteExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -3257,7 +3257,7 @@ func TestActDynamicIPExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -3731,7 +3731,7 @@ func TestActDynamicRateExecute(t *testing.T) {
 			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 			cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4157,7 +4157,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 			}
 
 			connMgr := engine.NewConnManager(cfg)
-			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 			connMgr.SetCache(cacheS)
 			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -4302,7 +4302,7 @@ func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAdminS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}}}
 	connMgr := engine.NewConnManager(cfg)

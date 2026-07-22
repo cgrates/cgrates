@@ -30,7 +30,7 @@ func TestFileFwvGetMetrics(t *testing.T) {
 
 func TestFileFwvComposeHeader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -95,7 +95,7 @@ func TestFileFwvComposeHeader(t *testing.T) {
 
 func TestFileFwvComposeTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -160,7 +160,7 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 
 func TestFileFwvExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -200,7 +200,7 @@ func (nopCloserWrite) Write(s []byte) (n int, err error) {
 
 func TestFileFwvExportEventWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -225,7 +225,7 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 
 func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -260,7 +260,7 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 
 func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -294,7 +294,7 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 }
 func TestFileFwvOnEvictedTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -335,7 +335,7 @@ func (nopCloserError) Write(s []byte) (n int, err error) {
 }
 func TestFileFwvOnEvictedClose(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)

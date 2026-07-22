@@ -4,78 +4,62 @@
 package loaders
 
 import (
-	"io"
 	"os"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 )
 
-type Locker interface {
-	Lock() error
-	Unlock() error
-	Locked() (bool, error)
-	IsLockFile(string) bool
-}
-
-func newLocker(path, loaderID string) Locker {
-	switch path {
-	case utils.EmptyString:
-		return new(nopLock)
-	case utils.MetaMemory:
-		return &memoryLock{loaderID: loaderID}
-	default:
-		return folderLock(path)
-	}
-}
-
-type folderLock string
-
-// lockFolder will attempt to lock the folder by creating the lock file
-func (fl folderLock) Lock() (err error) {
-	var file io.Closer
-	file, err = os.OpenFile(string(fl),
-		os.O_RDONLY|os.O_CREATE, 0644)
-	file.Close()
-	return
-}
-
-func (fl folderLock) Unlock() (err error) {
-	return os.Remove(string(fl))
-}
-
-func (fl folderLock) Locked() (lk bool, err error) {
-	if _, err = os.Stat(string(fl)); err != nil {
-		if os.IsNotExist(err) {
-			lk, err = false, nil
-		}
-		return
-	}
-	lk = true
-	return
-}
-func (fl folderLock) IsLockFile(path string) bool { return path == string(fl) }
-
-type nopLock struct{}
-
-func (nopLock) Lock() (_ error)            { return }
-func (nopLock) Unlock() (_ error)          { return }
-func (nopLock) Locked() (_ bool, _ error)  { return }
-func (nopLock) IsLockFile(string) (_ bool) { return }
-
-type memoryLock struct {
+type loaderLocker struct {
+	path     string
 	loaderID string
-	refID    string
+	memory   *guardian.Locker
 }
 
-func (m *memoryLock) Lock() (_ error) {
-	m.refID = guardian.Guardian.GuardIDs(m.refID, 0, utils.ConcatenatedKey(utils.LoaderS, m.loaderID))
-	return
+func newLoaderLocker(path, loaderID string, memory *guardian.Locker) loaderLocker {
+	locker := loaderLocker{path: path}
+	if path == utils.MetaMemory {
+		locker.loaderID = loaderID
+		locker.memory = memory
+	}
+	return locker
 }
-func (m *memoryLock) Unlock() (_ error) {
-	guardian.Guardian.UnguardIDs(m.refID)
-	m.refID = utils.EmptyString
-	return
+
+func (l loaderLocker) lock() (func(), error) {
+	switch l.path {
+	case "":
+		return func() {}, nil
+	case utils.MetaMemory:
+		return l.memory.Lock(utils.ConcatenatedKey(utils.LoaderS, l.loaderID)), nil
+	}
+	file, err := os.OpenFile(l.path, os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return nil, err
+	}
+	_ = file.Close()
+	return func() { _ = os.Remove(l.path) }, nil
 }
-func (m memoryLock) Locked() (bool, error)      { return len(m.refID) != 0, nil }
-func (m memoryLock) IsLockFile(string) (_ bool) { return }
+
+func (l loaderLocker) forceUnlock() error {
+	if l.path == "" || l.path == utils.MetaMemory {
+		return nil
+	}
+	return os.Remove(l.path)
+}
+
+func (l loaderLocker) locked() (bool, error) {
+	if l.path == "" || l.path == utils.MetaMemory {
+		return false, nil
+	}
+	if _, err := os.Stat(l.path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func (l loaderLocker) isLockFile(path string) bool {
+	return l.path != "" && l.path != utils.MetaMemory && path == l.path
+}

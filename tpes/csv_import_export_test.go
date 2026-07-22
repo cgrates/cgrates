@@ -507,10 +507,10 @@ func TestCSVImportExport(t *testing.T) {
 	}
 	inputZip := zipCSV(t, files)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	_, dm, connMgr, filters := newTestEnv(t, files, cfg, locker)
 
-	loader := loaders.NewLoaderS(cfg, dm, filters, connMgr)
+	loader := loaders.NewLoaderS(cfg, dm, filters, connMgr, locker)
 	var loaderReply string
 	if err := loader.V1ImportZip(context.Background(), &loaders.ArgsProcessZip{
 		Data: inputZip,
@@ -538,7 +538,7 @@ func TestCSVImportExport(t *testing.T) {
 	checkCSVZip(t, inputZip, outputZip)
 }
 
-func newTestEnv(t *testing.T, files map[string][][]string, cfg *config.CGRConfig, locker *guardian.GuardianLocker) (*config.CGRConfig, *engine.DataManager, *engine.ConnManager, *engine.FilterS) {
+func newTestEnv(t *testing.T, files map[string][][]string, cfg *config.CGRConfig, locker *guardian.Locker) (*config.CGRConfig, *engine.DataManager, *engine.ConnManager, *engine.FilterS) {
 	t.Helper()
 	cfg.LoaderCfg()[0].Enabled = true
 	cfg.LoaderCfg()[0].LockFilePath = utils.MetaMemory

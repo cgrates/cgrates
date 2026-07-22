@@ -34,7 +34,7 @@ func TestHttpJsonMapGetMetrics(t *testing.T) {
 
 func TestHttpJsonMapExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 
 	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil, locker), nil, nil)
@@ -49,7 +49,7 @@ func TestHttpJsonMapExportEvent1(t *testing.T) {
 
 func TestHttpJsonMapExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 
 	bodyExpect := map[string]any{
@@ -81,7 +81,7 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 func TestHttpJsonMapSync(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
 
 	var wg1 sync.WaitGroup
@@ -123,7 +123,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 func TestHttpJsonMapSyncLimit(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 1
 

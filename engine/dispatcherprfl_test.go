@@ -483,7 +483,7 @@ func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply any) 
 }
 func TestDispatcherHostGetConnExistingConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- &cMock{

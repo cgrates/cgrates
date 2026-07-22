@@ -131,7 +131,7 @@ func init() {
 
 // NewCacheS initializes the Cache service.
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS *CapsStats,
-	locker *guardian.GuardianLocker) (c *CacheS) {
+	locker *guardian.Locker) (c *CacheS) {
 	tCache := cfg.CacheCfg().AsTransCacheConfig()
 	if len(cfg.CacheCfg().ReplicationConns) != 0 {
 		var reply string
@@ -175,17 +175,14 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS
 type CacheS struct {
 	cfg     *config.CGRConfig
 	dm      *DataManager
-	locker  *guardian.GuardianLocker
+	locker  *guardian.Locker
 	connMgr *ConnManager
 	pcItems map[string]chan struct{} // signal precaching
 	tCache  *ltcache.TransCache
 }
 
 func (c *CacheS) LockRPCResponse(key string) func() {
-	refID := c.locker.GuardIDs("", c.cfg.GeneralCfg().LockingTimeout, key)
-	return func() {
-		c.locker.UnguardIDs(refID)
-	}
+	return c.locker.Lock(key)
 }
 
 // Set is an exported method from TransCache

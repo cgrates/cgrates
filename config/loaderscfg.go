@@ -241,6 +241,9 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 
 func (l LoaderSCfg) GetLockFilePath() (pathL string) {
 	pathL = l.LockFilePath
+	if pathL == utils.MetaMemory {
+		return pathL
+	}
 	if !filepath.IsAbs(pathL) {
 		pathL = path.Join(l.TpInDir, pathL)
 	}

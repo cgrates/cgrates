@@ -139,7 +139,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 
 	t.Run("StoreInterval is negative, with DataManager no DB", func(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
-		locker := engine.NewGuardianLocker(cfg)
+		locker := engine.NewLocker(cfg)
 		cfg.IPsCfg().StoreInterval = -1
 		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 		dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{}, &config.DbCfg{}), cfg, nil, locker)
@@ -169,7 +169,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 
 	t.Run("StoreInterval is negative, with working DataManager", func(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
-		locker := engine.NewGuardianLocker(cfg)
+		locker := engine.NewLocker(cfg)
 		cfg.IPsCfg().StoreInterval = -1
 
 		db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -225,7 +225,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 
 func TestNewIPService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -265,7 +265,7 @@ func TestNewIPService(t *testing.T) {
 
 func TestFilterAndSortPools(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
@@ -599,7 +599,7 @@ func TestIPsStartLoop(t *testing.T) {
 
 func TestStoreIPAllocationsList(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -882,7 +882,7 @@ func TestMatchedIPAllocsAllocateIPOnPoolNoTTL(t *testing.T) {
 
 func TestIPsV1ReleaseIPNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)

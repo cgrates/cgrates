@@ -26,7 +26,7 @@ import (
 
 func TestAgReqSetFields(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -131,7 +131,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 		utils.Tenant:       "cgrates.org",
 	}
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -460,7 +460,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 
 func TestAgReqMaxCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -510,7 +510,7 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -570,7 +570,7 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	//create radiusDataProvider
 	dP := newRADataProvider(pkt)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -613,7 +613,7 @@ Host: api.cgrates.org
 	//create radiusDataProvider
 	dP, _ := newHTTPUrlDP(req)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -688,7 +688,7 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	//create radiusDataProvider
 	dP, _ := newHTTPXmlDP(req)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -725,7 +725,7 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 
 func TestAgReqEmptyFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -767,7 +767,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 
 func TestAgReqMetaExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -799,7 +799,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 
 func TestAgReqFieldAsNone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -839,7 +839,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 
 func TestAgReqFieldAsNone2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -883,7 +883,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 
 func TestAgReqSetField2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -938,7 +938,7 @@ func TestAgReqSetField2(t *testing.T) {
 
 func TestAgReqFieldAsInterface(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1015,7 +1015,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1045,7 +1045,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathVars(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1080,7 +1080,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathVars(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathCgrReply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1115,7 +1115,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReply(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathTmp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1151,7 +1151,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathTmp(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1186,7 +1186,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathDiamReq(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1215,7 +1215,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathDiamReq(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathReply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1245,7 +1245,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathReply(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1276,7 +1276,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathOpts(t *testing.T) {
 
 func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1301,7 +1301,7 @@ func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1350,7 +1350,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 
 func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1395,7 +1395,7 @@ func (ev myEv) AsNavigableMap() map[string]*utils.DataNode {
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1460,7 +1460,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1552,7 +1552,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1626,7 +1626,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1674,7 +1674,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1725,7 +1725,7 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1773,7 +1773,7 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1821,7 +1821,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1880,7 +1880,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 
 func TestAgReqOverwrite(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1931,7 +1931,7 @@ func TestAgReqOverwrite(t *testing.T) {
 
 func TestAgReqGroupType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1979,7 +1979,7 @@ func TestAgReqGroupType(t *testing.T) {
 
 func TestAgReqSetFieldsInTmp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2013,7 +2013,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 
 func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2043,7 +2043,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 
 func TestAgReqSetFieldsString2Hex(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2073,7 +2073,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 
 func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2204,7 +2204,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 
 func TestAgReqSetFieldsInCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2251,7 +2251,7 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 
 func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2382,7 +2382,7 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2417,7 +2417,7 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 
 func TestAgReqDynamicPath(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2483,7 +2483,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 
 func TestAgReqRoundingDecimals(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2534,7 +2534,7 @@ ok  	github.com/cgrates/cgrates/agents	36.788s
 */
 func BenchmarkAgReqSetField(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2599,7 +2599,7 @@ func TestNeedsMaxUsage(t *testing.T) {
 
 func TestAgReqSetFieldsFromCfg(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -2661,7 +2661,7 @@ func TestFieldAsInterface(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2693,7 +2693,7 @@ func TestAgentRequestParseFieldDateTimeDaily(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2724,7 +2724,7 @@ func TestAgentRequestParseFieldDateTimeTimeZone(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2755,7 +2755,7 @@ func TestAgentRequestParseFieldDateTimeMonthly(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*monthlyEstimated", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2786,7 +2786,7 @@ func TestAgentRequestParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2817,7 +2817,7 @@ func TestAgentRequestParseFieldDateTimeYearly(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2848,7 +2848,7 @@ func TestAgentRequestParseFieldDateTimeMetaUnlimited(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2879,7 +2879,7 @@ func TestAgentRequestParseFieldDateTimeEmpty(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2910,7 +2910,7 @@ func TestAgentRequestParseFieldDateTimeMonthEnd(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	tntTpl := utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", cfg, cacheS, nil, nil)
@@ -2929,7 +2929,7 @@ func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 
 func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	prsr, err := utils.NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
@@ -2951,7 +2951,7 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 
 func TestGigawordsCalculateTotalOctets(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	var gigawordMultiplier int64 = 4294967296
 	configTemplate := `
 {
@@ -3152,7 +3152,7 @@ func TestGigawordsCalculateTotalOctets(t *testing.T) {
 	}
 }
 
-func newBenchAgReq(b *testing.B, cfg *config.CGRConfig, locker *guardian.GuardianLocker) *AgentRequest {
+func newBenchAgReq(b *testing.B, cfg *config.CGRConfig, locker *guardian.Locker) *AgentRequest {
 	b.Helper()
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -3181,7 +3181,7 @@ func newBenchAgReq(b *testing.B, cfg *config.CGRConfig, locker *guardian.Guardia
 
 func BenchmarkSetFields(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -3213,7 +3213,7 @@ func BenchmarkSetFields(b *testing.B) {
 
 func BenchmarkSetFieldsCrossRef(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -3249,7 +3249,7 @@ func BenchmarkSetFieldsCrossRef(b *testing.B) {
 
 func BenchmarkSetFieldsMixedDest(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -3286,7 +3286,7 @@ func BenchmarkSetFieldsMixedDest(b *testing.B) {
 
 func BenchmarkSetFieldsCompose(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
@@ -3315,7 +3315,7 @@ func BenchmarkSetFieldsCompose(b *testing.B) {
 
 func BenchmarkSetFieldsAppend2(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account1",
@@ -3338,7 +3338,7 @@ func BenchmarkSetFieldsAppend2(b *testing.B) {
 
 func BenchmarkSetFieldsAppend4(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account1",
@@ -3367,7 +3367,7 @@ func BenchmarkSetFieldsAppend4(b *testing.B) {
 
 func BenchmarkSetFieldsAppendMixed(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -3399,7 +3399,7 @@ func BenchmarkSetFieldsAppendMixed(b *testing.B) {
 
 func BenchmarkSetFieldsAndExport(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	agReq := newBenchAgReq(b, cfg, locker)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",

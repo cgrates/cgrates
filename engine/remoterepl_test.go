@@ -15,7 +15,7 @@ import (
 
 func TestUpdateReplicationFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
@@ -51,7 +51,7 @@ func TestUpdateReplicationFilters(t *testing.T) {
 
 func TestReplicateNnReplicatorSv1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}
@@ -73,7 +73,7 @@ func TestReplicateNnReplicatorSv1(t *testing.T) {
 
 func TestReplicateMultipleIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
 		Limit: 1,
 	}

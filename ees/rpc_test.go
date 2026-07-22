@@ -19,7 +19,7 @@ func TestNewRpcEE(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 
 	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
@@ -94,7 +94,7 @@ func TestRPCConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -138,7 +138,7 @@ func TestRPCClose(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -161,7 +161,7 @@ func TestRPCGetMetrics(t *testing.T) {
 		},
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -180,7 +180,7 @@ func TestRPCPrepareMap(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {

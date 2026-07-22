@@ -16,6 +16,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 	"github.com/cgrates/ltcache"
 )
 
@@ -151,7 +152,7 @@ func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) 
 }
 
 func newLoader(cfg *config.CGRConfig, ldrCfg *config.LoaderSCfg, dm *engine.DataManager, dataCache map[string]*ltcache.Cache,
-	filterS *engine.FilterS, connMgr *engine.ConnManager, cacheConns []string) *loader {
+	filterS *engine.FilterS, connMgr *engine.ConnManager, cacheConns []string, locker *guardian.Locker) *loader {
 	return &loader{
 		cfg:        cfg,
 		ldrCfg:     ldrCfg,
@@ -160,7 +161,7 @@ func newLoader(cfg *config.CGRConfig, ldrCfg *config.LoaderSCfg, dm *engine.Data
 		connMgr:    connMgr,
 		cacheConns: cacheConns,
 		dataCache:  dataCache,
-		Locker:     newLocker(ldrCfg.GetLockFilePath(), ldrCfg.ID),
+		locker:     newLoaderLocker(ldrCfg.GetLockFilePath(), ldrCfg.ID, locker),
 	}
 }
 
@@ -173,7 +174,7 @@ type loader struct {
 	cacheConns []string
 
 	dataCache map[string]*ltcache.Cache
-	Locker
+	locker    loaderLocker
 }
 
 func (l *loader) process(ctx *context.Context, obj profile, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
@@ -332,24 +333,26 @@ func (l *loader) orderedData() []*config.LoaderDataType {
 func (l *loader) processIFile(fileName string) (err error) {
 	cfg := l.getCfg(fileName)
 	if cfg == nil {
-		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); !l.IsLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
+		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); !l.locker.isLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
 			err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, fileName))
 		}
 		return
 	}
 
-	if err = l.Lock(); err != nil {
-		return
+	unlock, err := l.locker.lock()
+	if err != nil {
+		return err
 	}
-	defer l.Unlock()
+	defer unlock()
 	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
 }
 
 func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (err error) {
-	if err = l.Lock(); err != nil {
-		return
+	unlock, err := l.locker.lock()
+	if err != nil {
+		return err
 	}
-	defer l.Unlock()
+	defer unlock()
 	if inPath == utils.EmptyString {
 		inPath = l.ldrCfg.TpInDir
 	}
@@ -384,7 +387,7 @@ func (l *loader) moveUnprocessedFiles(inPath string) (err error) {
 		return
 	}
 	for _, f := range fs {
-		if pathIn := path.Join(inPath, f.Name()); !l.IsLockFile(pathIn) {
+		if pathIn := path.Join(inPath, f.Name()); !l.locker.isLockFile(pathIn) {
 			if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
 				return
 			}
@@ -429,10 +432,11 @@ func (l *loader) ListenAndServe(stopChan chan struct{}) (err error) {
 }
 
 func (l *loader) processZip(ctx *context.Context, opts map[string]any, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
-	if err = l.Lock(); err != nil {
-		return
+	unlock, err := l.locker.lock()
+	if err != nil {
+		return err
 	}
-	defer l.Unlock()
+	defer unlock()
 	ziP := zipProvider{zipR}
 	for _, cfg := range l.orderedData() {
 		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, ziP); err != nil {

@@ -35,7 +35,7 @@ func TestHttpPostGetMetrics(t *testing.T) {
 
 func TestHttpPostExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrEv := new(utils.CGREvent)
 	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, engine.NewCacheS(cgrCfg, nil, nil, nil, locker), nil, nil)
@@ -53,7 +53,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 
 func TestHttpPostExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	bodyExpect := "2=%2Areq.field2"
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -85,7 +85,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 func TestHttpPostSync(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 
@@ -159,7 +159,7 @@ func TestHttpPostSync(t *testing.T) {
 func TestHttpPostSyncLimit(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cgrCfg)
+	locker := engine.NewLocker(cgrCfg)
 
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 

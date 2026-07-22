@@ -16,7 +16,7 @@ import (
 
 func TestACExecuteAccountsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -73,7 +73,7 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 
 func TestACExecuteAccountsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -121,7 +121,7 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 
 func TestACExecuteAccountsParseError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)

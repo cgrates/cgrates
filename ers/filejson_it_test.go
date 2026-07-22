@@ -208,7 +208,7 @@ case utils.MetaMySQL:
 */
 func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, nil)
 	if err != nil {
@@ -223,7 +223,7 @@ func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 
 func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdrErr := make(chan error, 1)
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, rdrErr, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, nil)
@@ -246,7 +246,7 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 
 func TestFileJSONServeTimeDefault(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, nil)
 	if err != nil {
@@ -261,7 +261,7 @@ func TestFileJSONServeTimeDefault(t *testing.T) {
 
 func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdrExit := make(chan struct{}, 1)
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, rdrExit)
@@ -278,7 +278,7 @@ func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
 
 func TestFileJSONProcessFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, nil)
 	if err != nil {
@@ -293,7 +293,7 @@ func TestFileJSONProcessFile(t *testing.T) {
 
 func TestFileJSONProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfgIdx := 0
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, engine.NewCacheS(cfg, nil, nil, nil, locker), nil, nil)
 	if err != nil {

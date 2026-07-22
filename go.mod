@@ -18,7 +18,7 @@ require (
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
 	github.com/cgrates/go-diameter v0.0.0-20260512102405-f9dcf589d4ac
-	github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b
+	github.com/cgrates/guardian v0.0.0-20260717083347-4dd989a9dc8f
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191
 	github.com/cgrates/ltcache v0.0.0-20260702142901-a892bb64c827

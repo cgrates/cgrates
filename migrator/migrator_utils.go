@@ -14,7 +14,7 @@ import (
 
 func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 	cfg *config.CGRConfig, cache *engine.CacheS,
-	locker *guardian.GuardianLocker) (db *engine.DataManager, err error) {
+	locker *guardian.Locker) (db *engine.DataManager, err error) {
 	dataDBs := make(map[string]engine.DataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		dbCon, err := engine.NewDBConn(cfg.DbCfg().DBConns[dbConnID].Type,

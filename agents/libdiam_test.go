@@ -1132,7 +1132,7 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		}})
 	dP := newDADataProvider(nil, avps)
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

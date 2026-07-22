@@ -19,15 +19,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
 )
 
-// NewGuardianLocker returns a Guardian locker configured for cfg.
-func NewGuardianLocker(cfg *config.CGRConfig) *guardian.GuardianLocker {
-	if cfg.LoggerCfg().Level < 0 {
-		return guardian.New()
+// NewLocker returns a Guardian locker configured for cfg.
+func NewLocker(cfg *config.CGRConfig) *guardian.Locker {
+	timeout := time.Duration(0)
+	if cfg != nil {
+		timeout = cfg.GeneralCfg().LockingTimeout
 	}
-	return guardian.New(guardian.WithLogger(utils.Logger))
+	opts := []guardian.Option{guardian.WithTimeout(timeout)}
+	if cfg != nil && cfg.LoggerCfg().Level >= 0 {
+		opts = append(opts, guardian.WithLogger(utils.Logger))
+	}
+	return guardian.New(opts...)
 }

@@ -33,7 +33,7 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 	}
 	expErr := []string{"dial tcp [::1]:6012: connect: connection refused", "dial tcp 127.0.0.1:6012: connect: connection refused"}
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cgrCfg)
+	locker := NewLocker(cgrCfg)
 	cacheS := NewCacheS(cgrCfg, nil, nil, nil, locker)
 	cM := NewConnManager(cgrCfg)
 	cM.SetCache(cacheS)
@@ -61,7 +61,7 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		ClientKey:       "key1",
 	}
 	cgrCfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cgrCfg)
+	locker := NewLocker(cgrCfg)
 	cacheS := NewCacheS(cgrCfg, nil, nil, nil, locker)
 	cM := NewConnManager(cgrCfg)
 	cM.SetCache(cacheS)
@@ -220,7 +220,7 @@ func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
 
 func TestDynamicFiltersConns2(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{}`)
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
